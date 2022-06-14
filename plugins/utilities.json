@@ -1,0 +1,28 @@
+{
+  "ColorScheme": {
+    "description": "Create custom UI colorschemes!\nhttps://www.youtube.com/watch?v=qatwWrBAvjc",
+    "authors": [
+      {
+        "name": "Rikko",
+        "email": "rikkolovescats@proton.me",
+        "discord": "Rikko#7383"
+      },
+      {
+        "name": "Vishal",
+        "email": null,
+        "discord": "𝑽𝑰𝑺𝑯𝑼𝑼𝑼#2921"
+      }
+    ],
+    "versions": {
+       "1.1.0": {
+         "commit_sha": "caba1h98",
+         "known_compatible_game_versions": [
+           "1.7.0"
+         ],
+         "dependencies": [],
+         "released_on": "03-06-2022",
+         "md5sum": "c81b0905c95b6d3d75ae5b4e4f084bdd"
+      }
+    }
+  }
+}
