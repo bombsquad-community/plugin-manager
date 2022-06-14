@@ -16,7 +16,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        apt install jq
+        sudo apt install jq
     - name: Analysing mods
       run: |
         for jsonfile in $(git ls-files '*.json'); do jq -e < $jsonfile > /dev/null || exit 1; done
