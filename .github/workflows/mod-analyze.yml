@@ -19,4 +19,7 @@ jobs:
         sudo apt install jq
     - name: Analysing mods
       run: |
-        for jsonfile in $(git ls-files '*.json'); do jq -e < $jsonfile > /dev/null || exit 1; done
+        for jsonfile in $(git ls-files '*.json'); do
+          echo "Analyzing $jsonfile"
+          jq -e < $jsonfile > /dev/null || exit 1;
+        done
