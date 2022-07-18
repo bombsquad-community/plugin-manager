@@ -93,7 +93,9 @@ class PluginManagerWindow(ba.Window, PluginManager):
         uiscale = ba.app.ui.uiscale
 
         self._width = 650
-        self._height = 380 if uiscale is ba.UIScale.SMALL else 420 if uiscale is ba.UIScale.MEDIUM else 500
+        self._height = (380 if uiscale is ba.UIScale.SMALL
+                        else 420 if uiscale is ba.UIScale.MEDIUM
+                        else 500)
         top_extra = 20 if uiscale is ba.UIScale.SMALL else 0
 
         if origin_widget:
@@ -107,7 +109,9 @@ class PluginManagerWindow(ba.Window, PluginManager):
             toolbar_visibility="menu_minimal",
             scale_origin_stack_offset=self._scale_origin,
             parent=_ba.get_special_widget("overlay_stack"),
-            scale=1.9 if uiscale is ba.UIScale.SMALL else 1.5 if uiscale is ba.UIScale.MEDIUM else 1.0,
+            scale=(1.9 if uiscale is ba.UIScale.SMALL
+                   else 1.5 if uiscale is ba.UIScale.MEDIUM
+                   else 1.0),
             stack_offset=(0, -25) if uiscale is ba.UIScale.SMALL else (0, 0)
         )
 
@@ -243,12 +247,14 @@ class PluginManagerWindow(ba.Window, PluginManager):
         await self.draw_search_bar()
 
     async def draw_category_selection_button(self, label=None):
-        uiscale = ba.app.ui.uiscale
+        # uiscale = ba.app.ui.uiscale
         # v = (self._height - 75) if uiscale is ba.UIScale.SMALL else (self._height - 105)
         v = 395
         h = 440
-        # s = 1.0 if uiscale is ba.UIScale.SMALL else 1.27 if uiscale is ba.UIScale.MEDIUM else 1.57
-        s = 1.75
+        # the next 2 lines belong in 1 line
+        # # s = 1.0 if uiscale is ba.UIScale.SMALL else
+        # # 1.27 if uiscale is ba.UIScale.MEDIUM else 1.57
+        # s = 1.75
         # b_size = (90, 60 * s)
         b_size = (150, 30)
         b_textcolor = (0.75, 0.7, 0.8)
@@ -261,18 +267,19 @@ class PluginManagerWindow(ba.Window, PluginManager):
         if self.category_selection_button is not None:
             self.category_selection_button.delete()
 
-        loop = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
         self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
-                        position=(h, v),
-                        size=b_size,
-                        # on_activate_call=ba.Call(loop.create_task, self.show_categories()),
-                        on_activate_call=self.show_categories,
-                        label=label,
-                        button_type="square",
-                        color=b_color,
-                        textcolor=b_textcolor,
-                        autoselect=True,
-                        text_scale=0.6)
+                                                         position=(h, v),
+                                                         size=b_size,
+                                                         # on_activate_call=ba.Call(loop.create_
+                                                         # task, self.show_categories()),
+                                                         on_activate_call=self.show_categories,
+                                                         label=label,
+                                                         button_type="square",
+                                                         color=b_color,
+                                                         textcolor=b_textcolor,
+                                                         autoselect=True,
+                                                         text_scale=0.6)
 
     async def draw_search_bar(self):
         # TODO
@@ -281,14 +288,13 @@ class PluginManagerWindow(ba.Window, PluginManager):
                       scale=0.7,
                       # selectable=True,
                       always_highlight=True,
-                      color=(0.4,0.4,0.4),
+                      color=(0.4, 0.4, 0.4),
                       # on_select_call=lambda: None,
                       text="<Implement plugin search>",
                       on_activate_call=lambda: None,
                       h_align='left',
                       v_align='center',
                       maxwidth=420)
-
 
     async def draw_settings_icon(self):
         controller_button = ba.buttonwidget(parent=self._root_widget,
@@ -299,22 +305,24 @@ class PluginManagerWindow(ba.Window, PluginManager):
                                             label="",
                                             on_activate_call=lambda: None)
         ba.imagewidget(parent=self._root_widget,
-               position=(600, 70),
-               size=(30, 30),
-               color=(0.8, 0.95, 1),
-               texture=ba.gettexture("settingsIcon"),
-               draw_controller=controller_button)
+                       position=(600, 70),
+                       size=(30, 30),
+                       color=(0.8, 0.95, 1),
+                       texture=ba.gettexture("settingsIcon"),
+                       draw_controller=controller_button)
 
     async def draw_plugin_names(self):
-        uiscale = ba.app.ui.uiscale
-        v = (self._height - 75) if uiscale is ba.UIScale.SMALL else (self._height - 105)
-        h = 440
-        # s = 1.0 if uiscale is ba.UIScale.SMALL else 1.27 if uiscale is ba.UIScale.MEDIUM else 1.57
-        s = 1.75
-        # b_size = (90, 60 * s)
-        b_size = (150, 30)
-        b_textcolor = (0.75, 0.7, 0.8)
-        b_color = (0.6, 0.53, 0.63)
+        # uiscale = ba.app.ui.uiscale
+        # v = (self._height - 75) if uiscale is ba.UIScale.SMALL else (self._height - 105)
+        # h = 440
+        # next 2 lines belong in 1 line
+        # # s = 1.0 if uiscale is ba.UIScale.SMALL else
+        # # 1.27 if uiscale is ba.UIScale.MEDIUM else 1.57
+        # s = 1.75
+        # # b_size = (90, 60 * s)
+        # b_size = (150, 30)
+        # b_textcolor = (0.75, 0.7, 0.8)
+        # b_color = (0.6, 0.53, 0.63)
 
         for plugin in self._columnwidget.get_children():
             plugin.delete()
@@ -324,7 +332,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
             ba.textwidget(parent=self._columnwidget,
                           size=(410, 30),
                           selectable=True, always_highlight=True,
-                          color=(1,1,1),
+                          color=(1, 1, 1),
                           on_select_call=lambda: None,
                           text=plugin,
                           on_activate_call=lambda: None,
@@ -334,7 +342,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
     def show_categories(self):
         uiscale = ba.app.ui.uiscale
         # On each new entry, change position to y -= 40.
-        value = bastd.ui.popup.PopupMenuWindow(
+        # value = bastd.ui.popup.PopupMenuWindow(
+        bastd.ui.popup.PopupMenuWindow(
             # position=(200, 40),
             position=(200, 0),
             scale=(2.3 if uiscale is ba.UIScale.SMALL else
@@ -500,8 +509,9 @@ class NewAllSettingsWindow(ba.Window):
                                                     on_activate_call=self._do_audio)
         _b_title(x_offs4, v, abtn, ba.Lstr(resource=self._r + ".audioText"))
         imgw = imgh = 120
-        ba.imagewidget(parent=self._root_widget, position=(
-        x_offs4 + basew * 0.49 - imgw * 0.5 + 5, v + 35), size=(imgw, imgh),
+        ba.imagewidget(parent=self._root_widget,
+                       position=(x_offs4 + basew * 0.49 - imgw * 0.5 + 5, v + 35),
+                       size=(imgw, imgh),
                        color=(1, 1, 0), texture=ba.gettexture("audioIcon"),
                        draw_controller=abtn)
         v -= (baseh - 5)
@@ -546,11 +556,11 @@ class NewAllSettingsWindow(ba.Window):
     @staticmethod
     def _preload_modules() -> None:
         """Preload modules we use (called in bg thread)."""
-        import bastd.ui.mainmenu as _unused1
-        import bastd.ui.settings.controls as _unused2
-        import bastd.ui.settings.graphics as _unused3
-        import bastd.ui.settings.audio as _unused4
-        import bastd.ui.settings.advanced as _unused5
+        # import bastd.ui.mainmenu as _unused1
+        # import bastd.ui.settings.controls as _unused2
+        # import bastd.ui.settings.graphics as _unused3
+        # import bastd.ui.settings.audio as _unused4
+        # import bastd.ui.settings.advanced as _unused5
 
     def _do_back(self) -> None:
         # pylint: disable=cyclic-import
@@ -652,7 +662,7 @@ class EntryPoint(ba.Plugin):
         from bastd.ui.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         asyncio.set_event_loop(ba._asyncio._asyncio_event_loop)
-        loop = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
         # loop.create_task(do())
         # pm = PluginManager()
         # pm.plugin_index()

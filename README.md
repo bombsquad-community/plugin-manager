@@ -1,2 +1,2 @@
-# mod-manager
-A Mod Manager for Bombsquad
+# plugin-manager
+A Plugin Manager for Bombsquad
