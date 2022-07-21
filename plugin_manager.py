@@ -657,7 +657,7 @@ class NewAllSettingsWindow(ba.Window):
 
 # ba_meta export plugin
 class EntryPoint(ba.Plugin):
-    def on_app_launch(self) -> None:
+    def on_app_running(self) -> None:
         """Called when the app is being launched."""
         from bastd.ui.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
