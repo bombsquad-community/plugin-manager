@@ -1,4 +1,4 @@
-# ba_meta require api 6
+# ba_meta require api 7
 import ba
 import _ba
 import bastd
