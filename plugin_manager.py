@@ -5,14 +5,19 @@ import bastd
 
 import urllib.request
 import json
+import os
 import asyncio
 
 from typing import Union, Optional
 
+_env = _ba.env()
+
 INDEX_META = "https://raw.githubusercontent.com/bombsquad-community/mod-manager/main/index.json"
 HEADERS = {
-    "User-Agent": _ba.env()["user_agent_string"],
+    "User-Agent": _env["user_agent_string"],
 }
+PLUGIN_DIRECTORY = _env["python_directory_user"]
+PLUGIN_ENTRYPOINT = "Main"
 
 
 async def send_network_request(request):
@@ -35,7 +40,8 @@ class Category:
                 headers=HEADERS
             )
             response = await send_network_request(request)
-            self._plugins = json.loads(response.read())
+            plugins_info = json.loads(response.read())
+            self._plugins = [Plugin(plugin_info, self.base_download_url) for plugin_info in plugins_info.items()]
         return self._plugins
 
     async def refresh(self):
@@ -47,6 +53,161 @@ class CategoryAll(Category):
     def __init__(self, plugins={}):
         super().__init__(name="All", base_download_url=None, meta_url=None)
         self._plugins = plugins
+
+
+class Plugin:
+    def __init__(self, plugin, base_download_url):
+        self.name, self.info = plugin
+        self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
+        self.download_url = f"{base_download_url}/{self.name}.py"
+        self.entry_point = f"{self.name}.{PLUGIN_ENTRYPOINT}"
+
+    @property
+    def installed(self):
+        return os.path.isfile(self.install_path)
+
+    async def install(self):
+        response = await send_network_request(self.download_url)
+        with open(response.text, "w") as fout:
+            fout.write(self.install_path)
+
+    def remove(self):
+        os.remove(self.install_path)
+
+    def _set_status(self, to_enable=True):
+        if not self.entry_point in ba.app.config["Plugins"]:
+            ba.app.config["Plugins"][self.entry_point] = {}
+        ba.app.config["Plugins"][self.entry_point]["enabled"] = to_enable
+
+    def enable(self):
+        self._set_status(to_enable=True)
+        ba.app.config.apply_and_commit()
+
+    def disable(self):
+        self._set_status(to_enable=False)
+        ba.app.config.commit()
+
+
+class PluginWindow(ba.Window):
+    def __init__(self, plugin, origin_widget):
+        uiscale = ba.app.ui.uiscale
+        b_color = (0.6, 0.53, 0.63)
+        b_text_color = (0.75, 0.7, 0.8)
+        # self.manager_window = manager_window
+        s = 1.1 if uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
+        width = 360 * s
+        height = 100 + 100 * s
+        color = (1, 1, 1)
+        text_scale = 0.7 * s
+        self._transition_out = 'out_scale'
+        transition = 'in_scale'
+        scale_origin = origin_widget.get_screen_space_center()
+        self._root_widget = ba.containerwidget(size=(width, height),
+                                               parent=_ba.get_special_widget(
+                                                   'overlay_stack'),
+                                               # on_outside_click_call=self._ok,
+                                               transition=transition,
+                                               scale=2.1 if uiscale is ba.UIScale.SMALL else 1.5 if uiscale is ba.UIScale.MEDIUM else 1.0,
+                                               scale_origin_stack_offset=scale_origin)
+        pos = height * 0.8
+        # self.mod_type = mod_type = mod.get_mod_type()
+        # if mod_type == 'up-to-date':
+        #     status_text = 'Status: Installed'
+        #     button_text = 'Delete Mod'
+        #     on_button_press = self._delete
+        # elif mod_type == 'outdated':
+        #     status_text = 'Status: Installed (update available)'
+        #     button_text = 'Update Mod'
+        #     on_button_press = self._install
+        # elif mod_type == 'unknown version':
+        #     status_text = 'Status: Unknown version installed'
+        #     button_text = 'Reset Mod'
+        #     on_button_press = self._install
+        # elif mod_type == 'not installed':
+        #     status_text = 'Status: Not Installed'
+        #     button_text = 'Install Mod'
+        #     on_button_press = self._install
+        # elif mod_type == 'local only':
+        #     status_text = 'Status: Local Mod'
+        #     button_text = 'Delete Mod'
+        #     on_button_press = self._delete
+        name = ba.textwidget(parent=self._root_widget,
+                             position=(width * 0.49, pos), size=(0, 0),
+                             h_align='center', v_align='center', text=plugin.name,
+                             scale=text_scale * 1.25, color=color,
+                             maxwidth=width * 0.9)
+        pos -= 25
+        author = ba.textwidget(parent=self._root_widget,
+                               position=(width * 0.49, pos),
+                               size=(0, 0),
+                               h_align='center',
+                               v_align='center',
+                               text='by ' + plugin.info["authors"][0]["name"],
+                               scale=text_scale * 0.8,
+                               color=color, maxwidth=width * 0.9)
+        pos -= 35
+        # status = ba.textwidget(parent=self._root_widget,
+        #                        position=(width * 0.49, pos), size=(0, 0),
+        #                        h_align='center', v_align='center',
+        #                        text=status_text, scale=text_scale * 0.8,
+        #                        color=color, maxwidth=width * 0.9)
+        pos -= 25
+        info = ba.textwidget(parent=self._root_widget,
+                             position=(width * 0.49, pos), size=(0, 0),
+                             h_align='center', v_align='center',
+                             text=plugin.info["description"],
+                             scale=text_scale * 0.6, color=color,
+                             maxwidth=width * 0.95)
+        pos = height * 0.1
+        button_size = (80 * s, 40 * s)
+        # installed_plugin, enabled = mod.enabled()
+        # if installed_plugin:
+        #     if enabled:
+        #         b3_text = 'Disable'
+        #         b3_activate_call = self._disable
+        #         b3_color = (0.8, 0.15, 0.35)
+        #     else:
+        #         b3_text = 'Enable'
+        #         b3_activate_call = self._enable
+        #         b3_color = (0.15, 0.80, 0.35)
+        #     button1 = ba.buttonwidget(parent=self._root_widget,
+        #                               position=(width * 0.1, pos),
+        #                               size=button_size,
+        #                               on_activate_call=on_button_press,
+        #                               color=b_color, textcolor=b_text_color,
+        #                               button_type='square', text_scale=1,
+        #                               label=button_text)
+        #     button2 = ba.buttonwidget(parent=self._root_widget,
+        #                               position=(width * 0.7, pos),
+        #                               size=button_size,
+        #                               on_activate_call=self._ok,
+        #                               autoselect=True, button_type='square',
+        #                               text_scale=1, label='OK')
+        #     button3 = ba.buttonwidget(parent=self._root_widget,
+        #                               position=(width * 0.4, pos),
+        #                               size=button_size,
+        #                               on_activate_call=b3_activate_call,
+        #                               color=b3_color, textcolor=b_text_color,
+        #                               button_type='square', text_scale=1,
+        #                               label=b3_text)
+        # else:
+        #     button1 = ba.buttonwidget(parent=self._root_widget,
+        #                               position=(width * 0.2, pos),
+        #                               size=button_size,
+        #                               on_activate_call=on_button_press,
+        #                               color=b_color, textcolor=b_text_color,
+        #                               button_type='square', text_scale=1,
+        #                               label=button_text)
+        #     button2 = ba.buttonwidget(parent=self._root_widget,
+        #                               position=(width * 0.6, pos),
+        #                               size=button_size,
+        #                               on_activate_call=self._ok,
+        #                               autoselect=True, button_type='square',
+        #                               text_scale=1, label='OK')
+        ba.containerwidget(edit=self._root_widget,
+                           on_cancel_call=button2.activate)
+        ba.containerwidget(edit=self._root_widget, selected_child=button2)
+        ba.containerwidget(edit=self._root_widget, start_button=button2)
 
 
 class PluginManager:
@@ -231,9 +392,9 @@ class PluginManagerWindow(ba.Window, PluginManager):
             requests.append(request)
         categories = await asyncio.gather(*requests)
 
-        all_plugins = {}
+        all_plugins = []
         for plugins in categories:
-            all_plugins.update(plugins)
+            all_plugins.extend(plugins)
         self.categories["All"] = CategoryAll(plugins=all_plugins)
 
     async def plugin_index(self):
@@ -328,15 +489,17 @@ class PluginManagerWindow(ba.Window, PluginManager):
             plugin.delete()
 
         plugins = await self.categories[self.selected_category].get_plugins()
-        for plugin in plugins.keys():
+        for plugin in plugins:
             ba.textwidget(parent=self._columnwidget,
                           size=(410, 30),
-                          selectable=True, always_highlight=True,
+                          selectable=True,
+                          always_highlight=True,
                           color=(1, 1, 1),
                           on_select_call=lambda: None,
-                          text=plugin,
-                          on_activate_call=lambda: None,
-                          h_align='left', v_align='center',
+                          text=plugin.name,
+                          on_activate_call=ba.Call(PluginWindow, plugin, self._root_widget),
+                          h_align='left',
+                          v_align='center',
                           maxwidth=420)
 
     def show_categories(self):
