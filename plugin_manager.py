@@ -167,31 +167,34 @@ class PluginWindow(ba.Window):
             button1_action = ba.Call(loop.create_task, plugin.install())
             # button1_action = asyncio.run, plugin.install
         button3_label = "OK"
-        button3_action = lambda: None
 
-        button1 = ba.buttonwidget(parent=self._root_widget,
-                                  position=(width * 0.1, pos),
-                                  size=button_size,
-                                  on_activate_call=button1_action,
-                                  color=b_color,
-                                  textcolor=b_text_color,
-                                  button_type='square',
-                                  text_scale=1,
-                                  label=button1_label)
+        # button1 =
+        ba.buttonwidget(parent=self._root_widget,
+                        position=(width * 0.1, pos),
+                        size=button_size,
+                        on_activate_call=button1_action,
+                        color=b_color,
+                        textcolor=b_text_color,
+                        button_type='square',
+                        text_scale=1,
+                        label=button1_label)
+
         if plugin.installed:
-            button2 = ba.buttonwidget(parent=self._root_widget,
-                                      position=(width * 0.4, pos),
-                                      size=button_size,
-                                      on_activate_call=button2_action,
-                                      color=b3_color,
-                                      textcolor=b_text_color,
-                                      button_type='square',
-                                      text_scale=1,
-                                      label=button2_label)
+            # button2 =
+            ba.buttonwidget(parent=self._root_widget,
+                            position=(width * 0.4, pos),
+                            size=button_size,
+                            on_activate_call=button2_action,
+                            color=b3_color,
+                            textcolor=b_text_color,
+                            button_type='square',
+                            text_scale=1,
+                            label=button2_label)
+
         button3 = ba.buttonwidget(parent=self._root_widget,
                                   position=(width * 0.7, pos),
                                   size=button_size,
-                                  on_activate_call=button3_action,
+                                  on_activate_call=self.button3_action,
                                   autoselect=True,
                                   button_type='square',
                                   text_scale=1,
@@ -200,6 +203,9 @@ class PluginWindow(ba.Window):
                            on_cancel_call=button3.activate)
         ba.containerwidget(edit=self._root_widget, selected_child=button3)
         ba.containerwidget(edit=self._root_widget, start_button=button3)
+
+    def button3_action(self) -> None:
+        return None
 
 
 class PluginManager:
@@ -277,7 +283,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
                 autoselect=True,
                 button_type='backSmall',
                 on_activate_call=self._back)
-        
+
         ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
         ba.textwidget(
@@ -374,7 +380,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         #                                      border=2, margin=0)
         # self._mod_selected = None
         # self._refresh()
-        
+
     def _back(self) -> None:
         from bastd.ui.settings.allsettings import AllSettingsWindow
         ba.containerwidget(edit=self._root_widget,
