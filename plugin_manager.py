@@ -67,12 +67,20 @@ class Plugin:
     def installed(self):
         return os.path.isfile(self.install_path)
 
+    @property
+    def enabled(self):
+        try:
+            return ba.app.config["Plugins"][self.entry_point]["enabled"]
+        except KeyError:
+            return False
+
     async def install(self):
         response = await send_network_request(self.download_url)
-        with open(response.text, "w") as fout:
-            fout.write(self.install_path)
+        with open(self.install_path, "wb") as fout:
+            fout.write(response.read())
+        self.enable()
 
-    def remove(self):
+    def uninstall(self):
         os.remove(self.install_path)
 
     def _set_status(self, to_enable=True):
@@ -92,9 +100,8 @@ class Plugin:
 class PluginWindow(ba.Window):
     def __init__(self, plugin, origin_widget):
         uiscale = ba.app.ui.uiscale
-        # b_color = (0.6, 0.53, 0.63)
-        # b_text_color = (0.75, 0.7, 0.8)
-        # self.manager_window = manager_window
+        b_color = (0.6, 0.53, 0.63)
+        b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
         width = 360 * s
         height = 100 + 100 * s
@@ -112,29 +119,6 @@ class PluginWindow(ba.Window):
                                                       if uiscale is ba.UIScale.MEDIUM else 1.0),
                                                scale_origin_stack_offset=scale_origin)
         pos = height * 0.8
-        # self.mod_type = mod_type = mod.get_mod_type()
-        # if mod_type == 'up-to-date':
-        #     status_text = 'Status: Installed'
-        #     button_text = 'Delete Mod'
-        #     on_button_press = self._delete
-        # elif mod_type == 'outdated':
-        #     status_text = 'Status: Installed (update available)'
-        #     button_text = 'Update Mod'
-        #     on_button_press = self._install
-        # elif mod_type == 'unknown version':
-        #     status_text = 'Status: Unknown version installed'
-        #     button_text = 'Reset Mod'
-        #     on_button_press = self._install
-        # elif mod_type == 'not installed':
-        #     status_text = 'Status: Not Installed'
-        #     button_text = 'Install Mod'
-        #     on_button_press = self._install
-        # elif mod_type == 'local only':
-        #     status_text = 'Status: Local Mod'
-        #     button_text = 'Delete Mod'
-        #     on_button_press = self._delete
-
-        # name =
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center', text=plugin.name,
@@ -164,56 +148,58 @@ class PluginWindow(ba.Window):
                       text=plugin.info["description"],
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
-        # pos = height * 0.1
-        # button_size = (80 * s, 40 * s)
-        # installed_plugin, enabled = mod.enabled()
-        # if installed_plugin:
-        #     if enabled:
-        #         b3_text = 'Disable'
-        #         b3_activate_call = self._disable
-        #         b3_color = (0.8, 0.15, 0.35)
-        #     else:
-        #         b3_text = 'Enable'
-        #         b3_activate_call = self._enable
-        #         b3_color = (0.15, 0.80, 0.35)
-        #     button1 = ba.buttonwidget(parent=self._root_widget,
-        #                               position=(width * 0.1, pos),
-        #                               size=button_size,
-        #                               on_activate_call=on_button_press,
-        #                               color=b_color, textcolor=b_text_color,
-        #                               button_type='square', text_scale=1,
-        #                               label=button_text)
-        #     button2 = ba.buttonwidget(parent=self._root_widget,
-        #                               position=(width * 0.7, pos),
-        #                               size=button_size,
-        #                               on_activate_call=self._ok,
-        #                               autoselect=True, button_type='square',
-        #                               text_scale=1, label='OK')
-        #     button3 = ba.buttonwidget(parent=self._root_widget,
-        #                               position=(width * 0.4, pos),
-        #                               size=button_size,
-        #                               on_activate_call=b3_activate_call,
-        #                               color=b3_color, textcolor=b_text_color,
-        #                               button_type='square', text_scale=1,
-        #                               label=b3_text)
-        # else:
-        #     button1 = ba.buttonwidget(parent=self._root_widget,
-        #                               position=(width * 0.2, pos),
-        #                               size=button_size,
-        #                               on_activate_call=on_button_press,
-        #                               color=b_color, textcolor=b_text_color,
-        #                               button_type='square', text_scale=1,
-        #                               label=button_text)
-        #     button2 = ba.buttonwidget(parent=self._root_widget,
-        #                               position=(width * 0.6, pos),
-        #                               size=button_size,
-        #                               on_activate_call=self._ok,
-        #                               autoselect=True, button_type='square',
-        #                               text_scale=1, label='OK')
-        # ba.containerwidget(edit=self._root_widget,
-        #                    on_cancel_call=button2.activate)
-        # ba.containerwidget(edit=self._root_widget, selected_child=button2)
-        # ba.containerwidget(edit=self._root_widget, start_button=button2)
+        b3_color = (0.8, 0.15, 0.35)
+        # b3_color = (0.15, 0.80, 0.35)
+        pos = height * 0.1
+        button_size = (80 * s, 40 * s)
+        if plugin.installed:
+            if plugin.enabled:
+                button1_label = "Disable"
+                button1_action = plugin.disable
+            else:
+                button1_label = "Enable"
+                button1_action = plugin.enable
+            button2_label = "Uninstall"
+            button2_action = plugin.uninstall
+        else:
+            button1_label = "Install"
+            loop = asyncio.get_event_loop()
+            button1_action = ba.Call(loop.create_task, plugin.install())
+            # button1_action = asyncio.run, plugin.install
+        button3_label = "OK"
+        button3_action = lambda: None
+
+        button1 = ba.buttonwidget(parent=self._root_widget,
+                                  position=(width * 0.1, pos),
+                                  size=button_size,
+                                  on_activate_call=button1_action,
+                                  color=b_color,
+                                  textcolor=b_text_color,
+                                  button_type='square',
+                                  text_scale=1,
+                                  label=button1_label)
+        if plugin.installed:
+            button2 = ba.buttonwidget(parent=self._root_widget,
+                                      position=(width * 0.4, pos),
+                                      size=button_size,
+                                      on_activate_call=button2_action,
+                                      color=b3_color,
+                                      textcolor=b_text_color,
+                                      button_type='square',
+                                      text_scale=1,
+                                      label=button2_label)
+        button3 = ba.buttonwidget(parent=self._root_widget,
+                                  position=(width * 0.7, pos),
+                                  size=button_size,
+                                  on_activate_call=button3_action,
+                                  autoselect=True,
+                                  button_type='square',
+                                  text_scale=1,
+                                  label=button3_label)
+        ba.containerwidget(edit=self._root_widget,
+                           on_cancel_call=button3.activate)
+        ba.containerwidget(edit=self._root_widget, selected_child=button3)
+        ba.containerwidget(edit=self._root_widget, start_button=button3)
 
 
 class PluginManager:
