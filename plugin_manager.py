@@ -41,7 +41,8 @@ class Category:
             )
             response = await send_network_request(request)
             plugins_info = json.loads(response.read())
-            self._plugins = [Plugin(plugin_info, self.base_download_url) for plugin_info in plugins_info.items()]
+            self._plugins = ([Plugin(plugin_info, self.base_download_url)
+                             for plugin_info in plugins_info.items()])
         return self._plugins
 
     async def refresh(self):
@@ -75,7 +76,7 @@ class Plugin:
         os.remove(self.install_path)
 
     def _set_status(self, to_enable=True):
-        if not self.entry_point in ba.app.config["Plugins"]:
+        if self.entry_point not in ba.app.config["Plugins"]:
             ba.app.config["Plugins"][self.entry_point] = {}
         ba.app.config["Plugins"][self.entry_point]["enabled"] = to_enable
 
@@ -91,8 +92,8 @@ class Plugin:
 class PluginWindow(ba.Window):
     def __init__(self, plugin, origin_widget):
         uiscale = ba.app.ui.uiscale
-        b_color = (0.6, 0.53, 0.63)
-        b_text_color = (0.75, 0.7, 0.8)
+        # b_color = (0.6, 0.53, 0.63)
+        # b_text_color = (0.75, 0.7, 0.8)
         # self.manager_window = manager_window
         s = 1.1 if uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
         width = 360 * s
@@ -107,7 +108,8 @@ class PluginWindow(ba.Window):
                                                    'overlay_stack'),
                                                # on_outside_click_call=self._ok,
                                                transition=transition,
-                                               scale=2.1 if uiscale is ba.UIScale.SMALL else 1.5 if uiscale is ba.UIScale.MEDIUM else 1.0,
+                                               scale=(2.1 if uiscale is ba.UIScale.SMALL else 1.5
+                                                      if uiscale is ba.UIScale.MEDIUM else 1.0),
                                                scale_origin_stack_offset=scale_origin)
         pos = height * 0.8
         # self.mod_type = mod_type = mod.get_mod_type()
@@ -131,20 +133,23 @@ class PluginWindow(ba.Window):
         #     status_text = 'Status: Local Mod'
         #     button_text = 'Delete Mod'
         #     on_button_press = self._delete
-        name = ba.textwidget(parent=self._root_widget,
-                             position=(width * 0.49, pos), size=(0, 0),
-                             h_align='center', v_align='center', text=plugin.name,
-                             scale=text_scale * 1.25, color=color,
-                             maxwidth=width * 0.9)
+
+        # name =
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos), size=(0, 0),
+                      h_align='center', v_align='center', text=plugin.name,
+                      scale=text_scale * 1.25, color=color,
+                      maxwidth=width * 0.9)
         pos -= 25
-        author = ba.textwidget(parent=self._root_widget,
-                               position=(width * 0.49, pos),
-                               size=(0, 0),
-                               h_align='center',
-                               v_align='center',
-                               text='by ' + plugin.info["authors"][0]["name"],
-                               scale=text_scale * 0.8,
-                               color=color, maxwidth=width * 0.9)
+        # author =
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text='by ' + plugin.info["authors"][0]["name"],
+                      scale=text_scale * 0.8,
+                      color=color, maxwidth=width * 0.9)
         pos -= 35
         # status = ba.textwidget(parent=self._root_widget,
         #                        position=(width * 0.49, pos), size=(0, 0),
@@ -152,14 +157,15 @@ class PluginWindow(ba.Window):
         #                        text=status_text, scale=text_scale * 0.8,
         #                        color=color, maxwidth=width * 0.9)
         pos -= 25
-        info = ba.textwidget(parent=self._root_widget,
-                             position=(width * 0.49, pos), size=(0, 0),
-                             h_align='center', v_align='center',
-                             text=plugin.info["description"],
-                             scale=text_scale * 0.6, color=color,
-                             maxwidth=width * 0.95)
-        pos = height * 0.1
-        button_size = (80 * s, 40 * s)
+        # info =
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos), size=(0, 0),
+                      h_align='center', v_align='center',
+                      text=plugin.info["description"],
+                      scale=text_scale * 0.6, color=color,
+                      maxwidth=width * 0.95)
+        # pos = height * 0.1
+        # button_size = (80 * s, 40 * s)
         # installed_plugin, enabled = mod.enabled()
         # if installed_plugin:
         #     if enabled:
@@ -204,10 +210,10 @@ class PluginWindow(ba.Window):
         #                               on_activate_call=self._ok,
         #                               autoselect=True, button_type='square',
         #                               text_scale=1, label='OK')
-        ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=button2.activate)
-        ba.containerwidget(edit=self._root_widget, selected_child=button2)
-        ba.containerwidget(edit=self._root_widget, start_button=button2)
+        # ba.containerwidget(edit=self._root_widget,
+        #                    on_cancel_call=button2.activate)
+        # ba.containerwidget(edit=self._root_widget, selected_child=button2)
+        # ba.containerwidget(edit=self._root_widget, start_button=button2)
 
 
 class PluginManager:
