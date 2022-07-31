@@ -268,12 +268,17 @@ class PluginManagerWindow(ba.Window, PluginManager):
             stack_offset=(0, -25) if uiscale is ba.UIScale.SMALL else (0, 0)
         )
 
-        # self._back_button = back_button = ba.buttonwidget(
-        #     parent=self._root_widget,
-        #     position=(self._width - 160, self._height - 60), size=(160, 68),
-        #     button_type="back", scale=0.75, autoselect=True, text_scale=1.2,
-        #     label="Back", on_activate_call=self._back)
-        # ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
+        self._back_button = back_button = ba.buttonwidget(
+                parent=self._root_widget,
+                position=(53 + (100 if uiscale is ba.UIScale.SMALL else 0), self._height - 60),
+                size=(60, 60),
+                scale=0.8,
+                label=ba.charstr(ba.SpecialChar.BACK),
+                autoselect=True,
+                button_type='backSmall',
+                on_activate_call=self._back)
+        
+        ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
         ba.textwidget(
             parent=self._root_widget,
@@ -369,6 +374,13 @@ class PluginManagerWindow(ba.Window, PluginManager):
         #                                      border=2, margin=0)
         # self._mod_selected = None
         # self._refresh()
+        
+    def _back(self) -> None:
+        from bastd.ui.settings.allsettings import AllSettingsWindow
+        ba.containerwidget(edit=self._root_widget,
+                           transition=self._transition_out)
+        ba.app.ui.set_main_menu_window(
+            AllSettingsWindow(transition='in_left').get_root_widget())
 
     async def setup_plugin_categories(self, plugin_index):
         self.categories["All"] = None
