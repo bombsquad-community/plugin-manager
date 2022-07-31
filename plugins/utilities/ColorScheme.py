@@ -6,7 +6,7 @@
 # Settings -> Advanced -> Enter Code
 # to bring up the colorscheme UI.
 
-# ba_meta require api 6
+# ba_meta require api 7
 import _ba
 import ba
 
