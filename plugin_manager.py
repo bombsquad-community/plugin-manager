@@ -251,10 +251,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         uiscale = ba.app.ui.uiscale
 
-        self._width = 650
-        self._height = (380 if uiscale is ba.UIScale.SMALL
+        self._width = (570 if uiscale is ba.UIScale.MEDIUM else 650)
+        self._height = (540 if uiscale is ba.UIScale.SMALL
                         else 420 if uiscale is ba.UIScale.MEDIUM
-                        else 500)
+                        else 540)
         top_extra = 20 if uiscale is ba.UIScale.SMALL else 0
 
         if origin_widget:
@@ -274,9 +274,12 @@ class PluginManagerWindow(ba.Window, PluginManager):
             stack_offset=(0, -25) if uiscale is ba.UIScale.SMALL else (0, 0)
         )
 
+
+        back_pos_x = 15 + (0 if uiscale is ba.UIScale.SMALL else 17 if uiscale is ba.UIScale.MEDIUM else 58)
+        back_pos_y = self._height - (115 if uiscale is ba.UIScale.SMALL else 65 if uiscale is ba.UIScale.MEDIUM else 50)
         self._back_button = back_button = ba.buttonwidget(
                 parent=self._root_widget,
-                position=(53 + (100 if uiscale is ba.UIScale.SMALL else 0), self._height - 60),
+                position=(back_pos_x, back_pos_y),
                 size=(60, 60),
                 scale=0.8,
                 label=ba.charstr(ba.SpecialChar.BACK),
@@ -286,9 +289,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
+        title_pos = self._height - (95 if uiscale is ba.UIScale.SMALL else 50 if uiscale is ba.UIScale.MEDIUM else 50)
         ba.textwidget(
             parent=self._root_widget,
-            position=(-10, self._height - 50),
+            position=(-10, title_pos),
             size=(self._width, 25),
             text="Community Plugin Manager",
             color=ba.app.ui.title_color,
@@ -310,9 +314,13 @@ class PluginManagerWindow(ba.Window, PluginManager):
             maxwidth=270,
         )
 
+        scroll_size_x = (400 if uiscale is ba.UIScale.SMALL else 380 if uiscale is ba.UIScale.MEDIUM else 420)
+        scroll_size_y = (255 if uiscale is ba.UIScale.SMALL else 280 if uiscale is ba.UIScale.MEDIUM else 340)
+        scroll_pos_x = (160 if uiscale is ba.UIScale.SMALL else 130 if uiscale is ba.UIScale.MEDIUM else 160)
+        scroll_pos_y = (125 if uiscale is ba.UIScale.SMALL else 30 if uiscale is ba.UIScale.MEDIUM else 40)
         self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
-                                             size=(420, 340),
-                                             position=(160, 40))
+                                             size=(scroll_size_x, scroll_size_y),
+                                             position=(scroll_pos_x, scroll_pos_y))
         self._columnwidget = ba.columnwidget(parent=self._scrollwidget,
                                              border=2,
                                              margin=0)
@@ -422,6 +430,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # v = (self._height - 75) if uiscale is ba.UIScale.SMALL else (self._height - 105)
         v = 395
         h = 440
+        # category_pos_x = 15 + (0 if uiscale is ba.UIScale.SMALL else 17 if uiscale is ba.UIScale.MEDIUM else 58)
+        uiscale = ba.app.ui.uiscale
+        category_pos_x = (420 if uiscale is ba.UIScale.SMALL else 375 if uiscale is ba.UIScale.MEDIUM else 440)
+        category_pos_y = self._height - (140 if uiscale is ba.UIScale.SMALL else 100 if uiscale is ba.UIScale.MEDIUM else 140)
         # the next 2 lines belong in 1 line
         # # s = 1.0 if uiscale is ba.UIScale.SMALL else
         # # 1.27 if uiscale is ba.UIScale.MEDIUM else 1.57
@@ -440,10 +452,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         # loop = asyncio.get_event_loop()
         self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
-                                                         position=(h, v),
+                                                         position=(category_pos_x, category_pos_y),
                                                          size=b_size,
-                                                         # on_activate_call=ba.Call(loop.create_
-                                                         # task, self.show_categories()),
                                                          on_activate_call=self.show_categories,
                                                          label=label,
                                                          button_type="square",
@@ -454,8 +464,11 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     async def draw_search_bar(self):
         # TODO
+        uiscale = ba.app.ui.uiscale
+        search_bar_pos_x = (170 if uiscale is ba.UIScale.SMALL else 145 if uiscale is ba.UIScale.MEDIUM else 200)
+        search_bar_pos_y = self._height - (100 if uiscale is ba.UIScale.MEDIUM else 140)
         ba.textwidget(parent=self._root_widget,
-                      position=(200, 395),
+                      position=(search_bar_pos_x, search_bar_pos_y),
                       scale=0.7,
                       # selectable=True,
                       always_highlight=True,
@@ -468,15 +481,18 @@ class PluginManagerWindow(ba.Window, PluginManager):
                       maxwidth=420)
 
     async def draw_settings_icon(self):
+        uiscale = ba.app.ui.uiscale
+        settings_pos_x = (530 if uiscale is ba.UIScale.MEDIUM else 600)
+        settings_pos_y = (125 if uiscale is ba.UIScale.SMALL else 60 if uiscale is ba.UIScale.MEDIUM else 70)
         controller_button = ba.buttonwidget(parent=self._root_widget,
                                             autoselect=True,
-                                            position=(600, 70),
+                                            position=(settings_pos_x, settings_pos_y),
                                             size=(30, 30),
                                             button_type="square",
                                             label="",
                                             on_activate_call=lambda: None)
         ba.imagewidget(parent=self._root_widget,
-                       position=(600, 70),
+                       position=(settings_pos_x, settings_pos_y),
                        size=(30, 30),
                        color=(0.8, 0.95, 1),
                        texture=ba.gettexture("settingsIcon"),
