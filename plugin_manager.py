@@ -80,9 +80,11 @@ class Plugin:
         with open(self.install_path, "wb") as fout:
             fout.write(response.read())
         self.enable()
+        _ba.screenmessage("Plugin Installed")
 
     def uninstall(self):
         os.remove(self.install_path)
+        _ba.screenmessage("Plugin Uninstalled")
 
     def _set_status(self, to_enable=True):
         if self.entry_point not in ba.app.config["Plugins"]:
@@ -92,10 +94,12 @@ class Plugin:
     def enable(self):
         self._set_status(to_enable=True)
         ba.app.config.apply_and_commit()
+        _ba.screenmessage("Plugin Enabled")
 
     def disable(self):
         self._set_status(to_enable=False)
         ba.app.config.commit()
+        _ba.screenmessage("Plugin Disabled")
 
 
 class PluginWindow(popup.PopupWindow):
@@ -217,6 +221,7 @@ class PluginWindow(popup.PopupWindow):
     def button3_action(self) -> None:
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
         return None
+
 
 class PluginManager:
     def __init__(self):
