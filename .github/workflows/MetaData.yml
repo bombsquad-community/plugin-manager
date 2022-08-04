@@ -19,4 +19,7 @@ jobs:
     - name: Check MetaData
       run: |
         echo "Analyzing All Py Files"
-        cat $(git ls-files '*.py') | grep "# ba_meta require api 7"
+        for pyfile in $(git ls-files '*.py'); do
+          cat $pyfile | grep "# ba_meta require api 7" > /dev/null || (echo "$pyfile doesn't have the MetaData present in it." && exit 1)
+        done
+        echo "All Py Files have MetaData present in them."
