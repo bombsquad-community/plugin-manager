@@ -169,10 +169,10 @@ class Plugin:
 
     async def install(self):
         await self._download_plugin()
-        self.enable()
+        await self.enable()
         ba.screenmessage("Plugin Installed")
 
-    def uninstall(self):
+    async def uninstall(self):
         self.get_local().uninstall()
         ba.screenmessage("Plugin Uninstalled")
 
@@ -180,23 +180,24 @@ class Plugin:
         await self._download_plugin()
         ba.screenmessage("Plugin Updated")
 
-    def _set_status(self, to_enable=True):
+    async def _set_status(self, to_enable=True):
         if self.entry_point not in ba.app.config["Plugins"]:
             ba.app.config["Plugins"][self.entry_point] = {}
         ba.app.config["Plugins"][self.entry_point]["enabled"] = to_enable
 
-    def enable(self):
-        self._set_status(to_enable=True)
+    async def enable(self):
+        await self._set_status(to_enable=True)
         ba.screenmessage("Plugin Enabled")
 
-    def disable(self):
-        self._set_status(to_enable=False)
+    async def disable(self):
+        await self._set_status(to_enable=False)
         ba.screenmessage("Plugin Disabled")
 
 
 class PluginWindow(popup.PopupWindow):
-    def __init__(self, plugin, origin_widget):
+    def __init__(self, plugin, origin_widget, button_callback=lambda: None):
         self.plugin = plugin
+        self.button_callback = button_callback
         uiscale = ba.app.ui.uiscale
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
@@ -308,36 +309,41 @@ class PluginWindow(popup.PopupWindow):
 
     def ok(self) -> None:
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
-        return None
 
     def button(fn):
+        async def asyncio_handler(fn, self, *args, **kwargs):
+            await fn(self, *args, **kwargs)
+            self.button_callback()
+
         def wrapper(self, *args, **kwargs):
-            fn(self, *args, **kwargs)
             self.ok()
+            if asyncio.iscoroutinefunction(fn):
+                loop = asyncio.get_event_loop()
+                loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
+            else:
+                fn(self, *args, **kwargs)
+                self.button_callback()
         return wrapper
 
     @button
-    def disable(self) -> None:
-        self.plugin.disable()
+    async def disable(self) -> None:
+        await self.plugin.disable()
 
     @button
-    def enable(self) -> None:
-        self.plugin.enable()
+    async def enable(self) -> None:
+        await self.plugin.enable()
 
     @button
-    def install(self):
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.plugin.install())
+    async def install(self):
+        await self.plugin.install()
 
     @button
-    def uninstall(self):
-        self.plugin.uninstall()
-        self.ok()
+    async def uninstall(self):
+        await self.plugin.uninstall()
 
     @button
-    def update(self):
-        loop = asyncio.get_event_loop()
-        loop.create_task(self.plugin.update())
+    async def update(self):
+        await self.plugin.update()
 
 
 class PluginManager:
@@ -370,6 +376,9 @@ class PluginManager:
         self._index = {}
         return await self.get_index()
 
+    async def soft_refresh(self):
+        pass
+
 
 class PluginManagerWindow(ba.Window, PluginManager):
     def __init__(self, transition: str = "in_right", origin_widget: ba.Widget = None):
@@ -377,6 +386,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         self.categories = {}
         self.category_selection_button = None
         self.selected_category = None
+        self.plugins_in_current_view = {}
 
         # ba._asyncio._asyncio_event_loop.create_task(self.setup_plugin_categories())
         ba._asyncio._asyncio_event_loop.create_task(self.plugin_index())
@@ -659,30 +669,40 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         plugins = await self.categories[self.selected_category].get_plugins()
         for plugin in plugins:
-            if plugin.is_installed:
-                if plugin.is_enabled:
-                    local_plugin = plugin.get_local()
-                    if not local_plugin.is_installed_via_plugin_manager:
-                        color = (0.8, 0.2, 0.2)
-                    elif local_plugin.version == plugin.latest_version:
-                        color = (0, 1, 0)
-                    else:
-                        color = (1, 0.6, 0)
+            self.draw_plugin_name(plugin)
+
+    def draw_plugin_name(self, plugin):
+        if plugin.is_installed:
+            if plugin.is_enabled:
+                local_plugin = plugin.get_local()
+                if not local_plugin.is_installed_via_plugin_manager:
+                    color = (0.8, 0.2, 0.2)
+                elif local_plugin.version == plugin.latest_version:
+                    color = (0, 1, 0)
                 else:
-                    color = (0.5, 0.5, 0.5)
+                    color = (1, 0.6, 0)
             else:
-                color = (1, 1, 1)
-            ba.textwidget(parent=self._columnwidget,
-                          size=(410, 30),
-                          selectable=True,
-                          always_highlight=True,
-                          color=color,
-                          on_select_call=lambda: None,
-                          text=plugin.name,
-                          on_activate_call=ba.Call(PluginWindow, plugin, self._root_widget),
-                          h_align='left',
-                          v_align='center',
-                          maxwidth=420)
+                color = (0.5, 0.5, 0.5)
+        else:
+            color = (1, 1, 1)
+
+        plugin_to_update = self.plugins_in_current_view.get(plugin.name)
+        if plugin_to_update:
+            ba.textwidget(edit=plugin_to_update,
+                          color=color)
+        else:
+            text_widget = ba.textwidget(parent=self._columnwidget,
+                                        size=(410, 30),
+                                        selectable=True,
+                                        always_highlight=True,
+                                        color=color,
+                                        on_select_call=lambda: None,
+                                        text=plugin.name,
+                                        on_activate_call=ba.Call(PluginWindow, plugin, self._root_widget, lambda: self.draw_plugin_name(plugin)),
+                                        h_align='left',
+                                        v_align='center',
+                                        maxwidth=420)
+            self.plugins_in_current_view[plugin.name] = text_widget
 
     def show_categories(self):
         uiscale = ba.app.ui.uiscale
@@ -699,6 +719,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     async def select_category(self, category):
         self.selected_category = category
+        self.plugins_in_current_view = {}
         await self.draw_category_selection_button(label=category)
         await self.draw_plugin_names()
 
@@ -710,6 +731,9 @@ class PluginManagerWindow(ba.Window, PluginManager):
         pass
 
     async def refresh(self):
+        pass
+
+    def soft_refresh(self):
         pass
 
 
