@@ -27,7 +27,7 @@
     }
   },
   "StoreEventSpecials": {
-    "description": "Exposes event special store items not normally available for purchase",
+    "description": "Exposes event-special store items not normally available for purchase",
     "external_url": "",
     "authors": [
       {

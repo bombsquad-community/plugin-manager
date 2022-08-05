@@ -76,9 +76,12 @@ class Category:
         except KeyError:
             pass
 
-    async def refresh(self):
-        self._plugins = {}
+    def refresh(self):
+        self._plugins.clear()
         self.unset_category_plugins_global_cache()
+
+    async def cleanup(self):
+        self.refresh()
         return await self.get_plugins()
 
 
@@ -373,15 +376,17 @@ class PluginManager:
                 INDEX_META,
                 headers=HEADERS
             )
-            print(INDEX_META)
             response = await send_network_request(request)
             self._index = json.loads(response.read())
             self.set_index_global_cache(self._index)
         return self._index
 
-    async def refresh(self):
-        self._index = {}
+    def cleanup(self):
+        self._index.clear()
         self.unset_index_global_cache()
+
+    async def refresh(self):
+        self.cleanup()
         return await self.get_index()
 
     def set_index_global_cache(self, index):
@@ -405,8 +410,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
         self.selected_category = None
         self.plugins_in_current_view = {}
 
-        # ba._asyncio._asyncio_event_loop.create_task(self.setup_plugin_categories())
-        ba._asyncio._asyncio_event_loop.create_task(self.plugin_index())
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.plugin_index())
 
         uiscale = ba.app.ui.uiscale
 
@@ -583,6 +588,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
     async def plugin_index(self):
         index = await super().get_index()
         await asyncio.gather(
+            self.draw_refresh_icon(),
             self.draw_settings_icon(),
             self.setup_plugin_categories(index),
         )
@@ -615,20 +621,20 @@ class PluginManagerWindow(ba.Window, PluginManager):
             label = self.selected_category
         label = f"Category: {label}"
 
-        if self.category_selection_button is not None:
-            self.category_selection_button.delete()
-
-        # loop = asyncio.get_event_loop()
-        self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
-                                                         position=(category_pos_x, category_pos_y),
-                                                         size=b_size,
-                                                         on_activate_call=self.show_categories,
-                                                         label=label,
-                                                         button_type="square",
-                                                         color=b_color,
-                                                         textcolor=b_textcolor,
-                                                         autoselect=True,
-                                                         text_scale=0.6)
+        if self.category_selection_button is None:
+            self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
+                                                             position=(category_pos_x, category_pos_y),
+                                                             size=b_size,
+                                                             on_activate_call=self.show_categories,
+                                                             label=label,
+                                                             button_type="square",
+                                                             color=b_color,
+                                                             textcolor=b_textcolor,
+                                                             autoselect=True,
+                                                             text_scale=0.6)
+        else:
+            self.category_selection_button = ba.buttonwidget(edit=self.category_selection_button,
+                                                             label=label)
 
     async def draw_search_bar(self):
         # TODO
@@ -651,8 +657,9 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     async def draw_settings_icon(self):
         uiscale = ba.app.ui.uiscale
-        settings_pos_x = (530 if uiscale is ba.UIScale.MEDIUM else 600)
-        settings_pos_y = (125 if uiscale is ba.UIScale.SMALL else
+        settings_pos_x = (590 if uiscale is ba.UIScale.SMALL else
+                          530 if uiscale is ba.UIScale.MEDIUM else 600)
+        settings_pos_y = (130 if uiscale is ba.UIScale.SMALL else
                           60 if uiscale is ba.UIScale.MEDIUM else 70)
         controller_button = ba.buttonwidget(parent=self._root_widget,
                                             autoselect=True,
@@ -668,6 +675,26 @@ class PluginManagerWindow(ba.Window, PluginManager):
                        texture=ba.gettexture("settingsIcon"),
                        draw_controller=controller_button)
 
+    async def draw_refresh_icon(self):
+        uiscale = ba.app.ui.uiscale
+        settings_pos_x = (590 if uiscale is ba.UIScale.SMALL else
+                          530 if uiscale is ba.UIScale.MEDIUM else 600)
+        settings_pos_y = (180 if uiscale is ba.UIScale.SMALL else
+                          105 if uiscale is ba.UIScale.MEDIUM else 120)
+        controller_button = ba.buttonwidget(parent=self._root_widget,
+                                            autoselect=True,
+                                            position=(settings_pos_x, settings_pos_y),
+                                            size=(30, 30),
+                                            button_type="square",
+                                            label="",
+                                            on_activate_call=self.refresh)
+        ba.imagewidget(parent=self._root_widget,
+                       position=(settings_pos_x, settings_pos_y),
+                       size=(30, 30),
+                       color=(0.8, 0.95, 1),
+                       texture=ba.gettexture("replayIcon"),
+                       draw_controller=controller_button)
+
     async def draw_plugin_names(self):
         # uiscale = ba.app.ui.uiscale
         # v = (self._height - 75) if uiscale is ba.UIScale.SMALL else (self._height - 105)
@@ -680,7 +707,6 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # b_size = (150, 30)
         # b_textcolor = (0.75, 0.7, 0.8)
         # b_color = (0.6, 0.53, 0.63)
-
         for plugin in self._columnwidget.get_children():
             plugin.delete()
 
@@ -736,7 +762,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     async def select_category(self, category):
         self.selected_category = category
-        self.plugins_in_current_view = {}
+        self.plugins_in_current_view.clear()
         await self.draw_category_selection_button(label=category)
         await self.draw_plugin_names()
 
@@ -747,8 +773,21 @@ class PluginManagerWindow(ba.Window, PluginManager):
     def popup_menu_closing(self, window):
         pass
 
-    async def refresh(self):
-        pass
+    def cleanup(self):
+        super().cleanup()
+        self.categories.clear()
+        for plugin in self._columnwidget.get_children():
+            plugin.delete()
+        self.plugins_in_current_view.clear()
+
+    async def _refresh(self):
+        index = await super().refresh()
+        await self.setup_plugin_categories(index)
+        await self.select_category(self.selected_category)
+
+    def refresh(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self._refresh())
 
     def soft_refresh(self):
         pass
