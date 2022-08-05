@@ -16,13 +16,35 @@
     ],
     "versions": {
        "1.1.0": {
-         "commit_sha": "caba1h98",
+         "commit_sha": "13a9d128",
          "known_compatible_game_versions": [
            "1.7.0"
          ],
          "dependencies": [],
          "released_on": "03-06-2022",
-         "md5sum": "c81b0905c95b6d3d75ae5b4e4f084bdd"
+         "md5sum": "4b6bbb99037ebda4664da7c510b3717c"
+      }
+    }
+  },
+  "StoreEventSpecials": {
+    "description": "Exposes event special store items not normally available for purchase",
+    "external_url": "",
+    "authors": [
+      {
+        "name": "Rikko",
+        "email": "rikkolovescats@proton.me",
+        "discord": "Rikko#7383"
+      }
+    ],
+    "versions": {
+       "1.0.0": {
+         "commit_sha": "2aa6df31",
+         "known_compatible_game_versions": [
+           "1.7.0"
+         ],
+         "dependencies": [],
+         "released_on": "06-08-2022",
+         "md5sum": "4b6bbb99037ebda4664da7c510b3717c"
       }
     }
   }
