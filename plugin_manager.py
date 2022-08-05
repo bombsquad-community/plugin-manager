@@ -21,6 +21,22 @@ PLUGIN_DIRECTORY = _env["python_directory_user"]
 PLUGIN_ENTRYPOINT = "Main"
 
 
+def setup_config():
+    is_config_updated = False
+    if "Community Plugin Manager" not in ba.app.config:
+        ba.app.config["Community Plugin Manager"] = {}
+    if "Installed Plugins" not in ba.app.config["Community Plugin Manager"]:
+        ba.app.config["Community Plugin Manager"]["Installed Plugins"] = {}
+        is_config_updated = True
+    for plugin_name in ba.app.config["Community Plugin Manager"]["Installed Plugins"].keys():
+        plugin = PluginLocal(plugin_name)
+        if not plugin.is_installed:
+            del ba.app.config["Community Plugin Manager"]["Installed Plugins"][plugin_name]
+            is_config_updated = True
+    if is_config_updated:
+        ba.app.config.commit()
+
+
 async def send_network_request(request):
     loop = asyncio.get_event_loop()
     response = await loop.run_in_executor(None, urllib.request.urlopen, request)
@@ -57,34 +73,112 @@ class CategoryAll(Category):
         self._plugins = plugins
 
 
+class PluginLocal:
+    def __init__(self, name):
+        """
+        Initialize a plugin locally installed on the device.
+        """
+        self.name = name
+        self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{name}.py")
+
+    @property
+    def is_installed(self):
+        return os.path.isfile(self.install_path)
+
+    @property
+    def is_installed_via_plugin_manager(self):
+        return self.name in ba.app.config["Community Plugin Manager"]["Installed Plugins"]
+
+    def initialize(self):
+        if self.name not in ba.app.config["Community Plugin Manager"]["Installed Plugins"]:
+            ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name] = {}
+        return self
+
+    def uninstall(self):
+        try:
+            os.remove(self.install_path)
+        except FileNotFoundError:
+            pass
+        try:
+            del ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]
+        except KeyError:
+            pass
+        else:
+            ba.app.config.commit()
+
+    @property
+    def version(self):
+        try:
+            version = ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"]
+        except KeyError:
+            version = None
+        return version
+
+    def set_version(self, version):
+        ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = version
+        return self
+
+    def save(self):
+        ba.app.config.commit()
+        return self
+
+
 class Plugin:
     def __init__(self, plugin, base_download_url):
+        """
+        Initialize a plugin from network repository.
+        """
         self.name, self.info = plugin
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
         self.download_url = f"{base_download_url}/{self.name}.py"
         self.entry_point = f"{self.name}.{PLUGIN_ENTRYPOINT}"
 
+    def __repr__(self):
+        return f"<Plugin({self.name})>"
+
     @property
-    def installed(self):
+    def is_installed(self):
         return os.path.isfile(self.install_path)
 
     @property
-    def enabled(self):
+    def is_enabled(self):
         try:
             return ba.app.config["Plugins"][self.entry_point]["enabled"]
         except KeyError:
             return False
 
-    async def install(self):
+    @property
+    def latest_version(self):
+        return next(iter(self.info["versions"]))
+
+    def get_local(self):
+        if not self.is_installed:
+            raise ValueError("Plugin is not installed")
+        return PluginLocal(self.name)
+
+    async def _download_plugin(self):
         response = await send_network_request(self.download_url)
         with open(self.install_path, "wb") as fout:
             fout.write(response.read())
+        (
+            self.get_local()
+                .initialize()
+                .set_version(self.latest_version)
+                .save()
+        )
+
+    async def install(self):
+        await self._download_plugin()
         self.enable()
-        _ba.screenmessage("Plugin Installed")
+        ba.screenmessage("Plugin Installed")
 
     def uninstall(self):
-        os.remove(self.install_path)
-        _ba.screenmessage("Plugin Uninstalled")
+        self.get_local().uninstall()
+        ba.screenmessage("Plugin Uninstalled")
+
+    async def update(self):
+        await self._download_plugin()
+        ba.screenmessage("Plugin Updated")
 
     def _set_status(self, to_enable=True):
         if self.entry_point not in ba.app.config["Plugins"]:
@@ -93,19 +187,17 @@ class Plugin:
 
     def enable(self):
         self._set_status(to_enable=True)
-        ba.app.config.apply_and_commit()
-        _ba.screenmessage("Plugin Enabled")
+        ba.screenmessage("Plugin Enabled")
 
     def disable(self):
         self._set_status(to_enable=False)
-        ba.app.config.commit()
-        _ba.screenmessage("Plugin Disabled")
+        ba.screenmessage("Plugin Disabled")
 
 
 class PluginWindow(popup.PopupWindow):
     def __init__(self, plugin, origin_widget):
+        self.plugin = plugin
         uiscale = ba.app.ui.uiscale
-        b_color = (0.6, 0.53, 0.63)
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
         width = 360 * s
@@ -124,9 +216,10 @@ class PluginWindow(popup.PopupWindow):
                                                       if uiscale is ba.UIScale.MEDIUM else 1.0),
                                                scale_origin_stack_offset=scale_origin)
         pos = height * 0.8
+        plugin_title = f"{plugin.name} (v{plugin.latest_version})"
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
-                      h_align='center', v_align='center', text=plugin.name,
+                      h_align='center', v_align='center', text=plugin_title,
                       scale=text_scale * 1.25, color=color,
                       maxwidth=width * 0.9)
         pos -= 25
@@ -153,74 +246,98 @@ class PluginWindow(popup.PopupWindow):
                       text=plugin.info["description"],
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
-        b3_color = (0.8, 0.15, 0.35)
-        # b3_color = (0.15, 0.80, 0.35)
+        b1_color = (0.6, 0.53, 0.63)
+        b2_color = (0.8, 0.15, 0.35)
+        b3_color = (0.2, 0.8, 0.3)
         pos = height * 0.1
         button_size = (80 * s, 40 * s)
 
-        if plugin.installed:
-            if plugin.enabled:
+        if plugin.is_installed:
+            if plugin.is_enabled:
                 button1_label = "Disable"
-                self.button1_action = plugin.disable
+                button1_action = self.disable
             else:
                 button1_label = "Enable"
-                self.button1_action = plugin.enable
+                button1_action = self.enable
             button2_label = "Uninstall"
-            self.button2_action = plugin.uninstall
+            button2_action = self.uninstall
+            has_update = plugin.get_local().version != plugin.latest_version
+            if has_update:
+                button3_label = "Update"
+                button3_action = self.update
         else:
             button1_label = "Install"
-            loop = asyncio.get_event_loop()
-            self.button1_action = ba.Call(loop.create_task, plugin.install())
-            # button1_action = asyncio.run, plugin.install
-        button3_label = "OK"
+            button1_action = self.install
 
-        # button1 =
         ba.buttonwidget(parent=self._root_widget,
                         position=(width * 0.1, pos),
                         size=button_size,
-                        on_activate_call=self.button1_action_func,
-                        color=b_color,
+                        on_activate_call=button1_action,
+                        color=b1_color,
                         textcolor=b_text_color,
                         button_type='square',
                         text_scale=1,
                         label=button1_label)
 
-        if plugin.installed:
-            # button2 =
+        if plugin.is_installed:
             ba.buttonwidget(parent=self._root_widget,
                             position=(width * 0.4, pos),
                             size=button_size,
-                            on_activate_call=self.button2_action_func,
-                            color=b3_color,
+                            on_activate_call=button2_action,
+                            color=b2_color,
                             textcolor=b_text_color,
                             button_type='square',
                             text_scale=1,
                             label=button2_label)
 
-        button3 = ba.buttonwidget(parent=self._root_widget,
-                                  position=(width * 0.7, pos),
-                                  size=button_size,
-                                  on_activate_call=self.button3_action,
-                                  autoselect=True,
-                                  button_type='square',
-                                  text_scale=1,
-                                  label=button3_label)
+            if has_update:
+                button3 = ba.buttonwidget(parent=self._root_widget,
+                                          position=(width * 0.7, pos),
+                                          size=button_size,
+                                          on_activate_call=button3_action,
+                                          color=b3_color,
+                                          textcolor=b_text_color,
+                                          autoselect=True,
+                                          button_type='square',
+                                          text_scale=1,
+                                          label=button3_label)
         ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=button3.activate)
-        ba.containerwidget(edit=self._root_widget, selected_child=button3)
-        ba.containerwidget(edit=self._root_widget, start_button=button3)
+                           on_cancel_call=self.ok)
+        # ba.containerwidget(edit=self._root_widget, selected_child=button3)
+        # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
-    def button1_action_func(self) -> None:
-        self.button1_action()
-        self.button3_action()
-
-    def button2_action_func(self) -> None:
-        self.button2_action()
-        self.button3_action()
-
-    def button3_action(self) -> None:
+    def ok(self) -> None:
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
         return None
+
+    def button(fn):
+        def wrapper(self, *args, **kwargs):
+            fn(self, *args, **kwargs)
+            self.ok()
+        return wrapper
+
+    @button
+    def disable(self) -> None:
+        self.plugin.disable()
+
+    @button
+    def enable(self) -> None:
+        self.plugin.enable()
+
+    @button
+    def install(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.plugin.install())
+
+    @button
+    def uninstall(self):
+        self.plugin.uninstall()
+        self.ok()
+
+    @button
+    def update(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.plugin.update())
 
 
 class PluginManager:
@@ -542,11 +659,24 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         plugins = await self.categories[self.selected_category].get_plugins()
         for plugin in plugins:
+            if plugin.is_installed:
+                if plugin.is_enabled:
+                    local_plugin = plugin.get_local()
+                    if not local_plugin.is_installed_via_plugin_manager:
+                        color = (0.8, 0.2, 0.2)
+                    elif local_plugin.version == plugin.latest_version:
+                        color = (0, 1, 0)
+                    else:
+                        color = (1, 0.6, 0)
+                else:
+                    color = (0.5, 0.5, 0.5)
+            else:
+                color = (1, 1, 1)
             ba.textwidget(parent=self._columnwidget,
                           size=(410, 30),
                           selectable=True,
                           always_highlight=True,
-                          color=(1, 1, 1),
+                          color=color,
                           on_select_call=lambda: None,
                           text=plugin.name,
                           on_activate_call=ba.Call(PluginWindow, plugin, self._root_widget),
@@ -874,6 +1004,7 @@ class NewAllSettingsWindow(ba.Window):
 class EntryPoint(ba.Plugin):
     def on_app_running(self) -> None:
         """Called when the app is being launched."""
+        setup_config()
         from bastd.ui.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         asyncio.set_event_loop(ba._asyncio._asyncio_event_loop)
@@ -893,3 +1024,8 @@ class EntryPoint(ba.Plugin):
     def on_app_shutdown(self) -> None:
         """Called before closing the application."""
         print("shutdown")
+        # print(ba.app.config["Community Plugin Manager"])
+        # with open(_env["config_file_path"], "r") as fin:
+        #     c = fin.read()
+        # import json
+        # print(json.loads(c)["Community Plugin Manager"])
