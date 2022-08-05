@@ -20,6 +20,8 @@ HEADERS = {
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 PLUGIN_ENTRYPOINT = "Main"
 
+_CACHE = {}
+
 
 def setup_config():
     is_config_updated = False
@@ -48,7 +50,7 @@ class Category:
         self.name = name
         self.base_download_url = base_download_url
         self.meta_url = meta_url
-        self._plugins = None
+        self._plugins = _CACHE.get("categories", {}).get(self.name)
 
     async def get_plugins(self):
         if self._plugins is None:
@@ -60,10 +62,23 @@ class Category:
             plugins_info = json.loads(response.read())
             self._plugins = ([Plugin(plugin_info, self.base_download_url)
                              for plugin_info in plugins_info.items()])
+            self.set_category_plugins_global_cache(self._plugins)
         return self._plugins
+
+    def set_category_plugins_global_cache(self, plugins):
+        if "categories" not in _CACHE:
+            _CACHE["categories"] = {}
+        _CACHE["categories"][self.name] = plugins
+
+    def unset_category_plugins_global_cache(self):
+        try:
+            del _CACHE["categories"][self.name]
+        except KeyError:
+            pass
 
     async def refresh(self):
         self._plugins = {}
+        self.unset_category_plugins_global_cache()
         return await self.get_plugins()
 
 
@@ -349,32 +364,34 @@ class PluginWindow(popup.PopupWindow):
 class PluginManager:
     def __init__(self):
         self.request_headers = HEADERS
-        self._index = {}
-
-    # @property
-    # def index(self):
-    #     if not self._index:
-    #         loop = asyncio.get_event_loop()
-    #         self._index = loop.create_task(self.plugin_index())
-    #     return self._index
-
-    # def plugin_index(self):
-    #     loop = asyncio.get_event_loop()
-    #     loop.create_task(self.plugin_index())
+        self._index = _CACHE.get("index", {})
 
     async def get_index(self):
+        global _INDEX
         if not self._index:
             request = urllib.request.Request(
                 INDEX_META,
                 headers=HEADERS
             )
+            print(INDEX_META)
             response = await send_network_request(request)
             self._index = json.loads(response.read())
+            self.set_index_global_cache(self._index)
         return self._index
 
     async def refresh(self):
         self._index = {}
+        self.unset_index_global_cache()
         return await self.get_index()
+
+    def set_index_global_cache(self, index):
+        _CACHE["index"] = index
+
+    def unset_index_global_cache(self):
+        try:
+            del _CACHE["index"]
+        except KeyError:
+            pass
 
     async def soft_refresh(self):
         pass
@@ -682,9 +699,9 @@ class PluginManagerWindow(ba.Window, PluginManager):
                 else:
                     color = (1, 0.6, 0)
             else:
-                color = (0.5, 0.5, 0.5)
+                color = (1, 1, 1)
         else:
-            color = (1, 1, 1)
+            color = (0.5, 0.5, 0.5)
 
         plugin_to_update = self.plugins_in_current_view.get(plugin.name)
         if plugin_to_update:
