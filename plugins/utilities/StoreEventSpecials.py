@@ -64,4 +64,4 @@ def modified_get_store_layout() -> Dict[str, List[Dict[str, Any]]]:
 # ba_meta export plugin
 class Main(ba.Plugin):
     def on_app_running(self) -> None:
-        ba.internal.get_store_layout = 
+        ba.internal.get_store_layout = modified_get_store_layout
