@@ -46,6 +46,10 @@ async def send_network_request(request):
     return response
 
 
+def play_sound():
+    ba.playsound(ba.getsound('swish'))
+
+
 class Category:
     def __init__(self, name, base_download_url, meta_url):
         self.name = name
@@ -345,22 +349,27 @@ class PluginWindow(popup.PopupWindow):
 
     @button
     async def disable(self) -> None:
+        play_sound()
         await self.plugin.disable()
 
     @button
     async def enable(self) -> None:
+        play_sound()
         await self.plugin.enable()
 
     @button
     async def install(self):
+        play_sound()
         await self.plugin.install()
 
     @button
     async def uninstall(self):
+        play_sound()
         await self.plugin.uninstall()
 
     @button
     async def update(self):
+        play_sound()
         await self.plugin.update()
 
 
@@ -558,6 +567,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # self._refresh()
 
     def _back(self) -> None:
+        play_sound()
         from bastd.ui.settings.allsettings import AllSettingsWindow
         ba.containerwidget(edit=self._root_widget,
                            transition=self._transition_out)
@@ -744,6 +754,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
             self.plugins_in_current_view[plugin.name] = text_widget
 
     def show_categories(self):
+        play_sound()
         # On each new entry, change position to y -= 40.
         # value = bastd.ui.popup.PopupMenuWindow(
         bastd.ui.popup.PopupMenuWindow(
@@ -781,6 +792,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         await self.select_category(self.selected_category)
 
     def refresh(self):
+        play_sound()
         loop = asyncio.get_event_loop()
         loop.create_task(self._refresh())
 
