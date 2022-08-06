@@ -219,6 +219,7 @@ class Plugin:
 
 class PluginWindow(popup.PopupWindow):
     def __init__(self, plugin, origin_widget, button_callback=lambda: None):
+        play_sound()
         self.plugin = plugin
         self.button_callback = button_callback
         b_text_color = (0.75, 0.7, 0.8)
