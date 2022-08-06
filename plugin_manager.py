@@ -598,15 +598,20 @@ class PluginManagerWindow(ba.Window, PluginManager):
         self.categories["All"] = CategoryAll(plugins=all_plugins)
 
     async def plugin_index(self):
-        index = await super().get_index()
-        await asyncio.gather(
-            self.draw_refresh_icon(),
-            self.draw_settings_icon(),
-            self.setup_plugin_categories(index),
-        )
-        self._loading_text.delete()
-        await self.select_category("All")
-        await self.draw_search_bar()
+        try:
+            index = await super().get_index()
+            await asyncio.gather(
+                self.draw_refresh_icon(),
+                self.draw_settings_icon(),
+                self.setup_plugin_categories(index),
+            )
+            await self.select_category("All")
+            await self.draw_search_bar()
+            self._loading_text.delete()
+        except Exception:
+            ba.textwidget(edit=self._loading_text,
+                          text='Error')
+            print("Plugin Manager could not load due to a few Technical Issues.")
 
     async def draw_category_selection_button(self, label=None):
         # v = (self._height - 75) if _uiscale is ba.UIScale.SMALL else (self._height - 105)
