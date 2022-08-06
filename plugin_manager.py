@@ -132,13 +132,15 @@ class PluginLocal:
     @property
     def version(self):
         try:
-            version = ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"]
+            version = (ba.app.config["Community Plugin Manager"]
+                       ["Installed Plugins"][self.name]["version"])
         except KeyError:
             version = None
         return version
 
     def set_version(self, version):
-        ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = version
+        v = version
+        ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = v
         return self
 
     def save(self):
@@ -315,16 +317,17 @@ class PluginWindow(popup.PopupWindow):
                             label=button2_label)
 
             if has_update:
-                button3 = ba.buttonwidget(parent=self._root_widget,
-                                          position=(width * 0.7, pos),
-                                          size=button_size,
-                                          on_activate_call=button3_action,
-                                          color=b3_color,
-                                          textcolor=b_text_color,
-                                          autoselect=True,
-                                          button_type='square',
-                                          text_scale=1,
-                                          label=button3_label)
+                # button3 =
+                ba.buttonwidget(parent=self._root_widget,
+                                position=(width * 0.7, pos),
+                                size=button_size,
+                                on_activate_call=button3_action,
+                                color=b3_color,
+                                textcolor=b_text_color,
+                                autoselect=True,
+                                button_type='square',
+                                text_scale=1,
+                                label=button3_label)
         ba.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._ok)
         # ba.containerwidget(edit=self._root_widget, selected_child=button3)
@@ -423,7 +426,6 @@ class PluginManagerWindow(ba.Window, PluginManager):
         loop = asyncio.get_event_loop()
         loop.create_task(self.plugin_index())
 
-
         self._width = (570 if _uiscale is ba.UIScale.MEDIUM else 650)
         self._height = (540 if _uiscale is ba.UIScale.SMALL
                         else 420 if _uiscale is ba.UIScale.MEDIUM
@@ -519,7 +521,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # b_textcolor = (0.75, 0.7, 0.8)
         # b_color = (0.6, 0.53, 0.63)
 
-        # s = 1.0 if _uiscale is ba.UIScale.SMALL else 1.27 if _uiscale is ba.UIScale.MEDIUM else 1.57
+        # s = (1.0 if _uiscale is ba.UIScale.SMALL else
+        #      1.27 if _uiscale is ba.UIScale.MEDIUM else 1.57)
         # b_size = (90, 60 * s)
         # v -= 63 * s
 
@@ -630,7 +633,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         if self.category_selection_button is None:
             self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
-                                                             position=(category_pos_x, category_pos_y),
+                                                             position=(category_pos_x,
+                                                                       category_pos_y),
                                                              size=b_size,
                                                              on_activate_call=self.show_categories,
                                                              label=label,
@@ -748,7 +752,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
                                         # on_select_call=lambda: None,
                                         text=plugin.name,
                                         click_activate=True,
-                                        on_activate_call=ba.Call(PluginWindow, plugin, self._root_widget, lambda: self.draw_plugin_name(plugin)),
+                                        on_activate_call=ba.Call(PluginWindow, plugin,
+                                                                 self._root_widget,
+                                                                 (lambda:
+                                                                  self.draw_plugin_name(plugin))),
                                         h_align='left',
                                         v_align='center',
                                         maxwidth=420)
