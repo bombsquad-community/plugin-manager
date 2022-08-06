@@ -452,7 +452,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
-        title_pos = self._height - (95 if _uiscale is ba.UIScale.SMALL else
+        title_pos = self._height - (100 if _uiscale is ba.UIScale.SMALL else
                                     50 if _uiscale is ba.UIScale.MEDIUM else 50)
         ba.textwidget(
             parent=self._root_widget,
@@ -602,7 +602,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         #                        17 if _uiscale is ba.UIScale.MEDIUM else 58)
         category_pos_x = (420 if _uiscale is ba.UIScale.SMALL else
                           375 if _uiscale is ba.UIScale.MEDIUM else 440)
-        category_pos_y = self._height - (140 if _uiscale is ba.UIScale.SMALL else
+        category_pos_y = self._height - (145 if _uiscale is ba.UIScale.SMALL else
                                          100 if _uiscale is ba.UIScale.MEDIUM else 140)
         # the next 2 lines belong in 1 line
         # # s = 1.0 if _uiscale is ba.UIScale.SMALL else
@@ -636,7 +636,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # TODO
         search_bar_pos_x = (170 if _uiscale is ba.UIScale.SMALL else
                             145 if _uiscale is ba.UIScale.MEDIUM else 200)
-        search_bar_pos_y = self._height - (100 if _uiscale is ba.UIScale.MEDIUM else 140)
+        search_bar_pos_y = self._height - (
+            145 if _uiscale is ba.UIScale.SMALL else
+            100 if _uiscale is ba.UIScale.MEDIUM else 140
+        )
         ba.textwidget(parent=self._root_widget,
                       position=(search_bar_pos_x, search_bar_pos_y),
                       scale=0.7,
