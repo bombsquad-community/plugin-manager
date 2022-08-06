@@ -425,17 +425,16 @@ class PluginManagerWindow(ba.Window, PluginManager):
             self._scale_origin = origin_widget.get_screen_space_center()
             transition = "in_scale"
 
-        self._root_widget = ba.containerwidget(
+        super().__init__(root_widget=ba.containerwidget(
             size=(self._width, self._height + top_extra),
             transition=transition,
             toolbar_visibility="menu_minimal",
             scale_origin_stack_offset=self._scale_origin,
-            parent=_ba.get_special_widget("overlay_stack"),
             scale=(1.9 if _uiscale is ba.UIScale.SMALL
                    else 1.5 if _uiscale is ba.UIScale.MEDIUM
                    else 1.0),
             stack_offset=(0, -25) if _uiscale is ba.UIScale.SMALL else (0, 0)
-        )
+        ))
 
         back_pos_x = 15 + (0 if _uiscale is ba.UIScale.SMALL else
                            17 if _uiscale is ba.UIScale.MEDIUM else 58)
@@ -1022,7 +1021,7 @@ class NewAllSettingsWindow(ba.Window):
         self._save_state()
         ba.containerwidget(edit=self._root_widget, transition="out_left")
         ba.app.ui.set_main_menu_window(PluginManagerWindow(
-            origin_widget=self._advanced_button).get_root_widget())
+            origin_widget=self._modmgr_button).get_root_widget())
 
     def _save_state(self) -> None:
         try:
