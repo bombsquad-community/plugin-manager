@@ -229,7 +229,7 @@ class PluginWindow(popup.PopupWindow):
         self._root_widget = ba.containerwidget(size=(width, height),
                                                parent=_ba.get_special_widget(
                                                    'overlay_stack'),
-                                               # on_outside_click_call=self._ok,
+                                               on_outside_click_call=self._ok,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
                                                       if _uiscale is ba.UIScale.MEDIUM else 1.0),
@@ -321,11 +321,11 @@ class PluginWindow(popup.PopupWindow):
                                           text_scale=1,
                                           label=button3_label)
         ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self.ok)
+                           on_cancel_call=self._ok)
         # ba.containerwidget(edit=self._root_widget, selected_child=button3)
         # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
-    def ok(self) -> None:
+    def _ok(self) -> None:
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def button(fn):
@@ -334,7 +334,7 @@ class PluginWindow(popup.PopupWindow):
             self.button_callback()
 
         def wrapper(self, *args, **kwargs):
-            self.ok()
+            self._ok()
             if asyncio.iscoroutinefunction(fn):
                 loop = asyncio.get_event_loop()
                 loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
