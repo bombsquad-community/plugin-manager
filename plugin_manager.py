@@ -483,14 +483,14 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         self._loading_text = ba.textwidget(
             parent=self._root_widget,
-            position=(-10, self._height - 150),
+            position=(35, self._height - 150),
             size=(self._width, 25),
             text="Loading...",
             color=ba.app.ui.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
-            maxwidth=270,
+            maxwidth=400,
         )
 
         scroll_size_x = (400 if _uiscale is ba.UIScale.SMALL else
@@ -601,15 +601,23 @@ class PluginManagerWindow(ba.Window, PluginManager):
         self.categories["All"] = CategoryAll(plugins=all_plugins)
 
     async def plugin_index(self):
-        index = await super().get_index()
-        await asyncio.gather(
-            self.draw_refresh_icon(),
-            self.draw_settings_icon(),
-            self.setup_plugin_categories(index),
-        )
-        self._loading_text.delete()
-        await self.select_category("All")
-        await self.draw_search_bar()
+        try:
+            index = await super().get_index()
+            await asyncio.gather(
+                self.draw_refresh_icon(),
+                self.draw_settings_icon(),
+                self.setup_plugin_categories(index),
+            )
+            await self.select_category("All")
+            await self.draw_search_bar()
+        except RuntimeError:
+            # User probably went back before the PluginManagerWindow could finish loading.
+            pass
+        except urllib.error.URLError:
+            ba.textwidget(edit=self._loading_text,
+                          text="Make sure you are connected to the Internet and try again.")
+        else:
+            self._loading_text.delete()
 
     async def draw_category_selection_button(self, label=None):
         # v = (self._height - 75) if _uiscale is ba.UIScale.SMALL else (self._height - 105)
