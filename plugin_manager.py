@@ -666,15 +666,15 @@ class PluginManagerWindow(ba.Window, PluginManager):
             110 if _uiscale is ba.UIScale.MEDIUM else 120)
 
         search_bar_size_x = (250 if _uiscale is ba.UIScale.SMALL else
-                            230 if _uiscale is ba.UIScale.MEDIUM else 250)
-        search_bar_size_y =(
+                             230 if _uiscale is ba.UIScale.MEDIUM else 250)
+        search_bar_size_y = (
             35 if _uiscale is ba.UIScale.SMALL else
             35 if _uiscale is ba.UIScale.MEDIUM else 45)
 
         filter_txt = ba.Lstr(resource='filterText')
         self._filter_text = ba.textwidget(parent=self._root_widget,
                                           text="Search",
-                                          size=(search_bar_size_x,search_bar_size_y),
+                                          size=(search_bar_size_x, search_bar_size_y),
                                           position=(search_bar_pos_x, search_bar_pos_y),
                                           h_align='left',
                                           v_align='center',
