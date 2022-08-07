@@ -429,10 +429,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
         loop = asyncio.get_event_loop()
         loop.create_task(self.plugin_index())
 
-        self._width = (570 if _uiscale is ba.UIScale.MEDIUM else 650)
-        self._height = (540 if _uiscale is ba.UIScale.SMALL
-                        else 420 if _uiscale is ba.UIScale.MEDIUM
-                        else 540)
+        self._width = (490 if _uiscale is ba.UIScale.MEDIUM else 570)
+        self._height = (500 if _uiscale is ba.UIScale.SMALL
+                        else 380 if _uiscale is ba.UIScale.MEDIUM
+                        else 500)
         top_extra = 20 if _uiscale is ba.UIScale.SMALL else 0
 
         if origin_widget:
@@ -451,8 +451,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
             stack_offset=(0, -25) if _uiscale is ba.UIScale.SMALL else (0, 0)
         ))
 
-        back_pos_x = 15 + (0 if _uiscale is ba.UIScale.SMALL else
-                           17 if _uiscale is ba.UIScale.MEDIUM else 58)
+        back_pos_x = 5 + (10 if _uiscale is ba.UIScale.SMALL else
+                           27 if _uiscale is ba.UIScale.MEDIUM else 68)
         back_pos_y = self._height - (115 if _uiscale is ba.UIScale.SMALL else
                                      65 if _uiscale is ba.UIScale.MEDIUM else 50)
         self._back_button = back_button = ba.buttonwidget(
@@ -495,10 +495,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
         scroll_size_x = (400 if _uiscale is ba.UIScale.SMALL else
                          380 if _uiscale is ba.UIScale.MEDIUM else 420)
-        scroll_size_y = (255 if _uiscale is ba.UIScale.SMALL else
-                         280 if _uiscale is ba.UIScale.MEDIUM else 340)
-        scroll_pos_x = (160 if _uiscale is ba.UIScale.SMALL else
-                        130 if _uiscale is ba.UIScale.MEDIUM else 160)
+        scroll_size_y = (225 if _uiscale is ba.UIScale.SMALL else
+                         235 if _uiscale is ba.UIScale.MEDIUM else 335)
+        scroll_pos_x = (70 if _uiscale is ba.UIScale.SMALL else
+                        40 if _uiscale is ba.UIScale.MEDIUM else 70)
         scroll_pos_y = (125 if _uiscale is ba.UIScale.SMALL else
                         30 if _uiscale is ba.UIScale.MEDIUM else 40)
         self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
@@ -625,10 +625,10 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # h = 440
         # category_pos_x = 15 + (0 if _uiscale is ba.UIScale.SMALL else
         #                        17 if _uiscale is ba.UIScale.MEDIUM else 58)
-        category_pos_x = (420 if _uiscale is ba.UIScale.SMALL else
-                          375 if _uiscale is ba.UIScale.MEDIUM else 440)
+        category_pos_x = (330 if _uiscale is ba.UIScale.SMALL else
+                          285 if _uiscale is ba.UIScale.MEDIUM else 350)
         category_pos_y = self._height - (145 if _uiscale is ba.UIScale.SMALL else
-                                         100 if _uiscale is ba.UIScale.MEDIUM else 140)
+                                         110 if _uiscale is ba.UIScale.MEDIUM else 110)
         # the next 2 lines belong in 1 line
         # # s = 1.0 if _uiscale is ba.UIScale.SMALL else
         # # 1.27 if _uiscale is ba.UIScale.MEDIUM else 1.57
@@ -660,11 +660,11 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     async def draw_search_bar(self):
         # TODO
-        search_bar_pos_x = (170 if _uiscale is ba.UIScale.SMALL else
-                            145 if _uiscale is ba.UIScale.MEDIUM else 200)
+        search_bar_pos_x = (80 if _uiscale is ba.UIScale.SMALL else
+                            55 if _uiscale is ba.UIScale.MEDIUM else 110)
         search_bar_pos_y = self._height - (
             145 if _uiscale is ba.UIScale.SMALL else
-            100 if _uiscale is ba.UIScale.MEDIUM else 140
+            110 if _uiscale is ba.UIScale.MEDIUM else 110
         )
         ba.textwidget(parent=self._root_widget,
                       position=(search_bar_pos_x, search_bar_pos_y),
@@ -680,8 +680,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
                       maxwidth=420)
 
     async def draw_settings_icon(self):
-        settings_pos_x = (590 if _uiscale is ba.UIScale.SMALL else
-                          530 if _uiscale is ba.UIScale.MEDIUM else 600)
+        settings_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
+                          440 if _uiscale is ba.UIScale.MEDIUM else 510)
         settings_pos_y = (130 if _uiscale is ba.UIScale.SMALL else
                           60 if _uiscale is ba.UIScale.MEDIUM else 70)
         controller_button = ba.buttonwidget(parent=self._root_widget,
@@ -700,8 +700,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
                        draw_controller=controller_button)
 
     async def draw_refresh_icon(self):
-        settings_pos_x = (590 if _uiscale is ba.UIScale.SMALL else
-                          530 if _uiscale is ba.UIScale.MEDIUM else 600)
+        settings_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
+                          440 if _uiscale is ba.UIScale.MEDIUM else 510)
         settings_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
                           105 if _uiscale is ba.UIScale.MEDIUM else 120)
         controller_button = ba.buttonwidget(parent=self._root_widget,
@@ -818,6 +818,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     def soft_refresh(self):
         pass
+
 
 class PluginManagerSettingsWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
