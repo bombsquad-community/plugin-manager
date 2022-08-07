@@ -722,7 +722,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
                 self.setup_plugin_categories(index),
             )
             await self.select_category("All")
-            # await self.draw_search_bar()
+            await self.draw_search_bar()
         except RuntimeError:
             # User probably went back before the PluginManagerWindow could finish loading.
             pass
