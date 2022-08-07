@@ -21,6 +21,9 @@ HEADERS = {
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 PLUGIN_ENTRYPOINT = "Main"
 
+VERSION = "0.1.1"
+GITHUB_REPO_LINK = "https://github.com/bombsquad-community/plugin-manager/"
+
 _CACHE = {}
 
 
@@ -679,7 +682,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
                                             size=(30, 30),
                                             button_type="square",
                                             label="",
-                                            on_activate_call=lambda: None)
+                                            on_activate_call=ba.Call(PluginManagerSettingsWindow,
+                                                                     self._root_widget))
         ba.imagewidget(parent=self._root_widget,
                        position=(settings_pos_x, settings_pos_y),
                        size=(30, 30),
@@ -806,6 +810,70 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     def soft_refresh(self):
         pass
+
+class PluginManagerSettingsWindow(popup.PopupWindow):
+    def __init__(self, origin_widget):
+        play_sound()
+        b_text_color = (0.75, 0.7, 0.8)
+        s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
+        width = 360 * s
+        height = 150 + 100 * s
+        color = (1, 1, 1)
+        text_scale = 0.7 * s
+        self._transition_out = 'out_scale'
+        transition = 'in_scale'
+        scale_origin = origin_widget.get_screen_space_center()
+        self._root_widget = ba.containerwidget(size=(width, height),
+                                               parent=_ba.get_special_widget(
+                                                   'overlay_stack'),
+                                               on_outside_click_call=self._disappear,
+                                               transition=transition,
+                                               scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
+                                                      if _uiscale is ba.UIScale.MEDIUM else 1.0),
+                                               scale_origin_stack_offset=scale_origin)
+        pos = height * 0.9
+        setting_title = "Settings"
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos), size=(0, 0),
+                      h_align='center', v_align='center', text=setting_title,
+                      scale=text_scale * 1.30, color=color,
+                      maxwidth=width * 0.9)
+        pos -= 40
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text='Version : ' + VERSION,
+                      scale=text_scale * 1.1,
+                      color=color, maxwidth=width * 0.9)
+        pos -= 55
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos-5), size=(0, 0),
+                      h_align='center', v_align='center',
+                      text='More Updates Coming Soon.',
+                      scale=text_scale, color=color,
+                      maxwidth=width * 0.95)
+
+        pos = height * 0.1
+        button_size = (270 * s, 50 * s)
+
+        ba.buttonwidget(parent=self._root_widget,
+                        position=(width * 0.125, pos),
+                        size=button_size,
+                        on_activate_call=self._open,
+                        textcolor=b_text_color,
+                        button_type='square',
+                        text_scale=1,
+                        label='Open Github Repo')
+        ba.containerwidget(edit=self._root_widget,
+                           on_cancel_call=self._disappear)
+
+    def _disappear(self) -> None:
+        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+
+    def _open(self) -> None:
+        ba.open_url(GITHUB_REPO_LINK)
 
 
 class NewAllSettingsWindow(ba.Window):
