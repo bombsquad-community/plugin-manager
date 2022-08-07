@@ -452,7 +452,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         ))
 
         back_pos_x = 5 + (10 if _uiscale is ba.UIScale.SMALL else
-                           27 if _uiscale is ba.UIScale.MEDIUM else 68)
+                          27 if _uiscale is ba.UIScale.MEDIUM else 68)
         back_pos_y = self._height - (115 if _uiscale is ba.UIScale.SMALL else
                                      65 if _uiscale is ba.UIScale.MEDIUM else 50)
         self._back_button = back_button = ba.buttonwidget(
@@ -634,7 +634,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         # # 1.27 if _uiscale is ba.UIScale.MEDIUM else 1.57
         # s = 1.75
         # b_size = (90, 60 * s)
-        b_size = (150, 30)
+        b_size = (140, 30)
         b_textcolor = (0.75, 0.7, 0.8)
         b_color = (0.6, 0.53, 0.63)
 
@@ -659,25 +659,27 @@ class PluginManagerWindow(ba.Window, PluginManager):
                                                              label=label)
 
     async def draw_search_bar(self):
-        # TODO
         search_bar_pos_x = (80 if _uiscale is ba.UIScale.SMALL else
-                            55 if _uiscale is ba.UIScale.MEDIUM else 110)
+                            55 if _uiscale is ba.UIScale.MEDIUM else 90)
         search_bar_pos_y = self._height - (
             145 if _uiscale is ba.UIScale.SMALL else
-            110 if _uiscale is ba.UIScale.MEDIUM else 110
-        )
-        ba.textwidget(parent=self._root_widget,
-                      position=(search_bar_pos_x, search_bar_pos_y),
-                      scale=0.7,
-                      # selectable=True,
-                      always_highlight=True,
-                      color=(0.4, 0.4, 0.4),
-                      # on_select_call=lambda: None,
-                      text="<Implement plugin search>",
-                      on_activate_call=lambda: None,
-                      h_align='left',
-                      v_align='center',
-                      maxwidth=420)
+            110 if _uiscale is ba.UIScale.MEDIUM else 120)
+
+        search_bar_size_x = (250 if _uiscale is ba.UIScale.SMALL else
+                            230 if _uiscale is ba.UIScale.MEDIUM else 250)
+        search_bar_size_y =(
+            35 if _uiscale is ba.UIScale.SMALL else
+            35 if _uiscale is ba.UIScale.MEDIUM else 45)
+
+        filter_txt = ba.Lstr(resource='filterText')
+        self._filter_text = ba.textwidget(parent=self._root_widget,
+                                          text="Search",
+                                          size=(search_bar_size_x,search_bar_size_y),
+                                          position=(search_bar_pos_x, search_bar_pos_y),
+                                          h_align='left',
+                                          v_align='center',
+                                          editable=True,
+                                          description=filter_txt)
 
     async def draw_settings_icon(self):
         settings_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
