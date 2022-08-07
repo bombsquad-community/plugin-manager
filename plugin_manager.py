@@ -8,6 +8,7 @@ import urllib.request
 import json
 import os
 import asyncio
+import re
 
 from typing import Union, Optional
 
@@ -19,7 +20,11 @@ HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
-PLUGIN_ENTRYPOINT = "Main"
+REGEXP = {
+    "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
+    # "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\("),
+    "plugin_entry_points": re.compile(b"(ba_meta export .+\n+class )(.*)\("),
+}
 
 VERSION = "0.1.1"
 GITHUB_REPO_LINK = "https://github.com/bombsquad-community/plugin-manager/"
@@ -43,10 +48,34 @@ def setup_config():
         ba.app.config.commit()
 
 
-async def send_network_request(request):
+def send_network_request(request):
+    return urllib.request.urlopen(request)
+
+
+async def async_send_network_request(request):
     loop = asyncio.get_event_loop()
-    response = await loop.run_in_executor(None, urllib.request.urlopen, request)
+    response = await loop.run_in_executor(None, send_network_request, request)
     return response
+
+
+def stream_network_response_to_file(request, file):
+    response = urllib.request.urlopen(request)
+    chunk_size = 16 * 1024
+    content = b""
+    with open(file, "wb") as fout:
+        while True:
+            chunk = response.read(chunk_size)
+            if not chunk:
+                break
+            fout.write(chunk)
+            content += chunk
+    return content
+
+
+async def async_stream_network_response_to_file(request, file):
+    loop = asyncio.get_event_loop()
+    content = await loop.run_in_executor(None, stream_network_response_to_file, request, file)
+    return content
 
 
 def play_sound():
@@ -58,15 +87,16 @@ class Category:
         self.name = name
         self.base_download_url = base_download_url
         self.meta_url = meta_url
+        self.request_headers = HEADERS
         self._plugins = _CACHE.get("categories", {}).get(self.name)
 
     async def get_plugins(self):
         if self._plugins is None:
             request = urllib.request.Request(
                 self.meta_url,
-                headers=HEADERS
+                headers=self.request_headers,
             )
-            response = await send_network_request(request)
+            response = await async_send_network_request(request)
             plugins_info = json.loads(response.read())
             self._plugins = ([Plugin(plugin_info, self.base_download_url)
                              for plugin_info in plugins_info.items()])
@@ -106,6 +136,9 @@ class PluginLocal:
         """
         self.name = name
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{name}.py")
+        self._content = None
+        self._api_version = None
+        self._entry_points = []
 
     @property
     def is_installed(self):
@@ -141,14 +174,108 @@ class PluginLocal:
             version = None
         return version
 
+    def _get_content(self):
+        with open(self.install_path, "rb") as fin:
+            return fin.read()
+
+    def _set_content(self, content):
+        with open(self.install_path, "wb") as fout:
+            fout.write(content)
+
+    async def get_content(self):
+        if self._content is None:
+            if not self.is_installed:
+                # TODO: Raise a more fitting exception.
+                raise TypeError("Plugin is not available locally.")
+            loop = asyncio.get_event_loop()
+            self._content = await loop.run_in_executor(None, self._get_content)
+        return self._content
+
+    async def get_api_version(self):
+        if self._api_version is None:
+            content = await self.get_content()
+            self._api_version = REGEXP["plugin_api_version"].search(content).group()
+        return self._api_version
+
+    async def get_entry_points(self):
+        if not self._entry_points:
+            content = await self.get_content()
+            groups = REGEXP["plugin_entry_points"].findall(content)
+            # Actual entry points are stored in the first index inside the matching groups.
+            entry_points = tuple(f"{self.name}.{group[1].decode('utf-8')}" for group in groups)
+            self._entry_points = entry_points
+        return self._entry_points
+
+    @property
+    def is_enabled(self):
+        """
+        Return True even if a single entry point is enabled.
+        """
+        entry_point_initials = f"{self.name}."
+        for entry_point, plugin_info in ba.app.config["Plugins"].items():
+            if entry_point.startswith(entry_point_initials) and plugin_info["enabled"]:
+                return True
+        # XXX: The below logic is more accurate but less efficient, since it actually
+        #      reads the local plugin file and parses entry points from it.
+        # for entry_point in await self.get_entry_points():
+        #     if ba.app.config["Plugins"][entry_point]["enabled"]:
+        #         return True
+        return False
+
+    # XXX: Commenting this out for now, since `enable` and `disable` currently have their
+    #      own separate logic.
+    # async def _set_status(self, to_enable=True):
+    #     for entry_point in await self.get_entry_points:
+    #         if entry_point not in ba.app.config["Plugins"]:
+    #             ba.app.config["Plugins"][entry_point] = {}
+    #         ba.app.config["Plugins"][entry_point]["enabled"] = to_enable
+
+    async def enable(self):
+        for entry_point in await self.get_entry_points():
+            if entry_point not in ba.app.config["Plugins"]:
+                ba.app.config["Plugins"][entry_point] = {}
+            ba.app.config["Plugins"][entry_point]["enabled"] = True
+        # await self._set_status(to_enable=True)
+        ba.screenmessage("Plugin Enabled")
+
+    async def disable(self):
+        entry_point_initials = f"{self.name}."
+        for entry_point, plugin_info in ba.app.config["Plugins"].items():
+            if entry_point.startswith(entry_point_initials):
+                plugin_info["enabled"] = False
+        # XXX: The below logic is more accurate but less efficient, since it actually
+        #      reads the local plugin file and parses entry points from it.
+        # await self._set_status(to_enable=False)
+        ba.screenmessage("Plugin Disabled")
+
     def set_version(self, version):
-        v = version
-        ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = v
+        ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = version
+        return self
+
+    # def set_entry_points(self):
+    #     if not "entry_points" in ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]:
+    #         ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["entry_points"] = []
+    #     for entry_point in await self.get_entry_points():
+    #         ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["entry_points"].append(entry_point)
+
+    async def set_content(self, content):
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._set_content, content)
+        self._content = content
+        return self
+
+    async def set_content_from_network_response(self, request):
+        content = await async_stream_network_response_to_file(request, self.install_path)
+        self._content = content
         return self
 
     def save(self):
         ba.app.config.commit()
         return self
+
+
+class PluginVersion:
+    pass
 
 
 class Plugin:
@@ -159,7 +286,7 @@ class Plugin:
         self.name, self.info = plugin
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
         self.download_url = f"{base_download_url}/{self.name}.py"
-        self.entry_point = f"{self.name}.{PLUGIN_ENTRYPOINT}"
+        self._local_plugin = None
 
     def __repr__(self):
         return f"<Plugin({self.name})>"
@@ -169,35 +296,33 @@ class Plugin:
         return os.path.isfile(self.install_path)
 
     @property
-    def is_enabled(self):
-        try:
-            return ba.app.config["Plugins"][self.entry_point]["enabled"]
-        except KeyError:
-            return False
-
-    @property
     def latest_version(self):
+        # TODO: Return an instance of `PluginVersion`.
         return next(iter(self.info["versions"]))
+
+    async def _download(self):
+        local_plugin = self.create_local()
+        await local_plugin.set_content_from_network_response(self.download_url)
+        local_plugin.set_version(self.latest_version)
+        local_plugin.save()
+        return local_plugin
 
     def get_local(self):
         if not self.is_installed:
             raise ValueError("Plugin is not installed")
-        return PluginLocal(self.name)
+        if self._local_plugin is None:
+            self._local_plugin = PluginLocal(self.name)
+        return self._local_plugin
 
-    async def _download_plugin(self):
-        response = await send_network_request(self.download_url)
-        with open(self.install_path, "wb") as fout:
-            fout.write(response.read())
-        (
-            self.get_local()
-                .initialize()
-                .set_version(self.latest_version)
-                .save()
+    def create_local(self):
+        return (
+            PluginLocal(self.name)
+            .initialize()
         )
 
     async def install(self):
-        await self._download_plugin()
-        await self.enable()
+        local_plugin = await self._download()
+        await local_plugin.enable()
         ba.screenmessage("Plugin Installed")
 
     async def uninstall(self):
@@ -205,21 +330,8 @@ class Plugin:
         ba.screenmessage("Plugin Uninstalled")
 
     async def update(self):
-        await self._download_plugin()
+        await self._download()
         ba.screenmessage("Plugin Updated")
-
-    async def _set_status(self, to_enable=True):
-        if self.entry_point not in ba.app.config["Plugins"]:
-            ba.app.config["Plugins"][self.entry_point] = {}
-        ba.app.config["Plugins"][self.entry_point]["enabled"] = to_enable
-
-    async def enable(self):
-        await self._set_status(to_enable=True)
-        ba.screenmessage("Plugin Enabled")
-
-    async def disable(self):
-        await self._set_status(to_enable=False)
-        ba.screenmessage("Plugin Disabled")
 
 
 class PluginWindow(popup.PopupWindow):
@@ -282,7 +394,8 @@ class PluginWindow(popup.PopupWindow):
         button_size = (80 * s, 40 * s)
 
         if plugin.is_installed:
-            if plugin.is_enabled:
+            self.local_plugin = plugin.get_local()
+            if self.local_plugin.is_enabled:
                 button1_label = "Disable"
                 button1_action = self.disable
             else:
@@ -290,7 +403,7 @@ class PluginWindow(popup.PopupWindow):
                 button1_action = self.enable
             button2_label = "Uninstall"
             button2_action = self.uninstall
-            has_update = plugin.get_local().version != plugin.latest_version
+            has_update = self.local_plugin.version != plugin.latest_version
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
@@ -357,12 +470,12 @@ class PluginWindow(popup.PopupWindow):
     @button
     async def disable(self) -> None:
         play_sound()
-        await self.plugin.disable()
+        await self.local_plugin.disable()
 
     @button
     async def enable(self) -> None:
         play_sound()
-        await self.plugin.enable()
+        await self.local_plugin.enable()
 
     @button
     async def install(self):
@@ -390,9 +503,9 @@ class PluginManager:
         if not self._index:
             request = urllib.request.Request(
                 INDEX_META,
-                headers=HEADERS
+                headers=self.request_headers,
             )
-            response = await send_network_request(request)
+            response = await async_send_network_request(request)
             self._index = json.loads(response.read())
             self.set_index_global_cache(self._index)
         return self._index
@@ -609,7 +722,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
                 self.setup_plugin_categories(index),
             )
             await self.select_category("All")
-            await self.draw_search_bar()
+            # await self.draw_search_bar()
         except RuntimeError:
             # User probably went back before the PluginManagerWindow could finish loading.
             pass
@@ -740,8 +853,8 @@ class PluginManagerWindow(ba.Window, PluginManager):
 
     def draw_plugin_name(self, plugin):
         if plugin.is_installed:
-            if plugin.is_enabled:
-                local_plugin = plugin.get_local()
+            local_plugin = plugin.get_local()
+            if local_plugin.is_enabled:
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
                 elif local_plugin.version == plugin.latest_version:
@@ -879,6 +992,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                         label='Open Github Repo')
         ba.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._disappear)
+        # _ba.app.api_version
 
     def _disappear(self) -> None:
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
