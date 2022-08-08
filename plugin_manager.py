@@ -22,8 +22,8 @@ HEADERS = {
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
-    # "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\("),
-    "plugin_entry_points": re.compile(b"(ba_meta export .+\n+class )(.*)\("),
+    "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\("),
+    "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\("),
 }
 
 VERSION = "0.1.1"
@@ -136,9 +136,13 @@ class PluginLocal:
         """
         self.name = name
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{name}.py")
+        self.cleanup()
+
+    def cleanup(self):
         self._content = None
         self._api_version = None
         self._entry_points = []
+        self._contains_minigames = None
 
     @property
     def is_installed(self):
@@ -206,10 +210,15 @@ class PluginLocal:
             self._entry_points = entry_points
         return self._entry_points
 
-    @property
-    def is_enabled(self):
+    async def has_minigames(self):
+        if self._contains_minigames is None:
+            content = await self.get_content()
+            self._contains_minigames = REGEXP["minigames"].search(content) is not None
+        return self._contains_minigames
+
+    async def is_enabled(self):
         """
-        Return True even if a single entry point is enabled.
+        Return True even if a single entry point is enabled or contains minigames.
         """
         entry_point_initials = f"{self.name}."
         for entry_point, plugin_info in ba.app.config["Plugins"].items():
@@ -220,7 +229,7 @@ class PluginLocal:
         # for entry_point in await self.get_entry_points():
         #     if ba.app.config["Plugins"][entry_point]["enabled"]:
         #         return True
-        return False
+        return await self.has_minigames()
 
     # XXX: Commenting this out for now, since `enable` and `disable` currently have their
     #      own separate logic.
@@ -336,9 +345,14 @@ class Plugin:
 
 class PluginWindow(popup.PopupWindow):
     def __init__(self, plugin, origin_widget, button_callback=lambda: None):
-        play_sound()
         self.plugin = plugin
         self.button_callback = button_callback
+        self.scale_origin = origin_widget.get_screen_space_center()
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.draw_ui())
+
+    async def draw_ui(self):
+        play_sound()
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
         width = 360 * s
@@ -347,7 +361,6 @@ class PluginWindow(popup.PopupWindow):
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
-        scale_origin = origin_widget.get_screen_space_center()
         self._root_widget = ba.containerwidget(size=(width, height),
                                                parent=_ba.get_special_widget(
                                                    'overlay_stack'),
@@ -355,9 +368,9 @@ class PluginWindow(popup.PopupWindow):
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
                                                       if _uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               scale_origin_stack_offset=scale_origin)
+                                               scale_origin_stack_offset=self.scale_origin)
         pos = height * 0.8
-        plugin_title = f"{plugin.name} (v{plugin.latest_version})"
+        plugin_title = f"{self.plugin.name} (v{self.plugin.latest_version})"
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center', text=plugin_title,
@@ -370,7 +383,7 @@ class PluginWindow(popup.PopupWindow):
                       size=(0, 0),
                       h_align='center',
                       v_align='center',
-                      text='by ' + plugin.info["authors"][0]["name"],
+                      text='by ' + self.plugin.info["authors"][0]["name"],
                       scale=text_scale * 0.8,
                       color=color, maxwidth=width * 0.9)
         pos -= 35
@@ -384,7 +397,7 @@ class PluginWindow(popup.PopupWindow):
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center',
-                      text=plugin.info["description"],
+                      text=self.plugin.info["description"],
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
         b1_color = (0.6, 0.53, 0.63)
@@ -393,17 +406,21 @@ class PluginWindow(popup.PopupWindow):
         pos = height * 0.1
         button_size = (80 * s, 40 * s)
 
-        if plugin.is_installed:
-            self.local_plugin = plugin.get_local()
-            if self.local_plugin.is_enabled:
-                button1_label = "Disable"
-                button1_action = self.disable
+        to_draw_button1 = True
+        if self.plugin.is_installed:
+            self.local_plugin = self.plugin.get_local()
+            if await self.local_plugin.has_minigames():
+                to_draw_button1 = False
             else:
-                button1_label = "Enable"
-                button1_action = self.enable
+                if await self.local_plugin.is_enabled():
+                    button1_label = "Disable"
+                    button1_action = self.disable
+                else:
+                    button1_label = "Enable"
+                    button1_action = self.enable
             button2_label = "Uninstall"
             button2_action = self.uninstall
-            has_update = self.local_plugin.version != plugin.latest_version
+            has_update = self.local_plugin.version != self.plugin.latest_version
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
@@ -411,17 +428,18 @@ class PluginWindow(popup.PopupWindow):
             button1_label = "Install"
             button1_action = self.install
 
-        ba.buttonwidget(parent=self._root_widget,
-                        position=(width * 0.1, pos),
-                        size=button_size,
-                        on_activate_call=button1_action,
-                        color=b1_color,
-                        textcolor=b_text_color,
-                        button_type='square',
-                        text_scale=1,
-                        label=button1_label)
+        if to_draw_button1:
+            ba.buttonwidget(parent=self._root_widget,
+                            position=(width * 0.1, pos),
+                            size=button_size,
+                            on_activate_call=button1_action,
+                            color=b1_color,
+                            textcolor=b_text_color,
+                            button_type='square',
+                            text_scale=1,
+                            label=button1_label)
 
-        if plugin.is_installed:
+        if self.plugin.is_installed:
             ba.buttonwidget(parent=self._root_widget,
                             position=(width * 0.4, pos),
                             size=button_size,
@@ -456,7 +474,7 @@ class PluginWindow(popup.PopupWindow):
     def button(fn):
         async def asyncio_handler(fn, self, *args, **kwargs):
             await fn(self, *args, **kwargs)
-            self.button_callback()
+            await self.button_callback()
 
         def wrapper(self, *args, **kwargs):
             self._ok()
@@ -465,7 +483,8 @@ class PluginWindow(popup.PopupWindow):
                 loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
             else:
                 fn(self, *args, **kwargs)
-                self.button_callback()
+                asyncio.create_task(self.button_callback())
+
         return wrapper
 
     @button
@@ -852,13 +871,13 @@ class PluginManagerWindow(ba.Window, PluginManager):
             plugin.delete()
 
         plugins = await self.categories[self.selected_category].get_plugins()
-        for plugin in plugins:
-            self.draw_plugin_name(plugin)
+        plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
+        await asyncio.gather(*plugin_names_to_draw)
 
-    def draw_plugin_name(self, plugin):
+    async def draw_plugin_name(self, plugin):
         if plugin.is_installed:
             local_plugin = plugin.get_local()
-            if local_plugin.is_enabled:
+            if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
                 elif local_plugin.version == plugin.latest_version:
