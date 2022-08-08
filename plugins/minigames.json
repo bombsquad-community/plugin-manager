@@ -1,1 +1,22 @@
-{}
+{
+  "alliance_elimination": {
+    "description": "Fight in groups of duo, trio, or more.\nLast remaining alive wins.",
+    "external_url": "",
+    "authors": [
+      {
+        "name": "Rikko",
+        "email": "rikkolovescats@proton.me",
+        "discord": "Rikko#7383"
+      }
+    ],
+    "versions": {
+       "1.1.0": {
+         "api_version": 7,
+         "commit_sha": "cbdb3ead",
+         "dependencies": [],
+         "released_on": "08-08-2022",
+         "md5sum": "11dbb3c7e37e97bda028ea1251529ea0"
+      }
+    }
+  }
+}
