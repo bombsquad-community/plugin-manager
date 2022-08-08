@@ -739,13 +739,11 @@ class PluginManagerWindow(ba.Window, PluginManager):
     async def plugin_index(self):
         try:
             index = await super().get_index()
-            await asyncio.gather(
-                self.draw_refresh_icon(),
-                self.draw_settings_icon(),
-                self.setup_plugin_categories(index),
-            )
-            await self.select_category("All")
             await self.draw_search_bar()
+            await self.setup_plugin_categories(index)
+            await self.select_category("All")
+            await self.draw_refresh_icon()
+            await self.draw_settings_icon()
         except RuntimeError:
             # User probably went back before the PluginManagerWindow could finish loading.
             pass
