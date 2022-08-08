@@ -450,6 +450,7 @@ class PluginWindow(popup.PopupWindow):
         # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
     def _ok(self) -> None:
+        play_sound()
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def button(fn):
@@ -593,10 +594,13 @@ class PluginManagerWindow(ba.Window, PluginManager):
             v_align="center",
             maxwidth=270,
         )
-
+        
+        loading_pos_y = self._height - (235 if _uiscale is ba.UIScale.SMALL else
+                                        220 if _uiscale is ba.UIScale.MEDIUM else 250)
+        
         self._loading_text = ba.textwidget(
             parent=self._root_widget,
-            position=(35, self._height - 150),
+            position=(-5, loading_pos_y),
             size=(self._width, 25),
             text="Loading...",
             color=ba.app.ui.title_color,
@@ -728,7 +732,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
             pass
         except urllib.error.URLError:
             ba.textwidget(edit=self._loading_text,
-                          text="Make sure you are connected to the Internet and try again.")
+                          text="Make sure you are connected\n to the Internet and try again.")
         else:
             self._loading_text.delete()
 
@@ -995,6 +999,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         # _ba.app.api_version
 
     def _disappear(self) -> None:
+        play_sound()
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def _open(self) -> None:
