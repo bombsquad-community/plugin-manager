@@ -464,12 +464,33 @@ class PluginWindow(popup.PopupWindow):
                                 label=button3_label)
         ba.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._ok)
+
+        open_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
+                      440 if _uiscale is ba.UIScale.MEDIUM else 350)
+        open_pos_y = (130 if _uiscale is ba.UIScale.SMALL else
+                      60 if _uiscale is ba.UIScale.MEDIUM else 120)
+        open_button = ba.buttonwidget(parent=self._root_widget,
+                                            autoselect=True,
+                                            position=(open_pos_x, open_pos_y),
+                                            size=(40, 40),
+                                            button_type="square",
+                                            label="",
+                                            on_activate_call=self.open_plugin_page)
+        ba.imagewidget(parent=self._root_widget,
+                       position=(open_pos_x, open_pos_y),
+                       size=(40, 40),
+                       color=(0.8, 0.95, 1),
+                       texture=ba.gettexture("upButton"),
+                       draw_controller=open_button)
         # ba.containerwidget(edit=self._root_widget, selected_child=button3)
         # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
     def _ok(self) -> None:
         play_sound()
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
+
+    def open_plugin_page(self) -> None:
+        ba.open_url(f"https://github.com/bombsquad-community/plugin-manager/tree/main/plugins/utilities/{self.plugin.name}.py")
 
     def button(fn):
         async def asyncio_handler(fn, self, *args, **kwargs):
