@@ -1,5 +1,5 @@
 {
-  "ColorScheme": {
+  "colorscheme": {
     "description": "Create custom UI colorschemes!",
     "external_url": "https://www.youtube.com/watch?v=qatwWrBAvjc",
     "authors": [
@@ -24,7 +24,7 @@
       }
     }
   },
-  "StoreEventSpecials": {
+  "store_event_specials": {
     "description": "Exposes event-special store items not normally available for purchase",
     "external_url": "",
     "authors": [
