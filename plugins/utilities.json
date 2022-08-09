@@ -1,46 +1,51 @@
 {
-  "colorscheme": {
-    "description": "Create custom UI colorschemes!",
-    "external_url": "https://www.youtube.com/watch?v=qatwWrBAvjc",
-    "authors": [
-      {
-        "name": "Rikko",
-        "email": "rikkolovescats@proton.me",
-        "discord": "Rikko#7383"
-      },
-      {
-        "name": "Vishal",
-        "email": "vishal.u338@gmail.com",
-        "discord": "𝑽𝑰𝑺𝑯𝑼𝑼𝑼#2921"
+  "name": "Utilities",
+  "description": "Utilities",
+  "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities",
+  "plugins": {
+    "colorscheme": {
+      "description": "Create custom UI colorschemes!",
+      "external_url": "https://www.youtube.com/watch?v=qatwWrBAvjc",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "rikkolovescats@proton.me",
+          "discord": "Rikko#7383"
+        },
+        {
+          "name": "Vishal",
+          "email": "vishal.u338@gmail.com",
+          "discord": "𝑽𝑰𝑺𝑯𝑼𝑼𝑼#2921"
+        }
+      ],
+      "versions": {
+         "1.1.0": {
+           "api_version": 7,
+           "commit_sha": "13a9d128",
+           "dependencies": [],
+           "released_on": "03-06-2022",
+           "md5sum": "4b6bbb99037ebda4664da7c510b3717c"
+        }
       }
-    ],
-    "versions": {
-       "1.1.0": {
-         "api_version": 7,
-         "commit_sha": "13a9d128",
-         "dependencies": [],
-         "released_on": "03-06-2022",
-         "md5sum": "4b6bbb99037ebda4664da7c510b3717c"
-      }
-    }
-  },
-  "store_event_specials": {
-    "description": "Exposes event-special store items not normally available for purchase",
-    "external_url": "",
-    "authors": [
-      {
-        "name": "Rikko",
-        "email": "rikkolovescats@proton.me",
-        "discord": "Rikko#7383"
-      }
-    ],
-    "versions": {
-       "1.0.0": {
-         "api_version": 7,
-         "commit_sha": "2aa6df31",
-         "dependencies": [],
-         "released_on": "06-08-2022",
-         "md5sum": "233dfaa7f0e9394d21454f4ffa7d0205"
+    },
+    "store_event_specials": {
+      "description": "Exposes event-special store items not normally available for purchase",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "rikkolovescats@proton.me",
+          "discord": "Rikko#7383"
+        }
+      ],
+      "versions": {
+         "1.0.0": {
+           "api_version": 7,
+           "commit_sha": "2aa6df31",
+           "dependencies": [],
+           "released_on": "06-08-2022",
+           "md5sum": "233dfaa7f0e9394d21454f4ffa7d0205"
+        }
       }
     }
   }

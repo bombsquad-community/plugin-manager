@@ -15,7 +15,7 @@ from typing import Union, Optional
 _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
-INDEX_META = "https://raw.githubusercontent.com/bombsquad-community/mod-manager/main/index.json"
+INDEX_META = "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
@@ -83,49 +83,77 @@ def play_sound():
 
 
 class Category:
-    def __init__(self, name, base_download_url, meta_url):
-        self.name = name
-        self.base_download_url = base_download_url
+    def __init__(self, meta_url):
         self.meta_url = meta_url
         self.request_headers = HEADERS
-        self._plugins = _CACHE.get("categories", {}).get(self.name)
+        self._metadata = _CACHE.get("categories", {}).get(meta_url, {}).get("metadata")
+        self._plugins = _CACHE.get("categories", {}).get(meta_url, {}).get("plugins")
 
-    async def get_plugins(self):
-        if self._plugins is None:
+    async def fetch_metadata(self):
+        if self._metadata is None:
             request = urllib.request.Request(
-                self.meta_url,
+                self.meta_url.format(content_type="raw"),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
-            plugins_info = json.loads(response.read())
-            self._plugins = ([Plugin(plugin_info, self.base_download_url)
-                             for plugin_info in plugins_info.items()])
-            self.set_category_plugins_global_cache(self._plugins)
+            self._metadata = json.loads(response.read())
+            self.set_category_global_cache("metadata", self._metadata)
+        return self
+
+    async def get_name(self):
+        if self._metadata is None:
+            await self.fetch_metadata()
+        return self._metadata["name"]
+
+    async def get_description(self):
+        if self._metadata is None:
+            await self.fetch_metadata()
+        return self._metadata["description"]
+
+    async def get_plugins_base_url(self):
+        if self._metadata is None:
+            await self.fetch_metadata()
+        return self._metadata["plugins_base_url"]
+
+    async def get_plugins(self):
+        if self._plugins is None:
+            if self._metadata is None:
+                await self.fetch_metadata()
+            self._plugins = ([
+                Plugin(plugin_info, f"{await self.get_plugins_base_url()}/{plugin_info[0]}.py")
+                for plugin_info in self._metadata["plugins"].items()
+            ])
+            self.set_category_global_cache("plugins", self._plugins)
         return self._plugins
 
-    def set_category_plugins_global_cache(self, plugins):
+    def set_category_global_cache(self, key, value):
         if "categories" not in _CACHE:
             _CACHE["categories"] = {}
-        _CACHE["categories"][self.name] = plugins
+        if self.meta_url not in _CACHE["categories"]:
+            _CACHE["categories"][self.meta_url] = {}
+        _CACHE["categories"][self.meta_url][key] = value
 
-    def unset_category_plugins_global_cache(self):
+    def unset_category_global_cache(self):
         try:
-            del _CACHE["categories"][self.name]
+            del _CACHE["categories"][self.meta_url]
         except KeyError:
             pass
 
-    def refresh(self):
-        self._plugins.clear()
-        self.unset_category_plugins_global_cache()
+    async def refresh(self):
+        self.cleanup()
+        await self.get_plugins()
 
-    async def cleanup(self):
-        self.refresh()
-        return await self.get_plugins()
+    def cleanup(self):
+        self._metadata = None
+        self._plugins.clear()
+        self.unset_category_global_cache()
 
 
 class CategoryAll(Category):
     def __init__(self, plugins={}):
-        super().__init__(name="All", base_download_url=None, meta_url=None)
+        super().__init__(meta_url=None)
+        self._name = "All"
+        self._description = "All plugins"
         self._plugins = plugins
 
 
@@ -142,7 +170,7 @@ class PluginLocal:
         self._content = None
         self._api_version = None
         self._entry_points = []
-        self._contains_minigames = None
+        self._has_minigames = None
 
     @property
     def is_installed(self):
@@ -211,10 +239,10 @@ class PluginLocal:
         return self._entry_points
 
     async def has_minigames(self):
-        if self._contains_minigames is None:
+        if self._has_minigames is None:
             content = await self.get_content()
-            self._contains_minigames = REGEXP["minigames"].search(content) is not None
-        return self._contains_minigames
+            self._has_minigames = REGEXP["minigames"].search(content) is not None
+        return self._has_minigames
 
     async def is_enabled(self):
         """
@@ -288,13 +316,14 @@ class PluginVersion:
 
 
 class Plugin:
-    def __init__(self, plugin, base_download_url):
+    def __init__(self, plugin, url):
         """
         Initialize a plugin from network repository.
         """
         self.name, self.info = plugin
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
-        self.download_url = f"{base_download_url}/{self.name}.py"
+        self.download_url = url.format(content_type="raw")
+        self.view_url = url.format(content_type="blob")
         self._local_plugin = None
 
     def __repr__(self):
@@ -475,7 +504,7 @@ class PluginWindow(popup.PopupWindow):
                                             size=(40, 40),
                                             button_type="square",
                                             label="",
-                                            on_activate_call=self.open_plugin_page)
+                                            on_activate_call=lambda: ba.open_url(self.plugin.view_url))
         ba.imagewidget(parent=self._root_widget,
                        position=(open_pos_x, open_pos_y),
                        size=(40, 40),
@@ -488,9 +517,6 @@ class PluginWindow(popup.PopupWindow):
     def _ok(self) -> None:
         play_sound()
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
-
-    def open_plugin_page(self) -> None:
-        ba.open_url(f"https://github.com/bombsquad-community/plugin-manager/tree/main/plugins/utilities/{self.plugin.name}.py")
 
     def button(fn):
         async def asyncio_handler(fn, self, *args, **kwargs):
@@ -538,26 +564,47 @@ class PluginManager:
     def __init__(self):
         self.request_headers = HEADERS
         self._index = _CACHE.get("index", {})
+        self.categories = {}
 
-    async def get_index(self):
+    async def setup_index(self):
         global _INDEX
         if not self._index:
             request = urllib.request.Request(
-                INDEX_META,
+                INDEX_META.format(content_type="raw"),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
             self._index = json.loads(response.read())
             self.set_index_global_cache(self._index)
-        return self._index
+        await self._setup_plugin_categories(self._index)
+
+    async def _setup_plugin_categories(self, plugin_index):
+        # A hack to have the "All" category show at the top.
+        self.categories["All"] = None
+
+        requests = []
+        for plugin_category_url in plugin_index["categories"]:
+            category = Category(plugin_category_url)
+            request = category.fetch_metadata()
+            requests.append(request)
+        categories = await asyncio.gather(*requests)
+
+        all_plugins = []
+        for category in categories:
+            self.categories[await category.get_name()] = category
+            all_plugins.extend(await category.get_plugins())
+        self.categories["All"] = CategoryAll(plugins=all_plugins)
 
     def cleanup(self):
+        for category in self.categories.values():
+            category.cleanup()
+        self.categories.clear()
         self._index.clear()
         self.unset_index_global_cache()
 
     async def refresh(self):
         self.cleanup()
-        return await self.get_index()
+        await self.setup_index()
 
     def set_index_global_cache(self, index):
         _CACHE["index"] = index
@@ -572,16 +619,15 @@ class PluginManager:
         pass
 
 
-class PluginManagerWindow(ba.Window, PluginManager):
+class PluginManagerWindow(ba.Window):
     def __init__(self, transition: str = "in_right", origin_widget: ba.Widget = None):
-        PluginManager.__init__(self)
-        self.categories = {}
+        self.plugin_manager = PluginManager()
         self.category_selection_button = None
         self.selected_category = None
         self.plugins_in_current_view = {}
 
         loop = asyncio.get_event_loop()
-        loop.create_task(self.plugin_index())
+        loop.create_task(self.draw_index())
 
         self._width = (490 if _uiscale is ba.UIScale.MEDIUM else 570)
         self._height = (500 if _uiscale is ba.UIScale.SMALL
@@ -634,11 +680,11 @@ class PluginManagerWindow(ba.Window, PluginManager):
             v_align="center",
             maxwidth=270,
         )
-        
+
         loading_pos_y = self._height - (235 if _uiscale is ba.UIScale.SMALL else
                                         220 if _uiscale is ba.UIScale.MEDIUM else 250)
-        
-        self._loading_text = ba.textwidget(
+
+        self._plugin_manager_status_text = ba.textwidget(
             parent=self._root_widget,
             position=(-5, loading_pos_y),
             size=(self._width, 25),
@@ -738,43 +784,24 @@ class PluginManagerWindow(ba.Window, PluginManager):
         ba.app.ui.set_main_menu_window(
             AllSettingsWindow(transition='in_left').get_root_widget())
 
-    async def setup_plugin_categories(self, plugin_index):
-        self.categories["All"] = None
-        requests = []
-        for plugin_category in plugin_index["plugin_categories"]:
-            category = Category(
-                plugin_category["display_name"],
-                plugin_category["base_download_url"],
-                plugin_category["meta"],
-            )
-            self.categories[plugin_category["display_name"]] = category
-            request = category.get_plugins()
-            requests.append(request)
-        categories = await asyncio.gather(*requests)
-
-        all_plugins = []
-        for plugins in categories:
-            all_plugins.extend(plugins)
-        self.categories["All"] = CategoryAll(plugins=all_plugins)
-
-    async def plugin_index(self):
+    async def draw_index(self):
         try:
-            index = await super().get_index()
             await self.draw_search_bar()
-            await self.setup_plugin_categories(index)
-            await self.select_category("All")
+            await self.draw_category_selection_button(post_label="All")
             await self.draw_refresh_icon()
             await self.draw_settings_icon()
+            await self.plugin_manager.setup_index()
+            ba.textwidget(edit=self._plugin_manager_status_text,
+                          text="")
+            await self.select_category("All")
         except RuntimeError:
             # User probably went back before the PluginManagerWindow could finish loading.
             pass
         except urllib.error.URLError:
-            ba.textwidget(edit=self._loading_text,
+            ba.textwidget(edit=self._plugin_manager_status_text,
                           text="Make sure you are connected\n to the Internet and try again.")
-        else:
-            self._loading_text.delete()
 
-    async def draw_category_selection_button(self, label=None):
+    async def draw_category_selection_button(self, post_label):
         # v = (self._height - 75) if _uiscale is ba.UIScale.SMALL else (self._height - 105)
         # v = 395
         # h = 440
@@ -793,16 +820,14 @@ class PluginManagerWindow(ba.Window, PluginManager):
         b_textcolor = (0.75, 0.7, 0.8)
         b_color = (0.6, 0.53, 0.63)
 
-        if label is None:
-            label = self.selected_category
-        label = f"Category: {label}"
+        label = f"Category: {post_label}"
 
         if self.category_selection_button is None:
             self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
                                                              position=(category_pos_x,
                                                                        category_pos_y),
                                                              size=b_size,
-                                                             on_activate_call=self.show_categories,
+                                                             on_activate_call=lambda: self.show_categories(),
                                                              label=label,
                                                              button_type="square",
                                                              color=b_color,
@@ -875,7 +900,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
                        texture=ba.gettexture("replayIcon"),
                        draw_controller=controller_button)
 
-    async def draw_plugin_names(self):
+    async def draw_plugin_names(self, category):
         # v = (self._height - 75) if _uiscale is ba.UIScale.SMALL else (self._height - 105)
         # h = 440
         # next 2 lines belong in 1 line
@@ -889,7 +914,7 @@ class PluginManagerWindow(ba.Window, PluginManager):
         for plugin in self._columnwidget.get_children():
             plugin.delete()
 
-        plugins = await self.categories[self.selected_category].get_plugins()
+        plugins = await self.plugin_manager.categories[category].get_plugins()
         plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
         await asyncio.gather(*plugin_names_to_draw)
 
@@ -939,15 +964,15 @@ class PluginManagerWindow(ba.Window, PluginManager):
             position=(200, 0),
             scale=(2.3 if _uiscale is ba.UIScale.SMALL else
                    1.65 if _uiscale is ba.UIScale.MEDIUM else 1.23),
-            choices=self.categories.keys(),
+            choices=self.plugin_manager.categories.keys(),
             current_choice=self.selected_category,
             delegate=self)
 
     async def select_category(self, category):
         self.selected_category = category
         self.plugins_in_current_view.clear()
-        await self.draw_category_selection_button(label=category)
-        await self.draw_plugin_names()
+        await self.draw_category_selection_button(post_label=category)
+        await self.draw_plugin_names(category)
 
     def popup_menu_selected_choice(self, window, choice):
         loop = asyncio.get_event_loop()
@@ -957,19 +982,23 @@ class PluginManagerWindow(ba.Window, PluginManager):
         pass
 
     def cleanup(self):
-        super().cleanup()
-        self.categories.clear()
+        self.plugin_manager.cleanup()
         for plugin in self._columnwidget.get_children():
             plugin.delete()
         self.plugins_in_current_view.clear()
 
     async def _refresh(self):
-        index = await super().refresh()
-        await self.setup_plugin_categories(index)
+        await self.plugin_manager.refresh()
+        await self.plugin_manager.setup_index()
+        ba.textwidget(edit=self._plugin_manager_status_text,
+                      text="")
         await self.select_category(self.selected_category)
 
     def refresh(self):
         play_sound()
+        self.cleanup()
+        ba.textwidget(edit=self._plugin_manager_status_text,
+                      text="Refreshing...")
         loop = asyncio.get_event_loop()
         loop.create_task(self._refresh())
 

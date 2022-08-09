@@ -1,21 +1,26 @@
 {
-  "alliance_elimination": {
-    "description": "Fight in groups of duo, trio, or more. Last remaining alive wins.",
-    "external_url": "",
-    "authors": [
-      {
-        "name": "Rikko",
-        "email": "rikkolovescats@proton.me",
-        "discord": "Rikko#7383"
-      }
-    ],
-    "versions": {
-       "1.1.0": {
-         "api_version": 7,
-         "commit_sha": "cbdb3ead",
-         "dependencies": [],
-         "released_on": "08-08-2022",
-         "md5sum": "11dbb3c7e37e97bda028ea1251529ea0"
+  "name": "Minigames",
+  "description": "Minigames",
+  "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/minigames",
+  "plugins": {
+    "alliance_elimination": {
+      "description": "Fight in groups of duo, trio, or more. Last remaining alive wins.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "rikkolovescats@proton.me",
+          "discord": "Rikko#7383"
+        }
+      ],
+      "versions": {
+         "1.1.0": {
+           "api_version": 7,
+           "commit_sha": "cbdb3ead",
+           "dependencies": [],
+           "released_on": "08-08-2022",
+           "md5sum": "11dbb3c7e37e97bda028ea1251529ea0"
+        }
       }
     }
   }

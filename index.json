@@ -1,19 +1,7 @@
 {
-  "plugin_categories": [
-    {
-      "display_name": "Utilities",
-      "meta": "https://github.com/bombsquad-community/mod-manager/raw/main/plugins/utilities.json",
-      "base_download_url": "https://github.com/bombsquad-community/mod-manager/raw/main/plugins/utilities"
-    },
-    {
-      "display_name": "Minigames",
-      "meta": "https://github.com/bombsquad-community/mod-manager/raw/main/plugins/minigames.json",
-      "base_download_url": "https://github.com/bombsquad-community/mod-manager/raw/main/plugins/minigames"
-    },
-    {
-      "display_name": "Maps",
-      "meta": "https://github.com/bombsquad-community/mod-manager/raw/main/plugins/maps.json",
-      "base_download_url": "https://github.com/bombsquad-community/mod-manager/raw/main/plugins/maps"
-    }
+  "categories": [
+    "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities.json",
+    "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/minigames.json",
+    "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/maps.json"
   ]
 }
