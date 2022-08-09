@@ -9,6 +9,7 @@ import json
 import os
 import asyncio
 import re
+import string
 
 from typing import Union, Optional
 
@@ -29,6 +30,8 @@ REGEXP = {
 VERSION = "0.1.1"
 GITHUB_REPO_LINK = "https://github.com/bombsquad-community/plugin-manager/"
 
+THIRD_PARTY_CATEGORY_URL = "https://github.com/{repository}/{content_type}/main/category.json"
+
 _CACHE = {}
 
 
@@ -38,6 +41,9 @@ def setup_config():
         ba.app.config["Community Plugin Manager"] = {}
     if "Installed Plugins" not in ba.app.config["Community Plugin Manager"]:
         ba.app.config["Community Plugin Manager"]["Installed Plugins"] = {}
+        is_config_updated = True
+    if "Custom Categories" not in ba.app.config["Community Plugin Manager"]:
+        ba.app.config["Community Plugin Manager"]["Custom Categories"] = []
         is_config_updated = True
     for plugin_name in ba.app.config["Community Plugin Manager"]["Installed Plugins"].keys():
         plugin = PluginLocal(plugin_name)
@@ -83,8 +89,9 @@ def play_sound():
 
 
 class Category:
-    def __init__(self, meta_url):
+    def __init__(self, meta_url, is_3rd_party=False):
         self.meta_url = meta_url
+        self.is_3rd_party = is_3rd_party
         self.request_headers = HEADERS
         self._metadata = _CACHE.get("categories", {}).get(meta_url, {}).get("metadata")
         self._plugins = _CACHE.get("categories", {}).get(meta_url, {}).get("plugins")
@@ -120,7 +127,11 @@ class Category:
             if self._metadata is None:
                 await self.fetch_metadata()
             self._plugins = ([
-                Plugin(plugin_info, f"{await self.get_plugins_base_url()}/{plugin_info[0]}.py")
+                Plugin(
+                    plugin_info,
+                    f"{await self.get_plugins_base_url()}/{plugin_info[0]}.py",
+                    is_3rd_party=self.is_3rd_party,
+                )
                 for plugin_info in self._metadata["plugins"].items()
             ])
             self.set_category_global_cache("plugins", self._plugins)
@@ -195,7 +206,7 @@ class PluginLocal:
         except KeyError:
             pass
         else:
-            ba.app.config.commit()
+            self.save()
 
     @property
     def version(self):
@@ -273,6 +284,7 @@ class PluginLocal:
                 ba.app.config["Plugins"][entry_point] = {}
             ba.app.config["Plugins"][entry_point]["enabled"] = True
         # await self._set_status(to_enable=True)
+        self.save()
         ba.screenmessage("Plugin Enabled")
 
     async def disable(self):
@@ -283,6 +295,7 @@ class PluginLocal:
         # XXX: The below logic is more accurate but less efficient, since it actually
         #      reads the local plugin file and parses entry points from it.
         # await self._set_status(to_enable=False)
+        self.save()
         ba.screenmessage("Plugin Disabled")
 
     def set_version(self, version):
@@ -316,11 +329,12 @@ class PluginVersion:
 
 
 class Plugin:
-    def __init__(self, plugin, url):
+    def __init__(self, plugin, url, is_3rd_party=False):
         """
         Initialize a plugin from network repository.
         """
         self.name, self.info = plugin
+        self.is_3rd_party = is_3rd_party
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
         self.download_url = url.format(content_type="raw")
         self.view_url = url.format(content_type="blob")
@@ -585,6 +599,14 @@ class PluginManager:
         requests = []
         for plugin_category_url in plugin_index["categories"]:
             category = Category(plugin_category_url)
+            request = category.fetch_metadata()
+            requests.append(request)
+        for repository in ba.app.config["Community Plugin Manager"]["Custom Categories"]:
+            plugin_category_url = THIRD_PARTY_CATEGORY_URL.replace("{repository}", "$repository")
+            plugin_category_url = string.Template(plugin_category_url).safe_substitute({
+                "repository": repository,
+            })
+            category = Category(plugin_category_url, is_3rd_party=True)
             request = category.fetch_metadata()
             requests.append(request)
         categories = await asyncio.gather(*requests)
