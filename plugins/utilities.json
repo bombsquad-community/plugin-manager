@@ -1,11 +1,11 @@
 {
   "name": "Utilities",
   "description": "Utilities",
-  "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities",
+  "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities",
   "plugins": {
     "colorscheme": {
       "description": "Create custom UI colorschemes!",
-      "external_url": "https://www.youtube.com/watch?v=qatwWrBAvjc",
+      "external_url": "http://www.youtube.com/watch?v=qatwWrBAvjc",
       "authors": [
         {
           "name": "Rikko",

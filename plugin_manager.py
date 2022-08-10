@@ -16,7 +16,10 @@ from typing import Union, Optional
 _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
-INDEX_META = "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/index.json"
+# XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
+#      and won't open the actual URL in a web-browser. Let's fallback to http for now until this
+#      gets resolved.
+INDEX_META = "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
@@ -28,9 +31,9 @@ REGEXP = {
 }
 
 VERSION = "0.1.1"
-GITHUB_REPO_LINK = "https://github.com/bombsquad-community/plugin-manager/"
+GITHUB_REPO_LINK = "http://github.com/bombsquad-community/plugin-manager/"
 
-THIRD_PARTY_CATEGORY_URL = "https://github.com/{repository}/{content_type}/main/category.json"
+THIRD_PARTY_CATEGORY_URL = "http://github.com/{repository}/{content_type}/main/category.json"
 
 _CACHE = {}
 

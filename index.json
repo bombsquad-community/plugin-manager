@@ -1,7 +1,7 @@
 {
   "categories": [
-    "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities.json",
-    "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/minigames.json",
-    "https://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/maps.json"
+    "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities.json",
+    "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/minigames.json",
+    "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/maps.json"
   ]
 }
