@@ -7,7 +7,6 @@ from bastd.ui import popup
 import urllib.request
 import json
 import os
-import sys
 import asyncio
 import re
 import string
@@ -313,9 +312,17 @@ class PluginLocal:
             if entry_point not in ba.app.config["Plugins"]:
                 ba.app.config["Plugins"][entry_point] = {}
             ba.app.config["Plugins"][entry_point]["enabled"] = True
+            if entry_point not in ba.app.plugins.active_plugins:
+                self.load_plugin(entry_point)
         # await self._set_status(to_enable=True)
         self.save()
         ba.screenmessage("Plugin Enabled")
+
+    def load_plugin(self, entry_point):
+        plugin_class = ba._general.getclass(entry_point, ba.Plugin)
+        loaded_plugin_class = plugin_class()
+        loaded_plugin_class.on_app_running()
+        ba.app.plugins.active_plugins[entry_point] = loaded_plugin_class
 
     def disable(self):
         for entry_point, plugin_info in ba.app.config["Plugins"].items():
