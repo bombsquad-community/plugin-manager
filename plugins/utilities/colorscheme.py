@@ -367,7 +367,7 @@ class CustomTransactions:
         _ba.add_transaction = self._handle
 
 
-def colorscheme_transaction(transaction, *args, **kwargs):
+def launch_colorscheme_selection_window():
     # We store whether the player is a pro account or not since we
     # temporarily attempt to bypass the limitation where only pro
     # accounts can set custom RGB color values, and we restore this
@@ -384,6 +384,10 @@ def colorscheme_transaction(transaction, *args, **kwargs):
     original_have_pro = ba.app.accounts_v1.have_pro
 
     ColorSchemeWindow()
+
+
+def colorscheme_transaction(transaction, *args, **kwargs):
+    launch_colorscheme_selection_window()
 
 
 def load_colorscheme():
@@ -409,8 +413,8 @@ def load_plugin():
 
 # ba_meta export plugin
 class Main(ba.Plugin):
-    def __init__(self):
-        if _ba.env().get("build_number", 0) >= 20258:
-            load_plugin()
-        else:
-            print("ColorScheme.py only runs with BombSquad versions 1.7.0 or higher.")
+    def on_app_running(self):
+        load_plugin()
+
+    def on_plugin_manager_prompt(self):
+        launch_colorscheme_selection_window()
