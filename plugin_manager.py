@@ -10,6 +10,7 @@ import os
 import asyncio
 import re
 import string
+import pathlib
 
 from typing import Union, Optional
 
@@ -215,7 +216,9 @@ class PluginLocal:
             ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name] = {}
         return self
 
-    def uninstall(self):
+    async def uninstall(self):
+        if await self.has_minigames():
+            self.unload_minigames()
         try:
             os.remove(self.install_path)
         except FileNotFoundError:
@@ -285,6 +288,31 @@ class PluginLocal:
             self._has_minigames = REGEXP["minigames"].search(content) is not None
         return self._has_minigames
 
+    def load_minigames(self):
+        scanner = ba._meta.DirectoryScan(paths="")
+        directory, module = self.install_path.rsplit(os.path.sep, 1)
+        scanner.scan_module(
+            pathlib.Path(directory),
+            pathlib.Path(module),
+        )
+        scanned_results = set(ba.app.meta.scanresults.games)
+        for game in scanner.results.games:
+            if game not in scanned_results:
+                ba.app.meta.scanresults.games.append(game)
+
+    def unload_minigames(self):
+        scanner = ba._meta.DirectoryScan(paths="")
+        directory, module = self.install_path.rsplit(os.path.sep, 1)
+        scanner.scan_module(
+            pathlib.Path(directory),
+            pathlib.Path(module),
+        )
+        new_scanned_results_games = []
+        for game in ba.app.meta.scanresults.games:
+            if game not in scanner.results.games:
+                new_scanned_results_games.append(game)
+        ba.app.meta.scanresults.games = new_scanned_results_games
+
     async def is_enabled(self):
         """
         Return True even if a single entry point is enabled or contains minigames.
@@ -314,6 +342,8 @@ class PluginLocal:
             ba.app.config["Plugins"][entry_point]["enabled"] = True
             if entry_point not in ba.app.plugins.active_plugins:
                 self.load_plugin(entry_point)
+        if await self.has_minigames():
+            self.load_minigames()
         # await self._set_status(to_enable=True)
         self.save()
         ba.screenmessage("Plugin Enabled")
@@ -413,8 +443,8 @@ class Plugin:
         await local_plugin.enable()
         ba.screenmessage("Plugin Installed")
 
-    def uninstall(self):
-        self.get_local().uninstall()
+    async def uninstall(self):
+        await self.get_local().uninstall()
         ba.screenmessage("Plugin Uninstalled")
 
     async def update(self):
@@ -601,12 +631,12 @@ class PluginWindow(popup.PopupWindow):
 
         def wrapper(self, *args, **kwargs):
             self._ok()
+            loop = asyncio.get_event_loop()
             if asyncio.iscoroutinefunction(fn):
-                loop = asyncio.get_event_loop()
                 loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
             else:
                 fn(self, *args, **kwargs)
-                asyncio.create_task(self.button_callback())
+                loop.create_task(self.button_callback())
 
         return wrapper
 
@@ -631,9 +661,9 @@ class PluginWindow(popup.PopupWindow):
         await self.plugin.install()
 
     @button
-    def uninstall(self):
+    async def uninstall(self):
         play_sound()
-        self.plugin.uninstall()
+        await self.plugin.uninstall()
 
     @button
     async def update(self):
