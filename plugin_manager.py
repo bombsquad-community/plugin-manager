@@ -18,10 +18,12 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
+PLUGIN_MANAGER_VERSION = "0.1.0"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
 #      and won't open the actual URL in a web-browser. Let's fallback to http for now until this
 #      gets resolved.
 INDEX_META = "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/index.json"
+CURRENT_TAG = "main"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
@@ -31,12 +33,6 @@ REGEXP = {
     "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\("),
     "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\("),
 }
-DEFAULT_TAG = "main"
-
-VERSION = "0.1.0"
-GITHUB_REPO_LINK = "http://github.com/bombsquad-community/plugin-manager"
-
-THIRD_PARTY_CATEGORY_URL = "http://github.com/{repository}/{content_type}/{tag}/category.json"
 
 _CACHE = {}
 
@@ -94,6 +90,13 @@ def play_sound():
     ba.playsound(ba.getsound('swish'))
 
 
+def partial_format(string_template, **kwargs):
+    for key in kwargs:
+        string_template = string_template.replace("{" + key + "}", f"${kwargs[key]}")
+    formatted_string = string.Template(plugin_category_url).safe_substitute(kwargs)
+    return formatted_string
+
+
 class Category:
     def __init__(self, meta_url, is_3rd_party=False):
         self.meta_url = meta_url
@@ -105,7 +108,7 @@ class Category:
     async def fetch_metadata(self):
         if self._metadata is None:
             request = urllib.request.Request(
-                self.meta_url.format(content_type="raw", tag=DEFAULT_TAG),
+                self.meta_url.format(content_type="raw", tag=CURRENT_TAG),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -403,8 +406,12 @@ class Plugin:
         self.name, self.info = plugin
         self.is_3rd_party = is_3rd_party
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
-        self.download_url = url.format(content_type="raw", tag=DEFAULT_TAG)
-        self.view_url = url.format(content_type="blob", tag=DEFAULT_TAG)
+        if is_3rd_party:
+            tag = _CACHE["index"]["external_source_tag"]
+        else:
+            tag = CURRENT_TAG
+        self.download_url = url.format(content_type="raw", tag=tag)
+        self.view_url = url.format(content_type="blob", tag=tag)
         self._local_plugin = None
 
     def __repr__(self):
@@ -671,17 +678,20 @@ class PluginManager:
         self._index = _CACHE.get("index", {})
         self.categories = {}
 
-    async def setup_index(self):
-        global _INDEX
+    async def get_index(self):
         if not self._index:
             request = urllib.request.Request(
-                INDEX_META.format(content_type="raw", tag=DEFAULT_TAG),
+                INDEX_META.format(content_type="raw", tag=CURRENT_TAG),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
             self._index = json.loads(response.read())
             self.set_index_global_cache(self._index)
-        await self._setup_plugin_categories(self._index)
+        return self._index
+
+    async def setup_index(self):
+        index = await self.get_index()
+        await self._setup_plugin_categories(index)
 
     async def _setup_plugin_categories(self, plugin_index):
         # A hack to have the "All" category show at the top.
@@ -693,10 +703,7 @@ class PluginManager:
             request = category.fetch_metadata()
             requests.append(request)
         for repository in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
-            plugin_category_url = THIRD_PARTY_CATEGORY_URL.replace("{repository}", "$repository")
-            plugin_category_url = string.Template(plugin_category_url).safe_substitute({
-                "repository": repository,
-            })
+            plugin_category_url = partial_format(plugin_index["external_source_url"], {"repository": repository})
             category = Category(plugin_category_url, is_3rd_party=True)
             request = category.fetch_metadata()
             requests.append(request)
@@ -867,7 +874,11 @@ class PluginSourcesWindow(popup.PopupWindow):
 
     async def add_source(self):
         source = ba.textwidget(query=self._add_source_widget)
-        meta_url = THIRD_PARTY_CATEGORY_URL.format(repository=source, content_type="raw", tag=DEFAULT_TAG)
+        meta_url = _CACHE["index"]["external_source_url"].format(
+            repository=source,
+            content_type="raw",
+            tag=_CACHE["index"]["external_source_tag"]
+        )
         category = Category(meta_url, is_3rd_party=True)
         if not await category.is_valid():
             ba.screenmessage("Enter a valid plugin source")
@@ -1127,6 +1138,7 @@ class PluginManagerWindow(ba.Window):
                                             button_type="square",
                                             label="",
                                             on_activate_call=ba.Call(PluginManagerSettingsWindow,
+                                                                     self.plugin_manager.get_index,
                                                                      self._root_widget))
         ba.imagewidget(parent=self._root_widget,
                        position=(settings_pos_x, settings_pos_y),
@@ -1240,8 +1252,14 @@ class PluginManagerWindow(ba.Window):
 
 
 class PluginManagerSettingsWindow(popup.PopupWindow):
-    def __init__(self, origin_widget):
+    def __init__(self, index_asyncio_callback, origin_widget):
         play_sound()
+        self._index_asyncio_callback = index_asyncio_callback
+        self.scale_origin = origin_widget.get_screen_space_center()
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.draw_ui())
+
+    async def draw_ui(self):
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
         width = 360 * s
@@ -1250,7 +1268,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
-        scale_origin = origin_widget.get_screen_space_center()
+        index = await self._index_asyncio_callback()
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
                                                #     'overlay_stack'),
@@ -1258,7 +1276,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
                                                       if _uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               scale_origin_stack_offset=scale_origin)
+                                               scale_origin_stack_offset=self.scale_origin)
         pos = height * 0.9
         setting_title = "Settings"
         ba.textwidget(parent=self._root_widget,
@@ -1272,7 +1290,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       size=(0, 0),
                       h_align='center',
                       v_align='center',
-                      text='Version : ' + VERSION,
+                      text='Version : ' + PLUGIN_MANAGER_VERSION,
                       scale=text_scale * 1.1,
                       color=color, maxwidth=width * 0.9)
         pos -= 55
@@ -1289,7 +1307,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         ba.buttonwidget(parent=self._root_widget,
                         position=(width * 0.125, pos),
                         size=button_size,
-                        on_activate_call=lambda: ba.open_url(GITHUB_REPO_LINK),
+                        on_activate_call=lambda: ba.open_url(index["repository_url"]),
                         textcolor=b_text_color,
                         button_type='square',
                         text_scale=1,
