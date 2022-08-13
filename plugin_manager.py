@@ -21,7 +21,7 @@ _uiscale = ba.app.ui.uiscale
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
 #      and won't open the actual URL in a web-browser. Let's fallback to http for now until this
 #      gets resolved.
-INDEX_META = "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/index.json"
+INDEX_META = "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
@@ -31,11 +31,12 @@ REGEXP = {
     "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\("),
     "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\("),
 }
+DEFAULT_TAG = "main"
 
-VERSION = "0.1.1"
-GITHUB_REPO_LINK = "http://github.com/bombsquad-community/plugin-manager/"
+VERSION = "0.1.0"
+GITHUB_REPO_LINK = "http://github.com/bombsquad-community/plugin-manager"
 
-THIRD_PARTY_CATEGORY_URL = "http://github.com/{repository}/{content_type}/main/category.json"
+THIRD_PARTY_CATEGORY_URL = "http://github.com/{repository}/{content_type}/{tag}/category.json"
 
 _CACHE = {}
 
@@ -104,7 +105,7 @@ class Category:
     async def fetch_metadata(self):
         if self._metadata is None:
             request = urllib.request.Request(
-                self.meta_url.format(content_type="raw"),
+                self.meta_url.format(content_type="raw", tag=DEFAULT_TAG),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -402,8 +403,8 @@ class Plugin:
         self.name, self.info = plugin
         self.is_3rd_party = is_3rd_party
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
-        self.download_url = url.format(content_type="raw")
-        self.view_url = url.format(content_type="blob")
+        self.download_url = url.format(content_type="raw", tag=DEFAULT_TAG)
+        self.view_url = url.format(content_type="blob", tag=DEFAULT_TAG)
         self._local_plugin = None
 
     def __repr__(self):
@@ -674,7 +675,7 @@ class PluginManager:
         global _INDEX
         if not self._index:
             request = urllib.request.Request(
-                INDEX_META.format(content_type="raw"),
+                INDEX_META.format(content_type="raw", tag=DEFAULT_TAG),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -866,7 +867,7 @@ class PluginSourcesWindow(popup.PopupWindow):
 
     async def add_source(self):
         source = ba.textwidget(query=self._add_source_widget)
-        meta_url = THIRD_PARTY_CATEGORY_URL.format(repository=source, content_type="raw")
+        meta_url = THIRD_PARTY_CATEGORY_URL.format(repository=source, content_type="raw", tag=DEFAULT_TAG)
         category = Category(meta_url, is_3rd_party=True)
         if not await category.is_valid():
             ba.screenmessage("Enter a valid plugin source")
@@ -876,13 +877,13 @@ class PluginSourcesWindow(popup.PopupWindow):
             return
         ba.app.config["Community Plugin Manager"]["Custom Sources"].append(source)
         ba.app.config.commit()
-        ba.screenmessage("Plugin source added")
+        ba.screenmessage("Plugin source added, refresh plugin list to see changes")
         self.draw_sources()
 
     def delete_selected_source(self):
         ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
         ba.app.config.commit()
-        ba.screenmessage("Plugin source deleted")
+        ba.screenmessage("Plugin source deleted, refresh plugin list to see changes")
         self.draw_sources()
 
     def _ok(self) -> None:

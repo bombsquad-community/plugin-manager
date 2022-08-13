@@ -1,6 +1,6 @@
 {
   "name": "Maps",
   "description": "Maps",
-  "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/maps",
+  "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps",
   "plugins": {}
 }

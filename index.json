@@ -1,7 +1,17 @@
 {
+  "plugin_manager_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugin_manager.py",
+  "versions": {
+    "0.1.0": {
+       "api_version": 7,
+       "commit_sha": "a98dacd",
+       "dependencies": [],
+       "released_on": "12-08-2022",
+       "md5sum": "6aa01d047b1e6805ab0e111a1da41727"
+    }
+  },
   "categories": [
-    "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/utilities.json",
-    "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/minigames.json",
-    "http://github.com/bombsquad-community/plugin-manager/{content_type}/main/plugins/maps.json"
+    "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities.json",
+    "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames.json",
+    "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps.json"
   ]
 }
