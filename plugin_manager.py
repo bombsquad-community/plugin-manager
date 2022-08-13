@@ -291,27 +291,27 @@ class PluginLocal:
     def load_minigames(self):
         scanner = ba._meta.DirectoryScan(paths="")
         directory, module = self.install_path.rsplit(os.path.sep, 1)
-        scanner.scan_module(
+        scanner._scan_module(
             pathlib.Path(directory),
             pathlib.Path(module),
         )
-        scanned_results = set(ba.app.meta.scanresults.games)
-        for game in scanner.results.games:
+        scanned_results = set(ba.app.meta.scanresults.exports["ba.GameActivity"])
+        for game in scanner.results.exports["ba.GameActivity"]:
             if game not in scanned_results:
-                ba.app.meta.scanresults.games.append(game)
+                ba.app.meta.scanresults.exports["ba.GameActivity"].append(game)
 
     def unload_minigames(self):
         scanner = ba._meta.DirectoryScan(paths="")
         directory, module = self.install_path.rsplit(os.path.sep, 1)
-        scanner.scan_module(
+        scanner._scan_module(
             pathlib.Path(directory),
             pathlib.Path(module),
         )
         new_scanned_results_games = []
-        for game in ba.app.meta.scanresults.games:
-            if game not in scanner.results.games:
+        for game in ba.app.meta.scanresults.exports["ba.GameActivity"]:
+            if game not in scanner.results.exports["ba.GameActivity"]:
                 new_scanned_results_games.append(game)
-        ba.app.meta.scanresults.games = new_scanned_results_games
+        ba.app.meta.scanresults.exports["ba.GameActivity"] = new_scanned_results_games
 
     async def is_enabled(self):
         """
@@ -473,8 +473,8 @@ class PluginWindow(popup.PopupWindow):
         transition = 'in_scale'
 
         self._root_widget = ba.containerwidget(size=(width, height),
-                                               parent=_ba.get_special_widget(
-                                                   'overlay_stack'),
+                                               # parent=_ba.get_special_widget(
+                                               #     'overlay_stack'),
                                                on_outside_click_call=self._ok,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
@@ -640,34 +640,27 @@ class PluginWindow(popup.PopupWindow):
 
         return wrapper
 
-    @button
     def settings(self):
-        play_sound
         self.local_plugin.launch_settings()
 
     @button
     def disable(self) -> None:
-        play_sound()
         self.local_plugin.disable()
 
     @button
     async def enable(self) -> None:
-        play_sound()
         await self.local_plugin.enable()
 
     @button
     async def install(self):
-        play_sound()
         await self.plugin.install()
 
     @button
     async def uninstall(self):
-        play_sound()
         await self.plugin.uninstall()
 
     @button
     async def update(self):
-        play_sound()
         await self.plugin.update()
 
 
@@ -750,8 +743,8 @@ class PluginSourcesWindow(popup.PopupWindow):
         self._transition_out = 'out_scale'
         transition = 'in_scale'
         self._root_widget = ba.containerwidget(size=(400, 340),
-                                               parent=_ba.get_special_widget(
-                                                   'overlay_stack'),
+                                               # parent=_ba.get_special_widget(
+                                               #     'overlay_stack'),
                                                on_outside_click_call=self._ok,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
@@ -977,7 +970,7 @@ class PluginManagerWindow(ba.Window):
                 size=(60, 60),
                 scale=0.8,
                 label=ba.charstr(ba.SpecialChar.BACK),
-                autoselect=True,
+                # autoselect=True,
                 button_type='backSmall',
                 on_activate_call=self._back)
 
@@ -1012,6 +1005,33 @@ class PluginManagerWindow(ba.Window):
             maxwidth=400,
         )
 
+    def _back(self) -> None:
+        play_sound()
+        from bastd.ui.settings.allsettings import AllSettingsWindow
+        ba.containerwidget(edit=self._root_widget,
+                           transition=self._transition_out)
+        ba.app.ui.set_main_menu_window(
+            AllSettingsWindow(transition='in_left').get_root_widget())
+
+    async def draw_index(self):
+        try:
+            self.draw_search_bar()
+            self.draw_plugins_scroll_bar()
+            self.draw_category_selection_button(post_label="All")
+            self.draw_refresh_icon()
+            self.draw_settings_icon()
+            await self.plugin_manager.setup_index()
+            ba.textwidget(edit=self._plugin_manager_status_text,
+                          text="")
+            await self.select_category("All")
+        except RuntimeError:
+            # User probably went back before the PluginManagerWindow could finish loading.
+            pass
+        except urllib.error.URLError:
+            ba.textwidget(edit=self._plugin_manager_status_text,
+                          text="Make sure you are connected\n to the Internet and try again.")
+
+    def draw_plugins_scroll_bar(self):
         scroll_size_x = (400 if _uiscale is ba.UIScale.SMALL else
                          380 if _uiscale is ba.UIScale.MEDIUM else 420)
         scroll_size_y = (225 if _uiscale is ba.UIScale.SMALL else
@@ -1027,30 +1047,6 @@ class PluginManagerWindow(ba.Window):
                                              border=2,
                                              margin=0)
 
-    def _back(self) -> None:
-        play_sound()
-        from bastd.ui.settings.allsettings import AllSettingsWindow
-        ba.containerwidget(edit=self._root_widget,
-                           transition=self._transition_out)
-        ba.app.ui.set_main_menu_window(
-            AllSettingsWindow(transition='in_left').get_root_widget())
-
-    async def draw_index(self):
-        try:
-            self.draw_search_bar()
-            self.draw_category_selection_button(post_label="All")
-            self.draw_refresh_icon()
-            self.draw_settings_icon()
-            await self.plugin_manager.setup_index()
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text="")
-            await self.select_category("All")
-        except RuntimeError:
-            # User probably went back before the PluginManagerWindow could finish loading.
-            pass
-        except urllib.error.URLError:
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text="Make sure you are connected\n to the Internet and try again.")
 
     def draw_category_selection_button(self, post_label):
         category_pos_x = (330 if _uiscale is ba.UIScale.SMALL else
@@ -1073,7 +1069,7 @@ class PluginManagerWindow(ba.Window):
                                                              button_type="square",
                                                              color=b_color,
                                                              textcolor=b_textcolor,
-                                                             autoselect=True,
+                                                             # autoselect=True,
                                                              text_scale=0.6)
         else:
             self.category_selection_button = ba.buttonwidget(edit=self.category_selection_button,
@@ -1115,6 +1111,7 @@ class PluginManagerWindow(ba.Window):
                                           v_align='center',
                                           editable=True,
                                           scale=0.8,
+                                          autoselect=True,
                                           description=filter_txt)
 
     def draw_settings_icon(self):
@@ -1123,7 +1120,7 @@ class PluginManagerWindow(ba.Window):
         settings_pos_y = (130 if _uiscale is ba.UIScale.SMALL else
                           60 if _uiscale is ba.UIScale.MEDIUM else 70)
         controller_button = ba.buttonwidget(parent=self._root_widget,
-                                            autoselect=True,
+                                            # autoselect=True,
                                             position=(settings_pos_x, settings_pos_y),
                                             size=(30, 30),
                                             button_type="square",
@@ -1143,7 +1140,7 @@ class PluginManagerWindow(ba.Window):
         settings_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
                           105 if _uiscale is ba.UIScale.MEDIUM else 120)
         controller_button = ba.buttonwidget(parent=self._root_widget,
-                                            autoselect=True,
+                                            # autoselect=True,
                                             position=(settings_pos_x, settings_pos_y),
                                             size=(30, 30),
                                             button_type="square",
@@ -1254,8 +1251,8 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         transition = 'in_scale'
         scale_origin = origin_widget.get_screen_space_center()
         self._root_widget = ba.containerwidget(size=(width, height),
-                                               parent=_ba.get_special_widget(
-                                                   'overlay_stack'),
+                                               # parent=_ba.get_special_widget(
+                                               #     'overlay_stack'),
                                                on_outside_click_call=self._disappear,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
