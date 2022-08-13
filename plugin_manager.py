@@ -1080,8 +1080,8 @@ class PluginManagerWindow(ba.Window):
                                                              label=label)
 
     def draw_search_bar(self):
-        search_bar_pos_x = (80 if _uiscale is ba.UIScale.SMALL else
-                            55 if _uiscale is ba.UIScale.MEDIUM else 90)
+        search_bar_pos_x = (85 if _uiscale is ba.UIScale.SMALL else
+                            65 if _uiscale is ba.UIScale.MEDIUM else 90)
         search_bar_pos_y = self._height - (
             145 if _uiscale is ba.UIScale.SMALL else
             110 if _uiscale is ba.UIScale.MEDIUM else 116)
@@ -1092,9 +1092,14 @@ class PluginManagerWindow(ba.Window):
             35 if _uiscale is ba.UIScale.SMALL else
             35 if _uiscale is ba.UIScale.MEDIUM else 45)
 
+        filter_txt_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
+                            40 if _uiscale is ba.UIScale.MEDIUM else 60)
+        filter_txt_pos_y = search_bar_pos_y + (5 if _uiscale is ba.UIScale.SMALL else
+                            4 if _uiscale is ba.UIScale.MEDIUM else 8)
+
         ba.textwidget(parent=self._root_widget,
                       text="Filter",
-                      position=(60, search_bar_pos_y + 8),
+                      position=(filter_txt_pos_x, filter_txt_pos_y),
                       selectable=False,
                       h_align='left',
                       v_align='center',
