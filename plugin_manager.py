@@ -7,9 +7,9 @@ from bastd.ui import popup
 import urllib.request
 import json
 import os
+import sys
 import asyncio
 import re
-import string
 import pathlib
 
 from typing import Union, Optional
@@ -18,12 +18,13 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.0"
+PLUGIN_MANAGER_VERSION = "0.1.1"
+REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
+CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
 #      and won't open the actual URL in a web-browser. Let's fallback to http for now until this
 #      gets resolved.
-INDEX_META = "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/index.json"
-CURRENT_TAG = "main"
+INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
@@ -91,10 +92,9 @@ def play_sound():
 
 
 def partial_format(string_template, **kwargs):
-    for key in kwargs:
-        string_template = string_template.replace("{" + key + "}", f"${kwargs[key]}")
-    formatted_string = string.Template(plugin_category_url).safe_substitute(kwargs)
-    return formatted_string
+    for key, value in kwargs.items():
+        string_template = string_template.replace("{" + key + "}", value)
+    return string_template
 
 
 class Category:
@@ -406,10 +406,11 @@ class Plugin:
         self.name, self.info = plugin
         self.is_3rd_party = is_3rd_party
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
-        if is_3rd_party:
-            tag = _CACHE["index"]["external_source_tag"]
-        else:
-            tag = CURRENT_TAG
+        # if is_3rd_party:
+        #     tag = CURRENT_TAG
+        # else:
+        #     tag = CURRENT_TAG
+        tag = CURRENT_TAG
         self.download_url = url.format(content_type="raw", tag=tag)
         self.view_url = url.format(content_type="blob", tag=tag)
         self._local_plugin = None
@@ -677,11 +678,16 @@ class PluginManager:
         self.request_headers = HEADERS
         self._index = _CACHE.get("index", {})
         self.categories = {}
+        self.module_path = sys.modules[__name__].__file__
 
     async def get_index(self):
         if not self._index:
             request = urllib.request.Request(
-                INDEX_META.format(content_type="raw", tag=CURRENT_TAG),
+                INDEX_META.format(
+                    repository_url=REPOSITORY_URL,
+                    content_type="raw",
+                    tag=CURRENT_TAG
+                ),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -703,7 +709,7 @@ class PluginManager:
             request = category.fetch_metadata()
             requests.append(request)
         for repository in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
-            plugin_category_url = partial_format(plugin_index["external_source_url"], {"repository": repository})
+            plugin_category_url = partial_format(plugin_index["external_source_url"], repository=repository)
             category = Category(plugin_category_url, is_3rd_party=True)
             request = category.fetch_metadata()
             requests.append(request)
@@ -734,6 +740,36 @@ class PluginManager:
             del _CACHE["index"]
         except KeyError:
             pass
+
+    async def get_update_details(self):
+        index = await self.get_index()
+        for version, info in index["versions"].items():
+            if info["api_version"] != ba.app.api_version:
+                # No point checking a version of the API game doesn't support.
+                continue
+            if version == PLUGIN_MANAGER_VERSION:
+                # We're already on the latest version for the current API.
+                return
+            else:
+                if next(iter(index["versions"])) == version:
+                    # Version on the top is the latest, so no need to specify
+                    # the commit SHA explicitly to GitHub to access the latest file.
+                    commit_sha = None
+                else:
+                    commit_sha = info["commit_sha"]
+                return version, commit_sha
+
+    async def update(self, to_version, commit_sha=None):
+        index = await self.get_index()
+        if to_version is None:
+            to_version, commit_sha = await self.get_update_details()
+        to_version_info = index["versions"][to_version]
+        tag = commit_sha or CURRENT_TAG
+        download_url = index["plugin_manager_url"].format(
+            content_type="raw",
+            tag=tag,
+        )
+        await async_stream_network_response_to_file(download_url, self.module_path)
 
     async def soft_refresh(self):
         pass
@@ -877,7 +913,7 @@ class PluginSourcesWindow(popup.PopupWindow):
         meta_url = _CACHE["index"]["external_source_url"].format(
             repository=source,
             content_type="raw",
-            tag=_CACHE["index"]["external_source_tag"]
+            tag=CURRENT_TAG
         )
         category = Category(meta_url, is_3rd_party=True)
         if not await category.is_valid():
@@ -900,9 +936,6 @@ class PluginSourcesWindow(popup.PopupWindow):
     def _ok(self) -> None:
         play_sound()
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
-
-    def get_custom_sources():
-        return ba.app.config["Community Plugin Manager"]["Custom Sources"]
 
 
 class PluginCategoryWindow(popup.PopupMenuWindow):
@@ -1138,7 +1171,7 @@ class PluginManagerWindow(ba.Window):
                                             button_type="square",
                                             label="",
                                             on_activate_call=ba.Call(PluginManagerSettingsWindow,
-                                                                     self.plugin_manager.get_index,
+                                                                     self.plugin_manager,
                                                                      self._root_widget))
         ba.imagewidget(parent=self._root_widget,
                        position=(settings_pos_x, settings_pos_y),
@@ -1252,9 +1285,9 @@ class PluginManagerWindow(ba.Window):
 
 
 class PluginManagerSettingsWindow(popup.PopupWindow):
-    def __init__(self, index_asyncio_callback, origin_widget):
+    def __init__(self, plugin_manager, origin_widget):
         play_sound()
-        self._index_asyncio_callback = index_asyncio_callback
+        self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
@@ -1262,13 +1295,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
     async def draw_ui(self):
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
-        width = 360 * s
-        height = 150 + 100 * s
-        color = (1, 1, 1)
+        width = 380 * s
+        height = 150 + 150 * s
+        color = (0.9, 0.9, 0.9)
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
-        index = await self._index_asyncio_callback()
+        index = await self._plugin_manager.get_index()
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
                                                #     'overlay_stack'),
@@ -1280,41 +1313,108 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         pos = height * 0.9
         setting_title = "Settings"
         ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos), size=(0, 0),
-                      h_align='center', v_align='center', text=setting_title,
-                      scale=text_scale * 1.30, color=color,
+                      position=(width * 0.49, pos),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text=setting_title,
+                      scale=text_scale,
+                      color=ba.app.ui.title_color,
                       maxwidth=width * 0.9)
-        pos -= 40
+        pos -= 60
+        ba.checkboxwidget(parent=self._root_widget,
+                         position=(width * 0.1, pos),
+                         size=(170, 30),
+                         text="Auto Update Plugin Manager",
+                         value=False,
+                         on_value_change_call=lambda: None,
+                         maxwidth=500,
+                         textcolor=(0.9, 0.9, 0.9),
+                         scale=0.75)
+        pos -= 32
+        ba.checkboxwidget(parent=self._root_widget,
+                         position=(width * 0.1, pos),
+                         size=(170, 30),
+                         text="Auto Update Plugins",
+                         maxwidth=500,
+                         textcolor=(0.9, 0.9, 0.9),
+                         scale=0.75)
+        pos -= 32
+        ba.checkboxwidget(parent=self._root_widget,
+                         position=(width * 0.1, pos),
+                         size=(170, 30),
+                         text="Load plugins immediately without restart",
+                         maxwidth=500,
+                         textcolor=(0.9, 0.9, 0.9),
+                         scale=0.75)
+        pos -= 53
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos-5),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text='Contribute to plugins or to this community plugin manager!',
+                      scale=text_scale * 0.65,
+                      color=color,
+                      maxwidth=width * 0.95)
+
+        pos -= 70
+        button_size = (60 * s, 32 * s)
+        ba.buttonwidget(parent=self._root_widget,
+                        position=((width * 0.49) - button_size[0] / 2, pos),
+                        size=button_size,
+                        on_activate_call=lambda: ba.open_url(REPOSITORY_URL),
+                        textcolor=b_text_color,
+                        button_type='square',
+                        text_scale=1,
+                        label='GitHub')
+        ba.containerwidget(edit=self._root_widget,
+                           on_cancel_call=self._disappear)
+
+        plugin_manager_update_available = await self._plugin_manager.get_update_details()
+        if plugin_manager_update_available:
+            text_color = (0.75, 0.2, 0.2)
+            loop = asyncio.get_event_loop()
+            button_size = (95 * s, 32 * s)
+            self._update_button = ba.buttonwidget(parent=self._root_widget,
+                                                  position=((width * 0.77) - button_size[0] / 2, pos),
+                                                  size=button_size,
+                                                  on_activate_call=lambda: loop.create_task(self.update(*plugin_manager_update_available)),
+                                                  textcolor=b_text_color,
+                                                  button_type='square',
+                                                  text_scale=1,
+                                                  color=(0, 0.7, 0),
+                                                  label=f'Update to v{plugin_manager_update_available[0]}')
+            self._restart_to_reload_changes_text = ba.textwidget(parent=self._root_widget,
+                                                                 position=(width * 0.79, pos + 20),
+                                                                 size=(0, 0),
+                                                                 h_align='center',
+                                                                 v_align='center',
+                                                                 text='',
+                                                                 scale=text_scale * 0.65,
+                                                                 color=(0, 0.8, 0),
+                                                                 maxwidth=width * 0.9)
+        else:
+            text_color = (0, 0.8, 0)
+        pos -= 25
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos),
                       size=(0, 0),
                       h_align='center',
                       v_align='center',
-                      text='Version : ' + PLUGIN_MANAGER_VERSION,
-                      scale=text_scale * 1.1,
-                      color=color, maxwidth=width * 0.9)
-        pos -= 55
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos-5), size=(0, 0),
-                      h_align='center', v_align='center',
-                      text='More Updates Coming Soon.',
-                      scale=text_scale, color=color,
-                      maxwidth=width * 0.95)
+                      text=f'Plugin Manager v{PLUGIN_MANAGER_VERSION}',
+                      scale=text_scale * 0.8,
+                      color=text_color,
+                      maxwidth=width * 0.9)
 
         pos = height * 0.1
-        button_size = (270 * s, 50 * s)
 
-        ba.buttonwidget(parent=self._root_widget,
-                        position=(width * 0.125, pos),
-                        size=button_size,
-                        on_activate_call=lambda: ba.open_url(index["repository_url"]),
-                        textcolor=b_text_color,
-                        button_type='square',
-                        text_scale=1,
-                        label='Open Github Repo')
-        ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._disappear)
-        # _ba.app.api_version
+    async def update(self, to_version, commit_sha=None):
+        await self._plugin_manager.update(to_version, commit_sha)
+        ba.screenmessage("Update successful.")
+        ba.textwidget(edit=self._restart_to_reload_changes_text,
+                      text='Update Applied!\nRestart game to reload changes.')
+        self._update_button.delete()
 
     def _disappear(self) -> None:
         play_sound()

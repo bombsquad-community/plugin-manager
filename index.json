@@ -1,5 +1,4 @@
 {
-  "repository_url": "http://github.com/bombsquad-communithy/plugin-manager",
   "plugin_manager_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugin_manager.py",
   "versions": {
     "0.1.1": {
@@ -22,6 +21,5 @@
     "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames.json",
     "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps.json"
   ],
-  "external_source_url": "http://github.com/{repository}/{content_type}/{tag}/category.json",
-  "external_source_tag": "main"
+  "external_source_url": "http://github.com/{repository}/{content_type}/{tag}/category.json"
 }
