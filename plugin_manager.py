@@ -11,6 +11,7 @@ import sys
 import asyncio
 import re
 import pathlib
+import copy
 
 from typing import Union, Optional
 
@@ -84,31 +85,32 @@ class StartupTasks:
 
     def setup_config(self):
         is_config_updated = False
-        if "Community Plugin Manager" not in ba.app.config:
-            ba.app.config["Community Plugin Manager"] = {}
-        if "Installed Plugins" not in ba.app.config["Community Plugin Manager"]:
-            ba.app.config["Community Plugin Manager"]["Installed Plugins"] = {}
-            is_config_updated = True
-        if "Custom Sources" not in ba.app.config["Community Plugin Manager"]:
-            ba.app.config["Community Plugin Manager"]["Custom Sources"] = []
-            is_config_updated = True
-        for plugin_name in ba.app.config["Community Plugin Manager"]["Installed Plugins"].keys():
+        existing_plugin_manager_config = copy.deepcopy(ba.app.config.get("Community Plugin Manager"))
+
+        plugin_manager_config = ba.app.config.setdefault("Community Plugin Manager", {})
+        plugin_manager_config.setdefault("Custom Sources", [])
+        installed_plugins = plugin_manager_config.setdefault("Installed Plugins", {})
+
+        for plugin_name in tuple(installed_plugins.keys()):
             plugin = PluginLocal(plugin_name)
             if not plugin.is_installed:
-                del ba.app.config["Community Plugin Manager"]["Installed Plugins"][plugin_name]
-                is_config_updated = True
-        if "Settings" not in ba.app.config["Community Plugin Manager"]:
-            ba.app.config["Community Plugin Manager"]["Settings"] = {}
-        if "Auto Update Plugin Manager" not in ba.app.config["Community Plugin Manager"]["Settings"]:
-            ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"] = True
-            is_config_updated = True
-        if "Auto Update Plugins" not in ba.app.config["Community Plugin Manager"]["Settings"]:
-            ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"] = True
-            is_config_updated = True
-        if "Load plugins immediately without restart" not in ba.app.config["Community Plugin Manager"]["Settings"]:
-            ba.app.config["Community Plugin Manager"]["Settings"]["Load plugins immediately without restart"] = False
-            is_config_updated = True
-        if is_config_updated:
+                del installed_plugins[plugin_name]
+
+        # This order is the options will show up in Settings window.
+        current_settings = {
+            "Auto Update Plugin Manager": True,
+            "Auto Update Plugins": True,
+            "Auto Enable Plugins After Installation": True,
+        }
+        settings = plugin_manager_config.setdefault("Settings", {})
+
+        for setting, value in settings.items():
+            if setting in current_settings:
+                current_settings[setting] = value
+
+        plugin_manager_config["Settings"] = current_settings
+
+        if plugin_manager_config != existing_plugin_manager_config:
             ba.app.config.commit()
 
     async def update_plugin_manager(self):
@@ -484,7 +486,8 @@ class Plugin:
 
     async def install(self):
         local_plugin = await self._download()
-        await local_plugin.enable()
+        if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
+            await local_plugin.enable()
         ba.screenmessage("Plugin Installed", color = (0,1,0))
 
     async def uninstall(self):
