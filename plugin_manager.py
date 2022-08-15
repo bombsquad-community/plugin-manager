@@ -844,14 +844,14 @@ class PluginSourcesWindow(popup.PopupWindow):
             maxwidth=270,
         )
 
-        scroll_size_x = (400 if _uiscale is ba.UIScale.SMALL else
-                         380 if _uiscale is ba.UIScale.MEDIUM else 290)
-        scroll_size_y = (225 if _uiscale is ba.UIScale.SMALL else
-                         235 if _uiscale is ba.UIScale.MEDIUM else 180)
-        scroll_pos_x = (70 if _uiscale is ba.UIScale.SMALL else
+        scroll_size_x = (290 if _uiscale is ba.UIScale.SMALL else
+                         300 if _uiscale is ba.UIScale.MEDIUM else 290)
+        scroll_size_y = (170 if _uiscale is ba.UIScale.SMALL else
+                         185 if _uiscale is ba.UIScale.MEDIUM else 180)
+        scroll_pos_x = (55 if _uiscale is ba.UIScale.SMALL else
                         40 if _uiscale is ba.UIScale.MEDIUM else 60)
-        scroll_pos_y = (125 if _uiscale is ba.UIScale.SMALL else
-                        30 if _uiscale is ba.UIScale.MEDIUM else 105)
+        scroll_pos_y = 105
+
         self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
                                              size=(scroll_size_x, scroll_size_y),
                                              position=(scroll_pos_x, scroll_pos_y))
