@@ -119,7 +119,7 @@ class StartupTasks:
             to_version, commit_sha = update_details
             ba.screenmessage(f"Plugin Manager is being updated to version v{to_version}.")
             await self.plugin_manager.update(to_version, commit_sha)
-            ba.screenmessage("Update successful. Restart game to reload changes.")
+            ba.screenmessage("Update successful. Restart game to reload changes.", color = (0,1,0))
 
     async def update_plugins(self):
         pass
@@ -385,7 +385,7 @@ class PluginLocal:
             self.load_minigames()
         # await self._set_status(to_enable=True)
         self.save()
-        ba.screenmessage("Plugin Enabled")
+        ba.screenmessage("Plugin Enabled", color = (0,1,0))
 
     def load_plugin(self, entry_point):
         plugin_class = ba._general.getclass(entry_point, ba.Plugin)
@@ -401,7 +401,7 @@ class PluginLocal:
         #      reads the local plugin file and parses entry points from it.
         # await self._set_status(to_enable=False)
         self.save()
-        ba.screenmessage("Plugin Disabled")
+        ba.screenmessage("Plugin Disabled", color = (0,1,0))
 
     def set_version(self, version):
         ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = version
@@ -485,15 +485,15 @@ class Plugin:
     async def install(self):
         local_plugin = await self._download()
         await local_plugin.enable()
-        ba.screenmessage("Plugin Installed")
+        ba.screenmessage("Plugin Installed", color = (0,1,0))
 
     async def uninstall(self):
         await self.get_local().uninstall()
-        ba.screenmessage("Plugin Uninstalled")
+        ba.screenmessage("Plugin Uninstalled", color = (0,1,0))
 
     async def update(self):
         await self._download()
-        ba.screenmessage("Plugin Updated")
+        ba.screenmessage("Plugin Updated", color = (0,1,0))
 
 
 class PluginWindow(popup.PopupWindow):
@@ -953,21 +953,24 @@ class PluginSourcesWindow(popup.PopupWindow):
         )
         category = Category(meta_url, is_3rd_party=True)
         if not await category.is_valid():
-            ba.screenmessage("Enter a valid plugin source")
+            ba.screenmessage("Enter a valid plugin source", color = (1,0,0))
             return
         if source in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
             ba.screenmessage("Plugin source already exists")
             return
         ba.app.config["Community Plugin Manager"]["Custom Sources"].append(source)
         ba.app.config.commit()
-        ba.screenmessage("Plugin source added, refresh plugin list to see changes")
+        ba.screenmessage("Plugin source added, refresh plugin list to see changes", color = (0,1,0))
         self.draw_sources()
 
     def delete_selected_source(self):
-        ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
-        ba.app.config.commit()
-        ba.screenmessage("Plugin source deleted, refresh plugin list to see changes")
-        self.draw_sources()
+        try:
+            ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
+            ba.app.config.commit()
+            ba.screenmessage("Plugin source deleted, refresh plugin list to see changes", color = (0,1,0))
+            self.draw_sources()
+        except:
+            ba.screenmessage("No Plugin Selected to Delete", color = (1,0,0))
 
     def _ok(self) -> None:
         play_sound()
@@ -1464,7 +1467,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
     async def update(self, to_version=None, commit_sha=None):
         await self._plugin_manager.update(to_version, commit_sha)
-        ba.screenmessage("Update successful.")
+        ba.screenmessage("Update successful.", color = (0,1,0))
         ba.textwidget(edit=self._restart_to_reload_changes_text,
                       text='Update Applied!\nRestart game to reload changes.')
         self._update_button.delete()
