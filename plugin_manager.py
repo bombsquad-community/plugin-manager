@@ -38,36 +38,6 @@ REGEXP = {
 _CACHE = {}
 
 
-def setup_config():
-    is_config_updated = False
-    if "Community Plugin Manager" not in ba.app.config:
-        ba.app.config["Community Plugin Manager"] = {}
-    if "Installed Plugins" not in ba.app.config["Community Plugin Manager"]:
-        ba.app.config["Community Plugin Manager"]["Installed Plugins"] = {}
-        is_config_updated = True
-    if "Custom Sources" not in ba.app.config["Community Plugin Manager"]:
-        ba.app.config["Community Plugin Manager"]["Custom Sources"] = []
-        is_config_updated = True
-    for plugin_name in ba.app.config["Community Plugin Manager"]["Installed Plugins"].keys():
-        plugin = PluginLocal(plugin_name)
-        if not plugin.is_installed:
-            del ba.app.config["Community Plugin Manager"]["Installed Plugins"][plugin_name]
-            is_config_updated = True
-    if "Settings" not in ba.app.config["Community Plugin Manager"]:
-        ba.app.config["Community Plugin Manager"]["Settings"] = {}
-    if "Auto Update Plugin Manager" not in ba.app.config["Community Plugin Manager"]["Settings"]:
-        ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"] = True
-        is_config_updated = True
-    if "Auto Update Plugins" not in ba.app.config["Community Plugin Manager"]["Settings"]:
-        ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"] = True
-        is_config_updated = True
-    if "Load plugins immediately without restart" not in ba.app.config["Community Plugin Manager"]["Settings"]:
-        ba.app.config["Community Plugin Manager"]["Settings"]["Load plugins immediately without restart"] = False
-        is_config_updated = True
-    if is_config_updated:
-        ba.app.config.commit()
-
-
 def send_network_request(request):
     return urllib.request.urlopen(request)
 
@@ -106,6 +76,60 @@ def partial_format(string_template, **kwargs):
     for key, value in kwargs.items():
         string_template = string_template.replace("{" + key + "}", value)
     return string_template
+
+
+class StartupTasks:
+    def __init__(self):
+        self.plugin_manager = PluginManager()
+
+    def setup_config(self):
+        is_config_updated = False
+        if "Community Plugin Manager" not in ba.app.config:
+            ba.app.config["Community Plugin Manager"] = {}
+        if "Installed Plugins" not in ba.app.config["Community Plugin Manager"]:
+            ba.app.config["Community Plugin Manager"]["Installed Plugins"] = {}
+            is_config_updated = True
+        if "Custom Sources" not in ba.app.config["Community Plugin Manager"]:
+            ba.app.config["Community Plugin Manager"]["Custom Sources"] = []
+            is_config_updated = True
+        for plugin_name in ba.app.config["Community Plugin Manager"]["Installed Plugins"].keys():
+            plugin = PluginLocal(plugin_name)
+            if not plugin.is_installed:
+                del ba.app.config["Community Plugin Manager"]["Installed Plugins"][plugin_name]
+                is_config_updated = True
+        if "Settings" not in ba.app.config["Community Plugin Manager"]:
+            ba.app.config["Community Plugin Manager"]["Settings"] = {}
+        if "Auto Update Plugin Manager" not in ba.app.config["Community Plugin Manager"]["Settings"]:
+            ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"] = True
+            is_config_updated = True
+        if "Auto Update Plugins" not in ba.app.config["Community Plugin Manager"]["Settings"]:
+            ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"] = True
+            is_config_updated = True
+        if "Load plugins immediately without restart" not in ba.app.config["Community Plugin Manager"]["Settings"]:
+            ba.app.config["Community Plugin Manager"]["Settings"]["Load plugins immediately without restart"] = False
+            is_config_updated = True
+        if is_config_updated:
+            ba.app.config.commit()
+
+    async def update_plugin_manager(self):
+        if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"]:
+            return
+        update_details = await self.plugin_manager.get_update_details()
+        if update_details:
+            to_version, commit_sha = update_details
+            ba.screenmessage(f"Plugin Manager is being updated to version v{to_version}.")
+            await self.plugin_manager.update(to_version, commit_sha)
+            ba.screenmessage("Update successful. Restart game to reload changes.")
+
+    async def update_plugins(self):
+        pass
+
+    async def execute(self):
+        self.setup_config()
+        await asyncio.gather(
+            self.update_plugin_manager(),
+            self.update_plugins(),
+        )
 
 
 class Category:
@@ -770,7 +794,7 @@ class PluginManager:
                     commit_sha = info["commit_sha"]
                 return version, commit_sha
 
-    async def update(self, to_version, commit_sha=None):
+    async def update(self, to_version=None, commit_sha=None):
         index = await self.get_index()
         if to_version is None:
             to_version, commit_sha = await self.get_update_details()
@@ -781,6 +805,7 @@ class PluginManager:
             tag=tag,
         )
         await async_stream_network_response_to_file(download_url, self.module_path)
+        return to_version_info
 
     async def soft_refresh(self):
         pass
@@ -1437,7 +1462,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         ba.app.config.commit()
         self._ok()
 
-    async def update(self, to_version, commit_sha=None):
+    async def update(self, to_version=None, commit_sha=None):
         await self._plugin_manager.update(to_version, commit_sha)
         ba.screenmessage("Update successful.")
         ba.textwidget(edit=self._restart_to_reload_changes_text,
@@ -1738,10 +1763,12 @@ class NewAllSettingsWindow(ba.Window):
 class EntryPoint(ba.Plugin):
     def on_app_running(self) -> None:
         """Called when the app is being launched."""
-        setup_config()
         from bastd.ui.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         asyncio.set_event_loop(ba._asyncio._asyncio_event_loop)
+        startup_tasks = StartupTasks()
+        loop = asyncio.get_event_loop()
+        loop.create_task(startup_tasks.execute())
         # loop = asyncio.get_event_loop()
         # loop.create_task(do())
         # pm = PluginManager()
