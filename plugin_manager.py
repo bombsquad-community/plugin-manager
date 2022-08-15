@@ -53,6 +53,17 @@ def setup_config():
         if not plugin.is_installed:
             del ba.app.config["Community Plugin Manager"]["Installed Plugins"][plugin_name]
             is_config_updated = True
+    if "Settings" not in ba.app.config["Community Plugin Manager"]:
+        ba.app.config["Community Plugin Manager"]["Settings"] = {}
+    if "Auto Update Plugin Manager" not in ba.app.config["Community Plugin Manager"]["Settings"]:
+        ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"] = True
+        is_config_updated = True
+    if "Auto Update Plugins" not in ba.app.config["Community Plugin Manager"]["Settings"]:
+        ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"] = True
+        is_config_updated = True
+    if "Load plugins immediately without restart" not in ba.app.config["Community Plugin Manager"]["Settings"]:
+        ba.app.config["Community Plugin Manager"]["Settings"]["Load plugins immediately without restart"] = False
+        is_config_updated = True
     if is_config_updated:
         ba.app.config.commit()
 
@@ -1289,6 +1300,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         play_sound()
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
+        self.settings = ba.app.config["Community Plugin Manager"]["Settings"].copy()
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
 
@@ -1301,11 +1313,12 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
+        button_size = (60 * s, 32 * s)
         index = await self._plugin_manager.get_index()
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
                                                #     'overlay_stack'),
-                                               on_outside_click_call=self._disappear,
+                                               on_outside_click_call=self._ok,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
                                                       if _uiscale is ba.UIScale.MEDIUM else 1.0),
@@ -1321,33 +1334,33 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       scale=text_scale,
                       color=ba.app.ui.title_color,
                       maxwidth=width * 0.9)
-        pos -= 60
-        ba.checkboxwidget(parent=self._root_widget,
-                         position=(width * 0.1, pos),
-                         size=(170, 30),
-                         text="Auto Update Plugin Manager",
-                         value=False,
-                         on_value_change_call=lambda: None,
-                         maxwidth=500,
-                         textcolor=(0.9, 0.9, 0.9),
-                         scale=0.75)
-        pos -= 32
-        ba.checkboxwidget(parent=self._root_widget,
-                         position=(width * 0.1, pos),
-                         size=(170, 30),
-                         text="Auto Update Plugins",
-                         maxwidth=500,
-                         textcolor=(0.9, 0.9, 0.9),
-                         scale=0.75)
-        pos -= 32
-        ba.checkboxwidget(parent=self._root_widget,
-                         position=(width * 0.1, pos),
-                         size=(170, 30),
-                         text="Load plugins immediately without restart",
-                         maxwidth=500,
-                         textcolor=(0.9, 0.9, 0.9),
-                         scale=0.75)
-        pos -= 53
+
+        pos -= 20
+        self._save_button = ba.buttonwidget(parent=self._root_widget,
+                        position=((width * 0.82) - button_size[0] / 2, pos),
+                        size=(73, 35),
+                        on_activate_call=self.save_settings_button,
+                        textcolor=b_text_color,
+                        button_type='square',
+                        text_scale=1,
+                        scale=0,
+                        selectable=False,
+                        label="Save")
+        pos -= 40
+
+        for setting, value in self.settings.items():
+            ba.checkboxwidget(parent=self._root_widget,
+                             position=(width * 0.1, pos),
+                             size=(170, 30),
+                             text=setting,
+                             value=value,
+                             on_value_change_call=ba.Call(self.toggle_setting, setting),
+                             maxwidth=500,
+                             textcolor=(0.9, 0.9, 0.9),
+                             scale=0.75)
+            pos -= 32
+
+        pos -= 20
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos-5),
                       size=(0, 0),
@@ -1359,7 +1372,6 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       maxwidth=width * 0.95)
 
         pos -= 70
-        button_size = (60 * s, 32 * s)
         ba.buttonwidget(parent=self._root_widget,
                         position=((width * 0.49) - button_size[0] / 2, pos),
                         size=button_size,
@@ -1369,7 +1381,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                         text_scale=1,
                         label='GitHub')
         ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._disappear)
+                           on_cancel_call=self._ok)
 
         plugin_manager_update_available = await self._plugin_manager.get_update_details()
         if plugin_manager_update_available:
@@ -1409,6 +1421,22 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
         pos = height * 0.1
 
+    def toggle_setting(self, setting, set_value):
+        self.settings[setting] = set_value
+        if self.settings == ba.app.config["Community Plugin Manager"]["Settings"]:
+            ba.buttonwidget(edit=self._save_button,
+                            scale=0,
+                            selectable=False)
+        else:
+            ba.buttonwidget(edit=self._save_button,
+                            scale=1,
+                            selectable=True)
+
+    def save_settings_button(self):
+        ba.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
+        ba.app.config.commit()
+        self._ok()
+
     async def update(self, to_version, commit_sha=None):
         await self._plugin_manager.update(to_version, commit_sha)
         ba.screenmessage("Update successful.")
@@ -1416,7 +1444,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       text='Update Applied!\nRestart game to reload changes.')
         self._update_button.delete()
 
-    def _disappear(self) -> None:
+    def _ok(self) -> None:
         play_sound()
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
