@@ -435,7 +435,38 @@ class PluginLocal:
 
 
 class PluginVersion:
-    pass
+    def __init__(self, plugin, version, tag=None):
+        self.number, info = version
+        self.plugin = plugin
+        self.api_version = info["api_version"]
+        self.commit_sha = info["commit_sha"]
+        self.dependencies = info["dependencies"]
+        self.md5sum = info["md5sum"]
+
+        if tag is None:
+            tag = self.commit_sha
+
+        self.download_url = self.plugin.url.format(content_type="raw", tag=tag)
+        self.view_url = self.plugin.url.format(content_type="blob", tag=tag)
+
+    def __eq__(self, plugin_version):
+        return (self.number, self.plugin.name) == (plugin_version.number, plugin_version.plugin.name)
+
+    def __repr__(self):
+        return f"<PluginVersion({self.plugin.name} {self.plugin.version})>"
+
+    async def _download(self):
+        local_plugin = self.plugin.create_local()
+        await local_plugin.set_content_from_network_response(self.download_url)
+        local_plugin.set_version(self.number)
+        local_plugin.save()
+        return local_plugin
+
+    async def install(self):
+        local_plugin = await self._download()
+        if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
+            await local_plugin.enable()
+        ba.screenmessage("Plugin Installed", color = (0,1,0))
 
 
 class Plugin:
@@ -451,9 +482,14 @@ class Plugin:
         # else:
         #     tag = CURRENT_TAG
         tag = CURRENT_TAG
+        self.url = url
         self.download_url = url.format(content_type="raw", tag=tag)
         self.view_url = url.format(content_type="blob", tag=tag)
         self._local_plugin = None
+
+        self._versions = None
+        self._latest_version = None
+        self._latest_compatible_version = None
 
     def __repr__(self):
         return f"<Plugin({self.name})>"
@@ -463,16 +499,37 @@ class Plugin:
         return os.path.isfile(self.install_path)
 
     @property
-    def latest_version(self):
-        # TODO: Return an instance of `PluginVersion`.
-        return next(iter(self.info["versions"]))
+    def versions(self):
+        if self._versions is None:
+            self._versions = [
+                PluginVersion(
+                    self,
+                    version,
+                ) for version in self.info["versions"].items()
+            ]
+        return self._versions
 
-    async def _download(self):
-        local_plugin = self.create_local()
-        await local_plugin.set_content_from_network_response(self.download_url)
-        local_plugin.set_version(self.latest_version)
-        local_plugin.save()
-        return local_plugin
+    @property
+    def latest_version(self):
+        if self._latest_version is None:
+            self._latest_version = PluginVersion(
+                self,
+                tuple(self.info["versions"].items())[0],
+                tag=CURRENT_TAG,
+            )
+        return self._latest_version
+
+    @property
+    def latest_compatible_version(self):
+        if self._latest_compatible_version is None:
+            for number, info in self.info["versions"].items():
+                if info["api_version"] == ba.app.api_version:
+                    self._latest_compatible_version = PluginVersion(
+                        self,
+                        (number, info),
+                    )
+                    break
+        return self._latest_compatible_version
 
     def get_local(self):
         if not self.is_installed:
@@ -487,18 +544,12 @@ class Plugin:
             .initialize()
         )
 
-    async def install(self):
-        local_plugin = await self._download()
-        if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
-            await local_plugin.enable()
-        ba.screenmessage("Plugin Installed", color = (0,1,0))
-
     async def uninstall(self):
         await self.get_local().uninstall()
         ba.screenmessage("Plugin Uninstalled", color = (0,1,0))
 
     async def update(self):
-        await self._download()
+        await self.latest_version.install()
         ba.screenmessage("Plugin Updated", color = (0,1,0))
 
 
@@ -532,7 +583,7 @@ class PluginWindow(popup.PopupWindow):
                                                scale_origin_stack_offset=self.scale_origin)
 
         pos = height * 0.8
-        plugin_title = f"{self.plugin.name} (v{self.plugin.latest_version})"
+        plugin_title = f"{self.plugin.name} (v{self.plugin.latest_version.number})"
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center', text=plugin_title,
@@ -585,7 +636,7 @@ class PluginWindow(popup.PopupWindow):
                     button1_action = self.enable
             button2_label = "Uninstall"
             button2_action = self.uninstall
-            has_update = self.local_plugin.version != self.plugin.latest_version
+            has_update = self.local_plugin.version != self.plugin.latest_version.number
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
@@ -703,7 +754,7 @@ class PluginWindow(popup.PopupWindow):
 
     @button
     async def install(self):
-        await self.plugin.install()
+        await self.plugin.latest_version.install()
 
     @button
     async def uninstall(self):
@@ -1258,7 +1309,7 @@ class PluginManagerWindow(ba.Window):
             if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
-                elif local_plugin.version == plugin.latest_version:
+                elif local_plugin.version == plugin.latest_version.number:
                     color = (0, 1, 0)
                 else:
                     color = (1, 0.6, 0)
