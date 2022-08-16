@@ -527,6 +527,7 @@ class Plugin:
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
+                        CURRENT_TAG if self.latest_version.number == number else None
                     )
                     break
         return self._latest_compatible_version
@@ -549,7 +550,7 @@ class Plugin:
         ba.screenmessage("Plugin Uninstalled", color = (0,1,0))
 
     async def update(self):
-        await self.latest_version.install()
+        await self.latest_compatible_version.install()
         ba.screenmessage("Plugin Updated", color = (0,1,0))
 
 
@@ -583,7 +584,7 @@ class PluginWindow(popup.PopupWindow):
                                                scale_origin_stack_offset=self.scale_origin)
 
         pos = height * 0.8
-        plugin_title = f"{self.plugin.name} (v{self.plugin.latest_version.number})"
+        plugin_title = f"{self.plugin.name} (v{self.plugin.latest_compatible_version.number})"
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center', text=plugin_title,
@@ -636,7 +637,7 @@ class PluginWindow(popup.PopupWindow):
                     button1_action = self.enable
             button2_label = "Uninstall"
             button2_action = self.uninstall
-            has_update = self.local_plugin.version != self.plugin.latest_version.number
+            has_update = self.local_plugin.version != self.plugin.latest_compatible_version.number
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
@@ -754,7 +755,7 @@ class PluginWindow(popup.PopupWindow):
 
     @button
     async def install(self):
-        await self.plugin.latest_version.install()
+        await self.plugin.latest_compatible_version.install()
 
     @button
     async def uninstall(self):
@@ -1309,7 +1310,7 @@ class PluginManagerWindow(ba.Window):
             if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
-                elif local_plugin.version == plugin.latest_version.number:
+                elif local_plugin.version == plugin.latest_compatible_version.number:
                     color = (0, 1, 0)
                 else:
                     color = (1, 0.6, 0)
