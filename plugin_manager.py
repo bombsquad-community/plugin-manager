@@ -128,10 +128,13 @@ class StartupTasks:
 
     async def execute(self):
         self.setup_config()
-        await asyncio.gather(
-            self.update_plugin_manager(),
-            self.update_plugins(),
-        )
+        try:
+            await asyncio.gather(
+                self.update_plugin_manager(),
+                self.update_plugins(),
+            )
+        except urllib.error.URLError:
+            pass
 
 
 class Category:
