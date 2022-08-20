@@ -209,14 +209,14 @@ class Category:
         except KeyError:
             pass
 
-    async def refresh(self):
-        self.cleanup()
-        await self.get_plugins()
-
     def cleanup(self):
         self._metadata = None
         self._plugins.clear()
         self.unset_category_global_cache()
+
+    async def refresh(self):
+        self.cleanup()
+        await self.get_plugins()
 
     def save(self):
         ba.app.config["Community Plugin Manager"]["Custom Sources"].append(self.meta_url)
@@ -453,7 +453,7 @@ class PluginVersion:
         return (self.number, self.plugin.name) == (plugin_version.number, plugin_version.plugin.name)
 
     def __repr__(self):
-        return f"<PluginVersion({self.plugin.name} {self.plugin.version})>"
+        return f"<PluginVersion({self.plugin.name} {self.number})>"
 
     async def _download(self):
         local_plugin = self.plugin.create_local()
@@ -1255,6 +1255,42 @@ class PluginManagerWindow(ba.Window):
                                           scale=0.8,
                                           autoselect=True,
                                           description=filter_txt)
+        self._last_filter_text = None
+        self._last_filter_plugins = []
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.process_search_filter())
+
+    async def process_search_filter(self):
+        while True:
+            await asyncio.sleep(0.2)
+            try:
+                filter_text = ba.textwidget(query=self._filter_widget)
+            except RuntimeError:
+                # Search filter widget got destroyed. No point checking for filter text anymore.
+                return
+            if self.selected_category is None:
+                continue
+            try:
+                await self.draw_plugin_names(self.selected_category, search_filter=filter_text)
+            except (KeyError, AttributeError):
+                # TODO: Raise a more fitting exception here. Selected category doesn't exist, such
+                #       as the case where refresh button has been tapped on.
+                pass
+            # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
+            # attributes like color, position and more.
+            # for plugin in self._columnwidget.get_children():
+            # for name, widget in tuple(self.plugins_in_current_view.items()):
+            #     # print(ba.textwidget(query=plugin))
+            #     # plugin.delete()
+            #     print(dir(widget))
+            #     if filter_text in name:
+            #         import random
+            #         if random.random() > 0.9:
+            #             ba.textwidget(edit=widget).delete()
+            #         else:
+            #             ba.textwidget(edit=widget, position=None)
+            #     else:
+            #         ba.textwidget(edit=widget, position=None)
 
     def draw_settings_icon(self):
         settings_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
@@ -1282,13 +1318,14 @@ class PluginManagerWindow(ba.Window):
                           440 if _uiscale is ba.UIScale.MEDIUM else 510)
         settings_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
                           105 if _uiscale is ba.UIScale.MEDIUM else 120)
+        loop = asyncio.get_event_loop()
         controller_button = ba.buttonwidget(parent=self._root_widget,
                                             # autoselect=True,
                                             position=(settings_pos_x, settings_pos_y),
                                             size=(30, 30),
                                             button_type="square",
                                             label="",
-                                            on_activate_call=self.refresh)
+                                            on_activate_call=lambda: loop.create_task(self.refresh()))
         ba.imagewidget(parent=self._root_widget,
                        position=(settings_pos_x, settings_pos_y),
                        size=(30, 30),
@@ -1296,12 +1333,41 @@ class PluginManagerWindow(ba.Window):
                        texture=ba.gettexture("replayIcon"),
                        draw_controller=controller_button)
 
-    async def draw_plugin_names(self, category):
+    # async def draw_plugin_names(self, category):
+    #     for plugin in self._columnwidget.get_children():
+    #         plugin.delete()
+
+    #     plugins = await self.plugin_manager.categories[category].get_plugins()
+    #     plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
+    #     await asyncio.gather(*plugin_names_to_draw)
+
+    # XXX: Not sure if this is the best way to handle search filters.
+    async def draw_plugin_names(self, category, search_filter=""):
+        to_draw_plugin_names = (search_filter, category) != (self._last_filter_text, self.selected_category)
+        if not to_draw_plugin_names:
+            return
+
+        category_plugins = await self.plugin_manager.categories[category].get_plugins()
+
+        if search_filter:
+            plugins = []
+            for plugin in category_plugins:
+                if search_filter in plugin.name:
+                    plugins.append(plugin)
+        else:
+            plugins = category_plugins
+
+        if plugins == self._last_filter_plugins:
+            return
+
+        self._last_filter_text = search_filter
+        self._last_filter_plugins = plugins
+
+        plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
+
         for plugin in self._columnwidget.get_children():
             plugin.delete()
 
-        plugins = await self.plugin_manager.categories[category].get_plugins()
-        plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
         await asyncio.gather(*plugin_names_to_draw)
 
     async def draw_plugin_name(self, plugin):
@@ -1319,9 +1385,9 @@ class PluginManagerWindow(ba.Window):
         else:
             color = (0.5, 0.5, 0.5)
 
-        plugin_to_update = self.plugins_in_current_view.get(plugin.name)
-        if plugin_to_update:
-            ba.textwidget(edit=plugin_to_update,
+        plugin_name_widget_to_update = self.plugins_in_current_view.get(plugin.name)
+        if plugin_name_widget_to_update:
+            ba.textwidget(edit=plugin_name_widget_to_update,
                           color=color)
         else:
             text_widget = ba.textwidget(parent=self._columnwidget,
@@ -1337,6 +1403,8 @@ class PluginManagerWindow(ba.Window):
                                         v_align='center',
                                         maxwidth=420)
             self.plugins_in_current_view[plugin.name] = text_widget
+            # XXX: This seems nicer. Might wanna use this in future.
+            # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
 
     def show_plugin_window(self, plugin):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
@@ -1351,31 +1419,29 @@ class PluginManagerWindow(ba.Window):
         )
 
     async def select_category(self, category):
-        self.selected_category = category
         self.plugins_in_current_view.clear()
         self.draw_category_selection_button(post_label=category)
-        await self.draw_plugin_names(category)
+        await self.draw_plugin_names(category, search_filter=self._last_filter_text)
+        self.selected_category = category
 
     def cleanup(self):
         self.plugin_manager.cleanup()
         for plugin in self._columnwidget.get_children():
             plugin.delete()
         self.plugins_in_current_view.clear()
+        self._last_filter_text = None
+        self._last_filter_plugins = []
 
-    async def _refresh(self):
+    async def refresh(self):
+        play_sound()
+        self.cleanup()
+        ba.textwidget(edit=self._plugin_manager_status_text,
+                      text="Refreshing...")
         await self.plugin_manager.refresh()
         await self.plugin_manager.setup_index()
         ba.textwidget(edit=self._plugin_manager_status_text,
                       text="")
         await self.select_category(self.selected_category)
-
-    def refresh(self):
-        play_sound()
-        self.cleanup()
-        ba.textwidget(edit=self._plugin_manager_status_text,
-                      text="Refreshing...")
-        loop = asyncio.get_event_loop()
-        loop.create_task(self._refresh())
 
     def soft_refresh(self):
         pass
