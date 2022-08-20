@@ -12,6 +12,7 @@ import asyncio
 import re
 import pathlib
 import contextlib
+import hashlib
 import copy
 
 from typing import Union, Optional
@@ -420,15 +421,23 @@ class PluginLocal:
     #         ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["entry_points"].append(entry_point)
 
     async def set_content(self, content):
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self._set_content, content)
-        self._content = content
+        if not self._content:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, self._set_content, content)
+            self._content = content
         return self
 
-    async def set_content_from_network_response(self, request):
-        content = await async_stream_network_response_to_file(request, self.install_path)
-        self._content = content
-        return self
+    async def set_content_from_network_response(self, request, md5sum=None, retries=3):
+        if not self._content:
+            content = await async_stream_network_response_to_file(request, self.install_path)
+            content += b"\n"
+            if md5sum and hashlib.md5(content).hexdigest() != md5sum:
+                if retries <= 0:
+                    # TODO: Raise a more fitting exception.
+                    raise TypeError("md5sum match failed")
+                return await self.set_content_from_network_response(request, md5sum, retries=retries-1)
+            self._content = content
+        return self._content
 
     def save(self):
         ba.app.config.commit()
@@ -456,18 +465,23 @@ class PluginVersion:
     def __repr__(self):
         return f"<PluginVersion({self.plugin.name} {self.number})>"
 
-    async def _download(self):
+    async def _download(self, retries=3):
         local_plugin = self.plugin.create_local()
-        await local_plugin.set_content_from_network_response(self.download_url)
+        await local_plugin.set_content_from_network_response(self.download_url, self.md5sum)
         local_plugin.set_version(self.number)
         local_plugin.save()
         return local_plugin
 
     async def install(self):
-        local_plugin = await self._download()
-        if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
-            await local_plugin.enable()
-        ba.screenmessage("Plugin Installed", color = (0,1,0))
+        try:
+            local_plugin = await self._download()
+        except TypeError:
+            # TODO: Catch MD5ValidationCheckFailed or smth here instead.
+            ba.screenmessage("Got unexpected md5sum", color = (1,0,0))
+        else:
+            if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
+                await local_plugin.enable()
+            ba.screenmessage("Plugin Installed", color = (0,1,0))
 
 
 class Plugin:
