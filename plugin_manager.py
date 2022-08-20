@@ -11,6 +11,7 @@ import sys
 import asyncio
 import re
 import pathlib
+import contextlib
 import copy
 
 from typing import Union, Optional
@@ -1155,23 +1156,28 @@ class PluginManagerWindow(ba.Window):
         ba.app.ui.set_main_menu_window(
             AllSettingsWindow(transition='in_left').get_root_widget())
 
-    async def draw_index(self):
+    @contextlib.contextmanager
+    def exception_handler(self):
         try:
-            self.draw_search_bar()
-            self.draw_plugins_scroll_bar()
-            self.draw_category_selection_button(post_label="All")
-            self.draw_refresh_icon()
-            self.draw_settings_icon()
+            yield
+        except urllib.error.URLError:
+            ba.textwidget(edit=self._plugin_manager_status_text,
+                          text="Make sure you are connected\n to the Internet and try again.")
+        except RuntimeError:
+            # User probably went back before a ba.Window could finish loading.
+            pass
+
+    async def draw_index(self):
+        self.draw_search_bar()
+        self.draw_plugins_scroll_bar()
+        self.draw_category_selection_button(post_label="All")
+        self.draw_refresh_icon()
+        self.draw_settings_icon()
+        with self.exception_handler():
             await self.plugin_manager.setup_index()
             ba.textwidget(edit=self._plugin_manager_status_text,
                           text="")
             await self.select_category("All")
-        except RuntimeError:
-            # User probably went back before the PluginManagerWindow could finish loading.
-            pass
-        except urllib.error.URLError:
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text="Make sure you are connected\n to the Internet and try again.")
 
     def draw_plugins_scroll_bar(self):
         scroll_size_x = (400 if _uiscale is ba.UIScale.SMALL else
@@ -1437,11 +1443,13 @@ class PluginManagerWindow(ba.Window):
         self.cleanup()
         ba.textwidget(edit=self._plugin_manager_status_text,
                       text="Refreshing...")
-        await self.plugin_manager.refresh()
-        await self.plugin_manager.setup_index()
-        ba.textwidget(edit=self._plugin_manager_status_text,
-                      text="")
-        await self.select_category(self.selected_category)
+
+        with self.exception_handler():
+            await self.plugin_manager.refresh()
+            await self.plugin_manager.setup_index()
+            ba.textwidget(edit=self._plugin_manager_status_text,
+                          text="")
+            await self.select_category(self.selected_category)
 
     def soft_refresh(self):
         pass
@@ -1466,7 +1474,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         self._transition_out = 'out_scale'
         transition = 'in_scale'
         button_size = (60 * s, 32 * s)
-        index = await self._plugin_manager.get_index()
+        # index = await self._plugin_manager.get_index()
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
                                                #     'overlay_stack'),
@@ -1535,7 +1543,10 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         ba.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._ok)
 
-        plugin_manager_update_available = await self._plugin_manager.get_update_details()
+        try:
+            plugin_manager_update_available = await self._plugin_manager.get_update_details()
+        except urllib.error.URLError:
+            plugin_manager_update_available = False
         if plugin_manager_update_available:
             text_color = (0.75, 0.2, 0.2)
             loop = asyncio.get_event_loop()
