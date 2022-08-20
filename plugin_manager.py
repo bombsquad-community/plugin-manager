@@ -21,7 +21,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.1"
+PLUGIN_MANAGER_VERSION = "0.1.0"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
@@ -65,9 +65,19 @@ def stream_network_response_to_file(request, file):
     return content
 
 
-async def async_stream_network_response_to_file(request, file):
+async def async_stream_network_response_to_file(request, file, md5sum=None, retries=3):
     loop = asyncio.get_event_loop()
     content = await loop.run_in_executor(None, stream_network_response_to_file, request, file)
+    if md5sum and hashlib.md5(content).hexdigest() != md5sum:
+        if retries <= 0:
+            # TODO: Raise a more fitting exception.
+            raise TypeError("md5sum match failed")
+        return await async_stream_network_response_to_file(
+            request,
+            file,
+            md5sum=md5sum,
+            retries=retries-1,
+        )
     return content
 
 
@@ -427,16 +437,13 @@ class PluginLocal:
             self._content = content
         return self
 
-    async def set_content_from_network_response(self, request, md5sum=None, retries=3):
+    async def set_content_from_network_response(self, request, md5sum=None):
         if not self._content:
-            content = await async_stream_network_response_to_file(request, self.install_path)
-            content += b"\n"
-            if md5sum and hashlib.md5(content).hexdigest() != md5sum:
-                if retries <= 0:
-                    # TODO: Raise a more fitting exception.
-                    raise TypeError("md5sum match failed")
-                return await self.set_content_from_network_response(request, md5sum, retries=retries-1)
-            self._content = content
+            self._content = await async_stream_network_response_to_file(
+                request,
+                self.install_path,
+                md5sum=md5sum,
+            )
         return self._content
 
     def save(self):
@@ -467,7 +474,7 @@ class PluginVersion:
 
     async def _download(self, retries=3):
         local_plugin = self.plugin.create_local()
-        await local_plugin.set_content_from_network_response(self.download_url, self.md5sum)
+        await local_plugin.set_content_from_network_response(self.download_url, md5sum=self.md5sum)
         local_plugin.set_version(self.number)
         local_plugin.save()
         return local_plugin
@@ -877,7 +884,12 @@ class PluginManager:
             content_type="raw",
             tag=tag,
         )
-        await async_stream_network_response_to_file(download_url, self.module_path)
+        response = await async_send_network_request(download_url)
+        content = response.read()
+        if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
+            raise TypeError("md5sum check failed")
+        with open(self.module_path, "wb") as fout:
+            fout.write(content)
         return to_version_info
 
     async def soft_refresh(self):
@@ -1615,11 +1627,16 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         self._ok()
 
     async def update(self, to_version=None, commit_sha=None):
-        await self._plugin_manager.update(to_version, commit_sha)
-        ba.screenmessage("Update successful.", color = (0,1,0))
-        ba.textwidget(edit=self._restart_to_reload_changes_text,
-                      text='Update Applied!\nRestart game to reload changes.')
-        self._update_button.delete()
+        try:
+            await self._plugin_manager.update(to_version, commit_sha)
+        except TypeError:
+            # TODO: Catch a more fitting exception here.
+            ba.screenmessage(f"md5sum check failed", color=(1, 0, 0))
+        else:
+            ba.screenmessage("Update successful.", color = (0,1,0))
+            ba.textwidget(edit=self._restart_to_reload_changes_text,
+                          text='Update Applied!\nRestart game to reload changes.')
+            self._update_button.delete()
 
     def _ok(self) -> None:
         play_sound()
