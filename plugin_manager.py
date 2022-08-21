@@ -21,7 +21,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.0"
+PLUGIN_MANAGER_VERSION = "0.1.1"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
@@ -136,7 +136,15 @@ class StartupTasks:
             ba.screenmessage("Update successful. Restart game to reload changes.", color = (0,1,0))
 
     async def update_plugins(self):
-        pass
+        if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
+            return
+        await self.plugin_manager.setup_index()
+        all_plugins = await self.plugin_manager.categories["All"].get_plugins()
+        plugins_to_update = []
+        for plugin in all_plugins:
+            if await plugin.get_local().is_enabled() and plugin.has_update():
+                plugins_to_update.append(plugin.update())
+        await asyncio.gather(*plugins_to_update)
 
     async def execute(self):
         self.setup_config()
@@ -354,6 +362,7 @@ class PluginLocal:
         scanned_results = set(ba.app.meta.scanresults.exports["ba.GameActivity"])
         for game in scanner.results.exports["ba.GameActivity"]:
             if game not in scanned_results:
+                ba.screenmessage(f"{game} minigame loaded", color=(0,1,0))
                 ba.app.meta.scanresults.exports["ba.GameActivity"].append(game)
 
     def unload_minigames(self):
@@ -365,7 +374,9 @@ class PluginLocal:
         )
         new_scanned_results_games = []
         for game in ba.app.meta.scanresults.exports["ba.GameActivity"]:
-            if game not in scanner.results.exports["ba.GameActivity"]:
+            if game in scanner.results.exports["ba.GameActivity"]:
+                ba.screenmessage(f"{game} minigame unloaded", color=(0,1,0))
+            else:
                 new_scanned_results_games.append(game)
         ba.app.meta.scanresults.exports["ba.GameActivity"] = new_scanned_results_games
 
@@ -398,11 +409,11 @@ class PluginLocal:
             ba.app.config["Plugins"][entry_point]["enabled"] = True
             if entry_point not in ba.app.plugins.active_plugins:
                 self.load_plugin(entry_point)
+                ba.screenmessage(f"{entry_point} loaded", color = (0,1,0))
         if await self.has_minigames():
             self.load_minigames()
         # await self._set_status(to_enable=True)
         self.save()
-        ba.screenmessage("Plugin Enabled", color = (0,1,0))
 
     def load_plugin(self, entry_point):
         plugin_class = ba._general.getclass(entry_point, ba.Plugin)
@@ -413,12 +424,13 @@ class PluginLocal:
     def disable(self):
         for entry_point, plugin_info in ba.app.config["Plugins"].items():
             if entry_point.startswith(self._entry_point_initials):
-                plugin_info["enabled"] = False
+                if plugin_info["enabled"]:
+                    ba.screenmessage(f"{entry_point} unloaded", color = (0,1,0))
+                    plugin_info["enabled"] = False
         # XXX: The below logic is more accurate but less efficient, since it actually
         #      reads the local plugin file and parses entry points from it.
         # await self._set_status(to_enable=False)
         self.save()
-        ba.screenmessage("Plugin Disabled", color = (0,1,0))
 
     def set_version(self, version):
         ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = version
@@ -480,15 +492,10 @@ class PluginVersion:
         return local_plugin
 
     async def install(self):
-        try:
-            local_plugin = await self._download()
-        except TypeError:
-            # TODO: Catch MD5ValidationCheckFailed or smth here instead.
-            ba.screenmessage("Got unexpected md5sum", color = (1,0,0))
-        else:
-            if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
-                await local_plugin.enable()
-            ba.screenmessage("Plugin Installed", color = (0,1,0))
+        local_plugin = await self._download()
+        ba.screenmessage(f"{self.plugin.name} installed", color=(0,1,0))
+        if ba.app.config["Community Plugin Manager"]["Settings"]["Auto Enable Plugins After Installation"]:
+            await local_plugin.enable()
 
 
 class Plugin:
@@ -556,7 +563,7 @@ class Plugin:
 
     def get_local(self):
         if not self.is_installed:
-            raise ValueError("Plugin is not installed")
+            raise ValueError(f"{self.name} is not installed")
         if self._local_plugin is None:
             self._local_plugin = PluginLocal(self.name)
         return self._local_plugin
@@ -569,11 +576,14 @@ class Plugin:
 
     async def uninstall(self):
         await self.get_local().uninstall()
-        ba.screenmessage("Plugin Uninstalled", color = (0,1,0))
+        ba.screenmessage(f"{self.name} uninstalled", color=(0,1,0))
+
+    def has_update(self):
+        return self.get_local().version != self.latest_compatible_version.number
 
     async def update(self):
         await self.latest_compatible_version.install()
-        ba.screenmessage("Plugin Updated", color = (0,1,0))
+        ba.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}", color=(0,1,0))
 
 
 class PluginWindow(popup.PopupWindow):
@@ -659,7 +669,7 @@ class PluginWindow(popup.PopupWindow):
                     button1_action = self.enable
             button2_label = "Uninstall"
             button2_action = self.uninstall
-            has_update = self.local_plugin.version != self.plugin.latest_compatible_version.number
+            has_update = self.plugin.has_update()
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
@@ -812,9 +822,9 @@ class PluginManager:
 
     async def setup_index(self):
         index = await self.get_index()
-        await self._setup_plugin_categories(index)
+        await self.setup_plugin_categories(index)
 
-    async def _setup_plugin_categories(self, plugin_index):
+    async def setup_plugin_categories(self, plugin_index):
         # A hack to have the "All" category show at the top.
         self.categories["All"] = None
 
