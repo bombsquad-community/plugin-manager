@@ -424,9 +424,8 @@ class PluginLocal:
     def disable(self):
         for entry_point, plugin_info in ba.app.config["Plugins"].items():
             if entry_point.startswith(self._entry_point_initials):
-                if plugin_info["enabled"]:
-                    ba.screenmessage(f"{entry_point} unloaded", color = (0,1,0))
-                    plugin_info["enabled"] = False
+                # if plugin_info["enabled"]:
+                plugin_info["enabled"] = False
         # XXX: The below logic is more accurate but less efficient, since it actually
         #      reads the local plugin file and parses entry points from it.
         # await self._set_status(to_enable=False)
