@@ -719,8 +719,8 @@ class PluginWindow(popup.PopupWindow):
                       110 if _uiscale is ba.UIScale.MEDIUM else 120)
         open_button = ba.buttonwidget(parent=self._root_widget,
                                             autoselect=True,
-                                            position=(open_pos_x, open_pos_y),
-                                            size=(40, 40),
+                                            position=(open_pos_x-7.5, open_pos_y-15),
+                                            size=(55, 55),
                                             button_type="square",
                                             label="",
                                             on_activate_call=lambda: ba.open_url(self.plugin.view_url))
@@ -728,8 +728,13 @@ class PluginWindow(popup.PopupWindow):
                        position=(open_pos_x, open_pos_y),
                        size=(40, 40),
                        color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("upButton"),
+                       texture=ba.gettexture("file"),
                        draw_controller=open_button)
+        ba.textwidget(parent=self._root_widget,
+                      position=(open_pos_x, open_pos_y-6),
+                      text="Source",
+                      size=(10, 10),
+                      scale=0.5)
 
         if to_draw_button4:
             settings_pos_x = (0 if _uiscale is ba.UIScale.SMALL else
