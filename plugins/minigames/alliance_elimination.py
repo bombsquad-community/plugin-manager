@@ -14,7 +14,7 @@ from bastd.actor.spazfactory import SpazFactory
 from bastd.actor.scoreboard import Scoreboard
 
 if TYPE_CHECKING:
-    from typing import (Any, Tuple, Dict, Type, List, Sequence, Optional,
+    from typing import (Any, Tuple, Type, List, Sequence, Optional,
                         Union)
 
 

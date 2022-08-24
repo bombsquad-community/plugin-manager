@@ -1,7 +1,6 @@
 # ba_meta require api 7
 import ba
 import _ba
-import bastd
 from bastd.ui import popup
 
 import urllib.request
@@ -24,9 +23,9 @@ _uiscale = ba.app.ui.uiscale
 PLUGIN_MANAGER_VERSION = "0.1.1"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
-# XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on Android currently (v1.7.6)
-#      and won't open the actual URL in a web-browser. Let's fallback to http for now until this
-#      gets resolved.
+# XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
+#      Android currently (v1.7.6) and won't open the actual URL in a web-browser.
+#      Let's fallback to http for now until this gets resolved.
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
@@ -34,8 +33,8 @@ HEADERS = {
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
-    "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\("),
-    "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\("),
+    "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
+    "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
 }
 
 _CACHE = {}
@@ -96,8 +95,9 @@ class StartupTasks:
         self.plugin_manager = PluginManager()
 
     def setup_config(self):
-        is_config_updated = False
-        existing_plugin_manager_config = copy.deepcopy(ba.app.config.get("Community Plugin Manager"))
+        # is_config_updated = False
+        existing_plugin_manager_config = copy.deepcopy(
+                                            ba.app.config.get("Community Plugin Manager"))
 
         plugin_manager_config = ba.app.config.setdefault("Community Plugin Manager", {})
         plugin_manager_config.setdefault("Custom Sources", [])
@@ -133,7 +133,8 @@ class StartupTasks:
             to_version, commit_sha = update_details
             ba.screenmessage(f"Plugin Manager is being updated to version v{to_version}.")
             await self.plugin_manager.update(to_version, commit_sha)
-            ba.screenmessage("Update successful. Restart game to reload changes.", color = (0,1,0))
+            ba.screenmessage("Update successful. Restart game to reload changes.",
+                             color=(0, 1, 0))
 
     async def update_plugins(self):
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
@@ -362,7 +363,7 @@ class PluginLocal:
         scanned_results = set(ba.app.meta.scanresults.exports["ba.GameActivity"])
         for game in scanner.results.exports["ba.GameActivity"]:
             if game not in scanned_results:
-                ba.screenmessage(f"{game} minigame loaded", color=(0,1,0))
+                ba.screenmessage(f"{game} minigame loaded", color=(0, 1, 0))
                 ba.app.meta.scanresults.exports["ba.GameActivity"].append(game)
 
     def unload_minigames(self):
@@ -375,7 +376,7 @@ class PluginLocal:
         new_scanned_results_games = []
         for game in ba.app.meta.scanresults.exports["ba.GameActivity"]:
             if game in scanner.results.exports["ba.GameActivity"]:
-                ba.screenmessage(f"{game} minigame unloaded", color=(0,1,0))
+                ba.screenmessage(f"{game} minigame unloaded", color=(0, 1, 0))
             else:
                 new_scanned_results_games.append(game)
         ba.app.meta.scanresults.exports["ba.GameActivity"] = new_scanned_results_games
@@ -409,7 +410,7 @@ class PluginLocal:
             ba.app.config["Plugins"][entry_point]["enabled"] = True
             if entry_point not in ba.app.plugins.active_plugins:
                 self.load_plugin(entry_point)
-                ba.screenmessage(f"{entry_point} loaded", color = (0,1,0))
+                ba.screenmessage(f"{entry_point} loaded", color=(0, 1, 0))
         if await self.has_minigames():
             self.load_minigames()
         # await self._set_status(to_enable=True)
@@ -925,7 +926,7 @@ class PluginSourcesWindow(popup.PopupWindow):
         self.scale_origin = origin_widget.get_screen_space_center()
 
         b_textcolor = (0.75, 0.7, 0.8)
-        s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
+        # s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
         # text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
