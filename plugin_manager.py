@@ -1884,7 +1884,7 @@ class NewAllSettingsWindow(ba.Window):
                                                     button_type="square",
                                                     label="",
                                                     on_activate_call=self._do_modmanager)
-        _b_title(x_offs6, v, avb, ba.Lstr(value="Plugin Manager"))
+        _b_title(x_offs6, v, mmb, ba.Lstr(value="Plugin Manager"))
         imgw = imgh = 120
         ba.imagewidget(parent=self._root_widget,
                        position=(x_offs6 + basew * 0.49 - imgw * 0.5 + 5,
