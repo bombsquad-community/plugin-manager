@@ -40,6 +40,18 @@ REGEXP = {
 _CACHE = {}
 
 
+class MD5CheckSumFailedError(Exception):
+    pass
+
+
+class PluginNotInstalledError(Exception):
+    pass
+
+
+class CategoryDoesNotExistError(Exception):
+    pass
+
+
 def send_network_request(request):
     return urllib.request.urlopen(request)
 
@@ -63,8 +75,7 @@ def stream_network_response_to_file(request, file, md5sum=None, retries=3):
             content += chunk
     if md5sum and hashlib.md5(content).hexdigest() != md5sum:
         if retries <= 0:
-            # TODO: Raise a more fitting exception.
-            raise TypeError("MD5 checksum match failed. Please raise an issue on GitHub.")
+            raise MD5CheckSumFailedError("MD5 checksum match failed.")
         return stream_network_response_to_file(
             request,
             file,
@@ -138,7 +149,7 @@ class StartupTasks:
         update_details = await self.plugin_manager.get_update_details()
         if update_details:
             to_version, commit_sha = update_details
-            ba.screenmessage(f"Plugin Manager is being updated to version v{to_version}.")
+            ba.screenmessage(f"Plugin Manager is being updated to version v{to_version}")
             await self.plugin_manager.update(to_version, commit_sha)
             ba.screenmessage("Update successful. Restart game to reload changes.",
                              color=(0, 1, 0))
@@ -333,8 +344,7 @@ class PluginLocal:
     async def get_content(self):
         if self._content is None:
             if not self.is_installed:
-                # TODO: Raise a more fitting exception.
-                raise TypeError("Plugin is not available locally.")
+                raise PluginNotInstalledError("Plugin is not available locally.")
             loop = asyncio.get_event_loop()
             self._content = await loop.run_in_executor(None, self._get_content)
         return self._content
@@ -511,7 +521,7 @@ class PluginVersion:
     async def install(self, suppress_screenmessage=False):
         try:
             local_plugin = await self._download()
-        except TypeError:
+        except MD5CheckSumFailedError:
             if not suppress_screenmessage:
                 ba.screenmessage(f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
             return False
@@ -589,7 +599,7 @@ class Plugin:
 
     def get_local(self):
         if not self.is_installed:
-            raise ValueError(f"{self.name} is not installed")
+            raise PluginNotInstalledError(f"{self.name} needs to be installed to get its local plugin.")
         if self._local_plugin is None:
             self._local_plugin = PluginLocal(self.name)
         return self._local_plugin
@@ -934,7 +944,7 @@ class PluginManager:
         response = await async_send_network_request(download_url)
         content = response.read()
         if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
-            raise TypeError("md5sum check failed")
+            raise MD5CheckSumFailedError("MD5 checksum failed during plugin manager update.")
         with open(self.module_path, "wb") as fout:
             fout.write(content)
         return to_version_info
@@ -1100,12 +1110,14 @@ class PluginSourcesWindow(popup.PopupWindow):
     def delete_selected_source(self):
         try:
             ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
+        except ValueError:
+            # ba.screenmessage("No plugin source selected to delete.", color=(1, 0, 0))
+            pass
+        else:
             ba.app.config.commit()
             ba.screenmessage("Plugin source deleted, refresh plugin list to see changes",
                              color=(0, 1, 0))
             self.draw_sources()
-        except Exception:
-            ba.screenmessage("No Plugin Selected to Delete", color=(1, 0, 0))
 
     def _ok(self) -> None:
         play_sound()
@@ -1354,9 +1366,7 @@ class PluginManagerWindow(ba.Window):
                 continue
             try:
                 await self.draw_plugin_names(self.selected_category, search_filter=filter_text)
-            except (KeyError, AttributeError):
-                # TODO: Raise a more fitting exception here. Selected category doesn't exist, such
-                #       as the case where refresh button has been tapped on.
+            except CategoryDoesNotExistError:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
             # attributes like color, position and more.
@@ -1431,7 +1441,10 @@ class PluginManagerWindow(ba.Window):
         if not to_draw_plugin_names:
             return
 
-        category_plugins = await self.plugin_manager.categories[category].get_plugins()
+        try:
+            category_plugins = await self.plugin_manager.categories[category].get_plugins()
+        except (KeyError, AttributeError):
+            raise CategoryDoesNotExistError(f"{category} does not exist.")
 
         if search_filter:
             plugins = []
@@ -1688,11 +1701,10 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
     async def update(self, to_version=None, commit_sha=None):
         try:
             await self._plugin_manager.update(to_version, commit_sha)
-        except TypeError:
-            # TODO: Catch a more fitting exception here.
-            ba.screenmessage("md5sum check failed", color=(1, 0, 0))
+        except MD5CheckSumFailedError:
+            ba.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
         else:
-            ba.screenmessage("Update successful.", color=(0, 1, 0))
+            ba.screenmessage("Plugin manager update successful", color=(0, 1, 0))
             ba.textwidget(edit=self._restart_to_reload_changes_text,
                           text='Update Applied!\nRestart game to reload changes.')
             self._update_button.delete()
