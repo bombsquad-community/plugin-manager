@@ -50,7 +50,7 @@ async def async_send_network_request(request):
     return response
 
 
-def stream_network_response_to_file(request, file):
+def stream_network_response_to_file(request, file, md5sum=None, retries=3):
     response = urllib.request.urlopen(request)
     chunk_size = 16 * 1024
     content = b""
@@ -61,22 +61,29 @@ def stream_network_response_to_file(request, file):
                 break
             fout.write(chunk)
             content += chunk
-    return content
-
-
-async def async_stream_network_response_to_file(request, file, md5sum=None, retries=3):
-    loop = asyncio.get_event_loop()
-    content = await loop.run_in_executor(None, stream_network_response_to_file, request, file)
     if md5sum and hashlib.md5(content).hexdigest() != md5sum:
         if retries <= 0:
             # TODO: Raise a more fitting exception.
-            raise TypeError("md5sum match failed")
-        return await async_stream_network_response_to_file(
+            raise TypeError("MD5 checksum match failed. Please raise an issue on GitHub.")
+        return stream_network_response_to_file(
             request,
             file,
             md5sum=md5sum,
             retries=retries-1,
         )
+    return content
+
+
+async def async_stream_network_response_to_file(request, file, md5sum=None, retries=3):
+    loop = asyncio.get_event_loop()
+    content = await loop.run_in_executor(
+        None,
+        stream_network_response_to_file,
+        request,
+        file,
+        md5sum,
+        retries,
+    )
     return content
 
 
@@ -453,12 +460,13 @@ class PluginLocal:
             self._content = content
         return self
 
-    async def set_content_from_network_response(self, request, md5sum=None):
+    async def set_content_from_network_response(self, request, md5sum=None, retries=3):
         if not self._content:
             self._content = await async_stream_network_response_to_file(
                 request,
                 self.install_path,
                 md5sum=md5sum,
+                retries=retries,
             )
         return self._content
 
@@ -491,17 +499,29 @@ class PluginVersion:
 
     async def _download(self, retries=3):
         local_plugin = self.plugin.create_local()
-        await local_plugin.set_content_from_network_response(self.download_url, md5sum=self.md5sum)
+        await local_plugin.set_content_from_network_response(
+            self.download_url,
+            md5sum=self.md5sum,
+            retries=retries,
+        )
         local_plugin.set_version(self.number)
         local_plugin.save()
         return local_plugin
 
-    async def install(self):
-        local_plugin = await self._download()
-        ba.screenmessage(f"{self.plugin.name} installed", color=(0, 1, 0))
-        check = ba.app.config["Community Plugin Manager"]["Settings"]
-        if check["Auto Enable Plugins After Installation"]:
-            await local_plugin.enable()
+    async def install(self, suppress_screenmessage=False):
+        try:
+            local_plugin = await self._download()
+        except TypeError:
+            if not suppress_screenmessage:
+                ba.screenmessage(f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
+            return False
+        else:
+            if not suppress_screenmessage:
+                ba.screenmessage(f"{self.plugin.name} installed", color=(0, 1, 0))
+            check = ba.app.config["Community Plugin Manager"]["Settings"]
+            if check["Auto Enable Plugins After Installation"]:
+                await local_plugin.enable()
+            return True
 
 
 class Plugin:
@@ -588,9 +608,13 @@ class Plugin:
         return self.get_local().version != self.latest_compatible_version.number
 
     async def update(self):
-        await self.latest_compatible_version.install()
-        ba.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}",
-                         color=(0, 1, 0))
+        if await self.latest_compatible_version.install(suppress_screenmessage=True):
+            ba.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}",
+                             color=(0, 1, 0))
+        else:
+            ba.screenmessage(f"{self.name} failed MD5 checksum while updating to "
+                             f"{self.latest_compatible_version.number}",
+                             color=(1, 0, 0))
 
 
 class PluginWindow(popup.PopupWindow):
