@@ -68,7 +68,9 @@
          "0.0.1": {
            "api_version": 7,
            "commit_sha": "776fc174",
-           "dependencies": ["colorscheme"],
+           "dependencies": [
+             "colorscheme"
+           ],
            "released_on": "26-08-2022",
            "md5sum": "4243b4208fc10fa0de17241e6f51188a"
         }

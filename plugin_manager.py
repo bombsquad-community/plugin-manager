@@ -84,6 +84,12 @@ def play_sound():
     ba.playsound(ba.getsound('swish'))
 
 
+def plugin_category_url_from_repository(repository):
+    plugin_category_url = partial_format(_CACHE["index"]["external_source_url"],
+                                         repository=repository)
+    return plugin_category_url
+
+
 def partial_format(string_template, **kwargs):
     for key, value in kwargs.items():
         string_template = string_template.replace("{" + key + "}", value)
@@ -140,11 +146,13 @@ class StartupTasks:
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
             return
         await self.plugin_manager.setup_index()
-        all_plugins = await self.plugin_manager.categories["All"].get_plugins()
+        all_plugins = (await self.plugin_manager.categories["All"].get_plugins()).values()
         plugins_to_update = []
         for plugin in all_plugins:
-            if plugin.is_installed and await plugin.get_local().is_enabled() and plugin.has_update():
-                plugins_to_update.append(plugin.update())
+            if plugin.is_installed:
+                local_plugin = await plugin.get_local()
+                if await local_plugin.is_enabled() and await plugin.has_update():
+                    plugins_to_update.append(plugin.update())
         await asyncio.gather(*plugins_to_update)
 
     async def execute(self):
@@ -206,14 +214,14 @@ class Category:
     async def get_plugins(self):
         if self._plugins is None:
             await self.fetch_metadata()
-            self._plugins = ([
-                Plugin(
+            self._plugins = {
+                plugin_info[0]: Plugin(
                     plugin_info,
                     f"{await self.get_plugins_base_url()}/{plugin_info[0]}.py",
                     is_3rd_party=self.is_3rd_party,
                 )
                 for plugin_info in self._metadata["plugins"].items()
-            ])
+            }
             self.set_category_global_cache("plugins", self._plugins)
         return self._plugins
 
@@ -267,6 +275,8 @@ class PluginLocal:
         self._api_version = None
         self._entry_points = []
         self._has_minigames = None
+        self._resolved_dependants = None
+        self.dependencies = []
 
     @property
     def is_installed(self):
@@ -281,7 +291,25 @@ class PluginLocal:
             ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name] = {}
         return self
 
+    async def resolve_dependants(self):
+        if self._resolved_dependants is None:
+            self._resolved_dependants = {}
+            for plugin_category_url in _CACHE["index"]["categories"]:
+                category = Category(plugin_category_url)
+                plugins = await category.get_plugins()
+                for plugin_name, plugin in plugins.items():
+                    if plugin.is_installed:
+                        local_plugin = await plugin.get_local()
+                        installed_plugin_version = plugin.versions[local_plugin.version]
+                        if self.name in installed_plugin_version.dependencies:
+                            self._resolved_dependants[plugin_name] = plugin
+        return self._resolved_dependants
+
     async def uninstall(self):
+        dependants = await self.resolve_dependants()
+        dependants_to_uninstall = tuple(dependant.uninstall() for dependant in dependants.values())
+        await asyncio.gather(*dependants_to_uninstall)
+
         if await self.has_minigames():
             self.unload_minigames()
         try:
@@ -404,6 +432,16 @@ class PluginLocal:
     #         ba.app.config["Plugins"][entry_point]["enabled"] = to_enable
 
     async def enable(self):
+        local_dependencies = await asyncio.gather(
+            *tuple(dependency.get_local() for dependency in self.dependencies.values()),
+            return_exceptions=True,
+        )
+        dependencies_to_enable = []
+        for dependency in local_dependencies:
+            if isinstance(dependency, ValueError):
+                raise ValueError(f"plugin needs reinstallation due to missing dependencies")
+            dependencies_to_enable.append(dependency.enable())
+        await asyncio.gather(*dependencies_to_enable)
         for entry_point in await self.get_entry_points():
             if entry_point not in ba.app.config["Plugins"]:
                 ba.app.config["Plugins"][entry_point] = {}
@@ -422,7 +460,15 @@ class PluginLocal:
         loaded_plugin_class.on_app_running()
         ba.app.plugins.active_plugins[entry_point] = loaded_plugin_class
 
-    def disable(self):
+    async def disable(self):
+        dependants = await self.resolve_dependants()
+        local_dependants = await asyncio.gather(
+            *tuple(dependant.get_local() for dependant in dependants.values())
+        )
+        await asyncio.gather(
+            *tuple(dependant.disable() for dependant in local_dependants)
+        )
+
         for entry_point, plugin_info in ba.app.config["Plugins"].items():
             if entry_point.startswith(self._entry_point_initials):
                 # if plugin_info["enabled"]:
@@ -453,6 +499,10 @@ class PluginLocal:
             self._content = content
         return self
 
+    def set_dependencies(self, dependencies):
+        self.dependencies = dependencies
+        return self
+
     async def set_content_from_network_response(self, request, md5sum=None):
         if not self._content:
             self._content = await async_stream_network_response_to_file(
@@ -469,12 +519,13 @@ class PluginLocal:
 
 class PluginVersion:
     def __init__(self, plugin, version, tag=None):
-        self.number, info = version
+        self.number, self.info = version
         self.plugin = plugin
-        self.api_version = info["api_version"]
-        self.commit_sha = info["commit_sha"]
-        self.dependencies = info["dependencies"]
-        self.md5sum = info["md5sum"]
+        self.api_version = self.info["api_version"]
+        self.commit_sha = self.info["commit_sha"]
+        self.md5sum = self.info["md5sum"]
+        self._resolved_dependencies = None
+        self.dependencies = self.info["dependencies"]
 
         if tag is None:
             tag = self.commit_sha
@@ -489,19 +540,49 @@ class PluginVersion:
     def __repr__(self):
         return f"<PluginVersion({self.plugin.name} {self.number})>"
 
-    async def _download(self, retries=3):
+    async def resolve_dependencies(self):
+        if self._resolved_dependencies is None:
+            self._resolved_dependencies = {}
+            for dependency in self.info["dependencies"]:
+                for plugin_category_url in _CACHE["index"]["categories"]:
+                    category = Category(plugin_category_url)
+                    plugins = await category.get_plugins()
+                    plugin = plugins.get(dependency)
+                    if plugin:
+                        break
+                self._resolved_dependencies[dependency] = plugin
+        return self._resolved_dependencies
+
+    async def _download(self, dependencies=[], retries=3):
         local_plugin = self.plugin.create_local()
         await local_plugin.set_content_from_network_response(self.download_url, md5sum=self.md5sum)
         local_plugin.set_version(self.number)
         local_plugin.save()
+        local_plugin.set_dependencies(await self.resolve_dependencies())
         return local_plugin
 
     async def install(self):
+        dependencies_to_install = []
+        for dependency in (await self.resolve_dependencies()).values():
+            try:
+                local_plugin = await dependency.get_local()
+            except ValueError:
+                # Dependency isn't installed.
+                dependencies_to_install.append(dependency.latest_compatible_version.install())
+            else:
+                if local_plugin.version != dependency.latest_compatible_version.number:
+                    # This dependency is already installed but out-of-date. Use this chance
+                    # to update it.
+                    dependencies_to_install.append(depenedency.latest_compatible_version.update())
+        await asyncio.gather(*dependencies_to_install)
         local_plugin = await self._download()
         ba.screenmessage(f"{self.plugin.name} installed", color=(0, 1, 0))
-        check = ba.app.config["Community Plugin Manager"]["Settings"]
-        if check["Auto Enable Plugins After Installation"]:
+        settings = ba.app.config["Community Plugin Manager"]["Settings"]
+        if settings["Auto Enable Plugins After Installation"]:
             await local_plugin.enable()
+            for dependency in (await self.resolve_dependencies()).values():
+                local_plugin = await dependency.get_local()
+                await local_plugin.enable()
 
 
 class Plugin:
@@ -536,12 +617,12 @@ class Plugin:
     @property
     def versions(self):
         if self._versions is None:
-            self._versions = [
-                PluginVersion(
+            self._versions = {
+                version[0]: PluginVersion(
                     self,
                     version,
                 ) for version in self.info["versions"].items()
-            ]
+            }
         return self._versions
 
     @property
@@ -567,11 +648,14 @@ class Plugin:
                     break
         return self._latest_compatible_version
 
-    def get_local(self):
+    async def get_local(self):
         if not self.is_installed:
             raise ValueError(f"{self.name} is not installed")
         if self._local_plugin is None:
-            self._local_plugin = PluginLocal(self.name)
+            local_plugin = PluginLocal(self.name)
+            dependencies = await self.versions[local_plugin.version].resolve_dependencies()
+            local_plugin.set_dependencies(dependencies)
+            self._local_plugin = local_plugin
         return self._local_plugin
 
     def create_local(self):
@@ -581,11 +665,13 @@ class Plugin:
         )
 
     async def uninstall(self):
-        await self.get_local().uninstall()
+        local_plugin = await self.get_local()
+        await local_plugin.uninstall()
         ba.screenmessage(f"{self.name} uninstalled", color=(0, 1, 0))
 
-    def has_update(self):
-        return self.get_local().version != self.latest_compatible_version.number
+    async def has_update(self):
+        local_plugin = await self.get_local()
+        return local_plugin.version != self.latest_compatible_version.number
 
     async def update(self):
         await self.latest_compatible_version.install()
@@ -593,13 +679,32 @@ class Plugin:
                          color=(0, 1, 0))
 
 
+class PluginDependenciesWindow(popup.PopupMenuWindow):
+    def __init__(self, choices, origin_widget):
+        self.scale_origin = origin_widget.get_screen_space_center()
+        super().__init__(
+            position=(200, 0),
+            scale=(2.3 if _uiscale is ba.UIScale.SMALL else
+                   1.65 if _uiscale is ba.UIScale.MEDIUM else 1.23),
+            choices=choices,
+            current_choice=None,
+            delegate=self)
+
+    def popup_menu_selected_choice(self, window, choice):
+        pass
+
+    def popup_menu_closing(self, window):
+        pass
+
+
 class PluginWindow(popup.PopupWindow):
-    def __init__(self, plugin, origin_widget, button_callback=lambda: None):
+    def __init__(self, plugin, origin_widget, refresh_plugin_ui_field_async_cb=lambda: None):
         self.plugin = plugin
-        self.button_callback = button_callback
+        self.refresh_plugin_ui_field_async_cb = refresh_plugin_ui_field_async_cb
         self.scale_origin = origin_widget.get_screen_space_center()
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
+        self.plugins_ui_to_refresh = [plugin]
 
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
@@ -662,7 +767,7 @@ class PluginWindow(popup.PopupWindow):
         to_draw_button1 = True
         to_draw_button4 = False
         if self.plugin.is_installed:
-            self.local_plugin = self.plugin.get_local()
+            self.local_plugin = await self.plugin.get_local()
             if await self.local_plugin.has_minigames():
                 to_draw_button1 = False
             else:
@@ -676,7 +781,7 @@ class PluginWindow(popup.PopupWindow):
                     button1_action = self.enable
             button2_label = "Uninstall"
             button2_action = self.uninstall
-            has_update = self.plugin.has_update()
+            has_update = await self.plugin.has_update()
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
@@ -718,8 +823,24 @@ class PluginWindow(popup.PopupWindow):
                                 button_type='square',
                                 text_scale=1,
                                 label=button3_label)
-        ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._ok)
+
+        plugin_dependencies = self.plugin.latest_compatible_version.dependencies
+        if plugin_dependencies:
+            dependencies_text = "dependency" if len(plugin_dependencies) == 1 else "dependencies"
+            dependencies_pos_x = (300 if _uiscale is ba.UIScale.SMALL else
+                          360 if _uiscale is ba.UIScale.MEDIUM else 190)
+            dependencies_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
+                          110 if _uiscale is ba.UIScale.MEDIUM else 125)
+            dependencies_button = ba.buttonwidget(parent=self._root_widget,
+                                          autoselect=True,
+                                          position=(dependencies_pos_x-7.5, dependencies_pos_y-15),
+                                          size=(95, 30),
+                                          button_type="square",
+                                          label=f"{len(plugin_dependencies)} {dependencies_text}",
+                                          on_activate_call=lambda: PluginDependenciesWindow(
+                                              plugin_dependencies,
+                                              self._root_widget,
+                                          ))
 
         open_pos_x = (300 if _uiscale is ba.UIScale.SMALL else
                       360 if _uiscale is ba.UIScale.MEDIUM else 350)
@@ -763,6 +884,8 @@ class PluginWindow(popup.PopupWindow):
                            texture=ba.gettexture("settingsIcon"),
                            draw_controller=settings_button)
 
+        ba.containerwidget(edit=self._root_widget,
+                           on_cancel_call=self._ok)
         # ba.containerwidget(edit=self._root_widget, selected_child=button3)
         # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
@@ -773,16 +896,16 @@ class PluginWindow(popup.PopupWindow):
     def button(fn):
         async def asyncio_handler(fn, self, *args, **kwargs):
             await fn(self, *args, **kwargs)
-            await self.button_callback()
+            to_refresh = tuple(
+                self.refresh_plugin_ui_field_async_cb(plugin)
+                for plugin in self.plugins_ui_to_refresh
+            )
+            await asyncio.gather(*to_refresh)
 
         def wrapper(self, *args, **kwargs):
             self._ok()
             loop = asyncio.get_event_loop()
-            if asyncio.iscoroutinefunction(fn):
-                loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
-            else:
-                fn(self, *args, **kwargs)
-                loop.create_task(self.button_callback())
+            loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
 
         return wrapper
 
@@ -790,20 +913,33 @@ class PluginWindow(popup.PopupWindow):
         self.local_plugin.launch_settings()
 
     @button
-    def disable(self) -> None:
-        self.local_plugin.disable()
+    async def disable(self) -> None:
+        self.plugins_ui_to_refresh.extend(await self.local_plugin.resolve_dependants())
+        await self.local_plugin.disable()
 
     @button
     async def enable(self) -> None:
-        await self.local_plugin.enable()
+        try:
+            self.plugins_ui_to_refresh.extend(await self.plugin.resolve_dependencies())
+            await self.local_plugin.enable()
+        except ValueError as e:
+            # A dependant plugin is not installed
+            ba.screenmessage(str(e), color=(1,0,0))
 
     @button
     async def install(self):
+        self.plugins_ui_to_refresh.extend(
+            await self.plugin.latest_compatible_version.resolve_dependencies()
+        )
         await self.plugin.latest_compatible_version.install()
 
     @button
     async def uninstall(self):
-        await self.plugin.uninstall()
+        try:
+            self.plugins_ui_to_refresh.extend(await self.local_plugin.resolve_dependants())
+            await self.plugin.uninstall()
+        except ValueError as e:
+            ba.screenmessage(str(e), color=(1,0,0))
 
     @button
     async def update(self):
@@ -846,17 +982,16 @@ class PluginManager:
             request = category.fetch_metadata()
             requests.append(request)
         for repository in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
-            plugin_category_url = partial_format(plugin_index["external_source_url"],
-                                                 repository=repository)
+            plugin_category_url = plugin_category_url_from_repository(repository)
             category = Category(plugin_category_url, is_3rd_party=True)
             request = category.fetch_metadata()
             requests.append(request)
         categories = await asyncio.gather(*requests)
 
-        all_plugins = []
+        all_plugins = {}
         for category in categories:
             self.categories[await category.get_name()] = category
-            all_plugins.extend(await category.get_plugins())
+            all_plugins.update(await category.get_plugins())
         self.categories["All"] = CategoryAll(plugins=all_plugins)
 
     def cleanup(self):
@@ -1407,7 +1542,7 @@ class PluginManagerWindow(ba.Window):
         if not to_draw_plugin_names:
             return
 
-        category_plugins = await self.plugin_manager.categories[category].get_plugins()
+        category_plugins = (await self.plugin_manager.categories[category].get_plugins()).values()
 
         if search_filter:
             plugins = []
@@ -1432,7 +1567,7 @@ class PluginManagerWindow(ba.Window):
 
     async def draw_plugin_name(self, plugin):
         if plugin.is_installed:
-            local_plugin = plugin.get_local()
+            local_plugin = await plugin.get_local()
             if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
@@ -1467,7 +1602,7 @@ class PluginManagerWindow(ba.Window):
             # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
 
     def show_plugin_window(self, plugin):
-        PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
+        PluginWindow(plugin, self._root_widget, lambda plugin: self.draw_plugin_name(plugin))
 
     def show_categories_window(self):
         play_sound()
