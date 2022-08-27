@@ -143,7 +143,7 @@ class StartupTasks:
         all_plugins = await self.plugin_manager.categories["All"].get_plugins()
         plugins_to_update = []
         for plugin in all_plugins:
-            if await plugin.get_local().is_enabled() and plugin.has_update():
+            if plugin.is_installed and await plugin.get_local().is_enabled() and plugin.has_update():
                 plugins_to_update.append(plugin.update())
         await asyncio.gather(*plugins_to_update)
 
