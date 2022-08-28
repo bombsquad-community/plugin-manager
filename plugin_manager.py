@@ -52,6 +52,10 @@ class CategoryDoesNotExistError(Exception):
     pass
 
 
+class NoCompatibleVersionError(Exception):
+    pass
+
+
 def send_network_request(request):
     return urllib.request.urlopen(request)
 
@@ -594,6 +598,10 @@ class Plugin:
                         CURRENT_TAG if self.latest_version.number == number else None
                     )
                     break
+        if self._latest_compatible_version is None:
+            raise NoCompatibleVersionError(
+                f"{self.name} has no version compatible with API {ba.app.api_version}."
+            )
         return self._latest_compatible_version
 
     def get_local(self):
@@ -614,7 +622,12 @@ class Plugin:
         ba.screenmessage(f"{self.name} uninstalled", color=(0, 1, 0))
 
     def has_update(self):
-        return self.get_local().version != self.latest_compatible_version.number
+        try:
+            latest_compatible_version = self.latest_compatible_version
+        except NoCompatibleVersionError:
+            return False
+        else:
+            return self.get_local().version != latest_compatible_version.number
 
     async def update(self):
         if await self.latest_compatible_version.install(suppress_screenmessage=True):
@@ -1467,12 +1480,18 @@ class PluginManagerWindow(ba.Window):
         await asyncio.gather(*plugin_names_to_draw)
 
     async def draw_plugin_name(self, plugin):
+        try:
+            latest_compatible_version = plugin.latest_compatible_version
+        except NoCompatibleVersionError:
+            # We currently don't show plugins that have no compatible versions.
+            return
+
         if plugin.is_installed:
             local_plugin = plugin.get_local()
             if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
-                elif local_plugin.version == plugin.latest_compatible_version.number:
+                elif local_plugin.version == latest_compatible_version.number:
                     color = (0, 1, 0)
                 else:
                     color = (1, 0.6, 0)
