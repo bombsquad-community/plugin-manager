@@ -6,7 +6,7 @@
 # Settings -> Advanced -> Enter Code
 # to bring up the colorscheme UI.
 
-# ba_meta require api 7
+# ba_meta require api 6
 import _ba
 import ba
 
@@ -139,7 +139,7 @@ class ColorSchemeWindow(ba.Window):
 
         # A hack to let players select any RGB color value through the UI,
         # otherwise this is limited only to pro accounts.
-        ba.app.accounts_v1.have_pro = lambda: True
+        ba.app.accounts.have_pro = lambda: True
 
         self.draw_ui()
 
@@ -291,7 +291,7 @@ class ColorSchemeWindow(ba.Window):
             colorscheme = ColorScheme(self._last_color, self._last_highlight)
             colorscheme.apply()
         # Good idea to revert this back now so we do not break anything else.
-        ba.app.accounts_v1.have_pro = original_have_pro
+        ba.app.accounts.have_pro = original_have_pro
         ba.containerwidget(edit=self._root_widget, transition="out_right")
 
     def reset(self, transition_out=True):
@@ -299,7 +299,7 @@ class ColorSchemeWindow(ba.Window):
             ba.playsound(ba.getsound("gunCocking"))
         ba.app.config["ColorScheme"] = (None, None)
         # Good idea to revert this back now so we do not break anything else.
-        ba.app.accounts_v1.have_pro = original_have_pro
+        ba.app.accounts.have_pro = original_have_pro
         ba.app.config.commit()
         ba.containerwidget(edit=self._root_widget, transition="out_right")
 
@@ -312,7 +312,7 @@ class ColorSchemeWindow(ba.Window):
         )
         colorscheme.apply()
         # Good idea to revert this back now so we do not break anything else.
-        ba.app.accounts_v1.have_pro = original_have_pro
+        ba.app.accounts.have_pro = original_have_pro
         ba.app.config["ColorScheme"] = (
             self._color or self._default_colors[0],
             self._highlight or self._default_colors[1],
@@ -381,7 +381,7 @@ def launch_colorscheme_selection_window():
     # has pro-unlocked or not if our plugin runs before the dedicated
     # pro-unlocker plugin has been applied.
     global original_have_pro
-    original_have_pro = ba.app.accounts_v1.have_pro
+    original_have_pro = ba.app.accounts.have_pro
 
     ColorSchemeWindow()
 
