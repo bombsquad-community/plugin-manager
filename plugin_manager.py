@@ -552,7 +552,6 @@ class Plugin:
         tag = CURRENT_TAG
         self.url = url
         self.download_url = url.format(content_type="raw", tag=tag)
-        self.view_url = url.format(content_type="blob", tag=tag)
         self._local_plugin = None
 
         self._versions = None
@@ -561,6 +560,14 @@ class Plugin:
 
     def __repr__(self):
         return f"<Plugin({self.name})>"
+
+    @property
+    def view_url(self):
+        if self.latest_compatible_version == self.latest_version:
+            tag = CURRENT_TAG
+        else:
+            tag = self.latest_compatible_version.commit_sha
+        return self.url.format(content_type="blob", tag=tag)
 
     @property
     def is_installed(self):
