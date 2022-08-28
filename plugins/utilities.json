@@ -21,7 +21,7 @@
       "versions": {
          "1.2.0": {
            "api_version": 7,
-           "commit_sha": "a98dacd",
+           "commit_sha": "963a17379",
            "released_on": "12-08-2022",
            "md5sum": "41084bfec41119ca9df8e6d899cd3cc0"
         },
@@ -30,6 +30,12 @@
            "commit_sha": "13a9d128",
            "released_on": "03-06-2022",
            "md5sum": "4b6bbb99037ebda4664da7c510b3717c"
+        },
+         "1.0.0": {
+           "api_version": 6,
+           "commit_sha": "da5032a7",
+           "released_on": "28-05-2021",
+           "md5sum": "527acfec13a2d0a6115a52df7abca920"
         }
       }
     },
