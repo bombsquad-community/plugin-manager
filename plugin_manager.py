@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.2"
+PLUGIN_MANAGER_VERSION = "0.1.3"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
@@ -149,7 +149,7 @@ class StartupTasks:
         update_details = await self.plugin_manager.get_update_details()
         if update_details:
             to_version, commit_sha = update_details
-            ba.screenmessage(f"Plugin Manager is being updated to version v{to_version}")
+            ba.screenmessage(f"Plugin Manager is being updated to v{to_version}")
             await self.plugin_manager.update(to_version, commit_sha)
             ba.screenmessage("Update successful. Restart game to reload changes.",
                              color=(0, 1, 0))
