@@ -1640,7 +1640,17 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       color=color,
                       maxwidth=width * 0.95)
 
-        pos -= 70
+        pos -= 45
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.22, pos-5),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text=f'API Version: {ba.app.api_version}',
+                      scale=text_scale * 0.7,
+                      color=(0.4, 0.8, 1),
+                      maxwidth=width * 0.95)
+        pos -= 25
         ba.buttonwidget(parent=self._root_widget,
                         position=((width * 0.49) - button_size[0] / 2, pos),
                         size=button_size,
