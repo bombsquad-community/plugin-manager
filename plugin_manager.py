@@ -13,6 +13,7 @@ import pathlib
 import contextlib
 import hashlib
 import copy
+import shutil
 
 from typing import Union, Optional
 
@@ -20,7 +21,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.3"
+PLUGIN_MANAGER_VERSION = "0.1.4"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
@@ -112,6 +113,12 @@ def partial_format(string_template, **kwargs):
     return string_template
 
 
+def is_version_greater(a, b):
+    a = tuple(map(int, a.split(".")))
+    b = tuple(map(int, b.split(".")))
+    return a > b
+
+
 class StartupTasks:
     def __init__(self):
         self.plugin_manager = PluginManager()
@@ -146,6 +153,19 @@ class StartupTasks:
 
         if plugin_manager_config != existing_plugin_manager_config:
             ba.app.config.commit()
+
+        # XXX: This path could also point to a workspace directory, we wanna copy
+        #      this plugin manager to the local plugins directory. This allows us
+        #      to persist any plugin manager updates over restart, since local plugins
+        #      are given more preference than workspace plugins.
+        plugin_manager_path = sys.modules[__name__].__file__
+        local_plugin_manager_path = os.path.join(
+            PLUGIN_DIRECTORY,
+            "plugin_manager.py",
+        )
+        if plugin_manager_path != local_plugin_manager_path:
+            ba.screenmessage(f"Copying {plugin_manager_path} to {local_plugin_manager_path}")
+            shutil.copyfile(plugin_manager_path, local_plugin_manager_path)
 
     async def update_plugin_manager(self):
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"]:
@@ -868,7 +888,12 @@ class PluginManager:
         self.request_headers = HEADERS
         self._index = _CACHE.get("index", {})
         self.categories = {}
-        self.module_path = sys.modules[__name__].__file__
+
+        current_module_path = sys.modules[__name__].__file__
+        self.local_plugin_manager_path = os.path.join(
+            PLUGIN_DIRECTORY,
+            "plugin_manager.py",
+        )
 
     async def get_index(self):
         if not self._index:
@@ -964,7 +989,7 @@ class PluginManager:
         content = response.read()
         if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
             raise MD5CheckSumFailedError("MD5 checksum failed during plugin manager update.")
-        with open(self.module_path, "wb") as fout:
+        with open(self.local_plugin_manager_path, "wb") as fout:
             fout.write(content)
         return to_version_info
 
@@ -2038,6 +2063,15 @@ class NewAllSettingsWindow(ba.Window):
 class EntryPoint(ba.Plugin):
     def on_app_running(self) -> None:
         """Called when the app is being launched."""
+        ba.screenmessage(f"loading {PLUGIN_MANAGER_VERSION}")
+        previous_plugin_manager_instance = getattr(_ba, "_plugin_manager_preparing_version", None)
+        if previous_plugin_manager_instance and is_version_greater(previous_plugin_manager_instance, PLUGIN_MANAGER_VERSION):
+            # Another instance of Plugin Manager with a higher version is already
+            # being initialized.
+            ba.screenmessage(f"{previous_plugin_manager_instance} > {PLUGIN_MANAGER_VERSION}, bye.")
+            return
+        ba.screenmessage(f"Going with {PLUGIN_MANAGER_VERSION}")
+        _ba._plugin_manager_preparing_version = PLUGIN_MANAGER_VERSION
         from bastd.ui.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         asyncio.set_event_loop(ba._asyncio._asyncio_event_loop)
