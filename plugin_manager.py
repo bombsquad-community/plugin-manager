@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.1"
+PLUGIN_MANAGER_VERSION = "0.1.2"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
@@ -491,7 +491,6 @@ class PluginVersion:
         self.plugin = plugin
         self.api_version = info["api_version"]
         self.commit_sha = info["commit_sha"]
-        self.dependencies = info["dependencies"]
         self.md5sum = info["md5sum"]
 
         if tag is None:
@@ -1891,7 +1890,7 @@ class NewAllSettingsWindow(ba.Window):
                                  v + 35),
                        size=(imgw, imgh),
                        color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("heart"),
+                       texture=ba.gettexture("storeIcon"),
                        draw_controller=mmb)
 
         self._restore_state()
