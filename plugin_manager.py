@@ -865,6 +865,7 @@ class PluginWindow(popup.PopupWindow):
     @button
     async def enable(self) -> None:
         await self.local_plugin.enable()
+        ba.playsound(ba.getsound('gunCocking'))
 
     @button
     async def install(self):
@@ -1764,7 +1765,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         ba.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
         ba.app.config.commit()
         self._ok()
-        ba.playsound(ba.getsound('shieldUp'))
+        ba.playsound(ba.getsound('gunCocking'))
 
     async def update(self, to_version=None, commit_sha=None):
         try:
