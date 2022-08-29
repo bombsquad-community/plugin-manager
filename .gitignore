@@ -1,1 +1,3 @@
 reference.py
+__pycache__
+*.pyc
