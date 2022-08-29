@@ -54,6 +54,14 @@ A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombs
   selection popup window in-game.
 
 
+## Tests
+
+Metadata tests are automatically executed whenever a pull request is opened and a commit is pushed. You can also run them
+locally by executing the following in the project's root directory:
+```bash
+$ python -m unittest discover
+```
+
 ## License
 
 - [Plugin manager's source code](plugin_manager.py) is licensed under the MIT license. See [LICENSE](LICENSE) for more
