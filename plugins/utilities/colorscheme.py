@@ -165,11 +165,12 @@ class ColorSchemeWindow(ba.Window):
             if uiscale is ba.UIScale.MEDIUM
             else 1.0
         )
-        top_extra = 15 if uiscale is ba.UIScale.SMALL else 15
+        top_extra = 15
 
         super().__init__(
             root_widget=ba.containerwidget(
                 size=(width, height + top_extra),
+                on_outside_click_call=self.cancel_on_outside_click,
                 transition="in_right",
                 scale=self._base_scale,
                 stack_offset=(0, 15) if uiscale is ba.UIScale.SMALL else (0, 0),
@@ -285,6 +286,10 @@ class ColorSchemeWindow(ba.Window):
             delegate=self,
             tag=tag,
         )
+
+    def cancel_on_outside_click(self):
+        ba.playsound(ba.getsound("swish"))
+        self._cancel()
 
     def _cancel(self):
         if self._last_color and self._last_highlight:
