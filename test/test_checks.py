@@ -13,19 +13,24 @@ async def assert_for_md5sum(url, md5sum, aiohttp_session):
     async with aiohttp_session.get(url) as response:
         expected_response_status = 200
         assert response.status == expected_response_status, (
-            f'Request to "{url}" returned status code {response.status} (expected {expected_response_status}.'
+            f'Request to "{url}" returned status code {response.status} '
+            f'(expected {expected_response_status}).'
         )
         content = await response.read()
         caclulated_md5sum = hashlib.md5(content).hexdigest()
         assert caclulated_md5sum == md5sum, (
-            f'"{url}" failed MD5 checksum:\nGot {caclulated_md5sum} (expected {md5sum}).'
+            f'"{url}" failed MD5 checksum:\nGot {caclulated_md5sum} '
+            f'(expected {md5sum}).'
         )
 
 
 async def assert_for_commit_sha_and_md5sum_from_versions(base_url, versions, aiohttp_session):
         tasks = tuple(
             assert_for_md5sum(
-                base_url.format(content_type="raw", tag=version["commit_sha"]),
+                base_url.format(
+                    content_type="raw",
+                    tag=version["commit_sha"],
+                ),
                 version["md5sum"],
                 aiohttp_session,
             ) for number, version in versions.items()
@@ -65,7 +70,10 @@ class TestPluginManagerMetadata(unittest.IsolatedAsyncioTestCase):
                 ),
                 # Additionally assert for the latest version with tag as "main".
                 assert_for_md5sum(
-                    self.content["plugin_manager_url"].format(content_type="raw", tag="main"),
+                    self.content["plugin_manager_url"].format(
+                        content_type="raw",
+                        tag="main",
+                    ),
                     latest_version["md5sum"],
                     session,
                 ),
