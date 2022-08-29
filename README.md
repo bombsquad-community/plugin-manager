@@ -57,7 +57,14 @@ A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombs
 ## Tests
 
 Metadata tests are automatically executed whenever a pull request is opened and a commit is pushed. You can also run them
-locally by executing the following in the project's root directory:
+locally by installing test dependencies with:
+
+```bash
+$ pip install -r test/pip_reqs.txt
+```
+
+and then executing the following in the project's root directory:
+
 ```bash
 $ python -m unittest discover
 ```
