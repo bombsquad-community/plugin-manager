@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.3"
+PLUGIN_MANAGER_VERSION = "0.1.4"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
@@ -154,9 +154,14 @@ class StartupTasks:
         if update_details:
             to_version, commit_sha = update_details
             ba.screenmessage(f"Plugin Manager is being updated to v{to_version}")
-            await self.plugin_manager.update(to_version, commit_sha)
-            ba.screenmessage("Update successful. Restart game to reload changes.",
-                             color=(0, 1, 0))
+            try:
+                await self.plugin_manager.update(to_version, commit_sha)
+            except MD5CheckSumFailedError:
+                ba.playsound(ba.getsound('error'))
+            else:
+                ba.screenmessage("Update successful. Restart game to reload changes.",
+                                 color=(0, 1, 0))
+                ba.playsound(ba.getsound('shieldUp'))
 
     async def update_plugins(self):
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
@@ -200,7 +205,10 @@ class Category:
         return self
 
     async def is_valid(self):
-        await self.fetch_metadata()
+        try:
+            await self.fetch_metadata()
+        except urllib.error.HTTPError:
+            return False
         try:
             await asyncio.gather(
                 self.get_name(),
@@ -384,7 +392,7 @@ class PluginLocal:
         scanned_results = set(ba.app.meta.scanresults.exports["ba.GameActivity"])
         for game in scanner.results.exports["ba.GameActivity"]:
             if game not in scanned_results:
-                ba.screenmessage(f"{game} minigame loaded", color=(0, 1, 0))
+                ba.screenmessage(f"{game} minigame loaded")
                 ba.app.meta.scanresults.exports["ba.GameActivity"].append(game)
 
     def unload_minigames(self):
@@ -397,7 +405,7 @@ class PluginLocal:
         new_scanned_results_games = []
         for game in ba.app.meta.scanresults.exports["ba.GameActivity"]:
             if game in scanner.results.exports["ba.GameActivity"]:
-                ba.screenmessage(f"{game} minigame unloaded", color=(0, 1, 0))
+                ba.screenmessage(f"{game} minigame unloaded")
             else:
                 new_scanned_results_games.append(game)
         ba.app.meta.scanresults.exports["ba.GameActivity"] = new_scanned_results_games
@@ -431,7 +439,7 @@ class PluginLocal:
             ba.app.config["Plugins"][entry_point]["enabled"] = True
             if entry_point not in ba.app.plugins.active_plugins:
                 self.load_plugin(entry_point)
-                ba.screenmessage(f"{entry_point} loaded", color=(0, 1, 0))
+                ba.screenmessage(f"{entry_point} loaded")
         if await self.has_minigames():
             self.load_minigames()
         # await self._set_status(to_enable=True)
@@ -626,7 +634,7 @@ class Plugin:
 
     async def uninstall(self):
         await self.get_local().uninstall()
-        ba.screenmessage(f"{self.name} uninstalled", color=(0, 1, 0))
+        ba.screenmessage(f"{self.name} uninstalled", color=(0.9, 1, 0))
 
     def has_update(self):
         try:
@@ -640,10 +648,12 @@ class Plugin:
         if await self.latest_compatible_version.install(suppress_screenmessage=True):
             ba.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}",
                              color=(0, 1, 0))
+            ba.playsound(ba.getsound('shieldUp'))
         else:
             ba.screenmessage(f"{self.name} failed MD5 checksum while updating to "
                              f"{self.latest_compatible_version.number}",
                              color=(1, 0, 0))
+            ba.playsound(ba.getsound('error'))
 
 
 class PluginWindow(popup.PopupWindow):
@@ -706,7 +716,7 @@ class PluginWindow(popup.PopupWindow):
                       text=self.plugin.info["description"],
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
-        b1_color = (0.6, 0.53, 0.63)
+        b1_color = None
         b2_color = (0.8, 0.15, 0.35)
         b3_color = (0.2, 0.8, 0.3)
         pos = height * 0.1
@@ -721,6 +731,7 @@ class PluginWindow(popup.PopupWindow):
             else:
                 if await self.local_plugin.is_enabled():
                     button1_label = "Disable"
+                    b1_color = (0.6, 0.53, 0.63)
                     button1_action = self.disable
                     if self.local_plugin.has_settings():
                         to_draw_button4 = True
@@ -780,10 +791,12 @@ class PluginWindow(popup.PopupWindow):
                       110 if _uiscale is ba.UIScale.MEDIUM else 120)
         open_button = ba.buttonwidget(parent=self._root_widget,
                                       autoselect=True,
-                                      position=(open_pos_x-7.5, open_pos_y-15),
-                                      size=(55, 55),
+                                      position=(open_pos_x, open_pos_y),
+                                      size=(40, 40),
                                       button_type="square",
                                       label="",
+                                      # color=ba.app.ui.title_color,
+                                      color=(0.6, 0.53, 0.63),
                                       on_activate_call=lambda: ba.open_url(self.plugin.view_url))
         ba.imagewidget(parent=self._root_widget,
                        position=(open_pos_x, open_pos_y),
@@ -792,13 +805,16 @@ class PluginWindow(popup.PopupWindow):
                        texture=ba.gettexture("file"),
                        draw_controller=open_button)
         ba.textwidget(parent=self._root_widget,
-                      position=(open_pos_x, open_pos_y-6),
+                      position=(open_pos_x-3, open_pos_y+12),
                       text="Source",
                       size=(10, 10),
-                      scale=0.5)
+                      draw_controller=open_button,
+                      color=(1, 1, 1, 1),
+                      rotate=25,
+                      scale=0.45)
 
         if to_draw_button4:
-            settings_pos_x = (0 if _uiscale is ba.UIScale.SMALL else
+            settings_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
                               60 if _uiscale is ba.UIScale.MEDIUM else 60)
             settings_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
                               110 if _uiscale is ba.UIScale.MEDIUM else 120)
@@ -853,14 +869,17 @@ class PluginWindow(popup.PopupWindow):
     @button
     async def install(self):
         await self.plugin.latest_compatible_version.install()
+        ba.playsound(ba.getsound('cashRegister2'))
 
     @button
     async def uninstall(self):
         await self.plugin.uninstall()
+        ba.playsound(ba.getsound('shieldDown'))
 
     @button
     async def update(self):
         await self.plugin.update()
+        ba.playsound(ba.getsound('shieldUp'))
 
 
 class PluginManager:
@@ -914,7 +933,8 @@ class PluginManager:
 
     def cleanup(self):
         for category in self.categories.values():
-            category.cleanup()
+            if category is not None:
+                category.cleanup()
         self.categories.clear()
         self._index.clear()
         self.unset_index_global_cache()
@@ -975,6 +995,7 @@ class PluginManager:
 class PluginSourcesWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
         play_sound()
+        self.selected_source = None
 
         self.scale_origin = origin_widget.get_screen_space_center()
 
@@ -1042,9 +1063,13 @@ class PluginSourcesWindow(popup.PopupWindow):
                        color=(5, 2, 2),
                        texture=ba.gettexture("crossOut"),
                        draw_controller=delete_source_button)
+
+        warning_pos_x = (43 if _uiscale is ba.UIScale.SMALL else
+                         35 if _uiscale is ba.UIScale.MEDIUM else
+                         48)
         ba.textwidget(
             parent=self._root_widget,
-            position=(48, 74),
+            position=(warning_pos_x, 74),
             size=(50, 22),
             text=("Warning: 3rd party plugin sources are not moderated\n"
                   "               by the community and may be dangerous!"),
@@ -1056,7 +1081,7 @@ class PluginSourcesWindow(popup.PopupWindow):
         )
 
         self._add_source_widget = ba.textwidget(parent=self._root_widget,
-                                                text="rikkolovescats/sahilp-plugins",
+                                                # text="rikkolovescats/sahilp-plugins",
                                                 size=(335, 50),
                                                 position=(21, 22),
                                                 h_align='left',
@@ -1116,27 +1141,28 @@ class PluginSourcesWindow(popup.PopupWindow):
         category = Category(meta_url, is_3rd_party=True)
         if not await category.is_valid():
             ba.screenmessage("Enter a valid plugin source", color=(1, 0, 0))
+            ba.playsound(ba.getsound('error'))
             return
         if source in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
             ba.screenmessage("Plugin source already exists")
+            ba.playsound(ba.getsound('error'))
             return
         ba.app.config["Community Plugin Manager"]["Custom Sources"].append(source)
         ba.app.config.commit()
-        ba.screenmessage("Plugin source added, refresh plugin list to see changes",
+        ba.screenmessage("Plugin source added; Refresh plugin list to see changes",
                          color=(0, 1, 0))
+        ba.playsound(ba.getsound('cashRegister2'))
         self.draw_sources()
 
     def delete_selected_source(self):
-        try:
-            ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
-        except ValueError:
-            # ba.screenmessage("No plugin source selected to delete.", color=(1, 0, 0))
-            pass
-        else:
-            ba.app.config.commit()
-            ba.screenmessage("Plugin source deleted, refresh plugin list to see changes",
-                             color=(0, 1, 0))
-            self.draw_sources()
+        if self.selected_source is None:
+            return
+        ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
+        ba.app.config.commit()
+        ba.screenmessage("Plugin source deleted; Refresh plugin list to see changes",
+                         color=(0.9, 1, 0))
+        ba.playsound(ba.getsound('shieldDown'))
+        self.draw_sources()
 
     def _ok(self) -> None:
         play_sound()
@@ -1188,9 +1214,11 @@ class PluginManagerWindow(ba.Window):
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_index())
 
-        self._width = (490 if _uiscale is ba.UIScale.MEDIUM else 570)
+        self._width = (700 if _uiscale is ba.UIScale.SMALL
+                       else 550 if _uiscale is ba.UIScale.MEDIUM
+                       else 570)
         self._height = (500 if _uiscale is ba.UIScale.SMALL
-                        else 380 if _uiscale is ba.UIScale.MEDIUM
+                        else 422 if _uiscale is ba.UIScale.MEDIUM
                         else 500)
         top_extra = 20 if _uiscale is ba.UIScale.SMALL else 0
 
@@ -1210,9 +1238,9 @@ class PluginManagerWindow(ba.Window):
             stack_offset=(0, -25) if _uiscale is ba.UIScale.SMALL else (0, 0)
         ))
 
-        back_pos_x = 5 + (10 if _uiscale is ba.UIScale.SMALL else
+        back_pos_x = 5 + (37 if _uiscale is ba.UIScale.SMALL else
                           27 if _uiscale is ba.UIScale.MEDIUM else 68)
-        back_pos_y = self._height - (115 if _uiscale is ba.UIScale.SMALL else
+        back_pos_y = self._height - (95 if _uiscale is ba.UIScale.SMALL else
                                      65 if _uiscale is ba.UIScale.MEDIUM else 50)
         self._back_button = back_button = ba.buttonwidget(
                 parent=self._root_widget,
@@ -1226,7 +1254,7 @@ class PluginManagerWindow(ba.Window):
 
         ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
-        title_pos = self._height - (100 if _uiscale is ba.UIScale.SMALL else
+        title_pos = self._height - (83 if _uiscale is ba.UIScale.SMALL else
                                     50 if _uiscale is ba.UIScale.MEDIUM else 50)
         ba.textwidget(
             parent=self._root_widget,
@@ -1240,8 +1268,8 @@ class PluginManagerWindow(ba.Window):
             maxwidth=270,
         )
 
-        loading_pos_y = self._height - (235 if _uiscale is ba.UIScale.SMALL else
-                                        220 if _uiscale is ba.UIScale.MEDIUM else 250)
+        loading_pos_y = self._height - (275 if _uiscale is ba.UIScale.SMALL else
+                                        235 if _uiscale is ba.UIScale.MEDIUM else 270)
 
         self._plugin_manager_status_text = ba.textwidget(
             parent=self._root_widget,
@@ -1287,14 +1315,14 @@ class PluginManagerWindow(ba.Window):
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
-        scroll_size_x = (400 if _uiscale is ba.UIScale.SMALL else
-                         380 if _uiscale is ba.UIScale.MEDIUM else 420)
-        scroll_size_y = (225 if _uiscale is ba.UIScale.SMALL else
-                         235 if _uiscale is ba.UIScale.MEDIUM else 335)
+        scroll_size_x = (515 if _uiscale is ba.UIScale.SMALL else
+                         430 if _uiscale is ba.UIScale.MEDIUM else 420)
+        scroll_size_y = (245 if _uiscale is ba.UIScale.SMALL else
+                         265 if _uiscale is ba.UIScale.MEDIUM else 335)
         scroll_pos_x = (70 if _uiscale is ba.UIScale.SMALL else
-                        40 if _uiscale is ba.UIScale.MEDIUM else 70)
-        scroll_pos_y = (125 if _uiscale is ba.UIScale.SMALL else
-                        30 if _uiscale is ba.UIScale.MEDIUM else 40)
+                        50 if _uiscale is ba.UIScale.MEDIUM else 70)
+        scroll_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
+                        35 if _uiscale is ba.UIScale.MEDIUM else 40)
         self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
                                              size=(scroll_size_x, scroll_size_y),
                                              position=(scroll_pos_x, scroll_pos_y))
@@ -1303,13 +1331,14 @@ class PluginManagerWindow(ba.Window):
                                              margin=0)
 
     def draw_category_selection_button(self, post_label):
-        category_pos_x = (330 if _uiscale is ba.UIScale.SMALL else
-                          285 if _uiscale is ba.UIScale.MEDIUM else 350)
-        category_pos_y = self._height - (145 if _uiscale is ba.UIScale.SMALL else
+        category_pos_x = (440 if _uiscale is ba.UIScale.SMALL else
+                          340 if _uiscale is ba.UIScale.MEDIUM else 350)
+        category_pos_y = self._height - (141 if _uiscale is ba.UIScale.SMALL else
                                          110 if _uiscale is ba.UIScale.MEDIUM else 110)
         b_size = (140, 30)
-        b_textcolor = (0.75, 0.7, 0.8)
-        b_color = (0.6, 0.53, 0.63)
+        # b_textcolor = (0.75, 0.7, 0.8)
+        b_textcolor = (0.8, 0.8, 0.85)
+        # b_color = (0.6, 0.53, 0.63)
 
         label = f"Category: {post_label}"
 
@@ -1322,7 +1351,7 @@ class PluginManagerWindow(ba.Window):
                                                                  self.show_categories_window),
                                                              label=label,
                                                              button_type="square",
-                                                             color=b_color,
+                                                             # color=b_color,
                                                              textcolor=b_textcolor,
                                                              # autoselect=True,
                                                              text_scale=0.6)
@@ -1332,12 +1361,12 @@ class PluginManagerWindow(ba.Window):
 
     def draw_search_bar(self):
         search_bar_pos_x = (85 if _uiscale is ba.UIScale.SMALL else
-                            65 if _uiscale is ba.UIScale.MEDIUM else 90)
+                            68 if _uiscale is ba.UIScale.MEDIUM else 90)
         search_bar_pos_y = self._height - (
             145 if _uiscale is ba.UIScale.SMALL else
             110 if _uiscale is ba.UIScale.MEDIUM else 116)
 
-        search_bar_size_x = (250 if _uiscale is ba.UIScale.SMALL else
+        search_bar_size_x = (320 if _uiscale is ba.UIScale.SMALL else
                              230 if _uiscale is ba.UIScale.MEDIUM else 260)
         search_bar_size_y = (
             35 if _uiscale is ba.UIScale.SMALL else
@@ -1345,7 +1374,7 @@ class PluginManagerWindow(ba.Window):
 
         filter_txt_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
                             40 if _uiscale is ba.UIScale.MEDIUM else 60)
-        filter_txt_pos_y = search_bar_pos_y + (5 if _uiscale is ba.UIScale.SMALL else
+        filter_txt_pos_y = search_bar_pos_y + (3 if _uiscale is ba.UIScale.SMALL else
                                                4 if _uiscale is ba.UIScale.MEDIUM else 8)
 
         ba.textwidget(parent=self._root_widget,
@@ -1358,6 +1387,9 @@ class PluginManagerWindow(ba.Window):
                       scale=0.5)
 
         filter_txt = ba.Lstr(resource='filterText')
+        search_bar_maxwidth = search_bar_size_x - (95 if _uiscale is ba.UIScale.SMALL else
+                                                   77 if _uiscale is ba.UIScale.MEDIUM else
+                                                   85)
         self._filter_widget = ba.textwidget(parent=self._root_widget,
                                             text="",
                                             size=(search_bar_size_x, search_bar_size_y),
@@ -1367,6 +1399,7 @@ class PluginManagerWindow(ba.Window):
                                             editable=True,
                                             scale=0.8,
                                             autoselect=True,
+                                            maxwidth=search_bar_maxwidth,
                                             description=filter_txt)
         self._last_filter_text = None
         self._last_filter_plugins = []
@@ -1404,8 +1437,8 @@ class PluginManagerWindow(ba.Window):
             #         ba.textwidget(edit=widget, position=None)
 
     def draw_settings_icon(self):
-        settings_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
-                          440 if _uiscale is ba.UIScale.MEDIUM else 510)
+        settings_pos_x = (610 if _uiscale is ba.UIScale.SMALL else
+                          500 if _uiscale is ba.UIScale.MEDIUM else 510)
         settings_pos_y = (130 if _uiscale is ba.UIScale.SMALL else
                           60 if _uiscale is ba.UIScale.MEDIUM else 70)
         controller_button = ba.buttonwidget(parent=self._root_widget,
@@ -1425,21 +1458,21 @@ class PluginManagerWindow(ba.Window):
                        draw_controller=controller_button)
 
     def draw_refresh_icon(self):
-        settings_pos_x = (500 if _uiscale is ba.UIScale.SMALL else
-                          440 if _uiscale is ba.UIScale.MEDIUM else 510)
-        settings_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
-                          105 if _uiscale is ba.UIScale.MEDIUM else 120)
+        refresh_pos_x = (610 if _uiscale is ba.UIScale.SMALL else
+                          500 if _uiscale is ba.UIScale.MEDIUM else 510)
+        refresh_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
+                          108 if _uiscale is ba.UIScale.MEDIUM else 120)
         loop = asyncio.get_event_loop()
         controller_button = ba.buttonwidget(parent=self._root_widget,
                                             # autoselect=True,
-                                            position=(settings_pos_x, settings_pos_y),
+                                            position=(refresh_pos_x, refresh_pos_y),
                                             size=(30, 30),
                                             button_type="square",
                                             label="",
                                             on_activate_call=lambda:
                                                 loop.create_task(self.refresh()))
         ba.imagewidget(parent=self._root_widget,
-                       position=(settings_pos_x, settings_pos_y),
+                       position=(refresh_pos_x, refresh_pos_y),
                        size=(30, 30),
                        color=(0.8, 0.95, 1),
                        texture=ba.gettexture("replayIcon"),
@@ -1499,7 +1532,7 @@ class PluginManagerWindow(ba.Window):
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
                 elif local_plugin.version == latest_compatible_version.number:
-                    color = (0, 1, 0)
+                    color = (0, 0.95, 0.2)
                 else:
                     color = (1, 0.6, 0)
             else:
@@ -1555,7 +1588,6 @@ class PluginManagerWindow(ba.Window):
         self._last_filter_plugins = []
 
     async def refresh(self):
-        play_sound()
         self.cleanup()
         ba.textwidget(edit=self._plugin_manager_status_text,
                       text="Refreshing...")
@@ -1581,8 +1613,8 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         loop.create_task(self.draw_ui())
 
     async def draw_ui(self):
-        b_text_color = (0.75, 0.7, 0.8)
-        s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
+        b_text_color = (0.8, 0.8, 0.85)
+        s = 1.25 if _uiscale is ba.UIScale.SMALL else 1.27 if _uiscale is ba.UIScale.MEDIUM else 1.3
         width = 380 * s
         height = 150 + 150 * s
         color = (0.9, 0.9, 0.9)
@@ -1633,10 +1665,10 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                               on_value_change_call=ba.Call(self.toggle_setting, setting),
                               maxwidth=500,
                               textcolor=(0.9, 0.9, 0.9),
-                              scale=0.75)
-            pos -= 32
+                              scale=text_scale * 0.8)
+            pos -= 34 * text_scale
 
-        pos -= 20
+        pos = height - 220
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos-5),
                       size=(0, 0),
@@ -1732,14 +1764,17 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         ba.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
         ba.app.config.commit()
         self._ok()
+        ba.playsound(ba.getsound('shieldUp'))
 
     async def update(self, to_version=None, commit_sha=None):
         try:
             await self._plugin_manager.update(to_version, commit_sha)
         except MD5CheckSumFailedError:
             ba.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
+            ba.playsound(ba.getsound('error'))
         else:
             ba.screenmessage("Plugin manager update successful", color=(0, 1, 0))
+            ba.playsound(ba.getsound('shieldUp'))
             ba.textwidget(edit=self._restart_to_reload_changes_text,
                           text='Update Applied!\nRestart game to reload changes.')
             self._update_button.delete()
@@ -1920,7 +1955,7 @@ class NewAllSettingsWindow(ba.Window):
                                                     label="",
                                                     on_activate_call=self._do_modmanager)
         _b_title(x_offs6, v, mmb, ba.Lstr(value="Plugin Manager"))
-        imgw = imgh = 120
+        imgw = imgh = 112
         ba.imagewidget(parent=self._root_widget,
                        position=(x_offs6 + basew * 0.49 - imgw * 0.5 + 5,
                                  v + 35),
