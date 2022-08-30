@@ -1,4 +1,4 @@
-#By Freaku / @[Just] Freak#4999
+# By Freaku / @[Just] Freak#4999
 
 
 import ba
