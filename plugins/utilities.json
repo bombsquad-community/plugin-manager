@@ -63,6 +63,25 @@
            "md5sum": "233dfaa7f0e9394d21454f4ffa7d0205"
         }
       }
+    },
+    "TowerD-Unlocked": {
+      "description": "Ability to play Tower-D map in ffa/team games!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+         "1.0.0": {
+           "api_version": 7,
+           "commit_sha": "ece4b806",
+           "released_on": "30-08-2022",
+           "md5sum": "aac4edfcaeca1dc2910f97e739d67482"
+        }
+      }
     }
   }
 }
