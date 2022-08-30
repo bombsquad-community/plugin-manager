@@ -64,7 +64,7 @@
         }
       }
     },
-    "TowerD-Unlocked": {
+    "unlock_TowerD": {
       "description": "Ability to play Tower-D map in ffa/team games!",
       "external_url": "",
       "authors": [
@@ -77,7 +77,7 @@
       "versions": {
          "1.0.0": {
            "api_version": 7,
-           "commit_sha": "ece4b806",
+           "commit_sha": "6beb8ddf",
            "released_on": "30-08-2022",
            "md5sum": "aac4edfcaeca1dc2910f97e739d67482"
         }
