@@ -22,4 +22,4 @@ jobs:
         pip install -r test/pip_reqs.txt
     - name: Execute Tests
       run: |
-        python -m unittest discover
+        python -m unittest discover -v
