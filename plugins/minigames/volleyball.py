@@ -367,14 +367,14 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
         ba.playsound(self._chant_sound)
         if self.credit_text:
             t = ba.newnode('text',
-                attrs={ 'text':"Created by Freaku\nVolleyBall", ## Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
-                    'scale':0.7,
-                    'position':(0,0),
-                    'shadow':0.5,
-                    'flatness':1.2,
-                    'color':(1, 1, 1),
-                    'h_align':'center',
-                    'v_attach':'bottom'})
+                           attrs={'text': "Created by Freaku\nVolleyBall",  # Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
+                                  'scale': 0.7,
+                                  'position': (0, 0),
+                                  'shadow': 0.5,
+                                  'flatness': 1.2,
+                                  'color': (1, 1, 1),
+                                  'h_align': 'center',
+                                  'v_attach': 'bottom'})
         shared = SharedObjects.get()
         self.blocks.append(ba.NodeActor(ba.newnode('region', attrs={'position': (0, 2.4, 0), 'scale': (
             0.8, 6, 20), 'type': 'box', 'materials': (self._fake_wall_material, )})))
