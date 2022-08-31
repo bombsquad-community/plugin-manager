@@ -89,7 +89,7 @@ To do this, you'll have to edit the file and add something like this:
   ...
 }
 ```
-You can add whatever you wanna add to these fields. However, leave the value for your version key `null`:
+You can add whatever you wanna add to these fields. However, leave the value for your version key as `null`:
 ```json
 "1.0.0": null
 ```
@@ -109,7 +109,7 @@ plugin you've added and the modified JSON metadata file!
 Continuing the example from [Submitting a Plugin](#submitting-a-plugin) section, say you also wanna add a new screenmessage
 to the `sample.py` plugin after it was submitted. Edit `sample.py` with whatever changes you'd like:
 ```diff
-diff --git a/bla.py b/bla.py
+diff --git a/plugins/utilities/sample.py b/plugins/utilities/sample.py
 index ebb7dcc..da2b312 100644
 --- a/plugins/utilities/sample.py
 +++ b/plugins/utilities/sample.py
@@ -125,7 +125,7 @@ index ebb7dcc..da2b312 100644
 
 To name this new version as `1.1.0`, add `"1.1.0": null,` just above the previous plugin version in `utilities.json`:
 ```diff
-diff --git a/bla.json b/bla.json
+diff --git a/plugins/utilities.json b/plugins/utilities.json
 index d3fd5bc..34ce9ad 100644
 --- a/plugins/utilities.json
 +++ b/plugins/utilities.json
