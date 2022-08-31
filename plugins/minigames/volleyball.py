@@ -365,8 +365,16 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
                            })))
         self._update_scoreboard()
         ba.playsound(self._chant_sound)
-        import base64
-        exec(base64.b64decode("aWYgc2VsZi5jcmVkaXRfdGV4dDoKICAgICMjIFBlb3BsZSBzdGVhbGVkIGNyZWRpdHMgc28gdGhhdHMgd2h5IEkgZW5jb2RlZCB0aGlzLi4uCiAgICAjIyBFdmVuIHRobyB0aGVyZSBpcyBhIG9wdGlvbiwgdGhleSBjaGFuZ2VkIGNyZWF0ZWQgYnkKICAgICMjIGxpa2Ugd3RmIGlzIHRoaWVyIHByb2JsZW0/PwogICAgCiAgICAjIyBBbnl3YXlzIGhhdmUgYSBnb29kIGRheSEKICAgIHQgPSBiYS5uZXdub2RlKCd0ZXh0JywKICAgICAgICAgICAgICAgYXR0cnM9eyAndGV4dCc6IkNyZWF0ZWQgYnkg7oGIRnJlYWt1XG5Wb2xsZXlCYWxsIiwgIyMgRGlzYWJsZSAnRW5hYmxlIEJvdHRvbSBDcmVkaXRzJyB3aGVuIG1ha2luZyBwbGF5bGlzdCwgTm8gbmVlZCB0byBlZGl0IHRoaXMgbG92ZWx5Li4uCiAgICAgICAgJ3NjYWxlJzowLjcsCiAgICAgICAgJ3Bvc2l0aW9uJzooMCwwKSwgI0xldHMgaG9wZSBoZSB1c2VzIFRWIGJvcmRlciBvZiBzZXR0aW5ncz5HcmFwaGljcwogICAgICAgICdzaGFkb3cnOjAuNSwKICAgICAgICAnZmxhdG5lc3MnOjEuMiwKICAgICAgICAnY29sb3InOigxLCAxLCAxKSwKICAgICAgICAnaF9hbGlnbic6J2NlbnRlcicsCiAgICAgICAgJ3ZfYXR0YWNoJzonYm90dG9tJ30p").decode('UTF-8'))
+        if self.credit_text:
+            t = ba.newnode('text',
+                           attrs={'text': "Created by Freaku\nVolleyBall",  # Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
+                                  'scale': 0.7,
+                                  'position': (0, 0),
+                                  'shadow': 0.5,
+                                  'flatness': 1.2,
+                                  'color': (1, 1, 1),
+                                  'h_align': 'center',
+                                  'v_attach': 'bottom'})
         shared = SharedObjects.get()
         self.blocks.append(ba.NodeActor(ba.newnode('region', attrs={'position': (0, 2.4, 0), 'scale': (
             0.8, 6, 20), 'type': 'box', 'materials': (self._fake_wall_material, )})))

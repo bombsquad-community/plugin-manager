@@ -35,9 +35,9 @@
       "versions": {
         "1.1.0": {
           "api_version": 7,
-          "commit_sha": "0553bb9",
+          "commit_sha": "0bc9522",
           "released_on": "31-08-2022",
-          "md5sum": "9cd1416e086597684ceb17a5712791b1"
+          "md5sum": "a7ad7f1ac908fd871bcbcf665d49828c"
         }
       }
     }
