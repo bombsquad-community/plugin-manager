@@ -66,7 +66,7 @@ $ pip install -r test/pip_reqs.txt
 and then executing the following in the project's root directory:
 
 ```bash
-$ python -m unittest discover
+$ python -m unittest discover -v
 ```
 
 ## License
