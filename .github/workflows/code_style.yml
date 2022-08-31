@@ -1,6 +1,6 @@
-name: Flake8
+name: Code Style
 
-on: 
+on:
   push:
   pull_request:
 
