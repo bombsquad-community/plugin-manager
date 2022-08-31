@@ -19,23 +19,23 @@
         }
       ],
       "versions": {
-         "1.2.1": {
-           "api_version": 7,
-           "commit_sha": "109e61c5a",
-           "released_on": "29-08-2022",
-           "md5sum": "970360789f4605132eb5091e30a64642"
+        "1.2.1": {
+          "api_version": 7,
+          "commit_sha": "109e61c5a",
+          "released_on": "29-08-2022",
+          "md5sum": "970360789f4605132eb5091e30a64642"
         },
-         "1.2.0": {
-           "api_version": 7,
-           "commit_sha": "963a17379",
-           "released_on": "12-08-2022",
-           "md5sum": "41084bfec41119ca9df8e6d899cd3cc0"
+        "1.2.0": {
+          "api_version": 7,
+          "commit_sha": "963a17379",
+          "released_on": "12-08-2022",
+          "md5sum": "41084bfec41119ca9df8e6d899cd3cc0"
         },
-         "1.0.0": {
-           "api_version": 6,
-           "commit_sha": "da5032a7",
-           "released_on": "28-05-2021",
-           "md5sum": "527acfec13a2d0a6115a52df7abca920"
+        "1.0.0": {
+          "api_version": 6,
+          "commit_sha": "da5032a7",
+          "released_on": "28-05-2021",
+          "md5sum": "527acfec13a2d0a6115a52df7abca920"
         }
       }
     },
@@ -50,11 +50,11 @@
         }
       ],
       "versions": {
-         "1.0.0": {
-           "api_version": 7,
-           "commit_sha": "63d674cf",
-           "released_on": "06-08-2022",
-           "md5sum": "233dfaa7f0e9394d21454f4ffa7d0205"
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "63d674cf",
+          "released_on": "06-08-2022",
+          "md5sum": "233dfaa7f0e9394d21454f4ffa7d0205"
         }
       }
     },
@@ -69,11 +69,11 @@
         }
       ],
       "versions": {
-         "1.0.0": {
-           "api_version": 7,
-           "commit_sha": "6beb8ddf",
-           "released_on": "30-08-2022",
-           "md5sum": "aac4edfcaeca1dc2910f97e739d67482"
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "6beb8ddf",
+          "released_on": "30-08-2022",
+          "md5sum": "aac4edfcaeca1dc2910f97e739d67482"
         }
       }
     }

@@ -14,11 +14,11 @@
         }
       ],
       "versions": {
-         "1.1.0": {
-           "api_version": 7,
-           "commit_sha": "40b70fe",
-           "released_on": "08-08-2022",
-           "md5sum": "f4f0bb91f5d10cf8f591ecf7d2848182"
+        "1.1.0": {
+          "api_version": 7,
+          "commit_sha": "40b70fe",
+          "released_on": "08-08-2022",
+          "md5sum": "f4f0bb91f5d10cf8f591ecf7d2848182"
         }
       }
     }
