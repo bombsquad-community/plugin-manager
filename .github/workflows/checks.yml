@@ -26,16 +26,21 @@ jobs:
         python -m pip install --upgrade pip
         pip install autopep8
         pip install -r test/pip_reqs.txt
-    - name: Apply PEP8
+    - name: Apply AutoPEP8
       run: |
         autopep8 --in-place --recursive --max-line-length=100 .
-    - name: Apply Version Metadata
-      run: |
-        python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
-    - name: Apply Commit
+    - name: Apply Auto-Formatting Commit
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "[ci] auto-format"
+        branch: ${{ github.head_ref }}
+    - name: Apply Version Metadata
+      run: |
+        python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
+    - name: Apply Version Metadata Commit
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "[ci] apply-version-metadata"
         branch: ${{ github.head_ref }}
     - name: Execute Tests
       run: |
