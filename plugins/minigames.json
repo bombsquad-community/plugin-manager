@@ -21,6 +21,25 @@
           "md5sum": "f4f0bb91f5d10cf8f591ecf7d2848182"
         }
       }
+    },
+    "volleyball": {
+      "description": "Play Volleyball in teams of two",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 7,
+          "commit_sha": "0553bb9",
+          "released_on": "31-08-2022",
+          "md5sum": "9cd1416e086597684ceb17a5712791b1"
+        }
+      }
     }
   }
 }
