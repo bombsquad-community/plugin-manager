@@ -76,6 +76,20 @@
           "md5sum": "aac4edfcaeca1dc2910f97e739d67482"
         }
       }
+    },
+    "sample": {
+      "description": "Test CI",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "",
+          "discord": "Rikko#7383"
+        }
+      ],
+      "versions": {
+        "0.1.0": null
+      }
     }
   }
 }
