@@ -27,11 +27,11 @@ There are two different ways the plugin manager can be installed through:
    to your mods directory (check it out by going into your game's Settings -> Advanced -> Show Mods Folder). This is the
    recommended way (see below).
 
-2. A not recommended method is to add
+2. Another way is to add
    [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
-   to your workspace. However, plugin manager self-updates will fail when installed it's get installed from workspace
-   since the game will overrwrite the update with the older version that's on workspace on the next sync up. However, you can
-   manually apply updates by copying the latest plugin manager's source code again to your workspace when this method.
+   to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
+   will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
+   manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
 
 ## Contributing
 
