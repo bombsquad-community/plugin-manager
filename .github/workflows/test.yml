@@ -12,6 +12,8 @@ jobs:
         python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -22,4 +24,4 @@ jobs:
         pip install -r test/pip_reqs.txt
     - name: Execute Tests
       run: |
-        python -m unittest discover
+        python -m unittest discover -v
