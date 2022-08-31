@@ -107,12 +107,12 @@ plugin you've added and the modified JSON metadata file!
 #### Example
 
 Continuing the example from [Submitting a Plugin](#submitting-a-plugin) section, say you also wanna add a new screenmessage
-to the `sample.py` plugin after it was submitted. Edit `sample.py` with whatever changes you'd like:
+to the `sample_plugin.py` plugin after it was submitted. Edit `sample_plugin.py` with whatever changes you'd like:
 ```diff
-diff --git a/plugins/utilities/sample.py b/plugins/utilities/sample.py
+diff --git a/plugins/utilities/sample_plugin.py b/plugins/utilities/sample_plugin.py
 index ebb7dcc..da2b312 100644
---- a/plugins/utilities/sample.py
-+++ b/plugins/utilities/sample.py
+--- a/plugins/utilities/sample_plugin.py
++++ b/plugins/utilities/sample_plugin.py
 @@ -5,6 +5,7 @@ import ba
  class Main(ba.Plugin):
      def on_app_running(self):
@@ -142,7 +142,7 @@ index d3fd5bc..34ce9ad 100644
      },
      ...
 ```
-That's it! Now you can make a [pull request](../../compare) with both the updated `sample.py` and `utilities.json` files.
+That's it! Now you can make a [pull request](../../compare) with both the updated `sample_plugin.py` and `utilities.json` files.
 
 ## 3rd Party Plugin Sources
 
