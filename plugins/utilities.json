@@ -105,7 +105,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "f01323d",
+          "released_on": "31-08-2022",
+          "md5sum": "eb93f3df040261f73963621cb66565d3"
+        }
       }
     },
     "icons_keyboard": {
