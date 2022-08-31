@@ -22,8 +22,8 @@
         }
       }
     },
-    "VolleyBall": {
-      "description": "Play VolleyBall in teams of two",
+    "volleyball": {
+      "description": "Play Volleyball in teams of two",
       "external_url": "",
       "authors": [
         {
