@@ -31,12 +31,6 @@
            "released_on": "12-08-2022",
            "md5sum": "41084bfec41119ca9df8e6d899cd3cc0"
         },
-         "1.1.0": {
-           "api_version": 7,
-           "commit_sha": "13a9d128",
-           "released_on": "03-06-2022",
-           "md5sum": "4b6bbb99037ebda4664da7c510b3717c"
-        },
          "1.0.0": {
            "api_version": 6,
            "commit_sha": "da5032a7",
@@ -58,7 +52,7 @@
       "versions": {
          "1.0.0": {
            "api_version": 7,
-           "commit_sha": "2aa6df31",
+           "commit_sha": "63d674cf",
            "released_on": "06-08-2022",
            "md5sum": "233dfaa7f0e9394d21454f4ffa7d0205"
         }

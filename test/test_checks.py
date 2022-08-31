@@ -1,85 +1,163 @@
+import git
+
 import hashlib
-import os
 import json
 import re
-
-import asyncio
-import aiohttp
+import io
+import os
+import pathlib
 
 import unittest
 
 
-async def assert_for_md5sum(url, md5sum, aiohttp_session):
-    async with aiohttp_session.get(url) as response:
-        expected_response_status = 200
-        assert response.status == expected_response_status, (
-            f'Request to "{url}" returned status code {response.status} '
-            f'(expected {expected_response_status}).'
-        )
-        content = await response.read()
-        caclulated_md5sum = hashlib.md5(content).hexdigest()
-        assert caclulated_md5sum == md5sum, (
-            f'"{url}" failed MD5 checksum:\nGot {caclulated_md5sum} '
-            f'(expected {md5sum}).'
-        )
-
-
-async def assert_for_commit_sha_and_md5sum_from_versions(base_url, versions, aiohttp_session):
-        tasks = tuple(
-            assert_for_md5sum(
-                base_url.format(
-                    content_type="raw",
-                    tag=version["commit_sha"],
-                ),
-                version["md5sum"],
-                aiohttp_session,
-            ) for number, version in versions.items()
-        )
-        await asyncio.gather(*tasks)
-
-
-class TestPluginManagerMetadata(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self):
+class TestPluginManagerMetadata(unittest.TestCase):
+    def setUp(self):
         with open("index.json", "rb") as fin:
             self.content = json.load(fin)
-        self.version_regexp = re.compile(b"PLUGIN_MANAGER_VERSION = .+")
+        self.plugin_manager = "plugin_manager.py"
+        self.api_version_regexp = re.compile(b"(?<=ba_meta require api )(.*)")
+        self.plugin_manager_version_regexp = re.compile(b"(?<=PLUGIN_MANAGER_VERSION = )(.*)")
 
-    async def asyncTearDown(self):
-        pass
+        self.current_path = pathlib.Path()
+        self.repository = git.Repo()
 
     def test_keys(self):
-        assert isinstance(self.content["plugin_manager_url"], str)
-        assert isinstance(self.content["versions"], dict)
-        assert isinstance(self.content["categories"], list)
-        assert isinstance(self.content["external_source_url"], str)
+        self.assertTrue(isinstance(self.content["plugin_manager_url"], str))
+        self.assertTrue(isinstance(self.content["versions"], dict))
+        self.assertTrue(isinstance(self.content["categories"], list))
+        self.assertTrue(isinstance(self.content["external_source_url"], str))
 
     def test_versions_order(self):
         versions = list(self.content["versions"].items())
         sorted_versions = sorted(versions, key=lambda version: version[0])
         assert sorted_versions == versions
 
-    async def test_versions_metadata(self):
+    def test_versions(self):
+        for version_name, version_metadata in self.content["versions"].items():
+            commit = self.repository.commit(version_metadata["commit_sha"])
+            plugin_manager = commit.tree / self.plugin_manager
+            with io.BytesIO(plugin_manager.data_stream.read()) as fin:
+                content = fin.read()
+
+            md5sum = hashlib.md5(content).hexdigest()
+            api_version = self.api_version_regexp.search(content).group()
+            plugin_manager_version = self.plugin_manager_version_regexp.search(content).group()
+
+            self.assertEqual(md5sum, version_metadata["md5sum"])
+            self.assertEqual(int(api_version.decode("utf-8")), version_metadata["api_version"])
+            self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{version_name}"')
+
+    def test_latest_version(self):
         versions = tuple(self.content["versions"].items())
-        latest_number, latest_version = versions[0]
-        async with aiohttp.ClientSession() as session:
-            await asyncio.gather(
-                assert_for_commit_sha_and_md5sum_from_versions(
-                    self.content["plugin_manager_url"],
-                    self.content["versions"],
-                    session,
-                ),
-                # Additionally assert for the latest version with tag as "main".
-                assert_for_md5sum(
-                    self.content["plugin_manager_url"].format(
-                        content_type="raw",
-                        tag="main",
-                    ),
-                    latest_version["md5sum"],
-                    session,
-                ),
-            )
+        latest_version_name, latest_version_metadata = versions[0]
+        plugin_manager = self.current_path / self.plugin_manager
+        with open(plugin_manager, "rb") as fin:
+            content = fin.read()
+
+        md5sum = hashlib.md5(content).hexdigest()
+        api_version = self.api_version_regexp.search(content).group()
+        plugin_manager_version = self.plugin_manager_version_regexp.search(content).group()
+
+        self.assertEqual(md5sum, latest_version_metadata["md5sum"])
+        self.assertEqual(int(api_version.decode("utf-8")), latest_version_metadata["api_version"])
+        self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{latest_version_name}"')
 
 
-# class TestPluginsMetadata(unittest.IsolatedAsyncioTestCase):
+class TestPluginMetadata(unittest.TestCase):
+    def setUp(self):
+        self.category_directories = tuple(
+            f'{os.path.join("plugins", path)}'
+            for path in os.listdir("plugins") if os.path.isdir(path)
+        )
 
-# class TestExternalSourceMetadata(unittest.IsolatedAsyncioTestCase):
+    def test_no_duplicates(self):
+        unique_plugins = set()
+        total_plugin_count = 0
+        for category in self.category_directories:
+            plugins = os.listdir(category)
+            total_plugin_count += len(plugins)
+            unique_plugins.update(plugins)
+        self.assertEqual(len(unique_plugins), total_plugin_count)
+
+
+class BaseCategoryMetadataTestCases:
+    class BaseTest(unittest.TestCase):
+        def setUp(self):
+            self.api_version_regexp = re.compile(b"(?<=ba_meta require api )(.*)")
+
+            self.current_path = pathlib.Path()
+            self.repository = git.Repo()
+
+        def test_keys(self):
+            self.assertEqual(self.content["name"], self.name)
+            self.assertTrue(isinstance(self.content["description"], str))
+            self.assertTrue(self.content["plugins_base_url"].startswith("http"))
+            self.assertTrue(isinstance(self.content["plugins"], dict))
+
+        def test_versions_order(self):
+            for plugin_metadata in self.content["plugins"].values():
+                versions = list(plugin_metadata["versions"].items())
+                sorted_versions = sorted(
+                    versions,
+                    key=lambda version: version[0],
+                    reverse=True,
+                )
+                self.assertEqual(sorted_versions, versions)
+
+        def test_plugin_keys(self):
+            for plugin_metadata in self.content["plugins"].values():
+                self.assertTrue(isinstance(plugin_metadata["description"], str))
+                self.assertTrue(isinstance(plugin_metadata["external_url"], str))
+                self.assertTrue(isinstance(plugin_metadata["authors"], list))
+                self.assertTrue(len(plugin_metadata["authors"]) > 0)
+                for author in plugin_metadata["authors"]:
+                    self.assertTrue(isinstance(author["name"], str))
+                    self.assertTrue(isinstance(author["email"], str))
+                    self.assertTrue(isinstance(author["discord"], str))
+                self.assertTrue(isinstance(plugin_metadata["versions"], dict))
+                self.assertTrue(len(plugin_metadata["versions"]) > 0)
+
+        def test_versions(self):
+            for plugin_name, plugin_metadata in self.content["plugins"].items():
+                for version_name, version_metadata in plugin_metadata["versions"].items():
+                    commit = self.repository.commit(version_metadata["commit_sha"])
+                    plugin = commit.tree / self.category / f"{plugin_name}.py"
+                    with io.BytesIO(plugin.data_stream.read()) as fin:
+                        content = fin.read()
+
+                    md5sum = hashlib.md5(content).hexdigest()
+                    api_version = self.api_version_regexp.search(content).group()
+
+                    self.assertEqual(md5sum, version_metadata["md5sum"])
+                    self.assertEqual(int(api_version.decode("utf-8")), version_metadata["api_version"])
+
+        def test_latest_version(self):
+            for plugin_name, plugin_metadata in self.content["plugins"].items():
+                latest_version_name, latest_version_metadata = tuple(plugin_metadata["versions"].items())[0]
+                plugin = self.current_path / self.category / f"{plugin_name}.py"
+                with open(plugin, "rb") as fin:
+                    content = fin.read()
+
+                md5sum = hashlib.md5(content).hexdigest()
+                api_version = self.api_version_regexp.search(content).group()
+
+                self.assertEqual(md5sum, latest_version_metadata["md5sum"])
+                self.assertEqual(int(api_version.decode("utf-8")), latest_version_metadata["api_version"])
+
+
+class TestUtilitiesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.name = "Utilities"
+        self.category = os.path.join("plugins", "utilities")
+        with open(f"{self.category}.json", "rb") as fin:
+            self.content = json.load(fin)
+
+
+class TestMinigamesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.name = "Minigames"
+        self.category = os.path.join("plugins", "minigames")
+        with open(f"{self.category}.json", "rb") as fin:
+            self.content = json.load(fin)
