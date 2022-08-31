@@ -33,7 +33,12 @@
         }
       ],
       "versions": {
-        "1.1.0": null
+        "1.1.0": {
+          "api_version": 7,
+          "commit_sha": "153b807",
+          "released_on": "31-08-2022",
+          "md5sum": "9cd1416e086597684ceb17a5712791b1"
+        }
       }
     }
   }
