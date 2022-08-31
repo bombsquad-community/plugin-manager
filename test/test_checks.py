@@ -129,11 +129,13 @@ class BaseCategoryMetadataTestCases:
                     api_version = self.api_version_regexp.search(content).group()
 
                     self.assertEqual(md5sum, version_metadata["md5sum"])
-                    self.assertEqual(int(api_version.decode("utf-8")), version_metadata["api_version"])
+                    self.assertEqual(int(api_version.decode("utf-8")),
+                                     version_metadata["api_version"])
 
         def test_latest_version(self):
             for plugin_name, plugin_metadata in self.content["plugins"].items():
-                latest_version_name, latest_version_metadata = tuple(plugin_metadata["versions"].items())[0]
+                latest_version_name, latest_version_metadata = tuple(
+                    plugin_metadata["versions"].items())[0]
                 plugin = self.current_path / self.category / f"{plugin_name}.py"
                 with open(plugin, "rb") as fin:
                     content = fin.read()
@@ -142,7 +144,8 @@ class BaseCategoryMetadataTestCases:
                 api_version = self.api_version_regexp.search(content).group()
 
                 self.assertEqual(md5sum, latest_version_metadata["md5sum"])
-                self.assertEqual(int(api_version.decode("utf-8")), latest_version_metadata["api_version"])
+                self.assertEqual(int(api_version.decode("utf-8")),
+                                 latest_version_metadata["api_version"])
 
 
 class TestUtilitiesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):

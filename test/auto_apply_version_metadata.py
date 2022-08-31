@@ -71,7 +71,8 @@ class CategoryVersionMetadata:
 
     def get_plugins_having_null_version_values(self):
         for plugin_name, plugin_metadata in self.category_metadata["plugins"].items():
-            latest_version_name, latest_version_metadata = tuple(plugin_metadata["versions"].items())[0]
+            latest_version_name, latest_version_metadata = tuple(
+                plugin_metadata["versions"].items())[0]
             if latest_version_metadata is None:
                 plugin_path = f"{os.path.join(self.category_metadata_base, f'{plugin_name}.py')}"
                 yield NullVersionedPlugin(

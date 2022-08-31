@@ -119,7 +119,7 @@ class StartupTasks:
     def setup_config(self):
         # is_config_updated = False
         existing_plugin_manager_config = copy.deepcopy(
-                                            ba.app.config.get("Community Plugin Manager"))
+            ba.app.config.get("Community Plugin Manager"))
 
         plugin_manager_config = ba.app.config.setdefault("Community Plugin Manager", {})
         plugin_manager_config.setdefault("Custom Sources", [])
@@ -534,7 +534,8 @@ class PluginVersion:
             local_plugin = await self._download()
         except MD5CheckSumFailedError:
             if not suppress_screenmessage:
-                ba.screenmessage(f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
+                ba.screenmessage(
+                    f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
             return False
         else:
             if not suppress_screenmessage:
@@ -621,7 +622,8 @@ class Plugin:
 
     def get_local(self):
         if not self.is_installed:
-            raise PluginNotInstalledError(f"{self.name} needs to be installed to get its local plugin.")
+            raise PluginNotInstalledError(
+                f"{self.name} needs to be installed to get its local plugin.")
         if self._local_plugin is None:
             self._local_plugin = PluginLocal(self.name)
         return self._local_plugin
@@ -1244,14 +1246,14 @@ class PluginManagerWindow(ba.Window):
         back_pos_y = self._height - (95 if _uiscale is ba.UIScale.SMALL else
                                      65 if _uiscale is ba.UIScale.MEDIUM else 50)
         self._back_button = back_button = ba.buttonwidget(
-                parent=self._root_widget,
-                position=(back_pos_x, back_pos_y),
-                size=(60, 60),
-                scale=0.8,
-                label=ba.charstr(ba.SpecialChar.BACK),
-                # autoselect=True,
-                button_type='backSmall',
-                on_activate_call=self._back)
+            parent=self._root_widget,
+            position=(back_pos_x, back_pos_y),
+            size=(60, 60),
+            scale=0.8,
+            label=ba.charstr(ba.SpecialChar.BACK),
+            # autoselect=True,
+            button_type='backSmall',
+            on_activate_call=self._back)
 
         ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
@@ -1460,9 +1462,9 @@ class PluginManagerWindow(ba.Window):
 
     def draw_refresh_icon(self):
         refresh_pos_x = (610 if _uiscale is ba.UIScale.SMALL else
-                          500 if _uiscale is ba.UIScale.MEDIUM else 510)
+                         500 if _uiscale is ba.UIScale.MEDIUM else 510)
         refresh_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
-                          108 if _uiscale is ba.UIScale.MEDIUM else 120)
+                         108 if _uiscale is ba.UIScale.MEDIUM else 120)
         loop = asyncio.get_event_loop()
         controller_button = ba.buttonwidget(parent=self._root_widget,
                                             # autoselect=True,
@@ -1719,8 +1721,8 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                                                       loop.create_task(
                                                           self.update(
                                                               *plugin_manager_update_available
-                                                              )
-                                                          ),
+                                                          )
+                                                  ),
                                                   textcolor=b_text_color,
                                                   button_type='square',
                                                   text_scale=1,
