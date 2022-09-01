@@ -1,18 +1,20 @@
-#Ported by: Freaku / @[Just] Freak#4999
+# Ported by: Freaku / @[Just] Freak#4999
 
-#Join BCS:
+# Join BCS:
 # https://discord.gg/ucyaesh
 
 
-#My GitHub:
+# My GitHub:
 # https://github.com/Freaku17/BombSquad-Mods-byFreaku
-
 
 
 # ba_meta require api 7
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import _ba,ba,random,math
+import _ba
+import ba
+import random
+import math
 from bastd.gameutils import SharedObjects
 from bastd.actor.bomb import Bomb
 from bastd.actor.popuptext import PopupText
@@ -107,7 +109,8 @@ class Floater(ba.Actor):
             })
         self.node.connectattr('position', self.node2, 'position')
 
-    def pop(self): PopupText(text="Ported by \ue048Freaku", scale=1.3, position=(self.node.position[0],self.node.position[1]-1,self.node.position[2]), color=(0,1,1)).autoretain() #Edit = YouNoob...
+    def pop(self): PopupText(text="Ported by \ue048Freaku", scale=1.3, position=(
+        self.node.position[0], self.node.position[1]-1, self.node.position[2]), color=(0, 1, 1)).autoretain()  # Edit = YouNoob...
 
     def checkCanControl(self):
         if not self.node.exists():
@@ -183,7 +186,8 @@ class Floater(ba.Actor):
             np = self.node.position
         except:
             np = (0, 0, 0)
-        self.b = Bomb(bomb_type=random.choice(['normal', 'ice', 'sticky', 'impact', 'land_mine', 'tnt']), source_player=self.source_player, position=(np[0], np[1] - 1, np[2]), velocity=(0, -1, 0)).autoretain()
+        self.b = Bomb(bomb_type=random.choice(['normal', 'ice', 'sticky', 'impact', 'land_mine', 'tnt']),
+                      source_player=self.source_player, position=(np[0], np[1] - 1, np[2]), velocity=(0, -1, 0)).autoretain()
         if self.b.bomb_type in ['impact', 'land_mine']:
             self.b.arm()
 
@@ -208,21 +212,21 @@ class Floater(ba.Actor):
             super().handlemessage(msg)
 
 
-
-
-
-
 def assignFloInputs(clientID: int):
     with ba.Context(_ba.get_foreground_host_activity()):
         activity = ba.getactivity()
         if not hasattr(activity, 'flo') or not activity.flo.node.exists():
-            try: activity.flo = Floater(activity.map.get_def_bound_box('map_bounds'))
-            except: return #Perhaps using in main-menu/score-screen
+            try:
+                activity.flo = Floater(activity.map.get_def_bound_box('map_bounds'))
+            except:
+                return  # Perhaps using in main-menu/score-screen
         floater = activity.flo
         if floater.controlled:
-            ba.screenmessage('Floater is already being controlled', color=(1, 0, 0), transient=True, clients=[clientID])
+            ba.screenmessage('Floater is already being controlled',
+                             color=(1, 0, 0), transient=True, clients=[clientID])
             return
-        ba.screenmessage('You Gained Control Over The Floater!\n Press Bomb to Throw Bombs and Punch to leave!', clients=[clientID], transient=True, color=(0, 1, 1))
+        ba.screenmessage('You Gained Control Over The Floater!\n Press Bomb to Throw Bombs and Punch to leave!', clients=[
+                         clientID], transient=True, color=(0, 1, 1))
 
         for i in _ba.get_foreground_host_activity().players:
             if i.sessionplayer.inputdevice.client_id == clientID:
@@ -251,16 +255,22 @@ def assignFloInputs(clientID: int):
                 i.assigninput(ba.InputType.LEFT_RIGHT, floater.leftright)
 
 
-
-
 old_fcm = _ba.chatmessage
+
+
 def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, sender_override: str = None):
     old_fcm(msg, clients, sender_override)
     if msg == '/floater':
-        try: assignFloInputs(-1)
-        except: pass
+        try:
+            assignFloInputs(-1)
+        except:
+            pass
+
+
 _ba.chatmessage = new_chat_message
 
 # ba_meta export plugin
+
+
 class byFreaku(ba.Plugin):
     def __init__(self): pass

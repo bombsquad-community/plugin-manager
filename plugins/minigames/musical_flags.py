@@ -1,29 +1,30 @@
-## Made by MattZ45986 on GitHub
-## Ported by: Freaku / @[Just] Freak#4999
+# Made by MattZ45986 on GitHub
+# Ported by: Freaku / @[Just] Freak#4999
 
 
-#Bug Fixes & Improvements as well...
+# Bug Fixes & Improvements as well...
 
-#Join BCS:
+# Join BCS:
 # https://discord.gg/ucyaesh
-
-
 
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import _ba,ba,random,math
-from bastd.actor.flag import Flag,FlagPickedUpMessage
+import _ba
+import ba
+import random
+import math
+from bastd.actor.flag import Flag, FlagPickedUpMessage
 from bastd.actor.playerspaz import PlayerSpaz
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
-
 
 
 class Player(ba.Player['Team']):
     def __init__(self) -> None:
         self.done: bool = False
         self.survived: bool = True
+
 
 class Team(ba.Team[Player]):
     def __init__(self) -> None:
@@ -79,17 +80,17 @@ class MFGame(ba.TeamGameActivity[Player, Team]):
         self.is_run = bool(settings['Enable Running'])
 
         self._textRound = ba.newnode('text',
-                       attrs={'text': '',
-                       'position': (0, -38),
-                       'scale': 1,
-                       'shadow': 1.0,
-                       'flatness': 1.0,
-                       'color': (1.0, 0.0, 1.0),
-                       'opacity': 1,
-                       'v_attach': 'top',
-                       'h_attach': 'center',
-                       'h_align': 'center',
-                       'v_align': 'center'})
+                                     attrs={'text': '',
+                                            'position': (0, -38),
+                                            'scale': 1,
+                                            'shadow': 1.0,
+                                            'flatness': 1.0,
+                                            'color': (1.0, 0.0, 1.0),
+                                            'opacity': 1,
+                                            'v_attach': 'top',
+                                            'h_attach': 'center',
+                                            'h_align': 'center',
+                                            'v_align': 'center'})
 
         self.slow_motion = self._epic_mode
         # A cool music, matching our gamemode theme
@@ -106,7 +107,7 @@ class MFGame(ba.TeamGameActivity[Player, Team]):
             ba.screenmessage(
                 ba.Lstr(resource='playerDelayedJoinText',
                         subs=[('${PLAYER}', player.getname(full=True))]),
-                color=(0, 1, 0),transient=True)
+                color=(0, 1, 0), transient=True)
             player.survived = False
             return
         self.spawn_player(player)
@@ -126,61 +127,70 @@ class MFGame(ba.TeamGameActivity[Player, Team]):
         self.setup_standard_time_limit(self._time_limit)
         if self.credit_text:
             t = ba.newnode('text',
-                attrs={ 'text':"Ported by Freaku\nMade by MattZ45986", ## Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
-                    'scale':0.7,
-                    'position':(0,0),
-                    'shadow':0.5,
-                    'flatness':1.2,
-                    'color':(1, 1, 1),
-                    'h_align':'center',
-                    'v_attach':'bottom'})
+                           attrs={'text': "Ported by Freaku\nMade by MattZ45986",  # Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
+                                  'scale': 0.7,
+                                  'position': (0, 0),
+                                  'shadow': 0.5,
+                                  'flatness': 1.2,
+                                  'color': (1, 1, 1),
+                                  'h_align': 'center',
+                                  'v_attach': 'bottom'})
         self.makeRound()
         self._textRound.text = 'Round ' + str(self.roundNum)
         ba.timer(5, self.checkEnd)
 
     def makeRound(self):
         for player in self.players:
-            if player.survived: player.team.score += 1
+            if player.survived:
+                player.team.score += 1
         self.roundNum += 1
         self._textRound.text = 'Round ' + str(self.roundNum)
         self.flags = []
         self.spawned = []
-        angle = random.randint(0,359)
-        c=0
+        angle = random.randint(0, 359)
+        c = 0
         for player in self.players:
-            if player.survived: c+=1
+            if player.survived:
+                c += 1
         spacing = 10
         for player in self.players:
             player.done = False
             if player.survived:
                 if not player.is_alive():
-                    self.spawn_player(player,(.5,5,-4))
+                    self.spawn_player(player, (.5, 5, -4))
                 self.spawned.append(player)
-        try: spacing = 360 // (c)
-        except: self.checkEnd()
-        colors = [(1,0,0),(0,1,0),(0,0,1),(1,1,0),(1,0,1),(0,1,1),(0,0,0),(0.5,0.8,0),(0,0.8,0.5),(0.8,0.25,0.7),(0,0.27,0.55),(2,2,0.6),(0.4,3,0.85)]
+        try:
+            spacing = 360 // (c)
+        except:
+            self.checkEnd()
+        colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1), (0, 1, 1), (0, 0, 0),
+                  (0.5, 0.8, 0), (0, 0.8, 0.5), (0.8, 0.25, 0.7), (0, 0.27, 0.55), (2, 2, 0.6), (0.4, 3, 0.85)]
         # Smart Mathematics:
         # All Flags spawn same distance from the players
         for i in range(c-1):
             angle += spacing
             angle %= 360
-            x=6 * math.sin(math.degrees(angle))
-            z=6 * math.cos(math.degrees(angle))
-            flag = Flag(position=(x+.5,5,z-4), color=colors[i]).autoretain()
+            x = 6 * math.sin(math.degrees(angle))
+            z = 6 * math.cos(math.degrees(angle))
+            flag = Flag(position=(x+.5, 5, z-4), color=colors[i]).autoretain()
             self.flags.append(flag)
 
     def killRound(self):
         self.numPickedUp = 0
         for player in self.players:
-            if player.is_alive(): player.actor.handlemessage(ba.DieMessage())
-        for flag in self.flags: flag.node.delete()
-        for light in self.nodes: light.delete()
+            if player.is_alive():
+                player.actor.handlemessage(ba.DieMessage())
+        for flag in self.flags:
+            flag.node.delete()
+        for light in self.nodes:
+            light.delete()
 
-    def spawn_player(self, player: Player, pos: tuple = (0,0,0)) -> ba.Actor:
+    def spawn_player(self, player: Player, pos: tuple = (0, 0, 0)) -> ba.Actor:
         spaz = self.spawn_player_spaz(player)
-        if pos == (0,0,0):
-            pos = (-.5+random.random()*2,3+random.random()*2,-5+random.random()*2)
-        spaz.connect_controls_to_player(enable_punch=self.is_punch, enable_bomb=False, enable_run=self.is_run)
+        if pos == (0, 0, 0):
+            pos = (-.5+random.random()*2, 3+random.random()*2, -5+random.random()*2)
+        spaz.connect_controls_to_player(enable_punch=self.is_punch,
+                                        enable_bomb=False, enable_run=self.is_run)
         spaz.handlemessage(ba.StandMessage(pos))
         return spaz
 
@@ -199,10 +209,10 @@ class MFGame(ba.TeamGameActivity[Player, Team]):
             self.numPickedUp += 1
             msg.node.getdelegate(PlayerSpaz, True).getplayer(Player, True).done = True
             l = ba.newnode('light',
-                                 owner=None,
-                                 attrs={'color':msg.node.color,
-                                        'position':(msg.node.position_center),
-                                        'intensity':1})
+                           owner=None,
+                           attrs={'color': msg.node.color,
+                                  'position': (msg.node.position_center),
+                                  'intensity': 1})
             self.nodes.append(l)
             msg.flag.handlemessage(ba.DieMessage())
             msg.node.handlemessage(ba.DieMessage())
@@ -213,12 +223,13 @@ class MFGame(ba.TeamGameActivity[Player, Team]):
                         try:
                             player.survived = False
                             ba.screenmessage("No Flag? "+player.getname())
-                            player.actor.handlemessage(ba.StandMessage((0,3,-2)))
-                            ba.timer(0.5,ba.Call(player.actor.handlemessage, ba.FreezeMessage()))
-                            ba.timer(3,ba.Call(player.actor.handlemessage, ba.ShouldShatterMessage()))
-                        except: pass
-                ba.timer(3.5,self.killRound)
-                ba.timer(3.55,self.makeRound)
+                            player.actor.handlemessage(ba.StandMessage((0, 3, -2)))
+                            ba.timer(0.5, ba.Call(player.actor.handlemessage, ba.FreezeMessage()))
+                            ba.timer(3, ba.Call(player.actor.handlemessage, ba.ShouldShatterMessage()))
+                        except:
+                            pass
+                ba.timer(3.5, self.killRound)
+                ba.timer(3.55, self.makeRound)
         else:
             return super().handlemessage(msg)
         return None
@@ -227,7 +238,7 @@ class MFGame(ba.TeamGameActivity[Player, Team]):
         i = 0
         for player in self.players:
             if player.survived:
-                i+=1
+                i += 1
         if i <= 1:
             for player in self.players:
                 if player.survived:

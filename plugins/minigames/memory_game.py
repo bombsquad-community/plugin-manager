@@ -12,41 +12,42 @@ from __future__ import annotations
 # (& some improvements)
 
 
-
-
-
-
 # incase someone is wondering how is map floating. Check out
 # def spawnAllMap(self)
 
 
-
 # ba_meta require api 7
 from typing import TYPE_CHECKING, overload
-import _ba,ba,random
+import _ba
+import ba
+import random
 from bastd.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Optional, List, Dict, Type, Union, Any, Literal
 
 
-
-
 class OnTimer(ba.Actor):
     """Timer which counts but doesn't show on-screen"""
+
     def __init__(self) -> None:
         super().__init__()
         self._starttime_ms: Optional[int] = None
-        self.node = ba.newnode('text', attrs={ 'v_attach': 'top', 'h_attach': 'center', 'h_align': 'center', 'color': (1, 1, 0.5, 1), 'flatness': 0.5, 'shadow': 0.5, 'position': (0, -70), 'scale': 0, 'text': ''})
-        self.inputnode = ba.newnode('timedisplay',  attrs={      'timemin': 0,      'showsubseconds': True  })
+        self.node = ba.newnode('text', attrs={'v_attach': 'top', 'h_attach': 'center', 'h_align': 'center', 'color': (
+            1, 1, 0.5, 1), 'flatness': 0.5, 'shadow': 0.5, 'position': (0, -70), 'scale': 0, 'text': ''})
+        self.inputnode = ba.newnode('timedisplay',  attrs={
+                                    'timemin': 0,      'showsubseconds': True})
         self.inputnode.connectattr('output', self.node, 'text')
+
     def start(self) -> None:
         tval = ba.time(timeformat=ba.TimeFormat.MILLISECONDS)
         assert isinstance(tval, int)
         self._starttime_ms = tval
         self.inputnode.time1 = self._starttime_ms
         ba.getactivity().globalsnode.connectattr('time', self.inputnode, 'time2')
+
     def has_started(self) -> bool:
         return self._starttime_ms is not None
+
     def stop(self,
              endtime: Union[int, float] = None,
              timeformat: ba.TimeFormat = ba.TimeFormat.SECONDS) -> None:
@@ -67,13 +68,16 @@ class OnTimer(ba.Actor):
 
             self.inputnode.timemax = endtime_ms - self._starttime_ms
     # Overloads so type checker knows our exact return type based in args.
+
     @overload
     def getstarttime(self, timeformat: Literal[ba.TimeFormat.SECONDS] = ba.TimeFormat.SECONDS) -> float:
         ...
+
     @overload
     def getstarttime(self,
                      timeformat: Literal[ba.TimeFormat.MILLISECONDS]) -> int:
         ...
+
     def getstarttime(
         self,
         timeformat: ba.TimeFormat = ba.TimeFormat.SECONDS
@@ -108,8 +112,6 @@ class OnTimer(ba.Actor):
                 self.node.delete()
 
 
-
-
 class Player(ba.Player['Team']):
     """Our player type for this game."""
 
@@ -127,7 +129,8 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
     name = 'Memory Game'
     description = 'Memories tiles and survive till the end!'
-    available_settings = [ba.BoolSetting('Epic Mode', default=False), ba.BoolSetting('Enable Bottom Credits', True)]
+    available_settings = [ba.BoolSetting(
+        'Epic Mode', default=False), ba.BoolSetting('Enable Bottom Credits', True)]
     scoreconfig = ba.ScoreConfig(label='Survived', scoretype=ba.ScoreType.MILLISECONDS, version='B')
 
     # Print messages when players die (since its meaningful in this game).
@@ -159,9 +162,9 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         if self._epic_mode:
             self.slow_motion = True
         shared = SharedObjects.get()
-        self._collide_with_player=ba.Material()
+        self._collide_with_player = ba.Material()
         self._collide_with_player.add_actions(actions=(('modify_part_collision', 'collide', True)))
-        self.dont_collide=ba.Material()
+        self.dont_collide = ba.Material()
         self.dont_collide.add_actions(actions=(('modify_part_collision', 'collide', False)))
         self._levelStage = 0
 
@@ -184,7 +187,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self._mapFGSpaz = ba.gettexture('neoSpazIcon')
         self._mapFGZoe = ba.gettexture('zoeIcon')
         self._mapFGSnake = ba.gettexture('ninjaIcon')
-        self._mapFGKronk= ba.gettexture('kronkIcon')
+        self._mapFGKronk = ba.gettexture('kronkIcon')
         self._mapFGMel = ba.gettexture('melIcon')
         self._mapFGJack = ba.gettexture('jackIcon')
         self._mapFGSanta = ba.gettexture('santaIcon')
@@ -202,59 +205,58 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self._circleTex = ba.gettexture('circleShadow')
 
         self._image = ba.newnode('image',
-                       attrs={'texture': self._imageTextDefault,
-                       'position':(0,-100),
-                       'scale':(100,100),
-                       'opacity': 0.0,
-                       'attach':'topCenter'})
+                                 attrs={'texture': self._imageTextDefault,
+                                        'position': (0, -100),
+                                        'scale': (100, 100),
+                                        'opacity': 0.0,
+                                        'attach': 'topCenter'})
 
         self._textCounter = ba.newnode('text',
-                       attrs={'text': '10',
-                       'position': (0, -100),
-                       'scale': 2.3,
-                       'shadow': 1.0,
-                       'flatness': 1.0,
-                       'opacity': 0.0,
-                       'v_attach': 'top',
-                       'h_attach': 'center',
-                       'h_align': 'center',
-                       'v_align': 'center'})
+                                       attrs={'text': '10',
+                                              'position': (0, -100),
+                                              'scale': 2.3,
+                                              'shadow': 1.0,
+                                              'flatness': 1.0,
+                                              'opacity': 0.0,
+                                              'v_attach': 'top',
+                                              'h_attach': 'center',
+                                              'h_align': 'center',
+                                              'v_align': 'center'})
 
         self._textLevel = ba.newnode('text',
-                       attrs={'text': 'Level ' + str(self._levelStage),
-                       'position': (0, -28),
-                       'scale': 1.3,
-                       'shadow': 1.0,
-                       'flatness': 1.0,
-                       'color': (1.0, 0.0, 1.0),
-                       'opacity': 0.0,
-                       'v_attach': 'top',
-                       'h_attach': 'center',
-                       'h_align': 'center',
-                       'v_align': 'center'})
+                                     attrs={'text': 'Level ' + str(self._levelStage),
+                                            'position': (0, -28),
+                                            'scale': 1.3,
+                                            'shadow': 1.0,
+                                            'flatness': 1.0,
+                                            'color': (1.0, 0.0, 1.0),
+                                            'opacity': 0.0,
+                                            'v_attach': 'top',
+                                            'h_attach': 'center',
+                                            'h_align': 'center',
+                                            'v_align': 'center'})
 
         self._imageCircle = ba.newnode('image',
-                       attrs={'texture': self._circleTex,
-                       'position': (75, -75),
-                       'scale': (20,20),
-                       'color': (0.2, 0.2, 0.2),
-                       'opacity': 0.0,
-                       'attach': 'topCenter'})
+                                       attrs={'texture': self._circleTex,
+                                              'position': (75, -75),
+                                              'scale': (20, 20),
+                                              'color': (0.2, 0.2, 0.2),
+                                              'opacity': 0.0,
+                                              'attach': 'topCenter'})
         self._imageCircle2 = ba.newnode('image',
-                       attrs={'texture': self._circleTex,
-                       'position': (75, -100),
-                       'scale': (20,20),
-                       'color': (0.2, 0.2, 0.2),
-                       'opacity': 0.0,
-                       'attach': 'topCenter'})
+                                        attrs={'texture': self._circleTex,
+                                               'position': (75, -100),
+                                               'scale': (20, 20),
+                                               'color': (0.2, 0.2, 0.2),
+                                               'opacity': 0.0,
+                                               'attach': 'topCenter'})
         self._imageCircle3 = ba.newnode('image',
-                       attrs={'texture': self._circleTex,
-                       'position': (75, -125),
-                       'scale': (20,20),
-                       'color': (0.2, 0.2, 0.2),
-                       'opacity': 0.0,
-                       'attach': 'topCenter'})
-
+                                        attrs={'texture': self._circleTex,
+                                               'position': (75, -125),
+                                               'scale': (20, 20),
+                                               'color': (0.2, 0.2, 0.2),
+                                               'opacity': 0.0,
+                                               'attach': 'topCenter'})
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
@@ -307,14 +309,14 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self.coldel16 = True
         if self.credit_text:
             t = ba.newnode('text',
-                attrs={ 'text':"Made by Freaku\nOriginally for 1.4: byANG3L", ## Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
-                    'scale':0.7,
-                    'position':(0,0),
-                    'shadow':0.5,
-                    'flatness':1.2,
-                    'color':(1, 1, 1),
-                    'h_align':'center',
-                    'v_attach':'bottom'})
+                           attrs={'text': "Made by Freaku\nOriginally for 1.4: byANG3L",  # Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
+                                  'scale': 0.7,
+                                  'position': (0, 0),
+                                  'shadow': 0.5,
+                                  'flatness': 1.2,
+                                  'color': (1, 1, 1),
+                                  'h_align': 'center',
+                                  'v_attach': 'bottom'})
         self.spawnAllMap()
         self.flashHide()
 
@@ -325,6 +327,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
     def startCounter(self):
         self._textCounter.text = '10'
+
         def count9():
             def count8():
                 def count7():
@@ -374,7 +377,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
             ba.screenmessage(
                 ba.Lstr(resource='playerDelayedJoinText',
                         subs=[('${PLAYER}', player.getname(full=True))]),
-                color=(0, 1, 0),transient=True,clients=[player.sessionplayer.inputdevice.client_id])
+                color=(0, 1, 0), transient=True, clients=[player.sessionplayer.inputdevice.client_id])
             # For score purposes, mark them as having died right as the
             # game started.
             assert self._timer is not None
@@ -392,7 +395,8 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
     # overriding the default character spawning..
     def spawn_player(self, player: Player) -> ba.Actor:
         spaz = self.spawn_player_spaz(player)
-        pos = (self._spawnCenter[0] + random.uniform(-1.5, 2.5), self._spawnCenter[1], self._spawnCenter[2] + random.uniform(-2.5, 1.5))
+        pos = (self._spawnCenter[0] + random.uniform(-1.5, 2.5),
+               self._spawnCenter[1], self._spawnCenter[2] + random.uniform(-2.5, 1.5))
         spaz.connect_controls_to_player(enable_punch=False, enable_bomb=False, enable_pickup=False)
         spaz.handlemessage(ba.StandMessage(pos))
         return spaz
@@ -400,49 +404,50 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
     def _randomSelect(self):
         if self._levelStage == 1:
             self._textureSelected = random.choice([self._mapFGMinesTex,
-                                     self._mapFGStickyTex])
+                                                   self._mapFGStickyTex])
             self._image.texture = self._textureSelected
         elif self._levelStage == 2:
             self._textureSelected = random.choice([self._mapFGIceTex,
-                                     self._mapFGShieldTex])
+                                                   self._mapFGShieldTex])
             self._image.texture = self._textureSelected
-        elif self._levelStage in [3,4,5]:
+        elif self._levelStage in [3, 4, 5]:
             self._textureSelected = random.choice([self._mapFGStickyTex,
-                                     self._mapFGIceTex,
-                                     self._mapFGImpactTex,
-                                     self._mapFGMinesTex])
+                                                   self._mapFGIceTex,
+                                                   self._mapFGImpactTex,
+                                                   self._mapFGMinesTex])
             self._image.texture = self._textureSelected
-        elif self._levelStage in [6,7,8,9]:
+        elif self._levelStage in [6, 7, 8, 9]:
             self._textureSelected = random.choice([self._mapFGCurseTex,
-                                     self._mapFGHealthTex,
-                                     self._mapFGIceTex,
-                                     self._mapFGImpactTex,
-                                     self._mapFGMinesTex,
-                                     self._mapFGPunchTex,
-                                     self._mapFGShieldTex])
+                                                   self._mapFGHealthTex,
+                                                   self._mapFGIceTex,
+                                                   self._mapFGImpactTex,
+                                                   self._mapFGMinesTex,
+                                                   self._mapFGPunchTex,
+                                                   self._mapFGShieldTex])
             self._image.texture = self._textureSelected
         elif self._levelStage >= 10:
             self._textureSelected = random.choice([self._mapFGSpaz,
-                                     self._mapFGZoe,
-                                     self._mapFGSnake,
-                                     self._mapFGKronk,
-                                     self._mapFGMel,
-                                     self._mapFGJack,
-                                     self._mapFGSanta,
-                                     self._mapFGFrosty,
-                                     self._mapFGBones,
-                                     self._mapFGBernard,
-                                     self._mapFGPascal,
-                                     self._mapFGAli,
-                                     self._mapFGRobot,
-                                     self._mapFGAgent,
-                                     self._mapFGGrumbledorf,
-                                     self._mapFGPixel])
+                                                   self._mapFGZoe,
+                                                   self._mapFGSnake,
+                                                   self._mapFGKronk,
+                                                   self._mapFGMel,
+                                                   self._mapFGJack,
+                                                   self._mapFGSanta,
+                                                   self._mapFGFrosty,
+                                                   self._mapFGBones,
+                                                   self._mapFGBernard,
+                                                   self._mapFGPascal,
+                                                   self._mapFGAli,
+                                                   self._mapFGRobot,
+                                                   self._mapFGAgent,
+                                                   self._mapFGGrumbledorf,
+                                                   self._mapFGPixel])
             self._image.texture = self._textureSelected
         return self._textureSelected
 
     def _stop(self):
         self._textureSelected = self._randomSelect()
+
         def circle():
             def circle2():
                 def circle3():
@@ -462,100 +467,100 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
     def _randomPlatform(self):
         if self._levelStage == 1:
-            randomTexture=[self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex]
+            randomTexture = [self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex]
         elif self._levelStage == 2:
-            randomTexture=[self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex]
-        elif self._levelStage in [3,4,5]:
-            randomTexture=[self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGStickyTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGImpactTex,
-                           self._mapFGImpactTex,
-                           self._mapFGImpactTex,
-                           self._mapFGImpactTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex]
-        elif self._levelStage in [6,7,8,9]:
-            randomTexture=[self._mapFGHealthTex,
-                           self._mapFGShieldTex,
-                           self._mapFGCurseTex,
-                           self._mapFGCurseTex,
-                           self._mapFGHealthTex,
-                           self._mapFGHealthTex,
-                           self._mapFGIceTex,
-                           self._mapFGIceTex,
-                           self._mapFGImpactTex,
-                           self._mapFGImpactTex,
-                           self._mapFGMinesTex,
-                           self._mapFGMinesTex,
-                           self._mapFGPunchTex,
-                           self._mapFGPunchTex,
-                           self._mapFGShieldTex,
-                           self._mapFGShieldTex]
+            randomTexture = [self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex]
+        elif self._levelStage in [3, 4, 5]:
+            randomTexture = [self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGStickyTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGImpactTex,
+                             self._mapFGImpactTex,
+                             self._mapFGImpactTex,
+                             self._mapFGImpactTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex]
+        elif self._levelStage in [6, 7, 8, 9]:
+            randomTexture = [self._mapFGHealthTex,
+                             self._mapFGShieldTex,
+                             self._mapFGCurseTex,
+                             self._mapFGCurseTex,
+                             self._mapFGHealthTex,
+                             self._mapFGHealthTex,
+                             self._mapFGIceTex,
+                             self._mapFGIceTex,
+                             self._mapFGImpactTex,
+                             self._mapFGImpactTex,
+                             self._mapFGMinesTex,
+                             self._mapFGMinesTex,
+                             self._mapFGPunchTex,
+                             self._mapFGPunchTex,
+                             self._mapFGShieldTex,
+                             self._mapFGShieldTex]
         elif self._levelStage >= 10:
-            randomTexture=[self._mapFGSpaz,
-                           self._mapFGZoe,
-                           self._mapFGSnake,
-                           self._mapFGKronk,
-                           self._mapFGMel,
-                           self._mapFGJack,
-                           self._mapFGSanta,
-                           self._mapFGFrosty,
-                           self._mapFGBones,
-                           self._mapFGBernard,
-                           self._mapFGPascal,
-                           self._mapFGAli,
-                           self._mapFGRobot,
-                           self._mapFGAgent,
-                           self._mapFGGrumbledorf,
-                           self._mapFGPixel]
+            randomTexture = [self._mapFGSpaz,
+                             self._mapFGZoe,
+                             self._mapFGSnake,
+                             self._mapFGKronk,
+                             self._mapFGMel,
+                             self._mapFGJack,
+                             self._mapFGSanta,
+                             self._mapFGFrosty,
+                             self._mapFGBones,
+                             self._mapFGBernard,
+                             self._mapFGPascal,
+                             self._mapFGAli,
+                             self._mapFGRobot,
+                             self._mapFGAgent,
+                             self._mapFGGrumbledorf,
+                             self._mapFGPixel]
 
         (self.mapFGPTex, self.mapFGP2Tex,
             self.mapFGP3Tex, self.mapFGP4Tex,
-                self.mapFGP5Tex, self.mapFGP6Tex,
-                    self.mapFGP7Tex, self.mapFGP8Tex,
-                        self.mapFGP9Tex,self.mapFGP10Tex,
-                            self.mapFGP11Tex, self.mapFGP12Tex,
-                                self.mapFGP13Tex, self.mapFGP14Tex,
-                                    self.mapFGP15Tex, self.mapFGP16Tex) = (
-                                        random.sample(randomTexture, 16))
+         self.mapFGP5Tex, self.mapFGP6Tex,
+         self.mapFGP7Tex, self.mapFGP8Tex,
+         self.mapFGP9Tex, self.mapFGP10Tex,
+         self.mapFGP11Tex, self.mapFGP12Tex,
+         self.mapFGP13Tex, self.mapFGP14Tex,
+         self.mapFGP15Tex, self.mapFGP16Tex) = (
+            random.sample(randomTexture, 16))
         self._mixPlatform()
 
     def _mixPlatform(self):
@@ -692,114 +697,130 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         shared = SharedObjects.get()
         if self.coldel:
             self.mapFGP = ba.newnode('prop',
-                attrs={'body': 'puck', 'position': (3,2,-9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+                                     attrs={'body': 'puck', 'position': (3, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGPTex = None
-            self.mapFGPcol = ba.newnode('region',attrs={'position': (3,2,-9),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGPcol = ba.newnode('region', attrs={'position': (3, 2, -9), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel = False
 
         if self.coldel2:
-            self.mapFGP2 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (3,2,-6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP2 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (3, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP2Tex = None
-            self.mapFGP2col = ba.newnode('region',attrs={'position': (3,2,-6),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP2col = ba.newnode('region', attrs={'position': (3, 2, -6), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel2 = False
 
         if self.coldel3:
-            self.mapFGP3 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (3,2,-3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP3 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (3, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP3Tex = None
-            self.mapFGP3col = ba.newnode('region',attrs={'position': (3,2,-3),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP3col = ba.newnode('region', attrs={'position': (3, 2, -3), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel3 = False
 
         if self.coldel4:
-            self.mapFGP4 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (3,2,0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP4 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (3, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP4Tex = None
-            self.mapFGP4col = ba.newnode('region',attrs={'position': (3,2,0),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP4col = ba.newnode('region', attrs={'position': (3, 2, 0), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel4 = False
 
         if self.coldel5:
-            self.mapFGP5 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (0,2,-9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP5 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (0, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP5Tex = None
-            self.mapFGP5col = ba.newnode('region',attrs={'position': (0,2,-9),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP5col = ba.newnode('region', attrs={'position': (0, 2, -9), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel5 = False
 
         if self.coldel6:
-            self.mapFGP6 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (0,2,-6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP6 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (0, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP6Tex = None
-            self.mapFGP6col = ba.newnode('region',attrs={'position': (0,2,-6),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP6col = ba.newnode('region', attrs={'position': (0, 2, -6), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel6 = False
 
         if self.coldel7:
-            self.mapFGP7 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (0,2,-3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP7 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (0, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP7Tex = None
-            self.mapFGP7col = ba.newnode('region',attrs={'position': (0,2,-3),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP7col = ba.newnode('region', attrs={'position': (0, 2, -3), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel7 = False
 
         if self.coldel8:
-            self.mapFGP8 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (0,2,0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP8 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (0, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP8Tex = None
-            self.mapFGP8col = ba.newnode('region',attrs={'position': (0,2,0),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP8col = ba.newnode('region', attrs={'position': (0, 2, 0), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel8 = False
 
         if self.coldel9:
-            self.mapFGP9 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-3,2,-9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP9 = ba.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (-3, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP9Tex = None
-            self.mapFGP9col = ba.newnode('region',attrs={'position': (-3,2,-9),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP9col = ba.newnode('region', attrs={'position': (-3, 2, -9), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel9 = False
 
         if self.coldel10:
-            self.mapFGP10 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-3,2,-6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP10 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-3, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP10Tex = None
-            self.mapFGP10col = ba.newnode('region',attrs={'position': (-3,2,-6),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP10col = ba.newnode('region', attrs={'position': (-3, 2, -6), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel10 = False
 
         if self.coldel11:
-            self.mapFGP11 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-3,2,-3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP11 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-3, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP11Tex = None
-            self.mapFGP11col = ba.newnode('region',attrs={'position': (-3,2,-3),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP11col = ba.newnode('region', attrs={'position': (-3, 2, -3), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel11 = False
 
         if self.coldel12:
-            self.mapFGP12 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-3,2,0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP12 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-3, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP12Tex = None
-            self.mapFGP12col = ba.newnode('region',attrs={'position': (-3,2,0),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP12col = ba.newnode('region', attrs={'position': (-3, 2, 0), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel12 = False
 
         if self.coldel13:
-            self.mapFGP13 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-6,2,-9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP13 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-6, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP13Tex = None
-            self.mapFGP13col = ba.newnode('region',attrs={'position': (-6,2,-9),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP13col = ba.newnode('region', attrs={'position': (-6, 2, -9), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel13 = False
 
         if self.coldel14:
-            self.mapFGP14 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-6,2,-6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP14 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-6, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP14Tex = None
-            self.mapFGP14col = ba.newnode('region',attrs={'position': (-6,2,-6),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP14col = ba.newnode('region', attrs={'position': (-6, 2, -6), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel14 = False
 
         if self.coldel15:
-            self.mapFGP15 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-6,2,-3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP15 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-6, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP15Tex = None
-            self.mapFGP15col = ba.newnode('region',attrs={'position': (-6,2,-3),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP15col = ba.newnode('region', attrs={'position': (-6, 2, -3), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel15 = False
 
         if self.coldel16:
-            self.mapFGP16 = ba.newnode('prop', 
-                attrs={'body': 'puck', 'position': (-6,2,0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale':0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP16 = ba.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-6, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP16Tex = None
-            self.mapFGP16col = ba.newnode('region',attrs={'position': (-6,2,0),'scale': (3.5,0.1,3.5),'type': 'box','materials': (self._collide_with_player, shared.footing_material)})
+            self.mapFGP16col = ba.newnode('region', attrs={'position': (-6, 2, 0), 'scale': (
+                3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel16 = False
 
     def _platformTexDefault(self):
@@ -883,7 +904,6 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
             if living_team_count <= 1:
                 self.end_game()
 
-
     def end_game(self) -> None:
         cur_time = ba.time()
         assert self._timer is not None
@@ -936,18 +956,14 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self.end(results=results)
 
 
-
-
-
-
-
-
-
 class MGdefs():
     points = {}
     boxes = {}
-    boxes['area_of_interest_bounds'] = (0.3544110667, 4.493562578, -2.518391331) + (0.0, 0.0, 0.0) + (16.64754831, 8.06138989, 18.5029888)
-    boxes['map_bounds'] = (0.2608783669, 4.899663734, -3.543675157) + (0.0, 0.0, 0.0) + (29.23565494, 14.19991443, 29.92689344)
+    boxes['area_of_interest_bounds'] = (
+        0.3544110667, 4.493562578, -2.518391331) + (0.0, 0.0, 0.0) + (16.64754831, 8.06138989, 18.5029888)
+    boxes['map_bounds'] = (0.2608783669, 4.899663734, -3.543675157) + \
+        (0.0, 0.0, 0.0) + (29.23565494, 14.19991443, 29.92689344)
+
 
 class MGmap(ba.Map):
     defs = MGdefs()
@@ -990,16 +1006,12 @@ class MGmap(ba.Map):
         gnode.vr_near_clip = 0.5
 
 
-
-
-
 ba._map.register_map(MGmap)
-
-
 
 
 # ba_meta export plugin
 class byFreaku(ba.Plugin):
     def __init__(self):
         ## Campaign support ##
-        ba.app.add_coop_practice_level(ba.Level(name='Memory Game', displayname='${GAME}', gametype=MGgame, settings={}, preview_texture_name='achievementOffYouGo'))
+        ba.app.add_coop_practice_level(ba.Level(name='Memory Game', displayname='${GAME}', gametype=MGgame, settings={
+        }, preview_texture_name='achievementOffYouGo'))
