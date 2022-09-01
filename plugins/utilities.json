@@ -76,6 +76,25 @@
           "md5sum": "aac4edfcaeca1dc2910f97e739d67482"
         }
       }
+    },
+    "floater": {
+      "description": "Calls a overpowered floater in any gamemode. Chat  /floater to activate!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "858030b",
+          "released_on": "01-09-2022",
+          "md5sum": "c024a0774f2e960dad7f633efdc3feb5"
+        }
+      }
     }
   }
 }
