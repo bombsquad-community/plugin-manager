@@ -78,7 +78,7 @@
       }
     },
     "floater": {
-      "description": "Calls a overpowered floater in any gamemode. Chat  /floater  to activate!",
+      "description": "Calls a overpowered floater in any gamemode. Chat  /floater to activate!",
       "external_url": "",
       "authors": [
         {
