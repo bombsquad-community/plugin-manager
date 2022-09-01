@@ -52,7 +52,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "858030b",
+          "released_on": "01-09-2022",
+          "md5sum": "27de4d6a66f41367977812c2df307c24"
+        }
       }
     },
     "musical_flags": {
@@ -66,7 +71,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "858030b",
+          "released_on": "01-09-2022",
+          "md5sum": "c84b7f415de5d3e9189ee73fc0e3ce93"
+        }
       }
     }
   }
