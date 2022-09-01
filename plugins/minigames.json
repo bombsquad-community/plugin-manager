@@ -40,6 +40,34 @@
           "md5sum": "a7ad7f1ac908fd871bcbcf665d49828c"
         }
       }
+    },
+    "memory_game": {
+      "description": "Memorise tiles to surive! Playable in teams/ffa/co-op",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "musical_flags": {
+      "description": "Musical chairs... but for bombsquad!?!! Playable in ffa/teams",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
