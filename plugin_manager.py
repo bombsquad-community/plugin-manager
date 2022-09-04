@@ -382,6 +382,10 @@ class PluginLocal:
             self._has_minigames = REGEXP["minigames"].search(content) is not None
         return self._has_minigames
 
+    async def has_plugins(self):
+        entry_points = await self.get_entry_points()
+        return len(entry_points) > 0
+
     def load_minigames(self):
         scanner = ba._meta.DirectoryScan(paths="")
         directory, module = self.install_path.rsplit(os.path.sep, 1)
@@ -414,6 +418,8 @@ class PluginLocal:
         """
         Return True even if a single entry point is enabled or contains minigames.
         """
+        if not await self.has_plugins():
+            return True
         for entry_point, plugin_info in ba.app.config["Plugins"].items():
             if entry_point.startswith(self._entry_point_initials) and plugin_info["enabled"]:
                 return True
@@ -422,7 +428,7 @@ class PluginLocal:
         # for entry_point in await self.get_entry_points():
         #     if ba.app.config["Plugins"][entry_point]["enabled"]:
         #         return True
-        return await self.has_minigames()
+        return False
 
     # XXX: Commenting this out for now, since `enable` and `disable` currently have their
     #      own separate logic.
@@ -728,7 +734,7 @@ class PluginWindow(popup.PopupWindow):
         to_draw_button4 = False
         if self.plugin.is_installed:
             self.local_plugin = self.plugin.get_local()
-            if await self.local_plugin.has_minigames():
+            if not await self.local_plugin.has_plugins():
                 to_draw_button1 = False
             else:
                 if await self.local_plugin.is_enabled():
