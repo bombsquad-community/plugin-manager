@@ -95,6 +95,25 @@
           "md5sum": "c024a0774f2e960dad7f633efdc3feb5"
         }
       }
+    },
+    "icons_keyboard": {
+      "description": "Enable 'Always Use Internal Keyboard' in Settings>Advanced. Double tap space-bar to change keyboards",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "b581d90",
+          "released_on": "02-09-2022",
+          "md5sum": "94f67a98a9faed0ece63674c84d40061"
+        }
+      }
     }
   }
 }
