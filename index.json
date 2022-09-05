@@ -3,9 +3,9 @@
   "versions": {
     "0.1.4": {
        "api_version": 7,
-       "commit_sha": "29f531e5",
-       "released_on": "28-08-2022",
-       "md5sum": "5b3b8b36316ba2ab46aea38416301169"
+       "commit_sha": "7c4504cc1eb08670c9164ea6e1d29c60bd8b85b8",
+       "released_on": "05-09-2022",
+       "md5sum": "52e03d303e55738d3653f86fb5abe2de"
     }
   },
   "categories": [
