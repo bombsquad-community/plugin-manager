@@ -96,6 +96,25 @@
         }
       }
     },
+    "easy_connect": {
+      "description": "Can connect easily to servers by retrying automatically till you join the server.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "3a8ba07",
+          "released_on": "06-09-2022",
+          "md5sum": "eb93f3df040261f73963621cb66565d3"
+        }
+      }
+    },
     "icons_keyboard": {
       "description": "Enable 'Always Use Internal Keyboard' in Settings>Advanced. Double tap space-bar to change keyboards",
       "external_url": "",
