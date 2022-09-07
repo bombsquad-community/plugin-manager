@@ -6,7 +6,7 @@ import re
 import datetime
 
 
-class NullVersionedPlugin:
+class PluginVersionMetadata:
     def __init__(self, plugin_name, version_name, plugin_path, from_json={}):
         self.plugin_name = plugin_name
         self.version_name = version_name
@@ -57,9 +57,17 @@ class NullVersionedPlugin:
         if versions[self.version_name] is None:
             versions[self.version_name] = {}
 
-        md5sum = hashlib.md5(self._content).hexdigest()
+        md5sum = self.calculate_md5sum()
         versions[self.version_name]["md5sum"] = md5sum
         return self
+
+    def calculate_md5sum(self):
+        if self._content is None:
+            with open(self.plugin_path, "rb") as fin:
+                self._content = fin.read()
+
+        md5sum = hashlib.md5(self._content).hexdigest()
+        return md5sum
 
 
 class CategoryVersionMetadata:
@@ -75,17 +83,38 @@ class CategoryVersionMetadata:
                 plugin_metadata["versions"].items())[0]
             if latest_version_metadata is None:
                 plugin_path = f"{os.path.join(self.category_metadata_base, f'{plugin_name}.py')}"
-                yield NullVersionedPlugin(
+                yield PluginVersionMetadata(
                     plugin_name,
                     latest_version_name,
                     plugin_path,
                 )
 
+    def get_plugins_having_diff_last_md5sum_version_values(self):
+        for plugin_name, plugin_metadata in self.category_metadata["plugins"].items():
+            latest_version_name, latest_version_metadata = tuple(
+                plugin_metadata["versions"].items())[0]
+
+            plugin_path = f"{os.path.join(self.category_metadata_base, f'{plugin_name}.py')}"
+            plugin_version_metadata = PluginVersionMetadata(
+                plugin_name,
+                latest_version_name,
+                plugin_path,
+            )
+            if plugin_version_metadata.calculate_md5sum() != latest_version_metadata["md5sum"]:
+                yield plugin_version_metadata
+
     def apply_version_metadata_to_null_version_values(self, commit_sha):
         null_versioned_plugins = self.get_plugins_having_null_version_values()
+        return self.apply_metadata_to_plugins(commit_sha, null_versioned_plugins)
+
+    def apply_version_metadata_to_last_version_values(self, commit_sha):
+        diff_md5sum_plugins = self.get_plugins_having_diff_last_md5sum_version_values()
+        return self.apply_metadata_to_plugins(commit_sha, diff_md5sum_plugins)
+
+    def apply_metadata_to_plugins(self, commit_sha, plugins):
         today = datetime.date.today().strftime("%d-%m-%Y")
         category_json = self.category_metadata
-        for plugin in null_versioned_plugins:
+        for plugin in plugins:
             category_json = (
                 plugin.set_json(category_json)
                       .set_api_version()
@@ -106,7 +135,54 @@ class CategoryVersionMetadata:
             )
 
 
+class PluginManagerVersionMetadata:
+    def __init__(self):
+        with open("plugin_manager.py", "rb") as fin:
+            self._content = fin.read()
+        self.metadata_path = "index.json"
+        with open(self.metadata_path, "rb") as fin:
+            self.json = json.load(fin)
+        self.api_version_regexp = re.compile(b"(?<=ba_meta require api )(.*)")
+
+    def set_api_version(self, version_name):
+        version = self.json["versions"][version_name]
+        api_version = self.api_version_regexp.search(self._content).group()
+        version["api_version"] = int(api_version)
+
+    def calculate_md5sum(self):
+        md5sum = hashlib.md5(self._content).hexdigest()
+        return md5sum
+
+    def apply_version_metadata_to_null_version_value(self, commit_sha):
+        today = datetime.date.today().strftime("%d-%m-%Y")
+        latest_version_name, latest_version_metadata = tuple(
+            self.json["versions"].items())[0]
+
+        if self.json["versions"][latest_version_name] is None:
+            self.json["versions"][latest_version_name] = {}
+            version = self.json["versions"][latest_version_name]
+            self.set_api_version(latest_version_name)
+            version["commit_sha"] = commit_sha[:8]
+            version["released_on"] = today
+            version["md5sum"] = self.calculate_md5sum()
+
+        return self.json
+
+    def save(self, metadata):
+        with open(self.metadata_path, "w") as fout:
+            json.dump(
+                metadata,
+                fout,
+                indent=2,
+                ensure_ascii=False,
+            )
+
+
 def auto_apply_version_metadata(last_commit_sha):
+    plugin_manager = PluginManagerVersionMetadata()
+    metadata = plugin_manager.apply_version_metadata_to_null_version_value(last_commit_sha)
+    plugin_manager.save(metadata)
+
     utilities = CategoryVersionMetadata(os.path.join("plugins", "utilities"))
     category_json = utilities.apply_version_metadata_to_null_version_values(last_commit_sha)
     utilities.save(category_json)

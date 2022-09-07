@@ -29,7 +29,11 @@ class TestPluginManagerMetadata(unittest.TestCase):
 
     def test_versions_order(self):
         versions = list(self.content["versions"].items())
-        sorted_versions = sorted(versions, key=lambda version: version[0])
+        sorted_versions = sorted(
+            versions,
+            key=lambda version: version[0],
+            reverse=True,
+        )
         assert sorted_versions == versions
 
     def test_versions(self):
