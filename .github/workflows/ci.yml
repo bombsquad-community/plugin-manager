@@ -31,7 +31,7 @@ jobs:
     - name: Apply AutoPEP8
       run: |
         autopep8 --in-place --recursive --max-line-length=100 .
-    - name: Apply AutoPEP8 Commit
+    - name: Commit AutoPEP8
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "[ci] auto-format"
@@ -39,7 +39,7 @@ jobs:
     - name: Apply Version Metadata
       run: |
         python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
-    - name: Apply Version Metadata Commit
+    - name: Commit Version Metadata
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "[ci] apply-version-metadata"
