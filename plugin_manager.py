@@ -832,6 +832,7 @@ class PluginWindow(popup.PopupWindow):
                                               size=(40, 40),
                                               button_type="square",
                                               label="",
+                                              color=(0, 0.75, 0.75),
                                               on_activate_call=self.settings)
             ba.imagewidget(parent=self._root_widget,
                            position=(settings_pos_x, settings_pos_y),
