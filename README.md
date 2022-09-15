@@ -24,7 +24,7 @@ which makes further modding of your game more convenient by providing easier acc
 
 ## Installation
 
-There are two different ways the plugin manager can be installed through:
+There are two different ways the plugin manager can be installed:
 
 1. Download [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
    to your mods directory (check it out by going into your game's Settings -> Advanced -> Show Mods Folder). This is the
@@ -51,8 +51,8 @@ There are two different ways the plugin manager can be installed through:
 
 - In order for a plugin to get accepted to this official repository, it must target the general game audience and be
   completely open and readable, not be encoded or encrypted in any form.
-- If your plugin doesn't target the general game audience, you can put your plugins in a GitHub repository and then
-  your plugins can be installed through the custom source option in-game.
+- If your plugin doesn't target the general game audience, you can put your plugin(s) in a GitHub repository and then
+  your plugin(s) can be installed through the custom source option in-game.
   See [3rd party plugin sources](#3rd-party-plugin-sources) for more information.
 - New plugins are accepted through a [pull request](../../compare). Add your plugin in the minigames, utilities, or
   the category directory you feel is the most relevant to the type of plugin you're submitting, [here](plugins).
@@ -60,7 +60,7 @@ There are two different ways the plugin manager can be installed through:
 - Plugin manager will also show and execute the settings icon if your `ba.Plugin` export class has a method named
   `on_plugin_manager_prompt`; check out the
   [colorscheme](https://github.com/bombsquad-community/plugin-manager/blob/f24f0ca5ded427f6041795021f1af2e6a08b6ce9/plugins/utilities/colorscheme.py#L419-L420)
-  plugin for an example and it's behaviour when the settings icon is tapped on via the plugin manager in-game.
+  plugin as an example and its behaviour when the settings icon is tapped via the plugin manager in-game.
 
 #### Example:
 
@@ -79,7 +79,7 @@ class Main(ba.Plugin):
 ```
 
 You'll have to fork this repository and add your `sample_plugin.py` plugin file into the appropriate directory, which for
-utility plugins is [plugins/utilities](plugins/utilities). Now you'll have to add an entry for your plugin
+utility plugin is [plugins/utilities](plugins/utilities). After that, you'll have to add an entry for your plugin
 in [plugins/utilities.json](plugins/utilities.json) so that it gets picked up by the Plugin Manager in-game.
 
 To do this, you'll have to edit the file and add something like this:
@@ -115,7 +115,7 @@ You can add whatever you wanna add to these fields. However, leave the value for
 Version values will automatically be populated through github-actions (along with formatting your code as per PEP8 style
 guide) once you open a pull request.
 
-Save `utilities.json` with your modified changes and now you can make us a [pull request](../../compare) with the
+Save `utilities.json` with your modified changes and now you can create a [pull request](../../compare) with the
 plugin you've added and the modified JSON metadata file!
 
 ### Updating a Plugin
@@ -125,8 +125,8 @@ plugin you've added and the modified JSON metadata file!
 
 #### Example
 
-Continuing the example from [Submitting a Plugin](#submitting-a-plugin) section, say you also wanna add a new screenmessage
-to the `sample_plugin.py` plugin after it was submitted. Edit `sample_plugin.py` with whatever changes you'd like:
+Continuing the example from [Submitting a Plugin](#submitting-a-plugin) section, if you also want to add a new screenmessage
+to the `sample_plugin.py` plugin after it has been submitted, edit `sample_plugin.py` with whatever changes you'd like:
 ```diff
 diff --git a/plugins/utilities/sample_plugin.py b/plugins/utilities/sample_plugin.py
 index ebb7dcc..da2b312 100644
@@ -167,7 +167,7 @@ That's it! Now you can make a [pull request](../../compare) with both the update
 
 - In case your plugin doesn't sit well with our guidelines or you wouldn't want your plugin to be here for some reason,
   you can create your own GitHub repository and put all your plugins in there.
-- Check out https://github.com/rikkolovescats/sahilp-plugins for an example. You can choose to show up plugins from this
+- Check out https://github.com/rikkolovescats/sahilp-plugins as an example. You can choose to show up plugins from this
   repository in your plugin manager by adding `rikkolovescats/sahilp-plugins` as a custom source through the category
   selection popup window in-game.
 
@@ -189,7 +189,7 @@ $ python -m unittest discover -v
 
 ## Shout out!
 
-If you've been with the community for long enough, you may have known about the amazing
+If you've been with the community long enough, you may have known about the amazing
 [Mrmaxmeier's mod manager](https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager), which unfortunately wasn't
 maintained and failed to keep up with the game's latest versions and API changes. Well, this is another attempt to
 create something similar, with a hope we as a community can continue to keep it up-to-date with the original game.
