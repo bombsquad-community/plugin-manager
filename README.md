@@ -2,19 +2,22 @@
 
 # plugin-manager
 
-A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad).
+A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
+which makes further modding of your game more convenient by providing easier access to community created content.
 
+![Plugin Manager GIF](https://user-images.githubusercontent.com/106954762/190505304-519c4b91-2461-42b1-be57-655a3fb0cbe8.gif)
 
 ## Features
 
-- [x] Fully open-source plugin manager, as well as all the plugins you'll find in this repository.
-- [x] Ability to add 3rd party plugin sources (use them at your own risk, since they may not be audited!).
-- [x] Only deal with plugins and plugin updates targetting your game's current API version.
-- [x] Search installable plugins from this repository, as well as 3rd party sources.
-- [x] Setting to enable or disable auto-updates for plugin manager as well plugins.
-- [x] Setting to immediately enable installed plugins/minigames without having to restart game.
-- [x] Ability to launch a plugin's settings directly from the plugin manager window.
-- [x] Check out a plugin's source code before you even install it.
+- [x] Completely open-source - both the plugin-manager and all the plugins in this repository.
+- [x] Works on all platforms.
+- [x] Only deal with plugins and updates targetting your game's current API version.
+- [x] Search for plugins.
+- [x] Add 3rd party plugin sources (use them at your own risk, since they may not be audited!).
+- [x] Enable or disable auto-updates for plugin manager and plugins.
+- [x] Immediately enable installed plugins/minigames without having to restart game.
+- [x] Launch a plugin's settings directly from the plugin manager window.
+- [x] Check out a plugin's source code before installing it.
 - [ ] Sync installed plugins with workspaces.
 - [ ] Sort plugins by popularity, downloads, rating or some other metric.
 
@@ -32,6 +35,15 @@ There are two different ways the plugin manager can be installed through:
    to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
    will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
    manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
+
+
+## Usage
+
+- If installed correctly, you'll see the plugin manager button in your game's settings.
+
+<img src="https://user-images.githubusercontent.com/106954762/190507025-f9e0dd12-d91b-4e3e-a347-6998d776a399.png" width="600">
+
+- That's it, you now have access to a variety of community created content waiting for you to install!
 
 ## Contributing
 
@@ -174,6 +186,14 @@ and then executing the following in the project's root directory:
 ```bash
 $ python -m unittest discover -v
 ```
+
+## Shout out!
+
+If you've been with the community for long enough, you may have known about the amazing
+[Mrmaxmeier's mod manager](https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager), which unfortunately wasn't
+maintained and failed to keep up with the game's latest versions and API changes. Well, this is another attempt to
+create something similar, with a hope we as a community can continue to keep it up-to-date with the original game.
+
 
 ## License
 
