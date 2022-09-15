@@ -2089,24 +2089,3 @@ class EntryPoint(ba.Plugin):
         startup_tasks = StartupTasks()
         loop = asyncio.get_event_loop()
         loop.create_task(startup_tasks.execute())
-        # loop = asyncio.get_event_loop()
-        # loop.create_task(do())
-        # pm = PluginManager()
-        # pm.plugin_index()
-
-    def on_app_pause(self) -> None:
-        """Called after pausing game activity."""
-        print("pause")
-
-    def on_app_resume(self) -> None:
-        """Called after the game continues."""
-        print("resume")
-
-    def on_app_shutdown(self) -> None:
-        """Called before closing the application."""
-        print("shutdown")
-        # print(ba.app.config["Community Plugin Manager"])
-        # with open(_env["config_file_path"], "r") as fin:
-        #     c = fin.read()
-        # import json
-        # print(json.loads(c)["Community Plugin Manager"])
