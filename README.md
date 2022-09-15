@@ -60,7 +60,7 @@ There are two different ways the plugin manager can be installed:
 - Plugin manager will also show and execute the settings icon if your `ba.Plugin` export class has a method named
   `on_plugin_manager_prompt`; check out the
   [colorscheme](https://github.com/bombsquad-community/plugin-manager/blob/f24f0ca5ded427f6041795021f1af2e6a08b6ce9/plugins/utilities/colorscheme.py#L419-L420)
-  plugin as an example and it's behaviour when the settings icon is tapped via the plugin manager in-game.
+  plugin as an example and its behaviour when the settings icon is tapped via the plugin manager in-game.
 
 #### Example:
 
