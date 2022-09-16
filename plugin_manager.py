@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.6"
+PLUGIN_MANAGER_VERSION = "0.1.5"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
@@ -832,7 +832,6 @@ class PluginWindow(popup.PopupWindow):
                                               size=(40, 40),
                                               button_type="square",
                                               label="",
-                                              color=(0, 0.75, 0.75),
                                               on_activate_call=self.settings)
             ba.imagewidget(parent=self._root_widget,
                            position=(settings_pos_x, settings_pos_y),
@@ -2089,3 +2088,24 @@ class EntryPoint(ba.Plugin):
         startup_tasks = StartupTasks()
         loop = asyncio.get_event_loop()
         loop.create_task(startup_tasks.execute())
+        # loop = asyncio.get_event_loop()
+        # loop.create_task(do())
+        # pm = PluginManager()
+        # pm.plugin_index()
+
+    def on_app_pause(self) -> None:
+        """Called after pausing game activity."""
+        print("pause")
+
+    def on_app_resume(self) -> None:
+        """Called after the game continues."""
+        print("resume")
+
+    def on_app_shutdown(self) -> None:
+        """Called before closing the application."""
+        print("shutdown")
+        # print(ba.app.config["Community Plugin Manager"])
+        # with open(_env["config_file_path"], "r") as fin:
+        #     c = fin.read()
+        # import json
+        # print(json.loads(c)["Community Plugin Manager"])
