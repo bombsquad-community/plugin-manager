@@ -93,7 +93,8 @@
           "commit_sha": "858030b",
           "released_on": "01-09-2022",
           "md5sum": "c024a0774f2e960dad7f633efdc3feb5"
-        }
+        },
+       "1.1.0": null
       }
     },
     "easy_connect": {
