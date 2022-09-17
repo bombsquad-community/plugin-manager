@@ -15,68 +15,75 @@
 #  added advanced ID revealer
 # live ping support for bcs
 
-#Made by Mr.Smoothy - Plasma Boson
+# Made by Mr.Smoothy - Plasma Boson
+import traceback
+import codecs
+import json
+import re
+import sys
+import shutil
+import copy
+import urllib
+import os
+from bastd.ui.account import viewer
+from bastd.ui.popup import PopupMenuWindow, PopupWindow
+from ba._general import Call
+import base64
+import datetime
+import ssl
+import bastd.ui.party as bastd_party
+from typing import List, Sequence, Optional, Dict, Any, Union
+from bastd.ui.colorpicker import ColorPickerExact
+from bastd.ui.confirm import ConfirmWindow
+from dataclasses import dataclass
+import math
+import time
+import ba
+import _ba
+from typing import TYPE_CHECKING, cast
+import urllib.request
+from _thread import start_new_thread
+import threading
 version_str = "7"
 
-import os,urllib
-import os,sys,re,json,codecs,traceback,base64
-import threading
-import time,copy,datetime,shutil
 
-from _thread import start_new_thread
-
-import urllib.request
-
-from typing import TYPE_CHECKING, cast
-
-import _ba
-import ba
-import time
-import math
-import threading
-
-from dataclasses import dataclass
-from bastd.ui.popup import PopupMenuWindow,PopupWindow
-from bastd.ui.confirm import ConfirmWindow
-from bastd.ui.colorpicker import ColorPickerExact
-
-from typing import List, Sequence, Optional, Dict, Any, Union
-
-import bastd.ui.party as bastd_party
-cache_chat=[]
-connect=_ba.connect_to_party
-disconnect=_ba.disconnect_from_host
-unmuted_names=[]
-smo_mode=3
-f_chat=False
-chatlogger=False
-screenmsg=True
-ip_add="127.0.0.1"
-p_port=43210
-p_name="local"
+cache_chat = []
+connect = _ba.connect_to_party
+disconnect = _ba.disconnect_from_host
+unmuted_names = []
+smo_mode = 3
+f_chat = False
+chatlogger = False
+screenmsg = True
+ip_add = "127.0.0.1"
+p_port = 43210
+p_name = "local"
 current_ping = 0.0
 enable_typing = False    # this will prevent auto ping to update textwidget when user actually typing chat message
-import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
-def newconnect_to_party(address,port=43210,print_progress=False):
+
+
+def newconnect_to_party(address, port=43210, print_progress=False):
     global ip_add
     global p_port
-    dd=_ba.get_connection_to_host_info()
-    if(dd!={} ):
+    dd = _ba.get_connection_to_host_info()
+    if (dd != {}):
         _ba.disconnect_from_host()
 
-        ip_add=address
-        p_port=port
-        connect(address,port,print_progress)
+        ip_add = address
+        p_port = port
+        connect(address, port, print_progress)
     else:
-        ip_add=address
-        p_port=port
+        ip_add = address
+        p_port = port
         # print(ip_add,p_port)
-        connect(ip_add,port,print_progress)
+        connect(ip_add, port, print_progress)
 
 
 DEBUG_SERVER_COMMUNICATION = False
 DEBUG_PROCESSING = False
+
+
 class PingThread(threading.Thread):
     """Thread for sending out game pings."""
 
@@ -93,7 +100,7 @@ class PingThread(threading.Thread):
             from ba.internal import get_ip_address_type
             socket_type = get_ip_address_type(ip_add)
             sock = socket.socket(socket_type, socket.SOCK_DGRAM)
-            sock.connect((ip_add,p_port))
+            sock.connect((ip_add, p_port))
 
             accessible = False
             starttime = time.time()
@@ -116,7 +123,7 @@ class PingThread(threading.Thread):
                 time.sleep(1)
             ping = (time.time() - starttime) * 1000.0
             global current_ping
-            current_ping = round(ping,2)
+            current_ping = round(ping, 2)
         except ConnectionRefusedError:
             # Fine, server; sorry we pinged you. Hmph.
             pass
@@ -166,91 +173,107 @@ class PingThread(threading.Thread):
 try:
     import OnlineTranslator
     tranTypes = [item for item in dir(OnlineTranslator) if item.startswith("Translator_")]
-    if "item" in globals():del item
-except:tranTypes = []#;ba.print_exception()
+    if "item" in globals():
+        del item
+except:
+    tranTypes = []  # ;ba.print_exception()
 
-RecordFilesDir = os.path.join(_ba.env()["python_directory_user"],"Configs" + os.sep)
-if not os.path.exists(RecordFilesDir):os.makedirs(RecordFilesDir)
+RecordFilesDir = os.path.join(_ba.env()["python_directory_user"], "Configs" + os.sep)
+if not os.path.exists(RecordFilesDir):
+    os.makedirs(RecordFilesDir)
 
 version_str = "3.0.1"
 
 Current_Lang = None
 
 SystemEncode = sys.getfilesystemencoding()
-if not isinstance(SystemEncode,str):
+if not isinstance(SystemEncode, str):
     SystemEncode = "utf-8"
+
 
 def update_ping():
     try:
         _ba.set_ping_widget_value(current_ping)
     except:
         with _ba.Context('ui'):
-            if hasattr(_ba,"ping_widget") and _ba.ping_widget.exists():
-                ba.textwidget(edit=_ba.ping_widget,text="Ping:"+str(current_ping)+" ms")
+            if hasattr(_ba, "ping_widget") and _ba.ping_widget.exists():
+                ba.textwidget(edit=_ba.ping_widget, text="Ping:"+str(current_ping)+" ms")
+
 
 PingThread().start()
 
-import datetime
 try:
     from ba._generated.enums import TimeType
 except:
     from ba._enums import TimeType
+
+
 class chatloggThread():
     """Thread for sending out game pings."""
+
     def __init__(self):
         super().__init__()
-        self.saved_msg=[]
+        self.saved_msg = []
+
     def run(self) -> None:
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-statements
         global chatlogger
-        self.timerr=ba.Timer(5.0,self.chatlogg,repeat=True,timetype=TimeType.REAL)
+        self.timerr = ba.Timer(5.0, self.chatlogg, repeat=True, timetype=TimeType.REAL)
+
     def chatlogg(self):
-      global chatlogger
-      chats=_ba.get_chat_messages()
-      for msg in chats:
-        if msg in self.saved_msg:
-          pass
+        global chatlogger
+        chats = _ba.get_chat_messages()
+        for msg in chats:
+            if msg in self.saved_msg:
+                pass
+            else:
+                self.save(msg)
+                self.saved_msg.append(msg)
+                if len(self.saved_msg) > 45:
+                    self.saved_msg.pop(0)
+        if chatlogger:
+            pass
         else:
-          self.save(msg)
-          self.saved_msg.append(msg)
-          if len(self.saved_msg) > 45:
-            self.saved_msg.pop(0)
-      if chatlogger:
-        pass
-      else:
-        self.timerr=None
-    def save(self,msg):
-      x=str(datetime.datetime.now())
-      t=open(os.path.join(_ba.env()["python_directory_user"],"Chat logged.txt"),"a+")
-      t.write(x+" : "+ msg +"\n")
-      t.close()
+            self.timerr = None
+
+    def save(self, msg):
+        x = str(datetime.datetime.now())
+        t = open(os.path.join(_ba.env()["python_directory_user"], "Chat logged.txt"), "a+")
+        t.write(x+" : " + msg + "\n")
+        t.close()
+
+
 class mututalServerThread():
     def run(self):
-        self.timer=ba.Timer(10,self.checkPlayers,repeat=True,timetype=TimeType.REAL)
+        self.timer = ba.Timer(10, self.checkPlayers, repeat=True, timetype=TimeType.REAL)
+
     def checkPlayers(self):
-        if _ba.get_connection_to_host_info()!={}:
-            server_name=_ba.get_connection_to_host_info()["name"]
-            players=[]
+        if _ba.get_connection_to_host_info() != {}:
+            server_name = _ba.get_connection_to_host_info()["name"]
+            players = []
             for ros in _ba.get_game_roster():
                 players.append(ros["display_string"])
-            start_new_thread(dump_mutual_servers,(players,server_name,))
+            start_new_thread(dump_mutual_servers, (players, server_name,))
 
-def dump_mutual_servers(players,server_name):
+
+def dump_mutual_servers(players, server_name):
     filePath = os.path.join(RecordFilesDir, "players.json")
-    data={}
+    data = {}
     if os.path.isfile(filePath):
-        f=open(filePath,"r")
-        data=json.load(f)
+        f = open(filePath, "r")
+        data = json.load(f)
     for player in players:
         if player in data:
             if server_name not in data[player]:
-                data[player].insert(0,server_name)
-                data[player]=data[player][:3]
+                data[player].insert(0, server_name)
+                data[player] = data[player][:3]
         else:
-            data[player]=[server_name]
-    f=open(filePath,"w")
-    json.dump(data,f)
+            data[player] = [server_name]
+    f = open(filePath, "w")
+    json.dump(data, f)
+
+
 mututalServerThread().run()
 
 
@@ -260,58 +283,61 @@ class customchatThread():
     def __init__(self):
         super().__init__()
         global cache_chat
-        self.saved_msg=[]
-        chats=_ba.get_chat_messages()
-        for msg in chats:  #fill up old  chat , to avoid old msg popup
+        self.saved_msg = []
+        chats = _ba.get_chat_messages()
+        for msg in chats:  # fill up old  chat , to avoid old msg popup
             cache_chat.append(msg)
+
     def run(self) -> None:
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-statements
         global chatlogger
-        self.timerr=ba.Timer(5.0,self.chatcheck,repeat=True,timetype=TimeType.REAL)
+        self.timerr = ba.Timer(5.0, self.chatcheck, repeat=True, timetype=TimeType.REAL)
 
     def chatcheck(self):
-      global unmuted_names
-      global cache_chat
-      chats=_ba.get_chat_messages()
-      for msg in chats:
-        if msg in cache_chat:
-          pass
-        else:
-            if msg.split(":")[0] in unmuted_names:
-                ba.screenmessage(msg,color=(0.6,0.9,0.6))
-            cache_chat.append(msg)
-            if len(self.saved_msg) > 45:
-                cache_chat.pop(0)
-        if ba.app.config.resolve('Chat Muted'):
-            pass
-        else:
-            self.timerr=None
+        global unmuted_names
+        global cache_chat
+        chats = _ba.get_chat_messages()
+        for msg in chats:
+            if msg in cache_chat:
+                pass
+            else:
+                if msg.split(":")[0] in unmuted_names:
+                    ba.screenmessage(msg, color=(0.6, 0.9, 0.6))
+                cache_chat.append(msg)
+                if len(self.saved_msg) > 45:
+                    cache_chat.pop(0)
+            if ba.app.config.resolve('Chat Muted'):
+                pass
+            else:
+                self.timerr = None
+
 
 def chatloggerstatus():
-  global chatlogger
-  if chatlogger:
-    return "Turn off Chat Logger"
-  else:
-    return "Turn on chat logger"
+    global chatlogger
+    if chatlogger:
+        return "Turn off Chat Logger"
+    else:
+        return "Turn on chat logger"
 
-def _getTransText(text , isBaLstr = False , same_fb = False):
+
+def _getTransText(text, isBaLstr=False, same_fb=False):
     global Current_Lang
     global chatlogger
     if Current_Lang != 'English':
         Current_Lang = 'English'
         global Language_Texts
         Language_Texts = {
-                                "Chinese": {
+            "Chinese": {
 
-                                },
-                                "English": {
-                                    "Add_a_Quick_Reply": "Add a Quick Reply",
-                                    "Admin_Command_Kick_Confirm": "Are you sure to use admin\
+            },
+            "English": {
+                "Add_a_Quick_Reply": "Add a Quick Reply",
+                "Admin_Command_Kick_Confirm": "Are you sure to use admin\
 command to kick %s?",
-                                    "Ban_For_%d_Seconds": "Ban for %d second(s).",
-                                    "Ban_Time_Post": "Enter the time you want to ban(Seconds).",
-                                    "Credits_for_This": "Credits for This",
+                "Ban_For_%d_Seconds": "Ban for %d second(s).",
+                "Ban_Time_Post": "Enter the time you want to ban(Seconds).",
+                "Credits_for_This": "Credits for This",
                                     "Custom_Action": "Custom Action",
                                     "Debug_for_Host_Info": "Host Info Debug",
                                     "Game_Record_Saved": "Game replay %s is saved.",
@@ -329,67 +355,66 @@ command to kick %s?",
                                     "Something_is_removed": "'%s' is removed.",
                                     "Times": "Times",
                                     "Translator": "Translator",
-                                    "chatloggeroff":"Turn off Chat Logger",
-                                    "chatloggeron":"Turn on Chat Logger",
-                                    "screenmsgoff":"Hide ScreenMessage",
-                                    "screenmsgon":"Show ScreenMessage",
-                                    "unmutethisguy":"unmute this guy",
-                                    "mutethisguy":"mute this guy",
-                                    "muteall":"Mute all",
-                                    "unmuteall":"Unmute all"
+                                    "chatloggeroff": "Turn off Chat Logger",
+                                    "chatloggeron": "Turn on Chat Logger",
+                                    "screenmsgoff": "Hide ScreenMessage",
+                                    "screenmsgon": "Show ScreenMessage",
+                                    "unmutethisguy": "unmute this guy",
+                                    "mutethisguy": "mute this guy",
+                                    "muteall": "Mute all",
+                                    "unmuteall": "Unmute all"
 
-                               }
-                            }
+            }
+        }
 
         Language_Texts = Language_Texts.get(Current_Lang)
         try:
             from Language_Packs import ModifiedPartyWindow_LanguagePack as ext_lan_pack
-            if isinstance(ext_lan_pack,dict) and isinstance(ext_lan_pack.get(Current_Lang),dict):
+            if isinstance(ext_lan_pack, dict) and isinstance(ext_lan_pack.get(Current_Lang), dict):
                 complete_Pack = ext_lan_pack.get(Current_Lang)
-                for key,item in complete_Pack.items():
+                for key, item in complete_Pack.items():
                     Language_Texts[key] = item
         except:
             pass
 
-    return(Language_Texts.get(text,"#Unknown Text#" if not same_fb else text) if not isBaLstr else
-           ba.Lstr(resource = "??Unknown??",fallback_value = Language_Texts.get(text,"#Unknown Text#" if not same_fb else text)))
+    return (Language_Texts.get(text, "#Unknown Text#" if not same_fb else text) if not isBaLstr else
+            ba.Lstr(resource="??Unknown??", fallback_value=Language_Texts.get(text, "#Unknown Text#" if not same_fb else text)))
+
 
 def _get_popup_window_scale() -> float:
     uiscale = ba.app.ui.uiscale
-    return(2.3 if uiscale is ba.UIScale.SMALL else
-                   1.65 if uiscale is ba.UIScale.MEDIUM else 1.23)
-
-def _creat_Lstr_list(string_list : list = []) -> list:
-    return([ba.Lstr(resource = "??Unknown??",fallback_value = item) for item in string_list])
+    return (2.3 if uiscale is ba.UIScale.SMALL else
+            1.65 if uiscale is ba.UIScale.MEDIUM else 1.23)
 
 
+def _creat_Lstr_list(string_list: list = []) -> list:
+    return ([ba.Lstr(resource="??Unknown??", fallback_value=item) for item in string_list])
 
 
 customchatThread().run()
+
 
 class ModifiedPartyWindow(bastd_party.PartyWindow):
     def __init__(self, origin: Sequence[float] = (0, 0)):
         _ba.set_party_window_open(True)
         self._r = 'partyWindow'
-        self.msg_user_selected=''
+        self.msg_user_selected = ''
         self._popup_type: Optional[str] = None
         self._popup_party_member_client_id: Optional[int] = None
         self._popup_party_member_is_host: Optional[bool] = None
         self._width = 500
 
-
         uiscale = ba.app.ui.uiscale
         self._height = (365 if uiscale is ba.UIScale.SMALL else
                         480 if uiscale is ba.UIScale.MEDIUM else 600)
 
-        #Custom color here
-        self._bg_color = ba.app.config.get("PartyWindow_Main_Color",(0.40, 0.55, 0.20)) if not isinstance(self._getCustomSets().get("Color"),(list,tuple)) else self._getCustomSets().get("Color")
-        if not isinstance(self._bg_color,(list,tuple)) or not len(self._bg_color) == 3:self._bg_color = (0.40, 0.55, 0.20)
+        # Custom color here
+        self._bg_color = ba.app.config.get("PartyWindow_Main_Color", (0.40, 0.55, 0.20)) if not isinstance(
+            self._getCustomSets().get("Color"), (list, tuple)) else self._getCustomSets().get("Color")
+        if not isinstance(self._bg_color, (list, tuple)) or not len(self._bg_color) == 3:
+            self._bg_color = (0.40, 0.55, 0.20)
 
-
-
-
-        ba.Window.__init__(self,root_widget=ba.containerwidget(
+        ba.Window.__init__(self, root_widget=ba.containerwidget(
             size=(self._width, self._height),
             transition='in_scale',
             color=self._bg_color,
@@ -412,15 +437,15 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                               icon=ba.gettexture('crossOut'),
                                               iconscale=1.2)
         self._smoothy_button = ba.buttonwidget(parent=self._root_widget,
-                                              scale=0.6,
-                                              position=(5, self._height - 47 -40),
-                                              size=(50, 50),
-                                              label='69',
-                                              on_activate_call=self.smoothy_roster_changer,
-                                              autoselect=True,
-                                              color=(0.45, 0.63, 0.15),
-                                              icon=ba.gettexture('replayIcon'),
-                                              iconscale=1.2)
+                                               scale=0.6,
+                                               position=(5, self._height - 47 - 40),
+                                               size=(50, 50),
+                                               label='69',
+                                               on_activate_call=self.smoothy_roster_changer,
+                                               autoselect=True,
+                                               color=(0.45, 0.63, 0.15),
+                                               icon=ba.gettexture('replayIcon'),
+                                               iconscale=1.2)
         ba.containerwidget(edit=self._root_widget,
                            cancel_button=self._cancel_button)
 
@@ -489,7 +514,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
 
         # add all existing messages if chat is not muted
         # print("updates")
-        if True:   #smoothy - always show chat in partywindow
+        if True:  # smoothy - always show chat in partywindow
             msgs = _ba.get_chat_messages()
             for msg in msgs:
                 self._add_msg(msg)
@@ -514,10 +539,10 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             # ba.containerwidget(edit=self._columnwidget, visible_child=txt)
         self.ping_widget = txt = ba.textwidget(
             parent=self._root_widget,
-            scale = 0.6,
+            scale=0.6,
             size=(20, 5),
             color=(0.45, 0.63, 0.15),
-            position=(self._width/2 -20, 50),
+            position=(self._width/2 - 20, 50),
             text='',
             selectable=True,
             autoselect=False,
@@ -540,7 +565,6 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
-
 
         # for m in  _ba.get_chat_messages():
         #   if m:
@@ -575,8 +599,6 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                               position=(self._width - 70, 35),
                               on_activate_call=self._send_chat_message)
 
-
-
         def _times_button_on_click():
             # self._popup_type = "send_Times_Press"
             # allow_range = 100 if _ba.get_foreground_host_session() is not None else 4
@@ -589,147 +611,149 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             Quickreply = self._get_quick_responds()
             if len(Quickreply) > 0:
                 PopupMenuWindow(position=self._times_button.get_screen_space_center(),
-                                            scale=_get_popup_window_scale(),
-                                            choices=Quickreply,
-                                            choices_display=_creat_Lstr_list(Quickreply),
-                                            current_choice=Quickreply[0],
-                                            delegate=self)
+                                scale=_get_popup_window_scale(),
+                                choices=Quickreply,
+                                choices_display=_creat_Lstr_list(Quickreply),
+                                current_choice=Quickreply[0],
+                                delegate=self)
                 self._popup_type = "QuickMessageSelect"
 
         self._send_msg_times = 1
 
         self._times_button = ba.buttonwidget(parent=self._root_widget,
-                                              size=(50, 35),
-                                              label="Quick",
-                                              button_type='square',
-                                              autoselect=True,
-                                              position=(30, 35),
-                                              on_activate_call=_times_button_on_click)
+                                             size=(50, 35),
+                                             label="Quick",
+                                             button_type='square',
+                                             autoselect=True,
+                                             position=(30, 35),
+                                             on_activate_call=_times_button_on_click)
 
         ba.textwidget(edit=txt, on_return_press_call=btn.activate)
         self._name_widgets: List[ba.Widget] = []
         self._roster: Optional[List[Dict[str, Any]]] = None
 
-        self.smoothy_mode=1
-        self.full_chat_mode=False
+        self.smoothy_mode = 1
+        self.full_chat_mode = False
         self._update_timer = ba.Timer(1.0,
                                       ba.WeakCall(self._update),
                                       repeat=True,
                                       timetype=ba.TimeType.REAL)
 
         self._update()
+
     def title_selected(self):
 
-        self.full_chat_mode= self.full_chat_mode ==False
+        self.full_chat_mode = self.full_chat_mode == False
         self._update()
+
     def smoothy_roster_changer(self):
 
-      self.smoothy_mode=(self.smoothy_mode+1)%3
+        self.smoothy_mode = (self.smoothy_mode+1) % 3
 
-
-
-      self._update()
+        self._update()
 
     def on_chat_message(self, msg: str) -> None:
-            """Called when a new chat message comes through."""
-            # print("on_chat"+msg)
-            if True:
-                self._add_msg(msg)
-    def _on_chat_press(self,msg,widget):
+        """Called when a new chat message comes through."""
+        # print("on_chat"+msg)
+        if True:
+            self._add_msg(msg)
+
+    def _on_chat_press(self, msg, widget):
         global unmuted_names
         if msg.split(":")[0] in unmuted_names:
 
-            choices=['mute']
-            choices_display=[_getTransText("mutethisguy",isBaLstr = True)]
+            choices = ['mute']
+            choices_display = [_getTransText("mutethisguy", isBaLstr=True)]
         else:
-            choices=['unmute']
-            choices_display=[_getTransText("unmutethisguy",isBaLstr = True)]
+            choices = ['unmute']
+            choices_display = [_getTransText("unmutethisguy", isBaLstr=True)]
         PopupMenuWindow(position=widget.get_screen_space_center(),
-                            scale=_get_popup_window_scale(),
-                            choices=choices,
-                            choices_display=choices_display,
-                            current_choice="@ this guy",
-                            delegate=self)
-        self.msg_user_selected=msg.split(":")[0]
+                        scale=_get_popup_window_scale(),
+                        choices=choices,
+                        choices_display=choices_display,
+                        current_choice="@ this guy",
+                        delegate=self)
+        self.msg_user_selected = msg.split(":")[0]
         self._popup_type = "chatmessagepress"
 
         # _ba.chatmessage("pressed")
 
-
     def _add_msg(self, msg: str) -> None:
-            try:
-                if ba.app.config.resolve('Chat Muted'):
+        try:
+            if ba.app.config.resolve('Chat Muted'):
+
+                txt = ba.textwidget(parent=self._columnwidget,
+                                    text=msg,
+                                    h_align='left',
+                                    v_align='center',
+                                    size=(130, 13),
+                                    scale=0.55,
+                                    position=(-0.6, 0),
+                                    selectable=True,
+                                    click_activate=True,
+                                    maxwidth=self._scroll_width * 0.94,
+                                    shadow=0.3,
+                                    flatness=1.0)
+                ba.textwidget(edit=txt,
+                              on_activate_call=ba.Call(
+                                  self._on_chat_press,
+                                  msg, txt))
+            else:
+                txt = ba.textwidget(parent=self._columnwidget,
+                                    text=msg,
+                                    h_align='left',
+                                    v_align='center',
+                                    size=(0, 13),
+                                    scale=0.55,
 
 
-                    txt = ba.textwidget(parent=self._columnwidget,
-                                  text=msg,
-                                  h_align='left',
-                                  v_align='center',
-                                  size=(130, 13),
-                                  scale=0.55,
-                                  position=(-0.6,0),
-                                  selectable=True,
-                                  click_activate=True,
-                                  maxwidth=self._scroll_width * 0.94,
-                                  shadow=0.3,
-                                  flatness=1.0)
-                    ba.textwidget(edit=txt,
-                                on_activate_call=ba.Call(
-                                                self._on_chat_press,
-                                                msg,txt))
-                else:
-                    txt = ba.textwidget(parent=self._columnwidget,
-                                  text=msg,
-                                  h_align='left',
-                                  v_align='center',
-                                  size=(0, 13),
-                                  scale=0.55,
 
+                                    maxwidth=self._scroll_width * 0.94,
+                                    shadow=0.3,
+                                    flatness=1.0)
 
-
-                                  maxwidth=self._scroll_width * 0.94,
-                                  shadow=0.3,
-                                  flatness=1.0)
-
-              # btn = ba.buttonwidget(parent=self._columnwidget,
-              #                       scale=0.7,
-              #                       size=(100,20),
-              #                       label="smoothy buttin",
-              #                       icon=ba.gettexture('replayIcon'),
-              #                       texture=None,
-              #                       )
-                self._chat_texts_haxx.append(txt)
-                if len(self._chat_texts_haxx) > 40:
-                    first = self._chat_texts_haxx.pop(0)
-                    first.delete()
-                ba.containerwidget(edit=self._columnwidget, visible_child=txt)
-            except Exception:
-              pass
+          # btn = ba.buttonwidget(parent=self._columnwidget,
+          #                       scale=0.7,
+          #                       size=(100,20),
+          #                       label="smoothy buttin",
+          #                       icon=ba.gettexture('replayIcon'),
+          #                       texture=None,
+          #                       )
+            self._chat_texts_haxx.append(txt)
+            if len(self._chat_texts_haxx) > 40:
+                first = self._chat_texts_haxx.pop(0)
+                first.delete()
+            ba.containerwidget(edit=self._columnwidget, visible_child=txt)
+        except Exception:
+            pass
 
     def _add_msg_when_muted(self, msg: str) -> None:
 
-            txt = ba.textwidget(parent=self._columnwidget,
-                                text=msg,
-                                h_align='left',
-                                v_align='center',
-                                size=(0, 13),
-                                scale=0.55,
-                                maxwidth=self._scroll_width * 0.94,
-                                shadow=0.3,
-                                flatness=1.0)
-            self._chat_texts.append(txt)
-            if len(self._chat_texts) > 40:
-                first = self._chat_texts.pop(0)
-                first.delete()
-            ba.containerwidget(edit=self._columnwidget, visible_child=txt)
+        txt = ba.textwidget(parent=self._columnwidget,
+                            text=msg,
+                            h_align='left',
+                            v_align='center',
+                            size=(0, 13),
+                            scale=0.55,
+                            maxwidth=self._scroll_width * 0.94,
+                            shadow=0.3,
+                            flatness=1.0)
+        self._chat_texts.append(txt)
+        if len(self._chat_texts) > 40:
+            first = self._chat_texts.pop(0)
+            first.delete()
+        ba.containerwidget(edit=self._columnwidget, visible_child=txt)
+
     def color_picker_closing(self, picker) -> None:
         ba._appconfig.commit_app_config()
+
     def color_picker_selected_color(self, picker, color) -> None:
-        #bs.animateArray(self._root_widget,"color",3,{0:self._bg_color,1500:color})
-        ba.containerwidget(edit=self._root_widget,color=color)
+        # bs.animateArray(self._root_widget,"color",3,{0:self._bg_color,1500:color})
+        ba.containerwidget(edit=self._root_widget, color=color)
         self._bg_color = color
         ba.app.config["PartyWindow_Main_Color"] = color
-    def _on_nick_rename_press(self,arg) -> None:
+
+    def _on_nick_rename_press(self, arg) -> None:
 
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
         c_width = 600
@@ -749,7 +773,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                       text='Enter nickname',
                       maxwidth=c_width * 0.8,
                       position=(c_width * 0.5, c_height - 60))
-        id=self._get_nick(arg)
+        id = self._get_nick(arg)
         self._player_nick_text = txt89 = ba.textwidget(
             parent=cnt,
             size=(c_width * 0.8, 40),
@@ -776,64 +800,76 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                               size=(180, 60),
                               position=(c_width - 230, 30),
                               on_activate_call=ba.Call(
-                                  self._add_nick,arg),
+                                  self._add_nick, arg),
                               autoselect=True)
         ba.widget(edit=cbtn, right_widget=okb)
         ba.widget(edit=okb, left_widget=cbtn)
         ba.textwidget(edit=txt89, on_return_press_call=okb.activate)
         ba.containerwidget(edit=cnt, cancel_button=cbtn, start_button=okb)
-    def _add_nick(self,arg):
-      config = ba.app.config
-      new_name_raw = cast(str, ba.textwidget(query=self._player_nick_text))
-      if arg:
-        if not isinstance(config.get('players nick'), dict):
-            config['players nick'] = {}
-        config['players nick'][arg] = new_name_raw
-        config.commit()
-      ba.containerwidget(edit=self._nick_rename_window,
+
+    def _add_nick(self, arg):
+        config = ba.app.config
+        new_name_raw = cast(str, ba.textwidget(query=self._player_nick_text))
+        if arg:
+            if not isinstance(config.get('players nick'), dict):
+                config['players nick'] = {}
+            config['players nick'][arg] = new_name_raw
+            config.commit()
+        ba.containerwidget(edit=self._nick_rename_window,
                            transition='out_scale')
-      # ba.containerwidget(edit=self._root_widget,transition='in_scale')
-    def _get_nick(self,id):
-      config=ba.app.config
-      if not isinstance(config.get('players nick'), dict):
+        # ba.containerwidget(edit=self._root_widget,transition='in_scale')
+
+    def _get_nick(self, id):
+        config = ba.app.config
+        if not isinstance(config.get('players nick'), dict):
             return "add nick"
-      elif id in config['players nick']:
-        return config['players nick'][id]
-      else:
-        return "add nick"
+        elif id in config['players nick']:
+            return config['players nick'][id]
+        else:
+            return "add nick"
 
     def _reset_game_record(self) -> None:
         try:
-            dir_path = _ba.get_replays_dir();curFilePath = os.path.join(dir_path+os.sep,"__lastReplay.brp").encode(SystemEncode)
-            newFileName = str(ba.Lstr(resource="replayNameDefaultText").evaluate()+" (%s)"%(datetime.datetime.strftime(datetime.datetime.now(),"%Y_%m_%d_%H_%M_%S"))+".brp")
-            newFilePath = os.path.join(dir_path+os.sep,newFileName).encode(SystemEncode)
+            dir_path = _ba.get_replays_dir()
+            curFilePath = os.path.join(dir_path+os.sep, "__lastReplay.brp").encode(SystemEncode)
+            newFileName = str(ba.Lstr(resource="replayNameDefaultText").evaluate(
+            )+" (%s)" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y_%m_%d_%H_%M_%S"))+".brp")
+            newFilePath = os.path.join(dir_path+os.sep, newFileName).encode(SystemEncode)
             #print(curFilePath, newFilePath)
-            #os.rename(curFilePath,newFilePath)
+            # os.rename(curFilePath,newFilePath)
             shutil.copyfile(curFilePath, newFilePath)
             _ba.reset_game_activity_tracking()
-            ba.screenmessage(_getTransText("Game_Record_Saved")%newFileName,color = (1,1,1))
-        except:ba.print_exception();ba.screenmessage(ba.Lstr(resource="replayWriteErrorText").evaluate()+"\
-"+traceback.format_exc(),color = (1,0,0))
+            ba.screenmessage(_getTransText("Game_Record_Saved") % newFileName, color=(1, 1, 1))
+        except:
+            ba.print_exception()
+            ba.screenmessage(ba.Lstr(resource="replayWriteErrorText").evaluate() +
+                             ""+traceback.format_exc(), color=(1, 0, 0))
+
     def _on_menu_button_press(self) -> None:
         is_muted = ba.app.config.resolve('Chat Muted')
         global chatlogger
-        choices = ["unmute" if is_muted else "mute","screenmsg","addQuickReply","removeQuickReply","chatlogger","credits"]
-        DisChoices = [_getTransText("unmuteall",isBaLstr = True) if is_muted else _getTransText("muteall",isBaLstr = True),
-                _getTransText("screenmsgoff",isBaLstr = True) if screenmsg else _getTransText("screenmsgon",isBaLstr = True),
+        choices = ["unmute" if is_muted else "mute", "screenmsg",
+                   "addQuickReply", "removeQuickReply", "chatlogger", "credits"]
+        DisChoices = [_getTransText("unmuteall", isBaLstr=True) if is_muted else _getTransText("muteall", isBaLstr=True),
+                      _getTransText("screenmsgoff", isBaLstr=True) if screenmsg else _getTransText(
+                          "screenmsgon", isBaLstr=True),
 
-                _getTransText("Add_a_Quick_Reply",isBaLstr = True),
-                _getTransText("Remove_a_Quick_Reply",isBaLstr = True),
-                _getTransText("chatloggeroff",isBaLstr = True) if chatlogger else _getTransText("chatloggeron",isBaLstr = True),
-                _getTransText("Credits_for_This",isBaLstr = True)
-                ]
+                      _getTransText("Add_a_Quick_Reply", isBaLstr=True),
+                      _getTransText("Remove_a_Quick_Reply", isBaLstr=True),
+                      _getTransText("chatloggeroff", isBaLstr=True) if chatlogger else _getTransText(
+                          "chatloggeron", isBaLstr=True),
+                      _getTransText("Credits_for_This", isBaLstr=True)
+                      ]
 
-        if len(tranTypes) > 0 :
-            choices.append("translator");DisChoices.append(_getTransText("Translator",isBaLstr = True))
+        if len(tranTypes) > 0:
+            choices.append("translator")
+            DisChoices.append(_getTransText("Translator", isBaLstr=True))
 
         choices.append("resetGameRecord")
-        DisChoices.append(_getTransText("Restart_Game_Record",isBaLstr = True))
-        if self._getCustomSets().get("Enable_HostInfo_Debug",False):
-            choices.append("hostInfo_Debug");DisChoices.append(_getTransText("Debug_for_Host_Info",isBaLstr = True))
+        DisChoices.append(_getTransText("Restart_Game_Record", isBaLstr=True))
+        if self._getCustomSets().get("Enable_HostInfo_Debug", False):
+            choices.append("hostInfo_Debug")
+            DisChoices.append(_getTransText("Debug_for_Host_Info", isBaLstr=True))
 
         PopupMenuWindow(
             position=self._menu_button.get_screen_space_center(),
@@ -842,121 +878,123 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             choices_display=DisChoices,
             current_choice="unmute" if is_muted else "mute", delegate=self)
         self._popup_type = "menu"
+
     def _on_party_member_press(self, client_id: int, is_host: bool,
                                widget: ba.Widget) -> None:
         # if we"re the host, pop up "kick" options for all non-host members
         if _ba.get_foreground_host_session() is not None:
             kick_str = ba.Lstr(resource="kickText")
-        else:kick_str = ba.Lstr(resource="kickVoteText")
-        choices = ["kick","@ this guy","info","adminkick"]
+        else:
+            kick_str = ba.Lstr(resource="kickVoteText")
+        choices = ["kick", "@ this guy", "info", "adminkick"]
 
-        choices_display = [kick_str,_getTransText("Mention_this_guy",isBaLstr = True),ba.Lstr(resource="??Unknown??",fallback_value="Info"),
-                            ba.Lstr(resource = "??Unknown??",fallback_value = _getTransText("Kick_ID")%client_id)]
+        choices_display = [kick_str, _getTransText("Mention_this_guy", isBaLstr=True), ba.Lstr(resource="??Unknown??", fallback_value="Info"),
+                           ba.Lstr(resource="??Unknown??", fallback_value=_getTransText("Kick_ID") % client_id)]
 
         try:
-            if len(self._getCustomSets().get("partyMemberPress_Custom") if isinstance(self._getCustomSets().get("partyMemberPress_Custom"),dict) else {}) > 0:
-                choices.append("customAction");choices_display.append(_getTransText("Custom_Action",isBaLstr = True))
-        except:ba.print_exception()
-
-
+            if len(self._getCustomSets().get("partyMemberPress_Custom") if isinstance(self._getCustomSets().get("partyMemberPress_Custom"), dict) else {}) > 0:
+                choices.append("customAction")
+                choices_display.append(_getTransText("Custom_Action", isBaLstr=True))
+        except:
+            ba.print_exception()
 
         PopupMenuWindow(position=widget.get_screen_space_center(),
-                            scale=_get_popup_window_scale(),
-                            choices=choices,
-                            choices_display=choices_display,
-                            current_choice="@ this guy",
-                            delegate=self)
+                        scale=_get_popup_window_scale(),
+                        choices=choices,
+                        choices_display=choices_display,
+                        current_choice="@ this guy",
+                        delegate=self)
         self._popup_party_member_client_id = client_id
         self._popup_party_member_is_host = is_host
         self._popup_type = "partyMemberPress"
 
     def _send_chat_message(self) -> None:
         sendtext = ba.textwidget(query=self._text_field)
-        if sendtext==".ip":
-          _ba.chatmessage("IP "+ip_add+" PORT "+str(p_port))
+        if sendtext == ".ip":
+            _ba.chatmessage("IP "+ip_add+" PORT "+str(p_port))
 
-          ba.textwidget(edit=self._text_field,text="")
-          return
-        elif sendtext==".info":
-          if _ba.get_connection_to_host_info() == {}:
-            s_build=0
-          else:
-            s_build = _ba.get_connection_to_host_info()['build_number']
-          s_v="0"
-          if s_build <=14365:
-            s_v=" 1.4.148 or below"
-          elif s_build <=14377:
-            s_v="1.4.148 < x < = 1.4.155 "
-          elif s_build>=20001 and s_build < 20308:
-            s_v ="1.5"
-          elif s_build >= 20308 and s_build < 20591:
-            s_v="1.6 "
-          else:
-            s_v ="1.7 and above "
-          _ba.chatmessage("script version "+s_v+"- build "+str(s_build))
-          ba.textwidget(edit=self._text_field,text="")
-          return
-        elif sendtext==".ping disabled":
-          PingThread(ip_add, p_port).start()
-          ba.textwidget(edit=self._text_field,text="")
-          return
-        elif sendtext==".save":
-          info = _ba.get_connection_to_host_info()
-          config = ba.app.config
-          if info.get('name', '') != '':
-            title = info['name']
-            if not isinstance(config.get('Saved Servers'), dict):
-                config['Saved Servers'] = {}
-            config['Saved Servers'][f'{ip_add}@{p_port}'] = {
-                'addr': ip_add,
-                'port': p_port,
-                'name': title
-            }
-            config.commit()
-            ba.screenmessage("Server saved to manual")
-            ba.playsound(ba.getsound('gunCocking'))
-            ba.textwidget(edit=self._text_field,text="")
+            ba.textwidget(edit=self._text_field, text="")
             return
+        elif sendtext == ".info":
+            if _ba.get_connection_to_host_info() == {}:
+                s_build = 0
+            else:
+                s_build = _ba.get_connection_to_host_info()['build_number']
+            s_v = "0"
+            if s_build <= 14365:
+                s_v = " 1.4.148 or below"
+            elif s_build <= 14377:
+                s_v = "1.4.148 < x < = 1.4.155 "
+            elif s_build >= 20001 and s_build < 20308:
+                s_v = "1.5"
+            elif s_build >= 20308 and s_build < 20591:
+                s_v = "1.6 "
+            else:
+                s_v = "1.7 and above "
+            _ba.chatmessage("script version "+s_v+"- build "+str(s_build))
+            ba.textwidget(edit=self._text_field, text="")
+            return
+        elif sendtext == ".ping disabled":
+            PingThread(ip_add, p_port).start()
+            ba.textwidget(edit=self._text_field, text="")
+            return
+        elif sendtext == ".save":
+            info = _ba.get_connection_to_host_info()
+            config = ba.app.config
+            if info.get('name', '') != '':
+                title = info['name']
+                if not isinstance(config.get('Saved Servers'), dict):
+                    config['Saved Servers'] = {}
+                config['Saved Servers'][f'{ip_add}@{p_port}'] = {
+                    'addr': ip_add,
+                    'port': p_port,
+                    'name': title
+                }
+                config.commit()
+                ba.screenmessage("Server saved to manual")
+                ba.playsound(ba.getsound('gunCocking'))
+                ba.textwidget(edit=self._text_field, text="")
+                return
         # elif sendtext != "":
         #     for index in range(getattr(self,"_send_msg_times",1)):
         if '\\' in sendtext:
-          sendtext = sendtext.replace('\\d', ('\ue048'))
-          sendtext = sendtext.replace('\\c', ('\ue043'))
-          sendtext = sendtext.replace('\\h', ('\ue049'))
-          sendtext = sendtext.replace('\\s', ('\ue046'))
-          sendtext = sendtext.replace('\\n', ('\ue04b'))
-          sendtext = sendtext.replace('\\f', ('\ue04f'))
-          sendtext = sendtext.replace('\\g', ('\ue027'))
-          sendtext = sendtext.replace('\\i', ('\ue03a'))
-          sendtext = sendtext.replace('\\m', ('\ue04d'))
-          sendtext = sendtext.replace('\\t', ('\ue01f'))
-          sendtext = sendtext.replace('\\bs', ('\ue01e'))
-          sendtext = sendtext.replace('\\j', ('\ue010'))
-          sendtext = sendtext.replace('\\e', ('\ue045'))
-          sendtext = sendtext.replace('\\l', ('\ue047'))
-          sendtext = sendtext.replace('\\a', ('\ue020'))
-          sendtext = sendtext.replace('\\b', ('\ue00c'))
-        if sendtext=="":
-            sendtext="   "
-        msg=sendtext
-        msg1=msg.split(" ")
-        ms2=""
-        if(len(msg1)>11):
-            hp=int(len(msg1)/2)
+            sendtext = sendtext.replace('\\d', ('\ue048'))
+            sendtext = sendtext.replace('\\c', ('\ue043'))
+            sendtext = sendtext.replace('\\h', ('\ue049'))
+            sendtext = sendtext.replace('\\s', ('\ue046'))
+            sendtext = sendtext.replace('\\n', ('\ue04b'))
+            sendtext = sendtext.replace('\\f', ('\ue04f'))
+            sendtext = sendtext.replace('\\g', ('\ue027'))
+            sendtext = sendtext.replace('\\i', ('\ue03a'))
+            sendtext = sendtext.replace('\\m', ('\ue04d'))
+            sendtext = sendtext.replace('\\t', ('\ue01f'))
+            sendtext = sendtext.replace('\\bs', ('\ue01e'))
+            sendtext = sendtext.replace('\\j', ('\ue010'))
+            sendtext = sendtext.replace('\\e', ('\ue045'))
+            sendtext = sendtext.replace('\\l', ('\ue047'))
+            sendtext = sendtext.replace('\\a', ('\ue020'))
+            sendtext = sendtext.replace('\\b', ('\ue00c'))
+        if sendtext == "":
+            sendtext = "   "
+        msg = sendtext
+        msg1 = msg.split(" ")
+        ms2 = ""
+        if (len(msg1) > 11):
+            hp = int(len(msg1)/2)
 
-            for m in range (0,hp):
-                ms2=ms2+" "+msg1[m]
+            for m in range(0, hp):
+                ms2 = ms2+" "+msg1[m]
 
             _ba.chatmessage(ms2)
 
-            ms2=""
-            for m in range (hp,len(msg1)):
-                ms2=ms2+" "+msg1[m]
+            ms2 = ""
+            for m in range(hp, len(msg1)):
+                ms2 = ms2+" "+msg1[m]
             _ba.chatmessage(ms2)
         else:
             _ba.chatmessage(msg)
 
-        ba.textwidget(edit=self._text_field,text="")
+        ba.textwidget(edit=self._text_field, text="")
         # else:
         #     Quickreply = self._get_quick_responds()
         #     if len(Quickreply) > 0:
@@ -970,93 +1008,135 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         #     else:
         #         _ba.chatmessage(sendtext)
         #         ba.textwidget(edit=self._text_field,text="")
+
     def _get_quick_responds(self):
-        if not hasattr(self,"_caches") or not isinstance(self._caches,dict):self._caches = {}
+        if not hasattr(self, "_caches") or not isinstance(self._caches, dict):
+            self._caches = {}
         try:
-            filePath = os.path.join(RecordFilesDir,"Quickmessage.txt")
+            filePath = os.path.join(RecordFilesDir, "Quickmessage.txt")
 
             if os.path.exists(RecordFilesDir) is not True:
                 os.makedirs(RecordFilesDir)
 
             if not os.path.isfile(filePath):
-                with open(filePath,"wb") as writer:
-                    writer.write(({"Chinese":u"\xe5\x8e\x89\xe5\xae\xb3\xef\xbc\x8c\xe8\xbf\x98\xe6\x9c\x89\xe8\xbf\x99\xe7\xa7\x8d\xe9\xaa\x9a\xe6\x93\x8d\xe4\xbd\x9c!\
+                with open(filePath, "wb") as writer:
+                    writer.write(({"Chinese": u"\xe5\x8e\x89\xe5\xae\xb3\xef\xbc\x8c\xe8\xbf\x98\xe6\x9c\x89\xe8\xbf\x99\xe7\xa7\x8d\xe9\xaa\x9a\xe6\x93\x8d\xe4\xbd\x9c!\
 \xe4\xbd\xa0\xe2\x84\xa2\xe8\x83\xbd\xe5\x88\xab\xe6\x89\x93\xe9\x98\x9f\xe5\x8f\x8b\xe5\x90\x97\xef\xbc\x9f\
-\xe5\x8f\xaf\xe4\xbb\xa5\xe5\x95\x8a\xe5\xb1\x85\xe7\x84\xb6\xe8\x83\xbd\xe8\xbf\x99\xe4\xb9\x88\xe7\x8e\xa9\xef\xbc\x9f"}.get(Current_Lang,"What the hell?\nDude that's amazing!")).encode("UTF-8"))
+\xe5\x8f\xaf\xe4\xbb\xa5\xe5\x95\x8a\xe5\xb1\x85\xe7\x84\xb6\xe8\x83\xbd\xe8\xbf\x99\xe4\xb9\x88\xe7\x8e\xa9\xef\xbc\x9f"}.get(Current_Lang, "What the hell?\nDude that's amazing!")).encode("UTF-8"))
             if os.path.getmtime(filePath) != self._caches.get("Vertify_Quickresponse_Text"):
-                with open(filePath,"rU", encoding = "UTF-8-sig") as Reader:
+                with open(filePath, "rU", encoding="UTF-8-sig") as Reader:
                     Text = Reader.read()
                     if Text.startswith(str(codecs.BOM_UTF8)):
                         Text = Text[3:]
                     self._caches["quickReplys"] = (Text).split("\\n")
                     self._caches["Vertify_Quickresponse_Text"] = os.path.getmtime(filePath)
-            return(self._caches.get("quickReplys",[]))
-        except:ba.print_exception();ba.screenmessage(ba.Lstr(resource="errorText"),(1,0,0));ba.playsound(ba.getsound("error"))
-    def _write_quick_responds(self,data):
+            return (self._caches.get("quickReplys", []))
+        except:
+            ba.print_exception()
+            ba.screenmessage(ba.Lstr(resource="errorText"), (1, 0, 0))
+            ba.playsound(ba.getsound("error"))
+
+    def _write_quick_responds(self, data):
         try:
-            with open(os.path.join(RecordFilesDir,"Quickmessage.txt"),"wb") as writer:
+            with open(os.path.join(RecordFilesDir, "Quickmessage.txt"), "wb") as writer:
                 writer.write("\\n".join(data).encode("utf-8"))
-        except:ba.print_exception();ba.screenmessage(ba.Lstr(resource="errorText"),(1,0,0));ba.playsound(ba.getsound("error"))
+        except:
+            ba.print_exception()
+            ba.screenmessage(ba.Lstr(resource="errorText"), (1, 0, 0))
+            ba.playsound(ba.getsound("error"))
+
     def _getCustomSets(self):
         try:
-            if not hasattr(self,"_caches") or not isinstance(self._caches,dict):self._caches = {}
+            if not hasattr(self, "_caches") or not isinstance(self._caches, dict):
+                self._caches = {}
             try:
                 from VirtualHost import MainSettings
-                if MainSettings.get("Custom_PartyWindow_Sets",{}) != self._caches.get("PartyWindow_Sets",{}):
-                    self._caches["PartyWindow_Sets"] = MainSettings.get("Custom_PartyWindow_Sets",{})
+                if MainSettings.get("Custom_PartyWindow_Sets", {}) != self._caches.get("PartyWindow_Sets", {}):
+                    self._caches["PartyWindow_Sets"] = MainSettings.get(
+                        "Custom_PartyWindow_Sets", {})
             except:
                 try:
-                    filePath = os.path.join(RecordFilesDir,"Settings.json")
+                    filePath = os.path.join(RecordFilesDir, "Settings.json")
                     if os.path.isfile(filePath):
                         if os.path.getmtime(filePath) != self._caches.get("Vertify_MainSettings.json_Text"):
-                            with open(filePath,"rU", encoding = "UTF-8-sig") as Reader:
+                            with open(filePath, "rU", encoding="UTF-8-sig") as Reader:
                                 Text = Reader.read()
                                 if Text.startswith(str(codecs.BOM_UTF8)):
                                     Text = Text[3:]
-                                self._caches["PartyWindow_Sets"] = json.loads(Text.decode("utf-8")).get("Custom_PartyWindow_Sets",{})
-                            self._caches["Vertify_MainSettings.json_Text"] = os.path.getmtime(filePath)
-                except:ba.print_exception()
-            return(self._caches.get("PartyWindow_Sets") if isinstance(self._caches.get("PartyWindow_Sets"),dict) else {})
+                                self._caches["PartyWindow_Sets"] = json.loads(
+                                    Text.decode("utf-8")).get("Custom_PartyWindow_Sets", {})
+                            self._caches["Vertify_MainSettings.json_Text"] = os.path.getmtime(
+                                filePath)
+                except:
+                    ba.print_exception()
+            return (self._caches.get("PartyWindow_Sets") if isinstance(self._caches.get("PartyWindow_Sets"), dict) else {})
 
-        except:ba.print_exception()
-    def _getObjectByID(self,type = "playerName",ID = None):
-        if ID is None:ID = self._popup_party_member_client_id
-        type = type.lower();output = []
+        except:
+            ba.print_exception()
+
+    def _getObjectByID(self, type="playerName", ID=None):
+        if ID is None:
+            ID = self._popup_party_member_client_id
+        type = type.lower()
+        output = []
         for roster in self._roster:
             if type.startswith("all"):
-                if type in ("roster","fullrecord"):output += [roster]
+                if type in ("roster", "fullrecord"):
+                    output += [roster]
                 elif type.find("player") != -1 and roster["players"] != []:
-                    if type.find("namefull") != -1:output += [(i["name_full"]) for i in roster["players"]]
-                    elif type.find("name") != -1:output += [(i["name"]) for i in roster["players"]]
-                    elif type.find("playerid") != -1:output += [i["id"] for i in roster["players"]]
-                elif type.lower() in ("account","displaystring"):output += [(roster["display_string"])]
+                    if type.find("namefull") != -1:
+                        output += [(i["name_full"]) for i in roster["players"]]
+                    elif type.find("name") != -1:
+                        output += [(i["name"]) for i in roster["players"]]
+                    elif type.find("playerid") != -1:
+                        output += [i["id"] for i in roster["players"]]
+                elif type.lower() in ("account", "displaystring"):
+                    output += [(roster["display_string"])]
             elif roster["client_id"] == ID and not type.startswith("all"):
                 try:
-                    if type in ("roster","fullrecord"):return(roster)
+                    if type in ("roster", "fullrecord"):
+                        return (roster)
                     elif type.find("player") != -1 and roster["players"] != []:
                         if len(roster["players"]) == 1 or type.find("singleplayer") != -1:
-                            if type.find("namefull") != -1:return((roster["players"][0]["name_full"]))
-                            elif type.find("name") != -1:return((roster["players"][0]["name"]))
-                            elif type.find("playerid") != -1:return(roster["players"][0]["id"])
+                            if type.find("namefull") != -1:
+                                return ((roster["players"][0]["name_full"]))
+                            elif type.find("name") != -1:
+                                return ((roster["players"][0]["name"]))
+                            elif type.find("playerid") != -1:
+                                return (roster["players"][0]["id"])
                         else:
-                            if type.find("namefull") != -1:return([(i["name_full"]) for i in roster["players"]])
-                            elif type.find("name") != -1:return([(i["name"]) for i in roster["players"]])
-                            elif type.find("playerid") != -1:return([i["id"] for i in roster["players"]])
-                    elif type.lower() in ("account","displaystring"):return((roster["display_string"]))
-                except:ba.print_exception()
+                            if type.find("namefull") != -1:
+                                return ([(i["name_full"]) for i in roster["players"]])
+                            elif type.find("name") != -1:
+                                return ([(i["name"]) for i in roster["players"]])
+                            elif type.find("playerid") != -1:
+                                return ([i["id"] for i in roster["players"]])
+                    elif type.lower() in ("account", "displaystring"):
+                        return ((roster["display_string"]))
+                except:
+                    ba.print_exception()
 
-        return(None if len(output) == 0 else output)
-    def _edit_text_msg_box(self,text,type = "rewrite"):
-        if not isinstance(type,str) or not isinstance(text,str):return
-        type = type.lower();text = (text)
-        if type.find("add") != -1:ba.textwidget(edit=self._text_field,text=ba.textwidget(query=self._text_field)+text)
-        else:ba.textwidget(edit=self._text_field,text=text)
-    def _send_admin_kick_command(self):_ba.chatmessage("/kick " + str(self._popup_party_member_client_id))
-    def new_input_window_callback(self,got_text, flag, code):
+        return (None if len(output) == 0 else output)
+
+    def _edit_text_msg_box(self, text, type="rewrite"):
+        if not isinstance(type, str) or not isinstance(text, str):
+            return
+        type = type.lower()
+        text = (text)
+        if type.find("add") != -1:
+            ba.textwidget(edit=self._text_field, text=ba.textwidget(query=self._text_field)+text)
+        else:
+            ba.textwidget(edit=self._text_field, text=text)
+
+    def _send_admin_kick_command(self): _ba.chatmessage(
+        "/kick " + str(self._popup_party_member_client_id))
+
+    def new_input_window_callback(self, got_text, flag, code):
         if got_text:
             if flag.startswith("Host_Kick_Player:"):
                 try:
-                    result = _ba.disconnect_client(self._popup_party_member_client_id, ban_time=int(code))
+                    result = _ba.disconnect_client(
+                        self._popup_party_member_client_id, ban_time=int(code))
                     if not result:
                         ba.playsound(ba.getsound('error'))
                         ba.screenmessage(
@@ -1065,7 +1145,6 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 except:
                     ba.playsound(ba.getsound('error'))
                     print(traceback.format_exc())
-
 
     def _kick_selected_player(self):
         """
@@ -1077,14 +1156,15 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         if self._popup_party_member_client_id != -1:
             if _ba.get_foreground_host_session() is not None:
                 self._popup_type = "banTimePress"
-                choices = [0,30,60,120,300,600,900,1800,3600,7200,99999999] if not (isinstance(self._getCustomSets().get("Ban_Time_List"),list)
-                            and all([isinstance(item,int) for item in self._getCustomSets().get("Ban_Time_List")])) else self._getCustomSets().get("Ban_Time_List")
+                choices = [0, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 99999999] if not (isinstance(self._getCustomSets().get("Ban_Time_List"), list)
+                                                                                              and all([isinstance(item, int) for item in self._getCustomSets().get("Ban_Time_List")])) else self._getCustomSets().get("Ban_Time_List")
                 PopupMenuWindow(position=self.get_root_widget().get_screen_space_center(),
-                                            scale=_get_popup_window_scale(),
-                                            choices=[str(item) for item in choices],
-                                            choices_display=_creat_Lstr_list([_getTransText("Ban_For_%d_Seconds")%item for item in choices]),
-                                            current_choice="Share_Server_Info",
-                                            delegate=self)
+                                scale=_get_popup_window_scale(),
+                                choices=[str(item) for item in choices],
+                                choices_display=_creat_Lstr_list(
+                                    [_getTransText("Ban_For_%d_Seconds") % item for item in choices]),
+                                current_choice="Share_Server_Info",
+                                delegate=self)
                 """
                 NewInputWindow(origin_widget = self.get_root_widget(),
                             delegate = self,post_text = _getTransText("Ban_Time_Post"),
@@ -1101,7 +1181,8 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 else:
 
                     # Ban for 5 minutes.
-                    result = _ba.disconnect_client(self._popup_party_member_client_id, ban_time=5 * 60)
+                    result = _ba.disconnect_client(
+                        self._popup_party_member_client_id, ban_time=5 * 60)
                     if not result:
                         ba.playsound(ba.getsound('error'))
                         ba.screenmessage(
@@ -1116,8 +1197,9 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_ba._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
     def joinbombspot(self):
         import random
-        url=['https://discord.gg/CbxhJTrRta','https://discord.gg/ucyaesh']
-        ba.open_url(url[random.randint(0,1)])
+        url = ['https://discord.gg/CbxhJTrRta', 'https://discord.gg/ucyaesh']
+        ba.open_url(url[random.randint(0, 1)])
+
     def _update(self) -> None:
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
@@ -1140,16 +1222,16 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         roster = _ba.get_game_roster()
         global f_chat
         global smo_mode
-        if roster != self._roster or smo_mode!=self.smoothy_mode or f_chat!=self.full_chat_mode:
+        if roster != self._roster or smo_mode != self.smoothy_mode or f_chat != self.full_chat_mode:
             self._roster = roster
-            smo_mode=self.smoothy_mode
-            f_chat=self.full_chat_mode
+            smo_mode = self.smoothy_mode
+            f_chat = self.full_chat_mode
             # clear out old
             for widget in self._name_widgets:
                 widget.delete()
             self._name_widgets = []
 
-            if not self._roster :
+            if not self._roster:
                 top_section_height = 60
                 ba.textwidget(edit=self._empty_str,
                               text=ba.Lstr(resource=self._r + '.emptyText'))
@@ -1185,7 +1267,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             # their names as a display string instead of the
                             # client spec-string
                             try:
-                                if self.smoothy_mode ==1 and self._roster[index]['players']:
+                                if self.smoothy_mode == 1 and self._roster[index]['players']:
                                     # if there's just one, use the full name;
                                     # otherwise combine short names
                                     if len(self._roster[index]
@@ -1199,38 +1281,37 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                         ]))
                                         if len(p_str) > 25:
                                             p_str = p_str[:25] + '...'
-                                elif self.smoothy_mode==0 :
+                                elif self.smoothy_mode == 0:
                                     p_str = self._roster[index][
                                         'display_string']
-                                    p_str= self._get_nick(p_str)
+                                    p_str = self._get_nick(p_str)
 
                                 else:
-                                  p_str = self._roster[index][
+                                    p_str = self._roster[index][
                                         'display_string']
-
 
                             except Exception:
                                 ba.print_exception(
                                     'Error calcing client name str.')
                                 p_str = '???'
                             try:
-                              widget = ba.textwidget(parent=self._root_widget,
-                                                     position=(pos[0], pos[1]),
-                                                     scale=t_scale,
-                                                     size=(c_width * 0.85, 30),
-                                                     maxwidth=c_width * 0.85,
-                                                     color=(1, 1,
-                                                            1) if index == 0 else
-                                                     (1, 1, 1),
-                                                     selectable=True,
-                                                     autoselect=True,
-                                                     click_activate=True,
-                                                     text=ba.Lstr(value=p_str),
-                                                     h_align='left',
-                                                     v_align='center')
-                              self._name_widgets.append(widget)
+                                widget = ba.textwidget(parent=self._root_widget,
+                                                       position=(pos[0], pos[1]),
+                                                       scale=t_scale,
+                                                       size=(c_width * 0.85, 30),
+                                                       maxwidth=c_width * 0.85,
+                                                       color=(1, 1,
+                                                              1) if index == 0 else
+                                                       (1, 1, 1),
+                                                       selectable=True,
+                                                       autoselect=True,
+                                                       click_activate=True,
+                                                       text=ba.Lstr(value=p_str),
+                                                       h_align='left',
+                                                       v_align='center')
+                                self._name_widgets.append(widget)
                             except Exception:
-                              pass
+                                pass
                             # in newer versions client_id will be present and
                             # we can use that to determine who the host is.
                             # in older versions we assume the first client is
@@ -1245,13 +1326,13 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             #  calls; not spec-string (perhaps should wait till
                             #  client_id is more readily available though).
                             try:
-                              ba.textwidget(edit=widget,
-                                            on_activate_call=ba.Call(
-                                                self._on_party_member_press,
-                                                self._roster[index]['client_id'],
-                                                is_host, widget))
+                                ba.textwidget(edit=widget,
+                                              on_activate_call=ba.Call(
+                                                  self._on_party_member_press,
+                                                  self._roster[index]['client_id'],
+                                                  is_host, widget))
                             except Exception:
-                              pass
+                                pass
                             pos = (self._width * 0.53 - c_width_total * 0.5 +
                                    c_width * x,
                                    self._height - 65 - c_height * y)
@@ -1266,71 +1347,72 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                         p_str, suppress_warning=True) *
                                     t_scale)
                                 try:
-                                  self._name_widgets.append(
-                                      ba.textwidget(
-                                          parent=self._root_widget,
-                                          position=(pos[0] + twd + 1,
-                                                    pos[1] - 0.5),
-                                          size=(0, 0),
-                                          h_align='left',
-                                          v_align='center',
-                                          maxwidth=c_width * 0.96 - twd,
-                                          color=(0.1, 1, 0.1, 0.5),
-                                          text=ba.Lstr(resource=self._r +
-                                                       '.hostText'),
-                                          scale=0.4,
-                                          shadow=0.1,
-                                          flatness=1.0))
+                                    self._name_widgets.append(
+                                        ba.textwidget(
+                                            parent=self._root_widget,
+                                            position=(pos[0] + twd + 1,
+                                                      pos[1] - 0.5),
+                                            size=(0, 0),
+                                            h_align='left',
+                                            v_align='center',
+                                            maxwidth=c_width * 0.96 - twd,
+                                            color=(0.1, 1, 0.1, 0.5),
+                                            text=ba.Lstr(resource=self._r +
+                                                         '.hostText'),
+                                            scale=0.4,
+                                            shadow=0.1,
+                                            flatness=1.0))
                                 except Exception:
-                                  pass
+                                    pass
                 try:
-                  ba.textwidget(edit=self._empty_str, text='')
-                  ba.scrollwidget(edit=self._scrollwidget,
-                                size=(self._width - 50,
-                                      max(100, self._height - 139 -
-                                          c_height_total)),
-                                position=(30, 80))
+                    ba.textwidget(edit=self._empty_str, text='')
+                    ba.scrollwidget(edit=self._scrollwidget,
+                                    size=(self._width - 50,
+                                          max(100, self._height - 139 -
+                                              c_height_total)),
+                                    position=(30, 80))
                 except Exception:
-                  pass
+                    pass
+
     def hide_screen_msg(self):
-        file=open('ba_data/data/languages/english.json')
-        eng=json.loads(file.read())
+        file = open('ba_data/data/languages/english.json')
+        eng = json.loads(file.read())
         file.close()
-        eng['internal']['playerJoinedPartyText']=''
-        eng['internal']['playerLeftPartyText']=''
-        eng['internal']['chatBlockedText']=''
-        eng['kickVoteStartedText']=''
+        eng['internal']['playerJoinedPartyText'] = ''
+        eng['internal']['playerLeftPartyText'] = ''
+        eng['internal']['chatBlockedText'] = ''
+        eng['kickVoteStartedText'] = ''
         # eng['kickVoteText']=''
-        eng['kickWithChatText']=''
-        eng['kickOccurredText']=''
-        eng['kickVoteFailedText']=''
-        eng['votesNeededText']=''
-        eng['playerDelayedJoinText']=''
-        eng['playerLeftText']=''
-        eng['kickQuestionText']=''
-        file=open('ba_data/data/languages/english.json',"w")
-        json.dump(eng,file)
+        eng['kickWithChatText'] = ''
+        eng['kickOccurredText'] = ''
+        eng['kickVoteFailedText'] = ''
+        eng['votesNeededText'] = ''
+        eng['playerDelayedJoinText'] = ''
+        eng['playerLeftText'] = ''
+        eng['kickQuestionText'] = ''
+        file = open('ba_data/data/languages/english.json', "w")
+        json.dump(eng, file)
         file.close()
         ba.app.lang.setlanguage(None)
 
     def restore_screen_msg(self):
-        file=open('ba_data/data/languages/english.json')
-        eng=json.loads(file.read())
+        file = open('ba_data/data/languages/english.json')
+        eng = json.loads(file.read())
         file.close()
-        eng['internal']['playerJoinedPartyText']="${NAME} joined the pawri!"
-        eng['internal']['playerLeftPartyText']="${NAME} left the pawri."
-        eng['internal']['chatBlockedText']="${NAME} is chat-blocked for ${TIME} seconds."
-        eng['kickVoteStartedText']="A kick vote has been started for ${NAME}."
+        eng['internal']['playerJoinedPartyText'] = "${NAME} joined the pawri!"
+        eng['internal']['playerLeftPartyText'] = "${NAME} left the pawri."
+        eng['internal']['chatBlockedText'] = "${NAME} is chat-blocked for ${TIME} seconds."
+        eng['kickVoteStartedText'] = "A kick vote has been started for ${NAME}."
         # eng['kickVoteText']=''
-        eng['kickWithChatText']="Type ${YES} in chat for yes and ${NO} for no."
-        eng['kickOccurredText']="${NAME} was kicked."
-        eng['kickVoteFailedText']="Kick-vote failed."
-        eng['votesNeededText']="${NUMBER} votes needed"
-        eng['playerDelayedJoinText']="${PLAYER} will enter at the start of the next round."
-        eng['playerLeftText']="${PLAYER} left the game."
-        eng['kickQuestionText']="Kick ${NAME}?"
-        file=open('ba_data/data/languages/english.json',"w")
-        json.dump(eng,file)
+        eng['kickWithChatText'] = "Type ${YES} in chat for yes and ${NO} for no."
+        eng['kickOccurredText'] = "${NAME} was kicked."
+        eng['kickVoteFailedText'] = "Kick-vote failed."
+        eng['votesNeededText'] = "${NUMBER} votes needed"
+        eng['playerDelayedJoinText'] = "${PLAYER} will enter at the start of the next round."
+        eng['playerLeftText'] = "${PLAYER} left the game."
+        eng['kickQuestionText'] = "Kick ${NAME}?"
+        file = open('ba_data/data/languages/english.json', "w")
+        json.dump(eng, file)
         file.close()
         ba.app.lang.setlanguage(None)
     def popup_menu_selected_choice(self, popup_window: PopupMenuWindow,
@@ -1346,109 +1428,119 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     color=(1, 0, 0))
         elif self._popup_type == "send_Times_Press":
             self._send_msg_times = int(choice)
-            ba.buttonwidget(edit = self._times_button,label="%s:%d"%(_getTransText("Times"),getattr(self,"_send_msg_times",1)))
+            ba.buttonwidget(edit=self._times_button, label="%s:%d" %
+                            (_getTransText("Times"), getattr(self, "_send_msg_times", 1)))
 
         elif self._popup_type == "chatmessagepress":
-            if choice=="mute":
+            if choice == "mute":
 
                 unmuted_names.remove(self.msg_user_selected)
-            if choice=="unmute":
+            if choice == "unmute":
                 unmuted_names.append(self.msg_user_selected)
-
 
         elif self._popup_type == "partyMemberPress":
             if choice == "kick":
-                ConfirmWindow(text=_getTransText("Normal_kick_confirm")%self._getObjectByID("account"),
-                                    action=self._kick_selected_player, cancel_button=True, cancel_is_selected=True,
-                                    color=self._bg_color, text_scale=1.0,
-                                    origin_widget=self.get_root_widget())
-            elif choice=="info":
-                account=self._getObjectByID("account")
-
-                self.loading_widget= ConfirmWindow(text="Searching .....",
-                              color=self._bg_color, text_scale=1.0,cancel_button=False,
+                ConfirmWindow(text=_getTransText("Normal_kick_confirm") % self._getObjectByID("account"),
+                              action=self._kick_selected_player, cancel_button=True, cancel_is_selected=True,
+                              color=self._bg_color, text_scale=1.0,
                               origin_widget=self.get_root_widget())
-                start_new_thread(fetchAccountInfo,(account,self.loading_widget,))
+            elif choice == "info":
+                account = self._getObjectByID("account")
+
+                self.loading_widget = ConfirmWindow(text="Searching .....",
+                                                    color=self._bg_color, text_scale=1.0, cancel_button=False,
+                                                    origin_widget=self.get_root_widget())
+                start_new_thread(fetchAccountInfo, (account, self.loading_widget,))
 
             elif choice == "adminkick":
-                ConfirmWindow(text=_getTransText("Admin_Command_Kick_Confirm")%self._getObjectByID("account"),
-                                action=self._send_admin_kick_command, cancel_button=True, cancel_is_selected=True,
-                                color=self._bg_color, text_scale=1.0,
-                                origin_widget=self.get_root_widget())
+                ConfirmWindow(text=_getTransText("Admin_Command_Kick_Confirm") % self._getObjectByID("account"),
+                              action=self._send_admin_kick_command, cancel_button=True, cancel_is_selected=True,
+                              color=self._bg_color, text_scale=1.0,
+                              origin_widget=self.get_root_widget())
 
             elif choice == "@ this guy":
-                ChoiceDis = [];NewChoices = []
-                account=self._getObjectByID("account")
+                ChoiceDis = []
+                NewChoices = []
+                account = self._getObjectByID("account")
                 ChoiceDis.append(account)
                 temp = self._getObjectByID("playerNameFull")
                 if temp is not None:
-                    if isinstance(temp,str) and temp not in ChoiceDis:ChoiceDis.append(temp)
-                    elif isinstance(temp,(list,tuple)):
+                    if isinstance(temp, str) and temp not in ChoiceDis:
+                        ChoiceDis.append(temp)
+                    elif isinstance(temp, (list, tuple)):
                         for item in temp:
-                            if isinstance(item,str) and item not in ChoiceDis:ChoiceDis.append(item)
-                    #print("r\\""
+                            if isinstance(item, str) and item not in ChoiceDis:
+                                ChoiceDis.append(item)
+                    # print("r\\""
 
                 for item in ChoiceDis:
-                    NewChoices.append(u"self._edit_text_msg_box('%s','add')"%(item.replace("'",r"'").replace('"',r'\\"')))
+                    NewChoices.append(u"self._edit_text_msg_box('%s','add')" %
+                                      (item.replace("'", r"'").replace('"', r'\\"')))
 
                 else:
-                  nick=self._get_nick(account)
-                  ChoiceDis.append(nick)
-                NewChoices.append(u"self._on_nick_rename_press('%s')"%(account))
+                    nick = self._get_nick(account)
+                    ChoiceDis.append(nick)
+                NewChoices.append(u"self._on_nick_rename_press('%s')" % (account))
                 p = PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                            scale=_get_popup_window_scale(),
-                                            choices=NewChoices,
-                                            choices_display=_creat_Lstr_list(ChoiceDis),
-                                            current_choice=NewChoices[0],
-                                            delegate=self)
+                                    scale=_get_popup_window_scale(),
+                                    choices=NewChoices,
+                                    choices_display=_creat_Lstr_list(ChoiceDis),
+                                    current_choice=NewChoices[0],
+                                    delegate=self)
                 self._popup_type = "Custom_Exec_Choice"
             elif choice == "customAction":
                 customActionSets = self._getCustomSets()
-                customActionSets = customActionSets.get("partyMemberPress_Custom") if isinstance(customActionSets.get("partyMemberPress_Custom"),dict) else {}
-                ChoiceDis = [];NewChoices = []
-                for key,item in customActionSets.items():
-                    ChoiceDis.append(key);NewChoices.append(item)
+                customActionSets = customActionSets.get("partyMemberPress_Custom") if isinstance(
+                    customActionSets.get("partyMemberPress_Custom"), dict) else {}
+                ChoiceDis = []
+                NewChoices = []
+                for key, item in customActionSets.items():
+                    ChoiceDis.append(key)
+                    NewChoices.append(item)
                 if len(ChoiceDis) > 0:
                     p = PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                                scale=_get_popup_window_scale(),
-                                                choices=NewChoices,
-                                                choices_display=_creat_Lstr_list(ChoiceDis),
-                                                current_choice=NewChoices[0],
-                                                delegate=self)
+                                        scale=_get_popup_window_scale(),
+                                        choices=NewChoices,
+                                        choices_display=_creat_Lstr_list(ChoiceDis),
+                                        current_choice=NewChoices[0],
+                                        delegate=self)
                     self._popup_type = "customAction_partyMemberPress"
-                else:ba.playsound(ba.getsound("error"));ba.screenmessage(ba.Lstr(resource="getTicketsWindow.unavailableText"),color=(1,0,0))
+                else:
+                    ba.playsound(ba.getsound("error"))
+                    ba.screenmessage(
+                        ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
         elif self._popup_type == "menu":
             if choice in ("mute", "unmute"):
                 cfg = ba.app.config
                 cfg['Chat Muted'] = (choice == 'mute')
                 cfg.apply_and_commit()
                 if cfg['Chat Muted']:
-                        customchatThread().run()
+                    customchatThread().run()
                 self._update()
             elif choice in ("credits",):
                 ConfirmWindow(text="AdvancePartyWindow by Mr.Smoothy \n extended version of ModifyPartyWindow(Plasma Boson) \n Version 5.3 \n Dont modify or release the source code \n Discord : \n mr.smoothy#5824    Plasma Boson#4104",
-                             action=self.joinbombspot, width=420,height=200,
-                             cancel_button=False, cancel_is_selected=False,
-                             color=self._bg_color, text_scale=1.0, ok_text="More mods >", cancel_text=None,
-                             origin_widget=self.get_root_widget())
-            elif choice =="chatlogger":
+                              action=self.joinbombspot, width=420, height=200,
+                              cancel_button=False, cancel_is_selected=False,
+                              color=self._bg_color, text_scale=1.0, ok_text="More mods >", cancel_text=None,
+                              origin_widget=self.get_root_widget())
+            elif choice == "chatlogger":
                 # ColorPickerExact(parent=self.get_root_widget(), position=self.get_root_widget().get_screen_space_center(),
                 #             initial_color=self._bg_color, delegate=self, tag='')
                 global chatlogger
                 if chatlogger:
-                  chatlogger=False
-                  ba.screenmessage("Chat logger turned OFF")
+                    chatlogger = False
+                    ba.screenmessage("Chat logger turned OFF")
                 else:
-                  chatlogger=True
-                  chatloggThread().run()
-                  ba.screenmessage("Chat logger turned ON")
-            elif choice=='screenmsg':
+                    chatlogger = True
+                    chatloggThread().run()
+                    ba.screenmessage("Chat logger turned ON")
+            elif choice == 'screenmsg':
                 global screenmsg
                 if screenmsg:
-                    screenmsg=False
+                    screenmsg = False
                     self.hide_screen_msg()
                 else:
-                    screenmsg=True
+                    screenmsg = True
                     self.restore_screen_msg()
             elif choice == "addQuickReply":
                 try:
@@ -1456,138 +1548,171 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     data = self._get_quick_responds()
                     data.append(newReply)
                     self._write_quick_responds(data)
-                    ba.screenmessage(_getTransText("Something_is_added")%newReply,color=(0,1,0))
+                    ba.screenmessage(_getTransText("Something_is_added") %
+                                     newReply, color=(0, 1, 0))
                     ba.playsound(ba.getsound("dingSmallHigh"))
-                except:ba.print_exception()
+                except:
+                    ba.print_exception()
             elif choice == "removeQuickReply":
                 Quickreply = self._get_quick_responds()
                 PopupMenuWindow(position=self._text_field.get_screen_space_center(),
-                            scale=_get_popup_window_scale(),
-                            choices=Quickreply,
-                            choices_display=_creat_Lstr_list(Quickreply),
-                            current_choice=Quickreply[0],
-                            delegate=self)
+                                scale=_get_popup_window_scale(),
+                                choices=Quickreply,
+                                choices_display=_creat_Lstr_list(Quickreply),
+                                current_choice=Quickreply[0],
+                                delegate=self)
                 self._popup_type = "removeQuickReplySelect"
-            elif choice in ("hostInfo_Debug",) and isinstance(_ba.get_connection_to_host_info(),dict):
+            elif choice in ("hostInfo_Debug",) and isinstance(_ba.get_connection_to_host_info(), dict):
                 if len(_ba.get_connection_to_host_info()) > 0:
-                    #print(_ba.get_connection_to_host_info(),type(_ba.get_connection_to_host_info()))
+                    # print(_ba.get_connection_to_host_info(),type(_ba.get_connection_to_host_info()))
 
                     ChoiceDis = list(_ba.get_connection_to_host_info().keys())
-                    NewChoices = ["ba.screenmessage(str(_ba.get_connection_to_host_info().get('%s')))"%((str(i)).replace("'",r"'").replace('"',r'\\"')) for i in ChoiceDis]
+                    NewChoices = ["ba.screenmessage(str(_ba.get_connection_to_host_info().get('%s')))" % (
+                        (str(i)).replace("'", r"'").replace('"', r'\\"')) for i in ChoiceDis]
                     PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                                            scale=_get_popup_window_scale(),
-                                                            choices=NewChoices,
-                                                            choices_display=_creat_Lstr_list(ChoiceDis),
-                                                            current_choice=NewChoices[0],
-                                                            delegate=self)
+                                    scale=_get_popup_window_scale(),
+                                    choices=NewChoices,
+                                    choices_display=_creat_Lstr_list(ChoiceDis),
+                                    current_choice=NewChoices[0],
+                                    delegate=self)
 
                     self._popup_type = "Custom_Exec_Choice"
-                else:ba.playsound(ba.getsound("error"));ba.screenmessage(ba.Lstr(resource="getTicketsWindow.unavailableText"),color=(1,0,0))
+                else:
+                    ba.playsound(ba.getsound("error"))
+                    ba.screenmessage(
+                        ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
             elif choice == "translator":
                 chats = _ba._getChatMessages()
                 if len(chats) > 0:
                     choices = [(item) for item in chats[::-1]]
                     PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                                    scale=_get_popup_window_scale(),
-                                                    choices=choices,
-                                                    choices_display=_creat_Lstr_list(choices),
-                                                    current_choice=choices[0],
-                                                    delegate=self)
+                                    scale=_get_popup_window_scale(),
+                                    choices=choices,
+                                    choices_display=_creat_Lstr_list(choices),
+                                    current_choice=choices[0],
+                                    delegate=self)
                     self._popup_type = "translator_Press"
-                else:ba.playsound(ba.getsound("error"));ba.screenmessage(ba.Lstr(resource="getTicketsWindow.unavailableText"),color=(1,0,0))
+                else:
+                    ba.playsound(ba.getsound("error"))
+                    ba.screenmessage(
+                        ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
             elif choice == "resetGameRecord":
                 ConfirmWindow(text=_getTransText("Restart_Game_Record_Confirm"),
-                                action=self._reset_game_record, cancel_button=True, cancel_is_selected=True,
-                                color=self._bg_color, text_scale=1.0,
-                                origin_widget=self.get_root_widget())
+                              action=self._reset_game_record, cancel_button=True, cancel_is_selected=True,
+                              color=self._bg_color, text_scale=1.0,
+                              origin_widget=self.get_root_widget())
         elif self._popup_type == "translator_Press":
 
             if len(tranTypes) == 1:
-                exec("start_new_thread(OnlineTranslator.%s,(u'%s',))"%(tranTypes[0],choice.replace("'",r"'").replace('"',r'\\"')))
+                exec("start_new_thread(OnlineTranslator.%s,(u'%s',))" %
+                     (tranTypes[0], choice.replace("'", r"'").replace('"', r'\\"')))
             elif len(tranTypes) > 1:
-                choices = ["start_new_thread(OnlineTranslator.%s,(u'%s',))"%(item,choice.replace("'",r"'").replace('"',r'\\"')) for item in tranTypes]
+                choices = ["start_new_thread(OnlineTranslator.%s,(u'%s',))" % (
+                    item, choice.replace("'", r"'").replace('"', r'\\"')) for item in tranTypes]
 
                 PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                                scale=_get_popup_window_scale(),
-                                                choices=choices,
-                                                choices_display=_creat_Lstr_list(tranTypes),
-                                                current_choice=choices[0],
-                                                delegate=self)
+                                scale=_get_popup_window_scale(),
+                                choices=choices,
+                                choices_display=_creat_Lstr_list(tranTypes),
+                                current_choice=choices[0],
+                                delegate=self)
                 self._popup_type = "Custom_Exec_Choice"
-            else:ba.playsound(ba.getsound("error"));ba.screenmessage(ba.Lstr(resource="getTicketsWindow.unavailableText"),color=(1,0,0))
+            else:
+                ba.playsound(ba.getsound("error"))
+                ba.screenmessage(
+                    ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
         elif self._popup_type == "customAction_partyMemberPress":
 
             try:
-                keyReplaceValue = (r"{$PlayerNameFull}",r"{$PlayerName}",r"{$PlayerID}",r"{$AccountInfo}",r"{$AllPlayerName}",r"{$AllPlayerNameFull}")
-                pos = None;curKeyWord = None
+                keyReplaceValue = (r"{$PlayerNameFull}", r"{$PlayerName}", r"{$PlayerID}",
+                                   r"{$AccountInfo}", r"{$AllPlayerName}", r"{$AllPlayerNameFull}")
+                pos = None
+                curKeyWord = None
                 for keyWord in keyReplaceValue:
                     CurPos = choice.find(keyWord)
                     if CurPos != -1 and (pos is None or CurPos < pos):
-                        pos = CurPos;curKeyWord = keyWord
-                if isinstance(pos,int) and isinstance(curKeyWord,str):
-                    if curKeyWord in (r"{$PlayerNameFull}",r"{$PlayerName}",r"{$AllPlayerName}",r"{$AllPlayerNameFull}"):
-                        #if choice.count(curKeyWord) != 0:
-                        playerName = self._getObjectByID(curKeyWord.replace("{$","").replace("}",""))
-                        if isinstance(playerName,(list,tuple)):
-                            ChoiceDis = [];NewChoices = []
+                        pos = CurPos
+                        curKeyWord = keyWord
+                if isinstance(pos, int) and isinstance(curKeyWord, str):
+                    if curKeyWord in (r"{$PlayerNameFull}", r"{$PlayerName}", r"{$AllPlayerName}", r"{$AllPlayerNameFull}"):
+                        # if choice.count(curKeyWord) != 0:
+                        playerName = self._getObjectByID(
+                            curKeyWord.replace("{$", "").replace("}", ""))
+                        if isinstance(playerName, (list, tuple)):
+                            ChoiceDis = []
+                            NewChoices = []
                             for i in playerName:
                                 ChoiceDis.append(i)
-                                NewChoices.append(choice.replace(curKeyWord,(i.replace("'",r"'").replace('"',r'\\"')),1))
+                                NewChoices.append(choice.replace(
+                                    curKeyWord, (i.replace("'", r"'").replace('"', r'\\"')), 1))
                             p = PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                                        scale=_get_popup_window_scale(),
-                                                        choices=NewChoices,
-                                                        choices_display=_creat_Lstr_list(ChoiceDis),
-                                                        current_choice=NewChoices[0],
-                                                        delegate=self)
+                                                scale=_get_popup_window_scale(),
+                                                choices=NewChoices,
+                                                choices_display=_creat_Lstr_list(ChoiceDis),
+                                                current_choice=NewChoices[0],
+                                                delegate=self)
                             self._popup_type = "customAction_partyMemberPress"
-                        elif isinstance(playerName,str):
-                            self.popup_menu_selected_choice(popup_window,choice.replace(curKeyWord,(playerName.replace("'",r"'").replace('"',r'\\"')),1))
-                        else:ba.screenmessage(_getTransText("No_valid_player_found"),(1,0,0));ba.playsound(ba.getsound("error"))
+                        elif isinstance(playerName, str):
+                            self.popup_menu_selected_choice(popup_window, choice.replace(
+                                curKeyWord, (playerName.replace("'", r"'").replace('"', r'\\"')), 1))
+                        else:
+                            ba.screenmessage(_getTransText("No_valid_player_found"), (1, 0, 0))
+                            ba.playsound(ba.getsound("error"))
                     elif curKeyWord in (r"{$PlayerID}",) != 0:
                         playerID = self._getObjectByID("PlayerID")
                         playerName = self._getObjectByID("PlayerName")
-                        #print(playerID,playerName)
-                        if isinstance(playerID,(list,tuple)) and isinstance(playerName,(list,tuple)) and len(playerName) == len(playerID):
-                            ChoiceDis = [];NewChoices = []
-                            for i1,i2 in playerName,playerID:
-                                ChoiceDis.append(i1);NewChoices.append(choice.replace(r"{$PlayerID}",str(i2).replace("'",r"'").replace('"',r'\\"')),1)
+                        # print(playerID,playerName)
+                        if isinstance(playerID, (list, tuple)) and isinstance(playerName, (list, tuple)) and len(playerName) == len(playerID):
+                            ChoiceDis = []
+                            NewChoices = []
+                            for i1, i2 in playerName, playerID:
+                                ChoiceDis.append(i1)
+                                NewChoices.append(choice.replace(r"{$PlayerID}", str(
+                                    i2).replace("'", r"'").replace('"', r'\\"')), 1)
                             p = PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                                        scale=_get_popup_window_scale(),
-                                                        choices=NewChoices,
-                                                        choices_display=_creat_Lstr_list(ChoiceDis),
-                                                        current_choice=NewChoices[0],
-                                                        delegate=self)
+                                                scale=_get_popup_window_scale(),
+                                                choices=NewChoices,
+                                                choices_display=_creat_Lstr_list(ChoiceDis),
+                                                current_choice=NewChoices[0],
+                                                delegate=self)
                             self._popup_type = "customAction_partyMemberPress"
-                        elif isinstance(playerID,int):
-                            self.popup_menu_selected_choice(popup_window,choice.replace(r"{$PlayerID}",str(playerID).replace("'",r"'").replace('"',r'\\"')))
-                        else:ba.screenmessage(_getTransText("No_valid_player_id_found"),(1,0,0));ba.playsound(ba.getsound("error"))
+                        elif isinstance(playerID, int):
+                            self.popup_menu_selected_choice(popup_window, choice.replace(
+                                r"{$PlayerID}", str(playerID).replace("'", r"'").replace('"', r'\\"')))
+                        else:
+                            ba.screenmessage(_getTransText("No_valid_player_id_found"), (1, 0, 0))
+                            ba.playsound(ba.getsound("error"))
                     elif curKeyWord in (r"{$AccountInfo}",) != 0:
-                        self.popup_menu_selected_choice(popup_window,choice.replace(r"{$AccountInfo}",(str(self._getObjectByID("roster"))).replace("'",r"'").replace('"',r'\\"'),1))
-                else:exec(choice)
-            except Exception as e:ba.screenmessage(repr(e),(1,0,0))
+                        self.popup_menu_selected_choice(popup_window, choice.replace(
+                            r"{$AccountInfo}", (str(self._getObjectByID("roster"))).replace("'", r"'").replace('"', r'\\"'), 1))
+                else:
+                    exec(choice)
+            except Exception as e:
+                ba.screenmessage(repr(e), (1, 0, 0))
         elif self._popup_type == "QuickMessageSelect":
-            #ba.textwidget(edit=self._text_field,text=self._get_quick_responds()[index])
-            self._edit_text_msg_box(choice,"add")
+            # ba.textwidget(edit=self._text_field,text=self._get_quick_responds()[index])
+            self._edit_text_msg_box(choice, "add")
         elif self._popup_type == "removeQuickReplySelect":
             data = self._get_quick_responds()
             if len(data) > 0 and choice in data:
                 data.remove(choice)
                 self._write_quick_responds(data)
-                ba.screenmessage(_getTransText("Something_is_removed")%choice,(1,0,0))
+                ba.screenmessage(_getTransText("Something_is_removed") % choice, (1, 0, 0))
                 ba.playsound(ba.getsound("shieldDown"))
-            else:ba.screenmessage(ba.Lstr(resource="errorText"),(1,0,0));ba.playsound(ba.getsound("error"))
+            else:
+                ba.screenmessage(ba.Lstr(resource="errorText"), (1, 0, 0))
+                ba.playsound(ba.getsound("error"))
         elif choice.startswith("custom_Exec_Choice_") or self._popup_type == "Custom_Exec_Choice":
-            exec(choice[len("custom_Exec_Choice_"):] if choice.startswith("custom_Exec_Choice_") else choice)
+            exec(choice[len("custom_Exec_Choice_"):]
+                 if choice.startswith("custom_Exec_Choice_") else choice)
         else:
             print("unhandled popup type: "+str(self._popup_type))
 
 
-import base64
-from ba._general import Call
-def fetchAccountInfo(account,loading_widget):
-    pbid=""
-    account_data=[]
-    servers=[]
+def fetchAccountInfo(account, loading_widget):
+    pbid = ""
+    account_data = []
+    servers = []
     try:
         filePath = os.path.join(RecordFilesDir, "players.json")
         fdata = {}
@@ -1595,35 +1720,38 @@ def fetchAccountInfo(account,loading_widget):
             f = open(filePath, "r")
             fdata = json.load(f)
         if account in fdata:
-            servers=fdata[account]
-        data = urllib.request.urlopen(f'https://api.bombsquad.ga/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true')
-        account_data=json.loads(data.read().decode('utf-8'))[0]
-        pbid=account_data["pbid"]
+            servers = fdata[account]
+        data = urllib.request.urlopen(
+            f'https://api.bombsquad.ga/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true')
+        account_data = json.loads(data.read().decode('utf-8'))[0]
+        pbid = account_data["pbid"]
 
     except:
         pass
     # _ba.pushcall(Call(updateAccountWindow,loading_widget,accounts[0]),from_other_thread=True)
-    _ba.pushcall(Call(CustomAccountViewerWindow,pbid,account_data,servers,loading_widget),from_other_thread =True)
+    _ba.pushcall(Call(CustomAccountViewerWindow, pbid, account_data,
+                 servers, loading_widget), from_other_thread=True)
 
-from bastd.ui.account import viewer
 
 class CustomAccountViewerWindow(viewer.AccountViewerWindow):
-    def  __init__(self,account_id,custom_data,servers,loading_widget):
+    def __init__(self, account_id, custom_data, servers, loading_widget):
         super().__init__(account_id)
         try:
             loading_widget._cancel()
         except:
             pass
-        self.custom_data=custom_data
-        self.pb_id=account_id
-        self.servers=servers
+        self.custom_data = custom_data
+        self.pb_id = account_id
+        self.servers = servers
+
     def _copy_pb(self):
         ba.clipboard_set_text(self.pb_id)
         ba.screenmessage(ba.Lstr(resource='gatherWindow.copyCodeConfirmText'))
-    def _on_query_response(self,data):
+
+    def _on_query_response(self, data):
 
         if data is None:
-            ba.textwidget(edit=self._loading_text,text="")
+            ba.textwidget(edit=self._loading_text, text="")
             ba.textwidget(parent=self._scrollwidget,
                           size=(0, 0),
                           position=(170, 200),
@@ -1634,7 +1762,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                           color=ba.app.ui.infotextcolor,
                           text="Mutual servers",
                           maxwidth=300)
-            v=200-21
+            v = 200-21
             for server in self.servers:
                 ba.textwidget(parent=self._scrollwidget,
                               size=(0, 0),
@@ -1644,7 +1772,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               scale=0.55,
                               text=server,
                               maxwidth=300)
-                v-=23
+                v -= 23
         else:
             for account in self.custom_data["accounts"]:
                 if account not in data["accountDisplayStrings"]:
@@ -1670,7 +1798,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                                                   suppress_warning=True)
                 sub_width = self._width - 80
                 sub_height = 500 + ts_height * tscale + \
-                             account_name_spacing * len(data['accountDisplayStrings'])
+                    account_name_spacing * len(data['accountDisplayStrings'])
                 self._subcontainer = ba.containerwidget(
                     parent=self._scrollwidget,
                     size=(sub_width, sub_height),
@@ -1775,7 +1903,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               maxwidth=sub_width * maxwidth_scale)
                 self._copy_btn = ba.buttonwidget(
                     parent=self._subcontainer,
-                    position=(sub_width * center -120, v -9),
+                    position=(sub_width * center - 120, v - 9),
                     size=(60, 30),
                     scale=0.5,
                     label='copy',
@@ -1783,7 +1911,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                     on_activate_call=self._copy_pb,
                     autoselect=True)
 
-                v-=24
+                v -= 24
                 ba.textwidget(parent=self._subcontainer,
                               size=(0, 0),
                               position=(sub_width * center, v),
@@ -1794,7 +1922,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               color=ba.app.ui.infotextcolor,
                               text="Name",
                               maxwidth=sub_width * maxwidth_scale)
-                v-=26
+                v -= 26
                 for name in self.custom_data["names"]:
                     ba.textwidget(parent=self._subcontainer,
                                   size=(0, 0),
@@ -1804,8 +1932,8 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                                   scale=0.51,
                                   text=name,
                                   maxwidth=sub_width * maxwidth_scale)
-                    v-=13
-                v-=8
+                    v -= 13
+                v -= 8
                 ba.textwidget(parent=self._subcontainer,
                               size=(0, 0),
                               position=(sub_width * center, v),
@@ -1816,8 +1944,8 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               color=ba.app.ui.infotextcolor,
                               text="Created On",
                               maxwidth=sub_width * maxwidth_scale)
-                v-=19
-                d=self.custom_data["createdOn"]
+                v -= 19
+                d = self.custom_data["createdOn"]
 
                 ba.textwidget(parent=self._subcontainer,
                               size=(0, 0),
@@ -1827,7 +1955,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               scale=0.55,
                               text=d[:d.index("T")],
                               maxwidth=sub_width * maxwidth_scale)
-                v-=29
+                v -= 29
                 ba.textwidget(parent=self._subcontainer,
                               size=(0, 0),
                               position=(sub_width * center, v),
@@ -1839,14 +1967,15 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               text="Discord",
                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
-                if len(self.custom_data["discord"]) >0:
+                if len(self.custom_data["discord"]) > 0:
                     ba.textwidget(parent=self._subcontainer,
                                   size=(0, 0),
                                   position=(sub_width * center, v),
                                   h_align='center',
                                   v_align='center',
                                   scale=0.55,
-                                  text=self.custom_data["discord"][0]["username"]+ ","+self.custom_data["discord"][0]["id"],
+                                  text=self.custom_data["discord"][0]["username"] +
+                                  ","+self.custom_data["discord"][0]["id"],
                                   maxwidth=sub_width * maxwidth_scale)
                 v -= 26
                 ba.textwidget(parent=self._subcontainer,
@@ -1859,8 +1988,8 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               color=ba.app.ui.infotextcolor,
                               text="Mutual servers",
                               maxwidth=sub_width * maxwidth_scale)
-                v=-19
-                v=270
+                v = -19
+                v = 270
                 for server in self.servers:
                     ba.textwidget(parent=self._subcontainer,
                                   size=(0, 0),
@@ -1870,10 +1999,10 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                                   scale=0.55,
                                   text=server,
                                   maxwidth=sub_width * maxwidth_scale)
-                    v-=13
+                    v -= 13
 
-                v-=16
-                #==================================================================
+                v -= 16
+                # ==================================================================
                 ba.textwidget(parent=self._subcontainer,
                               size=(0, 0),
                               position=(sub_width * center, v),
@@ -2006,7 +2135,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                               v_align='center',
                               scale=0.55,
                               text=str(data['achievementsCompleted']) + ' / ' +
-                                   str(len(ba.app.ach.achievements)),
+                              str(len(ba.app.ach.achievements)),
                               maxwidth=sub_width * maxwidth_scale)
                 v -= 25
 
@@ -2043,9 +2172,12 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                 ba.print_exception('Error displaying account info.')
 
 # ba_meta export plugin
+
+
 class bySmoothy(ba.Plugin):
     def __init__(self):
-        if _ba.env().get("build_number",0) >= 20577:
-            _ba.connect_to_party=newconnect_to_party
+        if _ba.env().get("build_number", 0) >= 20577:
+            _ba.connect_to_party = newconnect_to_party
             bastd_party.PartyWindow = ModifiedPartyWindow
-        else:print("AdvancePartyWindow only runs with BombSquad version equal or higher than 1.7")
+        else:
+            print("AdvancePartyWindow only runs with BombSquad version equal or higher than 1.7")
