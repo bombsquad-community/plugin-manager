@@ -272,5 +272,7 @@ if not _ba.is_party_icon_visible():
     _ba.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
+
+
 class byFreaku(ba.Plugin):
     def __init__(self): pass
