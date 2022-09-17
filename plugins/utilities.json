@@ -126,10 +126,14 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "e994af5",
+          "released_on": "17-09-2022",
+          "md5sum": "efc4f07eb242d28fe08a7a707376bfc5"
+        }
       }
-    }
-    ,
+    },
     "server_switch": {
       "description": "Let you switch between recents servers",
       "external_url": "https://www.youtube.com/watch?v=QrES1jQGXF0",
@@ -141,7 +145,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "e994af5",
+          "released_on": "17-09-2022",
+          "md5sum": "5b90431822c8f6a8227266ab8d64686b"
+        }
       }
     },
     "icons_keyboard": {
