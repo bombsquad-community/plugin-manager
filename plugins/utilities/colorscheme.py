@@ -15,12 +15,30 @@ from bastd.ui.colorpicker import ColorPicker
 original_buttonwidget = ba.buttonwidget
 original_containerwidget = ba.containerwidget
 original_checkboxwidget = ba.checkboxwidget
-
-original_add_transaction = _ba.add_transaction
 # We set this later so we store the overridden method in case the
 # player is using pro-unlocker plugins that override the
 # `ba.app.accounts.have_pro` method.
 original_have_pro = None
+
+
+def is_game_version_lower_than(version):
+    """
+    Returns a boolean value indicating whether the current game
+    version is lower than the passed version. Useful for addressing
+    any breaking changes within game versions.
+    """
+    game_version = tuple(map(int, ba.app.version.split(".")))
+    version = tuple(map(int, version.split(".")))
+    return game_version < version
+
+
+# Adds backward compatibility for a breaking change released in
+# game version 1.7.7, which moves `_ba.add_transaction` to
+# `ba.internal.add_transaction`.
+if is_game_version_lower_than("1.7.7"):
+    original_add_transaction = _ba.add_transaction
+else:
+    original_add_transaction = ba.internal.add_transaction
 
 
 class ColorScheme:
@@ -369,7 +387,13 @@ class CustomTransactions:
         self.custom_transactions[transaction_code] = transaction_fn
 
     def enable(self):
-        _ba.add_transaction = self._handle
+        # Adds backward compatibility for a breaking change released in
+        # game version 1.7.7, which moves `_ba.add_transaction` to
+        # `ba.internal.add_transaction`.
+        if is_game_version_lower_than("1.7.7"):
+            _ba.add_transaction = self._handle
+        else:
+            ba.internal.add_transaction = self._handle
 
 
 def launch_colorscheme_selection_window():
