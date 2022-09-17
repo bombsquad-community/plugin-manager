@@ -268,9 +268,9 @@ def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, se
 
 
 _ba.chatmessage = new_chat_message
+if not _ba.is_party_icon_visible():
+    _ba.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
-
-
 class byFreaku(ba.Plugin):
     def __init__(self): pass
