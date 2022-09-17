@@ -115,6 +115,35 @@
         }
       }
     },
+    "advanced_party_window": {
+      "description": "Advanced your party window with lots of feature",
+      "external_url": "https://www.youtube.com/watch?v=QrES1jQGXF0",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothyt@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    }
+    ,
+    "server_switch": {
+      "description": "Let you switch between recents servers",
+      "external_url": "https://www.youtube.com/watch?v=QrES1jQGXF0",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothyt@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "icons_keyboard": {
       "description": "Enable 'Always Use Internal Keyboard' in Settings>Advanced. Double tap space-bar to change keyboards",
       "external_url": "",
