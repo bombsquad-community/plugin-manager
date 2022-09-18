@@ -183,6 +183,25 @@
           "md5sum": "94f67a98a9faed0ece63674c84d40061"
         }
       }
+    },
+    "pro_unlocker": {
+      "description": "Unlocks some pro-only features - custom colors, playlist maker, etc.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Anonymous",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "41e239c",
+          "released_on": "18-09-2022",
+          "md5sum": "bbaee5f133b41d2eb53e3b726403a75e"
+        }
+      }
     }
   }
 }
