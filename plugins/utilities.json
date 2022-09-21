@@ -3,6 +3,26 @@
   "description": "Utilities",
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "mood_light": {
+      "description": "mood lighting in co-op games"
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Anonymous",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "41e239c",
+          "released_on": "21-09-2022",
+          "md5sum": "bbaee5f133b41d2edjsjsk3b726403a75e"
+         }
+       }
+     },
+    
     "colorscheme": {
       "description": "Create custom UI colorschemes!",
       "external_url": "http://www.youtube.com/watch?v=qatwWrBAvjc",
