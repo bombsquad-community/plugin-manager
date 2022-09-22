@@ -9,6 +9,7 @@ import _ba
 import random
 from ba._map import Map
 from bastd import mainmenu
+from bastd.ui.party import PartyWindow
 from bastd.gameutils import SharedObjects
 from time import sleep
 if TYPE_CHECKING:
@@ -19,13 +20,14 @@ class SettingWindow(ba.Window):
             global Ldefault,Udefault
             Ldefault=5 
             Udefault=20
+            self.draw_ui()
         
         def increase_limit(self):
             global Ldefault,Udefault
             try:   
                 if Udefault>=29 and self.selected=="upper":
                     ba.textwidget(edit=self.warn_text,text="Careful!You risk get blind beyond this point")
-                elif self.selected=="lower" and Ldefault>=-20:
+                elif self.selected=="lower" and Ldefault>=-20 or self.selected=="upper" and Udefault<=30:
                     ba.textwidget(edit=self.warn_text,text="")
             
                 if self.selected=="lower":
@@ -42,7 +44,7 @@ class SettingWindow(ba.Window):
             try: 
                 if Ldefault<=-19 and self.selected == "lower":
                     ba.textwidget(edit=self.warn_text,text="DON'T BE AFRAID OF DARK,IT'S A PLACE WHERE YOU CAN HIDE")
-                elif (self.selected == "upper" and Udefault >=30) or (self.selected== "lower" and Ldefault>=-20):
+                elif (self.selected == "upper" and Udefault <=30) or (self.selected== "lower" and Ldefault>=-20):
                     ba.textwidget(edit=self.warn_text,text="")
             
             
@@ -115,11 +117,7 @@ class SettingWindow(ba.Window):
                 text=str(Udefault),
                 click_activate=True,
                 selectable=True)              
-            
-            ba.textwidget(edit=self.upper_text,on_activate_call=ba.Call(self.on_text_click,"upper"))
-            ba.textwidget(edit=self.lower_text,on_activate_call=ba.Call(self.on_text_click,"lower"))
-                        
-            
+                                                          
             self.warn_text=ba.textwidget(
                 parent=self._root_widget,
                 text="",
@@ -133,34 +131,41 @@ class SettingWindow(ba.Window):
                 parent=self._root_widget,
                 position=(700,650),
                 size=(100,100),
-                label=ba.Lstr(resource="cancelText"),
+                icon=ba.gettexture('crossOut'),
                 on_activate_call=self.close,
                 color=(0.8,0.2,0.2))
+            
             ba.containerwidget(edit=self._root_widget, cancel_button=close_button)
+            ba.textwidget(edit=self.upper_text,on_activate_call=ba.Call(self.on_text_click,"upper"))
+            ba.textwidget(edit=self.lower_text,on_activate_call=ba.Call(self.on_text_click,"lower"))
                 
-        def close(self):
-            ba.screenmessage("closed")
+        def close(self):            
             ba.containerwidget(edit=self._root_widget, transition="out_right")
-
-
-
-
-
-
-
 
 
 # ba_meta export plugin
 class moodlight(ba.Plugin):
+    def __init__(self):
+        pass
     Map._old_init = Map.__init__
     
     def on_app_running(self):
         try:
-            SettingWindow().draw_ui()   
+            SettingWindow()
+            _ba.timer(0.5, self.on_chat_message, True)  
         except Exception as err:
             ba.screenmessage(str(err)) 
-#    def on_plugin_manager_prompt(self):
-#       SettingWindow()
+    
+    def on_chat_message(self):
+        messages=_ba.get_chat_messages() 
+        if len(messages)>0:
+            lastmessage=messages[-1].split(":")[-1].strip().lower()
+            if lastmessage in ("/mood light","/mood lighting","/mood_light","/mood_lighting","/moodlight","ml"):
+                _ba.chatmessage("Mood light settings opened")
+                SettingWindow()
+        
+    def on_plugin_manager_prompt(self):
+        SettingWindow()
     
     def _new_init(self, vr_overlay_offset: Optional[Sequence[float]] = None) -> None:
         self._old_init(vr_overlay_offset)   
@@ -169,9 +174,7 @@ class moodlight(ba.Plugin):
         
         gnode = _ba.getactivity().globalsnode
 
-      
-        
-        def changetint():
+        def changetint(self):
         	   ba.animate_array(gnode, 'tint', 3, {
                        0.0: gnode.tint, 
                        1.0: (random.randrange(Ldefault,Udefault)/10, random.randrange(Ldefault,Udefault)/10, random.randrange(Ldefault,Udefault)/10) 
