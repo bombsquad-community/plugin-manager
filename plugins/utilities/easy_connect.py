@@ -330,7 +330,7 @@ def update(self, index: int, party: PartyEntry, sub_scroll_width: float,
         url = party.stats_addr.replace(
             '${ACCOUNT}',
             ba_internal.get_v1_account_misc_read_val_2('resolvedAccountID',
-                                               'UNKNOWN'))
+                                                       'UNKNOWN'))
         self._stats_button = ba.buttonwidget(
             color=(0.5, 0.8, 0.8),
             textcolor=(1.0, 1.0, 1.0),
@@ -433,7 +433,7 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
         url = _party.stats_addr.replace(
             '${ACCOUNT}',
             ba_internal.get_v1_account_misc_read_val_2('resolvedAccountID',
-                                               'UNKNOWN'))
+                                                       'UNKNOWN'))
         ba.open_url(url)
     elif choice == 'connect':
 
@@ -457,6 +457,7 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
         ba.clipboard_set_text(_party.queue)
         ba.playsound(ba.getsound('gunCocking'))
 
+
 def is_game_version_lower_than(version):
     """
     Returns a boolean value indicating whether the current game
@@ -466,6 +467,7 @@ def is_game_version_lower_than(version):
     game_version = tuple(map(int, ba.app.version.split(".")))
     version = tuple(map(int, version.split(".")))
     return game_version < version
+
 
 def replace():
     global ba_internal
