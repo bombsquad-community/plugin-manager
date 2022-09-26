@@ -156,7 +156,7 @@ def new_build_favorites_tab(self, region_height: float) -> None:
         autoselect=True)
     if uiscale is ba.UIScale.SMALL and ba.app.ui.use_toolbars:
         ba.widget(edit=btn1,
-                  left_widget=_ba.get_special_widget('back_button'))
+                  left_widget=ba_internal.get_special_widget('back_button'))
     btnv -= b_height + b_space_extra
     ba.buttonwidget(parent=self._container,
                     size=(b_width, b_height),
@@ -211,7 +211,7 @@ def new_on_favorites_connect_press(self) -> None:
                           call=ba.WeakCall(
                               self._host_lookup_result)).start()
 
-        if self.retry_inter > 0 and (_ba.get_connection_to_host_info() == {} or _ba.get_connection_to_host_info()['build_number'] == 0):
+        if self.retry_inter > 0 and (ba_internal.get_connection_to_host_info() == {} or ba_internal.get_connection_to_host_info()['build_number'] == 0):
             ba.screenmessage("Server full or unreachable, Retrying....")
             self._retry_timer = ba.Timer(self.retry_inter, ba.Call(
                 self._on_favorites_connect_press), timetype=ba.TimeType.REAL)
@@ -295,8 +295,8 @@ def update(self, index: int, party: PartyEntry, sub_scroll_width: float,
     if party.clean_display_index == index:
         return
 
-    ping_good = _ba.get_v1_account_misc_read_val('pingGood', 100)
-    ping_med = _ba.get_v1_account_misc_read_val('pingMed', 500)
+    ping_good = ba_internal.get_v1_account_misc_read_val('pingGood', 100)
+    ping_med = ba_internal.get_v1_account_misc_read_val('pingMed', 500)
 
     self._clear()
     hpos = 20
@@ -329,7 +329,7 @@ def update(self, index: int, party: PartyEntry, sub_scroll_width: float,
     if party.stats_addr or True:
         url = party.stats_addr.replace(
             '${ACCOUNT}',
-            _ba.get_v1_account_misc_read_val_2('resolvedAccountID',
+            ba_internal.get_v1_account_misc_read_val_2('resolvedAccountID',
                                                'UNKNOWN'))
         self._stats_button = ba.buttonwidget(
             color=(0.5, 0.8, 0.8),
@@ -432,7 +432,7 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
     if choice == 'stats':
         url = _party.stats_addr.replace(
             '${ACCOUNT}',
-            _ba.get_v1_account_misc_read_val_2('resolvedAccountID',
+            ba_internal.get_v1_account_misc_read_val_2('resolvedAccountID',
                                                'UNKNOWN'))
         ba.open_url(url)
     elif choice == 'connect':
@@ -457,8 +457,22 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
         ba.clipboard_set_text(_party.queue)
         ba.playsound(ba.getsound('gunCocking'))
 
+def is_game_version_lower_than(version):
+    """
+    Returns a boolean value indicating whether the current game
+    version is lower than the passed version. Useful for addressing
+    any breaking changes within game versions.
+    """
+    game_version = tuple(map(int, ba.app.version.split(".")))
+    version = tuple(map(int, version.split(".")))
+    return game_version < version
 
 def replace():
+    global ba_internal
+    if is_game_version_lower_than("1.7.7"):
+        ba_internal = _ba
+    else:
+        ba_internal = ba.internal
     manualtab.ManualGatherTab._build_favorites_tab = new_build_favorites_tab
     manualtab.ManualGatherTab._on_favorites_connect_press = new_on_favorites_connect_press
     manualtab.ManualGatherTab.auto_retry_dec = auto_retry_dec
@@ -572,10 +586,10 @@ class PartyQuickConnect(ba.Window):
                 self.direction = "right"
 
     def connect(self, address, port):
-        if not self.closed and (_ba.get_connection_to_host_info() == {} or _ba.get_connection_to_host_info()['build_number'] == 0):
+        if not self.closed and (ba_internal.get_connection_to_host_info() == {} or ba_internal.get_connection_to_host_info()['build_number'] == 0):
             ba.textwidget(edit=self._title_text, text="Retrying....("+str(self.retry_count)+")")
             self.retry_count += 1
-            _ba.connect_to_party(address, port=port)
+            ba_internal.connect_to_party(address, port=port)
             self._retry_timer = ba.Timer(1.5, ba.Call(
                 self.connect, address, port), timetype=ba.TimeType.REAL)
 
