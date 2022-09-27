@@ -47,6 +47,23 @@ from typing import Any, Optional, Dict, List, Tuple, Type, Union, Callable
 from bastd.ui.gather.publictab import PublicGatherTab
 
 
+def is_game_version_lower_than(version):
+    """
+    Returns a boolean value indicating whether the current game
+    version is lower than the passed version. Useful for addressing
+    any breaking changes within game versions.
+    """
+    game_version = tuple(map(int, ba.app.version.split(".")))
+    version = tuple(map(int, version.split(".")))
+    return game_version < version
+
+
+if is_game_version_lower_than("1.7.7"):
+    ba_internal = _ba
+else:
+    ba_internal = ba.internal
+
+
 class _HostLookupThread(threading.Thread):
     """Thread to fetch an addr."""
 
@@ -458,23 +475,7 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
         ba.playsound(ba.getsound('gunCocking'))
 
 
-def is_game_version_lower_than(version):
-    """
-    Returns a boolean value indicating whether the current game
-    version is lower than the passed version. Useful for addressing
-    any breaking changes within game versions.
-    """
-    game_version = tuple(map(int, ba.app.version.split(".")))
-    version = tuple(map(int, version.split(".")))
-    return game_version < version
-
-
 def replace():
-    global ba_internal
-    if is_game_version_lower_than("1.7.7"):
-        ba_internal = _ba
-    else:
-        ba_internal = ba.internal
     manualtab.ManualGatherTab._build_favorites_tab = new_build_favorites_tab
     manualtab.ManualGatherTab._on_favorites_connect_press = new_on_favorites_connect_press
     manualtab.ManualGatherTab.auto_retry_dec = auto_retry_dec
