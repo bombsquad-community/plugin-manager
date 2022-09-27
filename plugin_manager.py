@@ -36,7 +36,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
     "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
 }
-
+DISCORD_URL = "https://ballistica.net/discord"
 _CACHE = {}
 
 
@@ -1678,7 +1678,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                               scale=text_scale * 0.8)
             pos -= 34 * text_scale
 
-        pos = height - 220
+        pos = height - 180
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos-5),
                       size=(0, 0),
@@ -1689,17 +1689,16 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       color=color,
                       maxwidth=width * 0.95)
 
-        pos -= 45
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.22, pos-5),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text=f'API Version: {ba.app.api_version}',
-                      scale=text_scale * 0.7,
-                      color=(0.4, 0.8, 1),
-                      maxwidth=width * 0.95)
-        pos -= 25
+        pos -= 75
+        ba.buttonwidget(parent=self._root_widget,
+                        position=((width * 0.20) - button_size[0] / 2, pos),
+                        size=button_size,
+                        on_activate_call=lambda: ba.open_url(DISCORD_URL),
+                        textcolor=b_text_color,
+                        button_type='square',
+                        text_scale=1,
+                        label='Discord')
+
         ba.buttonwidget(parent=self._root_widget,
                         position=((width * 0.49) - button_size[0] / 2, pos),
                         size=button_size,
@@ -1756,6 +1755,16 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       scale=text_scale * 0.8,
                       color=text_color,
                       maxwidth=width * 0.9)
+        pos -= 25
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text=f'API Version: {ba.app.api_version}',
+                      scale=text_scale * 0.7,
+                      color=(0.4, 0.8, 1),
+                      maxwidth=width * 0.95)
 
         pos = height * 0.1
 
