@@ -81,16 +81,19 @@ def display_success(msg=None):
     else:
         ba.screenmessage('Successful!', (0, 1, 0))
 
+
 class Translate(Thread):
     def __init__(self, data, callback):
         super().__init__()
         self.data = data
         self._callback = callback
+
     def run(self):
         _ba.pushcall(ba.Call(ba.screenmessage, 'Translating...'), from_other_thread=True)
         response = messenger._send_request(f'{url}/translate', self.data)
         if response:
             _ba.pushcall(ba.Call(self._callback, response), from_other_thread=True)
+
 
 class ColorTracker:
     def __init__(self):
@@ -170,8 +173,8 @@ class PrivateChatHandler:
             if hash == file_hash:
                 with open(__file__, 'w') as f:
                     f.write(new_file)
-                    _ba.pushcall(ba.Call(ba.screenmessage, 'Ultra party window updated\nNeeds restart.'), True)
-
+                    _ba.pushcall(ba.Call(ba.screenmessage,
+                                 'Ultra party window updated\nNeeds restart.'), True)
 
     def _signup(self, registration_key):
         data = dict(pb_id=self.myid, registration_key=registration_key)
@@ -281,7 +284,8 @@ class PrivateChatHandler:
             else:
                 message = msg['message']
         else:
-            message = '[' + msg['filter'] + ']: ' + 'Message from unsaved id. Save id to view message.'
+            message = '[' + msg['filter'] + ']: ' + \
+                'Message from unsaved id. Save id to view message.'
         return message
 
     def _get_status(self, id, type='status'):
@@ -723,58 +727,58 @@ class TranslationSettings:
         try:
 
             translation_mode_text = ba.textwidget(parent=self.root_widget,
-                                              position=(40, height - 215),
-                                              size=(20, 20),
-                                              h_align='left',
-                                              v_align='center',
-                                              text="Translate Mode",
-                                              scale=0.9,
-                                              color=(1, 1, 1))
+                                                  position=(40, height - 215),
+                                                  size=(20, 20),
+                                                  h_align='left',
+                                                  v_align='center',
+                                                  text="Translate Mode",
+                                                  scale=0.9,
+                                                  color=(1, 1, 1))
             decoration = ba.textwidget(parent=self.root_widget,
-                                              position=(40, height - 225),
-                                              size=(20, 20),
-                                              h_align='left',
-                                              v_align='center',
-                                              text="________________",
-                                              scale=0.9,
-                                              color=(1, 1, 1))
+                                       position=(40, height - 225),
+                                       size=(20, 20),
+                                       h_align='left',
+                                       v_align='center',
+                                       text="________________",
+                                       scale=0.9,
+                                       color=(1, 1, 1))
 
             language_char_text = ba.textwidget(parent=self.root_widget,
-                                              position=(85, height - 273),
-                                              size=(20, 20),
-                                              h_align='left',
-                                              v_align='center',
-                                              text='Normal Translation',
-                                              scale=0.6,
-                                              color=(1, 1, 1))
+                                               position=(85, height - 273),
+                                               size=(20, 20),
+                                               h_align='left',
+                                               v_align='center',
+                                               text='Normal Translation',
+                                               scale=0.6,
+                                               color=(1, 1, 1))
 
             pronunciation_text = ba.textwidget(parent=self.root_widget,
-                                              position=(295, height - 273),
-                                              size=(20, 20),
-                                              h_align='left',
-                                              v_align='center',
-                                              text="Show Prononciation",
-                                              scale=0.6,
-                                              color=(1, 1, 1))
+                                               position=(295, height - 273),
+                                               size=(20, 20),
+                                               h_align='left',
+                                               v_align='center',
+                                               text="Show Prononciation",
+                                               scale=0.6,
+                                               color=(1, 1, 1))
 
             from bastd.ui.radiogroup import make_radio_group
             cur_val = ba.app.config.get('Pronunciation', True)
             cb1 = ba.checkboxwidget(
-                        parent=self.root_widget,
-                        position=(250, height - 275),
-                        size=(20, 20),
-                        maxwidth=300,
-                        scale=1,
-                        autoselect=True,
-                        text="")
+                parent=self.root_widget,
+                position=(250, height - 275),
+                size=(20, 20),
+                maxwidth=300,
+                scale=1,
+                autoselect=True,
+                text="")
             cb2 = ba.checkboxwidget(
-                        parent=self.root_widget,
-                        position=(40, height - 275),
-                        size=(20, 20),
-                        maxwidth=300,
-                        scale=1,
-                        autoselect=True,
-                        text="")
+                parent=self.root_widget,
+                position=(40, height - 275),
+                size=(20, 20),
+                maxwidth=300,
+                scale=1,
+                autoselect=True,
+                text="")
             make_radio_group((cb1, cb2), (True, False), cur_val,
                              self._actions_changed)
         except Exception as e:
@@ -782,7 +786,6 @@ class TranslationSettings:
             pass
 
         ba.containerwidget(edit=self.root_widget, cancel_button=btn)
-
 
     def _change_source(self, choice):
         cfg = ba.app.config
@@ -949,7 +952,7 @@ class SettingsWindow:
         ba.containerwidget(edit=self.root_widget, cancel_button=btn)
         ba.containerwidget(edit=self.root_widget,
                            selected_child=(cbtn if cbtn is not None
-                                                   and cancel_is_selected else None),
+                                           and cancel_is_selected else None),
                            start_button=None)
 
         self._translation_btn = ba.buttonwidget(parent=self._subcontainer,
@@ -1017,7 +1020,6 @@ class SettingsWindow:
 
     def _cancel(self) -> None:
         ba.containerwidget(edit=self.root_widget, transition='out_scale')
-
 
 
 class PartyWindow(ba.Window):
@@ -1214,7 +1216,8 @@ class PartyWindow(ba.Window):
                                                        button_type='square',
                                                        autoselect=True,
                                                        color=self.bg_color,
-                                                       position=(self._width - 530, self._height - 100),
+                                                       position=(self._width - 530,
+                                                                 self._height - 100),
                                                        on_activate_call=self._ip_port_msg)
         self._settings_button = ba.buttonwidget(parent=self._root_widget,
                                                 size=(50, 50),
@@ -1286,7 +1289,8 @@ class PartyWindow(ba.Window):
         uiscale = ba.app.ui.uiscale
 
         choices = ['muteOption', 'modifyColor', 'addQuickReply', 'removeQuickReply', 'credits']
-        choices_display = ['Mute Option', 'Modify Main Color', 'Add as Quick Reply', 'Remove a Quick Reply', 'Credits']
+        choices_display = ['Mute Option', 'Modify Main Color',
+                           'Add as Quick Reply', 'Remove a Quick Reply', 'Credits']
 
         if hasattr(_ba.get_foreground_host_activity(), '_map'):
             choices.append('manualCamera')
@@ -1414,7 +1418,7 @@ class PartyWindow(ba.Window):
                                 # host
                                 if self._roster[index]['client_id'] is not None:
                                     is_host = self._roster[index][
-                                                  'client_id'] == -1
+                                        'client_id'] == -1
                                 else:
                                     is_host = (index == 0)
 
@@ -1450,7 +1454,7 @@ class PartyWindow(ba.Window):
                                             maxwidth=c_width * 0.96 - twd,
                                             color=(0.1, 1, 0.1, 0.5),
                                             text=ba.Lstr(resource=self._r +
-                                                                  '.hostText'),
+                                                         '.hostText'),
                                             scale=0.4,
                                             shadow=0.1,
                                             flatness=1.0))
@@ -1497,7 +1501,8 @@ class PartyWindow(ba.Window):
                                                   h_align='center',
                                                   v_align='center')
                 choices = [i for i in messenger.saved_ids]
-                choices_display = [ba.Lstr(value=messenger.saved_ids[i]) for i in messenger.saved_ids]
+                choices_display = [ba.Lstr(value=messenger.saved_ids[i])
+                                   for i in messenger.saved_ids]
                 choices.append('add')
                 choices_display.append(ba.Lstr(value='***Add New***'))
                 filter_widget = PopupMenu(
@@ -1743,7 +1748,6 @@ class PartyWindow(ba.Window):
                 data['type'] = 'pronunciation'
             Translate(data, _apply_translation).start()
 
-
     def _copy_to_clipboard(self):
         msg = ba.textwidget(query=self._text_field)
         if msg == '':
@@ -1800,7 +1804,8 @@ class PartyWindow(ba.Window):
             kick_str = ba.Lstr(resource='kickVoteText')
         uiscale = ba.app.ui.uiscale
         choices = ['kick', 'mention', 'adminkick']
-        choices_display = [kick_str] + list(self._create_baLstr_list(['Mention this guy', f'Kick ID: {client_id}']))
+        choices_display = [kick_str] + \
+            list(self._create_baLstr_list(['Mention this guy', f'Kick ID: {client_id}']))
         choices.append('customCommands')
         choices_display.append(ba.Lstr(value='Custom Commands'))
         PopupMenuWindow(
@@ -1901,7 +1906,6 @@ class PartyWindow(ba.Window):
             Thread(target=messenger._send_request, args=(url, data)).start()
             Thread(target=check_new_message).start()
             ba.textwidget(edit=self._text_field, text='')
-        
 
     def _write_quick_responds(self, data):
         try:
@@ -2032,7 +2036,8 @@ class PartyWindow(ba.Window):
     def _edit_text_msg_box(self, text, action='add'):
         if isinstance(text, str):
             if action == 'add':
-                ba.textwidget(edit=self._text_field, text=ba.textwidget(query=self._text_field) + text)
+                ba.textwidget(edit=self._text_field, text=ba.textwidget(
+                    query=self._text_field) + text)
             elif action == 'replace':
                 ba.textwidget(edit=self._text_field, text=text)
 
@@ -2107,7 +2112,9 @@ class LoginWindow:
         self._id = ba.textwidget(parent=self._root_widget,
                                  scale=0.5,
                                  color=(1, 1, 1),
-                                 text=f'Account: ' + ba.internal.get_v1_account_misc_read_val_2('resolvedAccountID', ''),
+                                 text=f'Account: ' +
+                                 ba.internal.get_v1_account_misc_read_val_2(
+                                     'resolvedAccountID', ''),
                                  size=(0, 0),
                                  position=(220, 170),
                                  h_align='center',
@@ -2525,7 +2532,8 @@ class Manual_camera_window:
         elif direction == 'z-':
             center[2] -= increment
         elif direction == 'reset':
-            node.area_of_interest_bounds = activity._map.get_def_bound_box('area_of_interest_bounds')
+            node.area_of_interest_bounds = activity._map.get_def_bound_box(
+                'area_of_interest_bounds')
             return
 
         aoi = (center[0] - size[0] / 2,
@@ -2736,8 +2744,8 @@ def _get_store_char_tex(self) -> str:
     _ba.set_party_icon_always_visible(True)
     return ('storeCharacterXmas' if ba.internal.get_v1_account_misc_read_val(
         'xmas', False) else
-            'storeCharacterEaster' if ba.internal.get_v1_account_misc_read_val(
-                'easter', False) else 'storeCharacter')
+        'storeCharacterEaster' if ba.internal.get_v1_account_misc_read_val(
+        'easter', False) else 'storeCharacter')
 
 
 # ba_meta export plugin
