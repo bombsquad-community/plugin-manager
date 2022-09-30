@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 def Print(arg1, arg2="", arg3=""):
     ba.screenmessage(str(arg1)+str(arg2)+str(arg3))
 
+
 try:
     with open("moodlightSettings.txt", "r") as mltxt:
         global Ldefault, Udefault
@@ -30,6 +31,7 @@ except:
     with open("moodlightSettings.txt", "w") as mltxt:
         mltxt.write("15 \n 20")
         Ldefault, Udefault = 15, 20
+
 
 class SettingWindow(ba.Window):
     def __init__(self):
@@ -201,6 +203,8 @@ class SettingWindow(ba.Window):
         ba.containerwidget(edit=self._root_widget, transition="out_right",)
 
 # ba_meta export plugin
+
+
 class moodlight(ba.Plugin):
     def __init__(self):
         pass
