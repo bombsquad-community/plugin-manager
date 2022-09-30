@@ -86,6 +86,16 @@ class SettingWindow(ba.Window):
                     on_outside_click_call=self.close,
                     transition="in_right",))
         
+            moodlight_label=ba.textwidget(
+                parent=self._root_widget,
+                size=(200,100),
+                position=(150,550),
+                scale=2,
+                h_align="center",
+                v_align="center",
+                text="Mood light settings",
+                color=(0,1,0))
+            
             increase_button=ba.buttonwidget(
                 parent=self._root_widget,
                 position=(600,100),
@@ -115,6 +125,14 @@ class SettingWindow(ba.Window):
                 text=str(Ldefault),
                 click_activate=True,
                 selectable=True)
+                
+            lower_text_label=ba.textwidget(
+                parent=self._root_widget,
+                size=(200,100),
+                position=(100,150),
+                h_align="center",
+                v_align="center",
+                text="Limit darkness")
                  
             self.upper_text=ba.textwidget(
                 parent=self._root_widget,
@@ -126,12 +144,20 @@ class SettingWindow(ba.Window):
                 maxwidth=400.0,
                 text=str(Udefault),
                 click_activate=True,
-                selectable=True)           
+                selectable=True)     
+                
+            upper_text_label=ba.textwidget(
+                parent=self._root_widget,
+                size=(200,100),
+                position=(400,150),
+                h_align="center",
+                v_align="center",
+                text="Limit brightness")      
                                                           
             self.warn_text=ba.textwidget(
                 parent=self._root_widget,
                 text="",
-                size=(400,100),
+                size=(400,200),
                 position=(150,300),
                 h_align="center",
                 v_align="center",
@@ -140,20 +166,22 @@ class SettingWindow(ba.Window):
             self.close_button=ba.buttonwidget(
                 parent=self._root_widget,
                 position=(550,590),
-                size=(30,30),                
+                size=(35,35),                
                 icon=ba.gettexture("crossOut"),
                 icon_color=(1,0.2,0.2),
                 scale=2,
                 color=(1,0.2,0.2),
                 extra_touch_border_scale=5,
-                on_activate_call=self.close,)
+                on_activate_call=self.close,
+                button_type="square")
                 
             save_button=ba.buttonwidget(
                 parent=self._root_widget,
-                position=(450,450),
-                size=(125,70),
+                position=(520,470),
+                size=(90,70),
                 scale=1.5,
                 label="SAVE",
+                button_type="square",
                 on_activate_call=self.save_settings)    
                  
             ba.textwidget(edit=self.upper_text,on_activate_call=ba.Call(self.on_text_click,"upper"))
@@ -177,7 +205,6 @@ class moodlight(ba.Plugin):
     
     def on_app_running(self):
         try:            
-            SettingWindow()
             _ba.timer(0.5, self.on_chat_message, True)  
         except Exception as err:
             Print(err)   
