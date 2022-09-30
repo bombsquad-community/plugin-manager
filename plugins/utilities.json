@@ -8,17 +8,17 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Anonymous",
+          "name": "LoupGarou",
           "email": "",
-          "discord": ""
+          "discord": "ʟօʊքɢǟʀօʊ#3063"
         }
       ],
       "versions": {
         "1.0.0": {
           "api_version": 7,
-          "commit_sha": "41e239c",
-          "released_on": "21-09-2022",
-          "md5sum": "bbaee5f133b41d2edjsjsk3b726403a75e"
+          "commit_sha": "",
+          "released_on": "30-09-2022",
+          "md5sum": ""
          }
        }
      },
