@@ -4,7 +4,7 @@
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
     "mood_light": {
-      "description": "mood lighting in co-op games"
+      "description": "mood lighting in co-op games",
       "external_url": "https://github.com/Loup-Garou911XD/plugin-manager",
       "authors": [
         {
