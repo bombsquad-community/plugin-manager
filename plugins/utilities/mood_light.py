@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 # mood light plugin by ʟօʊքɢǟʀօʊ
 
+
 def Print(arg1, arg2="", arg3=""):
     ba.screenmessage(str(arg1)+str(arg2)+str(arg3))
 
