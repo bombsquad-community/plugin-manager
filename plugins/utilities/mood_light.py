@@ -1,5 +1,3 @@
-# mood light plugin by ʟօʊքɢǟʀօʊ
-
 # ba_meta require api 7
 from __future__ import annotations
 from typing import TYPE_CHECKING, cast
@@ -15,6 +13,7 @@ from time import sleep
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
+# mood light plugin by ʟօʊքɢǟʀօʊ
 
 def Print(arg1, arg2="", arg3=""):
     ba.screenmessage(str(arg1)+str(arg2)+str(arg3))
