@@ -5,7 +5,7 @@
   "plugins": {
     "mood_light": {
       "description": "mood lighting in co-op games",
-      "external_url": "https://github.com/Loup-Garou911XD/plugin-manager",
+      "external_url": "",
       "authors": [
         {
           "name": "LoupGarou",
