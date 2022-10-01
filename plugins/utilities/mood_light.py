@@ -2,7 +2,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
-import ba,_ba
+import ba
+import _ba
 import random
 from ba._map import Map
 from bastd import mainmenu
@@ -20,11 +21,11 @@ def Print(arg1, arg2="", arg3=""):
 
 
 try:
-        Ldefault, Udefault=ba.app.config.get("moodlightingSettings")  
+    Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
 except:
-        ba.app.config["moodlightingSettings"]=(15,20)
-        Ldefault, Udefault=ba.app.config.get("moodlightingSettings")
-        Print("settings up moodlight")
+    ba.app.config["moodlightingSettings"] = (15, 20)
+    Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
+    Print("settings up moodlight")
 
 
 class SettingWindow(ba.Window):
@@ -187,24 +188,27 @@ class SettingWindow(ba.Window):
         ba.textwidget(edit=self.lower_text, on_activate_call=ba.Call(self.on_text_click, "lower"))
 
     def save_settings(self):
-        ba.app.config["moodlightingSettings"]=(Ldefault,Udefault)
+        ba.app.config["moodlightingSettings"] = (Ldefault, Udefault)
         Print("settings saved")
         self.close()
 
     def close(self):
         ba.containerwidget(edit=self._root_widget, transition="out_right",)
 
+
 Map._old_init = Map.__init__
 
-def new_chat_message(msg: Union[str, ba.Lstr], clients:Sequence[int] = None, sender_override: str = None):
+
+def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, sender_override: str = None):
     old_fcm(msg, clients, sender_override)
     if msg == 'ml':
         try:
-            Ldefault, Udefault=ba.app.config.get("moodlightingSettings")          
+            Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
             SettingWindow()
-            _ba.chatmessage("Mood light settings opened")            
+            _ba.chatmessage("Mood light settings opened")
         except Exception as err:
             Print(err)
+
 
 old_fcm = _ba.chatmessage
 _ba.chatmessage = new_chat_message
@@ -215,7 +219,7 @@ _ba.chatmessage = new_chat_message
 class moodlight(ba.Plugin):
     def __init__(self):
         pass
-    
+
     def on_app_running(self):
         try:
             pass
@@ -242,4 +246,3 @@ class moodlight(ba.Plugin):
             })
         _ba.timer(0.3, changetint, repeat=True)
     Map.__init__ = _new_init
-
