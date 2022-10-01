@@ -160,21 +160,8 @@ class PrivateChatHandler:
             try:
                 self.server_online = True
                 version = float(response.replace('v', ''))
-                if version > __version__:
-                    self._update_version()
             except:
                 self.error = 'Server offline'
-
-    def _update_version(self):
-        new_file = self._send_request(url=f'{url}/updatepartywindow?get=file')
-        hash = self._send_request(url=f'{url}/updatepartywindow?get=md5')
-        if hash and new_file:
-            file_hash = md5(new_file.encode()).hexdigest()
-            if hash == file_hash:
-                with open(__file__, 'w') as f:
-                    f.write(new_file)
-                    _ba.pushcall(ba.Call(ba.screenmessage,
-                                 'Ultra party window updated\nNeeds restart.'), True)
 
     def _signup(self, registration_key):
         data = dict(pb_id=self.myid, registration_key=registration_key)
