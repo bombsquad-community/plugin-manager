@@ -207,8 +207,7 @@ class SettingWindow(ba.Window):
 
 class moodlight(ba.Plugin):
     def __init__(self):
-        pass
-    Map._old_init = Map.__init__
+        Map._old_init = Map.__init__
 
     def on_app_running(self):
         try:
