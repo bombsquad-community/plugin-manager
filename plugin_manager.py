@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.6"
+PLUGIN_MANAGER_VERSION = "0.1.7"
 REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 # XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
@@ -36,6 +36,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
     "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
 }
+DISCORD_URL = "https://ballistica.net/discord"
 
 _CACHE = {}
 
@@ -124,7 +125,6 @@ class StartupTasks:
         plugin_manager_config = ba.app.config.setdefault("Community Plugin Manager", {})
         plugin_manager_config.setdefault("Custom Sources", [])
         installed_plugins = plugin_manager_config.setdefault("Installed Plugins", {})
-
         for plugin_name in tuple(installed_plugins.keys()):
             plugin = PluginLocal(plugin_name)
             if not plugin.is_installed:
@@ -135,6 +135,7 @@ class StartupTasks:
             "Auto Update Plugin Manager": True,
             "Auto Update Plugins": True,
             "Auto Enable Plugins After Installation": True,
+            "Notify New Plugins": True
         }
         settings = plugin_manager_config.setdefault("Settings", {})
 
@@ -174,12 +175,34 @@ class StartupTasks:
                 plugins_to_update.append(plugin.update())
         await asyncio.gather(*plugins_to_update)
 
+    async def notify_new_plugins(self):
+        if not ba.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
+            return
+
+        await self.plugin_manager.setup_index()
+        try:
+            num_of_plugins = ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
+        except Exception:
+            ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = len(await self.plugin_manager.categories["All"].get_plugins())
+            num_of_plugins = ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
+            ba.app.config.commit()
+            return
+
+        new_num_of_plugins = len(await self.plugin_manager.categories["All"].get_plugins())
+
+        if num_of_plugins < new_num_of_plugins:
+            ba.screenmessage("We got new Plugins for you to try!")
+            ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
+            ba.app.config.commit()
+
+
     async def execute(self):
         self.setup_config()
         try:
             await asyncio.gather(
                 self.update_plugin_manager(),
                 self.update_plugins(),
+                self.notify_new_plugins(),
             )
         except urllib.error.URLError:
             pass
@@ -1678,7 +1701,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                               scale=text_scale * 0.8)
             pos -= 34 * text_scale
 
-        pos = height - 220
+        pos = height - 200
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos-5),
                       size=(0, 0),
@@ -1689,17 +1712,16 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       color=color,
                       maxwidth=width * 0.95)
 
-        pos -= 45
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.22, pos-5),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text=f'API Version: {ba.app.api_version}',
-                      scale=text_scale * 0.7,
-                      color=(0.4, 0.8, 1),
-                      maxwidth=width * 0.95)
-        pos -= 25
+        pos -= 75
+        ba.buttonwidget(parent=self._root_widget,
+                        position=((width * 0.20) - button_size[0] / 2, pos),
+                        size=button_size,
+                        on_activate_call=lambda: ba.open_url(DISCORD_URL),
+                        textcolor=b_text_color,
+                        button_type='square',
+                        text_scale=1,
+                        label='Discord')
+
         ba.buttonwidget(parent=self._root_widget,
                         position=((width * 0.49) - button_size[0] / 2, pos),
                         size=button_size,
@@ -1756,6 +1778,16 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       scale=text_scale * 0.8,
                       color=text_color,
                       maxwidth=width * 0.9)
+        pos -= 25
+        ba.textwidget(parent=self._root_widget,
+                      position=(width * 0.49, pos),
+                      size=(0, 0),
+                      h_align='center',
+                      v_align='center',
+                      text=f'API Version: {ba.app.api_version}',
+                      scale=text_scale * 0.7,
+                      color=(0.4, 0.8, 1),
+                      maxwidth=width * 0.95)
 
         pos = height * 0.1
 
