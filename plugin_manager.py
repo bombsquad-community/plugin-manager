@@ -195,7 +195,6 @@ class StartupTasks:
             ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
             ba.app.config.commit()
 
-
     async def execute(self):
         self.setup_config()
         try:
