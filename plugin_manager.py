@@ -920,6 +920,7 @@ class PluginManager:
         self._index = _CACHE.get("index", {})
         self.categories = {}
         self.module_path = sys.modules[__name__].__file__
+        self._index_setup_in_progress = False
 
     async def get_index(self):
         if not self._index:
@@ -932,13 +933,20 @@ class PluginManager:
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
-            self._index = json.loads(response.read())
-            self.set_index_global_cache(self._index)
+            index = json.loads(response.read())
+            self.set_index_global_cache(index)
+            self._index = index
         return self._index
 
     async def setup_index(self):
+        while self._index_setup_in_progress:
+            # Avoid making multiple network calls to the same resource in parallel.
+            # Rather wait for the previous network call to complete.
+            await asyncio.sleep(0.1)
+        self._index_setup_in_progress = not bool(self._index)
         index = await self.get_index()
         await self.setup_plugin_categories(index)
+        self._index_setup_in_progress = False
 
     async def setup_plugin_categories(self, plugin_index):
         # A hack to have the "All" category show at the top.
