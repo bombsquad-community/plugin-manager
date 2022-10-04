@@ -189,6 +189,7 @@ class SettingWindow(ba.Window):
 
     def save_settings(self):
         ba.app.config["moodlightingSettings"] = (Ldefault, Udefault)
+        ba.app.config.commit()
         Print("settings saved")
         self.close()
 
@@ -212,6 +213,7 @@ def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, se
 
 old_fcm = _ba.chatmessage
 _ba.chatmessage = new_chat_message
+_ba.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
 

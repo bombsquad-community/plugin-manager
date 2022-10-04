@@ -4,7 +4,7 @@
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
     "mood_light": {
-      "description": "mood lighting in co-op games",
+      "description": "Dynamic lighting in co-op games (adjustable using \"cm\" chat command)",
       "external_url": "",
       "authors": [
         {
@@ -14,12 +14,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "2594105",
-          "released_on": "30-09-2022",
-          "md5sum": "131585e571e9d4d60d40bbf7cbbd69e9"
-        }
+        "1.0.0": null
       }
     },
     "colorscheme": {
