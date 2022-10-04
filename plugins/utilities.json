@@ -208,6 +208,20 @@
           "md5sum": "bbaee5f133b41d2eb53e3b726403a75e"
         }
       }
+    },
+    "ultra_party_window": {
+      "description": "Ultra your party window with lots of features",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Droopy",
+          "email": "",
+          "discord": "Droopy#3730"
+        }
+      ],
+      "versions": {
+        "4.0.0": null
+      }
     }
   }
 }
