@@ -36,7 +36,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
     "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
 }
-DISCORD_URL = "https://ballistica.net/discord"
+DISCORD_URL = "http://ballistica.net/discord"
 
 _CACHE = {}
 
