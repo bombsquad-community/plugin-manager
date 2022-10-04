@@ -2,8 +2,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
-import ba
-import _ba
+import ba,_ba
 import random
 from ba._map import Map
 from bastd import mainmenu
@@ -21,11 +20,19 @@ def Print(arg1, arg2="", arg3=""):
 
 
 try:
-    Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
+        Ldefault, Udefault=ba.app.config.get("moodlightingSettings")  
 except:
-    ba.app.config["moodlightingSettings"] = (15, 20)
-    Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
-    Print("settings up moodlight")
+        ba.app.config["moodlightingSettings"]=(15,20)
+        Ldefault, Udefault=ba.app.config.get("moodlightingSettings")
+        Print("settings up moodlight")
+        Print("Type ml in chat or use plugin manager to access settings")
+
+try:
+    loop=ba.app.config.get("moodlightEnabled")
+except:
+    ba.app.config["moodlightEnabled"]=True
+    ba.app.config.commit()
+
 
 
 class SettingWindow(ba.Window):
@@ -95,6 +102,15 @@ class SettingWindow(ba.Window):
             v_align="center",
             text="Mood light settings",
             color=(0, 1, 0))
+            
+        self.enable_button=ba.buttonwidget(
+            parent=self._root_widget,
+            position=(100, 470),
+            size=(90, 70),
+            scale=1.5,
+            color=(1,0,0) if loop else (0,1,0),
+            label="DISABLE" if loop else "ENABLE",
+            on_activate_call=self.on_enableButton_press)
 
         increase_button = ba.buttonwidget(
             parent=self._root_widget,
@@ -172,8 +188,7 @@ class SettingWindow(ba.Window):
             scale=2,
             color=(1, 0.2, 0.2),
             extra_touch_border_scale=5,
-            on_activate_call=self.close,
-            button_type="square")
+            on_activate_call=self.close)
 
         save_button = ba.buttonwidget(
             parent=self._root_widget,
@@ -181,14 +196,29 @@ class SettingWindow(ba.Window):
             size=(90, 70),
             scale=1.5,
             label="SAVE",
-            button_type="square",
-            on_activate_call=self.save_settings)
+            on_activate_call=self.save_settings)                   
 
         ba.textwidget(edit=self.upper_text, on_activate_call=ba.Call(self.on_text_click, "upper"))
         ba.textwidget(edit=self.lower_text, on_activate_call=ba.Call(self.on_text_click, "lower"))
-
+    
+    def on_enableButton_press(self):
+        global loop
+        loop=ba.app.config.get("moodlightEnabled")
+        if loop:
+            loop=False
+            label="ENABLE"
+            color=(0,1,0)
+        elif not loop:
+            loop=True
+            label="DISABLE"
+            color=(1,0,0)
+            
+        ba.app.config["moodlightEnabled"]=loop   
+        ba.app.config.commit()
+        ba.buttonwidget(edit=self.enable_button,label=label,color=color)
+        
     def save_settings(self):
-        ba.app.config["moodlightingSettings"] = (Ldefault, Udefault)
+        ba.app.config["moodlightingSettings"]=(Ldefault,Udefault)
         ba.app.config.commit()
         Print("settings saved")
         self.close()
@@ -196,24 +226,20 @@ class SettingWindow(ba.Window):
     def close(self):
         ba.containerwidget(edit=self._root_widget, transition="out_right",)
 
-
 Map._old_init = Map.__init__
 
-
-def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, sender_override: str = None):
+def new_chat_message(msg: Union[str, ba.Lstr], clients:Sequence[int] = None, sender_override: str = None):
     old_fcm(msg, clients, sender_override)
     if msg == 'ml':
         try:
-            Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
+            Ldefault, Udefault=ba.app.config.get("moodlightingSettings")          
             SettingWindow()
-            _ba.chatmessage("Mood light settings opened")
+            _ba.chatmessage("Mood light settings opened")            
         except Exception as err:
             Print(err)
 
-
 old_fcm = _ba.chatmessage
 _ba.chatmessage = new_chat_message
-_ba.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
 
@@ -221,30 +247,43 @@ _ba.set_party_icon_always_visible(True)
 class moodlight(ba.Plugin):
     def __init__(self):
         pass
-
+    
     def on_app_running(self):
         try:
+            _ba.show_progress_bar()
+
             pass
         except Exception as err:
             Print(err)
 
-    def on_plugin_manager_prompt(self):
+    def on_plugin_manager_prompt(self):#called by plugin manager
         SettingWindow()
 
     def _new_init(self, vr_overlay_offset: Optional[Sequence[float]] = None) -> None:
         self._old_init(vr_overlay_offset)
-        in_game = not isinstance(_ba.get_foreground_host_session(), mainmenu.MainMenuSession)
+        in_game = not isinstance(_ba.get_foreground_host_session(), mainmenu.MainMenuSession)        
         if not in_game:
             return
-
+            
         gnode = _ba.getactivity().globalsnode
-
-        def changetint():
-            Range = (random.randrange(Ldefault, Udefault)/10, random.randrange(Ldefault,
-                     Udefault)/10, random.randrange(Ldefault, Udefault)/10)
-            ba.animate_array(gnode, 'tint', 3, {
-                0.0: gnode.tint,
-                1.0: Range
-            })
-        _ba.timer(0.3, changetint, repeat=True)
+        default_tint=(1.100000023841858, 1.0, 0.8999999761581421)
+        transition_duration=1.0#for future improvements
+        
+        def changetint():                        
+                if loop:                                      
+                    Range = (random.randrange(Ldefault, Udefault)/10, random.randrange(Ldefault,
+                             Udefault)/10, random.randrange(Ldefault, Udefault)/10)
+                    ba.animate_array(gnode, 'tint', 3 ,{
+                        0.0: gnode.tint,
+                        transition_duration: Range
+                    })
+                else:
+                    global timer
+                    timer=None
+                    ba.animate_array(gnode,"tint",3, {0.0:gnode.tint,0.4:default_tint})                              
+                         
+        global timer
+        timer=ba.Timer(0.3, changetint, repeat=True)     
+    
     Map.__init__ = _new_init
+
