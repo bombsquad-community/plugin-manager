@@ -201,10 +201,15 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "9a2c3b",
+          "released_on": "05-10-2022",
+          "md5sum": "da7dfd7e3837ae8f1578b0cb0983f780"
+        }
       }
     },
-    "character_builder": {
+    "character_maker": {
       "description": "Make new characters by manipulating models and textures.",
       "external_url": "https://www.youtube.com/watch?v=q0KxY1hfMPQ",
       "authors": [
@@ -215,7 +220,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "9a2c3b",
+          "released_on": "05-10-2022",
+          "md5sum": "0a3bd5728b7bbad6a7d4562079b05fea"
+        }
       }
     },
     "icons_keyboard": {
