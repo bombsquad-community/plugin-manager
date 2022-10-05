@@ -203,9 +203,9 @@
       "versions": {
         "1.0.0": {
           "api_version": 7,
-          "commit_sha": "9a2c3b",
+          "commit_sha": "ff4de19",
           "released_on": "05-10-2022",
-          "md5sum": "da7dfd7e3837ae8f1578b0cb0983f780"
+          "md5sum": "38d47297d4048a2fe1022ea841c76f91"
         }
       }
     },
@@ -222,9 +222,9 @@
       "versions": {
         "1.0.0": {
           "api_version": 7,
-          "commit_sha": "9a2c3b",
+          "commit_sha": "ff4de19",
           "released_on": "05-10-2022",
-          "md5sum": "0a3bd5728b7bbad6a7d4562079b05fea"
+          "md5sum": "f734fa33994c7cfafc637b7e3dca60ce"
         }
       }
     },
