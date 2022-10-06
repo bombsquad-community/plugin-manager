@@ -1,6 +1,8 @@
 # ba_meta require api 7
 from __future__ import annotations
 from typing import TYPE_CHECKING, cast
+if TYPE_CHECKING:
+    from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
 import ba
 import _ba
@@ -10,14 +12,19 @@ from bastd import mainmenu
 from bastd.ui.party import PartyWindow
 from bastd.gameutils import SharedObjects
 from time import sleep
-if TYPE_CHECKING:
-    from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
-# mood light plugin by ʟօʊքɢǟʀօʊ
+"""mood light plugin by ʟօʊքɢǟʀօʊ
+type ml in chat or use plugin manager to open settings"""
 
 
-def Print(arg1, arg2="", arg3=""):
-    ba.screenmessage(str(arg1)+str(arg2)+str(arg3))
+def Print(*args):
+    out = " ".join(args)
+    ba.screenmessage(out)
+
+
+def cprint(*args):
+    out = "\n".join(args)
+    _ba.chatmessage(out)
 
 
 try:
@@ -26,6 +33,14 @@ except:
     ba.app.config["moodlightingSettings"] = (15, 20)
     Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
     Print("settings up moodlight")
+    Print("Type ml in chat or use plugin manager to access settings")
+
+try:
+    loop = ba.app.config.get("moodlightEnabled")
+except:
+    ba.app.config["moodlightEnabled"] = True
+    ba.app.config.commit()
+    loop = True
 
 
 class SettingWindow(ba.Window):
@@ -91,28 +106,39 @@ class SettingWindow(ba.Window):
             size=(200, 100),
             position=(150, 550),
             scale=2,
+            selectable=False,
             h_align="center",
             v_align="center",
             text="Mood light settings",
             color=(0, 1, 0))
 
-        increase_button = ba.buttonwidget(
+        self.enable_button = ba.buttonwidget(
             parent=self._root_widget,
-            position=(600, 100),
-            size=(5, 1),
-            scale=3.5,
-            extra_touch_border_scale=2.5,
-            icon=ba.gettexture("upButton"),
-            on_activate_call=self.increase_limit)
+            position=(100, 470),
+            size=(90, 70),
+            scale=1.5,
+            color=(1, 0, 0) if loop else (0, 1, 0),
+            label="DISABLE" if loop else "ENABLE",
+            on_activate_call=self.on_enableButton_press)
 
-        decrease_button = ba.buttonwidget(
+        save_button = ba.buttonwidget(
             parent=self._root_widget,
-            position=(100, 100),
-            size=(5, 1),
-            scale=3.5,
-            extra_touch_border_scale=2.5,
-            icon=ba.gettexture("downButton"),
-            on_activate_call=self.decrease_limit)
+            position=(520, 470),
+            size=(90, 70),
+            scale=1.5,
+            label="SAVE",
+            on_activate_call=self.save_settings)
+
+        self.close_button = ba.buttonwidget(
+            parent=self._root_widget,
+            position=(550, 590),
+            size=(35, 35),
+            icon=ba.gettexture("crossOut"),
+            icon_color=(1, 0.2, 0.2),
+            scale=2,
+            color=(1, 0.2, 0.2),
+            extra_touch_border_scale=5,
+            on_activate_call=self.close)
 
         self.lower_text = ba.textwidget(
             parent=self._root_widget,
@@ -154,6 +180,24 @@ class SettingWindow(ba.Window):
             v_align="center",
             text="Limit brightness")
 
+        decrease_button = ba.buttonwidget(
+            parent=self._root_widget,
+            position=(100, 100),
+            size=(5, 1),
+            scale=3.5,
+            extra_touch_border_scale=2.5,
+            icon=ba.gettexture("downButton"),
+            on_activate_call=self.decrease_limit)
+
+        increase_button = ba.buttonwidget(
+            parent=self._root_widget,
+            position=(600, 100),
+            size=(5, 1),
+            scale=3.5,
+            extra_touch_border_scale=2.5,
+            icon=ba.gettexture("upButton"),
+            on_activate_call=self.increase_limit)
+
         self.warn_text = ba.textwidget(
             parent=self._root_widget,
             text="",
@@ -163,29 +207,41 @@ class SettingWindow(ba.Window):
             v_align="center",
             maxwidth=600)
 
-        self.close_button = ba.buttonwidget(
-            parent=self._root_widget,
-            position=(550, 590),
-            size=(35, 35),
-            icon=ba.gettexture("crossOut"),
-            icon_color=(1, 0.2, 0.2),
-            scale=2,
-            color=(1, 0.2, 0.2),
-            extra_touch_border_scale=5,
-            on_activate_call=self.close,
-            button_type="square")
-
-        save_button = ba.buttonwidget(
-            parent=self._root_widget,
-            position=(520, 470),
-            size=(90, 70),
-            scale=1.5,
-            label="SAVE",
-            button_type="square",
-            on_activate_call=self.save_settings)
+# ++++++++++++++++for keyboard navigation++++++++++++++++
+        ba.widget(edit=self.enable_button, up_widget=decrease_button,
+                  down_widget=self.lower_text, left_widget=save_button, right_widget=save_button)
+        ba.widget(edit=save_button, up_widget=self.close_button, down_widget=self.upper_text,
+                  left_widget=self.enable_button, right_widget=self.enable_button)
+        ba.widget(edit=self.close_button, up_widget=increase_button, down_widget=save_button,
+                  left_widget=self.enable_button, right_widget=save_button)
+        ba.widget(edit=self.lower_text, up_widget=self.enable_button, down_widget=decrease_button,
+                  left_widget=self.upper_text, right_widget=self.upper_text)
+        ba.widget(edit=self.upper_text, up_widget=save_button, down_widget=increase_button,
+                  left_widget=self.lower_text, right_widget=self.lower_text)
+        ba.widget(edit=decrease_button, up_widget=self.lower_text, down_widget=self.enable_button,
+                  left_widget=increase_button, right_widget=increase_button)
+        ba.widget(edit=increase_button, up_widget=self.upper_text, down_widget=self.close_button,
+                  left_widget=decrease_button, right_widget=decrease_button)
+# --------------------------------------------------------------------------------------------------
 
         ba.textwidget(edit=self.upper_text, on_activate_call=ba.Call(self.on_text_click, "upper"))
         ba.textwidget(edit=self.lower_text, on_activate_call=ba.Call(self.on_text_click, "lower"))
+
+    def on_enableButton_press(self):
+        global loop
+        loop = ba.app.config.get("moodlightEnabled")
+        if loop:
+            loop = False
+            label = "ENABLE"
+            color = (0, 1, 0)
+        elif not loop:
+            loop = True
+            label = "DISABLE"
+            color = (1, 0, 0)
+            Print("Restart level to enable")
+        ba.app.config["moodlightEnabled"] = loop
+        ba.app.config.commit()
+        ba.buttonwidget(edit=self.enable_button, label=label, color=color)
 
     def save_settings(self):
         ba.app.config["moodlightingSettings"] = (Ldefault, Udefault)
@@ -197,16 +253,13 @@ class SettingWindow(ba.Window):
         ba.containerwidget(edit=self._root_widget, transition="out_right",)
 
 
-Map._old_init = Map.__init__
-
-
 def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, sender_override: str = None):
     old_fcm(msg, clients, sender_override)
     if msg == 'ml':
         try:
             Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
             SettingWindow()
-            _ba.chatmessage("Mood light settings opened")
+            cprint("Mood light settings opened")
         except Exception as err:
             Print(err)
 
@@ -214,6 +267,7 @@ def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, se
 old_fcm = _ba.chatmessage
 _ba.chatmessage = new_chat_message
 _ba.set_party_icon_always_visible(True)
+Map._old_init = Map.__init__
 
 # ba_meta export plugin
 
@@ -223,12 +277,9 @@ class moodlight(ba.Plugin):
         pass
 
     def on_app_running(self):
-        try:
-            pass
-        except Exception as err:
-            Print(err)
+        _ba.show_progress_bar()
 
-    def on_plugin_manager_prompt(self):
+    def on_plugin_manager_prompt(self):  # called by plugin manager
         SettingWindow()
 
     def _new_init(self, vr_overlay_offset: Optional[Sequence[float]] = None) -> None:
@@ -238,13 +289,23 @@ class moodlight(ba.Plugin):
             return
 
         gnode = _ba.getactivity().globalsnode
+        default_tint = (1.100000023841858, 1.0, 0.8999999761581421)
+        transition_duration = 1.0  # for future improvements
 
         def changetint():
-            Range = (random.randrange(Ldefault, Udefault)/10, random.randrange(Ldefault,
-                     Udefault)/10, random.randrange(Ldefault, Udefault)/10)
-            ba.animate_array(gnode, 'tint', 3, {
-                0.0: gnode.tint,
-                1.0: Range
-            })
-        _ba.timer(0.3, changetint, repeat=True)
+            if loop:
+                Range = (random.randrange(Ldefault, Udefault)/10, random.randrange(Ldefault,
+                         Udefault)/10, random.randrange(Ldefault, Udefault)/10)
+                ba.animate_array(gnode, 'tint', 3, {
+                    0.0: gnode.tint,
+                    transition_duration: Range
+                })
+            else:
+                global timer
+                timer = None
+                ba.animate_array(gnode, "tint", 3, {0.0: gnode.tint, 0.4: default_tint})
+
+        global timer
+        timer = ba.Timer(0.3, changetint, repeat=True)
+
     Map.__init__ = _new_init
