@@ -25,21 +25,6 @@ def Print(*args):
 def cprint(*args):
     out = "\n".join(args)
     _ba.chatmessage(out)
-#
-# class printerr:#for debugging
-#    #def __init__(self):
-#        global errcounter
-#        errcounter=1
-#    def __enter__(self):
-#        _ba.chatmessage("executing")
-#
-#    def __exit__(self, exc_type, exc_value, exc_tb):
-#        cprint(exc_type, exc_value, exc_tb)
-#        if not(exc_type==None):
-#            cprint(exc_type, exc_value, exc_tb)
-#        else:
-#            cprint("Executed sucessfully","No error")
-
 
 try:
     Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
