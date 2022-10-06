@@ -4,7 +4,7 @@
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
     "mood_light": {
-      "description": "Dynamic lighting in co-op games (adjustable using \"cm\" chat command)",
+      "description": "Dynamic lighting in co-op games (adjustable using \"ml\" chat command)",
       "external_url": "",
       "authors": [
         {
@@ -133,7 +133,7 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "",
+          "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy#5824"
         }
       ],
@@ -158,7 +158,7 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothyt@bombsquad.ga",
+          "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy#5824"
         }
       ],
@@ -177,7 +177,7 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothyt@bombsquad.ga",
+          "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy#5824"
         }
       ],
@@ -187,6 +187,44 @@
           "commit_sha": "e994af5",
           "released_on": "17-09-2022",
           "md5sum": "5b90431822c8f6a8227266ab8d64686b"
+        }
+      }
+    },
+    "character_chooser": {
+      "description": "Let you choose your character before joining game.",
+      "external_url": "https://www.youtube.com/watch?v=hNmv2l-NahE",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "ff4de19",
+          "released_on": "05-10-2022",
+          "md5sum": "38d47297d4048a2fe1022ea841c76f91"
+        }
+      }
+    },
+    "character_maker": {
+      "description": "Make new characters by manipulating models and textures.",
+      "external_url": "https://www.youtube.com/watch?v=q0KxY1hfMPQ",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "ff4de19",
+          "released_on": "05-10-2022",
+          "md5sum": "f734fa33994c7cfafc637b7e3dca60ce"
         }
       }
     },
@@ -225,6 +263,25 @@
           "commit_sha": "41e239c",
           "released_on": "18-09-2022",
           "md5sum": "bbaee5f133b41d2eb53e3b726403a75e"
+        }
+      }
+    },
+    "ultra_party_window": {
+      "description": "Ultra your party window with lots of features",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Droopy",
+          "email": "",
+          "discord": "Droopy#3730"
+        }
+      ],
+      "versions": {
+        "4.0.0": {
+          "api_version": 7,
+          "commit_sha": "a23e8cd",
+          "released_on": "04-10-2022",
+          "md5sum": "7da7fae6ddf2560789bbef56f4ff5bd6"
         }
       }
     }
