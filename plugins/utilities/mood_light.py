@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
-import ba,_ba
+import ba
+import _ba
 import random
 from ba._map import Map
 from bastd import mainmenu
@@ -15,44 +16,45 @@ from time import sleep
 """mood light plugin by ʟօʊքɢǟʀօʊ
 type ml in chat or use plugin manager to open settings"""
 
+
 def Print(*args):
-    out=" ".join(args)
+    out = " ".join(args)
     ba.screenmessage(out)
 
+
 def cprint(*args):
-    out="\n".join(args)
+    out = "\n".join(args)
     _ba.chatmessage(out)
-#    
-#class printerr:#for debugging
+#
+# class printerr:#for debugging
 #    #def __init__(self):
 #        global errcounter
 #        errcounter=1
 #    def __enter__(self):
 #        _ba.chatmessage("executing")
-#    
+#
 #    def __exit__(self, exc_type, exc_value, exc_tb):
-#        cprint(exc_type, exc_value, exc_tb) 
+#        cprint(exc_type, exc_value, exc_tb)
 #        if not(exc_type==None):
-#            cprint(exc_type, exc_value, exc_tb)            
+#            cprint(exc_type, exc_value, exc_tb)
 #        else:
 #            cprint("Executed sucessfully","No error")
 
 
 try:
-        Ldefault, Udefault=ba.app.config.get("moodlightingSettings")  
+    Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
 except:
-        ba.app.config["moodlightingSettings"]=(15,20)
-        Ldefault, Udefault=ba.app.config.get("moodlightingSettings")
-        Print("settings up moodlight")
-        Print("Type ml in chat or use plugin manager to access settings")
+    ba.app.config["moodlightingSettings"] = (15, 20)
+    Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
+    Print("settings up moodlight")
+    Print("Type ml in chat or use plugin manager to access settings")
 
 try:
-    loop=ba.app.config.get("moodlightEnabled")
+    loop = ba.app.config.get("moodlightEnabled")
 except:
-    ba.app.config["moodlightEnabled"]=True
+    ba.app.config["moodlightEnabled"] = True
     ba.app.config.commit()
-    loop=True
-
+    loop = True
 
 
 class SettingWindow(ba.Window):
@@ -123,25 +125,24 @@ class SettingWindow(ba.Window):
             v_align="center",
             text="Mood light settings",
             color=(0, 1, 0))
-            
-        self.enable_button=ba.buttonwidget(
+
+        self.enable_button = ba.buttonwidget(
             parent=self._root_widget,
             position=(100, 470),
             size=(90, 70),
             scale=1.5,
-            color=(1,0,0) if loop else (0,1,0),
+            color=(1, 0, 0) if loop else (0, 1, 0),
             label="DISABLE" if loop else "ENABLE",
             on_activate_call=self.on_enableButton_press)
-        
-        
+
         save_button = ba.buttonwidget(
             parent=self._root_widget,
             position=(520, 470),
             size=(90, 70),
             scale=1.5,
             label="SAVE",
-            on_activate_call=self.save_settings)   
-            
+            on_activate_call=self.save_settings)
+
         self.close_button = ba.buttonwidget(
             parent=self._root_widget,
             position=(550, 590),
@@ -192,7 +193,7 @@ class SettingWindow(ba.Window):
             h_align="center",
             v_align="center",
             text="Limit brightness")
-        
+
         decrease_button = ba.buttonwidget(
             parent=self._root_widget,
             position=(100, 100),
@@ -200,7 +201,7 @@ class SettingWindow(ba.Window):
             scale=3.5,
             extra_touch_border_scale=2.5,
             icon=ba.gettexture("downButton"),
-            on_activate_call=self.decrease_limit)        
+            on_activate_call=self.decrease_limit)
 
         increase_button = ba.buttonwidget(
             parent=self._root_widget,
@@ -218,39 +219,46 @@ class SettingWindow(ba.Window):
             position=(150, 300),
             h_align="center",
             v_align="center",
-            maxwidth=600)                
+            maxwidth=600)
 
-#++++++++++++++++for keyboard navigation++++++++++++++++
-        ba.widget(edit=self.enable_button,up_widget=decrease_button,down_widget=self.lower_text,left_widget=save_button,right_widget=save_button)        
-        ba.widget(edit=save_button,up_widget=self.close_button,down_widget=self.upper_text,left_widget=self.enable_button,right_widget=self.enable_button)                
-        ba.widget(edit=self.close_button,up_widget=increase_button,down_widget=save_button,left_widget=self.enable_button,right_widget=save_button)                
-        ba.widget(edit=self.lower_text,up_widget=self.enable_button,down_widget=decrease_button,left_widget=self.upper_text,right_widget=self.upper_text)                      
-        ba.widget(edit=self.upper_text,up_widget=save_button,down_widget=increase_button,left_widget=self.lower_text,right_widget=self.lower_text)                       
-        ba.widget(edit=decrease_button,up_widget=self.lower_text,down_widget=self.enable_button,left_widget=increase_button,right_widget=increase_button)                           
-        ba.widget(edit=increase_button,up_widget=self.upper_text,down_widget=self.close_button,left_widget=decrease_button,right_widget=decrease_button)
-#--------------------------------------------------------------------------------------------------       
-           
+# ++++++++++++++++for keyboard navigation++++++++++++++++
+        ba.widget(edit=self.enable_button, up_widget=decrease_button,
+                  down_widget=self.lower_text, left_widget=save_button, right_widget=save_button)
+        ba.widget(edit=save_button, up_widget=self.close_button, down_widget=self.upper_text,
+                  left_widget=self.enable_button, right_widget=self.enable_button)
+        ba.widget(edit=self.close_button, up_widget=increase_button, down_widget=save_button,
+                  left_widget=self.enable_button, right_widget=save_button)
+        ba.widget(edit=self.lower_text, up_widget=self.enable_button, down_widget=decrease_button,
+                  left_widget=self.upper_text, right_widget=self.upper_text)
+        ba.widget(edit=self.upper_text, up_widget=save_button, down_widget=increase_button,
+                  left_widget=self.lower_text, right_widget=self.lower_text)
+        ba.widget(edit=decrease_button, up_widget=self.lower_text, down_widget=self.enable_button,
+                  left_widget=increase_button, right_widget=increase_button)
+        ba.widget(edit=increase_button, up_widget=self.upper_text, down_widget=self.close_button,
+                  left_widget=decrease_button, right_widget=decrease_button)
+# --------------------------------------------------------------------------------------------------
+
         ba.textwidget(edit=self.upper_text, on_activate_call=ba.Call(self.on_text_click, "upper"))
         ba.textwidget(edit=self.lower_text, on_activate_call=ba.Call(self.on_text_click, "lower"))
-    
+
     def on_enableButton_press(self):
         global loop
-        loop=ba.app.config.get("moodlightEnabled")
+        loop = ba.app.config.get("moodlightEnabled")
         if loop:
-            loop=False
-            label="ENABLE"
-            color=(0,1,0)
+            loop = False
+            label = "ENABLE"
+            color = (0, 1, 0)
         elif not loop:
-            loop=True
-            label="DISABLE"            
-            color=(1,0,0)
-            Print("Restart level to enable")                                                      
-        ba.app.config["moodlightEnabled"]=loop   
+            loop = True
+            label = "DISABLE"
+            color = (1, 0, 0)
+            Print("Restart level to enable")
+        ba.app.config["moodlightEnabled"] = loop
         ba.app.config.commit()
-        ba.buttonwidget(edit=self.enable_button,label=label,color=color)
-        
+        ba.buttonwidget(edit=self.enable_button, label=label, color=color)
+
     def save_settings(self):
-        ba.app.config["moodlightingSettings"]=(Ldefault,Udefault)
+        ba.app.config["moodlightingSettings"] = (Ldefault, Udefault)
         ba.app.config.commit()
         Print("settings saved")
         self.close()
@@ -258,58 +266,60 @@ class SettingWindow(ba.Window):
     def close(self):
         ba.containerwidget(edit=self._root_widget, transition="out_right",)
 
-def new_chat_message(msg: Union[str, ba.Lstr], clients:Sequence[int] = None, sender_override: str = None):
-        old_fcm(msg, clients, sender_override)
-        if msg == 'ml':
-            try:
-                Ldefault, Udefault=ba.app.config.get("moodlightingSettings")          
-                SettingWindow()
-                cprint("Mood light settings opened")            
-            except Exception as err:
-                Print(err)
- 
+
+def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, sender_override: str = None):
+    old_fcm(msg, clients, sender_override)
+    if msg == 'ml':
+        try:
+            Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
+            SettingWindow()
+            cprint("Mood light settings opened")
+        except Exception as err:
+            Print(err)
+
+
 old_fcm = _ba.chatmessage
 _ba.chatmessage = new_chat_message
 _ba.set_party_icon_always_visible(True)
-Map._old_init = Map.__init__                   
-                
+Map._old_init = Map.__init__
+
 # ba_meta export plugin
+
 
 class moodlight(ba.Plugin):
     def __init__(self):
         pass
-    
-    def on_app_running(self):
-            _ba.show_progress_bar()
 
-    def on_plugin_manager_prompt(self):#called by plugin manager
-        SettingWindow()        
-    
+    def on_app_running(self):
+        _ba.show_progress_bar()
+
+    def on_plugin_manager_prompt(self):  # called by plugin manager
+        SettingWindow()
+
     def _new_init(self, vr_overlay_offset: Optional[Sequence[float]] = None) -> None:
         self._old_init(vr_overlay_offset)
-        in_game = not isinstance(_ba.get_foreground_host_session(), mainmenu.MainMenuSession)        
+        in_game = not isinstance(_ba.get_foreground_host_session(), mainmenu.MainMenuSession)
         if not in_game:
             return
-            
-        gnode = _ba.getactivity().globalsnode
-        default_tint=(1.100000023841858, 1.0, 0.8999999761581421)
-        transition_duration=1.0#for future improvements
-        
-        def changetint():                      
-                if loop:                                      
-                    Range = (random.randrange(Ldefault, Udefault)/10, random.randrange(Ldefault,
-                             Udefault)/10, random.randrange(Ldefault, Udefault)/10)
-                    ba.animate_array(gnode, 'tint', 3 ,{
-                        0.0: gnode.tint,
-                        transition_duration: Range
-                    })
-                else:
-                    global timer
-                    timer=None
-                    ba.animate_array(gnode,"tint",3, {0.0:gnode.tint,0.4:default_tint})                              
-                         
-        global timer
-        timer=ba.Timer(0.3, changetint, repeat=True)     
-    
-    Map.__init__ = _new_init
 
+        gnode = _ba.getactivity().globalsnode
+        default_tint = (1.100000023841858, 1.0, 0.8999999761581421)
+        transition_duration = 1.0  # for future improvements
+
+        def changetint():
+            if loop:
+                Range = (random.randrange(Ldefault, Udefault)/10, random.randrange(Ldefault,
+                         Udefault)/10, random.randrange(Ldefault, Udefault)/10)
+                ba.animate_array(gnode, 'tint', 3, {
+                    0.0: gnode.tint,
+                    transition_duration: Range
+                })
+            else:
+                global timer
+                timer = None
+                ba.animate_array(gnode, "tint", 3, {0.0: gnode.tint, 0.4: default_tint})
+
+        global timer
+        timer = ba.Timer(0.3, changetint, repeat=True)
+
+    Map.__init__ = _new_init
