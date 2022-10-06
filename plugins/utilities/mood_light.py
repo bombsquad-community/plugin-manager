@@ -26,6 +26,7 @@ def cprint(*args):
     out = "\n".join(args)
     _ba.chatmessage(out)
 
+
 try:
     Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
 except:
