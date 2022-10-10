@@ -226,13 +226,13 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "ff4de19",
           "released_on": "05-10-2022",
           "md5sum": "f734fa33994c7cfafc637b7e3dca60ce"
-        },
-        "1.0.1": null
+        }
       }
     },
     "icons_keyboard": {
