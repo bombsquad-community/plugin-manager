@@ -228,9 +228,9 @@
       "versions": {
         "1.0.0": {
           "api_version": 7,
-          "commit_sha": "ff4de19",
+          "commit_sha": "86a22ce",
           "released_on": "05-10-2022",
-          "md5sum": "f734fa33994c7cfafc637b7e3dca60ce"
+          "md5sum": "b19ff011b6e229544324d4310770d7b9"
         }
       }
     },
