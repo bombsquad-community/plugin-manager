@@ -257,7 +257,7 @@ def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, se
     old_fcm(msg, clients, sender_override)
     if msg == 'ml':
         try:
-            global Ldefault,Udefault
+            global Ldefault, Udefault
             Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
             SettingWindow()
             cprint("Mood light settings opened")
