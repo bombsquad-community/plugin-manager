@@ -6,10 +6,6 @@ import re
 import datetime
 
 
-def get_comparable_version_tuple_from_string(version_string):
-    return tuple(map(int, version_string.split(".")))
-
-
 class PluginVersionMetadata:
     def __init__(self, plugin_name, version_name, plugin_path, from_json={}):
         self.plugin_name = plugin_name
@@ -73,20 +69,6 @@ class PluginVersionMetadata:
         md5sum = hashlib.md5(self._content).hexdigest()
         return md5sum
 
-    def sort_versions(self):
-        if self._content is None:
-            with open(self.plugin_path, "rb") as fin:
-                self._content = fin.read()
-
-        versions = self.json["plugins"][self.plugin_name]["versions"]
-        sorted_versions = dict(sorted(
-            tuple(versions.items()),
-            key=lambda version: get_comparable_version_tuple_from_string(version[0]),
-            reverse=True,
-        ))
-        self.json["plugins"][self.plugin_name]["versions"] = sorted_versions
-        return self
-
 
 class CategoryVersionMetadata:
     def __init__(self, category_metadata_base):
@@ -97,14 +79,15 @@ class CategoryVersionMetadata:
 
     def get_plugins_having_null_version_values(self):
         for plugin_name, plugin_metadata in self.category_metadata["plugins"].items():
-            for version_name, version_metadata in plugin_metadata["versions"].items():
-                if version_metadata is None:
-                    plugin_path = f"{os.path.join(self.category_metadata_base, f'{plugin_name}.py')}"
-                    yield PluginVersionMetadata(
-                        plugin_name,
-                        version_name,
-                        plugin_path,
-                    )
+            latest_version_name, latest_version_metadata = tuple(
+                plugin_metadata["versions"].items())[0]
+            if latest_version_metadata is None:
+                plugin_path = f"{os.path.join(self.category_metadata_base, f'{plugin_name}.py')}"
+                yield PluginVersionMetadata(
+                    plugin_name,
+                    latest_version_name,
+                    plugin_path,
+                )
 
     def get_plugins_having_diff_last_md5sum_version_values(self):
         for plugin_name, plugin_metadata in self.category_metadata["plugins"].items():
@@ -138,7 +121,6 @@ class CategoryVersionMetadata:
                       .set_commit_sha(commit_sha)
                       .set_released_on(today)
                       .set_md5sum()
-                      .sort_versions()
                       .json
             )
         return category_json
