@@ -249,8 +249,8 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-        cls,
-        sessiontype: type[ba.Session]) -> list[ba.Setting]:
+            cls,
+            sessiontype: type[ba.Session]) -> list[ba.Setting]:
         settings = [
             ba.IntSetting(
                 'Lives Per Player',
@@ -395,7 +395,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         # total lives match.
         if (isinstance(self.session, ba.DualTeamSession)
             and self._balance_total_lives and self.teams[0].players
-            and self.teams[1].players):
+                and self.teams[1].players):
             if self._get_total_team_lives(
                self.teams[0]) < self._get_total_team_lives(self.teams[1]):
                 lesser_team = self.teams[0]
