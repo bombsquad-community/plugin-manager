@@ -3,6 +3,20 @@
   "description": "Minigames",
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames",
   "plugins": {
+    "ultimate_last_stand": {
+      "description": "Bring Last Stand minigame into team fight and FFA.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "Cross Joy#0721"
+        }
+      ],
+      "versions": {
+        "2.0.0": null
+      }
+    },
     "alliance_elimination": {
       "description": "Fight in groups of duo, trio, or more. Last remaining alive wins.",
       "external_url": "",
