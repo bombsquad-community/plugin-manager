@@ -256,12 +256,12 @@ def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, se
     old_fcm(msg, clients, sender_override)
     if msg == 'ml':
         try:
-            global Ldefault,Udefault
+            global Ldefault, Udefault
             Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
             SettingWindow()
             cprint("Mood light settings opened")
         except Exception as err:
-            Print(err,"-from new_chat_message")
+            Print(err, "-from new_chat_message")
 
 
 old_fcm = _ba.chatmessage
@@ -278,12 +278,12 @@ class moodlight(ba.Plugin):
 
     def on_app_running(self):
         _ba.show_progress_bar()
-        
+
     def has_settings_ui(self):
         return True
-    def show_settings_ui(self,button):      
+
+    def show_settings_ui(self, button):
         SettingWindow()
-        
 
     def _new_init(self, vr_overlay_offset: Optional[Sequence[float]] = None) -> None:
         self._old_init(vr_overlay_offset)
