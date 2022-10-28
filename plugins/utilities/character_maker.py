@@ -439,7 +439,7 @@ class CharacterBuilder(ba.TeamGameActivity[Player, Team]):
 cm = _ba.chatmessage
 
 
-def _new_chatmessage(msg):
+def _new_chatmessage(msg: str | ba.Lstr, clients: Sequence[int] | None = None, sender_override: str | None = None):
     if msg.split(" ")[0] == "export":
         if len(msg.split(" ")) > 1:
             savecharacter(msg.split(" ")[1])
@@ -449,7 +449,7 @@ def _new_chatmessage(msg):
         importcharacter(msg[7:])
 
     else:
-        cm(msg)
+        cm(msg, clients, sender_override)
 
 
 _ba.chatmessage = _new_chatmessage
