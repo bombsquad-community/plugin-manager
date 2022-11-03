@@ -278,6 +278,9 @@ class moodlight(ba.Plugin):
 
     def on_app_running(self):
         _ba.show_progress_bar()
+        
+    def on_plugin_manager_prompt(self):
+        SettingWindow()
 
     def has_settings_ui(self):
         return True
