@@ -30,6 +30,7 @@ class NewBlast(Blast):
         else:
             return super().handlemessage(msg)
 
+
 @dataclass
 class RaceMine:
     """Holds info about a mine on the track."""
@@ -223,7 +224,7 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
                             ('modify_part_collision', 'physical', False),
                             ('call', 'at_connect',
                              self._handle_race_point_collide),
-                        ))
+        ))
         for rpt in pts:
             self._regions.append(RaceRegion(rpt, len(self._regions)))
 
@@ -271,7 +272,7 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
                         translate=('statements', 'Killing ${NAME} for'
                                    ' skipping part of the track!'),
                         subs=[('${NAME}', player.getname(full=True))]),
-                                     color=(1, 0, 0))
+                        color=(1, 0, 0))
             else:
                 # If this player is in first, note that this is the
                 # front-most race-point.
@@ -397,7 +398,7 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
                            '${TEAM} is disqualified because ${PLAYER} left'),
                 subs=[('${TEAM}', player.team.name),
                       ('${PLAYER}', player.getname(full=True))]),
-                             color=(1, 1, 0))
+                color=(1, 1, 0))
             player.team.finished = True
             player.team.time = None
             player.team.lap = 0
@@ -535,7 +536,7 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
         self._squidgame_countdown()
 
     def _squidgame_countdown(self) -> None:
-        self._countdown_timer = 80 * self._laps # 80
+        self._countdown_timer = 80 * self._laps  # 80
         ba.newnode(
             'image',
             attrs={
@@ -552,7 +553,7 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
                 'color': (1.0, 0.0, 0.0),
                 'attach': 'topCenter',
                 'position': (-220, -38),
-                'scale':(155, 65),
+                'scale': (155, 65),
                 'texture': ba.gettexture('uiAtlas'),
                 'model_transparent': ba.getmodel('meterTransparent')})
         self._sgcountdown_text = ba.newnode(
@@ -615,9 +616,9 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
         self._tick_timer = ba.timer(1.0, do_ticks, repeat=True)
 
     def _start_squid_game(self) -> None:
-        easy = [4.5,5,5.5,6]
-        normal = [4,4.5,5]
-        hard = [3,3.5,4]
+        easy = [4.5, 5, 5.5, 6]
+        normal = [4, 4.5, 5]
+        hard = [3, 3.5, 4]
         random_number = random.choice(
             hard if self._sq_mode == 'Hard' else
             normal if self._sq_mode == 'Normal' else easy)
@@ -665,18 +666,18 @@ class SquidRaceGame(ba.TeamGameActivity[Player, Team]):
                 posy = float("%.1f" % player.customdata['position'][2])
 
                 posx_list = [
-                    round(posx,1),round(posx+0.1,1),round(posx+0.2,1),
-                    round(posx-0.1,1),round(posx-0.2,1)]
+                    round(posx, 1), round(posx+0.1, 1), round(posx+0.2, 1),
+                    round(posx-0.1, 1), round(posx-0.2, 1)]
                 current_posx = float("%.1f" % player.actor.node.position[0])
 
                 posz_list = [
-                    round(posz,1),round(posz+0.1,1),round(posz+0.2,1),
-                    round(posz-0.1,1),round(posz-0.2,1)]
+                    round(posz, 1), round(posz+0.1, 1), round(posz+0.2, 1),
+                    round(posz-0.1, 1), round(posz-0.2, 1)]
                 current_posz = float("%.1f" % player.actor.node.position[1])
 
                 posy_list = [
-                    round(posy,1),round(posy+0.1,1),round(posy+0.2,1),
-                    round(posy-0.1,1),round(posy-0.2,1)]
+                    round(posy, 1), round(posy+0.1, 1), round(posy+0.2, 1),
+                    round(posy-0.1, 1), round(posy-0.2, 1)]
                 current_posy = float("%.1f" % player.actor.node.position[2])
 
                 if not (current_posx in posx_list) or not (

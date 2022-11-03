@@ -65,7 +65,7 @@ class PlayerSpaz_Zom(PlayerSpaz):
                 if not playa is None:
                     if opposingnode._source_player.lives > 0:
                         return True
-            except  Exception:
+            except Exception:
                 pass
 
             if (opposingnode.getnodetype() == 'spaz'
@@ -81,6 +81,7 @@ class PlayerSpaz_Zom(PlayerSpaz):
         else:
             return super().handlemessage(m)
         return None
+
 
 class PlayerZombie(PlayerSpaz):
     def handlemessage(self, m: Any) -> Any:
@@ -100,6 +101,7 @@ class PlayerZombie(PlayerSpaz):
                 super().handlemessage(m)
         else:
             super().handlemessage(m)
+
 
 class zBotSet(SpazBotSet):
     def start_moving(self) -> None:
@@ -138,6 +140,7 @@ class zBotSet(SpazBotSet):
         for bot in bot_list:
             bot.set_player_points(player_pts)
             bot.update_ai()
+
 
 class Team(ba.Team[Player]):
     """Our team type for this game."""
@@ -242,8 +245,8 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
         activity = ba.getactivity()
         my_factory = SpazFactory.get()
 
-        appears = ['Kronk','Zoe','Pixel','Agent Johnson',
-                   'Bones','Frosty','Kronk2']
+        appears = ['Kronk', 'Zoe', 'Pixel', 'Agent Johnson',
+                   'Bones', 'Frosty', 'Kronk2']
         myAppear = copy.copy(ba.app.spaz_appearances['Kronk'])
         myAppear.name = 'Kronk2'
         ba.app.spaz_appearances['Kronk2'] = myAppear
@@ -252,7 +255,7 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
         med = my_factory.spaz_media
         med['Kronk2']['head_model'] = med['Zoe']['head_model']
         med['Kronk2']['color_texture'] = med['Agent Johnson']['color_texture']
-        med['Kronk2']['color_mask_texture']=med['Pixel']['color_mask_texture']
+        med['Kronk2']['color_mask_texture'] = med['Pixel']['color_mask_texture']
         med['Kronk2']['torso_model'] = med['Bones']['torso_model']
         med['Kronk2']['pelvis_model'] = med['Pixel']['pelvis_model']
         med['Kronk2']['upper_arm_model'] = med['Frosty']['upper_arm_model']
@@ -351,9 +354,9 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
         self._bots = zBotSet()
 
-        #Set colors and character for ToughGuyBot to be zombie
-        setattr(BrawlerBot, 'color', (0.4,0.1,0.05))
-        setattr(BrawlerBot, 'highlight', (0.2,0.4,0.3))
+        # Set colors and character for ToughGuyBot to be zombie
+        setattr(BrawlerBot, 'color', (0.4, 0.1, 0.05))
+        setattr(BrawlerBot, 'highlight', (0.2, 0.4, 0.3))
         setattr(BrawlerBot, 'character', 'Kronk2')
         # start some timers to spawn bots
         thePt = self.map.get_ffa_start_position(self.players)
@@ -433,7 +436,6 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                             icon.set_position_and_scale((xval, 30), 0.7)
                             icon.update_for_lives()
                         xval += x_offs
-
 
     def _get_spawn_point(self, player: Player) -> ba.Vec3 | None:
         del player  # Unused.
@@ -612,7 +614,7 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
         try:
             pos = player.actor.node.position
         except Exception as e:
-            print('EXC getting player pos in bsElim',e)
+            print('EXC getting player pos in bsElim', e)
             return
         if player.lives > 0:
             popuptext.PopupText('x' + str(player.lives - 1),
@@ -692,7 +694,8 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
         elif isinstance(msg, SpazBotDiedMessage):
             self._onSpazBotDied(msg)
-            super().handlemessage(msg)#bs.PopupText("died",position=self._position,color=popupColor,scale=popupScale).autoRetain()
+            # bs.PopupText("died",position=self._position,color=popupColor,scale=popupScale).autoRetain()
+            super().handlemessage(msg)
         else:
             super().handlemessage(msg)
 
@@ -734,15 +737,15 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                 self._round_end_timer = ba.Timer(0.5, self.end_game)
 
     def spawn_zombie(self) -> None:
-        #We need a Z height...
+        # We need a Z height...
         thePt = list(self.get_random_point_in_play())
         thePt2 = self.map.get_ffa_start_position(self.players)
         thePt[1] = thePt2[1]
         ba.timer(0.1, ba.Call(
             self._bots.spawn_bot, BrawlerBot, pos=thePt, spawn_time=1.0))
 
-    def _onSpazBotDied(self,DeathMsg) -> None:
-        #Just in case we are over max...
+    def _onSpazBotDied(self, DeathMsg) -> None:
+        # Just in case we are over max...
         if len(self._bots.get_living_bots()) < self._max_zombies:
             self.zombieQ += 1
 
@@ -762,37 +765,38 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
         myMap = self.map.getname()
         if myMap == 'Doom Shroom':
             while True:
-                x = random.uniform(-1.0,1.0)
-                y = random.uniform(-1.0,1.0)
-                if x*x+y*y < 1.0: break
-            return ((8.0*x,8.0,-3.5+5.0*y))
+                x = random.uniform(-1.0, 1.0)
+                y = random.uniform(-1.0, 1.0)
+                if x*x+y*y < 1.0:
+                    break
+            return ((8.0*x, 8.0, -3.5+5.0*y))
         elif myMap == 'Rampage':
-            x = random.uniform(-6.0,7.0)
-            y = random.uniform(-6.0,-2.5)
+            x = random.uniform(-6.0, 7.0)
+            y = random.uniform(-6.0, -2.5)
             return ((x, 8.0, y))
         elif myMap == 'Hockey Stadium':
-            x = random.uniform(-11.5,11.5)
-            y = random.uniform(-4.5,4.5)
+            x = random.uniform(-11.5, 11.5)
+            y = random.uniform(-4.5, 4.5)
             return ((x, 5.0, y))
         elif myMap == 'Courtyard':
-            x = random.uniform(-4.3,4.3)
-            y = random.uniform(-4.4,0.3)
+            x = random.uniform(-4.3, 4.3)
+            y = random.uniform(-4.4, 0.3)
             return ((x, 8.0, y))
         elif myMap == 'Crag Castle':
-            x = random.uniform(-6.7,8.0)
-            y = random.uniform(-6.0,0.0)
+            x = random.uniform(-6.7, 8.0)
+            y = random.uniform(-6.0, 0.0)
             return ((x, 12.0, y))
         elif myMap == 'Big G':
-            x = random.uniform(-8.7,8.0)
-            y = random.uniform(-7.5,6.5)
+            x = random.uniform(-8.7, 8.0)
+            y = random.uniform(-7.5, 6.5)
             return ((x, 8.0, y))
         elif myMap == 'Football Stadium':
-            x = random.uniform(-12.5,12.5)
-            y = random.uniform(-5.0,5.5)
+            x = random.uniform(-12.5, 12.5)
+            y = random.uniform(-5.0, 5.5)
             return ((x, 8.0, y))
         else:
-            x = random.uniform(-5.0,5.0)
-            y = random.uniform(-6.0,0.0)
+            x = random.uniform(-5.0, 5.0)
+            y = random.uniform(-6.0, 0.0)
             return ((x, 8.0, y))
 
     def _update_scoreboard(self) -> None:
