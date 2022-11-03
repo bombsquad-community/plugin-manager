@@ -3,6 +3,81 @@
   "description": "Utilities",
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "CustomDeath": {
+      "description":  "Characters turn to Bones after death",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268" 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "MaxPlayers": {
+      "description":  "Increase the max player limit of 8 players",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268" 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "QuickCustomGame": {
+      "description": "Quckly create a custom game with any gamemode",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "RandomColors": {
+      "description": "Creates patches of random color after bomb explosions",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "chat_cmd": {
+      "description": "chatcmd for a beutiful game  - BombSquad OwO,type /help in chat for more info",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "IM_NOT_PRANAV#7874",
+          "email": null,
+          "discord": "IM_NOT_PRANAV#7874"
+        },
+        {
+          "name": "FireFighter1037 ",
+          "email": null,
+          "discord": null
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
     "mood_light": {
       "description": "Dynamic lighting in co-op games (adjustable using \"ml\" chat command)",
       "external_url": "",
