@@ -97,6 +97,25 @@
           "md5sum": "c84b7f415de5d3e9189ee73fc0e3ce93"
         }
       }
+    },
+    "soccer": {
+      "description": "Shoot the ball in left or right edge of the map to score",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Stary_Agent",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "e59073b",
+          "released_on": "02-11-2022",
+          "md5sum": "ceb7ac417c85396722fa9f7fee3cfc01"
+        }
+      }
     }
   }
 }
