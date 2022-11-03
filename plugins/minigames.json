@@ -2,7 +2,91 @@
   "name": "Minigames",
   "description": "Minigames",
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames",
-  "plugins": {
+  "plugins": {  
+    "SimonSays": {
+      "description":  "You better do what Simon says",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": null,
+          "discord": null 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "SquidRace": {
+      "description":  "Race inspired by the squid games",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268" 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "ZombieHorde": {
+      "description":  "Fight or defend against horde of zombies",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268" 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },    
+    "MeteorShower": {
+      "description":  "MeteorShower with many different bombs",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268" 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "Boxing": {
+      "description":  "Simple boxing minigame",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": null,
+          "discord": "! JoseANG3L#0268" 
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
+    "BasketBomb": {
+      "description": "Score all the baskets and be the MVP.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": null,
+          "discord": null
+        }
+      ],
+      "versions": {        
+        "1.0.0": null
+      }
+    },
     "ultimate_last_stand": {
       "description": "Bring Last Stand minigame into team fight and FFA.",
       "external_url": "",
@@ -95,25 +179,6 @@
           "commit_sha": "858030b",
           "released_on": "01-09-2022",
           "md5sum": "c84b7f415de5d3e9189ee73fc0e3ce93"
-        }
-      }
-    },
-    "soccer": {
-      "description": "Shoot the ball in left or right edge of the map to score",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "Stary_Agent",
-          "email": "",
-          "discord": ""
-        }
-      ],
-      "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "e59073b",
-          "released_on": "02-11-2022",
-          "md5sum": "ceb7ac417c85396722fa9f7fee3cfc01"
         }
       }
     }
