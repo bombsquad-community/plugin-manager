@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 
 
 Spaz.oldhandlemessage = Spaz.handlemessage
+
+
 def handlemessage(self, msg: Any) -> Any:
     if isinstance(msg, ba.DieMessage):
         if self.node:

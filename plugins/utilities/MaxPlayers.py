@@ -37,6 +37,7 @@ else:
     teams_text = 'Teams'
     ffa_text = 'FFA'
 
+
 class ConfigNumberEdit:
 
     def __init__(self,
@@ -101,6 +102,7 @@ class ConfigNumberEdit:
         ba.textwidget(edit=self.valuetext, text=str(self._value))
         cfg['Config Max Players'][self._config] = self._value
         cfg.apply_and_commit()
+
 
 class SettingsMaxPlayers(PopupWindow):
 
@@ -180,6 +182,7 @@ class SettingsMaxPlayers(PopupWindow):
         ba.playsound(ba.getsound('swish'))
         self._transition_out()
 
+
 def __init__(self) -> None:
     """Instantiate a co-op mode session."""
     # pylint: disable=cyclic-import
@@ -230,6 +233,7 @@ def __init__(self) -> None:
     self._next_game_level_name: Optional[str] = None
     self._update_on_deck_game_instances()
 
+
 def get_max_players(self) -> int:
     """Return max number of ba.Players allowed to join the game at once."""
     if self.use_teams:
@@ -240,11 +244,15 @@ def get_max_players(self) -> int:
         'Free-for-All Max Players',
         cfg['Config Max Players']['ffa_max_players'])
 
+
 GatherWindow.__old_init__ = GatherWindow.__init__
+
+
 def __gather_init__(self,
-             transition: Optional[str] = 'in_right',
-             origin_widget: ba.Widget = None):
+                    transition: Optional[str] = 'in_right',
+                    origin_widget: ba.Widget = None):
     self.__old_init__(transition, origin_widget)
+
     def _do_max_players():
         SettingsMaxPlayers()
     self._max_players_button = ba.buttonwidget(
@@ -259,6 +267,7 @@ def __gather_init__(self,
         label=title_short_text,
         button_type='regular',
         on_activate_call=_do_max_players)
+
 
 def _save_state(self) -> None:
     try:
@@ -286,6 +295,7 @@ def _save_state(self) -> None:
         }
     except Exception:
         ba.print_exception(f'Error saving state for {self}.')
+
 
 def _restore_state(self) -> None:
     from efro.util import enum_by_value
@@ -326,6 +336,8 @@ def _restore_state(self) -> None:
         ba.print_exception('Error restoring gather-win state.')
 
 # ba_meta export plugin
+
+
 class MaxPlayersPlugin(ba.Plugin):
 
     def has_settings_ui(self) -> bool:
@@ -338,7 +350,7 @@ class MaxPlayersPlugin(ba.Plugin):
         old_config = ba.app.config['Config Max Players']
         for setting in cmp:
             if setting not in old_config:
-                ba.app.config['Config Max Players'].update({setting:cmp[setting]})
+                ba.app.config['Config Max Players'].update({setting: cmp[setting]})
         remove_list = []
         for setting in old_config:
             if setting not in cmp:

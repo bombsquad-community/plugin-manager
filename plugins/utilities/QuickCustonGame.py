@@ -19,9 +19,9 @@ if TYPE_CHECKING:
 lang = ba.app.lang.language
 
 if lang == 'Spanish':
-	custom_txt = 'personalizar...'
+    custom_txt = 'personalizar...'
 else:
-	custom_txt = 'custom...'
+    custom_txt = 'custom...'
 
 
 if 'quick_game_button' in ba.app.config:
@@ -30,6 +30,7 @@ else:
     config = {'selected': None, 'config': None}
     ba.app.config['quick_game_button'] = config
     ba.app.config.commit()
+
 
 def start_game(session: ba.Session, fadeout: bool = True):
     def callback():
@@ -50,6 +51,7 @@ def start_game(session: ba.Session, fadeout: bool = True):
     else:
         callback()
 
+
 class SimplePlaylist:
 
     def __init__(self,
@@ -65,6 +67,7 @@ class SimplePlaylist:
         else:
             settings = self.settings['settings']
         return dict(resolved_type=self.gametype, settings=settings)
+
 
 class CustomSession(FreeForAllSession):
 
@@ -305,6 +308,8 @@ class SelectGameWindow(PlaylistAddGameWindow):
 
 
 PlayWindow._old_init = PlayWindow.__init__
+
+
 def __init__(self, *args, **kwargs):
     self._old_init()
 
@@ -331,6 +336,7 @@ def __init__(self, *args, **kwargs):
 
     self._restore_state()
 
+
 def states(self) -> None:
     return {
         'Team Games': self._teams_button,
@@ -340,6 +346,7 @@ def states(self) -> None:
         'Quick Game': self._quick_game_button
     }
 
+
 def _save_state(self) -> None:
     swapped = {v: k for k, v in states(self).items()}
     if self._root_widget.get_selected_child() in swapped:
@@ -348,6 +355,7 @@ def _save_state(self) -> None:
                 self._root_widget.get_selected_child()]
     else:
         ba.print_exception(f'Error saving state for {self}.')
+
 
 def _restore_state(self) -> None:
     if not hasattr(self, '_quick_game_button'):
