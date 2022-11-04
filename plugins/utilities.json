@@ -114,6 +114,7 @@
         }
       ],
       "versions": {
+        "1.2.2": null,
         "1.2.1": {
           "api_version": 7,
           "commit_sha": "1a56b57",
