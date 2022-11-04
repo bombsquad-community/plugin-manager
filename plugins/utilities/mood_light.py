@@ -17,12 +17,12 @@ type ml in chat or use plugin manager to open settings"""
 
 
 def Print(*args):
-    out = " ".join(args)
+    out = " ".join(str(args))
     ba.screenmessage(out)
 
 
 def cprint(*args):
-    out = "\n".join(args)
+    out = "\n".join(str(args))
     _ba.chatmessage(out)
 
 
@@ -237,7 +237,9 @@ class SettingWindow(ba.Window):
             loop = True
             label = "DISABLE"
             color = (1, 0, 0)
-            Print("Restart level to enable")
+            in_game = not isinstance(_ba.get_foreground_host_session(), mainmenu.MainMenuSession)
+            if in_game:
+                Print("Restart level to apply")
         ba.app.config["moodlightEnabled"] = loop
         ba.app.config.commit()
         ba.buttonwidget(edit=self.enable_button, label=label, color=color)
