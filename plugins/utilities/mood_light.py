@@ -17,12 +17,18 @@ type ml in chat or use plugin manager to open settings"""
 
 
 def Print(*args):
-    out = " ".join(str(args))
+    out=""
+    for arg in args:
+        a=str(arg)
+        out += a
     ba.screenmessage(out)
 
 
 def cprint(*args):
-    out = "\n".join(str(args))
+    out=""
+    for arg in args:
+        a=str(arg)
+        out += a
     _ba.chatmessage(out)
 
 
