@@ -3,7 +3,21 @@
   "description": "Utilities",
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
-    "CustomDeath": {
+    "share_replay": {
+      "description": "Export replays to mods folder and share them with friends or have a backup",
+      "external_url": null,
+      "authors": [
+        {
+          "name": "LoupGarou",
+          "email": "LoupGarou5418@outlook.com",
+          "discord": "ʟօʊքɢǟʀօʊ#3063"
+        }
+      ],
+      "versions": {
+        "1.0.0":null
+      }
+    },
+    "custom_death": {
       "description": "Characters turn to Bones after death",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -22,7 +36,7 @@
         }
       }
     },
-    "MaxPlayers": {
+    "max_players": {
       "description": "Increase the max player limit of 8 players",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -41,7 +55,7 @@
         }
       }
     },
-    "QuickCustomGame": {
+    "quick_custom_game": {
       "description": "Quckly create a custom game with any gamemode",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -60,7 +74,7 @@
         }
       }
     },
-    "RandomColors": {
+    "random_colors": {
       "description": "Creates patches of random color after bomb explosions",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
