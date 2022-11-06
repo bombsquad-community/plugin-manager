@@ -14,12 +14,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "32c6b83",
-          "released_on": "06-11-2022",
-          "md5sum": "b652c675e61332a9e7714342ee83bfce"
-        }
+        "1.0.0":null
       }
     },
     "custom_death": {
@@ -33,12 +28,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7d3d117",
-          "released_on": "03-11-2022",
-          "md5sum": "7b1941512532321eec18140087569215"
-        }
+        "1.0.0":null
       }
     },
     "max_players": {
@@ -52,12 +42,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7d3d117",
-          "released_on": "03-11-2022",
-          "md5sum": "f5e129f009e9732b3179c7edaf75478e"
-        }
+        "1.0.0":null
       }
     },
     "quick_custom_game": {
@@ -71,12 +56,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7d3d117",
-          "released_on": "03-11-2022",
-          "md5sum": "b691e35afb17cd3b5f6fe21c0194567d"
-        }
+        "1.0.0":null
       }
     },
     "random_colors": {
@@ -90,12 +70,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7d3d117",
-          "released_on": "03-11-2022",
-          "md5sum": "0c351a0aebed77c3771053cde0c18d7b"
-        }
+        "1.0.0":null
       }
     },
     "chat_cmd": {
@@ -114,12 +89,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7d3d117",
-          "released_on": "03-11-2022",
-          "md5sum": "c84d9a1c9e63e77949134020e1f11834"
-        }
+        "1.0.0":null
       }
     },
     "mood_light": {
@@ -133,18 +103,7 @@
         }
       ],
       "versions": {
-        "1.2.2": {
-          "api_version": 7,
-          "commit_sha": "490b857",
-          "released_on": "04-11-2022",
-          "md5sum": "cb367f877d6360a0e41941b1d0396a9b"
-        },
-        "1.2.1": {
-          "api_version": 7,
-          "commit_sha": "1a56b57",
-          "released_on": "28-10-2022",
-          "md5sum": "81414a2b497da3d2340a4d7eb004336c"
-        },
+        "1.2.1":null
         "1.2.0": {
           "api_version": 7,
           "commit_sha": "d838115",
