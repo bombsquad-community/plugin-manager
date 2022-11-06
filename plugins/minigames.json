@@ -22,7 +22,7 @@
         }
       }
     },
-    "SimonSays": {
+    "simon_says": {
       "description": "You better do what Simon says",
       "external_url": "",
       "authors": [
@@ -41,7 +41,7 @@
         }
       }
     },
-    "SquidRace": {
+    "squid_race": {
       "description": "Race inspired by the squid games",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -60,7 +60,7 @@
         }
       }
     },
-    "ZombieHorde": {
+    "zombie_horde": {
       "description": "Fight or defend against horde of zombies",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -79,7 +79,7 @@
         }
       }
     },
-    "MeteorShower": {
+    "meteor_shower": {
       "description": "MeteorShower with many different bombs",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -98,7 +98,7 @@
         }
       }
     },
-    "Boxing": {
+    "boxing": {
       "description": "Simple boxing minigame",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -117,7 +117,7 @@
         }
       }
     },
-    "BasketBomb": {
+    "basket_bomb": {
       "description": "Score all the baskets and be the MVP.",
       "external_url": "",
       "authors": [
