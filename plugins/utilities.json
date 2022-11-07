@@ -103,7 +103,7 @@
         }
       ],
       "versions": {
-        "1.2.1":null
+        "1.2.1":null,
         "1.2.0": {
           "api_version": 7,
           "commit_sha": "d838115",
