@@ -33,7 +33,12 @@
         }
       ],
       "versions": {
-        "1.0.0":null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "5ea8255",
+          "released_on": "07-11-2022",
+          "md5sum": "def39482b339095a7affb574af829ea0"
+        }
       }
     },
     "squid_race": {
@@ -47,7 +52,12 @@
         }
       ],
       "versions": {
-        "1.0.0":null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "5ea8255",
+          "released_on": "07-11-2022",
+          "md5sum": "7ec43481e6b35b4da4f6425977ee0004"
+        }
       }
     },
     "zombie_horde": {
@@ -61,7 +71,12 @@
         }
       ],
       "versions": {
-        "1.0.0":null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "5ea8255",
+          "released_on": "07-11-2022",
+          "md5sum": "671e7b98a9d3eb0aeb7e47448db25af9"
+        }
       }
     },
     "meteor_shower": {
@@ -75,7 +90,12 @@
         }
       ],
       "versions": {
-        "1.0.0":null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "5ea8255",
+          "released_on": "07-11-2022",
+          "md5sum": "1ce8c1a3f3ec240af39b7a73375e7891"
+        }
       }
     },
     "boxing": {
@@ -89,7 +109,12 @@
         }
       ],
       "versions": {
-        "1.0.0":null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "5ea8255",
+          "released_on": "07-11-2022",
+          "md5sum": "c1b615df09886ba05622c4e8b4f6be40"
+        }
       }
     },
     "basket_bomb": {
@@ -103,7 +128,12 @@
         }
       ],
       "versions": {
-        "1.0.0":null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "5ea8255",
+          "released_on": "07-11-2022",
+          "md5sum": "7ec87edbdd5183ec4b2daffad0019820"
+        }
       }
     },
     "ultimate_last_stand": {
