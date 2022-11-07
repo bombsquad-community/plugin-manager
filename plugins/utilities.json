@@ -5,7 +5,7 @@
   "plugins": {
     "share_replay": {
       "description": "Export replays to mods folder and share them with friends or have a backup",
-      "external_url": null,
+      "external_url": "",
       "authors": [
         {
           "name": "LoupGarou",
@@ -110,7 +110,7 @@
         {
           "name": "FireFighter1037 ",
           "email": "",
-          "discord": null
+          "discord": ""
         }
       ],
       "versions": {
