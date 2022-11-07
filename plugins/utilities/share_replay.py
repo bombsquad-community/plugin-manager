@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
-from os import listdir, mkdir
+from os import listdir, mkdir, path, sep
 from shutil import copy, copytree
+
 import ba
 import _ba
 from bastd.ui.watch import WatchWindow as ww
@@ -31,18 +32,17 @@ def cprint(*args):
     _ba.chatmessage(out)
 
 
-internal_dir = "/data/data/net.froemling.bombsquad/files/bombsquad_config/replays"
-external_dir = "/storage/emulated/0/Android/data/net.froemling.bombsquad/files/mods/replays"
+internal_dir = path.join("ba_data", "..", "..", "..", "files", "bombsquad_config", "replays" + sep)
+external_dir = path.join(_ba.env()["python_directory_user"], "replays"+sep)
+
 # colors
 pink = (1, 0.2, 0.8)
 green = (0.4, 1, 0.4)
 red = (1, 0, 0)
 
-try:
+if not path.exists(external_dir):
     mkdir(external_dir)
     Print("You are ready to share replays", color=pink)
-except FileExistsError:
-    pass
 
 
 class Help(PopupWindow):
@@ -98,7 +98,8 @@ class SettingWindow():
             parent=self.root,
             position=(400, 580),
             size=(35, 35),
-            label="Help",
+            texture=ba.gettexture("achievementEmpty"),
+            label="",
             on_activate_call=Help)
 
         ba.buttonwidget(
@@ -180,9 +181,8 @@ def new_init(self, transition="in_right", origin_widget=None):
 
 # ba_meta export plugin
 
-class main(ba.Plugin):
+class Loup(ba.Plugin):
     def on_app_running(self):
-
         ww.__init__ = new_init
 
     def has_settings_ui(self):
