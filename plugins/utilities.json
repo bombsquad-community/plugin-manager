@@ -81,9 +81,7 @@
       "versions": {
         "1.0.0": {
           "api_version": 7,
-<<
           "commit_sha": "2fda676",
-==
           "released_on": "07-11-2022",
           "md5sum": "b691e35afb17cd3b5f6fe21c0194567d"
         }
