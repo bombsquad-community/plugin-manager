@@ -1,6 +1,15 @@
 """
     
     Hot Potato by TheMikirog#1984
+    
+    A random player(s) gets Marked. 
+    They will die if they don't pass the mark to other players.
+    After they die, another random player gets Marked.
+    Last player standing wins!
+    
+    Heavily commented for easy modding learning!
+
+    No Rights Reserved
 
 """
 
@@ -404,7 +413,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
                           spread=0.1)
                           
             # Briefly flash when hit.
-            # We shouldn't play this if we're dead.
+            # We shouldn't do this if we're dead.
             if self.hitpoints > 0:
 
                 self.node.handlemessage('flash')
@@ -810,7 +819,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                 ba.playsound(sound, 1.0, new_victim.actor.node.position)
             self.mark(new_victim)
         
-    # This function is called the gamemode first loads.
+    # This function is called when the gamemode first loads.
     def on_begin(self) -> None:
         super().on_begin() # Do standard gamemode on_begin behavior
         
@@ -822,7 +831,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             self.match_placement.append(self.players[0].team)
             self._round_end_timer = ba.Timer(0.5, self.end_game)
         else:
-            # Pick a random player(s) to get marked
+            # Pick random player(s) to get marked
             self.new_mark_timer = ba.Timer(2.0 if self.slow_motion else 5.2, ba.Call(self.new_mark))
         
         self._update_icons() # Create player state icons
@@ -861,7 +870,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                 tip = tip.text
                 assert isinstance(tip, str)
 
-            # Do a few substitutions.
+            # Do a few replacements.
             tip_lstr = Lstr(translate=('tips', tip),
                             subs=[('${PICKUP}',
                                    ba.charstr(SpecialChar.TOP_BUTTON))])
@@ -955,10 +964,11 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             
         player.set_state(PlayerState.ELIMINATED)
                 
+    # This function is called every time a player spawns
     def spawn_player(self, player: Player) -> ba.Actor:
         position = self.map.get_ffa_start_position(self.players)
         position = (position[0],
-                    position[1] - 0.3,
+                    position[1] - 0.3, # Move the spawn a bit lower
                     position[2])
         
         name = player.getname()
@@ -966,18 +976,19 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         light_color = ba.normalized_color(player.color)
         display_color = ba.safecolor(player.color, target_intensity=0.75)
         
+        # Here we actually crate the player character
         spaz = PotatoPlayerSpaz(color=player.color,
                                 highlight=player.highlight,
                                 character=player.character,
                                 player=player)
-        spaz.node.invincible = False
-        player.actor = spaz
+        spaz.node.invincible = False # Immediately turn off invincibility
+        player.actor = spaz # Assign player character to the owner
         
         spaz.node.name = name
         spaz.node.name_color = display_color
         spaz.connect_controls_to_player()
         
-        # move to the stand position and add a flash of light
+        # Move to the stand position and add a flash of light
         spaz.handlemessage(ba.StandMessage(position, random.uniform(0, 360)))
         t = ba.time(ba.TimeType.BASE)
         ba.playsound(self._spawn_sound, 1.0, position=spaz.node.position)
@@ -988,15 +999,17 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                                         0.5: 0})
         ba.timer(0.5, light.delete)
         
+    # Game reacts to various events
     def handlemessage(self, msg: Any) -> Any:
+        # This is called if the player dies.
         if isinstance(msg, ba.PlayerDiedMessage):
-            super().handlemessage(msg)
+            super().handlemessage(msg) # 
             player = msg.getplayer(Player)
             
             # If a player gets eliminated, don't respawn
             if msg.how == 'marked_elimination': return
             
-            self.spawn_player(player)
+            self.spawn_player(player) # Spawn a new player character
             
             # If a REGULAR player dies, they respawn STUNNED.
             # If a STUNNED player dies, reapply all visual effects.
@@ -1007,11 +1020,19 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             if player.state == PlayerState.MARKED:
                 self.mark(player)
     
+    # This is called when we want to end the game and announce a victor
     def end_game(self) -> None:
+        # Proceed only if the game hasn't ended yet.
         if self.has_ended():
             return
         results = ba.GameResults()
+        # By this point our match placement list should be filled with all players.
+        # Players that died/left earliest should be the first entries.
+        # We're gonna use array indexes to decide match placements.
+        # Because of that, we're gonna flip the order of our array, so the last entries are first.
         self.match_placement.reverse()
         for team in self.teams:
+            # Use each player's index in the array for our scoring
+            # 0 is the first index, so we add 1 to the score.
             results.set_team_score(team, self.match_placement.index(team) + 1)
-        self.end(results=results)
+        self.end(results=results) # Standard game ending behavior
