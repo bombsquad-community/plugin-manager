@@ -3,6 +3,139 @@
   "description": "Minigames",
   "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames",
   "plugins": {
+    "soccer": {
+      "description": "Shoot the ball in left or right edge of the map to score",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Stary_Agent",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "e59073b",
+          "released_on": "02-11-2022",
+          "md5sum": "ceb7ac417c85396722fa9f7fee3cfc01"
+        }
+      }
+    },
+    "simon_says": {
+      "description": "You better do what Simon says",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2fda676",
+          "released_on": "07-11-2022",
+          "md5sum": "def39482b339095a7affb574af829ea0"
+        }
+      }
+    },
+    "squid_race": {
+      "description": "Race inspired by the squid games",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2fda676",
+          "released_on": "07-11-2022",
+          "md5sum": "7ec43481e6b35b4da4f6425977ee0004"
+        }
+      }
+    },
+    "zombie_horde": {
+      "description": "Fight or defend against horde of zombies",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2fda676",
+          "released_on": "07-11-2022",
+          "md5sum": "671e7b98a9d3eb0aeb7e47448db25af9"
+        }
+      }
+    },
+    "meteor_shower": {
+      "description": "MeteorShower with many different bombs",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2fda676",
+          "released_on": "07-11-2022",
+          "md5sum": "1ce8c1a3f3ec240af39b7a73375e7891"
+        }
+      }
+    },
+    "boxing": {
+      "description": "Simple boxing minigame",
+      "external_url": "https://youtube.com/c/JoseANG3LYT",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2fda676",
+          "released_on": "07-11-2022",
+          "md5sum": "c1b615df09886ba05622c4e8b4f6be40"
+        }
+      }
+    },
+    "basket_bomb": {
+      "description": "Score all the baskets and be the MVP.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2fda676",
+          "released_on": "07-11-2022",
+          "md5sum": "7ec87edbdd5183ec4b2daffad0019820"
+        }
+      }
+    },
     "ultimate_last_stand": {
       "description": "Bring Last Stand minigame into team fight and FFA.",
       "external_url": "",
@@ -95,25 +228,6 @@
           "commit_sha": "858030b",
           "released_on": "01-09-2022",
           "md5sum": "c84b7f415de5d3e9189ee73fc0e3ce93"
-        }
-      }
-    },
-    "soccer": {
-      "description": "Shoot the ball in left or right edge of the map to score",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "Stary_Agent",
-          "email": "",
-          "discord": ""
-        }
-      ],
-      "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "e59073b",
-          "released_on": "02-11-2022",
-          "md5sum": "ceb7ac417c85396722fa9f7fee3cfc01"
         }
       }
     }

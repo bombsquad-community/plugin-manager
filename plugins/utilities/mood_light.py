@@ -4,26 +4,31 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
+import random
 import ba
 import _ba
-import random
 from ba._map import Map
 from bastd import mainmenu
 from bastd.ui.party import PartyWindow
 from bastd.gameutils import SharedObjects
-from time import sleep
 
 """mood light plugin by ʟօʊքɢǟʀօʊ
 type ml in chat or use plugin manager to open settings"""
 
 
 def Print(*args):
-    out = " ".join(args)
+    out = ""
+    for arg in args:
+        a = str(arg)
+        out += a
     ba.screenmessage(out)
 
 
 def cprint(*args):
-    out = "\n".join(args)
+    out = ""
+    for arg in args:
+        a = str(arg)
+        out += a
     _ba.chatmessage(out)
 
 
@@ -238,7 +243,9 @@ class SettingWindow(ba.Window):
             loop = True
             label = "DISABLE"
             color = (1, 0, 0)
-            Print("Restart level to enable")
+            in_game = not isinstance(_ba.get_foreground_host_session(), mainmenu.MainMenuSession)
+            if in_game:
+                Print("Restart level to apply")
         ba.app.config["moodlightEnabled"] = loop
         ba.app.config.commit()
         ba.buttonwidget(edit=self.enable_button, label=label, color=color)
@@ -257,11 +264,12 @@ def new_chat_message(msg: Union[str, ba.Lstr], clients: Sequence[int] = None, se
     old_fcm(msg, clients, sender_override)
     if msg == 'ml':
         try:
+            global Ldefault, Udefault
             Ldefault, Udefault = ba.app.config.get("moodlightingSettings")
             SettingWindow()
             cprint("Mood light settings opened")
         except Exception as err:
-            Print(err)
+            Print(err, "-from new_chat_message")
 
 
 old_fcm = _ba.chatmessage
@@ -279,7 +287,13 @@ class moodlight(ba.Plugin):
     def on_app_running(self):
         _ba.show_progress_bar()
 
-    def on_plugin_manager_prompt(self):  # called by plugin manager
+    def on_plugin_manager_prompt(self):
+        SettingWindow()
+
+    def has_settings_ui(self):
+        return True
+
+    def show_settings_ui(self, button):
         SettingWindow()
 
     def _new_init(self, vr_overlay_offset: Optional[Sequence[float]] = None) -> None:
