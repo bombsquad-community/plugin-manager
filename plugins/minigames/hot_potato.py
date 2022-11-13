@@ -734,7 +734,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
         self.elimination_timer_display -= 1  # Decrease our timer by one second.
         if self.elimination_timer_display > 1:
-            self.elimination_timer_display -= 1 # Decrease our timer by one second.
+            self.elimination_timer_display -= 1  # Decrease our timer by one second.
             sound_volume = 1.0 / marked_player_amount
 
             for target in marked_players:
@@ -749,7 +749,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                 ba.playsound(self._danger_tick_sounds[self.elimination_timer_display - 1], 1.5)
         else:
             # Elimination timer is up! Let's eliminate all marked players.
-            self.elimination_timer_display -= 1 # Decrease our timer by one second.
+            self.elimination_timer_display -= 1  # Decrease our timer by one second.
             self._eliminate_marked_players()
 
     # This function explodes all marked players
