@@ -5,6 +5,10 @@
         
     With this cutting edge technology, you precisely know
     how close to the bomb you can tread. Supports modified blast radius values!
+    
+    Heavily commented for easy modding learning!
+    
+    No Rights Reserved
 """
 
 from __future__ import annotations
