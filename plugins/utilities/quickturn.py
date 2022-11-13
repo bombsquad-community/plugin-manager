@@ -6,6 +6,7 @@
     Sharp turns while running (releasing run button, changing direction, holding run again) are much faster with this mod, allowing for more dynamic, aggressive play. 
     Version 3
 
+    No Rights Reserved
 """
 
 # ba_meta require api 7
