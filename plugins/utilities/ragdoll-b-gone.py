@@ -8,6 +8,8 @@
     Literally that's it.
     
     Heavily commented for easy modding learning!
+    
+    No Rights Reserved
 
 """
 
