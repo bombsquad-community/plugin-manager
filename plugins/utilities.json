@@ -297,5 +297,47 @@
         }
       }
     }
+	"quickturn": {
+      "description": "Sharp turns while running (releasing run button, changing direction, holding run again) are much faster with this mod, allowing for more dynamic, aggressive play.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "TheMikirog",
+          "email": "",
+          "discord": "TheMikirog#1984"
+        }
+      ],
+      "versions": {
+        "3.0.0": null
+      }
+    }
+	"ragdoll_b_gone": {
+      "description": "Removes ragdolls. Thanos snaps those pesky feet-tripping body sacks out of existence.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "TheMikirog",
+          "email": "",
+          "discord": "TheMikirog#1984"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    }
+	"bomb_radius_visualizer": {
+      "description": "With this cutting edge technology, you precisely know\nhow close to the bomb you can tread.\nSupports modified blast radius values!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "TheMikirog",
+          "email": "",
+          "discord": "TheMikirog#1984"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    }
   }
 }
