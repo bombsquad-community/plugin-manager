@@ -433,7 +433,12 @@
         }
       ],
       "versions": {
-        "3.0.0": null
+        "3.0.0": {
+          "api_version": 7,
+          "commit_sha": "0841b9e",
+          "released_on": "14-11-2022",
+          "md5sum": "417cd87c17034b4eac8bc301d294d708"
+        }
       }
     },
     "ragdoll_b_gone": {
@@ -447,7 +452,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "0841b9e",
+          "released_on": "14-11-2022",
+          "md5sum": "dccb150ef67440f1db7e39884bd856b3"
+        }
       }
     },
     "bomb_radius_visualizer": {
@@ -461,7 +471,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "0841b9e",
+          "released_on": "14-11-2022",
+          "md5sum": "6213bc2573cb83f8bf72030604801f5a"
+        }
       }
     }
   }
