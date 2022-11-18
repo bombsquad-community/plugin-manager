@@ -15,12 +15,14 @@ from bastd.ui.popup import PopupWindow
 # mod by ʟօʊքɢǟʀօʊ
 # export replays to mods folder and share with your friends or have a backup
 
+
 def Print(*args, color=None, top=None):
     out = ""
     for arg in args:
         a = str(arg)
         out += a
     ba.screenmessage(out, color=color, top=top)
+
 
 def cprint(*args):
     out = ""
@@ -29,7 +31,8 @@ def cprint(*args):
         out += a
     _ba.chatmessage(out)
 
-title="SHARE REPLAY"
+
+title = "SHARE REPLAY"
 internal_dir = path.join("ba_data", "..", "..", "..", "files", "bombsquad_config", "replays" + sep)
 external_dir = path.join(_ba.env()["python_directory_user"], "replays"+sep)
 
@@ -38,12 +41,11 @@ external_dir = path.join(_ba.env()["python_directory_user"], "replays"+sep)
 pink = (1, 0.2, 0.8)
 green = (0.4, 1, 0.4)
 red = (1, 0, 0)
-blue=(0.26, 0.65,0.94)
+blue = (0.26, 0.65, 0.94)
 
 if not path.exists(external_dir):
     mkdir(external_dir)
     Print("You are ready to share replays", color=pink)
-
 
 
 class Help(PopupWindow):
@@ -64,7 +66,8 @@ class Help(PopupWindow):
     def close(self):
         ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self.root_widget, transition="out_right",)
-        
+
+
 class SyncConfirmation(PopupWindow):
     def __init__(self):
         uiscale = ba.app.ui.uiscale
@@ -77,8 +80,10 @@ class SyncConfirmation(PopupWindow):
         ba.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
         ba.textwidget(parent=self.root_widget, position=(30, self.height * 0.8),
                       text="            Are you sure you want to continue\n\nWARNING:replays with same name in mods folder\n will be overwritten")
-        ba.buttonwidget(parent=self.root_widget,label="CANCEL",size=(200,80),color=red,position=(80,50),on_activate_call=self.close)
-        ba.buttonwidget(parent=self.root_widget,label="continue",size=(200,80),position=(300,50),on_activate_call=SettingWindow.sync)
+        ba.buttonwidget(parent=self.root_widget, label="CANCEL", size=(200, 80),
+                        color=red, position=(80, 50), on_activate_call=self.close)
+        ba.buttonwidget(parent=self.root_widget, label="continue", size=(200, 80),
+                        position=(300, 50), on_activate_call=SettingWindow.sync)
 
     def close(self):
         ba.playsound(ba.getsound('swish'))
@@ -90,53 +95,53 @@ class SettingWindow():
         global internal
         self.draw_ui()
         self.selected_name = None
-        internal=True
+        internal = True
         self.on_tab_select(internal)
-        
-    def on_select_text(self, widget,name):  
-        existing_widgets=self.scroll2.get_children()
+
+    def on_select_text(self, widget, name):
+        existing_widgets = self.scroll2.get_children()
         for i in existing_widgets:
-            ba.textwidget(edit=i,color=(1,1,1))
+            ba.textwidget(edit=i, color=(1, 1, 1))
         ba.textwidget(edit=widget, color=(1, 1, 0))
-        self.selected_name=name
-        
-        
-    def on_tab_select(self,_internal):
-            global internal
-            internal=_internal
-            if internal==True:
-                 dir_list=listdir(internal_dir)   
-                 ba.buttonwidget(edit=self.share_button,label="EXPORT",icon=ba.gettexture("upButton"),)
-                 sel=self.internal_tab
-                 unsel=self.external_tab
-            else:
-                dir_list=listdir(external_dir)              
-                ba.buttonwidget(edit=self.share_button,label="IMPORT",icon=ba.gettexture("downButton"),)   
-                sel= self.external_tab
-                unsel= self.internal_tab   
-                
-            ba.buttonwidget(edit=sel,texture=ba.gettexture("circleShadow"))
-            ba.buttonwidget(edit=unsel,texture=ba.gettexture("nub"))
-                   
-            dir_list=sorted(dir_list)     
-            existing_widgets=self.scroll2.get_children()
-            if existing_widgets:
-                for i in existing_widgets:
-                    i.delete()
-            height = 900
-            for i in dir_list:
-                height -= 40
-                a = i
-                i = ba.textwidget(
-                    parent=self.scroll2,
-                    size=(500, 50),
-                    text=i.split(".")[0],
-                    position=(10, height),
-                    selectable=True,
-                    max_chars=40,
-                    click_activate=True,)    
-                ba.textwidget(edit=i, on_activate_call=ba.Call(self.on_select_text, i , a))
-                
+        self.selected_name = name
+
+    def on_tab_select(self, _internal):
+        global internal
+        internal = _internal
+        if internal == True:
+            dir_list = listdir(internal_dir)
+            ba.buttonwidget(edit=self.share_button, label="EXPORT", icon=ba.gettexture("upButton"),)
+            sel = self.internal_tab
+            unsel = self.external_tab
+        else:
+            dir_list = listdir(external_dir)
+            ba.buttonwidget(edit=self.share_button, label="IMPORT",
+                            icon=ba.gettexture("downButton"),)
+            sel = self.external_tab
+            unsel = self.internal_tab
+
+        ba.buttonwidget(edit=sel, texture=ba.gettexture("circleShadow"))
+        ba.buttonwidget(edit=unsel, texture=ba.gettexture("nub"))
+
+        dir_list = sorted(dir_list)
+        existing_widgets = self.scroll2.get_children()
+        if existing_widgets:
+            for i in existing_widgets:
+                i.delete()
+        height = 900
+        for i in dir_list:
+            height -= 40
+            a = i
+            i = ba.textwidget(
+                parent=self.scroll2,
+                size=(500, 50),
+                text=i.split(".")[0],
+                position=(10, height),
+                selectable=True,
+                max_chars=40,
+                click_activate=True,)
+            ba.textwidget(edit=i, on_activate_call=ba.Call(self.on_select_text, i, a))
+
     def draw_ui(self):
         self.uiscale = ba.app.ui.uiscale
         self.root = ba.Window(ba.containerwidget(
@@ -160,13 +165,13 @@ class SettingWindow():
             texture=ba.gettexture("achievementEmpty"),
             label="",
             on_activate_call=Help)
-        
-        internal_tab_pos=85,400
-        internal_tab_size=120,80
-        external_tab_pos=85,300
-        external_tab_size=120,80
-        
-        self.internal_tab=ba.buttonwidget(
+
+        internal_tab_pos = 85, 400
+        internal_tab_size = 120, 80
+        external_tab_pos = 85, 300
+        external_tab_size = 120, 80
+
+        self.internal_tab = ba.buttonwidget(
             parent=self.root,
             position=internal_tab_pos,
             size=internal_tab_size,
@@ -175,8 +180,8 @@ class SettingWindow():
             text_scale=2,
             color=blue,
             texture=ba.gettexture("circleShadow"))
-            
-        self.external_tab=ba.buttonwidget(
+
+        self.external_tab = ba.buttonwidget(
             parent=self.root,
             position=external_tab_pos,
             size=external_tab_size,
@@ -185,12 +190,11 @@ class SettingWindow():
             text_scale=2,
             color=blue,
             texture=ba.gettexture("nub"))
-            
-        ba.buttonwidget(edit=self.internal_tab,on_activate_call=ba.Call(self.on_tab_select,True))
-        ba.buttonwidget(edit=self.external_tab,on_activate_call=ba.Call(self.on_tab_select,False))
-        
- 
-        self.share_button=ba.buttonwidget(
+
+        ba.buttonwidget(edit=self.internal_tab, on_activate_call=ba.Call(self.on_tab_select, True))
+        ba.buttonwidget(edit=self.external_tab, on_activate_call=ba.Call(self.on_tab_select, False))
+
+        self.share_button = ba.buttonwidget(
             parent=self.root,
             position=(720, 400),
             size=(110, 50),
@@ -200,8 +204,8 @@ class SettingWindow():
             text_scale=2,
             icon=ba.gettexture("upButton"),
             on_activate_call=self.share)
-            
-        sync_button=ba.buttonwidget(
+
+        sync_button = ba.buttonwidget(
             parent=self.root,
             position=(720, 300),
             size=(110, 50),
@@ -228,20 +232,22 @@ class SettingWindow():
             size=(500, 400),
             position=(200, 100),)
         self.scroll2 = ba.columnwidget(parent=scroll, size=(
-            500, 900)) 
-    
+            500, 900))
+
     def share(self):
         if self.selected_name is None:
             Print("Select a replay", color=red)
             return
-        if internal:self.export()
-        else:self.importx()                    
-        
+        if internal:
+            self.export()
+        else:
+            self.importx()
+
         # image={"texture":ba.gettexture("bombColor"),"tint_texture":None,"tint_color":None,"tint2_color":None})
-        
+
     def sync(self=""):
-        internal_list=listdir(internal_dir)
-        external_list=listdir(external_dir)
+        internal_list = listdir(internal_dir)
+        external_list = listdir(external_dir)
         for i in internal_list:
             copy(internal_dir+sep+i, external_dir+sep+i)
         for i in external_list:
@@ -249,16 +255,16 @@ class SettingWindow():
                 pass
             else:
                 copy(external_dir+sep+i, internal_dir+sep+i)
-        Print("Synced all replays",color=pink)         
-                                    
+        Print("Synced all replays", color=pink)
+
     def export(self):
-        copy(internal_dir+self.selected_name, external_dir+self.selected_name)        
+        copy(internal_dir+self.selected_name, external_dir+self.selected_name)
         Print(self.selected_name[0:-4]+" exported", top=True, color=pink)
-        
+
     def importx(self):
         copy(external_dir+self.selected_name, internal_dir+self.selected_name)
-        Print(self.selected_name[0:-4]+" imported", top=True, color=green)        
-        
+        Print(self.selected_name[0:-4]+" imported", top=True, color=green)
+
     def close(self):
         ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self.root, transition="out_right",)
@@ -298,6 +304,6 @@ class Loup(ba.Plugin):
 
     def show_settings_ui(self, button):
         SettingWindow()
-        
+
     def on_plugin_manager_prompt(self):
         SettingWindow()
