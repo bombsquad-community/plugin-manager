@@ -1328,19 +1328,19 @@ class PluginManagerWindow(ba.Window):
     def loading_tick(self):
         text = ""
         if self.loading_frame == 5:
-            text="  • • •"
+            text = "  • • •"
             self.loading_frame = 4
         elif self.loading_frame == 4:
-            text="    • •"
+            text = "    • •"
             self.loading_frame = 3
         elif self.loading_frame == 3:
-            text="      •"
+            text = "      •"
             self.loading_frame = 2
         elif self.loading_frame == 2:
-            text="       "
+            text = "       "
             self.loading_frame = 1
         elif self.loading_frame == 1:
-            text="• • • •"
+            text = "• • • •"
             self.loading_frame = 5
         try:
             ba.textwidget(edit=self._plugin_manager_status_text, text=text)
