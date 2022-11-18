@@ -68,15 +68,17 @@ class Help(PopupWindow):
 class SyncConfirmation(PopupWindow):
     def __init__(self):
         uiscale = ba.app.ui.uiscale
-        self.width = 1000#h-hhhhhhhhhhh-----to completeh-hh-hhhhh-
+        self.width = 600
         self.height = 300
         PopupWindow.__init__(self,
                              position=(0.0, 0.0),
                              size=(self.width, self.height),
                              scale=1.2,)
         ba.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
-        ba.buttonwidget(parent=self.root_widget,label="cancel",size=e)
-        ba.buttonwidget(parent=self.root_widget,label="continue")
+        ba.textwidget(parent=self.root_widget, position=(30, self.height * 0.8),
+                      text="            Are you sure you want to continue\n\nWARNING:replays with same name in mods folder\n will be overwritten")
+        ba.buttonwidget(parent=self.root_widget,label="CANCEL",size=(200,80),color=red,position=(80,50),on_activate_call=self.close)
+        ba.buttonwidget(parent=self.root_widget,label="continue",size=(200,80),position=(300,50),on_activate_call=SettingWindow.sync)
 
     def close(self):
         ba.playsound(ba.getsound('swish'))
@@ -104,12 +106,12 @@ class SettingWindow():
             internal=_internal
             if internal==True:
                  dir_list=listdir(internal_dir)   
-                 ba.buttonwidget(edit=self.share_button,label="Export",icon=ba.gettexture("upButton"),)
+                 ba.buttonwidget(edit=self.share_button,label="EXPORT",icon=ba.gettexture("upButton"),)
                  sel=self.internal_tab
                  unsel=self.external_tab
             else:
                 dir_list=listdir(external_dir)              
-                ba.buttonwidget(edit=self.share_button,label="Import",icon=ba.gettexture("downButton"),)   
+                ba.buttonwidget(edit=self.share_button,label="IMPORT",icon=ba.gettexture("downButton"),)   
                 sel= self.external_tab
                 unsel= self.internal_tab   
                 
@@ -169,7 +171,7 @@ class SettingWindow():
             position=internal_tab_pos,
             size=internal_tab_size,
             button_type="square",
-            label="internal",
+            label="INTERNAL",
             text_scale=2,
             color=blue,
             texture=ba.gettexture("circleShadow"))
@@ -179,7 +181,7 @@ class SettingWindow():
             position=external_tab_pos,
             size=external_tab_size,
             button_type="square",
-            label="external",
+            label="EXTERNAL",
             text_scale=2,
             color=blue,
             texture=ba.gettexture("nub"))
@@ -208,7 +210,7 @@ class SettingWindow():
             label="SYNC",
             text_scale=2,
             icon=ba.gettexture("ouyaYButton"),
-            on_activate_call=self.sync)
+            on_activate_call=SyncConfirmation)
 
         self.close_button = ba.buttonwidget(
             parent=self.root,
@@ -237,7 +239,7 @@ class SettingWindow():
         
         # image={"texture":ba.gettexture("bombColor"),"tint_texture":None,"tint_color":None,"tint2_color":None})
         
-    def sync(self):
+    def sync(self=""):
         internal_list=listdir(internal_dir)
         external_list=listdir(external_dir)
         for i in internal_list:
@@ -250,13 +252,11 @@ class SettingWindow():
         Print("Synced all replays",color=pink)         
                                     
     def export(self):
-        copy(internal_dir+self.selected_name, external_dir+self.selected_name)
-        cprint(internal_dir+self.selected_name)
+        copy(internal_dir+self.selected_name, external_dir+self.selected_name)        
         Print(self.selected_name[0:-4]+" exported", top=True, color=pink)
         
     def importx(self):
         copy(external_dir+self.selected_name, internal_dir+self.selected_name)
-        cprint(external_dir+self.selected_name)
         Print(self.selected_name[0:-4]+" imported", top=True, color=green)        
         
     def close(self):
