@@ -1315,13 +1315,38 @@ class PluginManagerWindow(ba.Window):
             parent=self._root_widget,
             position=(-5, loading_pos_y),
             size=(self._width, 25),
-            text="Loading...",
+            text="• • • •",
             color=ba.app.ui.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
             maxwidth=400,
         )
+        self.loading_frame = 5
+        ba.timer(1, self.loading_tick)
+
+    def loading_tick(self):
+        text = ""
+        if self.loading_frame == 5:
+            text="  • • •"
+            self.loading_frame = 4
+        elif self.loading_frame == 4:
+            text="    • •"
+            self.loading_frame = 3
+        elif self.loading_frame == 3:
+            text="      •"
+            self.loading_frame = 2
+        elif self.loading_frame == 2:
+            text="       "
+            self.loading_frame = 1
+        elif self.loading_frame == 1:
+            text="• • • •"
+            self.loading_frame = 5
+        try:
+            ba.textwidget(edit=self._plugin_manager_status_text, text=text)
+            ba.timer(1, self.loading_tick)
+        except RuntimeError:
+            pass
 
     def _back(self) -> None:
         play_sound()
@@ -1350,6 +1375,7 @@ class PluginManagerWindow(ba.Window):
         self.draw_settings_icon()
         with self.exception_handler():
             await self.plugin_manager.setup_index()
+            self.loading_frame = None
             ba.textwidget(edit=self._plugin_manager_status_text,
                           text="")
             await self.select_category("All")
@@ -1635,6 +1661,7 @@ class PluginManagerWindow(ba.Window):
         with self.exception_handler():
             await self.plugin_manager.refresh()
             await self.plugin_manager.setup_index()
+            self.loading_frame = None
             ba.textwidget(edit=self._plugin_manager_status_text,
                           text="")
             await self.select_category(self.selected_category)
