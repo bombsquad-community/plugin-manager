@@ -302,6 +302,20 @@
         }
       }
     },
+    "auto_stunt": {
+      "description": "auto stunts, learn stunts, mirror your player, bro elimination mini game",
+      "external_url": "https://www.youtube.com/watch?v=DXZeWrTCZlI",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "server_switch": {
       "description": "Let you switch between recents servers",
       "external_url": "https://www.youtube.com/watch?v=QrES1jQGXF0",
