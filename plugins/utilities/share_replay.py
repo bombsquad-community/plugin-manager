@@ -32,13 +32,19 @@ def cprint(*args):
     _ba.chatmessage(out)
 
 
+title = "SHARE REPLAY"
 internal_dir = path.join("ba_data", "..", "..", "..", "files", "bombsquad_config", "replays" + sep)
 external_dir = path.join(_ba.env()["python_directory_user"], "replays"+sep)
+
+tab_sel_texture = ba.gettexture("buttonSquare")
+tab_unsel_texture = ba.gettexture("chestIconEmpty")
 
 # colors
 pink = (1, 0.2, 0.8)
 green = (0.4, 1, 0.4)
 red = (1, 0, 0)
+blue = (0.26, 0.65, 0.94)
+blue_highlight = (0.4, 0.7, 1)
 
 if not path.exists(external_dir):
     mkdir(external_dir)
@@ -48,7 +54,7 @@ if not path.exists(external_dir):
 class Help(PopupWindow):
     def __init__(self):
         uiscale = ba.app.ui.uiscale
-        self.width = 800
+        self.width = 1000
         self.height = 300
 
         PopupWindow.__init__(self,
@@ -58,7 +64,33 @@ class Help(PopupWindow):
 
         ba.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
         ba.textwidget(parent=self.root_widget, position=(0, self.height * 0.6),
-                      text=f"•Replays are exported to\n {external_dir}\n•Importing replay and other features comming in v1.2")
+                      text=f"•Replays are exported to\n {external_dir}\n•Copy replays to the above folder to be able to import them into the game")
+
+    def close(self):
+        ba.playsound(ba.getsound('swish'))
+        ba.containerwidget(edit=self.root_widget, transition="out_right",)
+
+
+class SyncConfirmation(PopupWindow):
+    def __init__(self):
+        uiscale = ba.app.ui.uiscale
+        self.width = 600
+        self.height = 300
+        PopupWindow.__init__(self,
+                             position=(0.0, 0.0),
+                             size=(self.width, self.height),
+                             scale=1.2,)
+
+        ba.textwidget(parent=self.root_widget, position=(30, self.height * 0.8),
+                      text="            Are you sure you want to continue\n\nWARNING:replays with same name in mods folder\n will be overwritten")
+        cancel = ba.buttonwidget(parent=self.root_widget, label=ba.Lstr(
+            resource='cancelText'), size=(200, 80), position=(80, 50), on_activate_call=self.close)
+
+        ba.buttonwidget(parent=self.root_widget, label=ba.Lstr(resource='okText'), size=(
+            200, 80), position=(300, 50), color=green, on_activate_call=SettingWindow.sync)
+
+        ba.containerwidget(edit=self.root_widget,
+                           on_outside_click_call=self.close, cancel_button=cancel)
 
     def close(self):
         ba.playsound(ba.getsound('swish'))
@@ -67,89 +99,177 @@ class Help(PopupWindow):
 
 class SettingWindow():
     def __init__(self):
+        global internal
         self.draw_ui()
-        self.selected_widget = None
+        ba.containerwidget(edit=self.root, cancel_button=self.close_button)
         self.selected_name = None
+        internal = True
+        self.on_tab_select(internal)
 
     def on_select_text(self, widget, name):
-        if self.selected_widget is not None:
-            ba.textwidget(edit=self.selected_widget, color=(1, 1, 1))
+        existing_widgets = self.scroll2.get_children()
+        for i in existing_widgets:
+            ba.textwidget(edit=i, color=(1, 1, 1))
         ba.textwidget(edit=widget, color=(1, 1, 0))
         self.selected_name = name
-        self.selected_widget = widget
 
-    def draw_ui(self):
-        self.uiscale = ba.app.ui.uiscale
-        self.root = ba.Window(ba.containerwidget(
-            size=(900, 670), on_outside_click_call=self.close, transition="in_right")).get_root_widget()
+    def on_tab_select(self, _internal):
+        global internal
+        internal = _internal
+        if internal == True:
+            dir_list = listdir(internal_dir)
+            ba.buttonwidget(edit=self.share_button, label="EXPORT", icon=ba.gettexture("upButton"),)
+            sel = self.internal_tab
+            unsel = self.external_tab
+        else:
+            dir_list = listdir(external_dir)
+            ba.buttonwidget(edit=self.share_button, label="IMPORT",
+                            icon=ba.gettexture("downButton"),)
+            sel = self.external_tab
+            unsel = self.internal_tab
 
-        ba.textwidget(
-            parent=self.root,
-            size=(200, 100),
-            position=(150, 550),
-            scale=2,
-            selectable=False,
-            h_align="center",
-            v_align="center",
-            text="ShareReplay",
-            color=green)
+        ba.buttonwidget(edit=sel, texture=tab_sel_texture, color=blue, size=(120, 80))
+        ba.buttonwidget(edit=unsel, texture=tab_unsel_texture, color=blue, size=(120, 100))
 
-        ba.buttonwidget(
-            parent=self.root,
-            position=(400, 580),
-            size=(35, 35),
-            texture=ba.gettexture("achievementEmpty"),
-            label="",
-            on_activate_call=Help)
-
-        ba.buttonwidget(
-            parent=self.root,
-            position=(770, 460),
-            size=(90, 70),
-            scale=1.5,
-            label="EXPORT",
-            on_activate_call=self.export)
-
-        self.close_button = ba.buttonwidget(
-            parent=self.root,
-            position=(820, 590),
-            size=(35, 35),
-            texture=ba.gettexture("crossOut"),
-            label="",
-            scale=2,
-            color=(1, 0.2, 0.2),
-            extra_touch_border_scale=3,
-            on_activate_call=self.close)
-
-        scroll = ba.scrollwidget(
-            parent=self.root,
-            size=(500, 400),
-            position=(200, 150))
-        self.scroll = ba.columnwidget(parent=scroll, size=(
-            500, 900), selection_loops_to_parent=True, single_depth=True)
-
+        dir_list = sorted(dir_list)
+        existing_widgets = self.scroll2.get_children()
+        if existing_widgets:
+            for i in existing_widgets:
+                i.delete()
         height = 900
-        for i in listdir(internal_dir):
+        for i in dir_list:
             height -= 40
             a = i
             i = ba.textwidget(
-                parent=self.scroll,
+                parent=self.scroll2,
                 size=(500, 50),
                 text=i.split(".")[0],
                 position=(10, height),
                 selectable=True,
                 max_chars=40,
                 click_activate=True,)
-
             ba.textwidget(edit=i, on_activate_call=ba.Call(self.on_select_text, i, a))
 
-    def export(self):
+    def draw_ui(self):
+        self.uiscale = ba.app.ui.uiscale
+        self.root = ba.Window(ba.containerwidget(
+            size=(900, 670), on_outside_click_call=self.close, transition="in_right")).get_root_widget()
+
+        self.close_button = ba.buttonwidget(
+            parent=self.root,
+            position=(90, 560),
+            button_type='backSmall',
+            size=(60, 60),
+            label=ba.charstr(ba.SpecialChar.BACK),
+            scale=1.5,
+            on_activate_call=self.close)
+
+        ba.textwidget(
+            parent=self.root,
+            size=(200, 100),
+            position=(350, 550),
+            scale=2,
+            selectable=False,
+            h_align="center",
+            v_align="center",
+            text=title,
+            color=green)
+
+        ba.buttonwidget(
+            parent=self.root,
+            position=(650, 580),
+            size=(35, 35),
+            texture=ba.gettexture("achievementEmpty"),
+            label="",
+            on_activate_call=Help)
+
+        internal_tab_pos = 85, 400
+        internal_tab_size = 120, 80
+        external_tab_pos = 85, 300
+        external_tab_size = 120, 80
+
+        self.internal_tab = ba.buttonwidget(
+            parent=self.root,
+            position=internal_tab_pos,
+            size=internal_tab_size,
+            button_type="square",
+            label="INTERNAL",
+            text_scale=2,
+            color=blue_highlight,
+            texture=tab_sel_texture)
+
+        self.external_tab = ba.buttonwidget(
+            parent=self.root,
+            position=external_tab_pos,
+            size=external_tab_size,
+            button_type="square",
+            label="EXTERNAL",
+            text_scale=2,
+            color=blue,
+            texture=tab_unsel_texture)
+
+        ba.buttonwidget(edit=self.internal_tab, on_activate_call=ba.Call(self.on_tab_select, True))
+        ba.buttonwidget(edit=self.external_tab, on_activate_call=ba.Call(self.on_tab_select, False))
+
+        self.share_button = ba.buttonwidget(
+            parent=self.root,
+            position=(720, 400),
+            size=(110, 50),
+            scale=1.5,
+            button_type="square",
+            label="EXPORT",
+            text_scale=2,
+            icon=ba.gettexture("upButton"),
+            on_activate_call=self.share)
+
+        sync_button = ba.buttonwidget(
+            parent=self.root,
+            position=(720, 300),
+            size=(110, 50),
+            scale=1.5,
+            button_type="square",
+            label="SYNC",
+            text_scale=2,
+            icon=ba.gettexture("ouyaYButton"),
+            on_activate_call=SyncConfirmation)
+
+        scroll = ba.scrollwidget(
+            parent=self.root,
+            size=(500, 400),
+            position=(200, 100),)
+        self.scroll2 = ba.columnwidget(parent=scroll, size=(
+            500, 900))
+
+    def share(self):
         if self.selected_name is None:
             Print("Select a replay", color=red)
             return
-        copy(internal_dir+"/"+self.selected_name, external_dir+"/"+self.selected_name)
+        if internal:
+            self.export()
+        else:
+            self.importx()
+
         # image={"texture":ba.gettexture("bombColor"),"tint_texture":None,"tint_color":None,"tint2_color":None})
+
+    def sync(self=""):
+        internal_list = listdir(internal_dir)
+        external_list = listdir(external_dir)
+        for i in internal_list:
+            copy(internal_dir+sep+i, external_dir+sep+i)
+        for i in external_list:
+            if i in internal_list:
+                pass
+            else:
+                copy(external_dir+sep+i, internal_dir+sep+i)
+        Print("Synced all replays", color=pink)
+
+    def export(self):
+        copy(internal_dir+self.selected_name, external_dir+self.selected_name)
         Print(self.selected_name[0:-4]+" exported", top=True, color=pink)
+
+    def importx(self):
+        copy(external_dir+self.selected_name, internal_dir+self.selected_name)
+        Print(self.selected_name[0:-4]+" imported", top=True, color=green)
 
     def close(self):
         ba.playsound(ba.getsound('swish'))
@@ -175,7 +295,7 @@ def new_init(self, transition="in_right", origin_widget=None):
         color=green,
         icon=ba.gettexture('usersButton'),
         iconscale=1.5,
-        label="SHARE REPLAY",
+        label=title,
         on_activate_call=SettingWindow)
 
 
@@ -189,4 +309,7 @@ class Loup(ba.Plugin):
         return True
 
     def show_settings_ui(self, button):
+        SettingWindow()
+
+    def on_plugin_manager_prompt(self):
         SettingWindow()
