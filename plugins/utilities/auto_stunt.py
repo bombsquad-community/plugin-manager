@@ -35,9 +35,10 @@ original_chatmessage = _ba.chatmessage
 
 
 class ControlsUI:
-    
+
     def on_jump_press(activity):
-        activity._jump_image.node.color = list(channel * 2 for channel in activity._jump_image.node.color[:3]) + [1]
+        activity._jump_image.node.color = list(
+            channel * 2 for channel in activity._jump_image.node.color[:3]) + [1]
 
     def on_jump_release(activity):
         activity._jump_image.node.color = list(
