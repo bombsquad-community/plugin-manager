@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.7"
+PLUGIN_MANAGER_VERSION = "0.1.8"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
