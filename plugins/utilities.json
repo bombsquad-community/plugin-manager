@@ -1,7 +1,7 @@
 {
   "name": "Utilities",
   "description": "Utilities",
-  "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
+  "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
     "share_replay": {
       "description": "Export replays to mods folder and share them with friends or have a backup",
@@ -161,7 +161,7 @@
     },
     "colorscheme": {
       "description": "Create custom UI colorschemes!",
-      "external_url": "http://www.youtube.com/watch?v=qatwWrBAvjc",
+      "external_url": "https://www.youtube.com/watch?v=qatwWrBAvjc",
       "authors": [
         {
           "name": "Rikko",
