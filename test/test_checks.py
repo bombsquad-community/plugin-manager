@@ -95,7 +95,7 @@ class BaseCategoryMetadataTestCases:
         def test_keys(self):
             self.assertEqual(self.content["name"], self.name)
             self.assertTrue(isinstance(self.content["description"], str))
-            self.assertTrue(self.content["plugins_base_url"].startswith("http"))
+            self.assertTrue(self.content["plugins_base_url"].startswith("https"))
             self.assertTrue(isinstance(self.content["plugins"], dict))
 
         def test_versions_order(self):
