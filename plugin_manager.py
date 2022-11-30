@@ -21,11 +21,8 @@ _uiscale = ba.app.ui.uiscale
 
 
 PLUGIN_MANAGER_VERSION = "0.1.7"
-REPOSITORY_URL = "http://github.com/bombsquad-community/plugin-manager"
+REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
-# XXX: Using https with `ba.open_url` seems to trigger a pop-up dialog box on
-#      Android currently (v1.7.6) and won't open the actual URL in a web-browser.
-#      Let's fallback to http for now until this gets resolved.
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
@@ -36,7 +33,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
     "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
 }
-DISCORD_URL = "http://ballistica.net/discord"
+DISCORD_URL = "https://ballistica.net/discord"
 
 _CACHE = {}
 
