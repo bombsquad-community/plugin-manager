@@ -1,7 +1,7 @@
 {
   "name": "Minigames",
   "description": "Minigames",
-  "plugins_base_url": "http://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames",
+  "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames",
   "plugins": {
     "soccer": {
       "description": "Shoot the ball in left or right edge of the map to score",
