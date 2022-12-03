@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.8"
+PLUGIN_MANAGER_VERSION = "0.1.9"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -1441,9 +1441,9 @@ class PluginManagerWindow(ba.Window):
         self._last_filter_text = None
         self._last_filter_plugins = []
         loop = asyncio.get_event_loop()
-        loop.create_task(self.process_search_filter())
+        loop.create_task(self.process_search_term())
 
-    async def process_search_filter(self):
+    async def process_search_term(self):
         while True:
             await asyncio.sleep(0.2)
             try:
@@ -1454,7 +1454,7 @@ class PluginManagerWindow(ba.Window):
             if self.selected_category is None:
                 continue
             try:
-                await self.draw_plugin_names(self.selected_category, search_filter=filter_text)
+                await self.draw_plugin_names(self.selected_category, search_term=filter_text)
             except CategoryDoesNotExistError:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
@@ -1515,6 +1515,16 @@ class PluginManagerWindow(ba.Window):
                        texture=ba.gettexture("replayIcon"),
                        draw_controller=controller_button)
 
+    def search_term_filterer(self, plugin, search_term):
+        if search_term in plugin.name:
+            return True
+        if search_term in plugin.info["description"].lower():
+            return True
+        for author in plugin.info["authors"]:
+            if search_term in author["name"].lower():
+                return True
+        return False
+
     # async def draw_plugin_names(self, category):
     #     for plugin in self._columnwidget.get_children():
     #         plugin.delete()
@@ -1524,8 +1534,9 @@ class PluginManagerWindow(ba.Window):
     #     await asyncio.gather(*plugin_names_to_draw)
 
     # XXX: Not sure if this is the best way to handle search filters.
-    async def draw_plugin_names(self, category, search_filter=""):
-        to_draw_plugin_names = (search_filter, category) != (self._last_filter_text,
+    async def draw_plugin_names(self, category, search_term=""):
+        # Re-draw plugin list UI if either search term or category was switched.
+        to_draw_plugin_names = (search_term, category) != (self._last_filter_text,
                                                              self.selected_category)
         if not to_draw_plugin_names:
             return
@@ -1535,18 +1546,17 @@ class PluginManagerWindow(ba.Window):
         except (KeyError, AttributeError):
             raise CategoryDoesNotExistError(f"{category} does not exist.")
 
-        if search_filter:
-            plugins = []
-            for plugin in category_plugins:
-                if search_filter in plugin.name:
-                    plugins.append(plugin)
+        if search_term:
+            search_term_filterer = lambda plugin: self.search_term_filterer(plugin, search_term)
+            plugins = filter(search_term_filterer, category_plugins)
         else:
             plugins = category_plugins
 
         if plugins == self._last_filter_plugins:
+            # Plugins names to draw on UI are already drawn.
             return
 
-        self._last_filter_text = search_filter
+        self._last_filter_text = search_term
         self._last_filter_plugins = plugins
 
         plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
@@ -1613,7 +1623,7 @@ class PluginManagerWindow(ba.Window):
     async def select_category(self, category):
         self.plugins_in_current_view.clear()
         self.draw_category_selection_button(post_label=category)
-        await self.draw_plugin_names(category, search_filter=self._last_filter_text)
+        await self.draw_plugin_names(category, search_term=self._last_filter_text)
         self.selected_category = category
 
     def cleanup(self):
