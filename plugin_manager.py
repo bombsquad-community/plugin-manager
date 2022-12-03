@@ -1537,7 +1537,7 @@ class PluginManagerWindow(ba.Window):
     async def draw_plugin_names(self, category, search_term=""):
         # Re-draw plugin list UI if either search term or category was switched.
         to_draw_plugin_names = (search_term, category) != (self._last_filter_text,
-                                                             self.selected_category)
+                                                           self.selected_category)
         if not to_draw_plugin_names:
             return
 
@@ -1547,7 +1547,7 @@ class PluginManagerWindow(ba.Window):
             raise CategoryDoesNotExistError(f"{category} does not exist.")
 
         if search_term:
-            search_term_filterer = lambda plugin: self.search_term_filterer(plugin, search_term)
+            def search_term_filterer(plugin): return self.search_term_filterer(plugin, search_term)
             plugins = filter(search_term_filterer, category_plugins)
         else:
             plugins = category_plugins
