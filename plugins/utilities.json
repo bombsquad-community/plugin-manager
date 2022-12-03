@@ -85,7 +85,7 @@
         }
       }
     },
-    "random_colors": {
+    "colored_bomb_explosion_patches": {
       "description": "Creates patches of random color after bomb explosions",
       "external_url": "https://youtube.com/c/JoseANG3LYT",
       "authors": [
@@ -98,7 +98,7 @@
       "versions": {
         "1.0.0": {
           "api_version": 7,
-          "commit_sha": "2fda676",
+          "commit_sha": "fed7c24",
           "released_on": "07-11-2022",
           "md5sum": "0c351a0aebed77c3771053cde0c18d7b"
         }
