@@ -1,5 +1,12 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.1.9 (03-12-2022)
+
+- Search now filters on author names and plugin description.
+
+### 0.1.8 (30-11-2022)
+
+- Use HTTPS for all network requests (now that the Android bug has been resolved as of v1.7.11).
 
 ### 0.1.7 (03-10-2022)
 
