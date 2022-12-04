@@ -14,7 +14,12 @@
         }
       ],
       "versions": {
-        "1.1.1": null,
+        "1.1.1": {
+          "api_version": 7,
+          "commit_sha": "ecfa9ea",
+          "released_on": "04-12-2022",
+          "md5sum": "e0b414bf7cdfb312ec4cf8cbb1ceec93"
+        },
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "77f92a5",
@@ -140,7 +145,12 @@
         }
       ],
       "versions": {
-        "1.2.2": null,
+        "1.2.2": {
+          "api_version": 7,
+          "commit_sha": "ecfa9ea",
+          "released_on": "04-12-2022",
+          "md5sum": "c6e5366b446e265c623e34010d5c40c7"
+        },
         "1.2.1": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -177,7 +187,12 @@
         }
       ],
       "versions": {
-        "1.2.3": null,
+        "1.2.3": {
+          "api_version": 7,
+          "commit_sha": "ecfa9ea",
+          "released_on": "04-12-2022",
+          "md5sum": "659794e1fa1e87cf9768899519994eac"
+        },
         "1.2.2": {
           "api_version": 7,
           "commit_sha": "a6d1a43",
