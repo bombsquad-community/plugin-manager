@@ -367,10 +367,10 @@ class PluginLocal:
                 return hasattr(plugin_class, "has_settings_ui")
         return False
 
-    def launch_settings(self):
+    def launch_settings(self, source_widget):
         for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return plugin_class.show_settings_ui()
+                return plugin_class.show_settings_ui(source_widget)
 
     async def get_content(self):
         if self._content is None:
@@ -851,8 +851,10 @@ class PluginWindow(popup.PopupWindow):
                                               size=(40, 40),
                                               button_type="square",
                                               label="",
-                                              color=(0, 0.75, 0.75),
-                                              on_activate_call=self.settings)
+                                              color=(0, 0.75, 0.75),)
+            ba.buttonwidget(
+                edit=settings_button,
+                on_activate_call=ba.Call(self.settings, settings_button),)
             ba.imagewidget(parent=self._root_widget,
                            position=(settings_pos_x, settings_pos_y),
                            size=(40, 40),
@@ -883,8 +885,8 @@ class PluginWindow(popup.PopupWindow):
 
         return wrapper
 
-    def settings(self):
-        self.local_plugin.launch_settings()
+    def settings(self, source_widget):
+        self.local_plugin.launch_settings(source_widget)
 
     @button
     def disable(self) -> None:
