@@ -9,6 +9,9 @@ from shutil import copy, copytree
 
 import ba
 import _ba
+from enum import Enum
+from bastd.ui.tabs import TabRow
+from bastd.ui.confirm import ConfirmWindow
 from bastd.ui.watch import WatchWindow as ww
 from bastd.ui.popup import PopupWindow
 
@@ -33,11 +36,8 @@ def cprint(*args):
 
 
 title = "SHARE REPLAY"
-internal_dir = path.join("ba_data", "..", "..", "..", "files", "bombsquad_config", "replays" + sep)
+internal_dir = _ba.get_replays_dir()+sep
 external_dir = path.join(_ba.env()["python_directory_user"], "replays"+sep)
-
-tab_sel_texture = ba.gettexture("buttonSquare")
-tab_unsel_texture = ba.gettexture("chestIconEmpty")
 
 # colors
 pink = (1, 0.2, 0.8)
@@ -64,33 +64,7 @@ class Help(PopupWindow):
 
         ba.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
         ba.textwidget(parent=self.root_widget, position=(0, self.height * 0.6),
-                      text=f"•Replays are exported to\n {external_dir}\n•Copy replays to the above folder to be able to import them into the game")
-
-    def close(self):
-        ba.playsound(ba.getsound('swish'))
-        ba.containerwidget(edit=self.root_widget, transition="out_right",)
-
-
-class SyncConfirmation(PopupWindow):
-    def __init__(self):
-        uiscale = ba.app.ui.uiscale
-        self.width = 600
-        self.height = 300
-        PopupWindow.__init__(self,
-                             position=(0.0, 0.0),
-                             size=(self.width, self.height),
-                             scale=1.2,)
-
-        ba.textwidget(parent=self.root_widget, position=(30, self.height * 0.8),
-                      text="            Are you sure you want to continue\n\nWARNING:replays with same name in mods folder\n will be overwritten")
-        cancel = ba.buttonwidget(parent=self.root_widget, label=ba.Lstr(
-            resource='cancelText'), size=(200, 80), position=(80, 50), on_activate_call=self.close)
-
-        ba.buttonwidget(parent=self.root_widget, label=ba.Lstr(resource='okText'), size=(
-            200, 80), position=(300, 50), color=green, on_activate_call=SettingWindow.sync)
-
-        ba.containerwidget(edit=self.root_widget,
-                           on_outside_click_call=self.close, cancel_button=cancel)
+                      text=f">Replays are exported to\n     {external_dir}\n>Copy replays to the above folder to be able to import them into the game\n>I would live to hear from you,meet me on discord\n                                -LoupGarou(author)")
 
     def close(self):
         ba.playsound(ba.getsound('swish'))
@@ -99,12 +73,20 @@ class SyncConfirmation(PopupWindow):
 
 class SettingWindow():
     def __init__(self):
-        global internal
         self.draw_ui()
         ba.containerwidget(edit=self.root, cancel_button=self.close_button)
         self.selected_name = None
-        internal = True
-        self.on_tab_select(internal)
+        # setting tab when window opens
+        self.on_tab_select(self.TabId.INTERNAL)
+        self.tab_id = self.TabId.INTERNAL
+
+    class TabId(Enum):
+        INTERNAL = "internal"
+        EXTERNAL = "external"
+
+    def sync_confirmation(self):
+        ConfirmWindow(text="WARNING:\nreplays with same name in mods folder\n will be overwritten",
+                      action=self.sync, cancel_is_selected=True)
 
     def on_select_text(self, widget, name):
         existing_widgets = self.scroll2.get_children()
@@ -113,30 +95,23 @@ class SettingWindow():
         ba.textwidget(edit=widget, color=(1, 1, 0))
         self.selected_name = name
 
-    def on_tab_select(self, _internal):
-        global internal
-        internal = _internal
-        if internal == True:
+    def on_tab_select(self, tab_id):
+        self.tab_id = tab_id
+        if tab_id == self.TabId.INTERNAL:
             dir_list = listdir(internal_dir)
             ba.buttonwidget(edit=self.share_button, label="EXPORT", icon=ba.gettexture("upButton"),)
-            sel = self.internal_tab
-            unsel = self.external_tab
         else:
             dir_list = listdir(external_dir)
             ba.buttonwidget(edit=self.share_button, label="IMPORT",
                             icon=ba.gettexture("downButton"),)
-            sel = self.external_tab
-            unsel = self.internal_tab
-
-        ba.buttonwidget(edit=sel, texture=tab_sel_texture, color=blue, size=(120, 80))
-        ba.buttonwidget(edit=unsel, texture=tab_unsel_texture, color=blue, size=(120, 100))
-
+        self.tab_row.update_appearance(tab_id)
         dir_list = sorted(dir_list)
         existing_widgets = self.scroll2.get_children()
         if existing_widgets:
             for i in existing_widgets:
                 i.delete()
         height = 900
+        # making textwidgets for all replays
         for i in dir_list:
             height -= 40
             a = i
@@ -147,6 +122,7 @@ class SettingWindow():
                 position=(10, height),
                 selectable=True,
                 max_chars=40,
+                corner_scale=1.3,
                 click_activate=True,)
             ba.textwidget(edit=i, on_activate_call=ba.Call(self.on_select_text, i, a))
 
@@ -183,33 +159,9 @@ class SettingWindow():
             label="",
             on_activate_call=Help)
 
-        internal_tab_pos = 85, 400
-        internal_tab_size = 120, 80
-        external_tab_pos = 85, 300
-        external_tab_size = 120, 80
-
-        self.internal_tab = ba.buttonwidget(
-            parent=self.root,
-            position=internal_tab_pos,
-            size=internal_tab_size,
-            button_type="square",
-            label="INTERNAL",
-            text_scale=2,
-            color=blue_highlight,
-            texture=tab_sel_texture)
-
-        self.external_tab = ba.buttonwidget(
-            parent=self.root,
-            position=external_tab_pos,
-            size=external_tab_size,
-            button_type="square",
-            label="EXTERNAL",
-            text_scale=2,
-            color=blue,
-            texture=tab_unsel_texture)
-
-        ba.buttonwidget(edit=self.internal_tab, on_activate_call=ba.Call(self.on_tab_select, True))
-        ba.buttonwidget(edit=self.external_tab, on_activate_call=ba.Call(self.on_tab_select, False))
+        tabdefs = [(self.TabId.INTERNAL, 'INTERNAL'), (self.TabId.EXTERNAL, "EXTERNAL")]
+        self.tab_row = TabRow(self.root, tabdefs, pos=(150, 500-5),
+                              size=(500, 300), on_select_call=self.on_tab_select)
 
         self.share_button = ba.buttonwidget(
             parent=self.root,
@@ -231,12 +183,12 @@ class SettingWindow():
             label="SYNC",
             text_scale=2,
             icon=ba.gettexture("ouyaYButton"),
-            on_activate_call=SyncConfirmation)
+            on_activate_call=self.sync_confirmation)
 
         scroll = ba.scrollwidget(
             parent=self.root,
-            size=(500, 400),
-            position=(200, 100),)
+            size=(600, 400),
+            position=(100, 100),)
         self.scroll2 = ba.columnwidget(parent=scroll, size=(
             500, 900))
 
@@ -244,14 +196,14 @@ class SettingWindow():
         if self.selected_name is None:
             Print("Select a replay", color=red)
             return
-        if internal:
+        if self.tab_id == self.TabId.INTERNAL:
             self.export()
         else:
             self.importx()
 
         # image={"texture":ba.gettexture("bombColor"),"tint_texture":None,"tint_color":None,"tint2_color":None})
 
-    def sync(self=""):
+    def sync(self):
         internal_list = listdir(internal_dir)
         external_list = listdir(external_dir)
         for i in internal_list:
