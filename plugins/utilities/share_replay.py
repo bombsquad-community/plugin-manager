@@ -310,4 +310,3 @@ class Loup(ba.Plugin):
 
     def show_settings_ui(self, button):
         SettingWindow()
-
