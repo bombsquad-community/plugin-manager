@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.9"
+PLUGIN_MANAGER_VERSION = "0.1.10"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -364,13 +364,13 @@ class PluginLocal:
     def has_settings(self):
         for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return hasattr(plugin_class, "on_plugin_manager_prompt")
+                return hasattr(plugin_class, "has_settings_ui")
         return False
 
     def launch_settings(self):
         for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return plugin_class.on_plugin_manager_prompt()
+                return plugin_class.show_settings_ui()
 
     async def get_content(self):
         if self._content is None:
