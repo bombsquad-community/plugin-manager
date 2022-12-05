@@ -364,8 +364,7 @@ class PluginLocal:
     def has_settings(self):
         for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return hasattr(plugin_class, "has_settings_ui")
-        return False
+                return plugin_class.has_settings_ui()
 
     def launch_settings(self, source_widget):
         for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
