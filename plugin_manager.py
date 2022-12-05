@@ -1665,8 +1665,12 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         width = 380 * s
         height = 150 + 150 * s
         color = (0.9, 0.9, 0.9)
-        discord_bg_color = ba.normalized_color((88, 101, 242))
-        github_bg_color = (0.2, 0.2, 0.2)
+
+        # Subtracting the default bluish-purple color from the texture, so it's as close
+        # as to white as possible.
+        discord_fg_color = (10 - 0.32, 10 - 0.39, 10 - 0.96)
+        discord_bg_color = (0.525, 0.595, 1.458)
+        github_bg_color = (0.23, 0.23, 0.23)
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
@@ -1743,7 +1747,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        position=((width * 0.20)+0.5 - button_size[0] / 2, pos),
                        size=button_size,
                        texture=ba.gettexture("discordLogo"),
-                       color=(10, 10, 10),
+                       color=discord_fg_color,
                        draw_controller=self.discord_button)
 
         self.github_button = ba.buttonwidget(parent=self._root_widget,
