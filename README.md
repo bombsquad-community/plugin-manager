@@ -57,10 +57,7 @@ There are two different ways the plugin manager can be installed:
 - New plugins are accepted through a [pull request](../../compare). Add your plugin in the minigames, utilities, or
   the category directory you feel is the most relevant to the type of plugin you're submitting, [here](plugins).
   Then add an entry to the category's JSON metadata file.
-- Plugin manager will also show and execute the settings icon if your `ba.Plugin` export class has a method named
-  `on_plugin_manager_prompt`; check out the
-  [colorscheme](https://github.com/bombsquad-community/plugin-manager/blob/f24f0ca5ded427f6041795021f1af2e6a08b6ce9/plugins/utilities/colorscheme.py#L419-L420)
-  plugin as an example and its behaviour when the settings icon is tapped via the plugin manager in-game.
+- Plugin manager will also show and execute the settings icon if your `ba.Plugin` class has methods `has_settings_ui` and `show_settings_ui`.
 
 #### Example:
 
@@ -73,9 +70,6 @@ import ba
 class Main(ba.Plugin):
     def on_app_running(self):
         ba.screenmessage("Hi! I am a sample plugin!")
-
-    def on_plugin_manager_prompt(self):
-        ba.screenmessage("You tapped my settings from the Plugin Manager Window!")
 ```
 
 You'll have to fork this repository and add your `sample_plugin.py` plugin file into the appropriate directory, which for
@@ -137,9 +131,6 @@ index ebb7dcc..da2b312 100644
      def on_app_running(self):
          ba.screenmessage("Hi! I am a sample plugin!")
 +        ba.screenmessage("Hey! This is my new screenmessage!")
- 
-     def on_plugin_manager_prompt(self):
-         ba.screenmessage("You tapped my settings from the Plugin Manager Window!")
 ```
 
 To name this new version as `1.1.0`, add `"1.1.0": null,` just above the previous plugin version in `utilities.json`:
