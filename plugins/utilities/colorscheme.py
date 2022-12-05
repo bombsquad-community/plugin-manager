@@ -445,5 +445,8 @@ class Main(ba.Plugin):
     def on_app_running(self):
         load_plugin()
 
-    def on_plugin_manager_prompt(self):
+    def has_settings_ui(self):
+        return True
+
+    def show_settings_ui(self, source_widget):
         launch_colorscheme_selection_window()
