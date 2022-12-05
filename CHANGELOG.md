@@ -1,5 +1,13 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.2.0 (05-12-2022)
+
+- Removed `on_plugin_manager_prompt` and replaced it with the in-game's plugin settings ui
+
+### 0.1.10 (05-12-2022)
+
+- Added Discord and Github textures on buttons
+
 ### 0.1.9 (03-12-2022)
 
 - Search now filters on author names and plugin description.
