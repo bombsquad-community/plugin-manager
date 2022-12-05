@@ -28,7 +28,7 @@ There are two different ways the plugin manager can be installed:
 
 1. Download [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
    to your mods directory (check it out by going into your game's Settings -> Advanced -> Show Mods Folder). This is the
-   recommended way (see below).
+   recommended way (read next method to know why).
 
 2. Another way is to add
    [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
@@ -57,7 +57,7 @@ There are two different ways the plugin manager can be installed:
 - New plugins are accepted through a [pull request](../../compare). Add your plugin in the minigames, utilities, or
   the category directory you feel is the most relevant to the type of plugin you're submitting, [here](plugins).
   Then add an entry to the category's JSON metadata file.
-- Plugin manager will also show and execute the settings icon if your `ba.Plugin` class has methods `has_settings_ui` and `show_settings_ui`.
+- Plugin manager will also show and execute the settings icon if your `ba.Plugin` class has methods `has_settings_ui` and `show_settings_ui`; check out the [colorscheme](https://github.com/bombsquad-community/plugin-manager/blob/eb163cf86014b2a057c4a048dcfa3d5b540b7fe1/plugins/utilities/colorscheme.py#L448-L452) plugin for an example.
 
 #### Example:
 
@@ -70,6 +70,12 @@ import ba
 class Main(ba.Plugin):
     def on_app_running(self):
         ba.screenmessage("Hi! I am a sample plugin!")
+
+    def has_settings_ui(self):
+        return True
+
+    def show_settings_ui(self, source_widget):
+        ba.screenmessage("You tapped my settings!")
 ```
 
 You'll have to fork this repository and add your `sample_plugin.py` plugin file into the appropriate directory, which for
@@ -130,6 +136,12 @@ index ebb7dcc..da2b312 100644
  class Main(ba.Plugin):
      def on_app_running(self):
          ba.screenmessage("Hi! I am a sample plugin!")
+
+     def has_settings_ui(self):
+         return True
+
+     def show_settings_ui(self, source_widget):
+-        ba.screenmessage("You tapped my settings!")
 +        ba.screenmessage("Hey! This is my new screenmessage!")
 ```
 
