@@ -7,6 +7,8 @@ import io
 import os
 import pathlib
 
+from distutils.version import StrictVersion
+
 import unittest
 
 
@@ -31,7 +33,7 @@ class TestPluginManagerMetadata(unittest.TestCase):
         versions = list(self.content["versions"].items())
         sorted_versions = sorted(
             versions,
-            key=lambda version: version[0],
+            key=lambda version: StrictVersion(version[0]),
             reverse=True,
         )
         assert sorted_versions == versions
@@ -103,7 +105,7 @@ class BaseCategoryMetadataTestCases:
                 versions = list(plugin_metadata["versions"].items())
                 sorted_versions = sorted(
                     versions,
-                    key=lambda version: version[0],
+                    key=lambda version: StrictVersion(version[0]),
                     reverse=True,
                 )
                 self.assertEqual(sorted_versions, versions)

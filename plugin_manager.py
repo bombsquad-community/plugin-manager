@@ -20,7 +20,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.1.9"
+PLUGIN_MANAGER_VERSION = "0.1.10"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -1665,10 +1665,16 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         width = 380 * s
         height = 150 + 150 * s
         color = (0.9, 0.9, 0.9)
+
+        # Subtracting the default bluish-purple color from the texture, so it's as close
+        # as to white as possible.
+        discord_fg_color = (10 - 0.32, 10 - 0.39, 10 - 0.96)
+        discord_bg_color = (0.525, 0.595, 1.458)
+        github_bg_color = (0.23, 0.23, 0.23)
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
-        button_size = (60 * s, 32 * s)
+        button_size = (32 * s, 32 * s)
         # index = await self._plugin_manager.get_index()
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
@@ -1727,23 +1733,40 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                       maxwidth=width * 0.95)
 
         pos -= 75
-        ba.buttonwidget(parent=self._root_widget,
-                        position=((width * 0.20) - button_size[0] / 2, pos),
-                        size=button_size,
-                        on_activate_call=lambda: ba.open_url(DISCORD_URL),
-                        textcolor=b_text_color,
-                        button_type='square',
-                        text_scale=1,
-                        label='Discord')
+        self.discord_button = ba.buttonwidget(parent=self._root_widget,
+                                              position=((width * 0.20) - button_size[0] / 2, pos),
+                                              size=button_size,
+                                              on_activate_call=lambda: ba.open_url(DISCORD_URL),
+                                              textcolor=b_text_color,
+                                              color=discord_bg_color,
+                                              button_type='square',
+                                              text_scale=1,
+                                              label="")
 
-        ba.buttonwidget(parent=self._root_widget,
-                        position=((width * 0.49) - button_size[0] / 2, pos),
-                        size=button_size,
-                        on_activate_call=lambda: ba.open_url(REPOSITORY_URL),
-                        textcolor=b_text_color,
-                        button_type='square',
-                        text_scale=1,
-                        label='GitHub')
+        ba.imagewidget(parent=self._root_widget,
+                       position=((width * 0.20)+0.5 - button_size[0] / 2, pos),
+                       size=button_size,
+                       texture=ba.gettexture("discordLogo"),
+                       color=discord_fg_color,
+                       draw_controller=self.discord_button)
+
+        self.github_button = ba.buttonwidget(parent=self._root_widget,
+                                             position=((width * 0.49) - button_size[0] / 2, pos),
+                                             size=button_size,
+                                             on_activate_call=lambda: ba.open_url(REPOSITORY_URL),
+                                             textcolor=b_text_color,
+                                             color=github_bg_color,
+                                             button_type='square',
+                                             text_scale=1,
+                                             label='')
+
+        ba.imagewidget(parent=self._root_widget,
+                       position=((width * 0.49) + 0.5 - button_size[0] / 2, pos),
+                       size=button_size,
+                       texture=ba.gettexture("githubLogo"),
+                       color=(1, 1, 1),
+                       draw_controller=self.github_button)
+
         ba.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._ok)
 
