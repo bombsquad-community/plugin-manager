@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.2.1 (17-12-2022)
+
+- Add Google DNS as a fallback for Jio ISP DNS blocking resolution of raw.githubusercontent.com domain.
+
 ### 0.2.0 (05-12-2022)
 
 - Removed `on_plugin_manager_prompt` and replaced it with the in-game's plugin settings ui

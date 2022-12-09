@@ -14,6 +14,12 @@
         }
       ],
       "versions": {
+        "1.3.0": {
+          "api_version": 7,
+          "commit_sha": "9429cf3",
+          "released_on": "19-12-2022",
+          "md5sum": "4c5e05101e837020a9d854f6df651275"
+        },
         "1.2.1": {
           "api_version": 7,
           "commit_sha": "7753b87",
@@ -299,6 +305,12 @@
         }
       ],
       "versions": {
+        "1.2.1": {
+          "api_version": 7,
+          "commit_sha": "64e8a5c",
+          "released_on": "18-12-2022",
+          "md5sum": "5237713243bd3ba5dd20a5efc568f40d"
+        },
         "1.2.0": {
           "api_version": 7,
           "commit_sha": "b7036af",
@@ -324,6 +336,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 7,
+          "commit_sha": "64e8a5c",
+          "released_on": "18-12-2022",
+          "md5sum": "7807b532802d17b77a0017c46ac1cbfb"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "e994af5",
@@ -362,6 +380,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 7,
+          "commit_sha": "64e8a5c",
+          "released_on": "18-12-2022",
+          "md5sum": "8efcf38604e5519d66a858cc38868641"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "e994af5",
@@ -525,6 +549,44 @@
           "commit_sha": "0841b9e",
           "released_on": "14-11-2022",
           "md5sum": "6213bc2573cb83f8bf72030604801f5a"
+        }
+      }
+    },
+    "disco_light": {
+      "description": "Add disco light into the game.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "Cross Joy#0721"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "800125c",
+          "released_on": "14-12-2022",
+          "md5sum": "616f31da667ea3663efe449c67a0e032"
+        }
+      }
+    },
+    "practice_tools": {
+      "description": "Powerful and comprehensive tools for practice purpose. Practice tabs can be access through party window.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "Cross Joy#0721"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "800125c",
+          "released_on": "14-12-2022",
+          "md5sum": "a04c30c11a43443fe192fe70ad528f22"
         }
       }
     }

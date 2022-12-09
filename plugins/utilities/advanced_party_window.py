@@ -42,14 +42,15 @@ import ba
 import _ba
 from typing import TYPE_CHECKING, cast
 import urllib.request
+import urllib.parse
 from _thread import start_new_thread
 import threading
 version_str = "7"
-
+BCSSERVER = 'api2.bombsquad.ga'
 
 cache_chat = []
-connect = _ba.connect_to_party
-disconnect = _ba.disconnect_from_host
+connect = ba.internal.connect_to_party
+disconnect = ba.internal.disconnect_from_host
 unmuted_names = []
 smo_mode = 3
 f_chat = False
@@ -66,6 +67,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def newconnect_to_party(address, port=43210, print_progress=False):
     global ip_add
     global p_port
+
     dd = _ba.get_connection_to_host_info()
     if (dd != {}):
         _ba.disconnect_from_host()
@@ -543,7 +545,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             size=(20, 5),
             color=(0.45, 0.63, 0.15),
             position=(self._width/2 - 20, 50),
-            text='',
+            text="Ping:"+str(current_ping)+" ms",
             selectable=True,
             autoselect=False,
             v_align='center')
@@ -835,7 +837,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             newFileName = str(ba.Lstr(resource="replayNameDefaultText").evaluate(
             )+" (%s)" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y_%m_%d_%H_%M_%S"))+".brp")
             newFilePath = os.path.join(dir_path+os.sep, newFileName).encode(SystemEncode)
-            #print(curFilePath, newFilePath)
+            # print(curFilePath, newFilePath)
             # os.rename(curFilePath,newFilePath)
             shutil.copyfile(curFilePath, newFilePath)
             _ba.reset_game_activity_tracking()
@@ -934,8 +936,8 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             _ba.chatmessage("script version "+s_v+"- build "+str(s_build))
             ba.textwidget(edit=self._text_field, text="")
             return
-        elif sendtext == ".ping disabled":
-            PingThread(ip_add, p_port).start()
+        elif sendtext == ".ping":
+            _ba.chatmessage("My ping:"+str(current_ping))
             ba.textwidget(edit=self._text_field, text="")
             return
         elif sendtext == ".save":
@@ -1194,7 +1196,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 ba.Lstr(resource='internal.cantKickHostError'),
                 color=(1, 0, 0))
 
-        #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_ba._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
+        # NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_ba._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
     def joinbombspot(self):
         import random
         url = ['https://discord.gg/CbxhJTrRta', 'https://discord.gg/ucyaesh']
@@ -1721,8 +1723,9 @@ def fetchAccountInfo(account, loading_widget):
             fdata = json.load(f)
         if account in fdata:
             servers = fdata[account]
-        data = urllib.request.urlopen(
-            f'https://api.bombsquad.ga/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true')
+        url = f'https://{BCSSERVER}/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true'
+
+        data = urllib.request.urlopen(url)
         account_data = json.loads(data.read().decode('utf-8'))[0]
         pbid = account_data["pbid"]
 
@@ -2177,7 +2180,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
 class bySmoothy(ba.Plugin):
     def __init__(self):
         if _ba.env().get("build_number", 0) >= 20577:
-            _ba.connect_to_party = newconnect_to_party
+            ba.internal.connect_to_party = newconnect_to_party
             bastd_party.PartyWindow = ModifiedPartyWindow
         else:
             print("AdvancePartyWindow only runs with BombSquad version equal or higher than 1.7")

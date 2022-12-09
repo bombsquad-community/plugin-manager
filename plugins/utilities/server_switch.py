@@ -22,8 +22,8 @@ from bastd.ui.confirm import ConfirmWindow
 
 import bastd.ui.mainmenu as bastd_ui_mainmenu
 
-connect = _ba.connect_to_party
-disconnect = _ba.disconnect_from_host
+connect = ba.internal.connect_to_party
+disconnect = ba.internal.disconnect_from_host
 
 server = []
 
@@ -566,7 +566,7 @@ class bySmoothy(ba.Plugin):
     def __init__(self):
         if _ba.env().get("build_number", 0) >= 20577:
             bastd_ui_mainmenu.MainMenuWindow._refresh_in_game = new_refresh_in_game
-            _ba.connect_to_party = newconnect_to_party
-            _ba.disconnect_from_host = newdisconnect_from_host
+            ba.internal.connect_to_party = newconnect_to_party
+            ba.internal.disconnect_from_host = newdisconnect_from_host
         else:
             print("Server Switch  only works on bs 1.7 and above")

@@ -4,7 +4,11 @@ import _ba
 from bastd.ui import popup
 
 import urllib.request
+import http.client
+import socket
+import ssl
 import json
+
 import os
 import sys
 import asyncio
@@ -20,7 +24,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.2.0"
+PLUGIN_MANAGER_VERSION = "0.2.1"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -108,6 +112,100 @@ def partial_format(string_template, **kwargs):
     for key, value in kwargs.items():
         string_template = string_template.replace("{" + key + "}", value)
     return string_template
+
+
+class DNSBlockWorkaround:
+    """
+    Some ISPs put a DNS block on domains that are needed for plugin manager to
+    work properly. This class stores methods to workaround such blocks by adding
+    dns.google as a fallback.
+
+    Such as Jio, a pretty popular ISP in India has a DNS block on
+    raw.githubusercontent.com (sigh..).
+
+    Usage:
+    -----
+    >>> import urllib.request
+    >>> import http.client
+    >>> import socket
+    >>> import ssl
+    >>> import json
+    >>> DNSBlockWorkaround.apply()
+    >>> response = urllib.request.urlopen("https://dnsblockeddomain.com/path/to/resource/")
+    """
+
+    _google_dns_cache = {}
+
+    def apply():
+        opener = urllib.request.build_opener(
+            DNSBlockWorkaround._HTTPHandler,
+            DNSBlockWorkaround._HTTPSHandler,
+        )
+        urllib.request.install_opener(opener)
+
+    def _resolve_using_google_dns(hostname):
+        response = urllib.request.urlopen(f"https://dns.google/resolve?name={hostname}")
+        response = response.read()
+        response = json.loads(response)
+        resolved_host = response["Answer"][0]["data"]
+        return resolved_host
+
+    def _resolve_using_system_dns(hostname):
+        resolved_host = socket.gethostbyname(hostname)
+        return resolved_host
+
+    def _resolve_with_workaround(hostname):
+        resolved_host_from_cache = DNSBlockWorkaround._google_dns_cache.get(hostname)
+        if resolved_host_from_cache:
+            return resolved_host_from_cache
+
+        resolved_host_by_system_dns = DNSBlockWorkaround._resolve_using_system_dns(hostname)
+
+        if DNSBlockWorkaround._is_blocked(hostname, resolved_host_by_system_dns):
+            resolved_host = DNSBlockWorkaround._resolve_using_google_dns(hostname)
+            DNSBlockWorkaround._google_dns_cache[hostname] = resolved_host
+        else:
+            resolved_host = resolved_host_by_system_dns
+
+        return resolved_host
+
+    def _is_blocked(hostname, address):
+        is_blocked = False
+        if hostname == "raw.githubusercontent.com":
+            # Jio's DNS server may be blocking it.
+            is_blocked = address.startswith("49.44.")
+
+        return is_blocked
+
+    class _HTTPConnection(http.client.HTTPConnection):
+        def connect(self):
+            host = DNSBlockWorkaround._resolve_with_workaround(self.host)
+            self.sock = socket.create_connection(
+                (host, self.port),
+                self.timeout,
+            )
+
+    class _HTTPSConnection(http.client.HTTPSConnection):
+        def connect(self):
+            host = DNSBlockWorkaround._resolve_with_workaround(self.host)
+            sock = socket.create_connection(
+                (host, self.port),
+                self.timeout,
+            )
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            context.verify_mode = ssl.CERT_REQUIRED
+            context.check_hostname = True
+            context.load_default_certs()
+            sock = context.wrap_socket(sock, server_hostname=self.host)
+            self.sock = sock
+
+    class _HTTPHandler(urllib.request.HTTPHandler):
+        def http_open(self, req):
+            return self.do_open(DNSBlockWorkaround._HTTPConnection, req)
+
+    class _HTTPSHandler(urllib.request.HTTPSHandler):
+        def https_open(self, req):
+            return self.do_open(DNSBlockWorkaround._HTTPSConnection, req)
 
 
 class StartupTasks:
@@ -2155,6 +2253,7 @@ class EntryPoint(ba.Plugin):
         """Called when the app is being launched."""
         from bastd.ui.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
+        DNSBlockWorkaround.apply()
         asyncio.set_event_loop(ba._asyncio._asyncio_event_loop)
         startup_tasks = StartupTasks()
         loop = asyncio.get_event_loop()

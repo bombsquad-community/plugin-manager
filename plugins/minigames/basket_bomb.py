@@ -488,7 +488,7 @@ class Aro(ba.Actor):
                               'materials': [self._score_region_material]})
         ]
         self.regions[0].connectattr('position', self.node, 'position')
-        #self.regions[0].connectattr('position', self.regions[1], 'position')
+        # self.regions[0].connectattr('position', self.regions[1], 'position')
 
         locs_count = 9
         pos = list(position)
@@ -555,8 +555,8 @@ class Cuadro(ba.Actor):
                                                  'materials': [self.collision,
                                                                shared.footing_material]})
 
-        #self.shield = ba.newnode('shield', attrs={'radius': 1.0, 'color': (0,10,0)})
-        #self.region.connectattr('position', self.shield, 'position')
+        # self.shield = ba.newnode('shield', attrs={'radius': 1.0, 'color': (0,10,0)})
+        # self.region.connectattr('position', self.shield, 'position')
 
         position = (position[0], position[1], position[2]+0.09)
         pos = list(position)

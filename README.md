@@ -5,6 +5,11 @@
 A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
 which makes further modding of your game more convenient by providing easier access to community created content.
 
+[![DownloadIcon]][DownloadLink]
+
+[DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
+[DownloadLink]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
+
 ![Plugin Manager GIF](https://user-images.githubusercontent.com/106954762/190505304-519c4b91-2461-42b1-be57-655a3fb0cbe8.gif)
 
 ## Features
@@ -26,9 +31,8 @@ which makes further modding of your game more convenient by providing easier acc
 
 There are two different ways the plugin manager can be installed:
 
-1. Download [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
-   to your mods directory (check it out by going into your game's Settings -> Advanced -> Show Mods Folder). This is the
-   recommended way (read next method to know why).
+1. [Download plugin_manager.py][DownloadLink] to your mods directory (check it out by going into your game's
+   Settings -> Advanced -> Show Mods Folder). This is the recommended way (read next method to know why).
 
 2. Another way is to add
    [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)

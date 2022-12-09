@@ -45,6 +45,23 @@ from enum import Enum
 from bastd.ui.popup import PopupMenuWindow, PopupWindow
 from typing import Any, Optional, Dict, List, Tuple, Type, Union, Callable
 from bastd.ui.gather.publictab import PublicGatherTab
+import json
+import urllib.request
+import time
+
+
+ENABLE_SERVER_BANNING = True
+DEBUG_SERVER_COMMUNICATION = False
+DEBUG_PROCESSING = False
+"""
+This banned servers list is maintained by commmunity , its not official.
+Reason for ban can be (not limited to) using abusive server names , using server name of a reputed server/community 
+without necessary permissions.
+Report such case on community discord channels   
+https://discord.gg/ucyaesh
+https://ballistica.net/discord
+"""
+BCSURL = 'https://bcsserver.bombsquad.ga/bannedservers'
 
 
 def is_game_version_lower_than(version):
@@ -62,6 +79,24 @@ if is_game_version_lower_than("1.7.7"):
     ba_internal = _ba
 else:
     ba_internal = ba.internal
+
+
+def updateBannedServersCache():
+    response = None
+    config = ba.app.config
+    if not isinstance(config.get('Banned Servers'), list):
+        config['Banned Servers'] = []
+    try:
+        response = urllib.request.urlopen(BCSURL).read()
+        data = json.loads(response.decode('utf-8'))
+        bannedlist = []
+        for server in data["servers"]:
+            bannedlist.append(server["ip"])
+        config['Banned Servers'] = bannedlist
+        config.commit()
+        print("updated cache")
+    except Exception as e:
+        print(e)
 
 
 class _HostLookupThread(threading.Thread):
@@ -453,7 +488,6 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
                                                        'UNKNOWN'))
         ba.open_url(url)
     elif choice == 'connect':
-
         PartyQuickConnect(_party.address, _party.port)
     elif choice == 'save':
         config = ba.app.config
@@ -475,6 +509,64 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
         ba.playsound(ba.getsound('gunCocking'))
 
 
+def _update_party_lists(self) -> None:
+    if not self._party_lists_dirty:
+        return
+    starttime = time.time()
+    config = ba.app.config
+    bannedservers = config.get('Banned Servers', [])
+    assert len(self._parties_sorted) == len(self._parties)
+
+    self._parties_sorted.sort(
+        key=lambda p: (
+            p[1].ping if p[1].ping is not None else 999999.0,
+            p[1].index,
+        )
+    )
+
+    # If signed out or errored, show no parties.
+    if (
+        ba.internal.get_v1_account_state() != 'signed_in'
+        or not self._have_valid_server_list
+    ):
+        self._parties_displayed = {}
+    else:
+        if self._filter_value:
+            filterval = self._filter_value.lower()
+            self._parties_displayed = {
+                k: v
+                for k, v in self._parties_sorted
+                if (filterval in v.name.lower() or filterval in v.address) and (v.address not in bannedservers if ENABLE_SERVER_BANNING else True)
+            }
+        else:
+            self._parties_displayed = {
+                k: v
+                for k, v in self._parties_sorted
+                if (v.address not in bannedservers if ENABLE_SERVER_BANNING else True)
+            }
+
+    # Any time our selection disappears from the displayed list, go back to
+    # auto-selecting the top entry.
+    if (
+        self._selection is not None
+        and self._selection.entry_key not in self._parties_displayed
+    ):
+        self._have_user_selected_row = False
+
+    # Whenever the user hasn't selected something, keep the first visible
+    # row selected.
+    if not self._have_user_selected_row and self._parties_displayed:
+        firstpartykey = next(iter(self._parties_displayed))
+        self._selection = Selection(firstpartykey, SelectionComponent.NAME)
+
+    self._party_lists_dirty = False
+    if DEBUG_PROCESSING:
+        print(
+            f'Sorted {len(self._parties_sorted)} parties in'
+            f' {time.time()-starttime:.5f}s.'
+        )
+
+
 def replace():
     manualtab.ManualGatherTab._build_favorites_tab = new_build_favorites_tab
     manualtab.ManualGatherTab._on_favorites_connect_press = new_on_favorites_connect_press
@@ -485,6 +577,7 @@ def replace():
     publictab.UIRow.on_stats_click = on_stats_click
     publictab.UIRow.popup_menu_closing = popup_menu_closing
     publictab.UIRow.popup_menu_selected_choice = popup_menu_selected_choice
+    publictab.PublicGatherTab._update_party_lists = _update_party_lists
 
 
 class PartyQuickConnect(ba.Window):
@@ -601,9 +694,11 @@ class PartyQuickConnect(ba.Window):
         self.closed = True
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
+
 # ba_meta export plugin
-
-
 class InitalRun(ba.Plugin):
     def __init__(self):
         replace()
+        config = ba.app.config
+        if config["launchCount"] % 5 == 0:
+            updateBannedServersCache()
