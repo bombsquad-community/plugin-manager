@@ -45,7 +45,8 @@ import random
 import weakref
 from enum import Enum
 from typing import TYPE_CHECKING
-import ba, _ba
+import ba
+import _ba
 import ba.internal
 import bastd
 from bastd.actor.powerupbox import PowerupBox
@@ -271,7 +272,7 @@ class Practice(Plugin):
                     })
 
             if ba.app.config.get(
-                "bombCountdown") and bomb_type not in fuse_bomb:
+                    "bombCountdown") and bomb_type not in fuse_bomb:
                 color = (1.0, 1.0, 0.0)
                 count_bomb(*args, count='3', color=color)
                 color = (1.0, 0.5, 0.0)
@@ -353,17 +354,17 @@ def _init_spaz_(self, *args, **kwargs):
                           'position')
 
     self.curse_visualizer_fatal = ba.newnode('locator',
-                                               owner=self.node,
-                                               # Remove itself when the bomb node dies.
-                                               attrs={
-                                                   'shape': 'circle',
-                                                   'color': (
-                                                       0.7, 0, 0),
-                                                   'size': (0.0, 0.0, 0.0),
-                                                   'opacity': 0.10,
-                                                   'draw_beauty': False,
-                                                   'additive': False
-        })
+                                             owner=self.node,
+                                             # Remove itself when the bomb node dies.
+                                             attrs={
+                                                 'shape': 'circle',
+                                                 'color': (
+                                                     0.7, 0, 0),
+                                                 'size': (0.0, 0.0, 0.0),
+                                                 'opacity': 0.10,
+                                                 'draw_beauty': False,
+                                                 'additive': False
+                                             })
     self.node.connectattr('position',
                           self.curse_visualizer_fatal,
                           'position')
@@ -422,7 +423,6 @@ Spaz.super_handlemessage = Spaz.handlemessage
 
 
 def bot_handlemessage(self, msg: Any):
-
 
     if isinstance(msg, ba.PowerupMessage):
         if msg.poweruptype == 'health':
@@ -498,7 +498,6 @@ def bot_handlemessage(self, msg: Any):
                 })
 
 
-
 Spaz.handlemessage = bot_handlemessage
 
 
@@ -546,48 +545,48 @@ class NewBotSet(SpazBotSet):
         super().__init__()
 
     def _update(self) -> None:
-            try:
-                with ba.Context(_ba.get_foreground_host_activity()):
-                    # Update one of our bot lists each time through.
-                    # First off, remove no-longer-existing bots from the list.
+        try:
+            with ba.Context(_ba.get_foreground_host_activity()):
+                # Update one of our bot lists each time through.
+                # First off, remove no-longer-existing bots from the list.
+                try:
+                    bot_list = self._bot_lists[self._bot_update_list] = ([
+                        b for b in self._bot_lists[self._bot_update_list] if b
+                    ])
+                except Exception:
+                    bot_list = []
+                    ba.print_exception('Error updating bot list: ' +
+                                       str(self._bot_lists[
+                                           self._bot_update_list]))
+                self._bot_update_list = (self._bot_update_list +
+                                         1) % self._bot_list_count
+
+                # Update our list of player points for the bots to use.
+                player_pts = []
+                for player in ba.getactivity().players:
+                    assert isinstance(player, ba.Player)
                     try:
-                        bot_list = self._bot_lists[self._bot_update_list] = ([
-                            b for b in self._bot_lists[self._bot_update_list] if b
-                        ])
+                        # TODO: could use abstracted player.position here so we
+                        # don't have to assume their actor type, but we have no
+                        # abstracted velocity as of yet.
+                        if player.is_alive():
+                            assert isinstance(player.actor, Spaz)
+                            assert player.actor.node
+                            player_pts.append(
+                                (ba.Vec3(player.actor.node.position),
+                                 ba.Vec3(
+                                     player.actor.node.velocity)))
                     except Exception:
-                        bot_list = []
-                        ba.print_exception('Error updating bot list: ' +
-                                           str(self._bot_lists[
-                                                   self._bot_update_list]))
-                    self._bot_update_list = (self._bot_update_list +
-                                             1) % self._bot_list_count
+                        ba.print_exception('Error on bot-set _update.')
 
-                    # Update our list of player points for the bots to use.
-                    player_pts = []
-                    for player in ba.getactivity().players:
-                        assert isinstance(player, ba.Player)
-                        try:
-                            # TODO: could use abstracted player.position here so we
-                            # don't have to assume their actor type, but we have no
-                            # abstracted velocity as of yet.
-                            if player.is_alive():
-                                assert isinstance(player.actor, Spaz)
-                                assert player.actor.node
-                                player_pts.append(
-                                    (ba.Vec3(player.actor.node.position),
-                                     ba.Vec3(
-                                         player.actor.node.velocity)))
-                        except Exception:
-                            ba.print_exception('Error on bot-set _update.')
+                for bot in bot_list:
+                    if not ba.app.config.get('stopBots'):
+                        bot.set_player_points(player_pts)
+                        bot.update_ai()
 
-                    for bot in bot_list:
-                        if not ba.app.config.get('stopBots'):
-                            bot.set_player_points(player_pts)
-                            bot.update_ai()
-
-                    ba.app.config["disablePractice"] = True
-            except:
-                ba.app.config["disablePractice"] = False
+                ba.app.config["disablePractice"] = True
+        except:
+            ba.app.config["disablePractice"] = False
 
     def clear(self) -> None:
         """Immediately clear out any bots in the set."""
@@ -603,11 +602,11 @@ class NewBotSet(SpazBotSet):
                 self._bot_lists[i] = []
 
     def spawn_bot(
-        self,
-        bot_type: type[SpazBot],
-        pos: Sequence[float],
-        spawn_time: float = 3.0,
-        on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
+            self,
+            bot_type: type[SpazBot],
+            pos: Sequence[float],
+            spawn_time: float = 3.0,
+            on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
         """Spawn a bot from this set."""
         from bastd.actor import spawner
         spawner.Spawner(pt=pos,
@@ -635,24 +634,23 @@ class DummyBotSet(NewBotSet):
 
     def _update(self) -> None:
 
-            try:
-                with ba.Context(_ba.get_foreground_host_activity()):
-                    # Update one of our bot lists each time through.
-                    # First off, remove no-longer-existing bots from the list.
-                    try:
-                        bot_list = self._bot_lists[self._bot_update_list] = ([
-                            b for b in self._bot_lists[self._bot_update_list] if b
-                        ])
-                    except Exception:
-                        ba.print_exception('Error updating bot list: ' +
-                                           str(self._bot_lists[
-                                                   self._bot_update_list]))
-                    self._bot_update_list = (self._bot_update_list +
-                                             1) % self._bot_list_count
+        try:
+            with ba.Context(_ba.get_foreground_host_activity()):
+                # Update one of our bot lists each time through.
+                # First off, remove no-longer-existing bots from the list.
+                try:
+                    bot_list = self._bot_lists[self._bot_update_list] = ([
+                        b for b in self._bot_lists[self._bot_update_list] if b
+                    ])
+                except Exception:
+                    ba.print_exception('Error updating bot list: ' +
+                                       str(self._bot_lists[
+                                           self._bot_update_list]))
+                self._bot_update_list = (self._bot_update_list +
+                                         1) % self._bot_list_count
 
-
-            except:
-                pass
+        except:
+            pass
 
 
 class DummyBot(SpazBot):
@@ -1085,7 +1083,7 @@ class BotsPracticeTab(PracticeTab):
                 'Pro Bomber', 'Pro Brawler',
                 'Pro Trigger', 'Pro Charger',
                 'S.Pro Bomber', 'S.Pro Brawler',
-                'S.Pro Trigger', 'S.Pro Charger'):
+                    'S.Pro Trigger', 'S.Pro Charger'):
                 tint1 = (1.0, 0.2, 0.1)
                 tint2 = (0.6, 0.1, 0.05)
             elif self.bot_array_name[self._icon_index] in 'Bouncy':
@@ -1097,7 +1095,7 @@ class BotsPracticeTab(PracticeTab):
 
             if self.bot_array_name[self._icon_index] in (
                 'S.Pro Bomber', 'S.Pro Brawler',
-                'S.Pro Trigger', 'S.Pro Charger'):
+                    'S.Pro Trigger', 'S.Pro Charger'):
                 color = (1.3, 1.2, 3.0)
             else:
                 color = (1.0, 1.0, 1.0)
@@ -1296,8 +1294,7 @@ class PowerUpPracticeTab(PracticeTab):
                                i.node.position[1],
                                i.node.position[2] + z)
                         PowerupBox(position=pos,
-                                   poweruptype=
-                                   self.power_list_type
+                                   poweruptype=self.power_list_type
                                    [self._icon_index]).autoretain()
 
     def _power_window(self) -> None:

@@ -43,6 +43,8 @@ if TYPE_CHECKING:
     from typing import Sequence, Union
 
 # Check game ver.
+
+
 def is_game_version_lower_than(version):
     """
     Returns a boolean value indicating whether the current game
