@@ -539,7 +539,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "800125c",
+          "released_on": "14-12-2022",
+          "md5sum": "616f31da667ea3663efe449c67a0e032"
+        }
       }
     },
     "practice_tools": {
@@ -553,7 +558,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "800125c",
+          "released_on": "14-12-2022",
+          "md5sum": "a04c30c11a43443fe192fe70ad528f22"
+        }
       }
     }
   }
