@@ -527,6 +527,44 @@
           "md5sum": "6213bc2573cb83f8bf72030604801f5a"
         }
       }
+    },
+    "disco_light": {
+      "description": "Add disco light into the game.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "Cross Joy#0721"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "800125c",
+          "released_on": "14-12-2022",
+          "md5sum": "616f31da667ea3663efe449c67a0e032"
+        }
+      }
+    },
+    "practice_tools": {
+      "description": "Powerful and comprehensive tools for practice purpose. Practice tabs can be access through party window.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "Cross Joy#0721"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "800125c",
+          "released_on": "14-12-2022",
+          "md5sum": "a04c30c11a43443fe192fe70ad528f22"
+        }
+      }
     }
   }
 }
