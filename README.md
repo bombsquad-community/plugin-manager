@@ -1,3 +1,8 @@
+[![DownloadIcon]][DownloadLink]
+
+[DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
+[DownloadLink]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
+
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
 # plugin-manager
