@@ -31,9 +31,8 @@ which makes further modding of your game more convenient by providing easier acc
 
 There are two different ways the plugin manager can be installed:
 
-1. [Download Plugin Manager.py](https://bombsquad-community.github.io/bombsquad-web/pluginmanager)
-   to your mods directory (check it out by going into your game's Settings -> Advanced -> Show Mods Folder). This is the
-   recommended way (read next method to know why).
+1. [Download plugin_manager.py][DownloadLink] to your mods directory (check it out by going into your game's
+   Settings -> Advanced -> Show Mods Folder). This is the recommended way (read next method to know why).
 
 2. Another way is to add
    [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
