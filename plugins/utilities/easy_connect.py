@@ -63,6 +63,7 @@ https://ballistica.net/discord
 """
 BCSURL = 'https://bcsserver.bombsquad.ga/bannedservers'
 
+
 def is_game_version_lower_than(version):
     """
     Returns a boolean value indicating whether the current game
@@ -78,6 +79,7 @@ if is_game_version_lower_than("1.7.7"):
     ba_internal = _ba
 else:
     ba_internal = ba.internal
+
 
 def updateBannedServersCache():
     response = None
@@ -508,61 +510,62 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
 
 
 def _update_party_lists(self) -> None:
-        if not self._party_lists_dirty:
-            return
-        starttime = time.time()
-        config = ba.app.config
-        bannedservers = config.get('Banned Servers',[])
-        assert len(self._parties_sorted) == len(self._parties)
+    if not self._party_lists_dirty:
+        return
+    starttime = time.time()
+    config = ba.app.config
+    bannedservers = config.get('Banned Servers', [])
+    assert len(self._parties_sorted) == len(self._parties)
 
-        self._parties_sorted.sort(
-            key=lambda p: (
-                p[1].ping if p[1].ping is not None else 999999.0,
-                p[1].index,
-            )
+    self._parties_sorted.sort(
+        key=lambda p: (
+            p[1].ping if p[1].ping is not None else 999999.0,
+            p[1].index,
+        )
+    )
+
+    # If signed out or errored, show no parties.
+    if (
+        ba.internal.get_v1_account_state() != 'signed_in'
+        or not self._have_valid_server_list
+    ):
+        self._parties_displayed = {}
+    else:
+        if self._filter_value:
+            filterval = self._filter_value.lower()
+            self._parties_displayed = {
+                k: v
+                for k, v in self._parties_sorted
+                if (filterval in v.name.lower() or filterval in v.address) and (v.address not in bannedservers if ENABLE_SERVER_BANNING else True)
+            }
+        else:
+            self._parties_displayed = {
+                k: v
+                for k, v in self._parties_sorted
+                if (v.address not in bannedservers if ENABLE_SERVER_BANNING else True)
+            }
+
+    # Any time our selection disappears from the displayed list, go back to
+    # auto-selecting the top entry.
+    if (
+        self._selection is not None
+        and self._selection.entry_key not in self._parties_displayed
+    ):
+        self._have_user_selected_row = False
+
+    # Whenever the user hasn't selected something, keep the first visible
+    # row selected.
+    if not self._have_user_selected_row and self._parties_displayed:
+        firstpartykey = next(iter(self._parties_displayed))
+        self._selection = Selection(firstpartykey, SelectionComponent.NAME)
+
+    self._party_lists_dirty = False
+    if DEBUG_PROCESSING:
+        print(
+            f'Sorted {len(self._parties_sorted)} parties in'
+            f' {time.time()-starttime:.5f}s.'
         )
 
-        # If signed out or errored, show no parties.
-        if (
-            ba.internal.get_v1_account_state() != 'signed_in'
-            or not self._have_valid_server_list
-        ):
-            self._parties_displayed = {}
-        else:
-            if self._filter_value:
-                filterval = self._filter_value.lower()
-                self._parties_displayed = {
-                    k: v
-                    for k, v in self._parties_sorted
-                    if (filterval in v.name.lower() or filterval in v.address) and (v.address not in bannedservers if ENABLE_SERVER_BANNING else True)
-                }
-            else:
-                self._parties_displayed = {
-                    k: v
-                    for k, v in self._parties_sorted
-                    if (v.address not in bannedservers if ENABLE_SERVER_BANNING else True)
-                }
-
-        # Any time our selection disappears from the displayed list, go back to
-        # auto-selecting the top entry.
-        if (
-            self._selection is not None
-            and self._selection.entry_key not in self._parties_displayed
-        ):
-            self._have_user_selected_row = False
-
-        # Whenever the user hasn't selected something, keep the first visible
-        # row selected.
-        if not self._have_user_selected_row and self._parties_displayed:
-            firstpartykey = next(iter(self._parties_displayed))
-            self._selection = Selection(firstpartykey, SelectionComponent.NAME)
-
-        self._party_lists_dirty = False
-        if DEBUG_PROCESSING:
-            print(
-                f'Sorted {len(self._parties_sorted)} parties in'
-                f' {time.time()-starttime:.5f}s.'
-            )
 
 def replace():
     manualtab.ManualGatherTab._build_favorites_tab = new_build_favorites_tab
@@ -697,5 +700,5 @@ class InitalRun(ba.Plugin):
     def __init__(self):
         replace()
         config = ba.app.config
-        if config["launchCount"]% 5 ==0:
+        if config["launchCount"] % 5 == 0:
             updateBannedServersCache()

@@ -67,7 +67,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def newconnect_to_party(address, port=43210, print_progress=False):
     global ip_add
     global p_port
-    
+
     dd = _ba.get_connection_to_host_info()
     if (dd != {}):
         _ba.disconnect_from_host()
@@ -1724,7 +1724,7 @@ def fetchAccountInfo(account, loading_widget):
         if account in fdata:
             servers = fdata[account]
         url = f'https://{BCSSERVER}/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true'
-        
+
         data = urllib.request.urlopen(url)
         account_data = json.loads(data.read().decode('utf-8'))[0]
         pbid = account_data["pbid"]
@@ -2175,6 +2175,8 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                 ba.print_exception('Error displaying account info.')
 
 # ba_meta export plugin
+
+
 class bySmoothy(ba.Plugin):
     def __init__(self):
         if _ba.env().get("build_number", 0) >= 20577:
