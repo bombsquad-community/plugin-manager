@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, List, Dict, Tuple, Optional, Union
 
-from os import listdir, mkdir, path, sep,remove
+from os import listdir, mkdir, path, sep, remove
 from shutil import copy, copytree
 
 import ba
@@ -44,6 +44,7 @@ blue_highlight = (0.4, 0.7, 1)
 b_color = (0.6, 0.53, 0.63)
 b_textcolor = (0.75, 0.7, 0.8)
 
+
 def Print(*args, color=None, top=None):
     out = ""
     for arg in args:
@@ -63,7 +64,6 @@ def cprint(*args):
 if not path.exists(external_dir):
     mkdir(external_dir)
     Print("You are ready to share replays", color=pink)
-
 
 
 def override(cls: ClassType) -> Callable[[MethodType], MethodType]:
@@ -97,32 +97,33 @@ class CommonUtilities:
                 copy(external_dir+sep+i, internal_dir+sep+i)
         Print("Synced all replays", color=pink)
 
-    def _copy(self, selected_replay,tab_id):
+    def _copy(self, selected_replay, tab_id):
         if selected_replay is None:
             Print("Select a replay", color=red)
             return
-        elif tab_id==MyTabId.INTERNAL:                         
+        elif tab_id == MyTabId.INTERNAL:
             copy(internal_dir+selected_replay, external_dir+selected_replay)
             Print(selected_replay[0:-4]+" exported", top=True, color=pink)
-        else:             
+        else:
             copy(external_dir+selected_replay, internal_dir+selected_replay)
             Print(selected_replay[0:-4]+" imported", top=True, color=green)
-        
-    def delete_replay(self,selected_replay,tab_id,cls_inst):        
+
+    def delete_replay(self, selected_replay, tab_id, cls_inst):
         if selected_replay is None:
             Print("Select a replay", color=red)
-            return        
+            return
+
         def do_it():
-            if tab_id==MyTabId.INTERNAL:
-                remove(internal_dir+selected_replay)            
-            elif tab_id==MyTabId.EXTERNAL:             
-                remove(external_dir+selected_replay) 
-            cls_inst.on_tab_select(tab_id)    #updating the tab               
+            if tab_id == MyTabId.INTERNAL:
+                remove(internal_dir+selected_replay)
+            elif tab_id == MyTabId.EXTERNAL:
+                remove(external_dir+selected_replay)
+            cls_inst.on_tab_select(tab_id)  # updating the tab
             Print(selected_replay[0:-4]+" was deleted", top=True, color=red)
         ConfirmWindow(text=f"Delete \"{selected_replay.split('.')[0]}\" \nfrom {'internal directory' if tab_id==MyTabId.INTERNAL else 'external directory'}?",
-                      action=do_it, cancel_is_selected=True)         
-            
-        
+                      action=do_it, cancel_is_selected=True)
+
+
 CommonUtils = CommonUtilities()
 
 
@@ -131,15 +132,16 @@ class MyTabId(Enum):
     EXTERNAL = "external"
     SHARE_REPLAYS = "share_replay"
 
+
 class Help(PopupWindow):
     def __init__(self):
         self.width = 1200
-        self.height = 250        
+        self.height = 250
         self.root_widget = ba.Window(ba.containerwidget(
-                size=(self.width, self.height), on_outside_click_call=self.close, transition="in_right")).get_root_widget()
+            size=(self.width, self.height), on_outside_click_call=self.close, transition="in_right")).get_root_widget()
 
         ba.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
-        ba.textwidget(parent=self.root_widget, position=(0, self.height * 0.7),corner_scale=1.2 ,color=green,
+        ba.textwidget(parent=self.root_widget, position=(0, self.height * 0.7), corner_scale=1.2, color=green,
                       text=f"»Replays are exported to\n     {external_dir}\n»Copy replays to the above folder to be able to import them into the game\n»I would love to hear from you,meet me on discord\n                                -LoupGarou(author)")
 
     def close(self):
@@ -158,9 +160,8 @@ class ShareTabUi(WatchWindow):
 
         else:
             self.root = root_widget
-            
+
         self.draw_ui()
-       
 
     def on_select_text(self, widget, name):
         existing_widgets = self.scroll2.get_children()
@@ -173,22 +174,22 @@ class ShareTabUi(WatchWindow):
         self.selected_replay = None
         self.tab_id = tab_id
         t_scale = 1.6
-        
+
         if tab_id == MyTabId.INTERNAL:
             dir_list = listdir(internal_dir)
             ba.buttonwidget(edit=self.share_button, label="Export\nReplay")
-        else:    
+        else:
             dir_list = listdir(external_dir)
             ba.buttonwidget(edit=self.share_button, label="Import\nReplay")
-                
+
         self.tab_row.update_appearance(tab_id)
         dir_list = sorted(dir_list)
         existing_widgets = self.scroll2.get_children()
-        if existing_widgets:# deleting textwidgets from old tab
+        if existing_widgets:  # deleting textwidgets from old tab
             for i in existing_widgets:
                 i.delete()
-        height = 900        
-        for i in dir_list:# making textwidgets for all replays
+        height = 900
+        for i in dir_list:  # making textwidgets for all replays
             height -= 50
             a = i
             i = ba.textwidget(
@@ -202,128 +203,127 @@ class ShareTabUi(WatchWindow):
                 click_activate=True,
                 always_highlight=True,)
             ba.textwidget(edit=i, on_activate_call=ba.Call(self.on_select_text, i, a))
-      
-    def draw_ui(self):        
-            self._r = 'watchWindow'
-            x_inset = 100 if uiscale is ba.UIScale.SMALL else 0
-            scroll_buffer_h = 130 + 2 * x_inset
-            self._width = 1240 if uiscale is ba.UIScale.SMALL else 1040
-            self._height = (
-                578
-                if uiscale is ba.UIScale.SMALL
-                else 670
-                if uiscale is ba.UIScale.MEDIUM
-                else 800)            
-            self._scroll_width = self._width - scroll_buffer_h
-            self._scroll_height = self._height - 180
-            #
-            c_width = self._scroll_width
-            c_height = self._scroll_height - 20
-            sub_scroll_height = c_height - 63
-            self._my_replays_scroll_width = sub_scroll_width = (
-                680 if uiscale is ba.UIScale.SMALL else 640
-            )
 
-            v = c_height - 30            
-            b_width = 140 if uiscale is ba.UIScale.SMALL else 178
-            b_height = (
-                107
-                if uiscale is ba.UIScale.SMALL
-                else 142
-                if uiscale is ba.UIScale.MEDIUM
-                else 190
-            )
-            b_space_extra = (
-                0
-                if uiscale is ba.UIScale.SMALL
-                else -2
-                if uiscale is ba.UIScale.MEDIUM
-                else -5
-            )
+    def draw_ui(self):
+        self._r = 'watchWindow'
+        x_inset = 100 if uiscale is ba.UIScale.SMALL else 0
+        scroll_buffer_h = 130 + 2 * x_inset
+        self._width = 1240 if uiscale is ba.UIScale.SMALL else 1040
+        self._height = (
+            578
+            if uiscale is ba.UIScale.SMALL
+            else 670
+            if uiscale is ba.UIScale.MEDIUM
+            else 800)
+        self._scroll_width = self._width - scroll_buffer_h
+        self._scroll_height = self._height - 180
+        #
+        c_width = self._scroll_width
+        c_height = self._scroll_height - 20
+        sub_scroll_height = c_height - 63
+        self._my_replays_scroll_width = sub_scroll_width = (
+            680 if uiscale is ba.UIScale.SMALL else 640
+        )
 
-            b_color = (0.6, 0.53, 0.63)
-            b_textcolor = (0.75, 0.7, 0.8)
-            btnv = (c_height- (48
-                    if uiscale is ba.UIScale.SMALL
-                    else 45
-                    if uiscale is ba.UIScale.MEDIUM
-                    else 40) - b_height)
-            btnh = 40 if uiscale is ba.UIScale.SMALL else 40
-            smlh = 190 if uiscale is ba.UIScale.SMALL else 225
-            tscl = 1.0 if uiscale is ba.UIScale.SMALL else 1.2
-            
-            stab_width=500
-            stab_height=300
-            stab_h=smlh
-                    
-            v -= sub_scroll_height + 23
-            scroll = ba.scrollwidget(
-                parent=self.root,
-                position=(smlh, v),
-                size=(sub_scroll_width, sub_scroll_height),
-            )
-    
-            self.scroll2 = ba.columnwidget(parent=scroll, 
-                size=(sub_scroll_width, sub_scroll_height))
-            
-            tabdefs = [(MyTabId.INTERNAL, 'INTERNAL'), (MyTabId.EXTERNAL, "EXTERNAL")]                                
-            self.tab_row = TabRow(self.root, tabdefs, pos=(stab_h,sub_scroll_height),
-                                  size=(stab_width,stab_height), on_select_call=self.on_tab_select)
-    
-            helpbtn_space=20
-            helpbtn_v=stab_h+stab_width+helpbtn_space+120
-            helpbtn_h=sub_scroll_height+helpbtn_space
-            
-            ba.buttonwidget(
-                parent=self.root,
-                position=(helpbtn_v ,helpbtn_h ),
-                size=(35, 35),            
-                button_type="square",
-                label="?",
-                text_scale=1.5,
-                color=b_color,
-                textcolor=b_textcolor,
-                on_activate_call=Help)
-            
-            call_copy=lambda:CommonUtils._copy(self.selected_replay,self.tab_id)      
-            self.share_button = ba.buttonwidget(
-                parent=self.root,
-                size=(b_width, b_height),
-                position=(btnh, btnv),         
-                button_type="square",
-                label="Export\nReplay",
-                text_scale=tscl,
-                color=b_color,
-                textcolor=b_textcolor,
-                on_activate_call=call_copy)
-                                
-            btnv -= b_height + b_space_extra
-            sync_button = ba.buttonwidget(
-                parent=self.root,
-                size=(b_width, b_height),
-                position=(btnh, btnv),             
-                button_type="square",
-                label="Sync\nReplay",
-                text_scale=tscl,
-                color=b_color,
-                textcolor=b_textcolor,
-                on_activate_call=CommonUtils.sync_confirmation)
-                
-            btnv -= b_height + b_space_extra
-            call_delete = lambda:CommonUtils.delete_replay(self.selected_replay,self.tab_id,self)
-            delete_replay_button = ba.buttonwidget(
-                parent=self.root,
-                size=(b_width, b_height),
-                position=(btnh, btnv),
-                button_type="square",
-                label=ba.Lstr(resource=self._r + '.deleteReplayButtonText'),
-                text_scale=tscl,
-                color=b_color,
-                textcolor=b_textcolor,
-                on_activate_call=call_delete)
+        v = c_height - 30
+        b_width = 140 if uiscale is ba.UIScale.SMALL else 178
+        b_height = (
+            107
+            if uiscale is ba.UIScale.SMALL
+            else 142
+            if uiscale is ba.UIScale.MEDIUM
+            else 190
+        )
+        b_space_extra = (
+            0
+            if uiscale is ba.UIScale.SMALL
+            else -2
+            if uiscale is ba.UIScale.MEDIUM
+            else -5
+        )
 
-        
-            self.on_tab_select(MyTabId.INTERNAL)
+        b_color = (0.6, 0.53, 0.63)
+        b_textcolor = (0.75, 0.7, 0.8)
+        btnv = (c_height - (48
+                if uiscale is ba.UIScale.SMALL
+                else 45
+                if uiscale is ba.UIScale.MEDIUM
+                else 40) - b_height)
+        btnh = 40 if uiscale is ba.UIScale.SMALL else 40
+        smlh = 190 if uiscale is ba.UIScale.SMALL else 225
+        tscl = 1.0 if uiscale is ba.UIScale.SMALL else 1.2
+
+        stab_width = 500
+        stab_height = 300
+        stab_h = smlh
+
+        v -= sub_scroll_height + 23
+        scroll = ba.scrollwidget(
+            parent=self.root,
+            position=(smlh, v),
+            size=(sub_scroll_width, sub_scroll_height),
+        )
+
+        self.scroll2 = ba.columnwidget(parent=scroll,
+                                       size=(sub_scroll_width, sub_scroll_height))
+
+        tabdefs = [(MyTabId.INTERNAL, 'INTERNAL'), (MyTabId.EXTERNAL, "EXTERNAL")]
+        self.tab_row = TabRow(self.root, tabdefs, pos=(stab_h, sub_scroll_height),
+                              size=(stab_width, stab_height), on_select_call=self.on_tab_select)
+
+        helpbtn_space = 20
+        helpbtn_v = stab_h+stab_width+helpbtn_space+120
+        helpbtn_h = sub_scroll_height+helpbtn_space
+
+        ba.buttonwidget(
+            parent=self.root,
+            position=(helpbtn_v, helpbtn_h),
+            size=(35, 35),
+            button_type="square",
+            label="?",
+            text_scale=1.5,
+            color=b_color,
+            textcolor=b_textcolor,
+            on_activate_call=Help)
+
+        def call_copy(): return CommonUtils._copy(self.selected_replay, self.tab_id)
+        self.share_button = ba.buttonwidget(
+            parent=self.root,
+            size=(b_width, b_height),
+            position=(btnh, btnv),
+            button_type="square",
+            label="Export\nReplay",
+            text_scale=tscl,
+            color=b_color,
+            textcolor=b_textcolor,
+            on_activate_call=call_copy)
+
+        btnv -= b_height + b_space_extra
+        sync_button = ba.buttonwidget(
+            parent=self.root,
+            size=(b_width, b_height),
+            position=(btnh, btnv),
+            button_type="square",
+            label="Sync\nReplay",
+            text_scale=tscl,
+            color=b_color,
+            textcolor=b_textcolor,
+            on_activate_call=CommonUtils.sync_confirmation)
+
+        btnv -= b_height + b_space_extra
+        def call_delete(): return CommonUtils.delete_replay(self.selected_replay, self.tab_id, self)
+        delete_replay_button = ba.buttonwidget(
+            parent=self.root,
+            size=(b_width, b_height),
+            position=(btnh, btnv),
+            button_type="square",
+            label=ba.Lstr(resource=self._r + '.deleteReplayButtonText'),
+            text_scale=tscl,
+            color=b_color,
+            textcolor=b_textcolor,
+            on_activate_call=call_delete)
+
+        self.on_tab_select(MyTabId.INTERNAL)
 
     def close(self):
         ba.playsound(ba.getsound('swish'))
@@ -403,4 +403,4 @@ class Loup(ba.Plugin):
         return True
 
     def show_settings_ui(self, button):
-        Print("Open share replay tab in replay window to share your replays",color=blue)
+        Print("Open share replay tab in replay window to share your replays", color=blue)
