@@ -787,6 +787,23 @@ class PluginWindow(popup.PopupWindow):
         self.scale_origin = origin_widget.get_screen_space_center()
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
+    
+    def partition(string, minimum_character_offset=40):
+        string_length = len(string)
+
+        partitioned_string = ""
+        partitioned_string_length = len(partitioned_string)
+
+        while partitioned_string_length != string_length:
+            next_empty_space = string[partitioned_string_length + minimum_character_offset:].find(" ")
+            next_word_end_position = partitioned_string_length + minimum_character_offset + max(0, next_empty_space)
+            partitioned_string += string[partitioned_string_length:next_word_end_position]
+            if next_empty_space != -1:
+                # Insert a line break here, there's still more partitioning to do.
+                partitioned_string += "\n"
+            partitioned_string_length = len(partitioned_string)
+
+        return partitioned_string
 
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
