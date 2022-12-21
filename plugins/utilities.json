@@ -482,7 +482,7 @@
       }
     },
     "pro_unlocker": {
-      "description": "Unlocks some pro-only features - custom colors, playlist maker, etc.\n(Please support the game developer if you can!)",
+      "description": "Unlocks some pro-only features - custom colors, playlist maker, etc. (Please support the game developer if you can!)",
       "external_url": "",
       "authors": [
         {
@@ -558,7 +558,7 @@
       }
     },
     "bomb_radius_visualizer": {
-      "description": "With this cutting edge technology, you precisely know\nhow close to the bomb you can tread.\nSupports modified blast radius values!",
+      "description": "With this cutting edge technology, you precisely know how close to the bomb you can tread. Supports modified blast radius values!",
       "external_url": "",
       "authors": [
         {
