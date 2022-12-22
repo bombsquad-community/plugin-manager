@@ -790,7 +790,7 @@ class PluginWindow(popup.PopupWindow):
 
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
-        
+
         def get_description(minimum_character_offset=40):
             string = self.plugin.info["description"]
             string_length = len(string)
@@ -810,7 +810,7 @@ class PluginWindow(popup.PopupWindow):
                 partitioned_string_length = len(partitioned_string)
 
             return partitioned_string
-        
+
         play_sound()
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
@@ -858,7 +858,7 @@ class PluginWindow(popup.PopupWindow):
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center',
-                      text=get_description(),#self.plugin.info["description"],
+                      text=get_description(),  # self.plugin.info["description"],
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
         b1_color = None
