@@ -1697,7 +1697,7 @@ class PluginManagerWindow(ba.Window):
                                         always_highlight=True,
                                         color=color,
                                         # on_select_call=lambda: None,
-                                        text=plugin.name,
+                                        text=plugin.name + ' - by ' + plugin.info["authors"][0]["name"],
                                         click_activate=True,
                                         on_activate_call=lambda: self.show_plugin_window(plugin),
                                         h_align='left',
