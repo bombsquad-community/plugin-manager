@@ -3,6 +3,21 @@
   "description": "Utilities",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "random_join": {
+      "description": "Come visit the unknown servers around all the world! Plugin designed not to join servers with similar names more frequently than rare ones. Have fun!",
+      "external_url": "",
+      "authors": [
+        {"name": "maxick",
+          "email": "",
+          "discord": "maxick#9227"},
+        {"name": "LoupGarou",
+          "email": "LoupGarou5418@outlook.com",
+          "discord": "ʟօʊքɢǟʀօʊ#3063"}
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "share_replay": {
       "description": "Export replays to mods folder and share them with friends or have a backup",
       "external_url": "",
