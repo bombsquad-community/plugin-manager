@@ -7,15 +7,24 @@
       "description": "Come visit the unknown servers around all the world! Plugin designed not to join servers with similar names more frequently than rare ones. Have fun!",
       "external_url": "",
       "authors": [
-        {"name": "maxick",
+        {
+          "name": "maxick",
           "email": "",
-          "discord": "maxick#9227"},
-        {"name": "LoupGarou",
+          "discord": "maxick#9227"
+        },
+        {
+          "name": "LoupGarou",
           "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"}
+          "discord": "ʟօʊքɢǟʀօʊ#3063"
+        }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2454845",
+          "released_on": "26-12-2022",
+          "md5sum": "7bac6bfe837ff89e7da10a0ab45691d1"
+        }
       }
     },
     "share_replay": {
