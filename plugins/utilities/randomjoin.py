@@ -6,7 +6,7 @@ import _ba
 import ba
 import ba.internal
 import random
-from bastd.ui.gather.publictab import PublicGatherTab, PartyEntry,PingThread
+from bastd.ui.gather.publictab import PublicGatherTab, PartyEntry, PingThread
 if TYPE_CHECKING:
     from typing import Callable
 
@@ -31,8 +31,10 @@ def override(cls: ClassType) -> Callable[[MethodType], MethodType]:
 # And anyways, why not just GatherPublicTab = NewGatherPublicTab?
 # But hmm, if we imagine someone used `from blah.blah import Blah`, using
 # `blah.Blah = NewBlah` AFTERWARDS would be meaningless.
-class NewPublicGatherTab(PublicGatherTab,PingThread):   
-    
+
+
+class NewPublicGatherTab(PublicGatherTab, PingThread):
+
     @override(PublicGatherTab)
     def _build_join_tab(self, region_width: float,
                         region_height: float,
@@ -87,13 +89,13 @@ class NewPublicGatherTab(PublicGatherTab,PingThread):
 
     @override(PublicGatherTab)
     def _join_random_server(self) -> None:
-        name_prefixes = set()     
+        name_prefixes = set()
         parties = [p for p in self._get_parties_list() if
                    (p.size >= randomjoin.minimum_players
                     and p.size < p.size_max and (randomjoin.maximum_ping == 9999
-                         or (p.ping is not None
-                             and p.ping <= randomjoin.maximum_ping)))]
-        
+                                                 or (p.ping is not None
+                                                     and p.ping <= randomjoin.maximum_ping)))]
+
         if not parties:
             ba.screenmessage('No suitable servers found; wait',
                              color=(1, 0, 0))
