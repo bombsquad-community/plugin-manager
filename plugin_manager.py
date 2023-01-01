@@ -1664,7 +1664,7 @@ class PluginManagerWindow(ba.Window):
             plugin.delete()
 
         await asyncio.gather(*plugin_names_to_draw)
-
+        
     async def draw_plugin_name(self, plugin):
         try:
             latest_compatible_version = plugin.latest_compatible_version
@@ -1691,18 +1691,36 @@ class PluginManagerWindow(ba.Window):
             ba.textwidget(edit=plugin_name_widget_to_update,
                           color=color)
         else:
-            text_widget = ba.textwidget(parent=self._columnwidget,
-                                        size=(410, 30),
+            
+            name_row = ba.rowwidget(parent=self._columnwidget,
+                        size=(800, 26),#height determines the space between each row.Width isn't important
+                        claims_left_right=True,)
+            
+            text_widget = ba.textwidget(parent=name_row,
+                                        size=(360, 30),
                                         selectable=True,
-                                        always_highlight=True,
+                                        #always_highlight=True,
                                         color=color,
-                                        # on_select_call=lambda: None,
                                         text=plugin.name,
                                         click_activate=True,
                                         on_activate_call=lambda: self.show_plugin_window(plugin),
                                         h_align='left',
                                         v_align='center',
                                         maxwidth=420)
+            
+                                      
+            author_text= ba.textwidget(parent=name_row,
+                                     color=(0.2,0.2,0.7),
+                                     click_activate=True,
+                                     selectable=True,
+                                     text=plugin.info["authors"][0]["name"],
+                                     #h_align="right",
+                                     v_align="center",
+                                     maxwidth=100,
+                                     scale=0.7,
+                                     on_activate_call=lambda: self.show_plugin_window(plugin),
+                                     )
+                                      
             self.plugins_in_current_view[plugin.name] = text_widget
             # XXX: This seems nicer. Might wanna use this in future.
             # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
