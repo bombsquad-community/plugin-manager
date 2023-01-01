@@ -614,5 +614,19 @@
         }
       }
     }
+    "autorun": {
+      "description": "Run without holding any buttons. Made for beginners or players on mobile.\nKeeps your character maneuverable. Start running as usual to override.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "TheMikirog",
+          "email": "",
+          "discord": "TheMikirog#1984"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    }
   }
 }
