@@ -633,7 +633,7 @@
         }
       }
     },
-	"tnt_respawn_text": {
+    "tnt_respawn_text": {
       "description": "Shows when a TNT box is about to respawn with non-intrusive text.",
       "external_url": "",
       "authors": [
@@ -644,7 +644,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "05ffa9f",
+          "released_on": "14-01-2023",
+          "md5sum": "cc1738b0326c9679453bdf1489ded483"
+        }
       }
     }
   }
