@@ -788,28 +788,33 @@ class PluginWindow(popup.PopupWindow):
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
 
-    async def draw_ui(self):
-        # print(ba.app.plugins.active_plugins)
 
-        def get_description(minimum_character_offset=40):
-            string = self.plugin.info["description"]
-            string_length = len(string)
+    def get_description(self, minimum_character_offset=40):
+        """
+        Splits the loong plugin description into multiple lines.
+        """
+        string = self.plugin.info["description"]
+        string_length = len(string)
 
-            partitioned_string = ""
+        partitioned_string = ""
+        partitioned_string_length = len(partitioned_string)
+
+        while partitioned_string_length != string_length:
+            next_empty_space = string[partitioned_string_length +
+                                      minimum_character_offset:].find(" ")
+            next_word_end_position = partitioned_string_length + \
+                minimum_character_offset + max(0, next_empty_space)
+            partitioned_string += string[partitioned_string_length:next_word_end_position]
+            if next_empty_space != -1:
+                # Insert a line break here, there's still more partitioning to do.
+                partitioned_string += "\n"
             partitioned_string_length = len(partitioned_string)
 
-            while partitioned_string_length != string_length:
-                next_empty_space = string[partitioned_string_length +
-                                          minimum_character_offset:].find(" ")
-                next_word_end_position = partitioned_string_length + \
-                    minimum_character_offset + max(0, next_empty_space)
-                partitioned_string += string[partitioned_string_length:next_word_end_position]
-                if next_empty_space != -1:
-                    # Insert a line break here, there's still more partitioning to do.
-                    partitioned_string += "\n"
-                partitioned_string_length = len(partitioned_string)
+        return partitioned_string
 
-            return partitioned_string
+
+    async def draw_ui(self):
+        # print(ba.app.plugins.active_plugins)
 
         play_sound()
         b_text_color = (0.75, 0.7, 0.8)
@@ -858,7 +863,7 @@ class PluginWindow(popup.PopupWindow):
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center',
-                      text=get_description(),  # self.plugin.info["description"],
+                      text=self.get_description(),
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
         b1_color = None
