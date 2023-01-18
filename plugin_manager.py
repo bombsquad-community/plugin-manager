@@ -788,7 +788,6 @@ class PluginWindow(popup.PopupWindow):
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
 
-
     def get_description(self, minimum_character_offset=40):
         """
         Splits the loong plugin description into multiple lines.
@@ -811,7 +810,6 @@ class PluginWindow(popup.PopupWindow):
             partitioned_string_length = len(partitioned_string)
 
         return partitioned_string
-
 
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
