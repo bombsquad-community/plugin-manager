@@ -1,6 +1,6 @@
 ## Plugin Manager (dd-mm-yyyy)
 
-### 0.2.2 (18-01-2022)
+### 0.2.2 (18-01-2023)
 
 - Auto add new line breaks in long plugin descriptions.
 - Fixed an issue where pressing back on the main plugin manager window would play the sound twice.
