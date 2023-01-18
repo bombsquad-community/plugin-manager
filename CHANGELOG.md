@@ -1,5 +1,10 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.2.2 (18-01-2022)
+
+- Auto add new line breaks in long plugin descriptions.
+- Fixed an issue where pressing back on the main plugin manager window would play the sound twice.
+
 ### 0.2.1 (17-12-2022)
 
 - Add Google DNS as a fallback for Jio ISP DNS blocking resolution of raw.githubusercontent.com domain.

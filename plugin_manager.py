@@ -24,7 +24,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.2.1"
+PLUGIN_MANAGER_VERSION = "0.2.2"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -788,8 +788,32 @@ class PluginWindow(popup.PopupWindow):
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
 
+    def get_description(self, minimum_character_offset=40):
+        """
+        Splits the loong plugin description into multiple lines.
+        """
+        string = self.plugin.info["description"]
+        string_length = len(string)
+
+        partitioned_string = ""
+        partitioned_string_length = len(partitioned_string)
+
+        while partitioned_string_length != string_length:
+            next_empty_space = string[partitioned_string_length +
+                                      minimum_character_offset:].find(" ")
+            next_word_end_position = partitioned_string_length + \
+                minimum_character_offset + max(0, next_empty_space)
+            partitioned_string += string[partitioned_string_length:next_word_end_position]
+            if next_empty_space != -1:
+                # Insert a line break here, there's still more partitioning to do.
+                partitioned_string += "\n"
+            partitioned_string_length = len(partitioned_string)
+
+        return partitioned_string
+
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
+
         play_sound()
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
@@ -837,7 +861,7 @@ class PluginWindow(popup.PopupWindow):
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center',
-                      text=self.plugin.info["description"],
+                      text=self.get_description(),
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
         b1_color = None
@@ -1420,7 +1444,6 @@ class PluginManagerWindow(ba.Window):
         )
 
     def _back(self) -> None:
-        play_sound()
         from bastd.ui.settings.allsettings import AllSettingsWindow
         ba.containerwidget(edit=self._root_widget,
                            transition=self._transition_out)
