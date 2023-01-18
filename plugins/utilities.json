@@ -615,7 +615,7 @@
       }
     },
     "autorun": {
-      "description": "Run without holding any buttons. Made for beginners or players on mobile.\nKeeps your character maneuverable. Start running as usual to override.",
+      "description": "Run without holding any buttons. Made for beginners or players on mobile. Keeps your character maneuverable. Start running as usual to override.",
       "external_url": "",
       "authors": [
         {
