@@ -1444,7 +1444,6 @@ class PluginManagerWindow(ba.Window):
         )
 
     def _back(self) -> None:
-        play_sound()
         from bastd.ui.settings.allsettings import AllSettingsWindow
         ba.containerwidget(edit=self._root_widget,
                            transition=self._transition_out)
