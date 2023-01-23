@@ -178,6 +178,14 @@ That's it! Now you can make a [pull request](../../compare) with both the update
   repository in your plugin manager by adding `rikkolovescats/sahilp-plugins` as a custom source through the category
   selection popup window in-game.
 
+  #### Known 3rd Party Plugin Sources
+
+  If you maintain or know of a 3rd party plugin source, let us know and we'll add it below so people can know about it. It
+  will also help us to notify the maintainers of any future breaking changes in plugin manager that could affect 3rd party
+  plugin sources.
+
+  https://github.com/rikkolovescats/sahilp-plugins
+
 
 ## Tests
 
