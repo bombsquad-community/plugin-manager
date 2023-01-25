@@ -670,6 +670,20 @@
           "md5sum": "24913c665d05c3056c8ba390fe88155e"
         }
       }
+    },
+    "hello_api_8": {
+      "description": "I shouldn't be visible to API 7 game clients",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "rikkolovescats@proton.me",
+          "discord": "Rikko#7383"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
