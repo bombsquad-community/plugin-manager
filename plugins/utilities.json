@@ -671,8 +671,8 @@
         }
       }
     },
-    "hello_api_8": {
-      "description": "I shouldn't be visible to API 7 game clients",
+    "hello_api_experiment": {
+      "description": "I shouldn't be visible to on clients with different API version",
       "external_url": "",
       "authors": [
         {
@@ -682,11 +682,17 @@
         }
       ],
       "versions": {
-        "1.0.0": {
+        "2.0.0": {
           "api_version": 8,
-          "commit_sha": "204499e",
-          "released_on": "25-01-2023",
+          "commit_sha": "24830a8",
+          "released_on": "26-01-2023",
           "md5sum": "b694717a3fc0ef3d1d3a66ed399adbae"
+        },
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "fb23c49",
+          "released_on": "26-01-2023",
+          "md5sum": "3a3c88996aaab26de8eab530cebebb44"
         }
       }
     }
