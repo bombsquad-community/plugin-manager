@@ -1,4 +1,4 @@
-# ba_meta require api 7
+# ba_meta require api 8
 import ba
 
 # ba_meta export plugin
@@ -6,4 +6,4 @@ import ba
 
 class Main(ba.Plugin):
     def on_app_running(self):
-        ba.screenmessage("Wohoo! I'm an API 7 plugin!")
+        ba.screenmessage("Wohoo! I'm an API 8 plugin!")
