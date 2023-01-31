@@ -960,8 +960,8 @@ class PluginWindow(popup.PopupWindow):
                       color=(1, 1, 1, 1),
                       rotate=25,
                       scale=0.45)
-        
-        ## Below snippet handles the tutorial button in the plugin window
+
+        # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
         if tutorial_url:
             open_pos_x = (10 if _uiscale is ba.UIScale.SMALL else
