@@ -2,7 +2,7 @@
 
 ### 0.2.3 (31-01-2023)
 
-- Displays a tutorial button, whenever there is a external_url is present in the plugin data.
+- Displays a tutorial button, whenever there is a "external_url" present in the plugin data.
 
 ### 0.2.2 (18-01-2023)
 
