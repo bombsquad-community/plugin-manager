@@ -962,33 +962,35 @@ class PluginWindow(popup.PopupWindow):
                       scale=0.45)
         
         ## Below snippet handles the tutorial button in the plugin window
-        open_pos_x = (10 if _uiscale is ba.UIScale.SMALL else
-                      50 if _uiscale is ba.UIScale.MEDIUM else 50)
-        open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
-                      110 if _uiscale is ba.UIScale.MEDIUM else 120)
-        open_button = ba.buttonwidget(parent=self._root_widget,
-                                      autoselect=True,
-                                      position=(open_pos_x, open_pos_y),
-                                      size=(40, 40),
-                                      button_type="square",
-                                      label="",
-                                      # color=ba.app.ui.title_color,
-                                      color=(0.6, 0.53, 0.63),
-                                      on_activate_call=lambda: ba.open_url(self.plugin.info["external_url"]))
-        ba.imagewidget(parent=self._root_widget,
-                       position=(open_pos_x, open_pos_y),
-                       size=(40, 40),
-                       color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("file"),
-                       draw_controller=open_button)
-        ba.textwidget(parent=self._root_widget,
-                      position=(open_pos_x - 3, open_pos_y + 12),
-                      text="Tutorial",
-                      size=(10, 10),
-                      draw_controller=open_button,
-                      color=(1, 1, 1, 1),
-                      rotate=25,
-                      scale=0.45)
+        tutorial_url = self.plugin.info["external_url"]
+        if tutorial_url:
+            open_pos_x = (10 if _uiscale is ba.UIScale.SMALL else
+                          70 if _uiscale is ba.UIScale.MEDIUM else 60)
+            open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
+                          110 if _uiscale is ba.UIScale.MEDIUM else 120)
+            open_button = ba.buttonwidget(parent=self._root_widget,
+                                          autoselect=True,
+                                          position=(open_pos_x, open_pos_y),
+                                          size=(40, 40),
+                                          button_type="square",
+                                          label="",
+                                          # color=ba.app.ui.title_color,
+                                          color=(0.6, 0.53, 0.63),
+                                          on_activate_call=lambda: ba.open_url(self.plugin.info["external_url"]))
+            ba.imagewidget(parent=self._root_widget,
+                           position=(open_pos_x, open_pos_y),
+                           size=(40, 40),
+                           color=(0.8, 0.95, 1),
+                           texture=ba.gettexture("frameInset"),
+                           draw_controller=open_button)
+            ba.textwidget(parent=self._root_widget,
+                          position=(open_pos_x - 3, open_pos_y + 12),
+                          text="Tutorial",
+                          size=(10, 10),
+                          draw_controller=open_button,
+                          color=(1, 1, 1, 1),
+                          rotate=25,
+                          scale=0.45)
 
         if to_draw_button4:
             settings_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
