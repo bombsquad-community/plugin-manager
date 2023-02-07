@@ -813,6 +813,7 @@ class PluginWindow(popup.PopupWindow):
 
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
+
         play_sound()
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
@@ -959,8 +960,8 @@ class PluginWindow(popup.PopupWindow):
                       color=(1, 1, 1, 1),
                       rotate=25,
                       scale=0.45)
-        
-        # Below snippet handles the tutorial button in the plugin window
+
+         # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
         if tutorial_url:
             def tutorial_confirm_window():
@@ -996,7 +997,7 @@ class PluginWindow(popup.PopupWindow):
                           color=(1, 1, 1, 1),
                           rotate=25,
                           scale=0.45)
-            
+
         if to_draw_button4:
             settings_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
                               60 if _uiscale is ba.UIScale.MEDIUM else 60)
