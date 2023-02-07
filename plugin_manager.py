@@ -961,6 +961,7 @@ class PluginWindow(popup.PopupWindow):
                       rotate=25,
                       scale=0.45)
 
+
          # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
         if tutorial_url:
@@ -982,7 +983,9 @@ class PluginWindow(popup.PopupWindow):
                                           label="",
                                           # color=ba.app.ui.title_color,
                                           color=(0.6, 0.53, 0.63),
+
                                           on_activate_call=tutorial_confirm_window)
+
             ba.imagewidget(parent=self._root_widget,
                            position=(open_pos_x, open_pos_y),
                            size=(40, 40),
