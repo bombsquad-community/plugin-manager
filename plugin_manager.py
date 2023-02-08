@@ -961,16 +961,15 @@ class PluginWindow(popup.PopupWindow):
                       rotate=25,
                       scale=0.45)
 
-
-         # Below snippet handles the tutorial button in the plugin window
+        # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
         if tutorial_url:
             def tutorial_confirm_window():
-                text="This will take you to \n\""+self.plugin.info["external_url"] + "\""
+                text = "This will take you to \n\""+self.plugin.info["external_url"] + "\""
                 tutorial_confirm_window = confirm.ConfirmWindow(
-                text=text,
-                action=lambda: ba.open_url(self.plugin.info["external_url"]),
-            )
+                    text=text,
+                    action=lambda: ba.open_url(self.plugin.info["external_url"]),
+                )
             open_pos_x = (350 if _uiscale is ba.UIScale.SMALL else
                           410 if _uiscale is ba.UIScale.MEDIUM else 400)
             open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
