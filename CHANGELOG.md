@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.3.0 (31-01-2023)
+
+- Displays a tutorial button in the plugin window, whenever there is a supported url present in the plugin data.
+
 ### 0.2.2 (18-01-2023)
 
 - Auto add new line breaks in long plugin descriptions.

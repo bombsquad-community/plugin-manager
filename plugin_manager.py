@@ -1,7 +1,7 @@
 # ba_meta require api 7
 import ba
 import _ba
-from bastd.ui import popup
+from bastd.ui import popup, confirm
 
 import urllib.request
 import http.client
@@ -24,7 +24,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.2.2"
+PLUGIN_MANAGER_VERSION = "0.3.0"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -960,6 +960,45 @@ class PluginWindow(popup.PopupWindow):
                       color=(1, 1, 1, 1),
                       rotate=25,
                       scale=0.45)
+
+        # Below snippet handles the tutorial button in the plugin window
+        tutorial_url = self.plugin.info["external_url"]
+        if tutorial_url:
+            def tutorial_confirm_window():
+                text = "This will take you to \n\""+self.plugin.info["external_url"] + "\""
+                tutorial_confirm_window = confirm.ConfirmWindow(
+                    text=text,
+                    action=lambda: ba.open_url(self.plugin.info["external_url"]),
+                )
+            open_pos_x = (350 if _uiscale is ba.UIScale.SMALL else
+                          410 if _uiscale is ba.UIScale.MEDIUM else 400)
+            open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
+                          110 if _uiscale is ba.UIScale.MEDIUM else 120)
+            open_button = ba.buttonwidget(parent=self._root_widget,
+                                          autoselect=True,
+                                          position=(open_pos_x, open_pos_y),
+                                          size=(40, 40),
+                                          button_type="square",
+                                          label="",
+                                          # color=ba.app.ui.title_color,
+                                          color=(0.6, 0.53, 0.63),
+
+                                          on_activate_call=tutorial_confirm_window)
+
+            ba.imagewidget(parent=self._root_widget,
+                           position=(open_pos_x, open_pos_y),
+                           size=(40, 40),
+                           color=(0.8, 0.95, 1),
+                           texture=ba.gettexture("frameInset"),
+                           draw_controller=open_button)
+            ba.textwidget(parent=self._root_widget,
+                          position=(open_pos_x - 3, open_pos_y + 12),
+                          text="Tutorial",
+                          size=(10, 10),
+                          draw_controller=open_button,
+                          color=(1, 1, 1, 1),
+                          rotate=25,
+                          scale=0.45)
 
         if to_draw_button4:
             settings_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
