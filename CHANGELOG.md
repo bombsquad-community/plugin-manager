@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.3.1 (04-03-2023)
+
+- Resize the plugin window to limit the overlapping of plugin description.
+
 ### 0.3.0 (12-02-2023)
 
 - Displays a tutorial button in the plugin window, whenever there is a supported url present in the plugin data.
