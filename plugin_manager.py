@@ -935,8 +935,8 @@ class PluginWindow(popup.PopupWindow):
 
         open_pos_x = (390 if _uiscale is ba.UIScale.SMALL else
                       450 if _uiscale is ba.UIScale.MEDIUM else 440)
-        open_pos_y = (125 if _uiscale is ba.UIScale.SMALL else
-                      135 if _uiscale is ba.UIScale.MEDIUM else 140)
+        open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
+                      110 if _uiscale is ba.UIScale.MEDIUM else 120)
         open_button = ba.buttonwidget(parent=self._root_widget,
                                       autoselect=True,
                                       position=(open_pos_x, open_pos_y),
