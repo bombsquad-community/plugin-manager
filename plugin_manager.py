@@ -24,7 +24,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.3.0"
+PLUGIN_MANAGER_VERSION = "0.3.1"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -816,9 +816,9 @@ class PluginWindow(popup.PopupWindow):
 
         play_sound()
         b_text_color = (0.75, 0.7, 0.8)
-        s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
-        width = 360 * s
-        height = 100 + 100 * s
+        s = 1.25 if _uiscale is ba.UIScale.SMALL else 1.39 if ba.UIScale.MEDIUM else 1.67
+        width = 400 * s
+        height = 120 + 100 * s
         color = (1, 1, 1)
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
@@ -933,8 +933,8 @@ class PluginWindow(popup.PopupWindow):
         ba.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._ok)
 
-        open_pos_x = (300 if _uiscale is ba.UIScale.SMALL else
-                      360 if _uiscale is ba.UIScale.MEDIUM else 350)
+        open_pos_x = (390 if _uiscale is ba.UIScale.SMALL else
+                      450 if _uiscale is ba.UIScale.MEDIUM else 440)
         open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
                       110 if _uiscale is ba.UIScale.MEDIUM else 120)
         open_button = ba.buttonwidget(parent=self._root_widget,
@@ -970,8 +970,8 @@ class PluginWindow(popup.PopupWindow):
                     text=text,
                     action=lambda: ba.open_url(self.plugin.info["external_url"]),
                 )
-            open_pos_x = (350 if _uiscale is ba.UIScale.SMALL else
-                          410 if _uiscale is ba.UIScale.MEDIUM else 400)
+            open_pos_x = (440 if _uiscale is ba.UIScale.SMALL else
+                          500 if _uiscale is ba.UIScale.MEDIUM else 490)
             open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
                           110 if _uiscale is ba.UIScale.MEDIUM else 120)
             open_button = ba.buttonwidget(parent=self._root_widget,
