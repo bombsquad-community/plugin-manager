@@ -61,3 +61,77 @@ class Main(ba.Plugin):
   ...
 
 }
+
+{
+
+  "name": "SahilP TeaMs",
+
+  "description": "Additional plugins to enhance your experience in servers under the SahilP TeaMs family",
+
+  "plugins_base_url": "https://github.com/rikkolovescats/sahilp-plugins/{content_type}/main/plugins",
+
+  "plugins": {
+
+    "sahilp_characters": {
+
+      "description": "Characters exclusive to servers under the SahilP TeaMs family.",
+
+      "external_url": "",
+
+      "authors": [
+
+        {
+
+          "name": "SahilP TeaMs community & contributors",
+
+          "email": "sahilpteams@gmail.com"
+
+        }
+
+      ],
+
+      "versions": {
+
+        "1.1.1": {
+
+           "api_version": 7,
+
+           "commit_sha": "5fa4ada1e",
+
+           "released_on": "17-01-2023",
+
+           "md5sum": "07b60b25927090a3204abdfff2f4329e"
+
+        },
+
+         "1.1.0": {
+
+           "api_version": 7,
+
+           "commit_sha": "6ef890d7",
+
+           "released_on": "17-01-2023",
+
+           "md5sum": "642a1c2b83a5d43505a3a54b9b4e3405"
+
+         },
+
+         "1.0.0": {
+
+           "api_version": 7,
+
+           "commit_sha": "3e3a9693",
+
+           "released_on": "10-08-2022",
+
+           "md5sum": "eaac2b7c7ee7dacc5b7a8ba3b1547dce"
+
+        }
+
+      }
+
+    }
+
+  }
+
+}
