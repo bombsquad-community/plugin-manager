@@ -36,7 +36,29 @@
           "email": "LoupGarou5418@outlook.com",
           "discord": "ʟօʊքɢǟʀօʊ#3063"
         }
+      ],{
+  "name": "Utilities",
+  ...
+  "plugins": {
+    ...
+    "sample_plugin": {
+      "description": "Shows screenmessages!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Alex",
+          "email": "alex@example.com",
+          "discord": null
+        }
       ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    ...
+  }
+  ...
+}
       "versions": {
         "1.3.0": {
           "api_version": 7,
