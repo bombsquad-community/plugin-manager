@@ -5,10 +5,24 @@
 # ba_meta require api 7
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
+from codecs import encode
+from pypresence.utils import get_event_loop
+import _ba
+import ba
+import threading
+import time
+import pypresence
+import json
+import uuid
+import ast
+import asyncio
 from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 
-#installing pypresence
+# installing pypresence
+
+
 def get_module():
     import os
     import zipfile
@@ -16,27 +30,14 @@ def get_module():
     path = Path(f"{install_path}/pypresence.zip")
     if not os.path.exists(Path(f"{install_path}/pypresence")):
         url = "https://github.com/brostosjoined/BombsquadRPC/releases/download/presence-1.0/pypresence.zip"
-        filename, headers = urlretrieve(url, filename = path)
+        filename, headers = urlretrieve(url, filename=path)
         with zipfile.ZipFile(path) as f:
             f.extractall(install_path)
         os.remove(path)
+
+
 get_module()
 
-import asyncio
-import ast
-import uuid
-import json
-import pypresence
-import time
-import threading
-import ba
-import _ba
-
-
-from pypresence.utils import get_event_loop
-from codecs import encode
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Tuple
@@ -79,7 +80,10 @@ def _run_overrides() -> None:
 
     _ba.connect_to_party = ba.internal.connect_to_party = new_connect
 
+
 start_time = time.time()
+
+
 class RpcThread(threading.Thread):
     def __init__(self):
         super().__init__()
@@ -95,7 +99,7 @@ class RpcThread(threading.Thread):
         self.party_size = 1
         self.party_max = 8
         self.join_secret: str | None = None
-        self._last_update_time : float = 0
+        self._last_update_time: float = 0
         self._last_secret_update_time: float = 0
         self._last_connect_time: float = 0
         self.should_close = False
@@ -186,7 +190,7 @@ class RpcThread(threading.Thread):
             join=self.join_secret,
             # buttons = [ #!cant use buttons together with join
             #     {
-            #         "label": "Discord Server", 
+            #         "label": "Discord Server",
             #         "url": "https://ballistica.net/discord"
             #     },
             #     {
@@ -233,7 +237,7 @@ class RpcThread(threading.Thread):
     def _connect_to_party(self, hostname, port) -> None:
         ba.pushcall(
             ba.Call(_ba.connect_to_party, hostname, port), from_other_thread=True
-        ) #!Switch windows from discord window to bombsquad if possible
+        )  # !Switch windows from discord window to bombsquad if possible
 
     def on_join_request(self, username, uid, discriminator, avatar) -> None:
         del uid  # unused
@@ -245,14 +249,14 @@ class RpcThread(threading.Thread):
                 color=(0.0, 1.0, 0.0),
             ),
             from_other_thread=True,
-        )#TODO- Add overlay like that one for achievements to show a requested invite request and button on the chat button to accept and maybe send 
+        )  # TODO- Add overlay like that one for achievements to show a requested invite request and button on the chat button to accept and maybe send
 
 
 dirpath = Path(f"{_ba.app.python_directory_user}/largesets.txt")
 run_once = False
 
 
-def get_once_asset(): 
+def get_once_asset():
     global run_once
     if run_once:
         return
@@ -282,14 +286,14 @@ class DiscordRP(ba.Plugin):
     def __init__(self) -> None:
         self.update_timer: ba.Timer | None = None
         self.rpc_thread = RpcThread()
-        self._last_server_info : str | None = None
+        self._last_server_info: str | None = None
 
         _run_overrides()
         get_once_asset()
         get_asset()
 
     def on_app_running(self) -> None:
-        self.rpc_thread.start() #!except incase discord is not open
+        self.rpc_thread.start()  # !except incase discord is not open
         self.update_timer = ba.Timer(
             1, ba.WeakCall(self.update_status), timetype=ba.TimeType.REAL, repeat=True
         )
@@ -303,19 +307,19 @@ class DiscordRP(ba.Plugin):
             return act.name
         this = "Lobby"
         name: str | None = (
-                act.__class__.__name__.replace("Activity", "")
-                .replace("ScoreScreen", "Ranking")
-                .replace("Coop", "")
-                .replace("MultiTeam", "")
-                .replace("Victory", "")
-                .replace("EndSession", "")
-                .replace("Transition", "")
-                .replace("Draw", "")
-                .replace("FreeForAll", "")
-                .replace("Join", this)
-                .replace("Team", "")
-                .replace("Series", "")
-                .replace("CustomSession", "Custom Session(mod)")
+            act.__class__.__name__.replace("Activity", "")
+            .replace("ScoreScreen", "Ranking")
+            .replace("Coop", "")
+            .replace("MultiTeam", "")
+            .replace("Victory", "")
+            .replace("EndSession", "")
+            .replace("Transition", "")
+            .replace("Draw", "")
+            .replace("FreeForAll", "")
+            .replace("Join", this)
+            .replace("Team", "")
+            .replace("Series", "")
+            .replace("CustomSession", "Custom Session(mod)")
         )
 
         if name == "MainMenu":

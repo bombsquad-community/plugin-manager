@@ -1,46 +1,49 @@
 # ba_meta require api 7
+from urllib.request import Request, urlopen, urlretrieve
+from typing import TYPE_CHECKING
+import _ba
+import ba
+import websocket
+import uuid
+import json
+import time
+import threading
+from pathlib import Path
 "Made to you by @brostos & @Dliwk"
 
 token = "paste-your-token-here"
 
-from urllib.request import Request, urlopen , urlretrieve
-from pathlib import Path
 
-#installing websocket-client
+# installing websocket-client
+
+
 def get_module():
-    import os 
+    import os
     import zipfile
-    install_path = Path(f"{os.getcwd()}/ba_data/python") #For the guys like me on windows
+    install_path = Path(f"{os.getcwd()}/ba_data/python")  # For the guys like me on windows
     path = Path(f"{install_path}/websocket.zip")
     if not os.path.exists(f"{install_path}/websocket"):
         url = "https://github.com/brostosjoined/BombsquadRPC/releases/download/presence-1.0/websocket.zip"
-        filename, headers = urlretrieve(url, filename = path)
+        filename, headers = urlretrieve(url, filename=path)
         with zipfile.ZipFile(path) as f:
             f.extractall(install_path)
         os.remove(path)
+
+
 get_module()
 
-import threading
-import time
-import json
-import uuid
-import websocket
-import ba
-import _ba
-
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Any, Tuple
-
 
 
 heartbeat_interval = int(41250)
 resume_gateway_url: str | None = None
 session_id: str | None = None
 
-start_time=time.time()
+start_time = time.time()
+
+
 class Presence_update:
     def __init__(self):
         self.state: str | None = "In Game"
@@ -51,11 +54,10 @@ class Presence_update:
         self.small_image_key: str | None = None
         self.small_image_text: str | None = (f"{_ba.app.platform.capitalize()}({_ba.app.version})")
         self.media_proxy = "mp:/app-assets/963434684669382696/{}.png"
-        self.identify : bool = False
+        self.identify: bool = False
         self.party_id: str = str(uuid.uuid4())
         self.party_size = 1
         self.party_max = 8
-    
 
     def presence(self):
         with open(dirpath, "r") as maptxt:
@@ -65,7 +67,7 @@ class Presence_update:
         presencepayload = {
             "op": 3,
             "d": {
-                "since": None, #used to show how long the user went idle will add afk to work with this and then set the status to idle 
+                "since": None,  # used to show how long the user went idle will add afk to work with this and then set the status to idle
                 "status": "online",
                 "afk": "false",
                 "activities": [
@@ -79,7 +81,7 @@ class Presence_update:
                             "start": start_time
                         },
                         "party": {
-                            "id": self.party_id, 
+                            "id": self.party_id,
                             "size": [self.party_size, self.party_max]
                         },
                         "assets": {
@@ -116,16 +118,14 @@ def on_message(ws, message):
             heartbeat_interval = get_interval
     except:
         pass
-    
 
 
 def on_error(ws, error):
-    ba.print_exception(error) 
-    
+    ba.print_exception(error)
 
 
 def on_close(ws, close_status_code, close_msg):
-    #print("### closed ###")
+    # print("### closed ###")
     pass
 
 
@@ -143,6 +143,7 @@ def on_open(ws):
             }  # step two keeping connection alive by sending heart beats and receiving opcode 11
             ws.send(json.dumps(heartbeat_payload))
             runonce = False
+
             def identify():
                 """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
                 identify_payload = {
@@ -165,8 +166,6 @@ def on_open(ws):
             time.sleep(heartbeat_interval / 1000)
 
     threading.Thread(target=heartbeats, daemon=True, name="heartbeat").start()
-
-    
 
 
 # websocket.enableTrace(True)
@@ -206,12 +205,11 @@ def get_once_asset():
         asset_id_dict = dict(zip(asset, asset_id))
     except:
         pass
-    
+
     with open(dirpath, "w") as imagesets:
         jsonfile = json.dumps(asset_id_dict, indent=4)
         json.dump(asset_id_dict, imagesets)
     run_once = True
-
 
 
 # ba_meta export plugin
@@ -220,10 +218,9 @@ class DiscordRP(ba.Plugin):
         self.update_timer: ba.Timer | None = None
         self.presence_update = Presence_update()
         get_once_asset()
-        
 
     def on_app_running(self) -> None:
-        self.presence_update.start_timestamp = time.mktime(time.localtime())    
+        self.presence_update.start_timestamp = time.mktime(time.localtime())
         self.update_timer = ba.Timer(
             4, ba.WeakCall(self.update_status), timetype=ba.TimeType.REAL, repeat=True
         )
@@ -275,9 +272,8 @@ class DiscordRP(ba.Plugin):
 
         roster = _ba.get_game_roster()
         connection_info = _ba.get_connection_to_host_info()
-        
 
-        self.presence_update.large_image_key = "bombsquadicon" #todo check if this block is needed
+        self.presence_update.large_image_key = "bombsquadicon"  # todo check if this block is needed
         self.presence_update.large_image_text = "BombSquad"
         self.presence_update.small_image_key = _ba.app.platform
         self.presence_update.small_image_text = (
@@ -343,7 +339,7 @@ class DiscordRP(ba.Plugin):
                 from bastd.game.meteorshower import MeteorShowerGame
 
                 # noinspection PyUnresolvedReferences,PyProtectedMember
-                try:#todo fixme use appropriate name
+                try:  # todo fixme use appropriate name
                     self.presence_update.start_timestamp = act._discordrp_start_time  # type: ignore
                 except AttributeError:
                     # This can be the case if plugin launched AFTER activity
