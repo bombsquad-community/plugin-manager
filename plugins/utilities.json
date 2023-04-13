@@ -684,7 +684,8 @@
           "discord": "Dliwk#7961"
         }
       ],
-      "versions": null
+      "versions": {
+        "1.0.0": null
       }
     },
     "mobile_rpc": {
@@ -700,7 +701,8 @@
           "discord": "brostoshasnotjoined#2084"
         }
       ],
-      "versions": null
+      "versions": {
+        "1.0.0": null
       }
     },
   
