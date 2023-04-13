@@ -671,14 +671,12 @@
         }
       }
     },
-  "name": "Utilities",
-  "plugins": {
     "desktop_rpc": {
       "description": "Display Bombsquad Rich Presence on Discord",
       "external_url": "https://github.com/brostosjoined/bombsquadrpc",
       "authors": [
         {
-          "name": "brosto&Dliwk",
+          "name": "brostos&Dliwk",
           "email": "",
           "discord": "brostoshasnotjoined#2084"
         }
@@ -686,16 +684,13 @@
       "versions": {
         "1.0.0": null
       }
-    }
-  },
-  "name": "Utilities",
-  "plugins": {
+    },
     "mobile_rpc": {
       "description": "Display Bombsquad Rich Presence on Discord",
       "external_url": "https://github.com/brostosjoined/bombsquadrpc",
       "authors": [
         {
-          "name": "brosto&Dliwk",
+          "name": "brostos&Dliwk",
           "email": "",
           "discord": "brostoshasnotjoined#2084"
         }
@@ -703,6 +698,6 @@
       "versions": {
         "1.0.0": null
       }
-    }
-  },
+    },
+  }
 }
