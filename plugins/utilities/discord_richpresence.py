@@ -74,7 +74,7 @@ if android:  # !can add ios in future
             with open(dirpath, "r") as maptxt:
                 #!if self.large_image_key != "https://media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif":
                 largetxt = json.load(maptxt)[self.large_image_key]
-                    #!"mp:external/btl_oZF6BdUjijINOnrf9hw0_nCrwsHYJoJKEZKKye8/https/media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif"
+                #!"mp:external/btl_oZF6BdUjijINOnrf9hw0_nCrwsHYJoJKEZKKye8/https/media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif"
                 # else: #!some junk here
                 #     self.media_proxy = "mp:external/btl_oZF6BdUjijINOnrf9hw0_nCrwsHYJoJKEZKKye8{}"
                 #     self.large_image_key = '/https/media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif'
@@ -631,7 +631,7 @@ class DiscordRP(ba.Plugin):
         self._last_server_info: str | None = None
 
         if not android:
-            _run_overrides()#!if not android here
+            _run_overrides()  # !if not android here
         get_once_asset()
 
     def on_app_running(self) -> None:
