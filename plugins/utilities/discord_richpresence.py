@@ -628,7 +628,7 @@ class DiscordRP(ba.Plugin):
         self.update_timer: ba.Timer | None = None
         self.rpc_thread = get_class()
         self._last_server_info: str | None = None
-            
+
         if not android:
             _run_overrides()
         get_once_asset()
