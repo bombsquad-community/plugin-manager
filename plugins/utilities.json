@@ -672,7 +672,7 @@
       }
     },
     "discord_richpresence": {
-      "description": "Discord Rich Presnce for Bombsquad.",
+      "description": "Discord Rich Presence for Bombsquad.",
       "external_url": "https://github.com/brostosjoined/bombsquadrpc",
       "authors": [
         {
