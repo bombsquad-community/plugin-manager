@@ -7,7 +7,7 @@
 
 
 from __future__ import annotations
-from urllib.request import Request, urlopen , urlretrieve
+from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
 from zipfile import ZipFile
@@ -31,28 +31,29 @@ if TYPE_CHECKING:
 
 android = ba.app.platform == "android"
 
-if android: #!can add ios in future
-    
-    #Installing websocket 
+if android:  # !can add ios in future
+
+    # Installing websocket
     def get_module():
-        install_path = Path(f"{getcwd()}/ba_data/python") #For the guys like me on windows
+        install_path = Path(f"{getcwd()}/ba_data/python")  # For the guys like me on windows
         path = Path(f"{install_path}/websocket.zip")
         file_path = Path(f"{install_path}/websocket")
         if not file_path.exists():
             url = "https://github.com/brostosjoined/bombsquadrpc/releases/download/presence-1.0/websocket.zip"
-            filename, headers = urlretrieve(url, filename = path)
+            filename, headers = urlretrieve(url, filename=path)
             with ZipFile(filename) as f:
                 f.extractall(install_path)
             remove(path)
     get_module()
-    
+
     import websocket
 
     heartbeat_interval = int(41250)
     resume_gateway_url: str | None = None
     session_id: str | None = None
 
-    start_time=time.time()
+    start_time = time.time()
+
     class PresenceUpdate:
         def __init__(self):
             self.state: str | None = "In Game"
@@ -61,13 +62,13 @@ if android: #!can add ios in future
             self.large_image_key: str | None = "bombsquadicon"
             self.large_image_text: str | None = "BombSquad Icon"
             self.small_image_key: str | None = None
-            self.small_image_text: str | None = (f"{_ba.app.platform.capitalize()}({_ba.app.version})")
+            self.small_image_text: str | None = (
+                f"{_ba.app.platform.capitalize()}({_ba.app.version})")
             self.media_proxy = "mp:/app-assets/963434684669382696/{}.png"
-            self.identify : bool = False
+            self.identify: bool = False
             self.party_id: str = str(uuid.uuid4())
             self.party_size = 1
             self.party_max = 8
-        
 
         def presence(self):
             with open(dirpath, "r") as maptxt:
@@ -78,11 +79,11 @@ if android: #!can add ios in future
                 #     self.large_image_key = '/https/media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif'
             with open(dirpath, "r") as maptxt:
                 smalltxt = json.load(maptxt)[self.small_image_key]
-                
+
             presencepayload = {
                 "op": 3,
                 "d": {
-                    "since": None, #used to show how long the user went idle will add afk to work with this and then set the status to idle 
+                    "since": None,  # used to show how long the user went idle will add afk to work with this and then set the status to idle
                     "status": "online",
                     "afk": "false",
                     "activities": [
@@ -96,7 +97,7 @@ if android: #!can add ios in future
                                 "start": start_time
                             },
                             "party": {
-                                "id": self.party_id, 
+                                "id": self.party_id,
                                 "size": [self.party_size, self.party_max]
                             },
                             "assets": {
@@ -123,7 +124,6 @@ if android: #!can add ios in future
             }
             ws.send(json.dumps(presencepayload))
 
-
     def on_message(ws, message):
         global heartbeat_interval
         message = json.loads(message)
@@ -133,18 +133,13 @@ if android: #!can add ios in future
                 heartbeat_interval = get_interval
         except:
             pass
-        
-
 
     def on_error(ws, error):
-        ba.print_exception(error) 
-        
-
+        ba.print_exception(error)
 
     def on_close(ws, close_status_code, close_msg):
-        #print("### closed ###")
+        # print("### closed ###")
         pass
-
 
     def on_open(ws):
         print("Connected to Discord Websocket")
@@ -160,9 +155,10 @@ if android: #!can add ios in future
                 }  # step two keeping connection alive by sending heart beats and receiving opcode 11
                 ws.send(json.dumps(heartbeat_payload))
                 runonce = False
+
                 def identify():
                     """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
-                    with open(f"{getcwd()}/token.txt",'r') as f:
+                    with open(f"{getcwd()}/token.txt", 'r') as f:
                         token = bytes.fromhex(f.read()).decode('utf-8')
                     identify_payload = {
                         "op": 2,
@@ -185,9 +181,6 @@ if android: #!can add ios in future
 
         threading.Thread(target=heartbeats, daemon=True, name="heartbeat").start()
 
-        
-
-
     # websocket.enableTrace(True)
     ws = websocket.WebSocketApp(
         "wss://gateway.discord.gg/?encoding=json&v=10",
@@ -200,30 +193,25 @@ if android: #!can add ios in future
     threading.Thread(target=ws.run_forever, daemon=True, name="websocket").start()
 
 
-    
-        
-
-
 if not android:
-    
-    #installing pypresence
+
+    # installing pypresence
     def get_module():
         install_path = Path(f"{getcwd()}/ba_data/python")
         path = Path(f"{install_path}/pypresence.zip")
         file_path = Path(f"{install_path}/pypresence")
         if not file_path.exists():
             url = "https://github.com/brostosjoined/bombsquadrpc/releases/download/presence-1.0/pypresence.zip"
-            filename, headers = urlretrieve(url, filename = path)
+            filename, headers = urlretrieve(url, filename=path)
             with ZipFile(filename) as f:
                 f.extractall(install_path)
             remove(path)
     get_module()
-    
+
     from pypresence.utils import get_event_loop
     import pypresence
-    
-    DEBUG = True
 
+    DEBUG = True
 
     def print_error(err: str, include_exception: bool = False) -> None:
         if DEBUG:
@@ -234,11 +222,9 @@ if not android:
         else:
             print(f"ERROR in discordrp.py: {err}")
 
-
     def log(msg: str) -> None:
         if DEBUG:
             print(f"LOG in discordrp.py: {msg}")
-
 
     def _run_overrides() -> None:
         old_init = ba.Activity.__init__
@@ -261,6 +247,7 @@ if not android:
         _ba.connect_to_party = ba.internal.connect_to_party = new_connect
 
     start_time = time.time()
+
     class RpcThread(threading.Thread):
         def __init__(self):
             super().__init__()
@@ -276,7 +263,7 @@ if not android:
             self.party_size = 1
             self.party_max = 8
             self.join_secret: str | None = None
-            self._last_update_time : float = 0
+            self._last_update_time: float = 0
             self._last_secret_update_time: float = 0
             self._last_connect_time: float = 0
             self.should_close = False
@@ -370,7 +357,7 @@ if not android:
                 join=self.join_secret,
                 # buttons = [ #!cant use buttons together with join
                 #     {
-                #         "label": "Discord Server", 
+                #         "label": "Discord Server",
                 #         "url": "https://ballistica.net/discord"
                 #     },
                 #     {
@@ -417,7 +404,7 @@ if not android:
         def _connect_to_party(self, hostname, port) -> None:
             ba.pushcall(
                 ba.Call(_ba.connect_to_party, hostname, port), from_other_thread=True
-            ) #!Switch windows from discord window to bombsquad if possible
+            )  # !Switch windows from discord window to bombsquad if possible
 
         def on_join_request(self, username, uid, discriminator, avatar) -> None:
             del uid  # unused
@@ -429,11 +416,12 @@ if not android:
                     color=(0.0, 1.0, 0.0),
                 ),
                 from_other_thread=True,
-            )#TODO- Add overlay like that one for achievements to show a requested invite request and button on the chat button to accept and maybe send 
+            )  # TODO- Add overlay like that one for achievements to show a requested invite request and button on the chat button to accept and maybe send
 
 
 dirpath = Path(f"{_ba.app.python_directory_user}/image_id.json")
 run_once = False
+
 
 class Discordlogin(PopupWindow):
 
@@ -465,49 +453,49 @@ class Discordlogin(PopupWindow):
             autoselect=True,
             icon=ba.gettexture('crossOut'),
             iconscale=1.2)
-        
-        
+
         self.terminate_button = ba.buttonwidget(parent=self.root_widget,
-                                              position=(135, 250),
-                                              size=(135, 90),
-                                              on_activate_call= self.terminate,
-                                              textcolor=(0.8, 0.8, 0.85),
-                                              color=(0.525, 0.595, 1.458),#(1.00, 0.15, 0.15)red
-                                              button_type='square',
-                                              text_scale=1,
-                                              label="")
+                                                position=(135, 250),
+                                                size=(135, 90),
+                                                on_activate_call=self.terminate,
+                                                textcolor=(0.8, 0.8, 0.85),
+                                                # (1.00, 0.15, 0.15)red
+                                                color=(0.525, 0.595, 1.458),
+                                                button_type='square',
+                                                text_scale=1,
+                                                label="")
 
         ba.imagewidget(parent=self.root_widget,
                        position=(143, 250),
-                       size=(115,90),
+                       size=(115, 90),
                        texture=ba.gettexture("discordLogo"),
                        color=(10 - 0.32, 10 - 0.39, 10 - 0.96),
                        draw_controller=self.terminate_button)
-        
+
         self.email_widget = ba.textwidget(parent=self.root_widget,
-                                            text="email",
-                                            size=(360, 70),
-                                            position=(35, 180),
-                                            h_align='left',
-                                            v_align='center',
-                                            editable=True,
-                                            scale=0.8,
-                                            autoselect=True,
-                                            maxwidth=220,)
-                                            #description='Username')
-        
+                                          text="email",
+                                          size=(360, 70),
+                                          position=(35, 180),
+                                          h_align='left',
+                                          v_align='center',
+                                          editable=True,
+                                          scale=0.8,
+                                          autoselect=True,
+                                          maxwidth=220,)
+        # description='Username')
+
         self.password_widget = ba.textwidget(parent=self.root_widget,
-                                            text="password",
-                                            size=(250, 70),
-                                            position=(44, 120),
-                                            h_align='left',
-                                            v_align='center',
-                                            editable=True,
-                                            scale=0.8,
-                                            autoselect=True,
-                                            maxwidth=220,)
-                                            #description='Username')
-        
+                                             text="password",
+                                             size=(250, 70),
+                                             position=(44, 120),
+                                             h_align='left',
+                                             v_align='center',
+                                             editable=True,
+                                             scale=0.8,
+                                             autoselect=True,
+                                             maxwidth=220,)
+        # description='Username')
+
         ba.containerwidget(edit=self.root_widget,
                            cancel_button=self._cancel_button)
         self._login_button = ba.buttonwidget(
@@ -516,11 +504,11 @@ class Discordlogin(PopupWindow):
             size=(160, 90),
             scale=0.58,
             label='Login',
-            color=(0.10,0.95,0.10),
+            color=(0.10, 0.95, 0.10),
             on_activate_call=self.login,
             autoselect=True,)
-            #icon=ba.gettexture('crossOut'),
-            #iconscale=1.2)
+        # icon=ba.gettexture('crossOut'),
+        # iconscale=1.2)
 
         ba.textwidget(
             parent=self.root_widget,
@@ -531,9 +519,7 @@ class Discordlogin(PopupWindow):
             scale=1.0,
             text="LOGIN/TERMINATE DISCORD",
             maxwidth=200,
-            color=(0.10,0.95,0.10))
-
-        
+            color=(0.10, 0.95, 0.10))
 
     def _on_cancel_press(self) -> None:
         self._transition_out()
@@ -558,55 +544,56 @@ class Discordlogin(PopupWindow):
                 'gift_code_sku_id': None,
             }
             headers = {
-                'user-agent': "Mozilla/5.0", 
+                'user-agent': "Mozilla/5.0",
                 'content-type': "application/json",
-                }
+            }
 
             conn = http.client.HTTPSConnection("discord.com")
 
             payload = json.dumps(json_data)
             conn.request("POST", "/api/v9/auth/login", payload, headers)
-            res = conn.getresponse().read() 
-            
+            res = conn.getresponse().read()
+
             try:
                 token = json.loads(res)['token'].encode().hex().encode()
                 with open(self.path, 'wb') as f:
-                    f.write(token)     
-                ba.screenmessage("Successfully logged in",(0.21,1.0,0.20))
+                    f.write(token)
+                ba.screenmessage("Successfully logged in", (0.21, 1.0, 0.20))
                 ba.playsound(ba.getsound('shieldUp'))
             except:
-                ba.screenmessage("Incorrect credentials", (1.00,0.15,0.15))
+                ba.screenmessage("Incorrect credentials", (1.00, 0.15, 0.15))
                 ba.playsound(ba.getsound('error'))
-            
+
             conn.close()
         else:
-            ba.screenmessage("Already logged in",(0.10,0.35,0.10))
+            ba.screenmessage("Already logged in", (0.10, 0.35, 0.10))
             ba.playsound(ba.getsound('block'))
-        
-        
-    
+
     def terminate(self):
         if self.consec_press > 9 and self.path.exists():
             remove(self.path)
             ba.playsound(ba.getsound('shieldDown'))
-            ba.screenmessage("Account successfully removed!!",(0.10,0.10,1.00))
+            ba.screenmessage("Account successfully removed!!", (0.10, 0.10, 1.00))
             self.consec_press = 0
         elif not self.path.exists():
             ba.playsound(ba.getsound('blip'))
-            ba.screenmessage("Login First",(1.00,0.50,0.00))
+            ba.screenmessage("Login First", (1.00, 0.50, 0.00))
         else:
             if self.consec_press <= 9:
                 ba.playsound(ba.getsound('activateBeep'))
                 ba.playsound(ba.getsound('warnBeeps'))
-                ba.screenmessage(f"You are {10-self.consec_press} steps from terminating your account",(0.50,0.25,1.00))
+                ba.screenmessage(
+                    f"You are {10-self.consec_press} steps from terminating your account", (0.50, 0.25, 1.00))
                 self.consec_press += 1
+
+
 def get_once_asset():
     global run_once
     if run_once:
         return
     response = Request(
         "https://discordapp.com/api/oauth2/applications/963434684669382696/assets",
-        headers={"User-Agent": "Mozilla/5.0"}, 
+        headers={"User-Agent": "Mozilla/5.0"},
     )
     try:
         with urlopen(response) as assets:
@@ -619,7 +606,7 @@ def get_once_asset():
             asset_id.append(don)
             asset.append(dem)
         asset_id_dict = dict(zip(asset, asset_id))
-    
+
         with open(dirpath, "w") as imagesets:
             jsonfile = json.dumps(asset_id_dict, indent=4)
             json.dump(asset_id_dict, imagesets)
@@ -627,13 +614,12 @@ def get_once_asset():
         pass
     run_once = True
 
+
 def get_class():
     if android:
         return PresenceUpdate()
-    elif ba.app.platform  != "android":
+    elif ba.app.platform != "android":
         return RpcThread()
-
-
 
 
 # ba_meta export plugin
@@ -641,14 +627,14 @@ class DiscordRP(ba.Plugin):
     def __init__(self) -> None:
         self.update_timer: ba.Timer | None = None
         self.rpc_thread = get_class()
-        self._last_server_info : str | None = None
+        self._last_server_info: str | None = None
 
         _run_overrides()
         get_once_asset()
 
     def on_app_running(self) -> None:
         if not android:
-            self.rpc_thread.start() #!except incase discord is not open
+            self.rpc_thread.start()  # !except incase discord is not open
             self.update_timer = ba.Timer(
                 1, ba.WeakCall(self.update_status), timetype=ba.TimeType.REAL, repeat=True
             )
@@ -656,6 +642,7 @@ class DiscordRP(ba.Plugin):
             self.update_timer = ba.Timer(
                 4, ba.WeakCall(self.update_status), timetype=ba.TimeType.REAL, repeat=True
             )
+
     def has_settings_ui(self):
         return True
 
@@ -665,32 +652,32 @@ class DiscordRP(ba.Plugin):
             ba.playsound(ba.getsound('achievement'))
         else:
             Discordlogin()
-        
+
     def on_app_shutdown(self) -> None:
         if not android:
             self.rpc_thread.should_close = True
         else:
             ws.close()
-            
+
     def _get_current_activity_name(self) -> str | None:
         act = _ba.get_foreground_host_activity()
         if isinstance(act, ba.GameActivity):
             return act.name
         this = "Lobby"
         name: str | None = (
-                act.__class__.__name__.replace("Activity", "")
-                .replace("ScoreScreen", "Ranking")
-                .replace("Coop", "")
-                .replace("MultiTeam", "")
-                .replace("Victory", "")
-                .replace("EndSession", "")
-                .replace("Transition", "")
-                .replace("Draw", "")
-                .replace("FreeForAll", "")
-                .replace("Join", this)
-                .replace("Team", "")
-                .replace("Series", "")
-                .replace("CustomSession", "Custom Session(mod)")
+            act.__class__.__name__.replace("Activity", "")
+            .replace("ScoreScreen", "Ranking")
+            .replace("Coop", "")
+            .replace("MultiTeam", "")
+            .replace("Victory", "")
+            .replace("EndSession", "")
+            .replace("Transition", "")
+            .replace("Draw", "")
+            .replace("FreeForAll", "")
+            .replace("Join", this)
+            .replace("Team", "")
+            .replace("Series", "")
+            .replace("CustomSession", "Custom Session(mod)")
         )
 
         if name == "MainMenu":
@@ -825,10 +812,10 @@ class DiscordRP(ba.Plugin):
                 #     self.rpc_thread.details += f' ({scores})'
 
             mapname, short_map_name = self._get_current_map_name()
-            if mapname: 
+            if mapname:
                 with open(dirpath, 'r') as asset_dict:
                     asset_keys = json.load(asset_dict).keys()
-                if short_map_name in asset_keys:    
+                if short_map_name in asset_keys:
                     self.rpc_thread.large_image_text = mapname
                     self.rpc_thread.large_image_key = short_map_name
 
@@ -839,4 +826,3 @@ class DiscordRP(ba.Plugin):
             )
         if android:
             self.rpc_thread.presence()
-
