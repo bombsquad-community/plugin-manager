@@ -671,40 +671,21 @@
         }
       }
     },
-    "desktop_rpc": {
+    "discord_richpresence": {
       "description": "Discord Rich Presnce for Bombsquad.",
       "external_url": "https://github.com/brostosjoined/bombsquadrpc",
       "authors": [
         {
-          "name": {
-            "brostos",
-            "Dliwk"
-          }
+          "name": "Dliwk & brostos"
           "email": "",
-          "discord": "Dliwk#7961"
+          "discord": "Dliwk#7961 & brostos#2394"
         }
       ],
       "versions": {
         "1.0.0": null
       }
     },
-    "mobile_rpc": {
-      "description": "Discord Rich Presnce for Bombsquad.",
-      "external_url": "https://github.com/brostosjoined/bombsquadrpc",
-      "authors": [
-        {
-          "name": {
-            "brostos",
-            "Dliwk"
-          }
-          "email": "",
-          "discord": "brostoshasnotjoined#2084"
-        }
-      ],
-      "versions": {
-        "1.0.0": null
-      }
-    },
+    
   
     
     
