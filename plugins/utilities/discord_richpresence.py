@@ -72,7 +72,7 @@ if android:  # !can add ios in future
 
         def presence(self):
             with open(dirpath, "r") as maptxt:
-                if self.large_image_key != "mp:external/btl_oZF6BdUjijINOnrf9hw0_nCrwsHYJoJKEZKKye8/https/media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif":
+                if self.large_image_key != "https://media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif":
                     largetxt = json.load(maptxt)[self.large_image_key]
                 # else: #!some junk here
                 #     self.media_proxy = "mp:external/btl_oZF6BdUjijINOnrf9hw0_nCrwsHYJoJKEZKKye8{}"
