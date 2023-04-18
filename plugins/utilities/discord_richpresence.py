@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
 from zipfile import ZipFile
-from bastd.ui import PopupWindow
+from bastd.ui.popup import PopupWindow
 
 import asyncio
 import http.client
@@ -618,7 +618,7 @@ def get_once_asset():
 def get_class():
     if android:
         return PresenceUpdate()
-    elif ba.app.platform != "android":
+    elif not android:
         return RpcThread()
 
 
@@ -628,8 +628,9 @@ class DiscordRP(ba.Plugin):
         self.update_timer: ba.Timer | None = None
         self.rpc_thread = get_class()
         self._last_server_info: str | None = None
-
-        _run_overrides()
+            
+        if not android:
+            _run_overrides()
         get_once_asset()
 
     def on_app_running(self) -> None:
@@ -760,7 +761,7 @@ class DiscordRP(ba.Plugin):
                     .replace("DualTeamSession", ": Teams")
                     .replace("CoopSession", ": Coop")
                 )
-                self.rpc_thread.small_image_key = session.lower()
+                #!self.rpc_thread.small_image_key = session.lower()
                 self.rpc_thread.details = f"{self.rpc_thread.details} {session}"
             if (
                 self.rpc_thread.state == "NoneType"
@@ -768,7 +769,7 @@ class DiscordRP(ba.Plugin):
                 self.rpc_thread.state = "Watching Replay"
                 self.rpc_thread.large_image_key = "replay"
                 self.rpc_thread.large_image_text = "Viewing Awesomeness"
-                self.rpc_thread.small_image_key = "replaysmall"
+                #!self.rpc_thread.small_image_key = "replaysmall"
 
             act = _ba.get_foreground_host_activity()
             session = _ba.get_foreground_host_session()
