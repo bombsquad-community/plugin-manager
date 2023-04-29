@@ -249,6 +249,25 @@
           "md5sum": "ec3980f3f3a5da96c27f4cbd61f98550"
         }
       }
+    },
+    "hot_bomb": {
+      "description": "Get the bomb to explode on the enemy team to win.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "SEBASTIAN2059",
+          "email": "",
+          "discord": "SEBASTIAN2059#5751"
+        },
+        {
+          "name": "zPanxo",
+          "email": "",
+          "discord": "zPanxo#7201"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
