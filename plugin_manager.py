@@ -29,7 +29,7 @@ PLUGIN_MANAGER_VERSION = "0.3.3"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
-CURRENT_TAG = "main"
+CURRENT_TAG = "staging"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["user_agent_string"],
@@ -62,6 +62,7 @@ class NoCompatibleVersionError(Exception):
 
 
 def send_network_request(request):
+    # print(request.full_url)
     return urllib.request.urlopen(request)
 
 
