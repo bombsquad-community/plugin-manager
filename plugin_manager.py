@@ -1680,6 +1680,8 @@ class PluginManagerWindow(ba.Window):
                        draw_controller=controller_button)
 
     def search_term_filterer(self, plugin, search_term):
+        # This helps resolve "plugin name" to "plugin_name".
+        search_term = search_term.replace(" ", "_")
         if search_term in plugin.name:
             return True
         if search_term in plugin.info["description"].lower():
