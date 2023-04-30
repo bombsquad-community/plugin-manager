@@ -1,5 +1,11 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.3.2 (30-04-2023)
+
+- Fix sometimes same sound would repeat twice when pressing a button.
+- Low key attempt to experiment with staging branch by changing current tag in `plugin_manager.py`.
+- Assume underscores as spaces when searching for plugins in game.
+
 ### 0.3.1 (04-03-2023)
 
 - Resize the plugin window to limit the overlapping of plugin description.
