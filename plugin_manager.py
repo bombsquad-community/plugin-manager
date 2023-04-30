@@ -104,10 +104,6 @@ async def async_stream_network_response_to_file(request, file, md5sum=None, retr
     return content
 
 
-def play_sound():
-    ba.playsound(ba.getsound('swish'))
-
-
 def partial_format(string_template, **kwargs):
     for key, value in kwargs.items():
         string_template = string_template.replace("{" + key + "}", value)
@@ -814,7 +810,7 @@ class PluginWindow(popup.PopupWindow):
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
 
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.25 if _uiscale is ba.UIScale.SMALL else 1.39 if ba.UIScale.MEDIUM else 1.67
         width = 400 * s
@@ -827,7 +823,7 @@ class PluginWindow(popup.PopupWindow):
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
                                                #     'overlay_stack'),
-                                               on_outside_click_call=self._ok,
+                                               on_outside_click_call=self._cancel,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
                                                       if _uiscale is ba.UIScale.MEDIUM else 1.0),
@@ -931,7 +927,7 @@ class PluginWindow(popup.PopupWindow):
                                 text_scale=1,
                                 label=button3_label)
         ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._ok)
+                           on_cancel_call=self._cancel)
 
         open_pos_x = (390 if _uiscale is ba.UIScale.SMALL else
                       450 if _uiscale is ba.UIScale.MEDIUM else 440)
@@ -1026,7 +1022,10 @@ class PluginWindow(popup.PopupWindow):
         # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
     def _ok(self) -> None:
-        play_sound()
+        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+
+    def _cancel(self) -> None:
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def button(fn):
@@ -1193,7 +1192,6 @@ class PluginManager:
 
 class PluginSourcesWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
-        play_sound()
         self.selected_source = None
 
         self.scale_origin = origin_widget.get_screen_space_center()
@@ -1364,7 +1362,7 @@ class PluginSourcesWindow(popup.PopupWindow):
         self.draw_sources()
 
     def _ok(self) -> None:
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
@@ -1399,7 +1397,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         PluginSourcesWindow(origin_widget=self.root_widget)
 
     def _ok(self) -> None:
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self.root_widget, transition='out_scale')
 
 
@@ -1773,7 +1771,6 @@ class PluginManagerWindow(ba.Window):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
     def show_categories_window(self):
-        play_sound()
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
@@ -1813,7 +1810,6 @@ class PluginManagerWindow(ba.Window):
 
 class PluginManagerSettingsWindow(popup.PopupWindow):
     def __init__(self, plugin_manager, origin_widget):
-        play_sound()
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
         self.settings = ba.app.config["Community Plugin Manager"]["Settings"].copy()
@@ -2020,7 +2016,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             self._update_button.delete()
 
     def _ok(self) -> None:
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
