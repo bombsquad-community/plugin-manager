@@ -26,6 +26,8 @@ _uiscale = ba.app.ui.uiscale
 
 PLUGIN_MANAGER_VERSION = "0.3.1"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
+# Current tag can be changed to "staging" or any other branch in
+# plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
@@ -308,8 +310,11 @@ class Category:
 
     async def fetch_metadata(self):
         if self._metadata is None:
+            # Let's keep depending on the "main" branch for 3rd party sources
+            # even if we're using a different branch of plugin manager's repository.
+            tag = "main" if self.is_3rd_party else CURRENT_TAG
             request = urllib.request.Request(
-                self.meta_url.format(content_type="raw", tag=CURRENT_TAG),
+                self.meta_url.format(content_type="raw", tag=tag),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
