@@ -1,7 +1,7 @@
 # ba_meta require api 7
 import ba
 import _ba
-from bastd.ui import popup
+from bastd.ui import popup, confirm
 
 import urllib.request
 import http.client
@@ -24,8 +24,10 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.2.1"
+PLUGIN_MANAGER_VERSION = "0.3.2"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
+# Current tag can be changed to "staging" or any other branch in
+# plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
@@ -102,10 +104,6 @@ async def async_stream_network_response_to_file(request, file, md5sum=None, retr
         retries,
     )
     return content
-
-
-def play_sound():
-    ba.playsound(ba.getsound('swish'))
 
 
 def partial_format(string_template, **kwargs):
@@ -312,8 +310,11 @@ class Category:
 
     async def fetch_metadata(self):
         if self._metadata is None:
+            # Let's keep depending on the "main" branch for 3rd party sources
+            # even if we're using a different branch of plugin manager's repository.
+            tag = "main" if self.is_3rd_party else CURRENT_TAG
             request = urllib.request.Request(
-                self.meta_url.format(content_type="raw", tag=CURRENT_TAG),
+                self.meta_url.format(content_type="raw", tag=tag),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -788,13 +789,37 @@ class PluginWindow(popup.PopupWindow):
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
 
+    def get_description(self, minimum_character_offset=40):
+        """
+        Splits the loong plugin description into multiple lines.
+        """
+        string = self.plugin.info["description"]
+        string_length = len(string)
+
+        partitioned_string = ""
+        partitioned_string_length = len(partitioned_string)
+
+        while partitioned_string_length != string_length:
+            next_empty_space = string[partitioned_string_length +
+                                      minimum_character_offset:].find(" ")
+            next_word_end_position = partitioned_string_length + \
+                minimum_character_offset + max(0, next_empty_space)
+            partitioned_string += string[partitioned_string_length:next_word_end_position]
+            if next_empty_space != -1:
+                # Insert a line break here, there's still more partitioning to do.
+                partitioned_string += "\n"
+            partitioned_string_length = len(partitioned_string)
+
+        return partitioned_string
+
     async def draw_ui(self):
         # print(ba.app.plugins.active_plugins)
-        play_sound()
+
+        ba.playsound(ba.getsound('swish'))
         b_text_color = (0.75, 0.7, 0.8)
-        s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
-        width = 360 * s
-        height = 100 + 100 * s
+        s = 1.25 if _uiscale is ba.UIScale.SMALL else 1.39 if ba.UIScale.MEDIUM else 1.67
+        width = 400 * s
+        height = 120 + 100 * s
         color = (1, 1, 1)
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
@@ -803,7 +828,7 @@ class PluginWindow(popup.PopupWindow):
         self._root_widget = ba.containerwidget(size=(width, height),
                                                # parent=_ba.get_special_widget(
                                                #     'overlay_stack'),
-                                               on_outside_click_call=self._ok,
+                                               on_outside_click_call=self._cancel,
                                                transition=transition,
                                                scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
                                                       if _uiscale is ba.UIScale.MEDIUM else 1.0),
@@ -837,7 +862,7 @@ class PluginWindow(popup.PopupWindow):
         ba.textwidget(parent=self._root_widget,
                       position=(width * 0.49, pos), size=(0, 0),
                       h_align='center', v_align='center',
-                      text=self.plugin.info["description"],
+                      text=self.get_description(),
                       scale=text_scale * 0.6, color=color,
                       maxwidth=width * 0.95)
         b1_color = None
@@ -907,10 +932,10 @@ class PluginWindow(popup.PopupWindow):
                                 text_scale=1,
                                 label=button3_label)
         ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._ok)
+                           on_cancel_call=self._cancel)
 
-        open_pos_x = (300 if _uiscale is ba.UIScale.SMALL else
-                      360 if _uiscale is ba.UIScale.MEDIUM else 350)
+        open_pos_x = (390 if _uiscale is ba.UIScale.SMALL else
+                      450 if _uiscale is ba.UIScale.MEDIUM else 440)
         open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
                       110 if _uiscale is ba.UIScale.MEDIUM else 120)
         open_button = ba.buttonwidget(parent=self._root_widget,
@@ -936,6 +961,45 @@ class PluginWindow(popup.PopupWindow):
                       color=(1, 1, 1, 1),
                       rotate=25,
                       scale=0.45)
+
+        # Below snippet handles the tutorial button in the plugin window
+        tutorial_url = self.plugin.info["external_url"]
+        if tutorial_url:
+            def tutorial_confirm_window():
+                text = "This will take you to \n\""+self.plugin.info["external_url"] + "\""
+                tutorial_confirm_window = confirm.ConfirmWindow(
+                    text=text,
+                    action=lambda: ba.open_url(self.plugin.info["external_url"]),
+                )
+            open_pos_x = (440 if _uiscale is ba.UIScale.SMALL else
+                          500 if _uiscale is ba.UIScale.MEDIUM else 490)
+            open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
+                          110 if _uiscale is ba.UIScale.MEDIUM else 120)
+            open_button = ba.buttonwidget(parent=self._root_widget,
+                                          autoselect=True,
+                                          position=(open_pos_x, open_pos_y),
+                                          size=(40, 40),
+                                          button_type="square",
+                                          label="",
+                                          # color=ba.app.ui.title_color,
+                                          color=(0.6, 0.53, 0.63),
+
+                                          on_activate_call=tutorial_confirm_window)
+
+            ba.imagewidget(parent=self._root_widget,
+                           position=(open_pos_x, open_pos_y),
+                           size=(40, 40),
+                           color=(0.8, 0.95, 1),
+                           texture=ba.gettexture("frameInset"),
+                           draw_controller=open_button)
+            ba.textwidget(parent=self._root_widget,
+                          position=(open_pos_x - 3, open_pos_y + 12),
+                          text="Tutorial",
+                          size=(10, 10),
+                          draw_controller=open_button,
+                          color=(1, 1, 1, 1),
+                          rotate=25,
+                          scale=0.45)
 
         if to_draw_button4:
             settings_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
@@ -963,7 +1027,10 @@ class PluginWindow(popup.PopupWindow):
         # ba.containerwidget(edit=self._root_widget, start_button=button3)
 
     def _ok(self) -> None:
-        play_sound()
+        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+
+    def _cancel(self) -> None:
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def button(fn):
@@ -1130,7 +1197,6 @@ class PluginManager:
 
 class PluginSourcesWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
-        play_sound()
         self.selected_source = None
 
         self.scale_origin = origin_widget.get_screen_space_center()
@@ -1301,7 +1367,7 @@ class PluginSourcesWindow(popup.PopupWindow):
         self.draw_sources()
 
     def _ok(self) -> None:
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
@@ -1336,7 +1402,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         PluginSourcesWindow(origin_widget=self.root_widget)
 
     def _ok(self) -> None:
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self.root_widget, transition='out_scale')
 
 
@@ -1420,7 +1486,6 @@ class PluginManagerWindow(ba.Window):
         )
 
     def _back(self) -> None:
-        play_sound()
         from bastd.ui.settings.allsettings import AllSettingsWindow
         ba.containerwidget(edit=self._root_widget,
                            transition=self._transition_out)
@@ -1615,6 +1680,8 @@ class PluginManagerWindow(ba.Window):
                        draw_controller=controller_button)
 
     def search_term_filterer(self, plugin, search_term):
+        # This helps resolve "plugin name" to "plugin_name".
+        search_term = search_term.replace(" ", "_")
         if search_term in plugin.name:
             return True
         if search_term in plugin.info["description"].lower():
@@ -1711,7 +1778,6 @@ class PluginManagerWindow(ba.Window):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
     def show_categories_window(self):
-        play_sound()
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
@@ -1751,7 +1817,6 @@ class PluginManagerWindow(ba.Window):
 
 class PluginManagerSettingsWindow(popup.PopupWindow):
     def __init__(self, plugin_manager, origin_widget):
-        play_sound()
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
         self.settings = ba.app.config["Community Plugin Manager"]["Settings"].copy()
@@ -1958,7 +2023,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             self._update_button.delete()
 
     def _ok(self) -> None:
-        play_sound()
+        ba.playsound(ba.getsound('swish'))
         ba.containerwidget(edit=self._root_widget, transition='out_scale')
 
 

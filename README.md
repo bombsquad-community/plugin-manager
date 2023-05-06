@@ -1,14 +1,14 @@
-[![DownloadIcon]][DownloadLink]
-
-[DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
-[DownloadLink]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
-
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
 # plugin-manager
 
 A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
 which makes further modding of your game more convenient by providing easier access to community created content.
+
+[![DownloadIcon]][DownloadLink]
+
+[DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
+[DownloadLink]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
 
 ![Plugin Manager GIF](https://user-images.githubusercontent.com/106954762/190505304-519c4b91-2461-42b1-be57-655a3fb0cbe8.gif)
 
@@ -177,6 +177,14 @@ That's it! Now you can make a [pull request](../../compare) with both the update
 - Check out https://github.com/rikkolovescats/sahilp-plugins as an example. You can choose to show up plugins from this
   repository in your plugin manager by adding `rikkolovescats/sahilp-plugins` as a custom source through the category
   selection popup window in-game.
+
+  #### Known 3rd Party Plugin Sources
+
+  If you maintain or know of a 3rd party plugin source, let us know and we'll add it below so people can know about it. It
+  will also help us to notify the maintainers of any future breaking changes in plugin manager that could affect 3rd party
+  plugin sources.
+
+  https://github.com/rikkolovescats/sahilp-plugins
 
 
 ## Tests

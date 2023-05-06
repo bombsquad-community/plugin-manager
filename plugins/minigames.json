@@ -250,6 +250,30 @@
         }
       }
     },
+    "hot_bomb": {
+      "description": "Get the bomb to explode on the enemy team to win.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "SEBASTIAN2059",
+          "email": "",
+          "discord": "SEBASTIAN2059#5751"
+        },
+        {
+          "name": "zPanxo",
+          "email": "",
+          "discord": "zPanxo#7201"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "095a773",
+          "released_on": "29-04-2023",
+          "md5sum": "7296a71c9ed796ab1f54c2eb5d843bda"
+        }
+      }
+    },
     "shimla": {
       "description": "Death match with elevators, 2-D view.",
       "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
