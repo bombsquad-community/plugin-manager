@@ -273,6 +273,44 @@
           "md5sum": "7296a71c9ed796ab1f54c2eb5d843bda"
         }
       }
+    },
+    "shimla": {
+      "description": "Death match with elevators, 2-D view.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "52094fc",
+          "released_on": "06-05-2023",
+          "md5sum": "d4303c1338df50aa15c718cfd9c4ba0a"
+        }
+      }
+    },
+    "air_soccer": {
+      "description": "Play soccer while flying in air",
+      "external_url": "https://youtu.be/j6FFk7E6W_U",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "52094fc",
+          "released_on": "06-05-2023",
+          "md5sum": "4eb4a07830e4bd52fd19150a593d70c5"
+        }
+      }
     }
   }
 }
