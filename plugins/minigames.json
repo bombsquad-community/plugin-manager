@@ -285,7 +285,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "52094fc",
+          "released_on": "06-05-2023",
+          "md5sum": "d4303c1338df50aa15c718cfd9c4ba0a"
+        }
       }
     },
     "air_soccer": {
@@ -299,7 +304,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "52094fc",
+          "released_on": "06-05-2023",
+          "md5sum": "4eb4a07830e4bd52fd19150a593d70c5"
+        }
       }
     }
   }
