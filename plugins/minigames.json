@@ -249,6 +249,34 @@
           "md5sum": "ec3980f3f3a5da96c27f4cbd61f98550"
         }
       }
+    },
+    "shimla": {
+      "description": "Death match with elevators, 2-D view.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "air_soccer": {
+      "description": "Play soccer while flying in air",
+      "external_url": "https://youtu.be/j6FFk7E6W_U",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
