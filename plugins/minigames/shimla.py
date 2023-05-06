@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
 # ba_meta export game
+
+
 class ShimlaGame(DeathMatchGame):
     name = 'Shimla'
 
@@ -71,14 +73,16 @@ class ShimlaGame(DeathMatchGame):
     def on_begin(self):
         ba.getactivity().globalsnode.happy_thoughts_mode = False
         super().on_begin()
-        
+
         self.make_map()
         ba.timer(2, self.disable_fly)
+
     def disable_fly(self):
         activity = _ba.get_foreground_host_activity()
 
         for players in activity.players:
             players.actor.node.fly = False
+
     def spawn_player_spaz(
         self,
         player: Player,
@@ -87,13 +91,13 @@ class ShimlaGame(DeathMatchGame):
     ) -> PlayerSpaz:
         """Intercept new spazzes and add our team material for them."""
         spaz = super().spawn_player_spaz(player, position, angle)
-        
+
         spaz.connect_controls_to_player(enable_punch=True,
                                         enable_bomb=True,
                                         enable_pickup=True,
                                         enable_fly=False,
                                         enable_jump=True)
-        spaz.fly = False                              
+        spaz.fly = False
         return spaz
 
     def make_map(self):
@@ -106,9 +110,9 @@ class ShimlaGame(DeathMatchGame):
 
         _ba.get_foreground_host_activity()._map.topwall.materials = [
             shared.footing_material, self._real_wall_material]
-        
-        self.floorwall1 = ba.newnode('region', attrs={'position': (-10, 5, -5.52), 'scale': 
-        (15, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+
+        self.floorwall1 = ba.newnode('region', attrs={'position': (-10, 5, -5.52), 'scale':
+                                                      (15, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
         self.floorwall2 = ba.newnode('region', attrs={'position': (10, 5, -5.52), 'scale': (
             15, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
 
@@ -144,7 +148,7 @@ class ShimlaGame(DeathMatchGame):
         self.create_static_step(-5, 10)
 
     def create_static_step(self, x, y):
-    
+
         shared = SharedObjects.get()
 
         ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (5.5, 0.1, 6),
@@ -157,7 +161,7 @@ class ShimlaGame(DeathMatchGame):
         color = (0.7, 0.6, 0.5)
 
         floor = ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
-            1.8, 0.1, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material ,self._lift_material]})
+            1.8, 0.1, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material, self._lift_material]})
 
         cleaner = ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
             2, 0.3, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
@@ -181,13 +185,13 @@ class ShimlaGame(DeathMatchGame):
         _tcombine.connectattr('output', mnode, 'input2')
 
         _cleaner_combine = ba.newnode('combine',
-                               owner=cleaner,
-                               attrs={
-                                   'input1': 5.6,
-                                   'input2': -5.5,
-                                   'size': 3
-                               })
-        _cleaner_combine.connectattr('output', cleaner, 'position')    
+                                      owner=cleaner,
+                                      attrs={
+                                          'input1': 5.6,
+                                          'input2': -5.5,
+                                          'size': 3
+                                      })
+        _cleaner_combine.connectattr('output', cleaner, 'position')
         ba.animate(_tcombine, 'input1', {
             0: 5.1,
         })
@@ -197,14 +201,16 @@ class ShimlaGame(DeathMatchGame):
 
         _tcombine.connectattr('output', floor, 'position')
         mnode.connectattr('output', lift, 'position')
-        self.lifts[floor] = {"state":"origin","lift":_tcombine,"cleaner":_cleaner_combine,'leftLift': x < 0}
+        self.lifts[floor] = {"state": "origin", "lift": _tcombine,
+                             "cleaner": _cleaner_combine, 'leftLift': x < 0}
 
     def _handle_lift(self):
         region = ba.getcollision().sourcenode
         lift = self.lifts[region]
+
         def clean(lift):
             ba.animate(lift["cleaner"], 'input0', {
-                0: -19 if lift["leftLift"] else 19 ,
+                0: -19 if lift["leftLift"] else 19,
                 2: -16 if lift["leftLift"] else 16,
                 4.3: -19 if lift["leftLift"] else 19
             })
@@ -220,7 +226,6 @@ class ShimlaGame(DeathMatchGame):
             ba.timer(16, ba.Call(lambda lift: lift.update({'state': 'end'}), lift))
             ba.timer(12, ba.Call(clean, lift))
 
-        
     def _handle_lift_disconnect(self):
         region = ba.getcollision().sourcenode
         lift = self.lifts[region]
@@ -241,6 +246,7 @@ class ShimlaGame(DeathMatchGame):
             else:
                 x = x-0.1
                 y = y+0.1
+
 
 class mapdefs:
     points = {}
@@ -284,6 +290,8 @@ class mapdefs:
         0.9516389866, 0.6666414677, 0.08607244075)
     points['spawn_by_flag4'] = (0.4932087091, 12.74493212, -5.598987003) + (
         0.5245740665, 0.5245740665, 0.01941146064)
+
+
 class CreativeThoughts(ba.Map):
     """Freaking map by smoothy."""
 
@@ -323,10 +331,11 @@ class CreativeThoughts(ba.Map):
     def __init__(self) -> None:
         super().__init__(vr_overlay_offset=(0, -3.7, 2.5))
         shared = SharedObjects.get()
-        self._fake_wall_material=ba.Material()
-        self._real_wall_material=ba.Material()
+        self._fake_wall_material = ba.Material()
+        self._real_wall_material = ba.Material()
         self._fake_wall_material.add_actions(
-            conditions=(('they_are_younger_than',9000),'and',('they_have_material', shared.player_material)),
+            conditions=(('they_are_younger_than', 9000), 'and',
+                        ('they_have_material', shared.player_material)),
             actions=(
                 ('modify_part_collision', 'collide', True),
                 ('modify_part_collision', 'physical', True)
@@ -348,12 +357,18 @@ class CreativeThoughts(ba.Map):
                 'color_texture': ba.gettexture("rampageBGColor")
             })
 
-        self.leftwall=ba.newnode('region',attrs={'position': (-17.75152479, 13, -5.52),'scale': (0.1,15.5,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        self.rightwall=ba.newnode('region',attrs={'position': (17.75, 13, -5.52),'scale': (0.1,15.5,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        self.topwall=ba.newnode('region',attrs={'position': (0, 21.0, -5.52),'scale': (35.4,0.2,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(-17.75152479, 13, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(0.1,15.5,2)})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(17.75, 13, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(0.1,15.5,2)})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(0, 21.0, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(35.4,0.2,2)})
+        self.leftwall = ba.newnode('region', attrs={'position': (-17.75152479, 13, -5.52), 'scale': (
+            0.1, 15.5, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        self.rightwall = ba.newnode('region', attrs={'position': (17.75, 13, -5.52), 'scale': (
+            0.1, 15.5, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        self.topwall = ba.newnode('region', attrs={'position': (0, 21.0, -5.52), 'scale': (
+            35.4, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (-17.75152479, 13, -5.52), 'color': (
+            0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 15.5, 2)})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (17.75, 13, -5.52), 'color': (
+            0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 15.5, 2)})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (0, 21.0, -5.52), 'color': (
+            0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (35.4, 0.2, 2)})
 
         gnode = ba.getactivity().globalsnode
         gnode.happy_thoughts_mode = True

@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba,_ba
+import ba
+import _ba
 from bastd.actor.playerspaz import PlayerSpaz
 from bastd.actor.scoreboard import Scoreboard
 from bastd.actor.powerupbox import PowerupBoxFactory
@@ -25,14 +26,17 @@ class PuckDiedMessage:
     def __init__(self, puck: Puck):
         self.puck = puck
 
+
 def create_slope(self):
-        shared = SharedObjects.get()
-        x=5
-        y=12
-        for i in range(0,10):
-            ba.newnode('region',attrs={'position': (x, y, -5.52),'scale': (0.2,0.1,6),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-            x = x+0.3
-            y = y+0.1
+    shared = SharedObjects.get()
+    x = 5
+    y = 12
+    for i in range(0, 10):
+        ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (0.2, 0.1, 6),
+                   'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        x = x+0.3
+        y = y+0.1
+
 
 class Puck(ba.Actor):
     """A lovely giant hockey puck."""
@@ -57,7 +61,7 @@ class Puck(ba.Actor):
                                    'body': 'sphere',
                                    'reflection': 'soft',
                                    'reflection_scale': [0.2],
-                                   'gravity_scale':0.3,
+                                   'gravity_scale': 0.3,
                                    'shadow_size': 0.5,
                                    'is_area_of_interest': True,
                                    'position': self._spawn_pos,
@@ -190,7 +194,7 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
                                                    shared.footing_material),
                                        actions=('impact_sound',
                                                 self._puck_sound, 0.2, 5))
-        self._real_wall_material=ba.Material()
+        self._real_wall_material = ba.Material()
         self._real_wall_material.add_actions(
 
             actions=(
@@ -206,7 +210,7 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
                 ('modify_part_collision', 'physical', True)
 
             ))
-        self._goal_post_material=ba.Material()
+        self._goal_post_material = ba.Material()
         self._goal_post_material.add_actions(
 
             actions=(
@@ -261,7 +265,7 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
 
         self.setup_standard_time_limit(self._time_limit)
         self.setup_standard_powerup_drops()
-        self._puck_spawn_pos =(0,16.9,-5.5)
+        self._puck_spawn_pos = (0, 16.9, -5.5)
         self._spawn_puck()
         self.make_map()
 
@@ -272,8 +276,8 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
             ba.NodeActor(
                 ba.newnode('region',
                            attrs={
-                               'position': (17,14.5,-5.52),
-                               'scale': (1,3,1),
+                               'position': (17, 14.5, -5.52),
+                               'scale': (1, 3, 1),
                                'type': 'box',
                                'materials': [self._score_region_material]
                            })))
@@ -281,8 +285,8 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
             ba.NodeActor(
                 ba.newnode('region',
                            attrs={
-                               'position': (-17,14.5,-5.52),
-                               'scale': (1,3,1),
+                               'position': (-17, 14.5, -5.52),
+                               'scale': (1, 3, 1),
                                'type': 'box',
                                'materials': [self._score_region_material]
                            })))
@@ -306,72 +310,80 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
 
     def make_map(self):
         shared = SharedObjects.get()
-        _ba.get_foreground_host_activity()._map.leftwall.materials= [shared.footing_material,self._real_wall_material ]
-        
-        _ba.get_foreground_host_activity()._map.rightwall.materials=[shared.footing_material,self._real_wall_material ]
-        
-        _ba.get_foreground_host_activity()._map.topwall.materials=[shared.footing_material,self._real_wall_material ]
-        self.floorwall=ba.newnode('region',attrs={'position': (0, 5, -5.52),'scale': (35.4,0.2,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(0, 5, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(35.4,0.2,2)})
-        
+        _ba.get_foreground_host_activity()._map.leftwall.materials = [
+            shared.footing_material, self._real_wall_material]
 
-        self.create_goal_post(-16.65,12.69)
-        self.create_goal_post(-16.65,16.69)
-        
-        self.create_goal_post(16.65,12.69)
-        self.create_goal_post(16.65,16.69)
-       
-        self.create_static_step(0,16.29)
+        _ba.get_foreground_host_activity()._map.rightwall.materials = [
+            shared.footing_material, self._real_wall_material]
 
-        self.create_static_step(4.35,11.1)
-        self.create_static_step(-4.35,11.1)
+        _ba.get_foreground_host_activity()._map.topwall.materials = [
+            shared.footing_material, self._real_wall_material]
+        self.floorwall = ba.newnode('region', attrs={'position': (0, 5, -5.52), 'scale': (
+            35.4, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (
+            0, 5, -5.52), 'color': (0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (35.4, 0.2, 2)})
+
+        self.create_goal_post(-16.65, 12.69)
+        self.create_goal_post(-16.65, 16.69)
+
+        self.create_goal_post(16.65, 12.69)
+        self.create_goal_post(16.65, 16.69)
+
+        self.create_static_step(0, 16.29)
+
+        self.create_static_step(4.35, 11.1)
+        self.create_static_step(-4.35, 11.1)
 
         self.create_vertical(10, 15.6)
         self.create_vertical(-10, 15.6)
-    
-    def create_static_step(self,x,y):
-        floor=""
-        for i in range(0,7):
-            floor+="_ "
+
+    def create_static_step(self, x, y):
+        floor = ""
+        for i in range(0, 7):
+            floor += "_ "
         shared = SharedObjects.get()
-        step={}
-        step["r"]=ba.newnode('region',attrs={'position': (x, y, -5.52),'scale': (3,0.1,6),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        ba.newnode('locator', attrs={'shape':'box', 'position':( x, y,  -5.52), 'color':(1,1,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(3,0.1,2)})
-        
+        step = {}
+        step["r"] = ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
+            3, 0.1, 6), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (
+            x, y,  -5.52), 'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (3, 0.1, 2)})
+
         return step
-    def create_goal_post(self,x,y):
+
+    def create_goal_post(self, x, y):
         shared = SharedObjects.get()
         if x > 0:
-            color = (1,0,0) #change to team specific color  
+            color = (1, 0, 0)  # change to team specific color
         else:
-            color = (0,0,1)
-        floor=""
-        for i in range(0,4):
-            floor+="_ "
-        ba.newnode('region',attrs={'position': (x-0.2, y, -5.52),'scale': (1.8,0.1,6),'type': 'box','materials': [shared.footing_material,self._goal_post_material]})
-        
-        ba.newnode('locator', attrs={'shape':'box', 'position':( x-0.2, y,  -5.52), 'color': color, 'opacity':1,'draw_beauty':True,'additive':False,'size':(1.8,0.1,2)})
-        
+            color = (0, 0, 1)
+        floor = ""
+        for i in range(0, 4):
+            floor += "_ "
+        ba.newnode('region', attrs={'position': (x-0.2, y, -5.52), 'scale': (1.8, 0.1, 6),
+                   'type': 'box', 'materials': [shared.footing_material, self._goal_post_material]})
 
-    def create_vertical(self,x,y):
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (
+            x-0.2, y,  -5.52), 'color': color, 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (1.8, 0.1, 2)})
+
+    def create_vertical(self, x, y):
         shared = SharedObjects.get()
         floor = ""
-        for i in range(0,4):
-            floor +="|\n"
-        ba.newnode('region',attrs={'position': (x, y, -5.52),'scale': (0.1,2.8,1),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        ba.newnode('locator', attrs={'shape':'box', 'position':( x, y,  -5.52), 'color':(1,1,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(0.1,2.8,2)})
-
+        for i in range(0, 4):
+            floor += "|\n"
+        ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (0.1, 2.8, 1),
+                   'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (
+            x, y,  -5.52), 'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 2.8, 2)})
 
     def spawn_player_spaz(self,
                           player: Player,
                           position: Sequence[float] = None,
                           angle: float = None) -> PlayerSpaz:
         """Intercept new spazzes and add our team material for them."""
-        if player.team.id==0:
-            position=(-10.75152479, 5.057427485, -5.52)
-        elif player.team.id==1:
-            position=(8.75152479, 5.057427485, -5.52)
-
+        if player.team.id == 0:
+            position = (-10.75152479, 5.057427485, -5.52)
+        elif player.team.id == 1:
+            position = (8.75152479, 5.057427485, -5.52)
 
         spaz = super().spawn_player_spaz(player, position, angle)
         return spaz
@@ -456,7 +468,7 @@ class AirSoccerGame(ba.TeamGameActivity[Player, Team]):
 
         # Respawn dead players if they're still in the game.
         if isinstance(msg, ba.PlayerDiedMessage):
-            # Augment standard behavior... 
+            # Augment standard behavior...
             super().handlemessage(msg)
             self.respawn_player(msg.getplayer(Player))
 
@@ -527,6 +539,8 @@ class mapdefs:
         0.9516389866, 0.6666414677, 0.08607244075)
     points['spawn_by_flag4'] = (0.4932087091, 12.74493212, -5.598987003) + (
         0.5245740665, 0.5245740665, 0.01941146064)
+
+
 class CreativeThoughts(ba.Map):
     """Freaking map by smoothy."""
 
@@ -566,10 +580,11 @@ class CreativeThoughts(ba.Map):
     def __init__(self) -> None:
         super().__init__(vr_overlay_offset=(0, -3.7, 2.5))
         shared = SharedObjects.get()
-        self._fake_wall_material=ba.Material()
-        self._real_wall_material=ba.Material()
+        self._fake_wall_material = ba.Material()
+        self._real_wall_material = ba.Material()
         self._fake_wall_material.add_actions(
-            conditions=(('they_are_younger_than',9000),'and',('they_have_material', shared.player_material)),
+            conditions=(('they_are_younger_than', 9000), 'and',
+                        ('they_have_material', shared.player_material)),
             actions=(
                 ('modify_part_collision', 'collide', True),
                 ('modify_part_collision', 'physical', True)
@@ -591,12 +606,18 @@ class CreativeThoughts(ba.Map):
                 'color_texture': ba.gettexture("rampageBGColor")
             })
 
-        self.leftwall=ba.newnode('region',attrs={'position': (-17.75152479, 13, -5.52),'scale': (0.1,15.5,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        self.rightwall=ba.newnode('region',attrs={'position': (17.75, 13, -5.52),'scale': (0.1,15.5,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        self.topwall=ba.newnode('region',attrs={'position': (0, 21.0, -5.52),'scale': (35.4,0.2,2),'type': 'box','materials': [shared.footing_material,self._real_wall_material ]})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(-17.75152479, 13, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(0.1,15.5,2)})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(17.75, 13, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(0.1,15.5,2)})
-        ba.newnode('locator', attrs={'shape':'box', 'position':(0, 21.0, -5.52), 'color':(0,0,0), 'opacity':1,'draw_beauty':True,'additive':False,'size':(35.4,0.2,2)})
+        self.leftwall = ba.newnode('region', attrs={'position': (-17.75152479, 13, -5.52), 'scale': (
+            0.1, 15.5, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        self.rightwall = ba.newnode('region', attrs={'position': (17.75, 13, -5.52), 'scale': (
+            0.1, 15.5, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        self.topwall = ba.newnode('region', attrs={'position': (0, 21.0, -5.52), 'scale': (
+            35.4, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (-17.75152479, 13, -5.52), 'color': (
+            0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 15.5, 2)})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (17.75, 13, -5.52), 'color': (
+            0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 15.5, 2)})
+        ba.newnode('locator', attrs={'shape': 'box', 'position': (0, 21.0, -5.52), 'color': (
+            0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (35.4, 0.2, 2)})
 
         gnode = ba.getactivity().globalsnode
         gnode.happy_thoughts_mode = True
