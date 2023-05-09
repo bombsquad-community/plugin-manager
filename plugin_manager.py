@@ -271,7 +271,7 @@ class StartupTasks:
     async def get_new_plugins(self):
         new_plugins = []
         await self.plugin_manager.setup_index()
-        current_plugins =  ## Need to fetch the current present plugins
+        current_plugins =  # Need to fetch the current present plugins
         all_plugins = await self.plugin_manager.categories["All"].get_plugins()
         for plugin in all_plugins:
             if plugin not in current_plugins:
