@@ -268,6 +268,20 @@ class StartupTasks:
                 plugins_to_update.append(plugin.update())
         await asyncio.gather(*plugins_to_update)
 
+    async def get_new_plugins(self):
+        new_plugins = []
+        await self.plugin_manager.setup_index()
+        current_plugins =  ## Need to fetch the current present plugins
+        all_plugins = await self.plugin_manager.categories["All"].get_plugins()
+        for plugin in all_plugins:
+            if plugin not in current_plugins:
+                new_plugins.append(plugin)
+        plugin_count = len(new_plugins)
+        plugin_names = ', '.join(new_plugins)
+
+        print_message = f"{plugin_count} new plugins ({plugin_names}) are available!"
+        ba.screenmessage(print_message, color=(0, 1, 0))
+
     async def notify_new_plugins(self):
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
             return
@@ -285,6 +299,7 @@ class StartupTasks:
 
         if num_of_plugins < new_num_of_plugins:
             ba.screenmessage("We got new Plugins for you to try!")
+            await self.get_new_plugins()
             ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
             ba.app.config.commit()
 
