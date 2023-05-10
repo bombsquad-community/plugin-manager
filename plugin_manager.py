@@ -277,7 +277,8 @@ class StartupTasks:
         for plugin in all_plugins:
             date, name = plugin.get_name_and_release_date
             plugin_dictionary[date] = name
-        sorted_dict = dict(sorted(plugin_dictionary.items(), key=lambda x: datetime.strptime(x[0], '%d-%m-%Y'), reverse=True))
+        sorted_dict = dict(sorted(plugin_dictionary.items(),
+                           key=lambda x: datetime.strptime(x[0], '%d-%m-%Y'), reverse=True))
         for iterator, value in enumerate(sorted_dict.values()):
             if iterator < new_plugin_count:
                 new_plugins.append(value)
