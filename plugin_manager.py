@@ -19,6 +19,7 @@ import hashlib
 import copy
 
 from typing import Union, Optional
+from datetime import datetime
 
 _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
@@ -268,18 +269,20 @@ class StartupTasks:
                 plugins_to_update.append(plugin.update())
         await asyncio.gather(*plugins_to_update)
 
-    async def get_new_plugins(self):
+    async def get_new_plugins(self, new_plugin_count):
         new_plugins = []
+        plugin_dictionary = {}
         await self.plugin_manager.setup_index()
-        current_plugins =  ## Need to fetch the current present plugins
         all_plugins = await self.plugin_manager.categories["All"].get_plugins()
         for plugin in all_plugins:
-            if plugin not in current_plugins:
-                new_plugins.append(plugin)
-        plugin_count = len(new_plugins)
-        plugin_names = ', '.join(new_plugins)
-
-        print_message = f"{plugin_count} new plugins ({plugin_names}) are available!"
+            date, name = plugin.get_name_and_release_date
+            plugin_dictionary[date] = name
+        sorted_dict = dict(sorted(plugin_dictionary.items(), key=lambda x: datetime.strptime(x[0], '%d-%m-%Y'), reverse=True))
+        for iterator, value in enumerate(sorted_dict.values()):
+            if iterator < new_plugin_count:
+                new_plugins.append(value)
+        new_plugin_names = ', '.join(new_plugins)
+        print_message = f"{new_plugin_count} new plugins ({new_plugin_names}) are available!"
         ba.screenmessage(print_message, color=(0, 1, 0))
 
     async def notify_new_plugins(self):
@@ -299,7 +302,7 @@ class StartupTasks:
 
         if num_of_plugins < new_num_of_plugins:
             ba.screenmessage("We got new Plugins for you to try!")
-            await self.get_new_plugins()
+            await self.get_new_plugins(new_num_of_plugins-num_of_plugins)
             ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
             ba.app.config.commit()
 
@@ -704,9 +707,19 @@ class Plugin:
         self._versions = None
         self._latest_version = None
         self._latest_compatible_version = None
+        self._released_on = None
+        self._latest_plugin_key = None
 
     def __repr__(self):
         return f"<Plugin({self.name})>"
+
+    @property
+    def get_name_and_release_date(self):
+        if self._released_on is None:
+            self._latest_plugin_key = list(self.info["versions"].keys())[0]
+            self._released_on = self.info["versions"][self._latest_plugin_key]
+            # self._released_on = sorted(self._released_on, key=self._released_on["released_on"])
+            return self._released_on["released_on"], self.name
 
     @property
     def view_url(self):
