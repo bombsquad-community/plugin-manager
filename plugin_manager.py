@@ -296,7 +296,10 @@ class StartupTasks:
         new_plugin_count = len(valid_new_plugins)
         if new_plugin_count:
             valid_new_plugins = ', '.join(valid_new_plugins)
-            print_message = f"{new_plugin_count} new plugins ({valid_new_plugins}) are available!"
+            if new_plugin_count == 1:
+                print_message = f"{new_plugin_count} new plugin ({valid_new_plugins}) is available!"
+            else:
+                print_message = f"{new_plugin_count} new plugins ({valid_new_plugins}) are available!"
             ba.screenmessage(print_message, color=(0, 1, 0))
 
     async def notify_new_plugins(self):
@@ -315,7 +318,6 @@ class StartupTasks:
         new_num_of_plugins = len(await self.plugin_manager.categories["All"].get_plugins())
 
         if num_of_plugins < new_num_of_plugins:
-            ba.screenmessage("We got new Plugins for you to try!")
             await self.get_new_plugins(new_num_of_plugins-num_of_plugins)
             ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
             ba.app.config.commit()
