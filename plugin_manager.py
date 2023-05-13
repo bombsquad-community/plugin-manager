@@ -25,7 +25,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.3.2"
+PLUGIN_MANAGER_VERSION = "0.3.3"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
