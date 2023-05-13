@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.3.3 (13-05-2023)
+
+- Print the number and names of the client supported plugins which are newly added to the plugin manager.
+
 ### 0.3.2 (30-04-2023)
 
 - Fix sometimes same sound would repeat twice when pressing a button.
