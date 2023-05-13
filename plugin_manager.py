@@ -270,20 +270,29 @@ class StartupTasks:
         await asyncio.gather(*plugins_to_update)
 
     async def get_new_plugins(self, new_plugin_count):
-        new_plugins = []
-        plugin_dictionary = {}
+        valid_new_plugins = []
+        plugin_dictionary, sorted_plugins, new_plugins = {}, {}, {}
+        count = 0
         await self.plugin_manager.setup_index()
         all_plugins = await self.plugin_manager.categories["All"].get_plugins()
         for plugin in all_plugins:
-            date, name = plugin.get_name_and_release_date
-            plugin_dictionary[date] = name
-        sorted_dict = dict(sorted(plugin_dictionary.items(),
-                           key=lambda x: datetime.strptime(x[0], '%d-%m-%Y'), reverse=True))
-        for iterator, value in enumerate(sorted_dict.values()):
-            if iterator < new_plugin_count:
-                new_plugins.append(value)
-        new_plugin_names = ', '.join(new_plugins)
-        print_message = f"{new_plugin_count} new plugins ({new_plugin_names}) are available!"
+            plugin_dictionary[plugin.name] = plugin.info
+        for key, value in plugin_dictionary.items():
+            latest_version = max(value['versions'].keys())
+            new_plugins[key] = {'released_on': value['versions'][latest_version]['released_on'],
+                                'api_version': value['versions'][latest_version]['api_version']}
+            sorted_plugins = dict(sorted(new_plugins.items(),
+                                         key=lambda x: datetime.strptime(x[1]['released_on'], '%d-%m-%Y'),
+                                         reverse=True))
+
+        for key, value in sorted_plugins.items():
+            if count < new_plugin_count:
+                valid_new_plugins.append(key)
+                count += 1
+            else:
+                break
+        valid_new_plugins = ', '.join(valid_new_plugins)
+        print_message = f"{new_plugin_count} new plugins ({valid_new_plugins}) are available!"
         ba.screenmessage(print_message, color=(0, 1, 0))
 
     async def notify_new_plugins(self):
@@ -708,19 +717,9 @@ class Plugin:
         self._versions = None
         self._latest_version = None
         self._latest_compatible_version = None
-        self._released_on = None
-        self._latest_plugin_key = None
 
     def __repr__(self):
         return f"<Plugin({self.name})>"
-
-    @property
-    def get_name_and_release_date(self):
-        if self._released_on is None:
-            self._latest_plugin_key = list(self.info["versions"].keys())[0]
-            self._released_on = self.info["versions"][self._latest_plugin_key]
-            # self._released_on = sorted(self._released_on, key=self._released_on["released_on"])
-            return self._released_on["released_on"], self.name
 
     @property
     def view_url(self):
