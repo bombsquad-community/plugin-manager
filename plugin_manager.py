@@ -272,7 +272,7 @@ class StartupTasks:
     async def get_new_plugins(self, new_plugin_count):
         valid_new_plugins = []
         plugin_dictionary, sorted_plugins, new_plugins = {}, {}, {}
-        count = 0
+
         await self.plugin_manager.setup_index()
         all_plugins = await self.plugin_manager.categories["All"].get_plugins()
         for plugin in all_plugins:
@@ -287,14 +287,17 @@ class StartupTasks:
                                          reverse=True))
 
         for key, value in sorted_plugins.items():
-            if count < new_plugin_count:
-                valid_new_plugins.append(key)
-                count += 1
+            if new_plugin_count > 0:
+                if ba.app.api_version == value['api_version']:
+                    valid_new_plugins.append(key)
+                new_plugin_count -= 1
             else:
                 break
-        valid_new_plugins = ', '.join(valid_new_plugins)
-        print_message = f"{new_plugin_count} new plugins ({valid_new_plugins}) are available!"
-        ba.screenmessage(print_message, color=(0, 1, 0))
+        new_plugin_count = len(valid_new_plugins)
+        if new_plugin_count:
+            valid_new_plugins = ', '.join(valid_new_plugins)
+            print_message = f"{new_plugin_count} new plugins ({valid_new_plugins}) are available!"
+            ba.screenmessage(print_message, color=(0, 1, 0))
 
     async def notify_new_plugins(self):
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
