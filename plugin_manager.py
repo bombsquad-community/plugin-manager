@@ -282,7 +282,8 @@ class StartupTasks:
             new_plugins[key] = {'released_on': value['versions'][latest_version]['released_on'],
                                 'api_version': value['versions'][latest_version]['api_version']}
             sorted_plugins = dict(sorted(new_plugins.items(),
-                                         key=lambda x: datetime.strptime(x[1]['released_on'], '%d-%m-%Y'),
+                                         key=lambda x: datetime.strptime(
+                                             x[1]['released_on'], '%d-%m-%Y'),
                                          reverse=True))
 
         for key, value in sorted_plugins.items():
