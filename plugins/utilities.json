@@ -670,6 +670,20 @@
           "md5sum": "24913c665d05c3056c8ba390fe88155e"
         }
       }
+    },
+    "smoothy_is_a_cat": {
+      "description": "Yes, Smoothy is a cat. This plugin makes it so!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "rikkolovescats@proton.me",
+          "discord": "Rikko#7383"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
