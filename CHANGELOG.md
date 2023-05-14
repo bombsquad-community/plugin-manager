@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.3.4 (14-05-2023)
+
+- Optimize new plugin detection mechanism.
+
 ### 0.3.3 (13-05-2023)
 
 - Print the number and names of the client supported plugins which are newly added to the plugin manager.

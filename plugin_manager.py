@@ -25,7 +25,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.3.3"
+PLUGIN_MANAGER_VERSION = "0.3.4"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -269,56 +269,50 @@ class StartupTasks:
                 plugins_to_update.append(plugin.update())
         await asyncio.gather(*plugins_to_update)
 
-    async def get_new_plugins(self, new_plugin_count):
-        valid_new_plugins = []
-        plugin_dictionary, sorted_plugins, new_plugins = {}, {}, {}
-
-        await self.plugin_manager.setup_index()
-        all_plugins = await self.plugin_manager.categories["All"].get_plugins()
-        for plugin in all_plugins:
-            plugin_dictionary[plugin.name] = plugin.info
-        for key, value in plugin_dictionary.items():
-            latest_version = max(value['versions'].keys())
-            new_plugins[key] = {'released_on': value['versions'][latest_version]['released_on'],
-                                'api_version': value['versions'][latest_version]['api_version']}
-            sorted_plugins = dict(sorted(new_plugins.items(),
-                                         key=lambda x: datetime.strptime(
-                                             x[1]['released_on'], '%d-%m-%Y'),
-                                         reverse=True))
-
-        for key, value in sorted_plugins.items():
-            if new_plugin_count > 0:
-                if ba.app.api_version == value['api_version']:
-                    valid_new_plugins.append(key)
-                new_plugin_count -= 1
-            else:
-                break
-        new_plugin_count = len(valid_new_plugins)
-        if new_plugin_count:
-            valid_new_plugins = ', '.join(valid_new_plugins)
-            if new_plugin_count == 1:
-                print_message = f"{new_plugin_count} new plugin ({valid_new_plugins}) is available!"
-            else:
-                print_message = f"{new_plugin_count} new plugins ({valid_new_plugins}) are available!"
-            ba.screenmessage(print_message, color=(0, 1, 0))
+    @staticmethod
+    def _is_new_supported_plugin(plugin):
+        is_an_update = len(plugin.versions) > 1
+        if is_an_update:
+            return False
+        try:
+            plugin.latest_compatible_version
+        except NoCompatibleVersionError:
+            return False
+        else:
+            return True
 
     async def notify_new_plugins(self):
         if not ba.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
             return
 
         await self.plugin_manager.setup_index()
+        new_num_of_plugins = len(await self.plugin_manager.categories["All"].get_plugins())
         try:
-            num_of_plugins = ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
-        except Exception:
-            ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = len(await self.plugin_manager.categories["All"].get_plugins())
-            num_of_plugins = ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
+            existing_num_of_plugins = ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
+        except KeyError:
+            ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
             ba.app.config.commit()
             return
 
-        new_num_of_plugins = len(await self.plugin_manager.categories["All"].get_plugins())
+        if existing_num_of_plugins < new_num_of_plugins:
+            new_plugin_count = new_num_of_plugins - existing_num_of_plugins
+            all_plugins = await self.plugin_manager.categories["All"].get_plugins()
+            new_supported_plugins = list(filter(self._is_new_supported_plugin, all_plugins))
+            new_supported_plugins.sort(
+                key=lambda plugin: plugin.latest_compatible_version.released_on_date,
+                reverse=True,
+            )
+            new_supported_plugins = new_supported_plugins[:new_plugin_count]
+            new_supported_plugins_count = len(new_supported_plugins)
+            if new_supported_plugins_count > 0:
+                new_supported_plugins = ", ".join(map(str, new_supported_plugins))
+                if new_supported_plugins_count == 1:
+                    notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
+                else:
+                    notification_text = f"{new_supported_plugins_count} new plugins ({new_supported_plugins}) are available!"
+                ba.screenmessage(notification_text, color=(0, 1, 0))
 
-        if num_of_plugins < new_num_of_plugins:
-            await self.get_new_plugins(new_num_of_plugins-num_of_plugins)
+        if existing_num_of_plugins != new_num_of_plugins:
             ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
             ba.app.config.commit()
 
@@ -659,6 +653,7 @@ class PluginVersion:
         self.number, info = version
         self.plugin = plugin
         self.api_version = info["api_version"]
+        self.released_on = info["released_on"]
         self.commit_sha = info["commit_sha"]
         self.md5sum = info["md5sum"]
 
@@ -674,6 +669,10 @@ class PluginVersion:
 
     def __repr__(self):
         return f"<PluginVersion({self.plugin.name} {self.number})>"
+
+    @property
+    def released_on_date(self):
+        return datetime.strptime(self.released_on, "%d-%m-%Y")
 
     async def _download(self, retries=3):
         local_plugin = self.plugin.create_local()
@@ -726,6 +725,9 @@ class Plugin:
 
     def __repr__(self):
         return f"<Plugin({self.name})>"
+
+    def __str__(self):
+        return self.name
 
     @property
     def view_url(self):
