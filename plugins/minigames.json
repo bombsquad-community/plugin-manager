@@ -313,7 +313,7 @@
       }
     },
     "arms_race": {
-      "description": "Upgrade your weapons by eliminating enemies.Win by being first one to kill while cursed",
+      "description": "Upgrade your weapons by eliminating enemies. Win by being first one to kill while cursed",
       "external_url": "",
       "authors": [
         {
@@ -332,7 +332,7 @@
       }
     },
     "collector": {
-      "description": "Kill your opponents  to steal their Capsules.Collect them and score at the Deposist Point!",
+      "description": "Kill your opponents to steal their Capsules. Collect them and score at the Deposit Point!",
       "external_url": "",
       "authors": [
         {
@@ -375,7 +375,7 @@
       }
     },
     "invisible_one": {
-      "description": "Be the invisible one for a length of time to win.Kill the invisible one to become it.",
+      "description": "Be the invisible one for a length of time to win. Kill the invisible one to become it.",
       "external_url": "",
       "authors": [
         {
