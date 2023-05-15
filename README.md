@@ -174,9 +174,9 @@ That's it! Now you can make a [pull request](../../compare) with both the update
 
 - In case your plugin doesn't sit well with our guidelines or you wouldn't want your plugin to be here for some reason,
   you can create your own GitHub repository and put all your plugins in there.
-- Check out https://github.com/rikkolovescats/sahilp-plugins as an example. You can choose to show up plugins from this
-  repository in your plugin manager by adding `rikkolovescats/sahilp-plugins` as a custom source through the category
-  selection popup window in-game.
+- Check out [bombsquad-community/sample-plugin-source](https://github.com/bombsquad-community/sample-plugin-source) as an example.
+  You can choose to show up plugins from this repository in your plugin manager by adding `bombsquad-community/sample-plugin-source`
+  as a custom source through the category selection popup window in-game.
 
   #### Known 3rd Party Plugin Sources
 
@@ -184,7 +184,7 @@ That's it! Now you can make a [pull request](../../compare) with both the update
   will also help us to notify the maintainers of any future breaking changes in plugin manager that could affect 3rd party
   plugin sources.
 
-  https://github.com/rikkolovescats/sahilp-plugins
+  [rikkolovescats/sahilp-plugins](https://github.com/rikkolovescats/sahilp-plugins)
 
 
 ## Tests
