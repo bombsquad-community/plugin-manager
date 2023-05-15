@@ -399,8 +399,8 @@
       }
     },
     "last_punch_stand": {
-      "description": "",
-      "external_url": "Last one to punch the spaz when timer ends wins",
+      "description": "Last one to punch the spaz when timer ends wins",
+      "external_url": "",
       "authors": [
         {
           "name": "ThePersonMan",
@@ -460,7 +460,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Sebastian",
+          "name": "SEBASTIAN2059",
           "email": "",
           "discord": "SEBASTIAN2059#5751"
         }
