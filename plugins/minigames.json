@@ -323,7 +323,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "1482bb521329ec10ab109d9414c0cc6b"
+        }
       }
     },
     "collector": {
@@ -342,7 +347,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "afca5167b564a7f7c0bdc53c3e52d198"
+        }
       }
     },
     "dodge_the_ball": {
@@ -356,7 +366,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "6951991607ecef5a6a93cc6eb9e560f5"
+        }
       }
     },
     "invisible_one": {
@@ -370,7 +385,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "bc2f85bb6149abbbd496c1b07f3a7189"
+        }
       }
     },
     "last_punch_stand": {
@@ -384,7 +404,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "410c3a275970d0c358125dd2edf035e0"
+        }
       }
     },
     "quake": {
@@ -398,7 +423,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "a771fb7d37dad80ed29a99bd5ca458d6"
+        }
       }
     },
     "sleep_race": {
@@ -412,7 +442,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "c8ea242e4b0b0110541370a2ce1b42fc"
+        }
       }
     },
     "snake": {
@@ -426,7 +461,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "cfd9a320ee6fd7b8adb3cae1015c67fa"
+        }
       }
     },
     "ufo_fight": {
@@ -440,7 +480,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "81617b130716996368b7d8f20f3a5154"
+        }
       }
     },
     "yeeting_party": {
@@ -454,7 +499,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "7219487",
+          "released_on": "15-05-2023",
+          "md5sum": "197a377652ab0c3bfbe1ca07833924b4"
+        }
       }
     }
   }
