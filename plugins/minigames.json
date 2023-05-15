@@ -311,6 +311,151 @@
           "md5sum": "4eb4a07830e4bd52fd19150a593d70c5"
         }
       }
-    }
+    },
+    "arms_race": {
+      "description": "Upgrade your weapons by eliminating enemies.Win by being first one to kill while cursed",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "collector": {
+      "description": "Kill your opponents  to steal their Capsules.Collect them and score at the Deposist Point!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "TheMikirog",
+          "email": "",
+          "discord": "TheMikirog#1984"
+        },
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "! JoseANG3L#0268"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "dodge_the_ball": {
+      "description": "Survive from shooting balls",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "EmperoR",
+          "email": "",
+          "discord": "EmperoR#4098"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "invisible_one": {
+      "description": "Be the invisible one for a length of time to win.Kill the invisible one to become it.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "itsre3",
+          "email": "",
+          "discord": "itsre3#0267"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "last_punch_stand": {
+      "description": "",
+      "external_url": "Last one to punch the spaz when timer ends wins",
+      "authors": [
+        {
+          "name": "ThePersonMan",
+          "email": "",
+          "discord": "ThePersonMan#0276"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "quake": {
+      "description": "Kill set number of enemies to win with optional rocket/railgun weapons",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Dliwk",
+          "email": "",
+          "discord": "Dliwk#7961"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "sleep_race": {
+      "description": "Can you win while sleeping?",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "itsre3",
+          "email": "",
+          "discord": "itsre3#0267"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "snake": {
+      "description": "Survive a set number of mines to win",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Sebastian",
+          "email": "",
+          "discord": "SEBASTIAN2059#5751"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "ufo_fight": {
+      "description": "Fight the UFO boss!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "Cross Joy#0721"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "yeeting_party": {
+      "description": "Yeet your enemies out of the map!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "[Just] Freak#4999"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
   }
 }
