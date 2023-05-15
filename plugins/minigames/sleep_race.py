@@ -1,7 +1,7 @@
 # Released under the MIT License. See LICENSE for details.
 # y me (: itsre3
 # =>2<=
-#BCS RULES
+# BCS RULES
 #
 """Defines Race mini-game."""
 
@@ -14,7 +14,8 @@ import random
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 
-import ba, _ba
+import ba
+import _ba
 from bastd.actor.bomb import Bomb
 from bastd.actor.playerspaz import PlayerSpaz
 from bastd.actor.scoreboard import Scoreboard
@@ -215,7 +216,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                             ('modify_part_collision', 'physical', False),
                             ('call', 'at_connect',
                              self._handle_race_point_collide),
-                        ))
+        ))
         for rpt in pts:
             self._regions.append(RaceRegion(rpt, len(self._regions)))
 
@@ -263,7 +264,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                         translate=('statements', 'Killing ${NAME} for'
                                    ' skipping part of the track!'),
                         subs=[('${NAME}', player.getname(full=True))]),
-                                     color=(1, 0, 0))
+                        color=(1, 0, 0))
             else:
                 # If this player is in first, note that this is the
                 # front-most race-point.
@@ -378,7 +379,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                            '${TEAM} is disqualified because ${PLAYER} left'),
                 subs=[('${TEAM}', player.team.name),
                       ('${PLAYER}', player.getname(full=True))]),
-                             color=(1, 1, 0))
+                color=(1, 1, 0))
             player.team.finished = True
             player.team.time = None
             player.team.lap = 0
@@ -434,7 +435,6 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                                'color': (1, 1, 1),
                                'text': 'By itsre3'
                            }))
-
 
         # Throw a timer up on-screen.
         self._time_text = ba.NodeActor(
@@ -543,35 +543,34 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                                               self._spawn_bomb,
                                               repeat=True)
 
-
         def knock_players():
             activity = _ba.get_foreground_host_activity()
             gnode = ba.getactivity().globalsnode
             for players in activity.players:
-                gnode.tint = (0.5,0.5,0.5)
+                gnode.tint = (0.5, 0.5, 0.5)
                 node = players.actor.node
                 node.handlemessage('knockout', 600.0)
                 self.text_offset = ba.newnode('math',
-                        owner=node,
-                        attrs={'input1': (-0.5, 0.5, 0.25),
-                               'operation': 'add'})
+                                              owner=node,
+                                              attrs={'input1': (-0.5, 0.5, 0.25),
+                                                     'operation': 'add'})
                 node.connectattr(
-                          'torso_position',
-                          self.text_offset, 
-                          'input2')
+                    'torso_position',
+                    self.text_offset,
+                    'input2')
                 self.text = ba.newnode('text',
-                    owner=node,
-                    attrs={
-                           'h_align': 'right',
-                           'color': (1.0, 1.0, 1.0),
-                           'shadow': 1.0,
-                           'text': 'z z',
-                           'scale': 0.01,
-                           'in_world': True})
+                                       owner=node,
+                                       attrs={
+                                           'h_align': 'right',
+                                           'color': (1.0, 1.0, 1.0),
+                                           'shadow': 1.0,
+                                           'text': 'z z',
+                                           'scale': 0.01,
+                                           'in_world': True})
                 self.text_offset.connectattr(
-                            'output',
-                            self.text,
-                            'position')
+                    'output',
+                    self.text,
+                    'position')
                 ba.animate(self.text, 'scale', {0: 0.0, 1.0: 0.01})
                 ba.timer(2, self.text.delete)
 
@@ -580,9 +579,8 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         self._knockout_timer = ba.Timer(knock_time,
                                         knock_players,
                                         repeat=True)
-       
-        self._race_started = True
 
+        self._race_started = True
 
     def _update_player_order(self) -> None:
 

@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import random
 from typing import TYPE_CHECKING
-import ba, _ba
+import ba
+import _ba
 from bastd.actor.playerspaz import PlayerSpaz
 from bastd.actor.spaz import Spaz
 from bastd.actor.bomb import Blast, Bomb
@@ -54,8 +55,6 @@ class RoboBot(StickyBot):
     default_bomb_type = 'land_mine'
     color = (0, 0, 0)
     highlight = (3, 3, 3)
-
-
 
 
 class UFO(ba.Actor):
@@ -252,8 +251,8 @@ class UFO(ba.Actor):
                     1.0 + i,
                     lambda: self._bots.spawn_bot(
                         RoboBot, pos=(self.node.position[0],
-                                         self.node.position[1] - 1,
-                                         self.node.position[2]), spawn_time=0.0
+                                      self.node.position[1] - 1,
+                                      self.node.position[2]), spawn_time=0.0
                     ),
                 )
         else:
@@ -299,7 +298,6 @@ class UFO(ba.Actor):
                                            node.position[2], 0, 5, 0, 3, 10, 0,
                                            0, 0, 5, 0)
 
-
                     except:
                         pass
 
@@ -314,7 +312,6 @@ class UFO(ba.Actor):
         if not self.node:
             return None
 
-
         damage = abs(msg.magnitude)
         if msg.hit_type == 'explosion':
             damage /= 20
@@ -326,7 +323,7 @@ class UFO(ba.Actor):
             self.handlemessage(ba.DieMessage())
 
     def _get_target_player_pt(self) -> tuple[
-        ba.Vec3 | None, ba.Vec3 | None]:
+            ba.Vec3 | None, ba.Vec3 | None]:
         """Returns the position and velocity of our target.
 
         Both values will be None in the case of no target.
@@ -519,7 +516,6 @@ class UFO(ba.Actor):
                              {0: self.shield_deco.color, 0.2: (5, 0.2, 0.2)})
             self.bot_count = 6
 
-
     def update_ai(self) -> None:
         """Should be called periodically to update the spaz' AI."""
         # pylint: disable=too-many-branches
@@ -572,9 +568,9 @@ class UFO(ba.Actor):
                      self.to_target.y,
                      self.to_target.z * self.xz_pos))
             setattr(self.node, 'extra_acceleration',
-                    (self.to_target.x  * self.xz_pos ,
+                    (self.to_target.x * self.xz_pos,
                      self.to_target.y * 80 + 70,
-                     self.to_target.z  * self.xz_pos))
+                     self.to_target.z * self.xz_pos))
 
     def on_expire(self) -> None:
         super().on_expire()
@@ -656,7 +652,6 @@ class UFO(ba.Actor):
                 self.xz_pos = 0.01
                 self.node.reflection_scale = [2]
 
-
                 def unfrozen():
                     self.frozen = False
                     if self.bot_dur_froze:
@@ -665,7 +660,6 @@ class UFO(ba.Actor):
                     self.y_pos = 3
                     self.xz_pos = 1
                     self.node.reflection_scale = [0.25]
-
 
                 ba.timer(5.0, unfrozen)
 
@@ -710,8 +704,8 @@ class UFOSet:
                 + str(self._ufo_bot_lists[self._ufo_bot_update_list])
             )
         self._bot_update_list = (
-                                    self._ufo_bot_update_list + 1
-                                ) % self._ufo_bot_list_count
+            self._ufo_bot_update_list + 1
+        ) % self._ufo_bot_list_count
 
         # Update our list of player points for the bots to use.
         player_pts = []
@@ -784,7 +778,7 @@ class UFOSet:
         """Add a ba.SpazBot instance to the set."""
         self._ufo_bot_lists[self._ufo_bot_add_list].append(bot)
         self._ufo_bot_add_list = (
-                                     self._ufo_bot_add_list + 1) % self._ufo_bot_list_count
+            self._ufo_bot_add_list + 1) % self._ufo_bot_list_count
 
     def have_living_bots(self) -> bool:
         """Return whether any bots in the set are alive or spawning."""
@@ -859,18 +853,16 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
         self._bots = UFOSet()
         self._preset = str(settings['preset'])
         self._credit = ba.newnode('text',
-                               attrs={
-                                   'v_attach': 'bottom',
-                                   'h_align': 'center',
-                                   'color': (0.4, 0.4, 0.4),
-                                   'flatness': 0.5,
-                                   'shadow': 0.5,
-                                   'position': (0, 20),
-                                   'scale': 0.7,
-                                   'text': 'By Cross Joy'
-                               })
-
-
+                                  attrs={
+                                      'v_attach': 'bottom',
+                                      'h_align': 'center',
+                                      'color': (0.4, 0.4, 0.4),
+                                      'flatness': 0.5,
+                                      'shadow': 0.5,
+                                      'position': (0, 20),
+                                      'scale': 0.7,
+                                      'text': 'By Cross Joy'
+                                  })
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
@@ -881,8 +873,6 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
     def on_begin(self) -> None:
         super().on_begin()
         self.setup_standard_powerup_drops()
-
-
 
         # In pro mode there's no powerups.
 
@@ -991,4 +981,3 @@ class MyUFOFightLevel(ba.Plugin):
                 preview_texture_name='footballStadiumPreview',
             )
         )
-

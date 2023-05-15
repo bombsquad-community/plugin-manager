@@ -1,8 +1,7 @@
-#Ported by: Freaku / @[Just] Freak#4999
+# Ported by: Freaku / @[Just] Freak#4999
 
-#Join BCS:
+# Join BCS:
 # https://discord.gg/ucyaesh
-
 
 
 # ba_meta require api 7
@@ -16,7 +15,6 @@ from bastd.actor.playerspaz import PlayerSpaz
 
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
-
 
 
 class State:
@@ -35,8 +33,8 @@ class State:
     def apply(self, spaz):
         spaz.disconnect_controls_from_player()
         spaz.connect_controls_to_player(enable_punch=self.punch,
-                                     enable_bomb=self.bomb,
-                                     enable_pickup=self.grab)
+                                        enable_bomb=self.bomb,
+                                        enable_pickup=self.grab)
         if self.curse:
             spaz.curse_time = -1
             spaz.curse()
@@ -48,16 +46,18 @@ class State:
         return (self.name)
 
 
-states = [ State(bomb='normal', name='Basic Bombs'),
-    State(bomb='ice', name='Frozen Bombs'),
-    State(bomb='sticky', name='Sticky Bombs'),
-    State(bomb='impact', name='Impact Bombs'),
-    State(grab=True, name='Grabbing only'),
-    State(punch=True, name='Punching only'),
-    State(curse=True, name='Cursed', final=True) ]
+states = [State(bomb='normal', name='Basic Bombs'),
+          State(bomb='ice', name='Frozen Bombs'),
+          State(bomb='sticky', name='Sticky Bombs'),
+          State(bomb='impact', name='Impact Bombs'),
+          State(grab=True, name='Grabbing only'),
+          State(punch=True, name='Punching only'),
+          State(curse=True, name='Cursed', final=True)]
+
 
 class Player(ba.Player['Team']):
     """Our player type for this game."""
+
     def __init__(self):
         self.state = None
 

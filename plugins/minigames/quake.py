@@ -6,16 +6,17 @@ from typing import TYPE_CHECKING
 
 import random
 import enum
-import ba, _ba
+import ba
+import _ba
 
 from bastd.actor.scoreboard import Scoreboard
 from bastd.actor.powerupbox import PowerupBox
 from bastd.gameutils import SharedObjects
 
-#from rocket
+# from rocket
 from bastd.actor.bomb import Blast
 
-#from railgun
+# from railgun
 from bastd.actor.playerspaz import PlayerSpaz
 from bastd.actor.spaz import Spaz
 
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
 STORAGE_ATTR_NAME = f'_shared_{__name__}_factory'
 
 
-#+++++++++++++++++++Rocket++++++++++++++++++++++++
+# +++++++++++++++++++Rocket++++++++++++++++++++++++
 class RocketFactory:
     """Quake Rocket factory"""
 
@@ -182,10 +183,10 @@ class Rocket(ba.Actor):
         elif isinstance(msg, ba.OutOfBoundsMessage):
             self.handlemessage(ba.DieMessage())
 
-#-------------------Rocket--------------------------
+# -------------------Rocket--------------------------
 
 
-#++++++++++++++++++Railgun++++++++++++++++++++++++++
+# ++++++++++++++++++Railgun++++++++++++++++++++++++++
 class Railgun:
     """Very dangerous weapon"""
 
@@ -298,7 +299,8 @@ class RailBullet(ba.Actor):
         elif isinstance(msg, ba.OutOfBoundsMessage):
             self.handlemessage(ba.DieMessage())
 
-#------------------Railgun-------------------------
+# ------------------Railgun-------------------------
+
 
 class Player(ba.Player['Team']):
     """Our player"""
@@ -306,6 +308,7 @@ class Player(ba.Player['Team']):
 
 class Team(ba.Team[Player]):
     """Our team"""
+
     def __init__(self) -> None:
         self.score = 0
 
@@ -618,10 +621,10 @@ class Obstacle(ba.Actor):
                 'color_texture':
                     ba.gettexture('bunnyColor'),
                 'materials': [SharedObjects.get().footing_material]
-                             if mirror else [
-                                 SharedObjects.get().object_material,
-                                 SharedObjects.get().footing_material
-                             ]
+                if mirror else [
+                        SharedObjects.get().object_material,
+                        SharedObjects.get().footing_material
+                    ]
             })
 
     def handlemessage(self, msg: Any) -> Any:

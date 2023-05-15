@@ -225,7 +225,6 @@ class InvicibleOneGame(ba.TeamGameActivity[Player, Team]):
                 scoring_team.time_remaining = max(
                     0, scoring_team.time_remaining - 1)
 
-
                 self._update_scoreboard()
 
                 # announce numbers we have sounds for
@@ -286,7 +285,8 @@ class InvicibleOneGame(ba.TeamGameActivity[Player, Team]):
                 self._invicible_one_player = player
 
                 if self._invicible_one_is_lazy:
-                    player.actor.connect_controls_to_player(enable_punch = False, enable_pickup = False, enable_bomb = False)
+                    player.actor.connect_controls_to_player(
+                        enable_punch=False, enable_pickup=False, enable_bomb=False)
                 if player.actor.node.torso_model != None:
                     player.actor.node.color_mask_texture = None
                     player.actor.node.color_texture = None
@@ -307,9 +307,8 @@ class InvicibleOneGame(ba.TeamGameActivity[Player, Team]):
                     player.actor.pickup_sounds = invi_sound
                     player.actor.death_sounds = invi_sound
                     player.actor.fall_sounds = invi_sound
-        
-                player.actor.node.name = ''
 
+                player.actor.node.name = ''
 
     def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, ba.PlayerDiedMessage):

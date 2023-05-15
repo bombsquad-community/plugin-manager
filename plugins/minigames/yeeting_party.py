@@ -1,4 +1,4 @@
-#Made by your friend: @[Just] Freak#4999
+# Made by your friend: @[Just] Freak#4999
 
 # ba_meta require api 7
 from __future__ import annotations
@@ -116,34 +116,36 @@ class BoxingGame(ba.TeamGameActivity[Player, Team]):
     def on_team_join(self, team: Team) -> None:
         if self.has_begun():
             self._update_scoreboard()
+
     def getRandomPowerupPoint(self) -> None:
         myMap = self.map.getname()
         if myMap == 'Doom Shroom':
             while True:
-                x = random.uniform(-1.0,1.0)
-                y = random.uniform(-1.0,1.0)
-                if x*x+y*y < 1.0: break
-            return ((8.0*x,2.5,-3.5+5.0*y))
+                x = random.uniform(-1.0, 1.0)
+                y = random.uniform(-1.0, 1.0)
+                if x*x+y*y < 1.0:
+                    break
+            return ((8.0*x, 2.5, -3.5+5.0*y))
         elif myMap == 'Rampage':
-            x = random.uniform(-6.0,7.0)
-            y = random.uniform(-6.0,-2.5)
+            x = random.uniform(-6.0, 7.0)
+            y = random.uniform(-6.0, -2.5)
             return ((x, 5.2, y))
         else:
-            x = random.uniform(-5.0,5.0)
-            y = random.uniform(-6.0,0.0)
+            x = random.uniform(-5.0, 5.0)
+            y = random.uniform(-6.0, 0.0)
             return ((x, 8.0, y))
 
     def on_begin(self) -> None:
         super().on_begin()
-        ba.screenmessage("start Yeeting",color = (0.2,1,1))
+        ba.screenmessage("start Yeeting", color=(0.2, 1, 1))
         self.setup_standard_time_limit(self._time_limit)
         # Base kills needed to win on the size of the largest team.
         self._score_to_win = (self._kills_to_win_per_player *
                               max(1, max(len(t.players) for t in self.teams)))
         self._update_scoreboard()
-    
+
     def spawn_player(self, player: Player) -> ba.Actor:
-        
+
         spaz = self.spawn_player_spaz(player)
 
         # Let's reconnect this player's controls to this

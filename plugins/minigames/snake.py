@@ -1,4 +1,4 @@
-#snake
+# snake
 # Released under the MIT License. See LICENSE for details.
 #
 """Snake game by SEBASTIAN2059"""
@@ -18,20 +18,25 @@ from bastd.actor import bomb as stdbomb
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
 
+
 class ScoreMessage:
     """It will help us with the scores."""
-    def __init__(self,player: Player):
+
+    def __init__(self, player: Player):
         self.player = player
-        
+
     def getplayer(self):
         return self.player
 
+
 class Player(ba.Player['Team']):
     """Our player type for this game."""
+
     def __init__(self) -> None:
-        
+
         self.mines = []
         self.actived = None
+
 
 class Team(ba.Team[Player]):
     """Our team type for this game."""
@@ -39,29 +44,35 @@ class Team(ba.Team[Player]):
     def __init__(self) -> None:
         self.score = 0
 
+
 lang = ba.app.lang.language
 if lang == 'Spanish':
     description = 'Sobrevive a un número determinado de minas para ganar.'
     join_description = 'Corre y no te dejes matar.'
     view_description = 'sobrevive ${ARG1} minas'
-   
+
 else:
     description = 'Survive a set number of mines to win.'
     join_description = "Run and don't get killed."
     view_description = 'survive ${ARG1} mines'
 
+
 class Custom_Mine(stdbomb.Bomb):
     """Custom a mine :)"""
-    def __init__(self,position,source_player):
-        stdbomb.Bomb.__init__(self,position=position,bomb_type='land_mine',source_player=source_player)
-        
-    def handlemessage(self,msg: Any) -> Any:
+
+    def __init__(self, position, source_player):
+        stdbomb.Bomb.__init__(self, position=position, bomb_type='land_mine',
+                              source_player=source_player)
+
+    def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, ba.HitMessage):
             return
         else:
             super().handlemessage(msg)
 
 # ba_meta export game
+
+
 class SnakeGame(ba.TeamGameActivity[Player, Team]):
     """A game type based on acquiring kills."""
 
@@ -122,17 +133,17 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
         self._scoreboard = Scoreboard()
         self._score_to_win: Optional[int] = None
         self._dingsound = ba.getsound('dingSmall')
-        
+
         self._beep_1_sound = ba.getsound('raceBeep1')
         self._beep_2_sound = ba.getsound('raceBeep2')
-        
+
         self._epic_mode = bool(settings['Epic Mode'])
         self._kills_to_win_per_player = int(
             settings['Score to Win'])
         self._time_limit = float(settings['Time Limit'])
-        
+
         self._started = False
-        
+
         # Base class overrides.
         self.slow_motion = self._epic_mode
         self.default_music = (ba.MusicType.EPIC if self._epic_mode else
@@ -151,14 +162,13 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
     def on_begin(self) -> None:
         super().on_begin()
         self.setup_standard_time_limit(self._time_limit)
-        #self.setup_standard_powerup_drops()
+        # self.setup_standard_powerup_drops()
 
         # Base kills needed to win on the size of the largest team.
         self._score_to_win = (self._kills_to_win_per_player *
                               max(1, max(len(t.players) for t in self.teams)))
         self._update_scoreboard()
-        
-    
+
         if self.slow_motion:
             t_scale = 0.4
             light_y = 50
@@ -220,10 +230,10 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
         ba.playsound(self._beep_2_sound)
 
         self._started = True
-        
+
         for player in self.players:
             self.generate_mines(player)
-    
+
     # overriding the default character spawning..
     def spawn_player(self, player: Player) -> ba.Actor:
         spaz = self.spawn_player_spaz(player)
@@ -239,33 +249,30 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
         if self._started:
             self.generate_mines(player)
         return spaz
-        
-    
-    def generate_mines(self,player: Player):
+
+    def generate_mines(self, player: Player):
         try:
-            player.actived = ba.Timer(0.5,ba.Call(self.spawn_mine, player),repeat=True)
+            player.actived = ba.Timer(0.5, ba.Call(self.spawn_mine, player), repeat=True)
         except Exception as e:
-         print('Exception -> '+ str(e))
-                
-    
-    
-    def spawn_mine(self,player: Player):
+            print('Exception -> ' + str(e))
+
+    def spawn_mine(self, player: Player):
         if player.team.score >= self._score_to_win:
             return
         pos = player.actor.node.position
         # mine = stdbomb.Bomb(position=(pos[0], pos[1] + 2.0, pos[2]),
-                    # velocity=(0, 0, 0),
-                    # bomb_type='land_mine',
-                    # #blast_radius=,
-                    # source_player=player.actor.source_player,
-                    # owner=player.actor.node).autoretain()
+        # velocity=(0, 0, 0),
+        # bomb_type='land_mine',
+        # #blast_radius=,
+        # source_player=player.actor.source_player,
+        # owner=player.actor.node).autoretain()
         mine = Custom_Mine(position=(pos[0], pos[1] + 2.0, pos[2]),
-                            source_player=player.actor.source_player)
-        
+                           source_player=player.actor.source_player)
+
         def arm():
             mine.arm()
-        ba.timer(0.5,arm)
-        
+        ba.timer(0.5, arm)
+
         player.mines.append(mine)
         if len(player.mines) > 15:
             for m in player.mines:
@@ -275,9 +282,9 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
                     pass
                 player.mines.remove(m)
                 break
-        
+
         self.handlemessage(ScoreMessage(player))
-    
+
     def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, ba.PlayerDiedMessage):
 
@@ -286,18 +293,18 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
 
             player = msg.getplayer(Player)
             self.respawn_player(player)
-            
+
             player.actived = None
-            
+
         elif isinstance(msg, ScoreMessage):
             player = msg.getplayer()
-            
+
             player.team.score += 1
             self._update_scoreboard()
-            
+
             assert self._score_to_win is not None
             if any(team.score >= self._score_to_win for team in self.teams):
-                self.end_game() #ba.timer(0.5, self.end_game)
+                self.end_game()  # ba.timer(0.5, self.end_game)
         else:
             return super().handlemessage(msg)
         return None
