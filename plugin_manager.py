@@ -1,4 +1,5 @@
 # ba_meta require api 8
+from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
 import babase
 import _babase
 import bauiv1 as bui
@@ -40,10 +41,25 @@ HEADERS = {
     "User-Agent": _env["user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
+_regexp_friendly_class_name_shortcut = lambda string: string.replace(".", "\.")
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
-    "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
-    "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
+    "plugin_entry_points": re.compile(
+        bytes(
+            "(ba_meta export (plugin|{})\n+class )(.*)\\(".format(
+                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["plugin"]),
+            ),
+            "utf-8"
+        ),
+    ),
+    "minigames": re.compile(
+        bytes(
+            "(ba_meta export (game|{})\n+class )(.*)\\(".format(
+                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["game"]),
+            ),
+            "utf-8"
+        ),
+    ),
 }
 DISCORD_URL = "https://ballistica.net/discord"
 
@@ -521,8 +537,8 @@ class PluginLocal:
         if not self._entry_points:
             content = await self.get_content()
             groups = REGEXP["plugin_entry_points"].findall(content)
-            # Actual entry points are stored in the first index inside the matching groups.
-            entry_points = tuple(f"{self.name}.{group[1].decode('utf-8')}" for group in groups)
+            # Actual entry points are stored in the last index inside the matching groups.
+            entry_points = tuple(f"{self.name}.{group[-1].decode('utf-8')}" for group in groups)
             self._entry_points = entry_points
         return self._entry_points
 
@@ -2419,6 +2435,8 @@ class NewAllSettingsWindow(bui.Window):
                 sel = self._audio_button
             elif sel_name == 'Advanced':
                 sel = self._advanced_button
+            elif sel_name == "Mod Manager":
+                sel = self._modmgr_button
             elif sel_name == 'Back':
                 sel = self._back_button
             else:
