@@ -426,4 +426,3 @@ class Main(babase.Plugin):
 
     def show_settings_ui(self, source_widget):
         launch_colorscheme_selection_window()
-
