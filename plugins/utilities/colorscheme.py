@@ -416,7 +416,7 @@ def load_plugin():
     load_colorscheme()
 
 
-# ba_meta export babase.Plugin
+# ba_meta export plugin
 class Main(babase.Plugin):
     def on_app_running(self):
         load_plugin()
