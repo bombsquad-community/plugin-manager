@@ -1003,7 +1003,7 @@ class PluginWindow(popup.PopupWindow):
         if tutorial_url:
             def tutorial_confirm_window():
                 text = "This will take you to \n\""+self.plugin.info["external_url"] + "\""
-                tutorial_confirm_window = confirm.ConfirmWindow(
+                confirm.ConfirmWindow(
                     text=text,
                     action=lambda: ba.open_url(self.plugin.info["external_url"]),
                 )
