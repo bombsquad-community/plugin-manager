@@ -30,7 +30,6 @@ class State:
         self.next = None
         self.index = None
 
-
     def apply(self, spaz):
         #spaz.disconnect_controls_from_player()
         #spaz.connect_controls_to_player(enable_punch=self.punch,
@@ -155,17 +154,17 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
             player.state = self.states[0]
         self.spawn_player(player)
 
-    def idk(self,spaz:PlayerSpaz):
+    def idk(self, spaz: PlayerSpaz):
 
-       return {"press":{
-                 ba.InputType.PUNCH_PRESS : spaz.on_punch_press,
-                 ba.InputType.PICK_UP_PRESS : spaz.on_pickup_press,},
-               "release":{
-                 ba.InputType.PUNCH_RELEASE : spaz.on_punch_release,
-                 ba.InputType.PICK_UP_RELEASE : spaz.on_pickup_release}
-               }
+        return {"press": {
+            ba.InputType.PUNCH_PRESS: spaz.on_punch_press,
+            ba.InputType.PICK_UP_PRESS: spaz.on_pickup_press, },
+            "release": {
+            ba.InputType.PUNCH_RELEASE: spaz.on_punch_release,
+            ba.InputType.PICK_UP_RELEASE: spaz.on_pickup_release}
+        }
 
-    def set_controls(self,spaz:PlayerSpaz,):
+    def set_controls(self, spaz: PlayerSpaz,):
         spaz.on_punch_press()
 
     # overriding the default character spawning..
@@ -175,8 +174,8 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
         super().spawn_player(player)
         player.state.apply(player.actor)
 
-        press_input=self.idk(player.actor)["press"]
-        release_input=self.idk(player.actor)["release"]
+        press_input = self.idk(player.actor)["press"]
+        release_input = self.idk(player.actor)["release"]
 
         for press,release in zip(press_input.keys(),release_input.keys()):
 #            player.assigninput(
