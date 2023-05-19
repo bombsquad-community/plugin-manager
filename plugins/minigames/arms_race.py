@@ -31,8 +31,8 @@ class State:
         self.index = None
 
     def apply(self, spaz):
-        #spaz.disconnect_controls_from_player()
-        #spaz.connect_controls_to_player(enable_punch=self.punch,
+        # spaz.disconnect_controls_from_player()
+        # spaz.connect_controls_to_player(enable_punch=self.punch,
         #                                enable_bomb=self.bomb,
         #                                enable_pickup=self.grab)
         if self.curse:
@@ -177,11 +177,11 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
         press_input = self.idk(player.actor)["press"]
         release_input = self.idk(player.actor)["release"]
 
-        for press,release in zip(press_input.keys(),release_input.keys()):
-#            player.assigninput(
-#                press,
-#                lambda : player.actor.on_bomb_press()
-#            )
+        for press, release in zip(press_input.keys(), release_input.keys()):
+            #            player.assigninput(
+            #                press,
+            #                lambda : player.actor.on_bomb_press()
+            #            )
             player.assigninput(
                 release,
                 lambda: player.actor.on_bomb_release()
