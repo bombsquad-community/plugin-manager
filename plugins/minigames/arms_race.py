@@ -32,10 +32,10 @@ class State:
 
 
     def apply(self, spaz):
-        spaz.disconnect_controls_from_player()
-        spaz.connect_controls_to_player(enable_punch=self.punch,
-                                        enable_bomb=self.bomb,
-                                        enable_pickup=self.grab)
+        #spaz.disconnect_controls_from_player()
+        #spaz.connect_controls_to_player(enable_punch=self.punch,
+        #                                enable_bomb=self.bomb,
+        #                                enable_pickup=self.grab)
         if self.curse:
             spaz.curse_time = -1
             spaz.curse()
@@ -179,10 +179,10 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
         release_input=self.idk(player.actor)["release"]
 
         for press,release in zip(press_input.keys(),release_input.keys()):
-            player.assigninput(
-                press,
-                lambda : player.actor.on_bomb_press()
-            )
+#            player.assigninput(
+#                press,
+#                lambda : player.actor.on_bomb_press()
+#            )
             player.assigninput(
                 release,
                 lambda: player.actor.on_bomb_release()
