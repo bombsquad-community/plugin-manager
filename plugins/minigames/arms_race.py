@@ -30,17 +30,32 @@ class State:
         self.next = None
         self.index = None
 
-    def apply(self, spaz):
-        # spaz.disconnect_controls_from_player()
-        # spaz.connect_controls_to_player(enable_punch=self.punch,
-        #                                enable_bomb=self.bomb,
-        #                                enable_pickup=self.grab)
+    
+        
+    def apply(self, player,spaz):
+    
+        spaz.disconnect_controls_from_player()
+        spaz.connect_controls_to_player(enable_punch=self.punch,
+                                        enable_bomb=self.bomb,
+                                        enable_pickup=self.grab)
         if self.curse:
             spaz.curse_time = -1
             spaz.curse()
         if self.bomb:
             spaz.bomb_type = self.bomb
         spaz.set_score_text(self.name)
+
+        def set_controls():
+            player.actor.node.bomb_pressed=True
+            player.actor.on_bomb_release()
+
+        release_input=(ba.InputType.PUNCH_RELEASE,ba.InputType.PICK_UP_RELEASE)
+        if not self.bomb is None:
+            for release in release_input:
+                player.assigninput(
+                    release,
+                    set_controls
+                )
 
     def get_setting(self):
         return (self.name)
@@ -154,38 +169,14 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
             player.state = self.states[0]
         self.spawn_player(player)
 
-    def idk(self, spaz: PlayerSpaz):
-
-        return {"press": {
-            ba.InputType.PUNCH_PRESS: spaz.on_punch_press,
-            ba.InputType.PICK_UP_PRESS: spaz.on_pickup_press, },
-            "release": {
-            ba.InputType.PUNCH_RELEASE: spaz.on_punch_release,
-            ba.InputType.PICK_UP_RELEASE: spaz.on_pickup_release}
-        }
-
-    def set_controls(self, spaz: PlayerSpaz,):
-        spaz.on_punch_press()
 
     # overriding the default character spawning..
     def spawn_player(self, player):
         if player.state is None:
             player.state = self.states[0]
         super().spawn_player(player)
-        player.state.apply(player.actor)
+        player.state.apply(player,player.actor)
 
-        press_input = self.idk(player.actor)["press"]
-        release_input = self.idk(player.actor)["release"]
-
-        for press, release in zip(press_input.keys(), release_input.keys()):
-            #            player.assigninput(
-            #                press,
-            #                lambda : player.actor.on_bomb_press()
-            #            )
-            player.assigninput(
-                release,
-                lambda: player.actor.on_bomb_release()
-            )
 
     def isValidKill(self, m):
         if m.getkillerplayer(Player) is None:
@@ -203,7 +194,7 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
                 self.stats.player_scored(msg.getkillerplayer(Player), 10, kill=True)
                 if not msg.getkillerplayer(Player).state.final:
                     msg.getkillerplayer(Player).state = msg.getkillerplayer(Player).state.next
-                    msg.getkillerplayer(Player).state.apply(msg.getkillerplayer(Player).actor)
+                    msg.getkillerplayer(Player).state.apply(msg.getkillerplayer(Player),msg.getkillerplayer(Player).actor)
                 else:
                     msg.getkillerplayer(Player).team.score += 1
                     self.end_game()
