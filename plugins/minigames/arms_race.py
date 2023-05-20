@@ -30,10 +30,8 @@ class State:
         self.next = None
         self.index = None
 
-    
-        
-    def apply(self, player,spaz):
-    
+    def apply(self, player, spaz):
+
         spaz.disconnect_controls_from_player()
         spaz.connect_controls_to_player(enable_punch=self.punch,
                                         enable_bomb=self.bomb,
@@ -46,10 +44,10 @@ class State:
         spaz.set_score_text(self.name)
 
         def set_controls():
-            player.actor.node.bomb_pressed=True
+            player.actor.node.bomb_pressed = True
             player.actor.on_bomb_release()
 
-        release_input=(ba.InputType.PUNCH_RELEASE,ba.InputType.PICK_UP_RELEASE)
+        release_input = (ba.InputType.PUNCH_RELEASE, ba.InputType.PICK_UP_RELEASE)
         if not self.bomb is None:
             for release in release_input:
                 player.assigninput(
@@ -169,14 +167,13 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
             player.state = self.states[0]
         self.spawn_player(player)
 
-
     # overriding the default character spawning..
+
     def spawn_player(self, player):
         if player.state is None:
             player.state = self.states[0]
         super().spawn_player(player)
-        player.state.apply(player,player.actor)
-
+        player.state.apply(player, player.actor)
 
     def isValidKill(self, m):
         if m.getkillerplayer(Player) is None:
@@ -194,7 +191,8 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
                 self.stats.player_scored(msg.getkillerplayer(Player), 10, kill=True)
                 if not msg.getkillerplayer(Player).state.final:
                     msg.getkillerplayer(Player).state = msg.getkillerplayer(Player).state.next
-                    msg.getkillerplayer(Player).state.apply(msg.getkillerplayer(Player),msg.getkillerplayer(Player).actor)
+                    msg.getkillerplayer(Player).state.apply(
+                        msg.getkillerplayer(Player), msg.getkillerplayer(Player).actor)
                 else:
                     msg.getkillerplayer(Player).team.score += 1
                     self.end_game()
