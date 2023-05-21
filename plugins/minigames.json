@@ -325,9 +325,20 @@
           "name": "Freaku",
           "email": "",
           "discord": "[Just] Freak#4999"
+        },
+        {
+          "name": "LoupGarou",
+          "email": "LoupGarou5418@outlook.com",
+          "discord": "ʟօʊքɢǟʀօʊ#3063"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 7,
+          "commit_sha": "2e2540a",
+          "released_on": "20-05-2023",
+          "md5sum": "e06fbfeb1c0c4c78e04054caab3d593f"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
