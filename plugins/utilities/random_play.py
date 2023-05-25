@@ -67,11 +67,11 @@ class RandomPlaylist:
     all_games: list[ba.GameActivity]
     usable_games: list[ba.GameActivity]
 
-    last_game: ba.GameActivity
+    last_game: str
 
     def __init__(self, sessiontype):
         self.sessiontype = sessiontype
-        self.usable_games = [
+        self.usable_games: list[ba.GameActivity] = [
             gt
             for gt in RandomPlaylist.all_games
             if gt.supports_session_type(self.sessiontype)
@@ -87,7 +87,7 @@ class RandomPlaylist:
 
         while True:
             game = choice(self.usable_games)
-            if game == self.last_game:
+            if game.name == self.last_game:
                 # Don't repeat the same game twice
                 if has_only_one_game:
                     # ...but don't freeze the game when there's only one game
@@ -95,6 +95,7 @@ class RandomPlaylist:
             else:
                 break
 
+        self.last_game = game.name
         game_map = choice(game.get_supported_maps(self.sessiontype))
         settings = {
             s.name: s.default for s in game.get_available_settings(self.sessiontype)
