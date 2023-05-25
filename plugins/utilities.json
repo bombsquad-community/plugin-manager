@@ -670,6 +670,25 @@
           "md5sum": "24913c665d05c3056c8ba390fe88155e"
         }
       }
+    },
+    "random_play": {
+      "description": "Play randomly generated FFA or Teams matches from your installed minigames and maps.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "silver_volt4",
+          "email": "",
+          "discord": "Silver_Volt4#6502"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "d91fea3",
+          "released_on": "25-05-2023",
+          "md5sum": "cec9a9c6f6aebddd8ec8160f7cc94b57"
+        }
+      }
     }
   }
 }
