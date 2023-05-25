@@ -672,7 +672,7 @@
       }
     },
     "random_play": {
-      "description": "A plugin that allows you to play randomly generated FFA or Teams matches by selecting a random minigame and map for each round. This eliminates the need to set up long playlists to enjoy all your BombSquad content.",
+      "description": "Play randomly generated FFA or Teams matches from your installed minigames and maps.",
       "external_url": "",
       "authors": [
         {
