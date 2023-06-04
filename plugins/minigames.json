@@ -293,6 +293,62 @@
         }
       }
     },
+    "demolition_war": {
+      "description": "BombFight on wooden floor flying in air.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "castel_queen": {
+      "description": "Carry the queen for some duration in her room.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "drone_war": {
+      "description": "Fly with Drone and attack with rocket launcher",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "the_spaz_game": {
+      "description": "Enemy Spaz Amoung us, kill correct person.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "air_soccer": {
       "description": "Play soccer while flying in air",
       "external_url": "https://youtu.be/j6FFk7E6W_U",
