@@ -304,7 +304,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "096107aaa9dad6d2753aa462c0a48537"
+        }
       }
     },
     "castel_queen": {
@@ -318,7 +323,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "74e876139e20a392c15deeafa31354f7"
+        }
       }
     },
     "drone_war": {
@@ -332,7 +342,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "569219eb72d8c27271f20fe375a01a69"
+        }
       }
     },
     "the_spaz_game": {
@@ -346,7 +361,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "55021c091b640780d6280cfb4b56b664"
+        }
       }
     },
     "air_soccer": {
