@@ -22,6 +22,8 @@ if TYPE_CHECKING:
     from typing import Any, Sequence
 
 # ba_meta export game
+
+
 class DemolitionWar(EliminationGame):
     name = 'DemolitionWar'
     description = 'Last remaining alive wins.'
@@ -121,7 +123,7 @@ class DemolitionWar(EliminationGame):
                   (0, 2, 0), 30, 1, spread=1, chunk_type='splinter')
         ba.timer(0.1, ba.Call(node.delete))
 
-    def map_extend(self): 
+    def map_extend(self):
         # TODO need to improve here , so we can increase size of map easily with settings
         p = [-6, -4.3, -2.6, -0.9, 0.8, 2.5, 4.2, 5.9]
         q = [-4, -2.3, -0.6, 1.1, 2.8, 4.5]
@@ -186,7 +188,6 @@ class DemolitionWar(EliminationGame):
         return ud_1_r
 
 
-
 class mapdefs:
     points = {}
     # noinspection PyDictCreation
@@ -203,9 +204,9 @@ class mapdefs:
     points['flag2'] = (11.01486398, 0.03986567039, 0.1095578275)
     points['flag_default'] = (-0.1001374046, 0.04180340146, 0.1095578275)
     boxes['goal1'] = (12.22454533, 1.0,
-                    0.1087926362) + (0.0, 0.0, 0.0) + (2.0, 2.0, 12.97466313)
+                      0.1087926362) + (0.0, 0.0, 0.0) + (2.0, 2.0, 12.97466313)
     boxes['goal2'] = (-12.15961605, 1.0,
-                    0.1097860203) + (0.0, 0.0, 0.0) + (2.0, 2.0, 13.11856424)
+                      0.1097860203) + (0.0, 0.0, 0.0) + (2.0, 2.0, 13.11856424)
     boxes['map_bounds'] = (0.0, 1.185751251, 0.4326226188) + (0.0, 0.0, 0.0) + (
         42.09506485, 22.81173179, 29.76723155)
     points['powerup_spawn1'] = (5.414681236, 0.9515026107, -5.037912441)
@@ -215,6 +216,8 @@ class mapdefs:
     points['spawn1'] = (-10.03866341, 0.02275111462, 0.0) + (0.5, 1.0, 4.0)
     points['spawn2'] = (9.823107149, 0.01092306765, 0.0) + (0.5, 1.0, 4.0)
     points['tnt1'] = (-0.08421587483, 0.9515026107, -0.7762602271)
+
+
 class WoodenFloor(ba.Map):
     """Stadium map for football games."""
     defs = mapdefs
@@ -261,13 +264,13 @@ class WoodenFloor(ba.Map):
                 'color_texture': self.preloaddata['model_bg_tex']
             })
         self.vr = ba.newnode('terrain',
-                   attrs={
-                       'model': self.preloaddata['bg_vr_fill_model'],
-                       'lighting': False,
-                       'vr_only': True,
-                       'background': True,
-                       'color_texture': self.preloaddata['model_bg_tex']
-                   })
+                             attrs={
+                                 'model': self.preloaddata['bg_vr_fill_model'],
+                                 'lighting': False,
+                                 'vr_only': True,
+                                 'background': True,
+                                 'color_texture': self.preloaddata['model_bg_tex']
+                             })
         gnode = ba.getactivity().globalsnode
         gnode.tint = (1.3, 1.2, 1.0)
         gnode.ambient_color = (1.3, 1.2, 1.0)
@@ -275,7 +278,6 @@ class WoodenFloor(ba.Map):
         gnode.vignette_inner = (0.9, 0.9, 0.9)
         gnode.vr_camera_offset = (0, -0.8, -1.1)
         gnode.vr_near_clip = 0.5
-
 
     def is_point_near_edge(self,
                            point: ba.Vec3,
@@ -294,7 +296,6 @@ class WoodenFloor(ba.Map):
             return
         if player.is_alive():
             player.shatter(True)
-
 
 
 try:

@@ -26,9 +26,12 @@ if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
 # ba_meta export game
+
+
 class ChooseQueen(KeepAwayGame):
     name = 'FCUK The Queen'
     description = 'Carry the queen for a set length of time'
+
     @classmethod
     def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
         return issubclass(sessiontype, ba.DualTeamSession)
@@ -42,7 +45,7 @@ class ChooseQueen(KeepAwayGame):
 
     def get_instance_description_short(self) -> str | Sequence:
         return 'FCUK the queen for ${ARG1} seconds', self._hold_time
-    
+
     def __init__(self, settings: dict):
         super().__init__(settings)
         shared = SharedObjects.get()
@@ -99,7 +102,7 @@ class ChooseQueen(KeepAwayGame):
         self._flag = spaz.Spaz((0, 0, 0), character="Pixel").autoretain()
         self._flag.handlemessage(ba.StandMessage((0, 14.63, -5.52), 93))
         self._flag.node.hold_position_pressed = True
-        self._flag.node.materials =  (self._queen_material,shared.object_material)
+        self._flag.node.materials = (self._queen_material, shared.object_material)
         # self._flag.node.extras_material= tuple(list(self._flag.node.extras_material).append(self._queen_materia))
         self._flag.hitpoints = 5000
         self._flag.hitpoints_max = 5000

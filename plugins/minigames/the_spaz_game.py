@@ -24,6 +24,8 @@ if TYPE_CHECKING:
 CHARACTER = 'Spaz'
 
 # ba_meta export game
+
+
 class TheSpazGame(EliminationGame):
     name = 'TheSpazGame'
     description = 'Enemy Spaz AmongUs. Kill them all'
@@ -84,7 +86,7 @@ class TheSpazGame(EliminationGame):
     @classmethod
     def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
         return ba.getmaps('melee')
-    
+
     def get_instance_description(self) -> str | Sequence:
         return (
             'Enemy Spaz AmongUs. Kill them all'
@@ -94,6 +96,7 @@ class TheSpazGame(EliminationGame):
         return (
             'Enemy Spaz AmongUs. Kill them all'
         )
+
     def __init__(self, settings: dict):
         super().__init__(settings)
         self._solo_mode = False
@@ -105,13 +108,13 @@ class TheSpazGame(EliminationGame):
         x = random.randrange(0, len(p))
         y = random.randrange(0, len(q))
         spaz = self.spawn_player_spaz(player, position=(p[x], 1.8, q[y]))
-        spaz.node.color = (1,1,1)
-        spaz.node.highlight = (1,0.4,1)
+        spaz.node.color = (1, 1, 1)
+        spaz.node.highlight = (1, 0.4, 1)
         self.update_appearance(spaz, character=CHARACTER)
         # Also lets have them make some noise when they die.
         spaz.play_big_death_sound = True
         return spaz
-    
+
     def update_appearance(self, spaz, character):
         factory = SpazFactory.get()
         media = factory.get_media(character)
@@ -119,4 +122,3 @@ class TheSpazGame(EliminationGame):
             setattr(spaz.node, field, value)
         spaz.node.style = factory.get_style(character)
         spaz.node.name = ''
-
