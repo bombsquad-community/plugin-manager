@@ -293,6 +293,82 @@
         }
       }
     },
+    "demolition_war": {
+      "description": "BombFight on wooden floor flying in air.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "096107aaa9dad6d2753aa462c0a48537"
+        }
+      }
+    },
+    "castel_queen": {
+      "description": "Carry the queen for some duration in her room.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "74e876139e20a392c15deeafa31354f7"
+        }
+      }
+    },
+    "drone_war": {
+      "description": "Fly with Drone and attack with rocket launcher",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "569219eb72d8c27271f20fe375a01a69"
+        }
+      }
+    },
+    "the_spaz_game": {
+      "description": "Enemy Spaz Amoung us, kill correct person.",
+      "external_url": "https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "smoothy@bombsquad.ga",
+          "discord": "mr.smoothy#5824"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "2aa1e50",
+          "released_on": "04-06-2023",
+          "md5sum": "55021c091b640780d6280cfb4b56b664"
+        }
+      }
+    },
     "air_soccer": {
       "description": "Play soccer while flying in air",
       "external_url": "https://youtu.be/j6FFk7E6W_U",
