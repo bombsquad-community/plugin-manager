@@ -11,7 +11,7 @@ import _babase
 import babase
 import bauiv1 as bui
 
-from bastd.ui.colorpicker import ColorPicker
+from bauiv1lib.colorpicker import ColorPicker
 
 original_buttonwidget = bui.buttonwidget
 original_containerwidget = bui.containerwidget
@@ -144,9 +144,9 @@ class ColorSchemeWindow(bui.Window):
         self.draw_ui()
 
     def draw_ui(self):
-        # Most of the stuff here for drawing the UI is referred from the
-        # game's bastd/ui/profile/edit.py, and so there could be some
-        # cruft here due to my oversight.
+        # NOTE: Most of the stuff here for drawing the UI is referred from the
+        # legacy (1.6 < version <= 1.7.19) game's bastd/ui/profile/edit.py, and
+        # so there could be some cruft here due to my oversight.
         uiscale = bui.app.classic.ui.uiscale
         self._width = width = 480.0 if uiscale is babase.UIScale.SMALL else 380.0
         self._x_inset = x_inset = 40.0 if uiscale is babase.UIScale.SMALL else 0.0
