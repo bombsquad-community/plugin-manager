@@ -561,11 +561,11 @@ class PluginLocal:
             pathlib.Path(directory),
             pathlib.Path(module),
         )
-        scanned_results = set(babase.app.meta.scanresults.exports["babase.GameActivity"])
-        for game in scanner.results.exports["babase.GameActivity"]:
+        scanned_results = set(babase.app.meta.scanresults.exports["bascenev1.GameActivity"])
+        for game in scanner.results.exports["bascenev1.GameActivity"]:
             if game not in scanned_results:
                 bui.screenmessage(f"{game} minigame loaded")
-                babase.app.meta.scanresults.exports["babase.GameActivity"].append(game)
+                babase.app.meta.scanresults.exports["bascenev1.GameActivity"].append(game)
 
     def unload_minigames(self):
         scanner = babase._meta.DirectoryScan(paths="")
@@ -575,12 +575,12 @@ class PluginLocal:
             pathlib.Path(module),
         )
         new_scanned_results_games = []
-        for game in babase.app.meta.scanresults.exports["babase.GameActivity"]:
-            if game in scanner.results.exports["babase.GameActivity"]:
+        for game in babase.app.meta.scanresults.exports["bascenev1.GameActivity"]:
+            if game in scanner.results.exports["bascenev1.GameActivity"]:
                 bui.screenmessage(f"{game} minigame unloaded")
             else:
                 new_scanned_results_games.append(game)
-        babase.app.meta.scanresults.exports["babase.GameActivity"] = new_scanned_results_games
+        babase.app.meta.scanresults.exports["bascenev1.GameActivity"] = new_scanned_results_games
 
     async def is_enabled(self):
         """
