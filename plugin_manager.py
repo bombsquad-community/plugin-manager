@@ -3,7 +3,7 @@ from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
 import babase
 import _babase
 import bauiv1 as bui
-from bastd.ui import popup, confirm
+from bauiv1lib import popup, confirm
 
 import urllib.request
 import http.client
@@ -56,8 +56,8 @@ REGEXP = {
     ),
     "minigames": re.compile(
         bytes(
-            "(ba_meta export (game|{})\n+class )(.*)\\(".format(
-                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["game"]),
+            "(ba_meta export ({})\n+class )(.*)\\(".format(
+                _regexp_friendly_class_name_shortcut("bascenev1.GameActivity"),
             ),
             "utf-8"
         ),
@@ -1545,7 +1545,7 @@ class PluginManagerWindow(bui.Window):
         )
 
     def _back(self) -> None:
-        from bastd.ui.settings.allsettings import AllSettingsWindow
+        from bauiv1lib.settings.allsettings import AllSettingsWindow
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
         bui.app.classic.ui.set_main_menu_window(
@@ -2314,15 +2314,15 @@ class NewAllSettingsWindow(bui.Window):
     @staticmethod
     def _preload_modules() -> None:
         """Preload modules we use (called in bg thread)."""
-        import bastd.ui.mainmenu as _unused1
-        import bastd.ui.settings.controls as _unused2
-        import bastd.ui.settings.graphics as _unused3
-        import bastd.ui.settings.audio as _unused4
-        import bastd.ui.settings.advanced as _unused5
+        import bauiv1lib.mainmenu as _unused1
+        import bauiv1lib.settings.controls as _unused2
+        import bauiv1lib.settings.graphics as _unused3
+        import bauiv1lib.settings.audio as _unused4
+        import bauiv1lib.settings.advanced as _unused5
 
     def _do_back(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.mainmenu import MainMenuWindow
+        from bauiv1lib.mainmenu import MainMenuWindow
 
         self._save_state()
         bui.containerwidget(
@@ -2335,7 +2335,7 @@ class NewAllSettingsWindow(bui.Window):
 
     def _do_controllers(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.controls import ControlsSettingsWindow
+        from bauiv1lib.settings.controls import ControlsSettingsWindow
 
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
@@ -2348,7 +2348,7 @@ class NewAllSettingsWindow(bui.Window):
 
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.graphics import GraphicsSettingsWindow
+        from bauiv1lib.settings.graphics import GraphicsSettingsWindow
 
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
@@ -2361,7 +2361,7 @@ class NewAllSettingsWindow(bui.Window):
 
     def _do_audio(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.audio import AudioSettingsWindow
+        from bauiv1lib.settings.audio import AudioSettingsWindow
 
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
@@ -2374,7 +2374,7 @@ class NewAllSettingsWindow(bui.Window):
 
     def _do_advanced(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.advanced import AdvancedSettingsWindow
+        from bauiv1lib.settings.advanced import AdvancedSettingsWindow
 
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
@@ -2449,7 +2449,7 @@ class NewAllSettingsWindow(bui.Window):
 class EntryPoint(babase.Plugin):
     def on_app_running(self) -> None:
         """Called when the app is being launched."""
-        from bastd.ui.settings import allsettings
+        from bauiv1lib.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         DNSBlockWorkaround.apply()
         asyncio.set_event_loop(babase._asyncio._asyncio_event_loop)
