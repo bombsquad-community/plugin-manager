@@ -13,39 +13,39 @@ if TYPE_CHECKING:
 
 
 class ForestMapData():
-	points = {}
-	boxes = {}
+    points = {}
+    boxes = {}
 
-	boxes['area_of_interest_bounds'] = (
-	    (0.0, 1.185751251, 0.4326226188)
-	    + (0.0, 0.0, 0.0)
-	    + (29.8180273, 11.57249038, 18.89134176)
-	)
-	boxes['edge_box'] = (
-	    (-0.103873591, 0.4133341891, 0.4294651013)
-	    + (0.0, 0.0, 0.0)
-	    + (22.48295719, 1.290242794, 8.990252454)
-	)
-	points['ffa_spawn1'] = (-2.0, -2.0, -4.373674593) + (
-	    8.895057015,
-	    1.0,
-	    0.444350722,
-	)
-	points['ffa_spawn2'] = (-2.0, -2.0, 2.076288941) + (
-	    8.895057015,
-	    1.0,
-	    0.444350722,
-	)
-	boxes['map_bounds'] = (
-	    (0.0, 1.185751251, 0.4326226188)
-	    + (0.0, 0.0, 0.0)
-	    + (42.09506485, 22.81173179, 29.76723155)
-	)
-	points['flag_default'] = (-2.5, -3.0, -2.0)
-	points['powerup_spawn1'] = (-6.0, -2.6, -1.25)
-	points['powerup_spawn2'] = (1.0, -2.6, -1.25)
-	points['spawn1'] = (-10.0, -2.0, -2.0) + (0.5, 1.0, 3.2)
-	points['spawn2'] = (5.0, -2.0, -2.0) + (0.5, 1.0, 3.2)
+    boxes['area_of_interest_bounds'] = (
+        (0.0, 1.185751251, 0.4326226188)
+        + (0.0, 0.0, 0.0)
+        + (29.8180273, 11.57249038, 18.89134176)
+    )
+    boxes['edge_box'] = (
+        (-0.103873591, 0.4133341891, 0.4294651013)
+        + (0.0, 0.0, 0.0)
+        + (22.48295719, 1.290242794, 8.990252454)
+    )
+    points['ffa_spawn1'] = (-2.0, -2.0, -4.373674593) + (
+        8.895057015,
+        1.0,
+        0.444350722,
+    )
+    points['ffa_spawn2'] = (-2.0, -2.0, 2.076288941) + (
+        8.895057015,
+        1.0,
+        0.444350722,
+    )
+    boxes['map_bounds'] = (
+        (0.0, 1.185751251, 0.4326226188)
+        + (0.0, 0.0, 0.0)
+        + (42.09506485, 22.81173179, 29.76723155)
+    )
+    points['flag_default'] = (-2.5, -3.0, -2.0)
+    points['powerup_spawn1'] = (-6.0, -2.6, -1.25)
+    points['powerup_spawn2'] = (1.0, -2.6, -1.25)
+    points['spawn1'] = (-10.0, -2.0, -2.0) + (0.5, 1.0, 3.2)
+    points['spawn2'] = (5.0, -2.0, -2.0) + (0.5, 1.0, 3.2)
 
 
 class ForestMap(ba.Map):
@@ -56,11 +56,11 @@ class ForestMap(ba.Map):
     @classmethod
     def get_play_types(cls) -> list[str]:
         return ['melee', 'keep_away']
-    
+
     @classmethod
     def get_preview_texture_name(cls) -> list[str]:
         return 'natureBackgroundColor'
-    
+
     @classmethod
     def on_preload(cls) -> any:
         data: dict[str, any] = {
@@ -71,11 +71,11 @@ class ForestMap(ba.Map):
             'bgtex': ba.gettexture('menuBG')
         }
         return data
-    
+
     def __init__(self) -> None:
         super().__init__()
         shared = SharedObjects.get()
-        
+
         self.node = ba.newnode(
             'terrain',
             delegate=self,
@@ -95,7 +95,7 @@ class ForestMap(ba.Map):
                 'color_texture': self.preloaddata['bgtex']
             }
         )
-        
+
         gnode = ba.getactivity().globalsnode
         gnode.tint = (1.0, 1.10, 1.15)
         gnode.ambient_color = (0.9, 1.3, 1.1)
