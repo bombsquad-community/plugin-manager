@@ -25,7 +25,7 @@ _env = _ba.env()
 _uiscale = ba.app.ui.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.3.4"
+PLUGIN_MANAGER_VERSION = "0.3.5"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1538,6 +1538,10 @@ class PluginManagerWindow(ba.Window):
         except RuntimeError:
             # User probably went back before a ba.Window could finish loading.
             pass
+        except Exception as e:
+            ba.textwidget(edit=self._plugin_manager_status_text,
+                          text=str(e))
+            raise
 
     async def draw_index(self):
         self.draw_search_bar()
