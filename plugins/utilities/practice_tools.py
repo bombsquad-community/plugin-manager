@@ -1348,8 +1348,8 @@ class OthersPracticeTab(PracticeTab):
         self.count = 1
         self.parent_widget = None
         self.activity = _ba.get_foreground_host_activity()
-        self.setting_name = (['Pause On Window', 'Invincible'])
-        self.config = (['pause', 'invincible'])
+        self.setting_name = (['Pause On Window', 'Invincible', 'Epic Mode'])
+        self.config = (['pause', 'invincible', 'epic'])
 
     def on_activate(
         self,
@@ -1462,6 +1462,12 @@ class OthersPracticeTab(PracticeTab):
                                 i.actor.node.invincible = False
                     except:
                         pass
+            elif setting == 2:
+                activity = _ba.get_foreground_host_activity()
+                if value:
+                    activity.globalsnode.slow_motion = True
+                else:
+                    activity.globalsnode.slow_motion = False
 
 
 class PracticeWindow(ba.Window):
