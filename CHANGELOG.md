@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 0.3.5 (16-06-2023)
+
+- Replace the "Loading..." text with the exception message in case something goes wrong.
+
 ### 0.3.4 (14-05-2023)
 
 - Optimize new plugin detection mechanism.

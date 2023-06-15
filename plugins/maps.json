@@ -3,7 +3,7 @@
   "description": "Maps",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps",
   "plugins": {
-    "forest_map": {
+    "forest": {
       "description": "Basically bridgit map but outter version",
       "external_url": "",
       "authors": [
@@ -14,8 +14,13 @@
         }
       ],
       "versions": {
-        "1.0.0": null
-      },
-    },
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "985e486",
+          "released_on": "15-06-2023",
+          "md5sum": "01fb81dc27d63789f31559140ec2bd72"
+        }
+      }
+    }
   }
 }
