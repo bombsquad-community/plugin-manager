@@ -2,5 +2,20 @@
   "name": "Maps",
   "description": "Maps",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps",
-  "plugins": {}
+  "plugins": {
+    "forest_map": {
+      "description": "Basically bridgit map but outter version",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Hopeless",
+          "email": "",
+          "discord": "Hopeless#9040"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      },
+    },
+  }
 }
