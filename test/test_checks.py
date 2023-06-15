@@ -163,6 +163,15 @@ class TestUtilitiesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
             self.content = json.load(fin)
 
 
+class TestMapsCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
+    def setUp(self):
+        super().setUp()
+        self.name = "Maps"
+        self.category = os.path.join("plugins", "maps")
+        with open(f"{self.category}.json", "rb") as fin:
+            self.content = json.load(fin)
+
+
 class TestMinigamesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
     def setUp(self):
         super().setUp()
