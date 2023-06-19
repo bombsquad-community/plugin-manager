@@ -57,7 +57,8 @@ import random
 import weakref
 from enum import Enum
 from typing import TYPE_CHECKING
-import ba, _ba
+import ba
+import _ba
 import ba.internal
 import bastd
 from bastd.actor.powerupbox import PowerupBox
@@ -560,7 +561,7 @@ class NewBotSet(SpazBotSet):
                     bot_list = []
                     ba.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
-                                               self._bot_update_list]))
+                                           self._bot_update_list]))
                 self._bot_update_list = (self._bot_update_list +
                                          1) % self._bot_list_count
 
@@ -648,10 +649,9 @@ class DummyBotSet(NewBotSet):
                 except Exception:
                     ba.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
-                                               self._bot_update_list]))
+                                           self._bot_update_list]))
                 self._bot_update_list = (self._bot_update_list +
                                          1) % self._bot_list_count
-
 
         except:
             pass
@@ -1100,7 +1100,6 @@ class BotsPracticeTab(PracticeTab):
         if self._bot_button:
             tint1, tint2, color = self.check_color()
 
-
             ba.buttonwidget(
                 edit=self._bot_button,
                 texture=ba.gettexture(self.image_array[self._icon_index]),
@@ -1163,7 +1162,6 @@ class BotsPracticeTab(PracticeTab):
 
         colors = tint1, tint2, color
         return colors
-
 
 
 class PowerUpPracticeTab(PracticeTab):
@@ -1361,8 +1359,7 @@ class PowerUpPracticeTab(PracticeTab):
                                i.node.position[1],
                                i.node.position[2] + z)
                         PowerupBox(position=pos,
-                                   poweruptype=
-                                   self.power_list_type
+                                   poweruptype=self.power_list_type
                                    [self._icon_index]).autoretain()
 
     def _power_window(self) -> None:
