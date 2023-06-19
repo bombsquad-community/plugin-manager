@@ -1,4 +1,4 @@
-"""Practice Tools Mod: V1.0
+"""Practice Tools Mod: V1.2
 Made by Cross Joy"""
 
 # If anyone who want to help me on giving suggestion/ fix bugs/ creating PR,
@@ -11,7 +11,19 @@ Made by Cross Joy"""
 # Some support will be much appreciated. :')
 # Support link: https://www.buymeacoffee.com/CrossJoy
 
+# ----------------------------------------------------------------------------
+# V1.2 update
+# - Added New Bot: Bomber Lite and Brawler Lite.
+# - Added New Setting: Epic Mode Toggle.
+# - Added immunity to curse if invincible.
+# - Fixed Power Up mini billboard will not removed after debuff.
+# - Fixed Power Up landmine count will not removed after debuff.
+# - Fixed the config (Bot Picker, Count, Radius and Power Up Picker) will set to default when exit the practice tab.
 
+# V1.1 update
+# - Fixed Charger Bot Pro bot spawn with shield.
+# - Fixed selecting Bruiser bot is not working.
+# - Added screen message when pressing spawn/clear/debuff button.
 # ----------------------------------------------------------------------------
 # Powerful and comprehensive tools for practice purpose.
 
@@ -45,8 +57,7 @@ import random
 import weakref
 from enum import Enum
 from typing import TYPE_CHECKING
-import ba
-import _ba
+import ba, _ba
 import ba.internal
 import bastd
 from bastd.actor.powerupbox import PowerupBox
@@ -56,7 +67,7 @@ from bastd.actor.spazbot import (SpazBotSet, SpazBot, BrawlerBot, TriggerBot,
                                  BomberBotPro, BrawlerBotPro, TriggerBotPro,
                                  ChargerBotPro, BomberBotProShielded,
                                  BrawlerBotProShielded, TriggerBotProShielded,
-                                 ChargerBotProShielded)
+                                 ChargerBotProShielded, BomberBotLite, BrawlerBotLite)
 from bastd.mainmenu import MainMenuSession
 from bastd.ui.party import PartyWindow as OriginalPartyWindow
 from ba import app, Plugin
@@ -84,14 +95,6 @@ try:
         ba.app.config.get("bombRadiusVisual")
 except:
     ba.app.config["bombRadiusVisual"] = False
-
-try:
-    if ba.app.config.get("stopBots") is None:
-        ba.app.config["stopBots"] = False
-    else:
-        ba.app.config.get("stopBots")
-except:
-    ba.app.config["stopBots"] = False
 
 try:
     if ba.app.config.get("stopBots") is None:
@@ -182,7 +185,7 @@ def main(plugin: Plugin) -> None:
 # ba_meta require api 7
 # ba_meta export plugin
 class Practice(Plugin):
-    __version__ = '1.0'
+    __version__ = '1.2'
 
     def on_app_running(self) -> None:
         """Plugin start point."""
@@ -389,9 +392,10 @@ Spaz.super_curse = Spaz.curse
 
 
 def new_cursed(self):
+    if self.node.invincible:
+        return
     self.super_curse()
     if ba.app.config.get("bombRadiusVisual"):
-
         ba.animate_array(self.curse_visualizer, 'size', 1, {
             0.0: [0.0],
             0.2: [3 * 2.2],
@@ -423,7 +427,6 @@ Spaz.super_handlemessage = Spaz.handlemessage
 
 
 def bot_handlemessage(self, msg: Any):
-
     if isinstance(msg, ba.PowerupMessage):
         if msg.poweruptype == 'health':
             if ba.app.config.get("bombRadiusVisual"):
@@ -478,8 +481,8 @@ def bot_handlemessage(self, msg: Any):
         elif ba.app.config.get('bombRadiusVisual'):
 
             ba.animate_array(self.bot_radius, 'size', 1, {
-                0.0: [(self.hitpoints_max - self.hitpoints) * 0.0048],
-                0.25: [(self.hitpoints_max - self.hitpoints) * 0.0048]
+                0.0: [(self.hitpoints_max - self.hitpoints) * 0.0045],
+                0.25: [(self.hitpoints_max - self.hitpoints) * 0.0045]
             })
             ba.animate(self.bot_radius, 'opacity', {
                 0.0: 0.00,
@@ -487,8 +490,8 @@ def bot_handlemessage(self, msg: Any):
             })
 
             ba.animate_array(self.radius_visualizer_circle, 'size', 1, {
-                0.0: [(self.hitpoints_max - self.hitpoints) * 0.0048],
-                0.25: [(self.hitpoints_max - self.hitpoints) * 0.0048]
+                0.0: [(self.hitpoints_max - self.hitpoints) * 0.0045],
+                0.25: [(self.hitpoints_max - self.hitpoints) * 0.0045]
             })
 
             ba.animate(
@@ -557,7 +560,7 @@ class NewBotSet(SpazBotSet):
                     bot_list = []
                     ba.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
-                                           self._bot_update_list]))
+                                               self._bot_update_list]))
                 self._bot_update_list = (self._bot_update_list +
                                          1) % self._bot_list_count
 
@@ -645,9 +648,10 @@ class DummyBotSet(NewBotSet):
                 except Exception:
                     ba.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
-                                           self._bot_update_list]))
+                                               self._bot_update_list]))
                 self._bot_update_list = (self._bot_update_list +
                                          1) % self._bot_list_count
+
 
         except:
             pass
@@ -670,6 +674,10 @@ class DummyBot(SpazBot):
             emit_type='fairydust')
 
 
+class NewChargerBotPro(ChargerBotPro):
+    default_shields = False
+
+
 # -------------------------------------------------------------------
 
 class PracticeTab:
@@ -687,13 +695,13 @@ class PracticeTab:
         return window
 
     def on_activate(
-        self,
-        parent_widget: ba.Widget,
-        tab_button: ba.Widget,
-        region_width: float,
-        region_height: float,
-        scroll_widget: ba.Widget,
-        extra_x: float,
+            self,
+            parent_widget: ba.Widget,
+            tab_button: ba.Widget,
+            region_width: float,
+            region_height: float,
+            scroll_widget: ba.Widget,
+            extra_x: float,
     ) -> ba.Widget:
         """Called when the tab becomes the active one.
 
@@ -736,21 +744,22 @@ class BotsPracticeTab(PracticeTab):
     def __init__(self, window: PracticeWindow,
                  bot1=DummyBotSet(), bot2=NewBotSet()) -> None:
         super().__init__(window)
+        bot_index, count, radius = self.load_settings()
         self._container: ba.Widget | None = None
-        self.count = 1
-        self.radius = 0
+        self.count = count
+        self.radius = radius
         self.radius_array = (['Small', 'Medium', 'Big'])
         self.parent_widget = None
         self.bot1 = bot1
         self.bot2 = bot2
         self.activity = _ba.get_foreground_host_activity()
         self.image_array = (
-            ['bonesIcon', 'neoSpazIcon', 'kronkIcon',
+            ['bonesIcon', 'neoSpazIcon', 'kronkIcon', 'neoSpazIcon', 'kronkIcon',
              'zoeIcon', 'ninjaIcon', 'melIcon', 'jackIcon', 'bunnyIcon',
              'neoSpazIcon', 'kronkIcon', 'zoeIcon', 'ninjaIcon',
              'neoSpazIcon', 'kronkIcon', 'zoeIcon', 'ninjaIcon'])
         self.bot_array_name = (
-            ['Dummy', 'Bomber', 'Bruiser',
+            ['Dummy', 'Bomber Lite', 'Brawler Lite', 'Bomber', 'Brawler',
              'Trigger', 'Charger', 'Sticky',
              'Explodey', 'Bouncy', 'Pro Bomber',
              'Pro Brawler', 'Pro Trigger', 'Pro Charger',
@@ -761,22 +770,22 @@ class BotsPracticeTab(PracticeTab):
         self.config = (['stopBots', 'immortalDummy'])
 
         self.bot_array = (
-            [DummyBot, SpazBot, BrawlerBot, TriggerBot,
+            [DummyBot, BomberBotLite, BrawlerBotLite, SpazBot, BrawlerBot, TriggerBot,
              ChargerBot, StickyBot, ExplodeyBot, BouncyBot,
-             BomberBotPro, BrawlerBotPro, TriggerBotPro, ChargerBotPro,
+             BomberBotPro, BrawlerBotPro, TriggerBotPro, NewChargerBotPro,
              BomberBotProShielded, BrawlerBotProShielded,
              TriggerBotProShielded, ChargerBotProShielded])
 
-        self._icon_index = self.bot_array_name.index('Dummy')
+        self._icon_index = bot_index
 
     def on_activate(
-        self,
-        parent_widget: ba.Widget,
-        tab_button: ba.Widget,
-        region_width: float,
-        region_height: float,
-        scroll_widget: ba.Widget,
-        extra_x: float,
+            self,
+            parent_widget: ba.Widget,
+            tab_button: ba.Widget,
+            region_width: float,
+            region_height: float,
+            scroll_widget: ba.Widget,
+            extra_x: float,
     ) -> ba.Widget:
 
         b_size_2 = 100
@@ -814,6 +823,8 @@ class BotsPracticeTab(PracticeTab):
                       text='Spawn Bot',
                       maxwidth=200)
 
+        tint1, tint2, color = self.check_color()
+
         self._bot_button = bot = ba.buttonwidget(
             parent=self._subcontainer,
             autoselect=True,
@@ -822,11 +833,11 @@ class BotsPracticeTab(PracticeTab):
             on_activate_call=self._bot_window,
             size=(b_size_2, b_size_2),
             label='',
-            color=(1, 1, 1),
+            color=color,
             tint_texture=(ba.gettexture(
                 self.image_array[self._icon_index] + 'ColorMask')),
-            tint_color=(0.6, 0.6, 0.6),
-            tint2_color=(0.1, 0.3, 0.1),
+            tint_color=tint1,
+            tint2_color=tint2,
             texture=ba.gettexture(self.image_array[self._icon_index]),
             mask_texture=mask_texture)
 
@@ -1017,6 +1028,7 @@ class BotsPracticeTab(PracticeTab):
 
             ba.textwidget(edit=self.count_text,
                           text=str(self.count))
+        self.save_settings()
 
     def decrease_count(self):
         if self.count > 1:
@@ -1024,6 +1036,7 @@ class BotsPracticeTab(PracticeTab):
 
             ba.textwidget(edit=self.count_text,
                           text=str(self.count))
+        self.save_settings()
 
     def increase_radius(self):
         if self.radius < 2:
@@ -1031,6 +1044,7 @@ class BotsPracticeTab(PracticeTab):
 
             ba.textwidget(edit=self.radius_text,
                           text=self.radius_array[self.radius])
+        self.save_settings()
 
     def decrease_radius(self):
         if self.radius > 0:
@@ -1038,13 +1052,18 @@ class BotsPracticeTab(PracticeTab):
 
             ba.textwidget(edit=self.radius_text,
                           text=self.radius_array[self.radius])
+        self.save_settings()
 
     def clear_bot(self):
+        ba.screenmessage('Cleared',
+                         clients=[-1], transient=True, color=(1, 0.1, 0.1))
         self.bot1.clear()
         self.bot2.clear()
 
     def do_spawn_bot(self, clid: int = -1) -> None:
         with ba.Context(self.activity):
+            ba.screenmessage('Spawned',
+                             clients=[-1], transient=True, color=(0.2, 1, 0.2))
             for i in _ba.get_foreground_host_activity().players:
                 if i.sessionplayer.inputdevice.client_id == clid:
                     if i.node:
@@ -1079,26 +1098,8 @@ class BotsPracticeTab(PracticeTab):
 
     def _update_character(self, change: int = 0) -> None:
         if self._bot_button:
-            if self.bot_array_name[self._icon_index] in (
-                'Pro Bomber', 'Pro Brawler',
-                'Pro Trigger', 'Pro Charger',
-                'S.Pro Bomber', 'S.Pro Brawler',
-                    'S.Pro Trigger', 'S.Pro Charger'):
-                tint1 = (1.0, 0.2, 0.1)
-                tint2 = (0.6, 0.1, 0.05)
-            elif self.bot_array_name[self._icon_index] in 'Bouncy':
-                tint1 = (1, 1, 1)
-                tint2 = (1.0, 0.5, 0.5)
-            else:
-                tint1 = (0.6, 0.6, 0.6)
-                tint2 = (0.1, 0.3, 0.1)
+            tint1, tint2, color = self.check_color()
 
-            if self.bot_array_name[self._icon_index] in (
-                'S.Pro Bomber', 'S.Pro Brawler',
-                    'S.Pro Trigger', 'S.Pro Charger'):
-                color = (1.3, 1.2, 3.0)
-            else:
-                color = (1.0, 1.0, 1.0)
 
             ba.buttonwidget(
                 edit=self._bot_button,
@@ -1108,6 +1109,61 @@ class BotsPracticeTab(PracticeTab):
                 color=color,
                 tint_color=tint1,
                 tint2_color=tint2)
+        self.save_settings()
+
+    def load_settings(self):
+        try:
+            if ba.app.config.get("botsSpawnSetting") is None:
+                ba.app.config["botsSpawnSetting"] = (0, 1, 0)
+                bot_index, count, radius = ba.app.config.get(
+                    "botsSpawnSetting")
+            else:
+                bot_index, count, radius = ba.app.config.get(
+                    "botsSpawnSetting")
+                print(ba.app.config.get("botsSpawnSetting"))
+        except:
+            ba.app.config["botsSpawnSetting"] = (0, 1, 0)
+            bot_index, count, radius = ba.app.config.get("botsSpawnSetting")
+        values = bot_index, count, radius
+        print("settings loaded")
+        return values
+
+    def save_settings(self):
+        ba.app.config["botsSpawnSetting"] = (self._icon_index, self.count,
+                                             self.radius)
+        print(ba.app.config.get("botsSpawnSetting"))
+        ba.app.config.commit()
+        print("settings saved")
+
+    def check_color(self):
+        if self.bot_array_name[self._icon_index] in (
+                'Pro Bomber', 'Pro Brawler',
+                'Pro Trigger', 'Pro Charger',
+                'S.Pro Bomber', 'S.Pro Brawler',
+                'S.Pro Trigger', 'S.Pro Charger'):
+            tint1 = (1.0, 0.2, 0.1)
+            tint2 = (0.6, 0.1, 0.05)
+        elif self.bot_array_name[self._icon_index] in 'Bouncy':
+            tint1 = (1, 1, 1)
+            tint2 = (1.0, 0.5, 0.5)
+        elif self.bot_array_name[self._icon_index] in ('Brawler Lite',
+                                                       'Bomber Lite'):
+            tint1 = (1.2, 0.9, 0.2)
+            tint2 = (1.0, 0.5, 0.6)
+        else:
+            tint1 = (0.6, 0.6, 0.6)
+            tint2 = (0.1, 0.3, 0.1)
+
+        if self.bot_array_name[self._icon_index] in (
+                'S.Pro Bomber', 'S.Pro Brawler',
+                'S.Pro Trigger', 'S.Pro Charger'):
+            color = (1.3, 1.2, 3.0)
+        else:
+            color = (1.0, 1.0, 1.0)
+
+        colors = tint1, tint2, color
+        return colors
+
 
 
 class PowerUpPracticeTab(PracticeTab):
@@ -1133,19 +1189,19 @@ class PowerUpPracticeTab(PracticeTab):
             ['triple_bombs', 'curse', 'health', 'ice_bombs',
              'impact_bombs', 'land_mines', 'punch',
              'shield', 'sticky_bombs'])
-        self._icon_index = self.power_list_type_name.index('Tripple Bombs')
+        self._icon_index = self.load_settings()
 
         self.setting_name = (['Bomb Countdown', 'Bomb Radius Visualizer'])
         self.config = (['bombCountdown', 'bombRadiusVisual'])
 
     def on_activate(
-        self,
-        parent_widget: ba.Widget,
-        tab_button: ba.Widget,
-        region_width: float,
-        region_height: float,
-        scroll_widget: ba.Widget,
-        extra_x: float,
+            self,
+            parent_widget: ba.Widget,
+            tab_button: ba.Widget,
+            region_width: float,
+            region_height: float,
+            scroll_widget: ba.Widget,
+            extra_x: float,
     ) -> ba.Widget:
 
         b_size_2 = 100
@@ -1276,14 +1332,25 @@ class PowerUpPracticeTab(PracticeTab):
         return self._subcontainer
 
     def debuff(self):
+        ba.screenmessage('Debuffed',
+                         clients=[-1], transient=True, color=(1, 0.1, 0.1))
         with ba.Context(_ba.get_foreground_host_activity()):
             for i in _ba.get_foreground_host_activity().players:
                 Spaz._gloves_wear_off(i.actor)
                 Spaz._multi_bomb_wear_off(i.actor)
                 Spaz._bomb_wear_off(i.actor)
+                i.actor.node.mini_billboard_1_end_time = 0
+                i.actor.node.mini_billboard_2_end_time = 0
+                i.actor.node.mini_billboard_3_end_time = 0
+                i.actor._multi_bomb_wear_off_flash_timer = None
+                i.actor._boxing_gloves_wear_off_flash_timer = None
+                i.actor._bomb_wear_off_flash_timer = None
+                Spaz.set_land_mine_count(i.actor, min(0, 0))
                 i.actor.shield_hitpoints = 1
 
     def get_powerup(self, clid: int = -1) -> None:
+        ba.screenmessage('Spawned',
+                         clients=[-1], transient=True, color=(0.2, 1, 0.2))
         with ba.Context(_ba.get_foreground_host_activity()):
             for i in _ba.get_foreground_host_activity().players:
                 if i.sessionplayer.inputdevice.client_id == clid:
@@ -1294,7 +1361,8 @@ class PowerUpPracticeTab(PracticeTab):
                                i.node.position[1],
                                i.node.position[2] + z)
                         PowerupBox(position=pos,
-                                   poweruptype=self.power_list_type
+                                   poweruptype=
+                                   self.power_list_type
                                    [self._icon_index]).autoretain()
 
     def _power_window(self) -> None:
@@ -1319,6 +1387,7 @@ class PowerUpPracticeTab(PracticeTab):
                 texture=(ba.gettexture('powerup' +
                                        self.power_list[
                                            self._icon_index])))
+        self.save_settings()
 
     def _check_value_change(self, setting: int, widget: ba.Widget,
                             value: str) -> None:
@@ -1338,6 +1407,28 @@ class PowerUpPracticeTab(PracticeTab):
                 else:
                     ba.app.config["bombRadiusVisual"] = False
 
+    def load_settings(self):
+        try:
+            if ba.app.config.get("powerSpawnSetting") is None:
+                ba.app.config["powerSpawnSetting"] = 0
+                power_index = ba.app.config.get("powerSpawnSetting")
+            else:
+                power_index = ba.app.config.get(
+                    "powerSpawnSetting")
+                print(ba.app.config.get("powerSpawnSetting"))
+        except:
+            ba.app.config["powerSpawnSetting"] = 0
+            power_index = ba.app.config.get("powerSpawnSetting")
+        values = power_index
+        print("power settings loaded")
+        return values
+
+    def save_settings(self):
+        ba.app.config["powerSpawnSetting"] = self._icon_index
+        print(ba.app.config.get("powerSpawnSetting"))
+        ba.app.config.commit()
+        print("power settings saved")
+
 
 class OthersPracticeTab(PracticeTab):
     """The about tab in the practice UI"""
@@ -1349,16 +1440,16 @@ class OthersPracticeTab(PracticeTab):
         self.parent_widget = None
         self.activity = _ba.get_foreground_host_activity()
         self.setting_name = (['Pause On Window', 'Invincible', 'Epic Mode'])
-        self.config = (['pause', 'invincible', 'epic'])
+        self.config = (['pause', 'invincible'])
 
     def on_activate(
-        self,
-        parent_widget: ba.Widget,
-        tab_button: ba.Widget,
-        region_width: float,
-        region_height: float,
-        scroll_widget: ba.Widget,
-        extra_x: float,
+            self,
+            parent_widget: ba.Widget,
+            tab_button: ba.Widget,
+            region_width: float,
+            region_height: float,
+            scroll_widget: ba.Widget,
+            extra_x: float,
     ) -> ba.Widget:
         spacing_v = 60
         spacing_h = -50
@@ -1403,7 +1494,11 @@ class OthersPracticeTab(PracticeTab):
                           color=(0.8, 0.8, 0.8),
                           v_align='center',
                           maxwidth=200)
-            value = ba.app.config.get(self.config[i])
+            if name == 'Epic Mode':
+                activity = _ba.get_foreground_host_activity()
+                value = activity.globalsnode.slow_motion
+            else:
+                value = ba.app.config.get(self.config[i])
             txt2 = ba.textwidget(
                 parent=self._subcontainer,
                 position=(self._sub_width * 0.8 - spacing_v / 2,
@@ -1546,7 +1641,7 @@ class PracticeWindow(ba.Window):
             (self.TabID.BOTS, 'Bots')
         ]
         if ba_internal.get_v1_account_misc_read_val(
-            'enablePublicParties', True
+                'enablePublicParties', True
         ):
             tabdefs.append(
                 (
@@ -1742,6 +1837,7 @@ org_begin = ba._activity.Activity.on_begin
 
 def new_begin(self):
     """Runs when game is began."""
+    org_begin(self)
     _ba.set_party_icon_always_visible(True)
 
 
@@ -1817,13 +1913,13 @@ class BotPicker(popup.PopupWindow):
 
         mask_texture = ba.gettexture('characterIconMask')
 
-        bot_list = (['bones', 'neoSpaz', 'kronk', 'zoe',
+        bot_list = (['bones', 'neoSpaz', 'kronk', 'neoSpaz', 'kronk', 'zoe',
                      'ninja', 'mel', 'jack', 'bunny',
                      'neoSpaz', 'kronk', 'zoe',
                      'ninja',
                      'neoSpaz', 'kronk', 'zoe',
                      'ninja'])
-        bot_list_type = (['Dummy', 'Bomber', 'Brawler', 'Trigger',
+        bot_list_type = (['Dummy', 'Bomber Lite', 'Brawler Lite', 'Bomber', 'Brawler', 'Trigger',
                           'Charger', 'Sticky', 'Explodey', 'Bouncy',
                           'Pro Bomber', 'Pro Brawler', 'Pro Trigger',
                           'Pro Charger', 'S.Pro Bomber', 'S.Pro Brawler',
@@ -1842,6 +1938,10 @@ class BotPicker(popup.PopupWindow):
                 elif bot_list_type[index] in 'Bouncy':
                     tint1 = (1, 1, 1)
                     tint2 = (1.0, 0.5, 0.5)
+                elif bot_list_type[index] in ('Brawler Lite',
+                                              'Bomber Lite'):
+                    tint1 = (1.2, 0.9, 0.2)
+                    tint2 = (1.0, 0.5, 0.6)
                 else:
                     tint1 = (0.6, 0.6, 0.6)
                     tint2 = (0.1, 0.3, 0.1)
@@ -2084,7 +2184,7 @@ class InfoWindow(popup.PopupWindow):
 
         text = ('Practice Tools Mod\n'
                 'Made By Cross Joy\n'
-                'version 1.0\n'
+                'version 1.2\n'
                 '\n'
                 'Thx to\n'
                 'Mikirog for the Bomb radius visualizer mod.\n'
