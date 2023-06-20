@@ -42,7 +42,9 @@ HEADERS = {
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 
-_regexp_friendly_class_name_shortcut = lambda string: string.replace(".", "\\.")
+
+def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
+
 
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
