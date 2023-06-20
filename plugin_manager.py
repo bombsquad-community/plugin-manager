@@ -41,8 +41,8 @@ HEADERS = {
     "User-Agent": _env["legacy_user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
-def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\.")
 
+_regexp_friendly_class_name_shortcut = lambda string: string.replace(".", "\\.")
 
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),

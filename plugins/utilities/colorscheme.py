@@ -147,7 +147,7 @@ class ColorSchemeWindow(bui.Window):
         # NOTE: Most of the stuff here for drawing the UI is referred from the
         # legacy (1.6 < version <= 1.7.19) game's bastd/ui/profile/edit.py, and
         # so there could be some cruft here due to my oversight.
-        uiscale = bui.app.classic.ui.uiscale
+        uiscale = bui.app.ui_v1.uiscale
         self._width = width = 480.0 if uiscale is babase.UIScale.SMALL else 380.0
         self._x_inset = x_inset = 40.0 if uiscale is babase.UIScale.SMALL else 0.0
         self._height = height = (
@@ -241,7 +241,7 @@ class ColorSchemeWindow(bui.Window):
             draw_controller=self._color_button,
             text=babase.Lstr(resource="editProfileWindow.colorText"),
             scale=0.7,
-            color=bui.app.classic.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             maxwidth=120,
         )
 
@@ -268,7 +268,7 @@ class ColorSchemeWindow(bui.Window):
             draw_controller=self._highlight_button,
             text=babase.Lstr(resource="editProfileWindow.highlightText"),
             scale=0.7,
-            color=bui.app.classic.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             maxwidth=120,
         )
 
