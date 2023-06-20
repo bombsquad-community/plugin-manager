@@ -28,7 +28,7 @@ from threading import Thread
 import logging
 
 _env = _babase.env()
-_uiscale = bui.app.classic.ui.uiscale
+_uiscale = bui.app.ui_v1.uiscale
 
 
 PLUGIN_MANAGER_VERSION = "1.0.0"
@@ -38,7 +38,7 @@ REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
-    "User-Agent": _env["user_agent_string"],
+    "User-Agent": _env["legacy_user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\.")
@@ -1003,7 +1003,7 @@ class PluginWindow(popup.PopupWindow):
                                        size=(40, 40),
                                        button_type="square",
                                        label="",
-                                       # color=bui.app.classic.ui.title_color,
+                                       # color=bui.app.ui_v1.title_color,
                                        color=(0.6, 0.53, 0.63),
                                        on_activate_call=lambda: bui.open_url(self.plugin.view_url))
         bui.imagewidget(parent=self._root_widget,
@@ -1040,7 +1040,7 @@ class PluginWindow(popup.PopupWindow):
                                            size=(40, 40),
                                            button_type="square",
                                            label="",
-                                           # color=bui.app.classic.ui.title_color,
+                                           # color=bui.app.ui_v1.title_color,
                                            color=(0.6, 0.53, 0.63),
 
                                            on_activate_call=tutorial_confirm_window)
@@ -1280,7 +1280,7 @@ class PluginSourcesWindow(popup.PopupWindow):
             position=(155, 300),
             size=(100, 25),
             text="Custom Plugin Sources",
-            color=bui.app.classic.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             scale=0.8,
             h_align="center",
             v_align="center",
@@ -1522,7 +1522,7 @@ class PluginManagerWindow(bui.Window):
             position=(-10, title_pos),
             size=(self._width, 25),
             text="Community Plugin Manager",
-            color=bui.app.classic.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             scale=1.05,
             h_align="center",
             v_align="center",
@@ -1537,7 +1537,7 @@ class PluginManagerWindow(bui.Window):
             position=(-5, loading_pos_y),
             size=(self._width, 25),
             text="Loading...",
-            color=bui.app.classic.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
@@ -1548,7 +1548,7 @@ class PluginManagerWindow(bui.Window):
         from bauiv1lib.settings.allsettings import AllSettingsWindow
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             AllSettingsWindow(transition='in_left').get_root_widget())
 
     @contextlib.contextmanager
@@ -1647,7 +1647,7 @@ class PluginManagerWindow(bui.Window):
                        selectable=False,
                        h_align='left',
                        v_align='center',
-                       color=bui.app.classic.ui.title_color,
+                       color=bui.app.ui_v1.title_color,
                        scale=0.5)
 
         filter_txt = babase.Lstr(resource='filterText')
@@ -1920,7 +1920,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        v_align='center',
                        text=setting_title,
                        scale=text_scale,
-                       color=bui.app.classic.ui.title_color,
+                       color=bui.app.ui_v1.title_color,
                        maxwidth=width * 0.9)
 
         pos -= 20
@@ -2140,7 +2140,7 @@ class NewAllSettingsWindow(bui.Window):
             )
         )
 
-        if bui.app.classic.ui.use_toolbars and _uiscale is bui.UIScale.SMALL:
+        if bui.app.ui_v1.use_toolbars and _uiscale is bui.UIScale.SMALL:
             self._back_button = None
             bui.containerwidget(
                 edit=self._root_widget, on_cancel_call=self._do_back
@@ -2164,7 +2164,7 @@ class NewAllSettingsWindow(bui.Window):
             position=(0, height - 44),
             size=(width, 25),
             text=bui.Lstr(resource=self._r + '.titleText'),
-            color=bui.app.classic.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             h_align='center',
             v_align='center',
             maxwidth=130,
@@ -2216,7 +2216,7 @@ class NewAllSettingsWindow(bui.Window):
             label='',
             on_activate_call=self._do_controllers,
         )
-        if bui.app.classic.ui.use_toolbars and self._back_button is None:
+        if bui.app.ui_v1.use_toolbars and self._back_button is None:
             bbtn = bui.get_special_widget('back_button')
             bui.widget(edit=ctb, left_widget=bbtn)
         _b_title(
@@ -2240,7 +2240,7 @@ class NewAllSettingsWindow(bui.Window):
             label='',
             on_activate_call=self._do_graphics,
         )
-        if bui.app.classic.ui.use_toolbars:
+        if bui.app.ui_v1.use_toolbars:
             pbtn = bui.get_special_widget('party_button')
             bui.widget(edit=gfxb, up_widget=pbtn, right_widget=pbtn)
         _b_title(x_offs3, v, gfxb, bui.Lstr(resource=self._r + '.graphicsText'))
@@ -2333,7 +2333,7 @@ class NewAllSettingsWindow(bui.Window):
             edit=self._root_widget, transition=self._transition_out
         )
         assert bui.app.classic is not None
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             MainMenuWindow(transition='in_left').get_root_widget()
         )
 
@@ -2344,7 +2344,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             ControlsSettingsWindow(
                 origin_widget=self._controllers_button
             ).get_root_widget()
@@ -2357,7 +2357,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             GraphicsSettingsWindow(
                 origin_widget=self._graphics_button
             ).get_root_widget()
@@ -2370,7 +2370,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             AudioSettingsWindow(
                 origin_widget=self._audio_button
             ).get_root_widget()
@@ -2383,7 +2383,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             AdvancedSettingsWindow(
                 origin_widget=self._advanced_button
             ).get_root_widget()
@@ -2392,7 +2392,7 @@ class NewAllSettingsWindow(bui.Window):
     def _do_modmanager(self) -> None:
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition="out_left")
-        bui.app.classic.ui.set_main_menu_window(
+        bui.app.ui_v1.set_main_menu_window(
             PluginManagerWindow(
                 origin_widget=self._modmgr_button
             ).get_root_widget()
@@ -2416,7 +2416,7 @@ class NewAllSettingsWindow(bui.Window):
             else:
                 raise ValueError(f'unrecognized selection \'{sel}\'')
             assert bui.app.classic is not None
-            bui.app.classic.ui.window_states[type(self)] = {
+            bui.app.ui_v1.window_states[type(self)] = {
                 'sel_name': sel_name
             }
         except Exception:
@@ -2425,7 +2425,7 @@ class NewAllSettingsWindow(bui.Window):
     def _restore_state(self) -> None:
         try:
             assert bui.app.classic is not None
-            sel_name = bui.app.classic.ui.window_states.get(type(self), {}).get(
+            sel_name = bui.app.ui_v1.window_states.get(type(self), {}).get(
                 'sel_name'
             )
             sel: bui.Widget | None
