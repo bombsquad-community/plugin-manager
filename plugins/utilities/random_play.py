@@ -151,8 +151,6 @@ def patched__init__(
         textcolor=(0.7, 0.65, 0.7),
     )
 
-    print(dir(self._customize_button))
-
 # Returns a function that starts the game
 
 
