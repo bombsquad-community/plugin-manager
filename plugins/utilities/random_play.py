@@ -1,11 +1,22 @@
-# ba_meta require api 7
+# ba_meta require api 8
 from random import choice, randint
 from typing import Any, Union
 
 # pylint: disable=import-error
-import _ba
-import ba
-from bastd.ui.playlist.browser import PlaylistBrowserWindow
+import babase
+from bascenev1 import (
+    Session,
+    MultiTeamSession,
+    FreeForAllSession,
+    DualTeamSession,
+    GameActivity,
+    newactivity,
+    new_host_session,
+)
+
+from bauiv1 import Widget, UIScale, buttonwidget
+from bauiv1lib.playlist.browser import PlaylistBrowserWindow
+from bascenev1lib.activity.multiteamjoin import MultiTeamJoinActivity
 
 DEFAULT_TEAM_COLORS = ((0.1, 0.25, 1.0), (1.0, 0.25, 0.2))
 DEFAULT_TEAM_NAMES = ("Blue", "Red")
@@ -13,16 +24,16 @@ DEFAULT_TEAM_NAMES = ("Blue", "Red")
 
 # More or less copied from game code
 # I have no idea what I'm doing here
-class RandomPlaySessionMixin(ba.MultiTeamSession, ba.Session):
+class RandomPlaySessionMixin(MultiTeamSession, Session):
     def __init__(self, playlist) -> None:
-        """Set up playlists and launches a ba.Activity to accept joiners."""
-        # pylint: disable=cyclic-import
-        from bastd.activity.multiteamjoin import MultiTeamJoinActivity
+        """Set up playlists & launch a bascenev1.Activity to accept joiners."""
 
-        app = _ba.app
+        app = babase.app
+        classic = app.classic
+        assert classic is not None
         _cfg = app.config
 
-        super(ba.MultiTeamSession, self).__init__(
+        super(MultiTeamSession, self).__init__(
             [],
             team_names=DEFAULT_TEAM_NAMES,
             team_colors=DEFAULT_TEAM_COLORS,
@@ -30,8 +41,8 @@ class RandomPlaySessionMixin(ba.MultiTeamSession, ba.Session):
             max_players=self.get_max_players(),
         )
 
-        self._series_length = app.teams_series_length
-        self._ffa_series_length = app.ffa_series_length
+        self._series_length: int = classic.teams_series_length
+        self._ffa_series_length: int = classic.ffa_series_length
 
         self._tutorial_activity_instance = None
         self._game_number = 0
@@ -41,37 +52,37 @@ class RandomPlaySessionMixin(ba.MultiTeamSession, ba.Session):
 
         self._current_game_spec: dict[str, Any] | None = None
         self._next_game_spec: dict[str, Any] = self._playlist.pull_next()
-        self._next_game: type[ba.GameActivity] = self._next_game_spec["resolved_type"]
+        self._next_game: type[GameActivity] = self._next_game_spec["resolved_type"]
 
         self._instantiate_next_game()
-        self.setactivity(_ba.newactivity(MultiTeamJoinActivity))
+        self.setactivity(newactivity(MultiTeamJoinActivity))
 
 
 # Classes for Teams autopilot and FFA autopilot
 # I think they have to be separate in order to comply with `ba.GameActivity.supports_session_type()`
-class RandFreeForAllSession(ba.FreeForAllSession, RandomPlaySessionMixin):
+class RandFreeForAllSession(FreeForAllSession, RandomPlaySessionMixin):
     def __init__(self):
-        playlist = RandomPlaylist(ba.FreeForAllSession)
-        super(ba.FreeForAllSession, self).__init__(playlist)
+        playlist = RandomPlaylist(FreeForAllSession)
+        super(FreeForAllSession, self).__init__(playlist)
 
 
-class RandDualTeamSession(ba.DualTeamSession, RandomPlaySessionMixin):
+class RandDualTeamSession(DualTeamSession, RandomPlaySessionMixin):
     def __init__(self):
-        playlist = RandomPlaylist(ba.DualTeamSession)
-        super(ba.DualTeamSession, self).__init__(playlist)
+        playlist = RandomPlaylist(DualTeamSession)
+        super(DualTeamSession, self).__init__(playlist)
 
 
 # The faux playlist that just picks games at random
 class RandomPlaylist:
-    sessiontype: ba.Session
-    all_games: list[ba.GameActivity]
-    usable_games: list[ba.GameActivity]
+    sessiontype: Session
+    all_games: list[GameActivity]
+    usable_games: list[GameActivity]
 
     last_game: str
 
     def __init__(self, sessiontype):
         self.sessiontype = sessiontype
-        self.usable_games: list[ba.GameActivity] = [
+        self.usable_games: list[GameActivity] = [
             gt
             for gt in RandomPlaylist.all_games
             if gt.supports_session_type(self.sessiontype)
@@ -90,7 +101,7 @@ class RandomPlaylist:
             if game.name == self.last_game:
                 # Don't repeat the same game twice
                 if has_only_one_game:
-                    # ...but don't freeze the game when there's only one game
+                    # ...but don't freeze when there's only one game
                     break
             else:
                 break
@@ -113,40 +124,42 @@ class RandomPlaylist:
 # Hope you don't mind.
 def patched__init__(
     self,
-    sessiontype: type[ba.Session],
+    sessiontype: type[Session],
     transition: str | None = "in_right",
-    origin_widget: ba.Widget | None = None,
+    origin_widget: Widget | None = None,
 ):
     width = 800
     height = 650
 
-    ui_scale = ba.app.ui.uiscale
-    y_offset = -100 if ui_scale is ba.UIScale.SMALL else 0
-    x_offset = 50 if ui_scale is ba.UIScale.SMALL else 0
+    ui_scale = babase.app.ui_v1.uiscale
+
+    y_offset = -100 if ui_scale is UIScale.SMALL else 0
+    x_offset = 50 if ui_scale is UIScale.SMALL else 0
 
     self.old__init__(sessiontype, transition, origin_widget)
     # pylint: disable=protected-access
-    self._quick_game_button = ba.buttonwidget(
+    self._quick_game_button = buttonwidget(
         parent=self._root_widget,
         position=(width - 120 * 2 + x_offset, height - 132 + y_offset),
         autoselect=True,
-        size=(120, 60),
+        size=(80, 60),
         scale=1.1,
         text_scale=1.2,
-        label="Random games",
+        label="Random",
         on_activate_call=game_starter_factory(sessiontype),
         color=(0.54, 0.52, 0.67),
         textcolor=(0.7, 0.65, 0.7),
     )
-
+    
+    print(dir(self._customize_button))
 
 # Returns a function that starts the game
-def game_starter_factory(sessiontype: type[ba.Session]):
+def game_starter_factory(sessiontype: type[Session]):
     session: Union[RandFreeForAllSession, RandDualTeamSession] = None
 
-    if issubclass(sessiontype, ba.FreeForAllSession):
+    if issubclass(sessiontype, FreeForAllSession):
         session = RandFreeForAllSession
-    elif issubclass(sessiontype, ba.DualTeamSession):
+    elif issubclass(sessiontype, DualTeamSession):
         session = RandDualTeamSession
     else:
         raise RuntimeError("Can't determine session type")
@@ -170,18 +183,18 @@ def game_starter_factory(sessiontype: type[ba.Session]):
                 start()
 
         def start():
-            _ba.unlock_all_input()
-            _ba.new_host_session(session)
+            babase.unlock_all_input()
+            new_host_session(session)
 
-        _ba.fade_screen(False, time=0.25, endcall=has_faded)
-        _ba.lock_all_input()
-        ba.app.meta.load_exported_classes(ba.GameActivity, do_start)
+        babase.fade_screen(False, time=0.25, endcall=has_faded)
+        babase.lock_all_input()
+        babase.app.meta.load_exported_classes(GameActivity, do_start)
 
     return on_run
 
 
 # ba_meta export plugin
-class RandomPlayPlugin(ba.Plugin):
+class RandomPlayPlugin(babase.Plugin):
     """
     A plugin that allows you to play randomly generated FFA or Teams matches by selecting a random minigame and map for each round.
     This eliminates the need to set up long playlists to enjoy all your BombSquad content.
