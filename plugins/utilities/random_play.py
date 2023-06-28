@@ -150,10 +150,12 @@ def patched__init__(
         color=(0.54, 0.52, 0.67),
         textcolor=(0.7, 0.65, 0.7),
     )
-    
+
     print(dir(self._customize_button))
 
 # Returns a function that starts the game
+
+
 def game_starter_factory(sessiontype: type[Session]):
     session: Union[RandFreeForAllSession, RandDualTeamSession] = None
 
