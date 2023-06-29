@@ -1,5 +1,11 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
+**Important:** Please check out the [main](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch
+if you're on game version (1.7.20 or later) which uses API 8 plugins. If you're on a older game version
+(1.7.0 <= your game version <= 1.7.19) which uses API 7 plugins then proceed with the rest of the README here.
+
+-------------------------------
+
 # plugin-manager
 
 A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
@@ -8,7 +14,7 @@ which makes further modding of your game more convenient by providing easier acc
 [![DownloadIcon]][DownloadLink]
 
 [DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
-[DownloadLink]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
+[DownloadLink]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager@api7/plugin_manager.py
 
 ![Plugin Manager GIF](https://user-images.githubusercontent.com/106954762/190505304-519c4b91-2461-42b1-be57-655a3fb0cbe8.gif)
 
@@ -35,7 +41,7 @@ There are two different ways the plugin manager can be installed:
    Settings -> Advanced -> Show Mods Folder). This is the recommended way (read next method to know why).
 
 2. Another way is to add
-   [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
+   [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/api7/plugin_manager.py)
    to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
    will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
    manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
