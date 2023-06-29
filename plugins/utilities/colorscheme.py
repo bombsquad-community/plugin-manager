@@ -6,39 +6,21 @@
 # Settings -> Advanced -> Enter Code
 # to bring up the colorscheme UI.
 
-# ba_meta require api 7
-import _ba
-import ba
+# ba_meta require api 8
+import _babase
+import babase
+import bauiv1 as bui
 
-from bastd.ui.colorpicker import ColorPicker
+from bauiv1lib.colorpicker import ColorPicker
 
-original_buttonwidget = ba.buttonwidget
-original_containerwidget = ba.containerwidget
-original_checkboxwidget = ba.checkboxwidget
+original_buttonwidget = bui.buttonwidget
+original_containerwidget = bui.containerwidget
+original_checkboxwidget = bui.checkboxwidget
 # We set this later so we store the overridden method in case the
 # player is using pro-unlocker plugins that override the
-# `ba.app.accounts.have_pro` method.
+# `bui.app.classic.accounts.have_pro` method.
 original_have_pro = None
-
-
-def is_game_version_lower_than(version):
-    """
-    Returns a boolean value indicating whether the current game
-    version is lower than the passed version. Useful for addressing
-    any breaking changes within game versions.
-    """
-    game_version = tuple(map(int, ba.app.version.split(".")))
-    version = tuple(map(int, version.split(".")))
-    return game_version < version
-
-
-# Adds backward compatibility for a breaking change released in
-# game version 1.7.7, which moves `_ba.add_transaction` to
-# `ba.internal.add_transaction`.
-if is_game_version_lower_than("1.7.7"):
-    original_add_transaction = _ba.add_transaction
-else:
-    original_add_transaction = ba.internal.add_transaction
+original_add_transaction = bui.app.plus.add_v1_account_transaction
 
 
 class ColorScheme:
@@ -61,24 +43,24 @@ class ColorScheme:
     --------
     + Apply dark colorscheme:
 
-        >>> import _ba
-        >>> dark = _ba.ColorScheme((0.2,0.2,0.2), (0.8,0.8,0.8))
+        >>> import _babase
+        >>> dark = _babase.ColorScheme((0.2,0.2,0.2), (0.8,0.8,0.8))
         >>> dark.apply()
         # Reset back to game's default colorscheme
         >>> dark.disable()
 
     + Colorscheme that modifies only the main colors:
 
-        >>> import _ba
-        >>> bluey = _ba.ColorScheme(color=(0.1,0.3,0.6))
+        >>> import _babase
+        >>> bluey = _babase.ColorScheme(color=(0.1,0.3,0.6))
         >>> bluey.apply()
         # Reset back to game's default colorscheme
         >>> bluey.disable()
 
     + Colorscheme that modifies only the highlight colors:
 
-        >>> import _ba
-        >>> reddish = _ba.ColorScheme(highlight=(0.8,0.35,0.35))
+        >>> import _babase
+        >>> reddish = _babase.ColorScheme(highlight=(0.8,0.35,0.35))
         >>> reddish.apply()
         # Reset back to game's default colorscheme
         >>> reddish.disable()
@@ -86,8 +68,8 @@ class ColorScheme:
     + Revert back to game's default colorscheme irrespective of
       whatever colorscheme is active at the moment:
 
-        >>> import _ba
-        >>> _ba.ColorScheme.disable()
+        >>> import _babase
+        >>> _babase.ColorScheme.disable()
     """
 
     def __init__(self, color=None, highlight=None):
@@ -112,13 +94,13 @@ class ColorScheme:
     def _apply_color(self):
         if self.color is None:
             raise TypeError("Expected color to be an (R,G,B) tuple.")
-        ba.containerwidget = self._custom_containerwidget
+        bui.containerwidget = self._custom_containerwidget
 
     def _apply_highlight(self):
         if self.highlight is None:
             raise TypeError("Expected highlight to be an (R,G,B) tuple.")
-        ba.buttonwidget = self._custom_buttonwidget
-        ba.checkboxwidget = self._custom_checkboxwidget
+        bui.buttonwidget = self._custom_buttonwidget
+        bui.checkboxwidget = self._custom_checkboxwidget
 
     def apply(self):
         if self.color:
@@ -128,12 +110,12 @@ class ColorScheme:
 
     @staticmethod
     def _disable_color():
-        ba.buttonwidget = original_buttonwidget
-        ba.checkboxwidget = original_checkboxwidget
+        bui.buttonwidget = original_buttonwidget
+        bui.checkboxwidget = original_checkboxwidget
 
     @staticmethod
     def _disable_highlight():
-        ba.containerwidget = original_containerwidget
+        bui.containerwidget = original_containerwidget
 
     @classmethod
     def disable(cls):
@@ -141,10 +123,10 @@ class ColorScheme:
         cls._disable_highlight()
 
 
-class ColorSchemeWindow(ba.Window):
+class ColorSchemeWindow(bui.Window):
     def __init__(self, default_colors=((0.41, 0.39, 0.5), (0.5, 0.7, 0.25))):
         self._default_colors = default_colors
-        self._color, self._highlight = ba.app.config.get("ColorScheme", (None, None))
+        self._color, self._highlight = babase.app.config.get("ColorScheme", (None, None))
 
         self._last_color = self._color
         self._last_highlight = self._highlight
@@ -157,88 +139,88 @@ class ColorSchemeWindow(ba.Window):
 
         # A hack to let players select any RGB color value through the UI,
         # otherwise this is limited only to pro accounts.
-        ba.app.accounts_v1.have_pro = lambda: True
+        bui.app.classic.accounts.have_pro = lambda: True
 
         self.draw_ui()
 
     def draw_ui(self):
-        # Most of the stuff here for drawing the UI is referred from the
-        # game's bastd/ui/profile/edit.py, and so there could be some
-        # cruft here due to my oversight.
-        uiscale = ba.app.ui.uiscale
-        self._width = width = 480.0 if uiscale is ba.UIScale.SMALL else 380.0
-        self._x_inset = x_inset = 40.0 if uiscale is ba.UIScale.SMALL else 0.0
+        # NOTE: Most of the stuff here for drawing the UI is referred from the
+        # legacy (1.6 < version <= 1.7.19) game's bastd/ui/profile/edit.py, and
+        # so there could be some cruft here due to my oversight.
+        uiscale = bui.app.ui_v1.uiscale
+        self._width = width = 480.0 if uiscale is babase.UIScale.SMALL else 380.0
+        self._x_inset = x_inset = 40.0 if uiscale is babase.UIScale.SMALL else 0.0
         self._height = height = (
             275.0
-            if uiscale is ba.UIScale.SMALL
+            if uiscale is babase.UIScale.SMALL
             else 288.0
-            if uiscale is ba.UIScale.MEDIUM
+            if uiscale is babase.UIScale.MEDIUM
             else 300.0
         )
         spacing = 40
         self._base_scale = (
             2.05
-            if uiscale is ba.UIScale.SMALL
+            if uiscale is babase.UIScale.SMALL
             else 1.5
-            if uiscale is ba.UIScale.MEDIUM
+            if uiscale is babase.UIScale.MEDIUM
             else 1.0
         )
         top_extra = 15
 
         super().__init__(
-            root_widget=ba.containerwidget(
+            root_widget=bui.containerwidget(
                 size=(width, height + top_extra),
                 on_outside_click_call=self.cancel_on_outside_click,
                 transition="in_right",
                 scale=self._base_scale,
-                stack_offset=(0, 15) if uiscale is ba.UIScale.SMALL else (0, 0),
+                stack_offset=(0, 15) if uiscale is babase.UIScale.SMALL else (0, 0),
             )
         )
 
-        cancel_button = ba.buttonwidget(
+        cancel_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(52 + x_inset, height - 60),
             size=(155, 60),
             scale=0.8,
             autoselect=True,
-            label=ba.Lstr(resource="cancelText"),
+            label=babase.Lstr(resource="cancelText"),
             on_activate_call=self._cancel,
         )
-        ba.containerwidget(edit=self._root_widget, cancel_button=cancel_button)
+        bui.containerwidget(edit=self._root_widget, cancel_button=cancel_button)
 
-        save_button = ba.buttonwidget(
+        save_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(width - (177 + x_inset), height - 110),
             size=(155, 60),
             autoselect=True,
             scale=0.8,
-            label=ba.Lstr(resource="saveText"),
+            label=babase.Lstr(resource="saveText"),
         )
-        ba.widget(edit=save_button, left_widget=cancel_button)
-        ba.buttonwidget(edit=save_button, on_activate_call=self.save)
-        ba.widget(edit=cancel_button, right_widget=save_button)
-        ba.containerwidget(edit=self._root_widget, start_button=save_button)
+        bui.widget(edit=save_button, left_widget=cancel_button)
+        bui.buttonwidget(edit=save_button, on_activate_call=self.save)
+        bui.widget(edit=cancel_button, right_widget=save_button)
+        bui.containerwidget(edit=self._root_widget, start_button=save_button)
 
-        reset_button = ba.buttonwidget(
+        reset_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(width - (177 + x_inset), height - 60),
             size=(155, 60),
             color=(0.2, 0.5, 0.6),
             autoselect=True,
             scale=0.8,
-            label=ba.Lstr(resource="settingsWindowAdvanced.resetText"),
+            label=babase.Lstr(resource="settingsWindowAdvanced.resetText"),
         )
-        ba.widget(edit=reset_button, left_widget=reset_button)
-        ba.buttonwidget(edit=reset_button, on_activate_call=self.reset)
-        ba.widget(edit=cancel_button, right_widget=reset_button)
-        ba.containerwidget(edit=self._root_widget, start_button=reset_button)
+        bui.widget(edit=reset_button, left_widget=reset_button)
+        bui.buttonwidget(edit=reset_button, on_activate_call=self.reset)
+        bui.widget(edit=cancel_button, right_widget=reset_button)
+        bui.containerwidget(edit=self._root_widget, start_button=reset_button)
 
         v = height - 65.0
         v -= spacing * 3.0
         b_size = 80
         b_offs = 75
 
-        self._color_button = ba.buttonwidget(
+        self._color_button = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
             position=(self._width * 0.5 - b_offs - b_size * 0.5, v - 50),
@@ -247,23 +229,23 @@ class ColorSchemeWindow(ba.Window):
             label="",
             button_type="square",
         )
-        ba.buttonwidget(
-            edit=self._color_button, on_activate_call=ba.Call(self._pick_color, "color")
+        bui.buttonwidget(
+            edit=self._color_button, on_activate_call=babase.Call(self._pick_color, "color")
         )
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             h_align="center",
             v_align="center",
             position=(self._width * 0.5 - b_offs, v - 65),
             size=(0, 0),
             draw_controller=self._color_button,
-            text=ba.Lstr(resource="editProfileWindow.colorText"),
+            text=babase.Lstr(resource="editProfileWindow.colorText"),
             scale=0.7,
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             maxwidth=120,
         )
 
-        self._highlight_button = ba.buttonwidget(
+        self._highlight_button = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
             position=(self._width * 0.5 + b_offs - b_size * 0.5, v - 50),
@@ -273,20 +255,20 @@ class ColorSchemeWindow(ba.Window):
             button_type="square",
         )
 
-        ba.buttonwidget(
+        bui.buttonwidget(
             edit=self._highlight_button,
-            on_activate_call=ba.Call(self._pick_color, "highlight"),
+            on_activate_call=babase.Call(self._pick_color, "highlight"),
         )
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             h_align="center",
             v_align="center",
             position=(self._width * 0.5 + b_offs, v - 65),
             size=(0, 0),
             draw_controller=self._highlight_button,
-            text=ba.Lstr(resource="editProfileWindow.highlightText"),
+            text=babase.Lstr(resource="editProfileWindow.highlightText"),
             scale=0.7,
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             maxwidth=120,
         )
 
@@ -306,7 +288,7 @@ class ColorSchemeWindow(ba.Window):
         )
 
     def cancel_on_outside_click(self):
-        ba.playsound(ba.getsound("swish"))
+        bui.getsound("swish").play()
         self._cancel()
 
     def _cancel(self):
@@ -314,44 +296,44 @@ class ColorSchemeWindow(ba.Window):
             colorscheme = ColorScheme(self._last_color, self._last_highlight)
             colorscheme.apply()
         # Good idea to revert this back now so we do not break anything else.
-        ba.app.accounts_v1.have_pro = original_have_pro
-        ba.containerwidget(edit=self._root_widget, transition="out_right")
+        bui.app.classic.accounts.have_pro = original_have_pro
+        bui.containerwidget(edit=self._root_widget, transition="out_right")
 
     def reset(self, transition_out=True):
         if transition_out:
-            ba.playsound(ba.getsound("gunCocking"))
-        ba.app.config["ColorScheme"] = (None, None)
+            bui.getsound("gunCocking").play()
+        babase.app.config["ColorScheme"] = (None, None)
         # Good idea to revert this back now so we do not break anything else.
-        ba.app.accounts_v1.have_pro = original_have_pro
-        ba.app.config.commit()
-        ba.containerwidget(edit=self._root_widget, transition="out_right")
+        bui.app.classic.accounts.have_pro = original_have_pro
+        babase.app.config.commit()
+        bui.containerwidget(edit=self._root_widget, transition="out_right")
 
     def save(self, transition_out=True):
         if transition_out:
-            ba.playsound(ba.getsound("gunCocking"))
+            bui.getsound("gunCocking").play()
         colorscheme = ColorScheme(
             self._color or self._default_colors[0],
             self._highlight or self._default_colors[1],
         )
         colorscheme.apply()
         # Good idea to revert this back now so we do not break anything else.
-        ba.app.accounts_v1.have_pro = original_have_pro
-        ba.app.config["ColorScheme"] = (
+        bui.app.classic.accounts.have_pro = original_have_pro
+        babase.app.config["ColorScheme"] = (
             self._color or self._default_colors[0],
             self._highlight or self._default_colors[1],
         )
-        ba.app.config.commit()
-        ba.containerwidget(edit=self._root_widget, transition="out_right")
+        babase.app.config.commit()
+        bui.containerwidget(edit=self._root_widget, transition="out_right")
 
     def _set_color(self, color):
         self._color = color
         if self._color_button:
-            ba.buttonwidget(edit=self._color_button, color=color)
+            bui.buttonwidget(edit=self._color_button, color=color)
 
     def _set_highlight(self, color):
         self._highlight = color
         if self._highlight_button:
-            ba.buttonwidget(edit=self._highlight_button, color=color)
+            bui.buttonwidget(edit=self._highlight_button, color=color)
 
     def color_picker_selected_color(self, picker, color):
         # The `ColorPicker` calls this method in the delegate once a color
@@ -387,13 +369,7 @@ class CustomTransactions:
         self.custom_transactions[transaction_code] = transaction_fn
 
     def enable(self):
-        # Adds backward compatibility for a breaking change released in
-        # game version 1.7.7, which moves `_ba.add_transaction` to
-        # `ba.internal.add_transaction`.
-        if is_game_version_lower_than("1.7.7"):
-            _ba.add_transaction = self._handle
-        else:
-            ba.internal.add_transaction = self._handle
+        bui.app.plus.add_v1_account_transaction = self._handle
 
 
 def launch_colorscheme_selection_window():
@@ -410,7 +386,7 @@ def launch_colorscheme_selection_window():
     # has pro-unlocked or not if our plugin runs before the dedicated
     # pro-unlocker plugin has been applied.
     global original_have_pro
-    original_have_pro = ba.app.accounts_v1.have_pro
+    original_have_pro = bui.app.classic.accounts.have_pro
 
     ColorSchemeWindow()
 
@@ -420,7 +396,7 @@ def colorscheme_transaction(transaction, *args, **kwargs):
 
 
 def load_colorscheme():
-    color, highlight = ba.app.config.get("ColorScheme", (None, None))
+    color, highlight = babase.app.config.get("ColorScheme", (None, None))
     if color and highlight:
         colorscheme = ColorScheme(color, highlight)
         colorscheme.apply()
@@ -429,7 +405,7 @@ def load_colorscheme():
 def load_plugin():
     # Allow access to changing colorschemes manually through the in-game
     # console.
-    _ba.ColorScheme = ColorScheme
+    _babase.ColorScheme = ColorScheme
     # Adds a new advanced code entry named "colorscheme" which can be
     # entered through Settings -> Advanced -> Enter Code, allowing
     # colorscheme modification through a friendly UI.
@@ -441,7 +417,7 @@ def load_plugin():
 
 
 # ba_meta export plugin
-class Main(ba.Plugin):
+class Main(babase.Plugin):
     def on_app_running(self):
         load_plugin()
 

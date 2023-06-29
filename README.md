@@ -1,5 +1,12 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
+**Important:** Please check out the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch if you're
+using the game version (1.7.0 <= your game version <= 1.7.19) which uses API 7 plugins.
+If you're on game version (1.7.20 or a later version) where it uses API 8 plugins, then proceed with the rest of the
+README here.
+
+-------------------------------
+
 # plugin-manager
 
 A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
@@ -177,6 +184,8 @@ That's it! Now you can make a [pull request](../../compare) with both the update
 - Check out [bombsquad-community/sample-plugin-source](https://github.com/bombsquad-community/sample-plugin-source) as an example.
   You can choose to show up plugins from this repository in your plugin manager by adding `bombsquad-community/sample-plugin-source`
   as a custom source through the category selection popup window in-game.
+- Plugin manager will default to picking up plugins from the `main` branch of the custom source repository. You
+  can specify a different branch by suffixing the source URI with `@branchname`, such as `bombsquad-community/sample-plugin-source@experimental`.
 
   #### Known 3rd Party Plugin Sources
 

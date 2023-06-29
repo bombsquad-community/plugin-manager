@@ -1,7 +1,9 @@
-# ba_meta require api 7
-import ba
-import _ba
-from bastd.ui import popup, confirm
+# ba_meta require api 8
+from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
+import babase
+import _babase
+import bauiv1 as bui
+from bauiv1lib import popup, confirm
 
 import urllib.request
 import http.client
@@ -17,47 +19,79 @@ import pathlib
 import contextlib
 import hashlib
 import copy
+import traceback
 
 from typing import Union, Optional
 from datetime import datetime
 
-_env = _ba.env()
-_uiscale = ba.app.ui.uiscale
+# Modules used for overriding AllSettingsWindow
+from threading import Thread
+import logging
+
+_env = _babase.env()
+_uiscale = bui.app.ui_v1.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "0.3.5"
+PLUGIN_MANAGER_VERSION = "1.0.1"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
-    "User-Agent": _env["user_agent_string"],
+    "User-Agent": _env["legacy_user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
+
+
+def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
+
+
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
-    "plugin_entry_points": re.compile(b"(ba_meta export plugin\n+class )(.*)\\("),
-    "minigames": re.compile(b"(ba_meta export game\n+class )(.*)\\("),
+    "plugin_entry_points": re.compile(
+        bytes(
+            "(ba_meta export (plugin|{})\n+class )(.*)\\(".format(
+                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["plugin"]),
+            ),
+            "utf-8"
+        ),
+    ),
+    "minigames": re.compile(
+        bytes(
+            "(ba_meta export ({})\n+class )(.*)\\(".format(
+                _regexp_friendly_class_name_shortcut("bascenev1.GameActivity"),
+            ),
+            "utf-8"
+        ),
+    ),
 }
 DISCORD_URL = "https://ballistica.net/discord"
 
 _CACHE = {}
 
 
-class MD5CheckSumFailedError(Exception):
+class MD5CheckSumFailed(Exception):
     pass
 
 
-class PluginNotInstalledError(Exception):
+class PluginNotInstalled(Exception):
     pass
 
 
-class CategoryDoesNotExistError(Exception):
+class CategoryDoesNotExist(Exception):
     pass
 
 
-class NoCompatibleVersionError(Exception):
+class NoCompatibleVersion(Exception):
+    pass
+
+
+class PluginSourceNetworkError(Exception):
+    pass
+
+
+class CategoryMetadataParseError(Exception):
     pass
 
 
@@ -84,7 +118,7 @@ def stream_network_response_to_file(request, file, md5sum=None, retries=3):
             content += chunk
     if md5sum and hashlib.md5(content).hexdigest() != md5sum:
         if retries <= 0:
-            raise MD5CheckSumFailedError("MD5 checksum match failed.")
+            raise MD5CheckSumFailed("MD5 checksum match failed.")
         return stream_network_response_to_file(
             request,
             file,
@@ -214,9 +248,9 @@ class StartupTasks:
     def setup_config(self):
         # is_config_updated = False
         existing_plugin_manager_config = copy.deepcopy(
-            ba.app.config.get("Community Plugin Manager"))
+            babase.app.config.get("Community Plugin Manager"))
 
-        plugin_manager_config = ba.app.config.setdefault("Community Plugin Manager", {})
+        plugin_manager_config = babase.app.config.setdefault("Community Plugin Manager", {})
         plugin_manager_config.setdefault("Custom Sources", [])
         installed_plugins = plugin_manager_config.setdefault("Installed Plugins", {})
         for plugin_name in tuple(installed_plugins.keys()):
@@ -240,26 +274,26 @@ class StartupTasks:
         plugin_manager_config["Settings"] = current_settings
 
         if plugin_manager_config != existing_plugin_manager_config:
-            ba.app.config.commit()
+            babase.app.config.commit()
 
     async def update_plugin_manager(self):
-        if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"]:
+        if not babase.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"]:
             return
         update_details = await self.plugin_manager.get_update_details()
         if update_details:
             to_version, commit_sha = update_details
-            ba.screenmessage(f"Plugin Manager is being updated to v{to_version}")
+            bui.screenmessage(f"Plugin Manager is being updated to v{to_version}")
             try:
                 await self.plugin_manager.update(to_version, commit_sha)
-            except MD5CheckSumFailedError:
-                ba.playsound(ba.getsound('error'))
+            except MD5CheckSumFailed:
+                bui.getsound('error').play()
             else:
-                ba.screenmessage("Update successful. Restart game to reload changes.",
-                                 color=(0, 1, 0))
-                ba.playsound(ba.getsound('shieldUp'))
+                bui.screenmessage("Update successful. Restart game to reload changes.",
+                                  color=(0, 1, 0))
+                bui.getsound('shieldUp').play()
 
     async def update_plugins(self):
-        if not ba.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
+        if not babase.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
             return
         await self.plugin_manager.setup_index()
         all_plugins = await self.plugin_manager.categories["All"].get_plugins()
@@ -276,22 +310,22 @@ class StartupTasks:
             return False
         try:
             plugin.latest_compatible_version
-        except NoCompatibleVersionError:
+        except NoCompatibleVersion:
             return False
         else:
             return True
 
     async def notify_new_plugins(self):
-        if not ba.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
+        if not babase.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
             return
 
         await self.plugin_manager.setup_index()
         new_num_of_plugins = len(await self.plugin_manager.categories["All"].get_plugins())
         try:
-            existing_num_of_plugins = ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
+            existing_num_of_plugins = babase.app.config["Community Plugin Manager"]["Existing Number of Plugins"]
         except KeyError:
-            ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
-            ba.app.config.commit()
+            babase.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
+            babase.app.config.commit()
             return
 
         if existing_num_of_plugins < new_num_of_plugins:
@@ -310,11 +344,11 @@ class StartupTasks:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
                 else:
                     notification_text = f"{new_supported_plugins_count} new plugins ({new_supported_plugins}) are available!"
-                ba.screenmessage(notification_text, color=(0, 1, 0))
+                bui.screenmessage(notification_text, color=(0, 1, 0))
 
         if existing_num_of_plugins != new_num_of_plugins:
-            ba.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
-            ba.app.config.commit()
+            babase.app.config["Community Plugin Manager"]["Existing Number of Plugins"] = new_num_of_plugins
+            babase.app.config.commit()
 
     async def execute(self):
         self.setup_config()
@@ -329,9 +363,9 @@ class StartupTasks:
 
 
 class Category:
-    def __init__(self, meta_url, is_3rd_party=False):
+    def __init__(self, meta_url, tag=CURRENT_TAG):
         self.meta_url = meta_url
-        self.is_3rd_party = is_3rd_party
+        self.tag = tag
         self.request_headers = HEADERS
         self._metadata = _CACHE.get("categories", {}).get(meta_url, {}).get("metadata")
         self._plugins = _CACHE.get("categories", {}).get(meta_url, {}).get("plugins")
@@ -340,9 +374,8 @@ class Category:
         if self._metadata is None:
             # Let's keep depending on the "main" branch for 3rd party sources
             # even if we're using a different branch of plugin manager's repository.
-            tag = "main" if self.is_3rd_party else CURRENT_TAG
             request = urllib.request.Request(
-                self.meta_url.format(content_type="raw", tag=tag),
+                self.meta_url.format(content_type="raw", tag=self.tag),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -350,11 +383,13 @@ class Category:
             self.set_category_global_cache("metadata", self._metadata)
         return self
 
-    async def is_valid(self):
+    async def validate(self):
         try:
             await self.fetch_metadata()
-        except urllib.error.HTTPError:
-            return False
+        except urllib.error.HTTPError as e:
+            raise PluginSourceNetworkError(str(e))
+        except json.decoder.JSONDecodeError as e:
+            raise CategoryMetadataParseError(f"Failed to parse JSON: {str(e)}")
         try:
             await asyncio.gather(
                 self.get_name(),
@@ -363,7 +398,7 @@ class Category:
                 self.get_plugins(),
             )
         except KeyError:
-            return False
+            raise CategoryMetadataParseError(f"Failed to parse JSON; missing required fields.")
         else:
             return True
 
@@ -386,7 +421,7 @@ class Category:
                 Plugin(
                     plugin_info,
                     f"{await self.get_plugins_base_url()}/{plugin_info[0]}.py",
-                    is_3rd_party=self.is_3rd_party,
+                    tag=self.tag,
                 )
                 for plugin_info in self._metadata["plugins"].items()
             ])
@@ -416,8 +451,8 @@ class Category:
         await self.get_plugins()
 
     def save(self):
-        ba.app.config["Community Plugin Manager"]["Custom Sources"].append(self.meta_url)
-        ba.app.config.commit()
+        babase.app.config["Community Plugin Manager"]["Custom Sources"].append(self.meta_url)
+        babase.app.config.commit()
 
 
 class CategoryAll(Category):
@@ -450,11 +485,11 @@ class PluginLocal:
 
     @property
     def is_installed_via_plugin_manager(self):
-        return self.name in ba.app.config["Community Plugin Manager"]["Installed Plugins"]
+        return self.name in babase.app.config["Community Plugin Manager"]["Installed Plugins"]
 
     def initialize(self):
-        if self.name not in ba.app.config["Community Plugin Manager"]["Installed Plugins"]:
-            ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name] = {}
+        if self.name not in babase.app.config["Community Plugin Manager"]["Installed Plugins"]:
+            babase.app.config["Community Plugin Manager"]["Installed Plugins"][self.name] = {}
         return self
 
     async def uninstall(self):
@@ -465,7 +500,7 @@ class PluginLocal:
         except FileNotFoundError:
             pass
         try:
-            del ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]
+            del babase.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]
         except KeyError:
             pass
         else:
@@ -474,7 +509,7 @@ class PluginLocal:
     @property
     def version(self):
         try:
-            version = (ba.app.config["Community Plugin Manager"]
+            version = (babase.app.config["Community Plugin Manager"]
                        ["Installed Plugins"][self.name]["version"])
         except KeyError:
             version = None
@@ -489,19 +524,19 @@ class PluginLocal:
             fout.write(content)
 
     def has_settings(self):
-        for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
+        for plugin_entry_point, plugin_spec in bui.app.plugins.plugin_specs.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return plugin_class.has_settings_ui()
+                return plugin_spec.plugin.has_settings_ui()
 
     def launch_settings(self, source_widget):
-        for plugin_entry_point, plugin_class in ba.app.plugins.active_plugins.items():
+        for plugin_entry_point, plugin_spec in bui.app.plugins.plugin_specs.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return plugin_class.show_settings_ui(source_widget)
+                return plugin_spec.plugin.show_settings_ui(source_widget)
 
     async def get_content(self):
         if self._content is None:
             if not self.is_installed:
-                raise PluginNotInstalledError("Plugin is not available locally.")
+                raise PluginNotInstalled("Plugin is not available locally.")
             loop = asyncio.get_event_loop()
             self._content = await loop.run_in_executor(None, self._get_content)
         return self._content
@@ -516,8 +551,8 @@ class PluginLocal:
         if not self._entry_points:
             content = await self.get_content()
             groups = REGEXP["plugin_entry_points"].findall(content)
-            # Actual entry points are stored in the first index inside the matching groups.
-            entry_points = tuple(f"{self.name}.{group[1].decode('utf-8')}" for group in groups)
+            # Actual entry points are stored in the last index inside the matching groups.
+            entry_points = tuple(f"{self.name}.{group[-1].decode('utf-8')}" for group in groups)
             self._entry_points = entry_points
         return self._entry_points
 
@@ -532,32 +567,32 @@ class PluginLocal:
         return len(entry_points) > 0
 
     def load_minigames(self):
-        scanner = ba._meta.DirectoryScan(paths="")
+        scanner = babase._meta.DirectoryScan(paths="")
         directory, module = self.install_path.rsplit(os.path.sep, 1)
         scanner._scan_module(
             pathlib.Path(directory),
             pathlib.Path(module),
         )
-        scanned_results = set(ba.app.meta.scanresults.exports["ba.GameActivity"])
-        for game in scanner.results.exports["ba.GameActivity"]:
+        scanned_results = set(babase.app.meta.scanresults.exports["bascenev1.GameActivity"])
+        for game in scanner.results.exports["bascenev1.GameActivity"]:
             if game not in scanned_results:
-                ba.screenmessage(f"{game} minigame loaded")
-                ba.app.meta.scanresults.exports["ba.GameActivity"].append(game)
+                bui.screenmessage(f"{game} minigame loaded")
+                babase.app.meta.scanresults.exports["bascenev1.GameActivity"].append(game)
 
     def unload_minigames(self):
-        scanner = ba._meta.DirectoryScan(paths="")
+        scanner = babase._meta.DirectoryScan(paths="")
         directory, module = self.install_path.rsplit(os.path.sep, 1)
         scanner._scan_module(
             pathlib.Path(directory),
             pathlib.Path(module),
         )
         new_scanned_results_games = []
-        for game in ba.app.meta.scanresults.exports["ba.GameActivity"]:
-            if game in scanner.results.exports["ba.GameActivity"]:
-                ba.screenmessage(f"{game} minigame unloaded")
+        for game in babase.app.meta.scanresults.exports["bascenev1.GameActivity"]:
+            if game in scanner.results.exports["bascenev1.GameActivity"]:
+                bui.screenmessage(f"{game} minigame unloaded")
             else:
                 new_scanned_results_games.append(game)
-        ba.app.meta.scanresults.exports["ba.GameActivity"] = new_scanned_results_games
+        babase.app.meta.scanresults.exports["bascenev1.GameActivity"] = new_scanned_results_games
 
     async def is_enabled(self):
         """
@@ -565,13 +600,13 @@ class PluginLocal:
         """
         if not await self.has_plugins():
             return True
-        for entry_point, plugin_info in ba.app.config["Plugins"].items():
+        for entry_point, plugin_info in babase.app.config["Plugins"].items():
             if entry_point.startswith(self._entry_point_initials) and plugin_info["enabled"]:
                 return True
         # XXX: The below logic is more accurate but less efficient, since it actually
         #      reads the local plugin file and parses entry points from it.
         # for entry_point in await self.get_entry_points():
-        #     if ba.app.config["Plugins"][entry_point]["enabled"]:
+        #     if babase.app.config["Plugins"][entry_point]["enabled"]:
         #         return True
         return False
 
@@ -579,31 +614,37 @@ class PluginLocal:
     #      own separate logic.
     # async def _set_status(self, to_enable=True):
     #     for entry_point in await self.get_entry_points:
-    #         if entry_point not in ba.app.config["Plugins"]:
-    #             ba.app.config["Plugins"][entry_point] = {}
-    #         ba.app.config["Plugins"][entry_point]["enabled"] = to_enable
+    #         if entry_point not in babase.app.config["Plugins"]:
+    #             babase.app.config["Plugins"][entry_point] = {}
+    #         babase.app.config["Plugins"][entry_point]["enabled"] = to_enable
 
     async def enable(self):
         for entry_point in await self.get_entry_points():
-            if entry_point not in ba.app.config["Plugins"]:
-                ba.app.config["Plugins"][entry_point] = {}
-            ba.app.config["Plugins"][entry_point]["enabled"] = True
-            if entry_point not in ba.app.plugins.active_plugins:
+            if entry_point not in babase.app.config["Plugins"]:
+                babase.app.config["Plugins"][entry_point] = {}
+            babase.app.config["Plugins"][entry_point]["enabled"] = True
+            plugin_spec = bui.app.plugins.plugin_specs.get(entry_point)
+            if plugin_spec not in bui.app.plugins.active_plugins:
                 self.load_plugin(entry_point)
-                ba.screenmessage(f"{entry_point} loaded")
+                bui.screenmessage(f"{entry_point} loaded")
         if await self.has_minigames():
             self.load_minigames()
         # await self._set_status(to_enable=True)
         self.save()
 
     def load_plugin(self, entry_point):
-        plugin_class = ba._general.getclass(entry_point, ba.Plugin)
-        loaded_plugin_class = plugin_class()
-        loaded_plugin_class.on_app_running()
-        ba.app.plugins.active_plugins[entry_point] = loaded_plugin_class
+        plugin_class = babase._general.getclass(entry_point, babase.Plugin)
+        loaded_plugin_instance = plugin_class()
+        loaded_plugin_instance.on_app_running()
+
+        plugin_spec = babase.PluginSpec(class_path=entry_point, loadable=True)
+        plugin_spec.enabled = True
+        plugin_spec.plugin = loaded_plugin_instance
+        bui.app.plugins.plugin_specs[entry_point] = plugin_spec
+        bui.app.plugins.active_plugins.append(plugin_spec.plugin)
 
     def disable(self):
-        for entry_point, plugin_info in ba.app.config["Plugins"].items():
+        for entry_point, plugin_info in babase.app.config["Plugins"].items():
             if entry_point.startswith(self._entry_point_initials):
                 # if plugin_info["enabled"]:
                 plugin_info["enabled"] = False
@@ -613,17 +654,17 @@ class PluginLocal:
         self.save()
 
     def set_version(self, version):
-        app = ba.app
+        app = babase.app
         app.config["Community Plugin Manager"]["Installed Plugins"][self.name]["version"] = version
         return self
 
     # def set_entry_points(self):
-    #     if not "entry_points" in ba.app.config["Community Plugin Manager"]
+    #     if not "entry_points" in babase.app.config["Community Plugin Manager"]
     #                                                            ["Installed Plugins"][self.name]:
-    #         ba.app.config["Community Plugin Manager"]["Installed Plugins"]
+    #         babase.app.config["Community Plugin Manager"]["Installed Plugins"]
     #                                                             [self.name]["entry_points"] = []
     #     for entry_point in await self.get_entry_points():
-    #         ba.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]
+    #         babase.app.config["Community Plugin Manager"]["Installed Plugins"][self.name]
     #                                                         ["entry_points"].append(entry_point)
 
     async def set_content(self, content):
@@ -644,12 +685,12 @@ class PluginLocal:
         return self._content
 
     def save(self):
-        ba.app.config.commit()
+        babase.app.config.commit()
         return self
 
 
 class PluginVersion:
-    def __init__(self, plugin, version, tag=None):
+    def __init__(self, plugin, version, tag=CURRENT_TAG):
         self.number, info = version
         self.plugin = plugin
         self.api_version = info["api_version"]
@@ -657,10 +698,8 @@ class PluginVersion:
         self.commit_sha = info["commit_sha"]
         self.md5sum = info["md5sum"]
 
-        if tag is None:
-            tag = self.commit_sha
-
         self.download_url = self.plugin.url.format(content_type="raw", tag=tag)
+        print(self.download_url)
         self.view_url = self.plugin.url.format(content_type="blob", tag=tag)
 
     def __eq__(self, plugin_version):
@@ -688,35 +727,29 @@ class PluginVersion:
     async def install(self, suppress_screenmessage=False):
         try:
             local_plugin = await self._download()
-        except MD5CheckSumFailedError:
+        except MD5CheckSumFailed:
             if not suppress_screenmessage:
-                ba.screenmessage(
+                bui.screenmessage(
                     f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
             return False
         else:
             if not suppress_screenmessage:
-                ba.screenmessage(f"{self.plugin.name} installed", color=(0, 1, 0))
-            check = ba.app.config["Community Plugin Manager"]["Settings"]
+                bui.screenmessage(f"{self.plugin.name} installed", color=(0, 1, 0))
+            check = babase.app.config["Community Plugin Manager"]["Settings"]
             if check["Auto Enable Plugins After Installation"]:
                 await local_plugin.enable()
             return True
 
 
 class Plugin:
-    def __init__(self, plugin, url, is_3rd_party=False):
+    def __init__(self, plugin, url, tag=CURRENT_TAG):
         """
         Initialize a plugin from network repository.
         """
         self.name, self.info = plugin
-        self.is_3rd_party = is_3rd_party
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
-        # if is_3rd_party:
-        #     tag = CURRENT_TAG
-        # else:
-        #     tag = CURRENT_TAG
-        tag = CURRENT_TAG
         self.url = url
-        self.download_url = url.format(content_type="raw", tag=tag)
+        self.tag = tag
         self._local_plugin = None
 
         self._versions = None
@@ -748,6 +781,7 @@ class Plugin:
                 PluginVersion(
                     self,
                     version,
+                    tag=self.tag,
                 ) for version in self.info["versions"].items()
             ]
         return self._versions
@@ -758,7 +792,7 @@ class Plugin:
             self._latest_version = PluginVersion(
                 self,
                 tuple(self.info["versions"].items())[0],
-                tag=CURRENT_TAG,
+                tag=self.tag,
             )
         return self._latest_version
 
@@ -766,22 +800,22 @@ class Plugin:
     def latest_compatible_version(self):
         if self._latest_compatible_version is None:
             for number, info in self.info["versions"].items():
-                if info["api_version"] == ba.app.api_version:
+                if info["api_version"] == babase.app.api_version:
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
-                        CURRENT_TAG if self.latest_version.number == number else None
+                        tag=self.tag if self.latest_version.number == number else info["commit_sha"]
                     )
                     break
         if self._latest_compatible_version is None:
-            raise NoCompatibleVersionError(
-                f"{self.name} has no version compatible with API {ba.app.api_version}."
+            raise NoCompatibleVersion(
+                f"{self.name} has no version compatible with API {babase.app.api_version}."
             )
         return self._latest_compatible_version
 
     def get_local(self):
         if not self.is_installed:
-            raise PluginNotInstalledError(
+            raise PluginNotInstalled(
                 f"{self.name} needs to be installed to get its local plugin.")
         if self._local_plugin is None:
             self._local_plugin = PluginLocal(self.name)
@@ -795,26 +829,26 @@ class Plugin:
 
     async def uninstall(self):
         await self.get_local().uninstall()
-        ba.screenmessage(f"{self.name} uninstalled", color=(0.9, 1, 0))
+        bui.screenmessage(f"{self.name} uninstalled", color=(0.9, 1, 0))
 
     def has_update(self):
         try:
             latest_compatible_version = self.latest_compatible_version
-        except NoCompatibleVersionError:
+        except NoCompatibleVersion:
             return False
         else:
             return self.get_local().version != latest_compatible_version.number
 
     async def update(self):
         if await self.latest_compatible_version.install(suppress_screenmessage=True):
-            ba.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}",
-                             color=(0, 1, 0))
-            ba.playsound(ba.getsound('shieldUp'))
+            bui.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}",
+                              color=(0, 1, 0))
+            bui.getsound('shieldUp').play()
         else:
-            ba.screenmessage(f"{self.name} failed MD5 checksum while updating to "
-                             f"{self.latest_compatible_version.number}",
-                             color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage(f"{self.name} failed MD5 checksum while updating to "
+                              f"{self.latest_compatible_version.number}",
+                              color=(1, 0, 0))
+            bui.getsound('error').play()
 
 
 class PluginWindow(popup.PopupWindow):
@@ -849,11 +883,9 @@ class PluginWindow(popup.PopupWindow):
         return partitioned_string
 
     async def draw_ui(self):
-        # print(ba.app.plugins.active_plugins)
-
-        ba.playsound(ba.getsound('swish'))
+        bui.getsound('swish').play()
         b_text_color = (0.75, 0.7, 0.8)
-        s = 1.25 if _uiscale is ba.UIScale.SMALL else 1.39 if ba.UIScale.MEDIUM else 1.67
+        s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.39 if babase.UIScale.MEDIUM else 1.67
         width = 400 * s
         height = 120 + 100 * s
         color = (1, 1, 1)
@@ -861,46 +893,46 @@ class PluginWindow(popup.PopupWindow):
         self._transition_out = 'out_scale'
         transition = 'in_scale'
 
-        self._root_widget = ba.containerwidget(size=(width, height),
-                                               # parent=_ba.get_special_widget(
-                                               #     'overlay_stack'),
-                                               on_outside_click_call=self._cancel,
-                                               transition=transition,
-                                               scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
-                                                      if _uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               scale_origin_stack_offset=self.scale_origin)
+        self._root_widget = bui.containerwidget(size=(width, height),
+                                                # parent=_babase.get_special_widget(
+                                                #     'overlay_stack'),
+                                                on_outside_click_call=self._cancel,
+                                                transition=transition,
+                                                scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
+                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
+                                                scale_origin_stack_offset=self.scale_origin)
 
         pos = height * 0.8
         plugin_title = f"{self.plugin.name} (v{self.plugin.latest_compatible_version.number})"
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos), size=(0, 0),
-                      h_align='center', v_align='center', text=plugin_title,
-                      scale=text_scale * 1.25, color=color,
-                      maxwidth=width * 0.9)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos), size=(0, 0),
+                       h_align='center', v_align='center', text=plugin_title,
+                       scale=text_scale * 1.25, color=color,
+                       maxwidth=width * 0.9)
         pos -= 25
         # author =
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text='by ' + self.plugin.info["authors"][0]["name"],
-                      scale=text_scale * 0.8,
-                      color=color, maxwidth=width * 0.9)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos),
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text='by ' + self.plugin.info["authors"][0]["name"],
+                       scale=text_scale * 0.8,
+                       color=color, maxwidth=width * 0.9)
         pos -= 35
-        # status = ba.textwidget(parent=self._root_widget,
+        # status = bui.textwidget(parent=self._root_widget,
         #                        position=(width * 0.49, pos), size=(0, 0),
         #                        h_align='center', v_align='center',
         #                        text=status_text, scale=text_scale * 0.8,
         #                        color=color, maxwidth=width * 0.9)
         pos -= 25
         # info =
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos), size=(0, 0),
-                      h_align='center', v_align='center',
-                      text=self.get_description(),
-                      scale=text_scale * 0.6, color=color,
-                      maxwidth=width * 0.95)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos), size=(0, 0),
+                       h_align='center', v_align='center',
+                       text=self.get_description(),
+                       scale=text_scale * 0.6, color=color,
+                       maxwidth=width * 0.95)
         b1_color = None
         b2_color = (0.8, 0.15, 0.35)
         b3_color = (0.2, 0.8, 0.3)
@@ -934,69 +966,69 @@ class PluginWindow(popup.PopupWindow):
             button1_action = self.install
 
         if to_draw_button1:
-            ba.buttonwidget(parent=self._root_widget,
-                            position=(width * 0.1, pos),
-                            size=button_size,
-                            on_activate_call=button1_action,
-                            color=b1_color,
-                            textcolor=b_text_color,
-                            button_type='square',
-                            text_scale=1,
-                            label=button1_label)
+            bui.buttonwidget(parent=self._root_widget,
+                             position=(width * 0.1, pos),
+                             size=button_size,
+                             on_activate_call=button1_action,
+                             color=b1_color,
+                             textcolor=b_text_color,
+                             button_type='square',
+                             text_scale=1,
+                             label=button1_label)
 
         if self.plugin.is_installed:
-            ba.buttonwidget(parent=self._root_widget,
-                            position=(width * 0.4, pos),
-                            size=button_size,
-                            on_activate_call=button2_action,
-                            color=b2_color,
-                            textcolor=b_text_color,
-                            button_type='square',
-                            text_scale=1,
-                            label=button2_label)
+            bui.buttonwidget(parent=self._root_widget,
+                             position=(width * 0.4, pos),
+                             size=button_size,
+                             on_activate_call=button2_action,
+                             color=b2_color,
+                             textcolor=b_text_color,
+                             button_type='square',
+                             text_scale=1,
+                             label=button2_label)
 
             if has_update:
                 # button3 =
-                ba.buttonwidget(parent=self._root_widget,
-                                position=(width * 0.7, pos),
-                                size=button_size,
-                                on_activate_call=button3_action,
-                                color=b3_color,
-                                textcolor=b_text_color,
-                                autoselect=True,
-                                button_type='square',
-                                text_scale=1,
-                                label=button3_label)
-        ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._cancel)
+                bui.buttonwidget(parent=self._root_widget,
+                                 position=(width * 0.7, pos),
+                                 size=button_size,
+                                 on_activate_call=button3_action,
+                                 color=b3_color,
+                                 textcolor=b_text_color,
+                                 autoselect=True,
+                                 button_type='square',
+                                 text_scale=1,
+                                 label=button3_label)
+        bui.containerwidget(edit=self._root_widget,
+                            on_cancel_call=self._cancel)
 
-        open_pos_x = (390 if _uiscale is ba.UIScale.SMALL else
-                      450 if _uiscale is ba.UIScale.MEDIUM else 440)
-        open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
-                      110 if _uiscale is ba.UIScale.MEDIUM else 120)
-        open_button = ba.buttonwidget(parent=self._root_widget,
-                                      autoselect=True,
-                                      position=(open_pos_x, open_pos_y),
-                                      size=(40, 40),
-                                      button_type="square",
-                                      label="",
-                                      # color=ba.app.ui.title_color,
-                                      color=(0.6, 0.53, 0.63),
-                                      on_activate_call=lambda: ba.open_url(self.plugin.view_url))
-        ba.imagewidget(parent=self._root_widget,
-                       position=(open_pos_x, open_pos_y),
-                       size=(40, 40),
-                       color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("file"),
-                       draw_controller=open_button)
-        ba.textwidget(parent=self._root_widget,
-                      position=(open_pos_x-3, open_pos_y+12),
-                      text="Source",
-                      size=(10, 10),
-                      draw_controller=open_button,
-                      color=(1, 1, 1, 1),
-                      rotate=25,
-                      scale=0.45)
+        open_pos_x = (390 if _uiscale is babase.UIScale.SMALL else
+                      450 if _uiscale is babase.UIScale.MEDIUM else 440)
+        open_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
+                      110 if _uiscale is babase.UIScale.MEDIUM else 120)
+        open_button = bui.buttonwidget(parent=self._root_widget,
+                                       autoselect=True,
+                                       position=(open_pos_x, open_pos_y),
+                                       size=(40, 40),
+                                       button_type="square",
+                                       label="",
+                                       # color=bui.app.ui_v1.title_color,
+                                       color=(0.6, 0.53, 0.63),
+                                       on_activate_call=lambda: bui.open_url(self.plugin.view_url))
+        bui.imagewidget(parent=self._root_widget,
+                        position=(open_pos_x, open_pos_y),
+                        size=(40, 40),
+                        color=(0.8, 0.95, 1),
+                        texture=bui.gettexture("file"),
+                        draw_controller=open_button)
+        bui.textwidget(parent=self._root_widget,
+                       position=(open_pos_x-3, open_pos_y+12),
+                       text="Source",
+                       size=(10, 10),
+                       draw_controller=open_button,
+                       color=(1, 1, 1, 1),
+                       rotate=25,
+                       scale=0.45)
 
         # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
@@ -1005,69 +1037,69 @@ class PluginWindow(popup.PopupWindow):
                 text = "This will take you to \n\""+self.plugin.info["external_url"] + "\""
                 tutorial_confirm_window = confirm.ConfirmWindow(
                     text=text,
-                    action=lambda: ba.open_url(self.plugin.info["external_url"]),
+                    action=lambda: bui.open_url(self.plugin.info["external_url"]),
                 )
-            open_pos_x = (440 if _uiscale is ba.UIScale.SMALL else
-                          500 if _uiscale is ba.UIScale.MEDIUM else 490)
-            open_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
-                          110 if _uiscale is ba.UIScale.MEDIUM else 120)
-            open_button = ba.buttonwidget(parent=self._root_widget,
-                                          autoselect=True,
-                                          position=(open_pos_x, open_pos_y),
-                                          size=(40, 40),
-                                          button_type="square",
-                                          label="",
-                                          # color=ba.app.ui.title_color,
-                                          color=(0.6, 0.53, 0.63),
+            open_pos_x = (440 if _uiscale is babase.UIScale.SMALL else
+                          500 if _uiscale is babase.UIScale.MEDIUM else 490)
+            open_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
+                          110 if _uiscale is babase.UIScale.MEDIUM else 120)
+            open_button = bui.buttonwidget(parent=self._root_widget,
+                                           autoselect=True,
+                                           position=(open_pos_x, open_pos_y),
+                                           size=(40, 40),
+                                           button_type="square",
+                                           label="",
+                                           # color=bui.app.ui_v1.title_color,
+                                           color=(0.6, 0.53, 0.63),
 
-                                          on_activate_call=tutorial_confirm_window)
+                                           on_activate_call=tutorial_confirm_window)
 
-            ba.imagewidget(parent=self._root_widget,
-                           position=(open_pos_x, open_pos_y),
-                           size=(40, 40),
-                           color=(0.8, 0.95, 1),
-                           texture=ba.gettexture("frameInset"),
-                           draw_controller=open_button)
-            ba.textwidget(parent=self._root_widget,
-                          position=(open_pos_x - 3, open_pos_y + 12),
-                          text="Tutorial",
-                          size=(10, 10),
-                          draw_controller=open_button,
-                          color=(1, 1, 1, 1),
-                          rotate=25,
-                          scale=0.45)
+            bui.imagewidget(parent=self._root_widget,
+                            position=(open_pos_x, open_pos_y),
+                            size=(40, 40),
+                            color=(0.8, 0.95, 1),
+                            texture=bui.gettexture("frameInset"),
+                            draw_controller=open_button)
+            bui.textwidget(parent=self._root_widget,
+                           position=(open_pos_x - 3, open_pos_y + 12),
+                           text="Tutorial",
+                           size=(10, 10),
+                           draw_controller=open_button,
+                           color=(1, 1, 1, 1),
+                           rotate=25,
+                           scale=0.45)
 
         if to_draw_button4:
-            settings_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
-                              60 if _uiscale is ba.UIScale.MEDIUM else 60)
-            settings_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
-                              110 if _uiscale is ba.UIScale.MEDIUM else 120)
-            settings_button = ba.buttonwidget(parent=self._root_widget,
-                                              autoselect=True,
-                                              position=(settings_pos_x, settings_pos_y),
-                                              size=(40, 40),
-                                              button_type="square",
-                                              label="",
-                                              color=(0, 0.75, 0.75),)
-            ba.buttonwidget(
+            settings_pos_x = (60 if _uiscale is babase.UIScale.SMALL else
+                              60 if _uiscale is babase.UIScale.MEDIUM else 60)
+            settings_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
+                              110 if _uiscale is babase.UIScale.MEDIUM else 120)
+            settings_button = bui.buttonwidget(parent=self._root_widget,
+                                               autoselect=True,
+                                               position=(settings_pos_x, settings_pos_y),
+                                               size=(40, 40),
+                                               button_type="square",
+                                               label="",
+                                               color=(0, 0.75, 0.75),)
+            bui.buttonwidget(
                 edit=settings_button,
-                on_activate_call=ba.Call(self.settings, settings_button),)
-            ba.imagewidget(parent=self._root_widget,
-                           position=(settings_pos_x, settings_pos_y),
-                           size=(40, 40),
-                           color=(0.8, 0.95, 1),
-                           texture=ba.gettexture("settingsIcon"),
-                           draw_controller=settings_button)
+                on_activate_call=babase.Call(self.settings, settings_button),)
+            bui.imagewidget(parent=self._root_widget,
+                            position=(settings_pos_x, settings_pos_y),
+                            size=(40, 40),
+                            color=(0.8, 0.95, 1),
+                            texture=bui.gettexture("settingsIcon"),
+                            draw_controller=settings_button)
 
-        # ba.containerwidget(edit=self._root_widget, selected_child=button3)
-        # ba.containerwidget(edit=self._root_widget, start_button=button3)
+        # bui.containerwidget(edit=self._root_widget, selected_child=button3)
+        # bui.containerwidget(edit=self._root_widget, start_button=button3)
 
     def _ok(self) -> None:
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def _cancel(self) -> None:
-        ba.playsound(ba.getsound('swish'))
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.getsound('swish').play()
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def button(fn):
         async def asyncio_handler(fn, self, *args, **kwargs):
@@ -1095,22 +1127,22 @@ class PluginWindow(popup.PopupWindow):
     @button
     async def enable(self) -> None:
         await self.local_plugin.enable()
-        ba.playsound(ba.getsound('gunCocking'))
+        bui.getsound('gunCocking').play()
 
     @button
     async def install(self):
         await self.plugin.latest_compatible_version.install()
-        ba.playsound(ba.getsound('cashRegister2'))
+        bui.getsound('cashRegister2').play()
 
     @button
     async def uninstall(self):
         await self.plugin.uninstall()
-        ba.playsound(ba.getsound('shieldDown'))
+        bui.getsound('shieldDown').play()
 
     @button
     async def update(self):
         await self.plugin.update()
-        ba.playsound(ba.getsound('shieldUp'))
+        bui.getsound('shieldUp').play()
 
 
 class PluginManager:
@@ -1152,14 +1184,22 @@ class PluginManager:
         self.categories["All"] = None
 
         requests = []
-        for plugin_category_url in plugin_index["categories"]:
-            category = Category(plugin_category_url)
+        for meta_url in plugin_index["categories"]:
+            category = Category(meta_url)
             request = category.fetch_metadata()
             requests.append(request)
-        for repository in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
-            plugin_category_url = partial_format(plugin_index["external_source_url"],
-                                                 repository=repository)
-            category = Category(plugin_category_url, is_3rd_party=True)
+        for source in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
+            source_splits = source.split("@", maxsplit=1)
+            if len(source_splits) == 1:
+                # Fallack to `main` if `@branchname` isn't specified in an external source URI.
+                source_repo, source_tag = source_splits[0], "main"
+            else:
+                source_repo, source_tag = source_splits
+            meta_url = partial_format(
+                plugin_index["external_source_url"],
+                repository=source_repo,
+            )
+            category = Category(meta_url, tag=source_tag)
             request = category.fetch_metadata()
             requests.append(request)
         categories = await asyncio.gather(*requests)
@@ -1194,7 +1234,7 @@ class PluginManager:
     async def get_update_details(self):
         index = await self.get_index()
         for version, info in index["versions"].items():
-            if info["api_version"] != ba.app.api_version:
+            if info["api_version"] != babase.app.api_version:
                 # No point checking a version of the API game doesn't support.
                 continue
             if version == PLUGIN_MANAGER_VERSION:
@@ -1222,7 +1262,7 @@ class PluginManager:
         response = await async_send_network_request(download_url)
         content = response.read()
         if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
-            raise MD5CheckSumFailedError("MD5 checksum failed during plugin manager update.")
+            raise MD5CheckSumFailed("MD5 checksum failed during plugin manager update.")
         with open(self.module_path, "wb") as fout:
             fout.write(content)
         return to_version_info
@@ -1238,74 +1278,74 @@ class PluginSourcesWindow(popup.PopupWindow):
         self.scale_origin = origin_widget.get_screen_space_center()
 
         b_textcolor = (0.75, 0.7, 0.8)
-        # s = 1.1 if _uiscale is ba.UIScale.SMALL else 1.27 if ba.UIScale.MEDIUM else 1.57
+        # s = 1.1 if _uiscale is babase.UIScale.SMALL else 1.27 if babase.UIScale.MEDIUM else 1.57
         # text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
-        self._root_widget = ba.containerwidget(size=(400, 340),
-                                               # parent=_ba.get_special_widget(
-                                               #     'overlay_stack'),
-                                               on_outside_click_call=self._ok,
-                                               transition=transition,
-                                               scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
-                                                      if _uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               scale_origin_stack_offset=self.scale_origin,
-                                               on_cancel_call=self._ok)
+        self._root_widget = bui.containerwidget(size=(400, 340),
+                                                # parent=_babase.get_special_widget(
+                                                #     'overlay_stack'),
+                                                on_outside_click_call=self._ok,
+                                                transition=transition,
+                                                scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
+                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
+                                                scale_origin_stack_offset=self.scale_origin,
+                                                on_cancel_call=self._ok)
 
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             position=(155, 300),
             size=(100, 25),
             text="Custom Plugin Sources",
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             scale=0.8,
             h_align="center",
             v_align="center",
             maxwidth=270,
         )
 
-        scroll_size_x = (290 if _uiscale is ba.UIScale.SMALL else
-                         300 if _uiscale is ba.UIScale.MEDIUM else 290)
-        scroll_size_y = (170 if _uiscale is ba.UIScale.SMALL else
-                         185 if _uiscale is ba.UIScale.MEDIUM else 180)
-        scroll_pos_x = (55 if _uiscale is ba.UIScale.SMALL else
-                        40 if _uiscale is ba.UIScale.MEDIUM else 60)
+        scroll_size_x = (290 if _uiscale is babase.UIScale.SMALL else
+                         300 if _uiscale is babase.UIScale.MEDIUM else 290)
+        scroll_size_y = (170 if _uiscale is babase.UIScale.SMALL else
+                         185 if _uiscale is babase.UIScale.MEDIUM else 180)
+        scroll_pos_x = (55 if _uiscale is babase.UIScale.SMALL else
+                        40 if _uiscale is babase.UIScale.MEDIUM else 60)
         scroll_pos_y = 105
 
-        self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
-                                             size=(scroll_size_x, scroll_size_y),
-                                             position=(scroll_pos_x, scroll_pos_y))
-        self._columnwidget = ba.columnwidget(parent=self._scrollwidget,
-                                             border=1,
-                                             margin=0)
+        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
+                                              size=(scroll_size_x, scroll_size_y),
+                                              position=(scroll_pos_x, scroll_pos_y))
+        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
+                                              border=1,
+                                              margin=0)
 
         delete_source_button_position_pos_x = 360
         delete_source_button_position_pos_y = 110
-        delete_source_button = ba.buttonwidget(parent=self._root_widget,
-                                               position=(delete_source_button_position_pos_x,
-                                                         delete_source_button_position_pos_y),
-                                               size=(25, 25),
-                                               on_activate_call=self.delete_selected_source,
-                                               label="",
-                                               # texture=ba.gettexture("crossOut"),
-                                               button_type="square",
-                                               color=(0.6, 0, 0),
-                                               textcolor=b_textcolor,
-                                               # autoselect=True,
-                                               text_scale=1)
+        delete_source_button = bui.buttonwidget(parent=self._root_widget,
+                                                position=(delete_source_button_position_pos_x,
+                                                          delete_source_button_position_pos_y),
+                                                size=(25, 25),
+                                                on_activate_call=self.delete_selected_source,
+                                                label="",
+                                                # texture=bui.gettexture("crossOut"),
+                                                button_type="square",
+                                                color=(0.6, 0, 0),
+                                                textcolor=b_textcolor,
+                                                # autoselect=True,
+                                                text_scale=1)
 
-        ba.imagewidget(parent=self._root_widget,
-                       position=(delete_source_button_position_pos_x + 2,
-                                 delete_source_button_position_pos_y),
-                       size=(25, 25),
-                       color=(5, 2, 2),
-                       texture=ba.gettexture("crossOut"),
-                       draw_controller=delete_source_button)
+        bui.imagewidget(parent=self._root_widget,
+                        position=(delete_source_button_position_pos_x + 2,
+                                  delete_source_button_position_pos_y),
+                        size=(25, 25),
+                        color=(5, 2, 2),
+                        texture=bui.gettexture("crossOut"),
+                        draw_controller=delete_source_button)
 
-        warning_pos_x = (43 if _uiscale is ba.UIScale.SMALL else
-                         35 if _uiscale is ba.UIScale.MEDIUM else
+        warning_pos_x = (43 if _uiscale is babase.UIScale.SMALL else
+                         35 if _uiscale is babase.UIScale.MEDIUM else
                          48)
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             position=(warning_pos_x, 74),
             size=(50, 22),
@@ -1318,32 +1358,32 @@ class PluginSourcesWindow(popup.PopupWindow):
             maxwidth=400,
         )
 
-        self._add_source_widget = ba.textwidget(parent=self._root_widget,
-                                                # text="rikkolovescats/sahilp-plugins",
-                                                size=(335, 50),
-                                                position=(21, 22),
-                                                h_align='left',
-                                                v_align='center',
-                                                editable=True,
-                                                scale=0.75,
-                                                maxwidth=215,
-                                                # autoselect=True,
-                                                description="Add Source")
+        self._add_source_widget = bui.textwidget(parent=self._root_widget,
+                                                 # text="rikkolovescats/sahilp-plugins",
+                                                 size=(335, 50),
+                                                 position=(21, 22),
+                                                 h_align='left',
+                                                 v_align='center',
+                                                 editable=True,
+                                                 scale=0.75,
+                                                 maxwidth=215,
+                                                 # autoselect=True,
+                                                 description="Add Source")
 
         loop = asyncio.get_event_loop()
 
-        ba.buttonwidget(parent=self._root_widget,
-                        position=(330, 28),
-                        size=(37, 37),
-                        on_activate_call=lambda: loop.create_task(self.add_source()),
-                        label="",
-                        texture=ba.gettexture("startButton"),
-                        # texture=ba.gettexture("chestOpenIcon"),
-                        button_type="square",
-                        color=(0, 0.9, 0),
-                        textcolor=b_textcolor,
-                        # autoselect=True,
-                        text_scale=1)
+        bui.buttonwidget(parent=self._root_widget,
+                         position=(330, 28),
+                         size=(37, 37),
+                         on_activate_call=lambda: loop.create_task(self.add_source()),
+                         label="",
+                         texture=bui.gettexture("startButton"),
+                         # texture=bui.gettexture("chestOpenIcon"),
+                         button_type="square",
+                         color=(0, 0.9, 0),
+                         textcolor=b_textcolor,
+                         # autoselect=True,
+                         text_scale=1)
 
         self.draw_sources()
 
@@ -1352,59 +1392,68 @@ class PluginSourcesWindow(popup.PopupWindow):
             plugin.delete()
 
         color = (1, 1, 1)
-        for custom_source in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
-            ba.textwidget(parent=self._columnwidget,
-                          # size=(410, 30),
-                          selectable=True,
-                          # always_highlight=True,
-                          color=color,
-                          text=custom_source,
-                          # click_activate=True,
-                          on_select_call=lambda: self.select_source(custom_source),
-                          h_align='left',
-                          v_align='center',
-                          scale=0.75,
-                          maxwidth=260)
+        for custom_source in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
+            bui.textwidget(parent=self._columnwidget,
+                           # size=(410, 30),
+                           selectable=True,
+                           # always_highlight=True,
+                           color=color,
+                           text=custom_source,
+                           # click_activate=True,
+                           on_select_call=lambda: self.select_source(custom_source),
+                           h_align='left',
+                           v_align='center',
+                           scale=0.75,
+                           maxwidth=260)
 
     def select_source(self, source):
         self.selected_source = source
 
     async def add_source(self):
-        source = ba.textwidget(query=self._add_source_widget)
-        meta_url = _CACHE["index"]["external_source_url"].format(
-            repository=source,
-            content_type="raw",
-            tag=CURRENT_TAG
+        source = bui.textwidget(query=self._add_source_widget)
+        # External source URIs can optionally suffix `@branchname`, for example:
+        # `bombsquad-community/sample-plugin-source@experimental`
+        source_splits = source.split("@", maxsplit=1)
+        if len(source_splits) == 1:
+            # Fallack to `main` if `@branchname` isn't specified in an external source URI.
+            source_repo, source_tag = source_splits[0], "main"
+        else:
+            source_repo, source_tag = source_splits
+        meta_url = partial_format(
+            _CACHE["index"]["external_source_url"],
+            repository=source_repo,
         )
-        category = Category(meta_url, is_3rd_party=True)
-        if not await category.is_valid():
-            ba.screenmessage("Enter a valid plugin source", color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+        category = Category(meta_url, tag=source_tag)
+        try:
+            await category.validate()
+        except (PluginSourceNetworkError, CategoryMetadataParseError) as e:
+            bui.screenmessage(str(e), color=(1, 0, 0))
+            bui.getsound('error').play()
             return
-        if source in ba.app.config["Community Plugin Manager"]["Custom Sources"]:
-            ba.screenmessage("Plugin source already exists")
-            ba.playsound(ba.getsound('error'))
+        if source in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
+            bui.screenmessage("Plugin source already exists")
+            bui.getsound('error').play()
             return
-        ba.app.config["Community Plugin Manager"]["Custom Sources"].append(source)
-        ba.app.config.commit()
-        ba.screenmessage("Plugin source added; Refresh plugin list to see changes",
-                         color=(0, 1, 0))
-        ba.playsound(ba.getsound('cashRegister2'))
+        babase.app.config["Community Plugin Manager"]["Custom Sources"].append(source)
+        babase.app.config.commit()
+        bui.screenmessage("Plugin source added; Refresh plugin list to see changes",
+                          color=(0, 1, 0))
+        bui.getsound('cashRegister2').play()
         self.draw_sources()
 
     def delete_selected_source(self):
         if self.selected_source is None:
             return
-        ba.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
-        ba.app.config.commit()
-        ba.screenmessage("Plugin source deleted; Refresh plugin list to see changes",
-                         color=(0.9, 1, 0))
-        ba.playsound(ba.getsound('shieldDown'))
+        babase.app.config["Community Plugin Manager"]["Custom Sources"].remove(self.selected_source)
+        babase.app.config.commit()
+        bui.screenmessage("Plugin source deleted; Refresh plugin list to see changes",
+                          color=(0.9, 1, 0))
+        bui.getsound('shieldDown').play()
         self.draw_sources()
 
     def _ok(self) -> None:
-        ba.playsound(ba.getsound('swish'))
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.getsound('swish').play()
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
 class PluginCategoryWindow(popup.PopupMenuWindow):
@@ -1414,17 +1463,17 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         self.scale_origin = origin_widget.get_screen_space_center()
         super().__init__(
             position=(200, 0),
-            scale=(2.3 if _uiscale is ba.UIScale.SMALL else
-                   1.65 if _uiscale is ba.UIScale.MEDIUM else 1.23),
+            scale=(2.3 if _uiscale is babase.UIScale.SMALL else
+                   1.65 if _uiscale is babase.UIScale.MEDIUM else 1.23),
             choices=choices,
             current_choice=current_choice,
             delegate=self)
         self._update_custom_sources_widget()
 
     def _update_custom_sources_widget(self):
-        ba.textwidget(edit=self._columnwidget.get_children()[-1],
-                      color=(0.5, 0.5, 0.5),
-                      on_activate_call=self.show_sources_window)
+        bui.textwidget(edit=self._columnwidget.get_children()[-1],
+                       color=(0.5, 0.5, 0.5),
+                       on_activate_call=self.show_sources_window)
 
     def popup_menu_selected_choice(self, window, choice):
         loop = asyncio.get_event_loop()
@@ -1438,12 +1487,12 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         PluginSourcesWindow(origin_widget=self.root_widget)
 
     def _ok(self) -> None:
-        ba.playsound(ba.getsound('swish'))
-        ba.containerwidget(edit=self.root_widget, transition='out_scale')
+        bui.getsound('swish').play()
+        bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
 
-class PluginManagerWindow(ba.Window):
-    def __init__(self, transition: str = "in_right", origin_widget: ba.Widget = None):
+class PluginManagerWindow(bui.Window):
+    def __init__(self, transition: str = "in_right", origin_widget: bui.Widget = None):
         self.plugin_manager = PluginManager()
         self.category_selection_button = None
         self.selected_category = None
@@ -1452,69 +1501,69 @@ class PluginManagerWindow(ba.Window):
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_index())
 
-        self._width = (700 if _uiscale is ba.UIScale.SMALL
-                       else 550 if _uiscale is ba.UIScale.MEDIUM
+        self._width = (700 if _uiscale is babase.UIScale.SMALL
+                       else 550 if _uiscale is babase.UIScale.MEDIUM
                        else 570)
-        self._height = (500 if _uiscale is ba.UIScale.SMALL
-                        else 422 if _uiscale is ba.UIScale.MEDIUM
+        self._height = (500 if _uiscale is babase.UIScale.SMALL
+                        else 422 if _uiscale is babase.UIScale.MEDIUM
                         else 500)
-        top_extra = 20 if _uiscale is ba.UIScale.SMALL else 0
+        top_extra = 20 if _uiscale is babase.UIScale.SMALL else 0
 
         if origin_widget:
             self._transition_out = "out_scale"
             self._scale_origin = origin_widget.get_screen_space_center()
             transition = "in_scale"
 
-        super().__init__(root_widget=ba.containerwidget(
+        super().__init__(root_widget=bui.containerwidget(
             size=(self._width, self._height + top_extra),
             transition=transition,
             toolbar_visibility="menu_minimal",
             scale_origin_stack_offset=self._scale_origin,
-            scale=(1.9 if _uiscale is ba.UIScale.SMALL
-                   else 1.5 if _uiscale is ba.UIScale.MEDIUM
+            scale=(1.9 if _uiscale is babase.UIScale.SMALL
+                   else 1.5 if _uiscale is babase.UIScale.MEDIUM
                    else 1.0),
-            stack_offset=(0, -25) if _uiscale is ba.UIScale.SMALL else (0, 0)
+            stack_offset=(0, -25) if _uiscale is babase.UIScale.SMALL else (0, 0)
         ))
 
-        back_pos_x = 5 + (37 if _uiscale is ba.UIScale.SMALL else
-                          27 if _uiscale is ba.UIScale.MEDIUM else 68)
-        back_pos_y = self._height - (95 if _uiscale is ba.UIScale.SMALL else
-                                     65 if _uiscale is ba.UIScale.MEDIUM else 50)
-        self._back_button = back_button = ba.buttonwidget(
+        back_pos_x = 5 + (37 if _uiscale is babase.UIScale.SMALL else
+                          27 if _uiscale is babase.UIScale.MEDIUM else 68)
+        back_pos_y = self._height - (95 if _uiscale is babase.UIScale.SMALL else
+                                     65 if _uiscale is babase.UIScale.MEDIUM else 50)
+        self._back_button = back_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(back_pos_x, back_pos_y),
             size=(60, 60),
             scale=0.8,
-            label=ba.charstr(ba.SpecialChar.BACK),
+            label=babase.charstr(babase.SpecialChar.BACK),
             # autoselect=True,
             button_type='backSmall',
             on_activate_call=self._back)
 
-        ba.containerwidget(edit=self._root_widget, cancel_button=back_button)
+        bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
-        title_pos = self._height - (83 if _uiscale is ba.UIScale.SMALL else
-                                    50 if _uiscale is ba.UIScale.MEDIUM else 50)
-        ba.textwidget(
+        title_pos = self._height - (83 if _uiscale is babase.UIScale.SMALL else
+                                    50 if _uiscale is babase.UIScale.MEDIUM else 50)
+        bui.textwidget(
             parent=self._root_widget,
             position=(-10, title_pos),
             size=(self._width, 25),
             text="Community Plugin Manager",
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             scale=1.05,
             h_align="center",
             v_align="center",
             maxwidth=270,
         )
 
-        loading_pos_y = self._height - (275 if _uiscale is ba.UIScale.SMALL else
-                                        235 if _uiscale is ba.UIScale.MEDIUM else 270)
+        loading_pos_y = self._height - (275 if _uiscale is babase.UIScale.SMALL else
+                                        235 if _uiscale is babase.UIScale.MEDIUM else 270)
 
-        self._plugin_manager_status_text = ba.textwidget(
+        self._plugin_manager_status_text = bui.textwidget(
             parent=self._root_widget,
             position=(-5, loading_pos_y),
             size=(self._width, 25),
             text="Loading...",
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
@@ -1522,10 +1571,10 @@ class PluginManagerWindow(ba.Window):
         )
 
     def _back(self) -> None:
-        from bastd.ui.settings.allsettings import AllSettingsWindow
-        ba.containerwidget(edit=self._root_widget,
-                           transition=self._transition_out)
-        ba.app.ui.set_main_menu_window(
+        from bauiv1lib.settings.allsettings import AllSettingsWindow
+        bui.containerwidget(edit=self._root_widget,
+                            transition=self._transition_out)
+        bui.app.ui_v1.set_main_menu_window(
             AllSettingsWindow(transition='in_left').get_root_widget())
 
     @contextlib.contextmanager
@@ -1533,14 +1582,14 @@ class PluginManagerWindow(ba.Window):
         try:
             yield
         except urllib.error.URLError:
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text="Make sure you are connected\n to the Internet and try again.")
+            bui.textwidget(edit=self._plugin_manager_status_text,
+                           text="Make sure you are connected\n to the Internet and try again.")
         except RuntimeError:
-            # User probably went back before a ba.Window could finish loading.
+            # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text=str(e))
+            bui.textwidget(edit=self._plugin_manager_status_text,
+                           text=str(e))
             raise
 
     async def draw_index(self):
@@ -1551,31 +1600,31 @@ class PluginManagerWindow(ba.Window):
         self.draw_settings_icon()
         with self.exception_handler():
             await self.plugin_manager.setup_index()
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text="")
+            bui.textwidget(edit=self._plugin_manager_status_text,
+                           text="")
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
-        scroll_size_x = (515 if _uiscale is ba.UIScale.SMALL else
-                         430 if _uiscale is ba.UIScale.MEDIUM else 420)
-        scroll_size_y = (245 if _uiscale is ba.UIScale.SMALL else
-                         265 if _uiscale is ba.UIScale.MEDIUM else 335)
-        scroll_pos_x = (70 if _uiscale is ba.UIScale.SMALL else
-                        50 if _uiscale is ba.UIScale.MEDIUM else 70)
-        scroll_pos_y = (100 if _uiscale is ba.UIScale.SMALL else
-                        35 if _uiscale is ba.UIScale.MEDIUM else 40)
-        self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
-                                             size=(scroll_size_x, scroll_size_y),
-                                             position=(scroll_pos_x, scroll_pos_y))
-        self._columnwidget = ba.columnwidget(parent=self._scrollwidget,
-                                             border=2,
-                                             margin=0)
+        scroll_size_x = (515 if _uiscale is babase.UIScale.SMALL else
+                         430 if _uiscale is babase.UIScale.MEDIUM else 420)
+        scroll_size_y = (245 if _uiscale is babase.UIScale.SMALL else
+                         265 if _uiscale is babase.UIScale.MEDIUM else 335)
+        scroll_pos_x = (70 if _uiscale is babase.UIScale.SMALL else
+                        50 if _uiscale is babase.UIScale.MEDIUM else 70)
+        scroll_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
+                        35 if _uiscale is babase.UIScale.MEDIUM else 40)
+        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
+                                              size=(scroll_size_x, scroll_size_y),
+                                              position=(scroll_pos_x, scroll_pos_y))
+        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
+                                              border=2,
+                                              margin=0)
 
     def draw_category_selection_button(self, post_label):
-        category_pos_x = (440 if _uiscale is ba.UIScale.SMALL else
-                          340 if _uiscale is ba.UIScale.MEDIUM else 350)
-        category_pos_y = self._height - (141 if _uiscale is ba.UIScale.SMALL else
-                                         110 if _uiscale is ba.UIScale.MEDIUM else 110)
+        category_pos_x = (440 if _uiscale is babase.UIScale.SMALL else
+                          340 if _uiscale is babase.UIScale.MEDIUM else 350)
+        category_pos_y = self._height - (141 if _uiscale is babase.UIScale.SMALL else
+                                         110 if _uiscale is babase.UIScale.MEDIUM else 110)
         b_size = (140, 30)
         # b_textcolor = (0.75, 0.7, 0.8)
         b_textcolor = (0.8, 0.8, 0.85)
@@ -1584,64 +1633,64 @@ class PluginManagerWindow(ba.Window):
         label = f"Category: {post_label}"
 
         if self.category_selection_button is None:
-            self.category_selection_button = ba.buttonwidget(parent=self._root_widget,
-                                                             position=(category_pos_x,
-                                                                       category_pos_y),
-                                                             size=b_size,
-                                                             on_activate_call=(
-                                                                 self.show_categories_window),
-                                                             label=label,
-                                                             button_type="square",
-                                                             # color=b_color,
-                                                             textcolor=b_textcolor,
-                                                             # autoselect=True,
-                                                             text_scale=0.6)
+            self.category_selection_button = bui.buttonwidget(parent=self._root_widget,
+                                                              position=(category_pos_x,
+                                                                        category_pos_y),
+                                                              size=b_size,
+                                                              on_activate_call=(
+                                                                  self.show_categories_window),
+                                                              label=label,
+                                                              button_type="square",
+                                                              # color=b_color,
+                                                              textcolor=b_textcolor,
+                                                              # autoselect=True,
+                                                              text_scale=0.6)
         else:
-            self.category_selection_button = ba.buttonwidget(edit=self.category_selection_button,
-                                                             label=label)
+            self.category_selection_button = bui.buttonwidget(edit=self.category_selection_button,
+                                                              label=label)
 
     def draw_search_bar(self):
-        search_bar_pos_x = (85 if _uiscale is ba.UIScale.SMALL else
-                            68 if _uiscale is ba.UIScale.MEDIUM else 90)
+        search_bar_pos_x = (85 if _uiscale is babase.UIScale.SMALL else
+                            68 if _uiscale is babase.UIScale.MEDIUM else 90)
         search_bar_pos_y = self._height - (
-            145 if _uiscale is ba.UIScale.SMALL else
-            110 if _uiscale is ba.UIScale.MEDIUM else 116)
+            145 if _uiscale is babase.UIScale.SMALL else
+            110 if _uiscale is babase.UIScale.MEDIUM else 116)
 
-        search_bar_size_x = (320 if _uiscale is ba.UIScale.SMALL else
-                             230 if _uiscale is ba.UIScale.MEDIUM else 260)
+        search_bar_size_x = (320 if _uiscale is babase.UIScale.SMALL else
+                             230 if _uiscale is babase.UIScale.MEDIUM else 260)
         search_bar_size_y = (
-            35 if _uiscale is ba.UIScale.SMALL else
-            35 if _uiscale is ba.UIScale.MEDIUM else 45)
+            35 if _uiscale is babase.UIScale.SMALL else
+            35 if _uiscale is babase.UIScale.MEDIUM else 45)
 
-        filter_txt_pos_x = (60 if _uiscale is ba.UIScale.SMALL else
-                            40 if _uiscale is ba.UIScale.MEDIUM else 60)
-        filter_txt_pos_y = search_bar_pos_y + (3 if _uiscale is ba.UIScale.SMALL else
-                                               4 if _uiscale is ba.UIScale.MEDIUM else 8)
+        filter_txt_pos_x = (60 if _uiscale is babase.UIScale.SMALL else
+                            40 if _uiscale is babase.UIScale.MEDIUM else 60)
+        filter_txt_pos_y = search_bar_pos_y + (3 if _uiscale is babase.UIScale.SMALL else
+                                               4 if _uiscale is babase.UIScale.MEDIUM else 8)
 
-        ba.textwidget(parent=self._root_widget,
-                      text="Filter",
-                      position=(filter_txt_pos_x, filter_txt_pos_y),
-                      selectable=False,
-                      h_align='left',
-                      v_align='center',
-                      color=ba.app.ui.title_color,
-                      scale=0.5)
+        bui.textwidget(parent=self._root_widget,
+                       text="Filter",
+                       position=(filter_txt_pos_x, filter_txt_pos_y),
+                       selectable=False,
+                       h_align='left',
+                       v_align='center',
+                       color=bui.app.ui_v1.title_color,
+                       scale=0.5)
 
-        filter_txt = ba.Lstr(resource='filterText')
-        search_bar_maxwidth = search_bar_size_x - (95 if _uiscale is ba.UIScale.SMALL else
-                                                   77 if _uiscale is ba.UIScale.MEDIUM else
+        filter_txt = babase.Lstr(resource='filterText')
+        search_bar_maxwidth = search_bar_size_x - (95 if _uiscale is babase.UIScale.SMALL else
+                                                   77 if _uiscale is babase.UIScale.MEDIUM else
                                                    85)
-        self._filter_widget = ba.textwidget(parent=self._root_widget,
-                                            text="",
-                                            size=(search_bar_size_x, search_bar_size_y),
-                                            position=(search_bar_pos_x, search_bar_pos_y),
-                                            h_align='left',
-                                            v_align='center',
-                                            editable=True,
-                                            scale=0.8,
-                                            autoselect=True,
-                                            maxwidth=search_bar_maxwidth,
-                                            description=filter_txt)
+        self._filter_widget = bui.textwidget(parent=self._root_widget,
+                                             text="",
+                                             size=(search_bar_size_x, search_bar_size_y),
+                                             position=(search_bar_pos_x, search_bar_pos_y),
+                                             h_align='left',
+                                             v_align='center',
+                                             editable=True,
+                                             scale=0.8,
+                                             autoselect=True,
+                                             maxwidth=search_bar_maxwidth,
+                                             description=filter_txt)
         self._last_filter_text = None
         self._last_filter_plugins = []
         loop = asyncio.get_event_loop()
@@ -1651,7 +1700,7 @@ class PluginManagerWindow(ba.Window):
         while True:
             await asyncio.sleep(0.2)
             try:
-                filter_text = ba.textwidget(query=self._filter_widget)
+                filter_text = bui.textwidget(query=self._filter_widget)
             except RuntimeError:
                 # Search filter widget got destroyed. No point checking for filter text anymore.
                 return
@@ -1659,65 +1708,65 @@ class PluginManagerWindow(ba.Window):
                 continue
             try:
                 await self.draw_plugin_names(self.selected_category, search_term=filter_text)
-            except CategoryDoesNotExistError:
+            except CategoryDoesNotExist:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
             # attributes like color, position and more.
             # for plugin in self._columnwidget.get_children():
             # for name, widget in tuple(self.plugins_in_current_view.items()):
-            #     # print(ba.textwidget(query=plugin))
+            #     # print(bui.textwidget(query=plugin))
             #     # plugin.delete()
             #     print(dir(widget))
             #     if filter_text in name:
             #         import random
             #         if random.random() > 0.9:
-            #             ba.textwidget(edit=widget).delete()
+            #             bui.textwidget(edit=widget).delete()
             #         else:
-            #             ba.textwidget(edit=widget, position=None)
+            #             bui.textwidget(edit=widget, position=None)
             #     else:
-            #         ba.textwidget(edit=widget, position=None)
+            #         bui.textwidget(edit=widget, position=None)
 
     def draw_settings_icon(self):
-        settings_pos_x = (610 if _uiscale is ba.UIScale.SMALL else
-                          500 if _uiscale is ba.UIScale.MEDIUM else 510)
-        settings_pos_y = (130 if _uiscale is ba.UIScale.SMALL else
-                          60 if _uiscale is ba.UIScale.MEDIUM else 70)
-        controller_button = ba.buttonwidget(parent=self._root_widget,
-                                            # autoselect=True,
-                                            position=(settings_pos_x, settings_pos_y),
-                                            size=(30, 30),
-                                            button_type="square",
-                                            label="",
-                                            on_activate_call=ba.Call(PluginManagerSettingsWindow,
-                                                                     self.plugin_manager,
-                                                                     self._root_widget))
-        ba.imagewidget(parent=self._root_widget,
-                       position=(settings_pos_x, settings_pos_y),
-                       size=(30, 30),
-                       color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("settingsIcon"),
-                       draw_controller=controller_button)
+        settings_pos_x = (610 if _uiscale is babase.UIScale.SMALL else
+                          500 if _uiscale is babase.UIScale.MEDIUM else 510)
+        settings_pos_y = (130 if _uiscale is babase.UIScale.SMALL else
+                          60 if _uiscale is babase.UIScale.MEDIUM else 70)
+        controller_button = bui.buttonwidget(parent=self._root_widget,
+                                             # autoselect=True,
+                                             position=(settings_pos_x, settings_pos_y),
+                                             size=(30, 30),
+                                             button_type="square",
+                                             label="",
+                                             on_activate_call=babase.Call(PluginManagerSettingsWindow,
+                                                                          self.plugin_manager,
+                                                                          self._root_widget))
+        bui.imagewidget(parent=self._root_widget,
+                        position=(settings_pos_x, settings_pos_y),
+                        size=(30, 30),
+                        color=(0.8, 0.95, 1),
+                        texture=bui.gettexture("settingsIcon"),
+                        draw_controller=controller_button)
 
     def draw_refresh_icon(self):
-        refresh_pos_x = (610 if _uiscale is ba.UIScale.SMALL else
-                         500 if _uiscale is ba.UIScale.MEDIUM else 510)
-        refresh_pos_y = (180 if _uiscale is ba.UIScale.SMALL else
-                         108 if _uiscale is ba.UIScale.MEDIUM else 120)
+        refresh_pos_x = (610 if _uiscale is babase.UIScale.SMALL else
+                         500 if _uiscale is babase.UIScale.MEDIUM else 510)
+        refresh_pos_y = (180 if _uiscale is babase.UIScale.SMALL else
+                         108 if _uiscale is babase.UIScale.MEDIUM else 120)
         loop = asyncio.get_event_loop()
-        controller_button = ba.buttonwidget(parent=self._root_widget,
-                                            # autoselect=True,
-                                            position=(refresh_pos_x, refresh_pos_y),
-                                            size=(30, 30),
-                                            button_type="square",
-                                            label="",
-                                            on_activate_call=lambda:
-                                                loop.create_task(self.refresh()))
-        ba.imagewidget(parent=self._root_widget,
-                       position=(refresh_pos_x, refresh_pos_y),
-                       size=(30, 30),
-                       color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("replayIcon"),
-                       draw_controller=controller_button)
+        controller_button = bui.buttonwidget(parent=self._root_widget,
+                                             # autoselect=True,
+                                             position=(refresh_pos_x, refresh_pos_y),
+                                             size=(30, 30),
+                                             button_type="square",
+                                             label="",
+                                             on_activate_call=lambda:
+                                             loop.create_task(self.refresh()))
+        bui.imagewidget(parent=self._root_widget,
+                        position=(refresh_pos_x, refresh_pos_y),
+                        size=(30, 30),
+                        color=(0.8, 0.95, 1),
+                        texture=bui.gettexture("replayIcon"),
+                        draw_controller=controller_button)
 
     def search_term_filterer(self, plugin, search_term):
         # This helps resolve "plugin name" to "plugin_name".
@@ -1750,7 +1799,7 @@ class PluginManagerWindow(ba.Window):
         try:
             category_plugins = await self.plugin_manager.categories[category].get_plugins()
         except (KeyError, AttributeError):
-            raise CategoryDoesNotExistError(f"{category} does not exist.")
+            raise CategoryDoesNotExist(f"{category} does not exist.")
 
         if search_term:
             def search_term_filterer(plugin): return self.search_term_filterer(plugin, search_term)
@@ -1775,7 +1824,7 @@ class PluginManagerWindow(ba.Window):
     async def draw_plugin_name(self, plugin):
         try:
             latest_compatible_version = plugin.latest_compatible_version
-        except NoCompatibleVersionError:
+        except NoCompatibleVersion:
             # We currently don't show plugins that have no compatible versions.
             return
 
@@ -1795,21 +1844,21 @@ class PluginManagerWindow(ba.Window):
 
         plugin_name_widget_to_update = self.plugins_in_current_view.get(plugin.name)
         if plugin_name_widget_to_update:
-            ba.textwidget(edit=plugin_name_widget_to_update,
-                          color=color)
+            bui.textwidget(edit=plugin_name_widget_to_update,
+                           color=color)
         else:
-            text_widget = ba.textwidget(parent=self._columnwidget,
-                                        size=(410, 30),
-                                        selectable=True,
-                                        always_highlight=True,
-                                        color=color,
-                                        # on_select_call=lambda: None,
-                                        text=plugin.name,
-                                        click_activate=True,
-                                        on_activate_call=lambda: self.show_plugin_window(plugin),
-                                        h_align='left',
-                                        v_align='center',
-                                        maxwidth=420)
+            text_widget = bui.textwidget(parent=self._columnwidget,
+                                         size=(410, 30),
+                                         selectable=True,
+                                         always_highlight=True,
+                                         color=color,
+                                         # on_select_call=lambda: None,
+                                         text=plugin.name,
+                                         click_activate=True,
+                                         on_activate_call=lambda: self.show_plugin_window(plugin),
+                                         h_align='left',
+                                         v_align='center',
+                                         maxwidth=420)
             self.plugins_in_current_view[plugin.name] = text_widget
             # XXX: This seems nicer. Might wanna use this in future.
             # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
@@ -1841,14 +1890,14 @@ class PluginManagerWindow(ba.Window):
 
     async def refresh(self):
         self.cleanup()
-        ba.textwidget(edit=self._plugin_manager_status_text,
-                      text="Refreshing...")
+        bui.textwidget(edit=self._plugin_manager_status_text,
+                       text="Refreshing...")
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
             await self.plugin_manager.setup_index()
-            ba.textwidget(edit=self._plugin_manager_status_text,
-                          text="")
+            bui.textwidget(edit=self._plugin_manager_status_text,
+                           text="")
             await self.select_category(self.selected_category)
 
     def soft_refresh(self):
@@ -1859,13 +1908,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
     def __init__(self, plugin_manager, origin_widget):
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
-        self.settings = ba.app.config["Community Plugin Manager"]["Settings"].copy()
+        self.settings = babase.app.config["Community Plugin Manager"]["Settings"].copy()
         loop = asyncio.get_event_loop()
         loop.create_task(self.draw_ui())
 
     async def draw_ui(self):
         b_text_color = (0.8, 0.8, 0.85)
-        s = 1.25 if _uiscale is ba.UIScale.SMALL else 1.27 if _uiscale is ba.UIScale.MEDIUM else 1.3
+        s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.27 if _uiscale is babase.UIScale.MEDIUM else 1.3
         width = 380 * s
         height = 150 + 150 * s
         color = (0.9, 0.9, 0.9)
@@ -1880,99 +1929,99 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         transition = 'in_scale'
         button_size = (32 * s, 32 * s)
         # index = await self._plugin_manager.get_index()
-        self._root_widget = ba.containerwidget(size=(width, height),
-                                               # parent=_ba.get_special_widget(
-                                               #     'overlay_stack'),
-                                               on_outside_click_call=self._ok,
-                                               transition=transition,
-                                               scale=(2.1 if _uiscale is ba.UIScale.SMALL else 1.5
-                                                      if _uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               scale_origin_stack_offset=self.scale_origin)
+        self._root_widget = bui.containerwidget(size=(width, height),
+                                                # parent=_babase.get_special_widget(
+                                                #     'overlay_stack'),
+                                                on_outside_click_call=self._ok,
+                                                transition=transition,
+                                                scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
+                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
+                                                scale_origin_stack_offset=self.scale_origin)
         pos = height * 0.9
         setting_title = "Settings"
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text=setting_title,
-                      scale=text_scale,
-                      color=ba.app.ui.title_color,
-                      maxwidth=width * 0.9)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos),
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text=setting_title,
+                       scale=text_scale,
+                       color=bui.app.ui_v1.title_color,
+                       maxwidth=width * 0.9)
 
         pos -= 20
-        self._save_button = ba.buttonwidget(parent=self._root_widget,
-                                            position=((width * 0.82) - button_size[0] / 2, pos),
-                                            size=(73, 35),
-                                            on_activate_call=self.save_settings_button,
-                                            textcolor=b_text_color,
-                                            button_type='square',
-                                            text_scale=1,
-                                            scale=0,
-                                            selectable=False,
-                                            label="Save")
+        self._save_button = bui.buttonwidget(parent=self._root_widget,
+                                             position=((width * 0.82) - button_size[0] / 2, pos),
+                                             size=(73, 35),
+                                             on_activate_call=self.save_settings_button,
+                                             textcolor=b_text_color,
+                                             button_type='square',
+                                             text_scale=1,
+                                             scale=0,
+                                             selectable=False,
+                                             label="Save")
         pos -= 40
 
         for setting, value in self.settings.items():
-            ba.checkboxwidget(parent=self._root_widget,
-                              position=(width * 0.1, pos),
-                              size=(170, 30),
-                              text=setting,
-                              value=value,
-                              on_value_change_call=ba.Call(self.toggle_setting, setting),
-                              maxwidth=500,
-                              textcolor=(0.9, 0.9, 0.9),
-                              scale=text_scale * 0.8)
+            bui.checkboxwidget(parent=self._root_widget,
+                               position=(width * 0.1, pos),
+                               size=(170, 30),
+                               text=setting,
+                               value=value,
+                               on_value_change_call=babase.Call(self.toggle_setting, setting),
+                               maxwidth=500,
+                               textcolor=(0.9, 0.9, 0.9),
+                               scale=text_scale * 0.8)
             pos -= 34 * text_scale
 
         pos = height - 200
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos-5),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text='Contribute to plugins or to this community plugin manager!',
-                      scale=text_scale * 0.65,
-                      color=color,
-                      maxwidth=width * 0.95)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos-5),
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text='Contribute to plugins or to this community plugin manager!',
+                       scale=text_scale * 0.65,
+                       color=color,
+                       maxwidth=width * 0.95)
 
         pos -= 75
-        self.discord_button = ba.buttonwidget(parent=self._root_widget,
-                                              position=((width * 0.20) - button_size[0] / 2, pos),
+        self.discord_button = bui.buttonwidget(parent=self._root_widget,
+                                               position=((width * 0.20) - button_size[0] / 2, pos),
+                                               size=button_size,
+                                               on_activate_call=lambda: bui.open_url(DISCORD_URL),
+                                               textcolor=b_text_color,
+                                               color=discord_bg_color,
+                                               button_type='square',
+                                               text_scale=1,
+                                               label="")
+
+        bui.imagewidget(parent=self._root_widget,
+                        position=((width * 0.20)+0.5 - button_size[0] / 2, pos),
+                        size=button_size,
+                        texture=bui.gettexture("discordLogo"),
+                        color=discord_fg_color,
+                        draw_controller=self.discord_button)
+
+        self.github_button = bui.buttonwidget(parent=self._root_widget,
+                                              position=((width * 0.49) - button_size[0] / 2, pos),
                                               size=button_size,
-                                              on_activate_call=lambda: ba.open_url(DISCORD_URL),
+                                              on_activate_call=lambda: bui.open_url(REPOSITORY_URL),
                                               textcolor=b_text_color,
-                                              color=discord_bg_color,
+                                              color=github_bg_color,
                                               button_type='square',
                                               text_scale=1,
-                                              label="")
+                                              label='')
 
-        ba.imagewidget(parent=self._root_widget,
-                       position=((width * 0.20)+0.5 - button_size[0] / 2, pos),
-                       size=button_size,
-                       texture=ba.gettexture("discordLogo"),
-                       color=discord_fg_color,
-                       draw_controller=self.discord_button)
+        bui.imagewidget(parent=self._root_widget,
+                        position=((width * 0.49) + 0.5 - button_size[0] / 2, pos),
+                        size=button_size,
+                        texture=bui.gettexture("githubLogo"),
+                        color=(1, 1, 1),
+                        draw_controller=self.github_button)
 
-        self.github_button = ba.buttonwidget(parent=self._root_widget,
-                                             position=((width * 0.49) - button_size[0] / 2, pos),
-                                             size=button_size,
-                                             on_activate_call=lambda: ba.open_url(REPOSITORY_URL),
-                                             textcolor=b_text_color,
-                                             color=github_bg_color,
-                                             button_type='square',
-                                             text_scale=1,
-                                             label='')
-
-        ba.imagewidget(parent=self._root_widget,
-                       position=((width * 0.49) + 0.5 - button_size[0] / 2, pos),
-                       size=button_size,
-                       texture=ba.gettexture("githubLogo"),
-                       color=(1, 1, 1),
-                       draw_controller=self.github_button)
-
-        ba.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._ok)
+        bui.containerwidget(edit=self._root_widget,
+                            on_cancel_call=self._ok)
 
         try:
             plugin_manager_update_available = await self._plugin_manager.get_update_details()
@@ -1983,269 +2032,311 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             loop = asyncio.get_event_loop()
             button_size = (95 * s, 32 * s)
             update_button_label = f'Update to v{plugin_manager_update_available[0]}'
-            self._update_button = ba.buttonwidget(parent=self._root_widget,
-                                                  position=((width * 0.77) - button_size[0] / 2,
-                                                            pos),
-                                                  size=button_size,
-                                                  on_activate_call=lambda:
-                                                      loop.create_task(
-                                                          self.update(
-                                                              *plugin_manager_update_available
-                                                          )
-                                                  ),
-                                                  textcolor=b_text_color,
-                                                  button_type='square',
-                                                  text_scale=1,
-                                                  color=(0, 0.7, 0),
-                                                  label=update_button_label)
-            self._restart_to_reload_changes_text = ba.textwidget(parent=self._root_widget,
-                                                                 position=(width * 0.79, pos + 20),
-                                                                 size=(0, 0),
-                                                                 h_align='center',
-                                                                 v_align='center',
-                                                                 text='',
-                                                                 scale=text_scale * 0.65,
-                                                                 color=(0, 0.8, 0),
-                                                                 maxwidth=width * 0.9)
+            self._update_button = bui.buttonwidget(parent=self._root_widget,
+                                                   position=((width * 0.77) - button_size[0] / 2,
+                                                             pos),
+                                                   size=button_size,
+                                                   on_activate_call=lambda:
+                                                   loop.create_task(
+                                                       self.update(
+                                                           *plugin_manager_update_available
+                                                       )
+                                                   ),
+                                                   textcolor=b_text_color,
+                                                   button_type='square',
+                                                   text_scale=1,
+                                                   color=(0, 0.7, 0),
+                                                   label=update_button_label)
+            self._restart_to_reload_changes_text = bui.textwidget(parent=self._root_widget,
+                                                                  position=(width * 0.79, pos + 20),
+                                                                  size=(0, 0),
+                                                                  h_align='center',
+                                                                  v_align='center',
+                                                                  text='',
+                                                                  scale=text_scale * 0.65,
+                                                                  color=(0, 0.8, 0),
+                                                                  maxwidth=width * 0.9)
         else:
             text_color = (0, 0.8, 0)
         pos -= 25
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text=f'Plugin Manager v{PLUGIN_MANAGER_VERSION}',
-                      scale=text_scale * 0.8,
-                      color=text_color,
-                      maxwidth=width * 0.9)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos),
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text=f'Plugin Manager v{PLUGIN_MANAGER_VERSION}',
+                       scale=text_scale * 0.8,
+                       color=text_color,
+                       maxwidth=width * 0.9)
         pos -= 25
-        ba.textwidget(parent=self._root_widget,
-                      position=(width * 0.49, pos),
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text=f'API Version: {ba.app.api_version}',
-                      scale=text_scale * 0.7,
-                      color=(0.4, 0.8, 1),
-                      maxwidth=width * 0.95)
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, pos),
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text=f'API Version: {babase.app.api_version}',
+                       scale=text_scale * 0.7,
+                       color=(0.4, 0.8, 1),
+                       maxwidth=width * 0.95)
 
         pos = height * 0.1
 
     def toggle_setting(self, setting, set_value):
         self.settings[setting] = set_value
-        if self.settings == ba.app.config["Community Plugin Manager"]["Settings"]:
-            ba.buttonwidget(edit=self._save_button,
-                            scale=0,
-                            selectable=False)
+        if self.settings == babase.app.config["Community Plugin Manager"]["Settings"]:
+            bui.buttonwidget(edit=self._save_button,
+                             scale=0,
+                             selectable=False)
         else:
-            ba.buttonwidget(edit=self._save_button,
-                            scale=1,
-                            selectable=True)
+            bui.buttonwidget(edit=self._save_button,
+                             scale=1,
+                             selectable=True)
 
     def save_settings_button(self):
-        ba.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
-        ba.app.config.commit()
+        babase.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
+        babase.app.config.commit()
         self._ok()
-        ba.playsound(ba.getsound('gunCocking'))
+        bui.getsound('gunCocking').play()
 
     async def update(self, to_version=None, commit_sha=None):
         try:
             await self._plugin_manager.update(to_version, commit_sha)
-        except MD5CheckSumFailedError:
-            ba.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+        except MD5CheckSumFailed:
+            bui.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
+            bui.getsound('error').play()
         else:
-            ba.screenmessage("Plugin manager update successful", color=(0, 1, 0))
-            ba.playsound(ba.getsound('shieldUp'))
-            ba.textwidget(edit=self._restart_to_reload_changes_text,
-                          text='Update Applied!\nRestart game to reload changes.')
+            bui.screenmessage("Plugin manager update successful", color=(0, 1, 0))
+            bui.getsound('shieldUp').play()
+            bui.textwidget(edit=self._restart_to_reload_changes_text,
+                           text='Update Applied!\nRestart game to reload changes.')
             self._update_button.delete()
 
     def _ok(self) -> None:
-        ba.playsound(ba.getsound('swish'))
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.getsound('swish').play()
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
-class NewAllSettingsWindow(ba.Window):
-    def __init__(self,
-                 transition: str = "in_right",
-                 origin_widget: ba.Widget = None):
+class NewAllSettingsWindow(bui.Window):
+    """Window for selecting a settings category."""
+
+    def __init__(
+        self,
+        transition: str = 'in_right',
+        origin_widget: bui.Widget | None = None,
+    ):
         # pylint: disable=too-many-statements
         # pylint: disable=too-many-locals
-        import threading
 
-        # Preload some modules we use in a background thread so we won"t
+        # Preload some modules we use in a background thread so we won't
         # have a visual hitch when the user taps them.
-        threading.Thread(target=self._preload_modules).start()
+        Thread(target=self._preload_modules).start()
 
-        ba.set_analytics_screen("Settings Window")
-        scale_origin: Optional[tuple[float, float]]
+        bui.set_analytics_screen('Settings Window')
+        scale_origin: tuple[float, float] | None
         if origin_widget is not None:
-            self._transition_out = "out_scale"
+            self._transition_out = 'out_scale'
             scale_origin = origin_widget.get_screen_space_center()
-            transition = "in_scale"
+            transition = 'in_scale'
         else:
-            self._transition_out = "out_right"
+            self._transition_out = 'out_right'
             scale_origin = None
-        width = 900 if _uiscale is ba.UIScale.SMALL else 670
-        x_inset = 75 if _uiscale is ba.UIScale.SMALL else 0
+        assert bui.app.classic is not None
+        width = 900 if _uiscale is bui.UIScale.SMALL else 670
+        x_inset = 75 if _uiscale is bui.UIScale.SMALL else 0
         height = 435
-        self._r = "settingsWindow"
-        top_extra = 20 if _uiscale is ba.UIScale.SMALL else 0
+        self._r = 'settingsWindow'
+        top_extra = 20 if _uiscale is bui.UIScale.SMALL else 0
 
-        super().__init__(root_widget=ba.containerwidget(
-            size=(width, height + top_extra),
-            transition=transition,
-            toolbar_visibility="menu_minimal",
-            scale_origin_stack_offset=scale_origin,
-            scale=(1.75 if _uiscale is ba.UIScale.SMALL else
-                   1.35 if _uiscale is ba.UIScale.MEDIUM else 1.0),
-            stack_offset=(0, -8) if _uiscale is ba.UIScale.SMALL else (0, 0)))
+        super().__init__(
+            root_widget=bui.containerwidget(
+                size=(width, height + top_extra),
+                transition=transition,
+                toolbar_visibility='menu_minimal',
+                scale_origin_stack_offset=scale_origin,
+                scale=(
+                    1.75
+                    if _uiscale is bui.UIScale.SMALL
+                    else 1.35
+                    if _uiscale is bui.UIScale.MEDIUM
+                    else 1.0
+                ),
+                stack_offset=(0, -8)
+                if _uiscale is bui.UIScale.SMALL
+                else (0, 0),
+            )
+        )
 
-        if ba.app.ui.use_toolbars and _uiscale is ba.UIScale.SMALL:
+        if bui.app.ui_v1.use_toolbars and _uiscale is bui.UIScale.SMALL:
             self._back_button = None
-            ba.containerwidget(edit=self._root_widget,
-                               on_cancel_call=self._do_back)
+            bui.containerwidget(
+                edit=self._root_widget, on_cancel_call=self._do_back
+            )
         else:
-            self._back_button = btn = ba.buttonwidget(
+            self._back_button = btn = bui.buttonwidget(
                 parent=self._root_widget,
                 autoselect=True,
                 position=(40 + x_inset, height - 55),
                 size=(130, 60),
                 scale=0.8,
                 text_scale=1.2,
-                label=ba.Lstr(resource="backText"),
-                button_type="back",
-                on_activate_call=self._do_back)
-            ba.containerwidget(edit=self._root_widget, cancel_button=btn)
+                label=bui.Lstr(resource='backText'),
+                button_type='back',
+                on_activate_call=self._do_back,
+            )
+            bui.containerwidget(edit=self._root_widget, cancel_button=btn)
 
-        ba.textwidget(parent=self._root_widget,
-                      position=(0, height - 44),
-                      size=(width, 25),
-                      text=ba.Lstr(resource=self._r + ".titleText"),
-                      color=ba.app.ui.title_color,
-                      h_align="center",
-                      v_align="center",
-                      maxwidth=130)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(0, height - 44),
+            size=(width, 25),
+            text=bui.Lstr(resource=self._r + '.titleText'),
+            color=bui.app.ui_v1.title_color,
+            h_align='center',
+            v_align='center',
+            maxwidth=130,
+        )
 
         if self._back_button is not None:
-            ba.buttonwidget(edit=self._back_button,
-                            button_type="backSmall",
-                            size=(60, 60),
-                            label=ba.charstr(ba.SpecialChar.BACK))
+            bui.buttonwidget(
+                edit=self._back_button,
+                button_type='backSmall',
+                size=(60, 60),
+                label=bui.charstr(bui.SpecialChar.BACK),
+            )
 
         v = height - 80
         v -= 145
 
         basew = 200
         baseh = 160
-
-        x_offs = x_inset + (105 if _uiscale is ba.UIScale.SMALL else
-                            72) - basew  # now unused
+        x_offs = (
+            x_inset + (105 if _uiscale is bui.UIScale.SMALL else 72) - basew
+        )  # now unused
         x_offs2 = x_offs + basew - 7
         x_offs3 = x_offs + 2 * (basew - 7)
         x_offs4 = x_offs + 3 * (basew - 7)
         x_offs5 = x_offs2 + 0.5 * (basew - 7)
         x_offs6 = x_offs5 + (basew - 7)
 
-        def _b_title(x: float, y: float, button: ba.Widget,
-                     text: Union[str, ba.Lstr]) -> None:
-            ba.textwidget(parent=self._root_widget,
-                          text=text,
-                          position=(x + basew * 0.47, y + baseh * 0.22),
-                          maxwidth=basew * 0.7, size=(0, 0),
-                          h_align="center",
-                          v_align="center",
-                          draw_controller=button,
-                          color=(0.7, 0.9, 0.7, 1.0))
+        def _b_title(
+            x: float, y: float, button: bui.Widget, text: str | bui.Lstr
+        ) -> None:
+            bui.textwidget(
+                parent=self._root_widget,
+                text=text,
+                position=(x + basew * 0.47, y + baseh * 0.22),
+                maxwidth=basew * 0.7,
+                size=(0, 0),
+                h_align='center',
+                v_align='center',
+                draw_controller=button,
+                color=(0.7, 0.9, 0.7, 1.0),
+            )
 
-        ctb = self._controllers_button = ba.buttonwidget(parent=self._root_widget,
-                                                         autoselect=True,
-                                                         position=(x_offs2, v),
-                                                         size=(basew, baseh),
-                                                         button_type="square",
-                                                         label="",
-                                                         on_activate_call=self._do_controllers)
-        if ba.app.ui.use_toolbars and self._back_button is None:
-            bbtn = _ba.get_special_widget("back_button")
-            ba.widget(edit=ctb, left_widget=bbtn)
-        _b_title(x_offs2, v, ctb,
-                 ba.Lstr(resource=self._r + ".controllersText"))
+        ctb = self._controllers_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(x_offs2, v),
+            size=(basew, baseh),
+            button_type='square',
+            label='',
+            on_activate_call=self._do_controllers,
+        )
+        if bui.app.ui_v1.use_toolbars and self._back_button is None:
+            bbtn = bui.get_special_widget('back_button')
+            bui.widget(edit=ctb, left_widget=bbtn)
+        _b_title(
+            x_offs2, v, ctb, bui.Lstr(resource=self._r + '.controllersText')
+        )
         imgw = imgh = 130
-        ba.imagewidget(parent=self._root_widget,
-                       position=(x_offs2 + basew * 0.49 - imgw * 0.5, v + 35),
-                       size=(imgw, imgh),
-                       texture=ba.gettexture("controllerIcon"),
-                       draw_controller=ctb)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(x_offs2 + basew * 0.49 - imgw * 0.5, v + 35),
+            size=(imgw, imgh),
+            texture=bui.gettexture('controllerIcon'),
+            draw_controller=ctb,
+        )
 
-        gfxb = self._graphics_button = ba.buttonwidget(parent=self._root_widget,
-                                                       autoselect=True,
-                                                       position=(x_offs3, v),
-                                                       size=(basew, baseh),
-                                                       button_type="square",
-                                                       label="",
-                                                       on_activate_call=self._do_graphics)
-        if ba.app.ui.use_toolbars:
-            pbtn = _ba.get_special_widget("party_button")
-            ba.widget(edit=gfxb, up_widget=pbtn, right_widget=pbtn)
-        _b_title(x_offs3, v, gfxb, ba.Lstr(resource=self._r + ".graphicsText"))
+        gfxb = self._graphics_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(x_offs3, v),
+            size=(basew, baseh),
+            button_type='square',
+            label='',
+            on_activate_call=self._do_graphics,
+        )
+        if bui.app.ui_v1.use_toolbars:
+            pbtn = bui.get_special_widget('party_button')
+            bui.widget(edit=gfxb, up_widget=pbtn, right_widget=pbtn)
+        _b_title(x_offs3, v, gfxb, bui.Lstr(resource=self._r + '.graphicsText'))
         imgw = imgh = 110
-        ba.imagewidget(parent=self._root_widget,
-                       position=(x_offs3 + basew * 0.49 - imgw * 0.5, v + 42),
-                       size=(imgw, imgh),
-                       texture=ba.gettexture("graphicsIcon"),
-                       draw_controller=gfxb)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(x_offs3 + basew * 0.49 - imgw * 0.5, v + 42),
+            size=(imgw, imgh),
+            texture=bui.gettexture('graphicsIcon'),
+            draw_controller=gfxb,
+        )
 
-        abtn = self._audio_button = ba.buttonwidget(parent=self._root_widget,
-                                                    autoselect=True,
-                                                    position=(x_offs4, v),
-                                                    size=(basew, baseh),
-                                                    button_type="square",
-                                                    label="",
-                                                    on_activate_call=self._do_audio)
-        _b_title(x_offs4, v, abtn, ba.Lstr(resource=self._r + ".audioText"))
+        abtn = self._audio_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(x_offs4, v),
+            size=(basew, baseh),
+            button_type='square',
+            label='',
+            on_activate_call=self._do_audio,
+        )
+        _b_title(x_offs4, v, abtn, bui.Lstr(resource=self._r + '.audioText'))
         imgw = imgh = 120
-        ba.imagewidget(parent=self._root_widget,
-                       position=(x_offs4 + basew * 0.49 - imgw * 0.5 + 5, v + 35),
-                       size=(imgw, imgh),
-                       color=(1, 1, 0), texture=ba.gettexture("audioIcon"),
-                       draw_controller=abtn)
-        v -= (baseh - 5)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(x_offs4 + basew * 0.49 - imgw * 0.5 + 5, v + 35),
+            size=(imgw, imgh),
+            color=(1, 1, 0),
+            texture=bui.gettexture('audioIcon'),
+            draw_controller=abtn,
+        )
 
-        avb = self._advanced_button = ba.buttonwidget(parent=self._root_widget,
-                                                      autoselect=True,
-                                                      position=(x_offs5, v),
-                                                      size=(basew, baseh),
-                                                      button_type="square",
-                                                      label="",
-                                                      on_activate_call=self._do_advanced)
-        _b_title(x_offs5, v, avb, ba.Lstr(resource=self._r + ".advancedText"))
+        v -= baseh - 5
+
+        avb = self._advanced_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(x_offs5, v),
+            size=(basew, baseh),
+            button_type='square',
+            label='',
+            on_activate_call=self._do_advanced,
+        )
+        _b_title(x_offs5, v, avb, bui.Lstr(resource=self._r + '.advancedText'))
         imgw = imgh = 120
-        ba.imagewidget(parent=self._root_widget,
-                       position=(x_offs5 + basew * 0.49 - imgw * 0.5 + 5,
-                                 v + 35),
-                       size=(imgw, imgh),
-                       color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("advancedIcon"),
-                       draw_controller=avb)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(x_offs5 + basew * 0.49 - imgw * 0.5 + 5, v + 35),
+            size=(imgw, imgh),
+            color=(0.8, 0.95, 1),
+            texture=bui.gettexture('advancedIcon'),
+            draw_controller=avb,
+        )
 
-        mmb = self._modmgr_button = ba.buttonwidget(parent=self._root_widget,
-                                                    autoselect=True,
-                                                    position=(x_offs6, v),
-                                                    size=(basew, baseh),
-                                                    button_type="square",
-                                                    label="",
-                                                    on_activate_call=self._do_modmanager)
-        _b_title(x_offs6, v, mmb, ba.Lstr(value="Plugin Manager"))
+        mmb = self._modmgr_button = bui.buttonwidget(parent=self._root_widget,
+                                                     autoselect=True,
+                                                     position=(x_offs6, v),
+                                                     size=(basew, baseh),
+                                                     button_type="square",
+                                                     label="",
+                                                     on_activate_call=self._do_modmanager)
+        _b_title(x_offs6, v, mmb, bui.Lstr(value="Plugin Manager"))
         imgw = imgh = 112
-        ba.imagewidget(parent=self._root_widget,
-                       position=(x_offs6 + basew * 0.49 - imgw * 0.5 + 5,
-                                 v + 35),
-                       size=(imgw, imgh),
-                       color=(0.8, 0.95, 1),
-                       texture=ba.gettexture("storeIcon"),
-                       draw_controller=mmb)
+        bui.imagewidget(parent=self._root_widget,
+                        position=(x_offs6 + basew * 0.49 - imgw * 0.5 + 5,
+                                  v + 35),
+                        size=(imgw, imgh),
+                        color=(0.8, 0.95, 1),
+                        texture=bui.gettexture("storeIcon"),
+                        draw_controller=mmb)
 
         self._restore_state()
 
@@ -2253,113 +2344,145 @@ class NewAllSettingsWindow(ba.Window):
     @staticmethod
     def _preload_modules() -> None:
         """Preload modules we use (called in bg thread)."""
-        # import bastd.ui.mainmenu as _unused1
-        # import bastd.ui.settings.controls as _unused2
-        # import bastd.ui.settings.graphics as _unused3
-        # import bastd.ui.settings.audio as _unused4
-        # import bastd.ui.settings.advanced as _unused5
+        import bauiv1lib.mainmenu as _unused1
+        import bauiv1lib.settings.controls as _unused2
+        import bauiv1lib.settings.graphics as _unused3
+        import bauiv1lib.settings.audio as _unused4
+        import bauiv1lib.settings.advanced as _unused5
 
     def _do_back(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.mainmenu import MainMenuWindow
+        from bauiv1lib.mainmenu import MainMenuWindow
+
         self._save_state()
-        ba.containerwidget(edit=self._root_widget,
-                           transition=self._transition_out)
-        ba.app.ui.set_main_menu_window(
-            MainMenuWindow(transition="in_left").get_root_widget())
+        bui.containerwidget(
+            edit=self._root_widget, transition=self._transition_out
+        )
+        assert bui.app.classic is not None
+        bui.app.ui_v1.set_main_menu_window(
+            MainMenuWindow(transition='in_left').get_root_widget()
+        )
 
     def _do_controllers(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.controls import ControlsSettingsWindow
+        from bauiv1lib.settings.controls import ControlsSettingsWindow
+
         self._save_state()
-        ba.containerwidget(edit=self._root_widget, transition="out_left")
-        ba.app.ui.set_main_menu_window(ControlsSettingsWindow(
-            origin_widget=self._controllers_button).get_root_widget())
+        bui.containerwidget(edit=self._root_widget, transition='out_left')
+        assert bui.app.classic is not None
+        bui.app.ui_v1.set_main_menu_window(
+            ControlsSettingsWindow(
+                origin_widget=self._controllers_button
+            ).get_root_widget()
+        )
 
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.graphics import GraphicsSettingsWindow
+        from bauiv1lib.settings.graphics import GraphicsSettingsWindow
+
         self._save_state()
-        ba.containerwidget(edit=self._root_widget, transition="out_left")
-        ba.app.ui.set_main_menu_window(GraphicsSettingsWindow(
-            origin_widget=self._graphics_button).get_root_widget())
+        bui.containerwidget(edit=self._root_widget, transition='out_left')
+        assert bui.app.classic is not None
+        bui.app.ui_v1.set_main_menu_window(
+            GraphicsSettingsWindow(
+                origin_widget=self._graphics_button
+            ).get_root_widget()
+        )
 
     def _do_audio(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.audio import AudioSettingsWindow
+        from bauiv1lib.settings.audio import AudioSettingsWindow
+
         self._save_state()
-        ba.containerwidget(edit=self._root_widget, transition="out_left")
-        ba.app.ui.set_main_menu_window(AudioSettingsWindow(
-            origin_widget=self._audio_button).get_root_widget())
+        bui.containerwidget(edit=self._root_widget, transition='out_left')
+        assert bui.app.classic is not None
+        bui.app.ui_v1.set_main_menu_window(
+            AudioSettingsWindow(
+                origin_widget=self._audio_button
+            ).get_root_widget()
+        )
 
     def _do_advanced(self) -> None:
         # pylint: disable=cyclic-import
-        from bastd.ui.settings.advanced import AdvancedSettingsWindow
+        from bauiv1lib.settings.advanced import AdvancedSettingsWindow
+
         self._save_state()
-        ba.containerwidget(edit=self._root_widget, transition="out_left")
-        ba.app.ui.set_main_menu_window(AdvancedSettingsWindow(
-            origin_widget=self._advanced_button).get_root_widget())
+        bui.containerwidget(edit=self._root_widget, transition='out_left')
+        assert bui.app.classic is not None
+        bui.app.ui_v1.set_main_menu_window(
+            AdvancedSettingsWindow(
+                origin_widget=self._advanced_button
+            ).get_root_widget()
+        )
 
     def _do_modmanager(self) -> None:
         self._save_state()
-        ba.containerwidget(edit=self._root_widget, transition="out_left")
-        ba.app.ui.set_main_menu_window(PluginManagerWindow(
-            origin_widget=self._modmgr_button).get_root_widget())
+        bui.containerwidget(edit=self._root_widget, transition="out_left")
+        bui.app.ui_v1.set_main_menu_window(
+            PluginManagerWindow(
+                origin_widget=self._modmgr_button
+            ).get_root_widget()
+        )
 
     def _save_state(self) -> None:
         try:
             sel = self._root_widget.get_selected_child()
             if sel == self._controllers_button:
-                sel_name = "Controllers"
+                sel_name = 'Controllers'
             elif sel == self._graphics_button:
-                sel_name = "Graphics"
+                sel_name = 'Graphics'
             elif sel == self._audio_button:
-                sel_name = "Audio"
+                sel_name = 'Audio'
             elif sel == self._advanced_button:
-                sel_name = "Advanced"
+                sel_name = 'Advanced'
             elif sel == self._modmgr_button:
-                sel_name = "Mod Manager"
+                sel_name = 'Mod Manager'
             elif sel == self._back_button:
-                sel_name = "Back"
+                sel_name = 'Back'
             else:
-                raise ValueError(f"unrecognized selection \"{sel}\"")
-            ba.app.ui.window_states[type(self)] = {"sel_name": sel_name}
+                raise ValueError(f'unrecognized selection \'{sel}\'')
+            assert bui.app.classic is not None
+            bui.app.ui_v1.window_states[type(self)] = {
+                'sel_name': sel_name
+            }
         except Exception:
-            ba.print_exception(f"Error saving state for {self}.")
+            logging.exception('Error saving state for %s.', self)
 
     def _restore_state(self) -> None:
         try:
-            sel_name = ba.app.ui.window_states.get(type(self),
-                                                   {}).get("sel_name")
-            sel: Optional[ba.Widget]
-            if sel_name == "Controllers":
+            assert bui.app.classic is not None
+            sel_name = bui.app.ui_v1.window_states.get(type(self), {}).get(
+                'sel_name'
+            )
+            sel: bui.Widget | None
+            if sel_name == 'Controllers':
                 sel = self._controllers_button
-            elif sel_name == "Graphics":
+            elif sel_name == 'Graphics':
                 sel = self._graphics_button
-            elif sel_name == "Audio":
+            elif sel_name == 'Audio':
                 sel = self._audio_button
-            elif sel_name == "Advanced":
+            elif sel_name == 'Advanced':
                 sel = self._advanced_button
             elif sel_name == "Mod Manager":
                 sel = self._modmgr_button
-            elif sel_name == "Back":
+            elif sel_name == 'Back':
                 sel = self._back_button
             else:
                 sel = self._controllers_button
             if sel is not None:
-                ba.containerwidget(edit=self._root_widget, selected_child=sel)
+                bui.containerwidget(edit=self._root_widget, selected_child=sel)
         except Exception:
-            ba.print_exception(f"Error restoring state for {self}.")
+            logging.exception('Error restoring state for %s.', self)
 
 
-# ba_meta export plugin
-class EntryPoint(ba.Plugin):
+# ba_meta export babase.Plugin
+class EntryPoint(babase.Plugin):
     def on_app_running(self) -> None:
         """Called when the app is being launched."""
-        from bastd.ui.settings import allsettings
+        from bauiv1lib.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         DNSBlockWorkaround.apply()
-        asyncio.set_event_loop(ba._asyncio._asyncio_event_loop)
+        asyncio.set_event_loop(babase._asyncio._asyncio_event_loop)
         startup_tasks = StartupTasks()
         loop = asyncio.get_event_loop()
         loop.create_task(startup_tasks.execute())
