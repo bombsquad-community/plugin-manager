@@ -1,5 +1,13 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.1 (30-06-2023)
+
+- Allow specifying branch names in custom sources.
+
+### 1.0.0 (20-06-2023)
+
+- Migrate plugin manager's source code to API 8.
+
 ### 0.3.5 (16-06-2023)
 
 - Replace the "Loading..." text with the exception message in case something goes wrong.

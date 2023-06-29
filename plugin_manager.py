@@ -19,6 +19,7 @@ import pathlib
 import contextlib
 import hashlib
 import copy
+import traceback
 
 from typing import Union, Optional
 from datetime import datetime
@@ -31,7 +32,7 @@ _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "1.0.0"
+PLUGIN_MANAGER_VERSION = "1.0.1"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -70,19 +71,27 @@ DISCORD_URL = "https://ballistica.net/discord"
 _CACHE = {}
 
 
-class MD5CheckSumFailedError(Exception):
+class MD5CheckSumFailed(Exception):
     pass
 
 
-class PluginNotInstalledError(Exception):
+class PluginNotInstalled(Exception):
     pass
 
 
-class CategoryDoesNotExistError(Exception):
+class CategoryDoesNotExist(Exception):
     pass
 
 
-class NoCompatibleVersionError(Exception):
+class NoCompatibleVersion(Exception):
+    pass
+
+
+class PluginSourceNetworkError(Exception):
+    pass
+
+
+class CategoryMetadataParseError(Exception):
     pass
 
 
@@ -109,7 +118,7 @@ def stream_network_response_to_file(request, file, md5sum=None, retries=3):
             content += chunk
     if md5sum and hashlib.md5(content).hexdigest() != md5sum:
         if retries <= 0:
-            raise MD5CheckSumFailedError("MD5 checksum match failed.")
+            raise MD5CheckSumFailed("MD5 checksum match failed.")
         return stream_network_response_to_file(
             request,
             file,
@@ -276,7 +285,7 @@ class StartupTasks:
             bui.screenmessage(f"Plugin Manager is being updated to v{to_version}")
             try:
                 await self.plugin_manager.update(to_version, commit_sha)
-            except MD5CheckSumFailedError:
+            except MD5CheckSumFailed:
                 bui.getsound('error').play()
             else:
                 bui.screenmessage("Update successful. Restart game to reload changes.",
@@ -301,7 +310,7 @@ class StartupTasks:
             return False
         try:
             plugin.latest_compatible_version
-        except NoCompatibleVersionError:
+        except NoCompatibleVersion:
             return False
         else:
             return True
@@ -354,9 +363,9 @@ class StartupTasks:
 
 
 class Category:
-    def __init__(self, meta_url, is_3rd_party=False):
+    def __init__(self, meta_url, tag=CURRENT_TAG):
         self.meta_url = meta_url
-        self.is_3rd_party = is_3rd_party
+        self.tag = tag
         self.request_headers = HEADERS
         self._metadata = _CACHE.get("categories", {}).get(meta_url, {}).get("metadata")
         self._plugins = _CACHE.get("categories", {}).get(meta_url, {}).get("plugins")
@@ -365,9 +374,8 @@ class Category:
         if self._metadata is None:
             # Let's keep depending on the "main" branch for 3rd party sources
             # even if we're using a different branch of plugin manager's repository.
-            tag = "main" if self.is_3rd_party else CURRENT_TAG
             request = urllib.request.Request(
-                self.meta_url.format(content_type="raw", tag=tag),
+                self.meta_url.format(content_type="raw", tag=self.tag),
                 headers=self.request_headers,
             )
             response = await async_send_network_request(request)
@@ -375,11 +383,13 @@ class Category:
             self.set_category_global_cache("metadata", self._metadata)
         return self
 
-    async def is_valid(self):
+    async def validate(self):
         try:
             await self.fetch_metadata()
-        except urllib.error.HTTPError:
-            return False
+        except urllib.error.HTTPError as e:
+            raise PluginSourceNetworkError(str(e))
+        except json.decoder.JSONDecodeError as e:
+            raise CategoryMetadataParseError(f"Failed to parse JSON: {str(e)}")
         try:
             await asyncio.gather(
                 self.get_name(),
@@ -388,7 +398,7 @@ class Category:
                 self.get_plugins(),
             )
         except KeyError:
-            return False
+            raise CategoryMetadataParseError(f"Failed to parse JSON; missing required fields.")
         else:
             return True
 
@@ -411,7 +421,7 @@ class Category:
                 Plugin(
                     plugin_info,
                     f"{await self.get_plugins_base_url()}/{plugin_info[0]}.py",
-                    is_3rd_party=self.is_3rd_party,
+                    tag=self.tag,
                 )
                 for plugin_info in self._metadata["plugins"].items()
             ])
@@ -514,19 +524,19 @@ class PluginLocal:
             fout.write(content)
 
     def has_settings(self):
-        for plugin_entry_point, plugin_class in babase.app.plugins.active_plugins.items():
+        for plugin_entry_point, plugin_spec in bui.app.plugins.plugin_specs.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return plugin_class.has_settings_ui()
+                return plugin_spec.plugin.has_settings_ui()
 
     def launch_settings(self, source_widget):
-        for plugin_entry_point, plugin_class in babase.app.plugins.active_plugins.items():
+        for plugin_entry_point, plugin_spec in bui.app.plugins.plugin_specs.items():
             if plugin_entry_point.startswith(self._entry_point_initials):
-                return plugin_class.show_settings_ui(source_widget)
+                return plugin_spec.plugin.show_settings_ui(source_widget)
 
     async def get_content(self):
         if self._content is None:
             if not self.is_installed:
-                raise PluginNotInstalledError("Plugin is not available locally.")
+                raise PluginNotInstalled("Plugin is not available locally.")
             loop = asyncio.get_event_loop()
             self._content = await loop.run_in_executor(None, self._get_content)
         return self._content
@@ -613,7 +623,8 @@ class PluginLocal:
             if entry_point not in babase.app.config["Plugins"]:
                 babase.app.config["Plugins"][entry_point] = {}
             babase.app.config["Plugins"][entry_point]["enabled"] = True
-            if entry_point not in babase.app.plugins.active_plugins:
+            plugin_spec = bui.app.plugins.plugin_specs.get(entry_point)
+            if plugin_spec not in bui.app.plugins.active_plugins:
                 self.load_plugin(entry_point)
                 bui.screenmessage(f"{entry_point} loaded")
         if await self.has_minigames():
@@ -623,9 +634,14 @@ class PluginLocal:
 
     def load_plugin(self, entry_point):
         plugin_class = babase._general.getclass(entry_point, babase.Plugin)
-        loaded_plugin_class = plugin_class()
-        loaded_plugin_class.on_app_running()
-        babase.app.plugins.active_plugins[entry_point] = loaded_plugin_class
+        loaded_plugin_instance = plugin_class()
+        loaded_plugin_instance.on_app_running()
+
+        plugin_spec = babase.PluginSpec(class_path=entry_point, loadable=True)
+        plugin_spec.enabled = True
+        plugin_spec.plugin = loaded_plugin_instance
+        bui.app.plugins.plugin_specs[entry_point] = plugin_spec
+        bui.app.plugins.active_plugins.append(plugin_spec.plugin)
 
     def disable(self):
         for entry_point, plugin_info in babase.app.config["Plugins"].items():
@@ -674,7 +690,7 @@ class PluginLocal:
 
 
 class PluginVersion:
-    def __init__(self, plugin, version, tag=None):
+    def __init__(self, plugin, version, tag=CURRENT_TAG):
         self.number, info = version
         self.plugin = plugin
         self.api_version = info["api_version"]
@@ -682,10 +698,8 @@ class PluginVersion:
         self.commit_sha = info["commit_sha"]
         self.md5sum = info["md5sum"]
 
-        if tag is None:
-            tag = self.commit_sha
-
         self.download_url = self.plugin.url.format(content_type="raw", tag=tag)
+        print(self.download_url)
         self.view_url = self.plugin.url.format(content_type="blob", tag=tag)
 
     def __eq__(self, plugin_version):
@@ -713,7 +727,7 @@ class PluginVersion:
     async def install(self, suppress_screenmessage=False):
         try:
             local_plugin = await self._download()
-        except MD5CheckSumFailedError:
+        except MD5CheckSumFailed:
             if not suppress_screenmessage:
                 bui.screenmessage(
                     f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
@@ -728,20 +742,14 @@ class PluginVersion:
 
 
 class Plugin:
-    def __init__(self, plugin, url, is_3rd_party=False):
+    def __init__(self, plugin, url, tag=CURRENT_TAG):
         """
         Initialize a plugin from network repository.
         """
         self.name, self.info = plugin
-        self.is_3rd_party = is_3rd_party
         self.install_path = os.path.join(PLUGIN_DIRECTORY, f"{self.name}.py")
-        # if is_3rd_party:
-        #     tag = CURRENT_TAG
-        # else:
-        #     tag = CURRENT_TAG
-        tag = CURRENT_TAG
         self.url = url
-        self.download_url = url.format(content_type="raw", tag=tag)
+        self.tag = tag
         self._local_plugin = None
 
         self._versions = None
@@ -773,6 +781,7 @@ class Plugin:
                 PluginVersion(
                     self,
                     version,
+                    tag=self.tag,
                 ) for version in self.info["versions"].items()
             ]
         return self._versions
@@ -783,7 +792,7 @@ class Plugin:
             self._latest_version = PluginVersion(
                 self,
                 tuple(self.info["versions"].items())[0],
-                tag=CURRENT_TAG,
+                tag=self.tag,
             )
         return self._latest_version
 
@@ -795,18 +804,18 @@ class Plugin:
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
-                        CURRENT_TAG if self.latest_version.number == number else None
+                        tag=self.tag if self.latest_version.number == number else info["commit_sha"]
                     )
                     break
         if self._latest_compatible_version is None:
-            raise NoCompatibleVersionError(
+            raise NoCompatibleVersion(
                 f"{self.name} has no version compatible with API {babase.app.api_version}."
             )
         return self._latest_compatible_version
 
     def get_local(self):
         if not self.is_installed:
-            raise PluginNotInstalledError(
+            raise PluginNotInstalled(
                 f"{self.name} needs to be installed to get its local plugin.")
         if self._local_plugin is None:
             self._local_plugin = PluginLocal(self.name)
@@ -825,7 +834,7 @@ class Plugin:
     def has_update(self):
         try:
             latest_compatible_version = self.latest_compatible_version
-        except NoCompatibleVersionError:
+        except NoCompatibleVersion:
             return False
         else:
             return self.get_local().version != latest_compatible_version.number
@@ -874,8 +883,6 @@ class PluginWindow(popup.PopupWindow):
         return partitioned_string
 
     async def draw_ui(self):
-        # print(babase.app.plugins.active_plugins)
-
         bui.getsound('swish').play()
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.39 if babase.UIScale.MEDIUM else 1.67
@@ -1177,14 +1184,22 @@ class PluginManager:
         self.categories["All"] = None
 
         requests = []
-        for plugin_category_url in plugin_index["categories"]:
-            category = Category(plugin_category_url)
+        for meta_url in plugin_index["categories"]:
+            category = Category(meta_url)
             request = category.fetch_metadata()
             requests.append(request)
-        for repository in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
-            plugin_category_url = partial_format(plugin_index["external_source_url"],
-                                                 repository=repository)
-            category = Category(plugin_category_url, is_3rd_party=True)
+        for source in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
+            source_splits = source.split("@", maxsplit=1)
+            if len(source_splits) == 1:
+                # Fallack to `main` if `@branchname` isn't specified in an external source URI.
+                source_repo, source_tag = source_splits[0], "main"
+            else:
+                source_repo, source_tag = source_splits
+            meta_url = partial_format(
+                plugin_index["external_source_url"],
+                repository=source_repo,
+            )
+            category = Category(meta_url, tag=source_tag)
             request = category.fetch_metadata()
             requests.append(request)
         categories = await asyncio.gather(*requests)
@@ -1247,7 +1262,7 @@ class PluginManager:
         response = await async_send_network_request(download_url)
         content = response.read()
         if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
-            raise MD5CheckSumFailedError("MD5 checksum failed during plugin manager update.")
+            raise MD5CheckSumFailed("MD5 checksum failed during plugin manager update.")
         with open(self.module_path, "wb") as fout:
             fout.write(content)
         return to_version_info
@@ -1396,14 +1411,23 @@ class PluginSourcesWindow(popup.PopupWindow):
 
     async def add_source(self):
         source = bui.textwidget(query=self._add_source_widget)
-        meta_url = _CACHE["index"]["external_source_url"].format(
-            repository=source,
-            content_type="raw",
-            tag=CURRENT_TAG
+        # External source URIs can optionally suffix `@branchname`, for example:
+        # `bombsquad-community/sample-plugin-source@experimental`
+        source_splits = source.split("@", maxsplit=1)
+        if len(source_splits) == 1:
+            # Fallack to `main` if `@branchname` isn't specified in an external source URI.
+            source_repo, source_tag = source_splits[0], "main"
+        else:
+            source_repo, source_tag = source_splits
+        meta_url = partial_format(
+            _CACHE["index"]["external_source_url"],
+            repository=source_repo,
         )
-        category = Category(meta_url, is_3rd_party=True)
-        if not await category.is_valid():
-            bui.screenmessage("Enter a valid plugin source", color=(1, 0, 0))
+        category = Category(meta_url, tag=source_tag)
+        try:
+            await category.validate()
+        except (PluginSourceNetworkError, CategoryMetadataParseError) as e:
+            bui.screenmessage(str(e), color=(1, 0, 0))
             bui.getsound('error').play()
             return
         if source in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
@@ -1564,7 +1588,7 @@ class PluginManagerWindow(bui.Window):
             # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
-            ba.textwidget(edit=self._plugin_manager_status_text,
+            bui.textwidget(edit=self._plugin_manager_status_text,
                           text=str(e))
             raise
 
@@ -1684,7 +1708,7 @@ class PluginManagerWindow(bui.Window):
                 continue
             try:
                 await self.draw_plugin_names(self.selected_category, search_term=filter_text)
-            except CategoryDoesNotExistError:
+            except CategoryDoesNotExist:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
             # attributes like color, position and more.
@@ -1775,7 +1799,7 @@ class PluginManagerWindow(bui.Window):
         try:
             category_plugins = await self.plugin_manager.categories[category].get_plugins()
         except (KeyError, AttributeError):
-            raise CategoryDoesNotExistError(f"{category} does not exist.")
+            raise CategoryDoesNotExist(f"{category} does not exist.")
 
         if search_term:
             def search_term_filterer(plugin): return self.search_term_filterer(plugin, search_term)
@@ -1800,7 +1824,7 @@ class PluginManagerWindow(bui.Window):
     async def draw_plugin_name(self, plugin):
         try:
             latest_compatible_version = plugin.latest_compatible_version
-        except NoCompatibleVersionError:
+        except NoCompatibleVersion:
             # We currently don't show plugins that have no compatible versions.
             return
 
@@ -2077,7 +2101,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
     async def update(self, to_version=None, commit_sha=None):
         try:
             await self._plugin_manager.update(to_version, commit_sha)
-        except MD5CheckSumFailedError:
+        except MD5CheckSumFailed:
             bui.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
             bui.getsound('error').play()
         else:
