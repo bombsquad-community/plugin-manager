@@ -1,11 +1,13 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
-# plugin-manager
-
 **Important:** Please check out the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch if you're
 using the game version (1.7.0 <= your game version <= 1.7.19) which uses API 7 plugins.
 If you're on game version (1.7.20 or a later version) where it uses API 8 plugins, then proceed with the rest of the
 README here.
+
+-------------------------------
+
+# plugin-manager
 
 A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
 which makes further modding of your game more convenient by providing easier access to community created content.
