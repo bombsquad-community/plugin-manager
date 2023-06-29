@@ -1589,7 +1589,7 @@ class PluginManagerWindow(bui.Window):
             pass
         except Exception as e:
             bui.textwidget(edit=self._plugin_manager_status_text,
-                          text=str(e))
+                           text=str(e))
             raise
 
     async def draw_index(self):
