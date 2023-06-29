@@ -699,7 +699,6 @@ class PluginVersion:
         self.md5sum = info["md5sum"]
 
         self.download_url = self.plugin.url.format(content_type="raw", tag=tag)
-        print(self.download_url)
         self.view_url = self.plugin.url.format(content_type="blob", tag=tag)
 
     def __eq__(self, plugin_version):
