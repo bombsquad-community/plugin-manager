@@ -1,19 +1,26 @@
 # -*- coding: utf-8 -*-
-# ba_meta require api 7
+# ba_meta require api 8
+'''
+AdvancedPartyWindow by Mr.Smoothy
 
-# AdvancedPartyWindow by Mr.Smoothy
+Updated to API 8 on 2nd July 2023 by Mr.Smoothy
 
-# build on base of plasma's modifypartywindow
+build on base of plasma's modifypartywindow
 
-# added many features
+discord mr.smoothy#5824
 
-# discord mr.smoothy#5824
+https://discord.gg/ucyaesh 
 
-# https://discord.gg/ucyaesh   Join BCS
-# Youtube : Hey Smoothy
+
+Youtube : Hey Smoothy
+
+Download more mods from 
+https://bombsquad-community.web.app/mods
+
+'''
 
 #  added advanced ID revealer
-# live ping support for bcs
+# live ping
 
 # Made by Mr.Smoothy - Plasma Boson
 import traceback
@@ -25,32 +32,34 @@ import shutil
 import copy
 import urllib
 import os
-from bastd.ui.account import viewer
-from bastd.ui.popup import PopupMenuWindow, PopupWindow
-from ba._general import Call
+from bauiv1lib.account import viewer
+from bauiv1lib.popup import PopupMenuWindow, PopupWindow
+from babase._general import Call
 import base64
 import datetime
 import ssl
-import bastd.ui.party as bastd_party
+import bauiv1lib.party as bascenev1lib_party
 from typing import List, Sequence, Optional, Dict, Any, Union
-from bastd.ui.colorpicker import ColorPickerExact
-from bastd.ui.confirm import ConfirmWindow
+from bauiv1lib.colorpicker import ColorPickerExact
+from bauiv1lib.confirm import ConfirmWindow
 from dataclasses import dataclass
 import math
 import time
-import ba
-import _ba
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import _babase
 from typing import TYPE_CHECKING, cast
 import urllib.request
 import urllib.parse
 from _thread import start_new_thread
 import threading
 version_str = "7"
-BCSSERVER = 'api2.bombsquad.ga'
+BCSSERVER = 'mods.ballistica.workers.dev'
 
 cache_chat = []
-connect = ba.internal.connect_to_party
-disconnect = ba.internal.disconnect_from_host
+connect = bs.connect_to_party
+disconnect = bs.disconnect_from_host
 unmuted_names = []
 smo_mode = 3
 f_chat = False
@@ -68,9 +77,9 @@ def newconnect_to_party(address, port=43210, print_progress=False):
     global ip_add
     global p_port
 
-    dd = _ba.get_connection_to_host_info()
+    dd = bs.get_connection_to_host_info()
     if (dd != {}):
-        _ba.disconnect_from_host()
+        bs.disconnect_from_host()
 
         ip_add = address
         p_port = port
@@ -95,11 +104,11 @@ class PingThread(threading.Thread):
     def run(self) -> None:
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-statements
-        ba.app.ping_thread_count += 1
+        bui.app.classic.ping_thread_count += 1
         sock: Optional[socket.socket] = None
         try:
             import socket
-            from ba.internal import get_ip_address_type
+            from babase._net import get_ip_address_type
             socket_type = get_ip_address_type(ip_add)
             sock = socket.socket(socket_type, socket.SOCK_DGRAM)
             sock.connect((ip_add, p_port))
@@ -149,38 +158,29 @@ class PingThread(threading.Thread):
                 if self._port == 0:
                     # This has happened. Ignore.
                     pass
-                elif ba.do_once():
+                elif babase.do_once():
                     print(f'Got EADDRNOTAVAIL on gather ping'
                           f' for addr {self._address}'
                           f' port {self._port}.')
             else:
-                ba.print_exception(
+                babase.print_exception(
                     f'Error on gather ping '
                     f'(errno={exc.errno})', once=True)
         except Exception:
-            ba.print_exception('Error on gather ping', once=True)
+            babase.print_exception('Error on gather ping', once=True)
         finally:
             try:
                 if sock is not None:
                     sock.close()
             except Exception:
-                ba.print_exception('Error on gather ping cleanup', once=True)
+                babase.print_exception('Error on gather ping cleanup', once=True)
 
-        ba.app.ping_thread_count -= 1
-        _ba.pushcall(update_ping, from_other_thread=True)
+        bui.app.classic.ping_thread_count -= 1
         time.sleep(4)
         self.run()
 
 
-try:
-    import OnlineTranslator
-    tranTypes = [item for item in dir(OnlineTranslator) if item.startswith("Translator_")]
-    if "item" in globals():
-        del item
-except:
-    tranTypes = []  # ;ba.print_exception()
-
-RecordFilesDir = os.path.join(_ba.env()["python_directory_user"], "Configs" + os.sep)
+RecordFilesDir = os.path.join(_babase.env()["python_directory_user"], "Configs" + os.sep)
 if not os.path.exists(RecordFilesDir):
     os.makedirs(RecordFilesDir)
 
@@ -193,21 +193,7 @@ if not isinstance(SystemEncode, str):
     SystemEncode = "utf-8"
 
 
-def update_ping():
-    try:
-        _ba.set_ping_widget_value(current_ping)
-    except:
-        with _ba.Context('ui'):
-            if hasattr(_ba, "ping_widget") and _ba.ping_widget.exists():
-                ba.textwidget(edit=_ba.ping_widget, text="Ping:"+str(current_ping)+" ms")
-
-
 PingThread().start()
-
-try:
-    from ba._generated.enums import TimeType
-except:
-    from ba._enums import TimeType
 
 
 class chatloggThread():
@@ -221,11 +207,11 @@ class chatloggThread():
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-statements
         global chatlogger
-        self.timerr = ba.Timer(5.0, self.chatlogg, repeat=True, timetype=TimeType.REAL)
+        self.timerr = babase.AppTimer(5.0, self.chatlogg, repeat=True)
 
     def chatlogg(self):
         global chatlogger
-        chats = _ba.get_chat_messages()
+        chats = bs.get_chat_messages()
         for msg in chats:
             if msg in self.saved_msg:
                 pass
@@ -241,20 +227,20 @@ class chatloggThread():
 
     def save(self, msg):
         x = str(datetime.datetime.now())
-        t = open(os.path.join(_ba.env()["python_directory_user"], "Chat logged.txt"), "a+")
+        t = open(os.path.join(_babase.env()["python_directory_user"], "Chat logged.txt"), "a+")
         t.write(x+" : " + msg + "\n")
         t.close()
 
 
 class mututalServerThread():
     def run(self):
-        self.timer = ba.Timer(10, self.checkPlayers, repeat=True, timetype=TimeType.REAL)
+        self.timer = babase.AppTimer(10, self.checkPlayers, repeat=True)
 
     def checkPlayers(self):
-        if _ba.get_connection_to_host_info() != {}:
-            server_name = _ba.get_connection_to_host_info()["name"]
+        if bs.get_connection_to_host_info() != {}:
+            server_name = bs.get_connection_to_host_info()["name"]
             players = []
-            for ros in _ba.get_game_roster():
+            for ros in bs.get_game_roster():
                 players.append(ros["display_string"])
             start_new_thread(dump_mutual_servers, (players, server_name,))
 
@@ -286,30 +272,36 @@ class customchatThread():
         super().__init__()
         global cache_chat
         self.saved_msg = []
-        chats = _ba.get_chat_messages()
-        for msg in chats:  # fill up old  chat , to avoid old msg popup
-            cache_chat.append(msg)
+        try:
+            chats = bs.get_chat_messages()
+            for msg in chats:  # fill up old  chat , to avoid old msg popup
+                cache_chat.append(msg)
+        except:
+            pass
 
     def run(self) -> None:
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-statements
         global chatlogger
-        self.timerr = ba.Timer(5.0, self.chatcheck, repeat=True, timetype=TimeType.REAL)
+        self.timerr = babase.AppTimer(5.0, self.chatcheck, repeat=True)
 
     def chatcheck(self):
         global unmuted_names
         global cache_chat
-        chats = _ba.get_chat_messages()
+        try:
+            chats = bs.get_chat_messages()
+        except:
+            chats = []
         for msg in chats:
             if msg in cache_chat:
                 pass
             else:
                 if msg.split(":")[0] in unmuted_names:
-                    ba.screenmessage(msg, color=(0.6, 0.9, 0.6))
+                    bs.broadcastmessage(msg, color=(0.6, 0.9, 0.6))
                 cache_chat.append(msg)
                 if len(self.saved_msg) > 45:
                     cache_chat.pop(0)
-            if ba.app.config.resolve('Chat Muted'):
+            if babase.app.config.resolve('Chat Muted'):
                 pass
             else:
                 self.timerr = None
@@ -380,25 +372,25 @@ command to kick %s?",
             pass
 
     return (Language_Texts.get(text, "#Unknown Text#" if not same_fb else text) if not isBaLstr else
-            ba.Lstr(resource="??Unknown??", fallback_value=Language_Texts.get(text, "#Unknown Text#" if not same_fb else text)))
+            babase.Lstr(resource="??Unknown??", fallback_value=Language_Texts.get(text, "#Unknown Text#" if not same_fb else text)))
 
 
 def _get_popup_window_scale() -> float:
-    uiscale = ba.app.ui.uiscale
-    return (2.3 if uiscale is ba.UIScale.SMALL else
-            1.65 if uiscale is ba.UIScale.MEDIUM else 1.23)
+    uiscale = bui.app.ui_v1.uiscale
+    return (2.3 if uiscale is babase.UIScale.SMALL else
+            1.65 if uiscale is babase.UIScale.MEDIUM else 1.23)
 
 
 def _creat_Lstr_list(string_list: list = []) -> list:
-    return ([ba.Lstr(resource="??Unknown??", fallback_value=item) for item in string_list])
+    return ([babase.Lstr(resource="??Unknown??", fallback_value=item) for item in string_list])
 
 
 customchatThread().run()
 
 
-class ModifiedPartyWindow(bastd_party.PartyWindow):
+class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
     def __init__(self, origin: Sequence[float] = (0, 0)):
-        _ba.set_party_window_open(True)
+        bui.set_party_window_open(True)
         self._r = 'partyWindow'
         self.msg_user_selected = ''
         self._popup_type: Optional[str] = None
@@ -406,52 +398,52 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         self._popup_party_member_is_host: Optional[bool] = None
         self._width = 500
 
-        uiscale = ba.app.ui.uiscale
-        self._height = (365 if uiscale is ba.UIScale.SMALL else
-                        480 if uiscale is ba.UIScale.MEDIUM else 600)
+        uiscale = bui.app.ui_v1.uiscale
+        self._height = (365 if uiscale is babase.UIScale.SMALL else
+                        480 if uiscale is babase.UIScale.MEDIUM else 600)
 
         # Custom color here
-        self._bg_color = ba.app.config.get("PartyWindow_Main_Color", (0.40, 0.55, 0.20)) if not isinstance(
+        self._bg_color = babase.app.config.get("PartyWindow_Main_Color", (0.40, 0.55, 0.20)) if not isinstance(
             self._getCustomSets().get("Color"), (list, tuple)) else self._getCustomSets().get("Color")
         if not isinstance(self._bg_color, (list, tuple)) or not len(self._bg_color) == 3:
             self._bg_color = (0.40, 0.55, 0.20)
 
-        ba.Window.__init__(self, root_widget=ba.containerwidget(
+        bui.Window.__init__(self, root_widget=bui.containerwidget(
             size=(self._width, self._height),
             transition='in_scale',
             color=self._bg_color,
-            parent=_ba.get_special_widget('overlay_stack'),
+            parent=bui.get_special_widget('overlay_stack'),
             on_outside_click_call=self.close_with_sound,
             scale_origin_stack_offset=origin,
-            scale=(2.0 if uiscale is ba.UIScale.SMALL else
-                   1.35 if uiscale is ba.UIScale.MEDIUM else 1.0),
-            stack_offset=(0, -10) if uiscale is ba.UIScale.SMALL else (
-                240, 0) if uiscale is ba.UIScale.MEDIUM else (330, 20)))
+            scale=(2.0 if uiscale is babase.UIScale.SMALL else
+                   1.35 if uiscale is babase.UIScale.MEDIUM else 1.0),
+            stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+                240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20)))
 
-        self._cancel_button = ba.buttonwidget(parent=self._root_widget,
-                                              scale=0.7,
-                                              position=(30, self._height - 47),
-                                              size=(50, 50),
-                                              label='',
-                                              on_activate_call=self.close,
-                                              autoselect=True,
-                                              color=(0.45, 0.63, 0.15),
-                                              icon=ba.gettexture('crossOut'),
-                                              iconscale=1.2)
-        self._smoothy_button = ba.buttonwidget(parent=self._root_widget,
-                                               scale=0.6,
-                                               position=(5, self._height - 47 - 40),
+        self._cancel_button = bui.buttonwidget(parent=self._root_widget,
+                                               scale=0.7,
+                                               position=(30, self._height - 47),
                                                size=(50, 50),
-                                               label='69',
-                                               on_activate_call=self.smoothy_roster_changer,
+                                               label='',
+                                               on_activate_call=self.close,
                                                autoselect=True,
                                                color=(0.45, 0.63, 0.15),
-                                               icon=ba.gettexture('replayIcon'),
+                                               icon=bui.gettexture('crossOut'),
                                                iconscale=1.2)
-        ba.containerwidget(edit=self._root_widget,
-                           cancel_button=self._cancel_button)
+        self._smoothy_button = bui.buttonwidget(parent=self._root_widget,
+                                                scale=0.6,
+                                                position=(5, self._height - 47 - 40),
+                                                size=(50, 50),
+                                                label='69',
+                                                on_activate_call=self.smoothy_roster_changer,
+                                                autoselect=True,
+                                                color=(0.45, 0.63, 0.15),
+                                                icon=bui.gettexture('replayIcon'),
+                                                iconscale=1.2)
+        bui.containerwidget(edit=self._root_widget,
+                            cancel_button=self._cancel_button)
 
-        self._menu_button = ba.buttonwidget(
+        self._menu_button = bui.buttonwidget(
             parent=self._root_widget,
             scale=0.7,
             position=(self._width - 60, self._height - 47),
@@ -459,73 +451,73 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             label="\xee\x80\x90",
             autoselect=True,
             button_type='square',
-            on_activate_call=ba.WeakCall(self._on_menu_button_press),
+            on_activate_call=bs.WeakCall(self._on_menu_button_press),
             color=(0.55, 0.73, 0.25),
-            icon=ba.gettexture('menuButton'),
+            icon=bui.gettexture('menuButton'),
             iconscale=1.2)
 
-        info = _ba.get_connection_to_host_info()
+        info = bs.get_connection_to_host_info()
         if info.get('name', '') != '':
             title = info['name']
         else:
-            title = ba.Lstr(resource=self._r + '.titleText')
+            title = babase.Lstr(resource=self._r + '.titleText')
 
-        self._title_text = ba.textwidget(parent=self._root_widget,
-                                         scale=0.9,
-                                         color=(0.5, 0.7, 0.5),
-                                         text=title,
-                                         size=(120, 20),
-                                         position=(self._width * 0.5-60,
-                                                   self._height - 29),
-                                         on_select_call=self.title_selected,
-                                         selectable=True,
-                                         maxwidth=self._width * 0.7,
+        self._title_text = bui.textwidget(parent=self._root_widget,
+                                          scale=0.9,
+                                          color=(0.5, 0.7, 0.5),
+                                          text=title,
+                                          size=(120, 20),
+                                          position=(self._width * 0.5-60,
+                                                    self._height - 29),
+                                          on_select_call=self.title_selected,
+                                          selectable=True,
+                                          maxwidth=self._width * 0.7,
+                                          h_align='center',
+                                          v_align='center')
+
+        self._empty_str = bui.textwidget(parent=self._root_widget,
+                                         scale=0.75,
+                                         size=(0, 0),
+                                         position=(self._width * 0.5,
+                                                   self._height - 65),
+                                         maxwidth=self._width * 0.85,
+                                         text="no one",
                                          h_align='center',
                                          v_align='center')
 
-        self._empty_str = ba.textwidget(parent=self._root_widget,
-                                        scale=0.75,
-                                        size=(0, 0),
-                                        position=(self._width * 0.5,
-                                                  self._height - 65),
-                                        maxwidth=self._width * 0.85,
-                                        text="no one",
-                                        h_align='center',
-                                        v_align='center')
-
         self._scroll_width = self._width - 50
-        self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
-                                             size=(self._scroll_width,
-                                                   self._height - 200),
-                                             position=(30, 80),
-                                             color=(0.4, 0.6, 0.3))
-        self._columnwidget = ba.columnwidget(parent=self._scrollwidget,
-                                             border=2,
-                                             margin=0)
-        ba.widget(edit=self._menu_button, down_widget=self._columnwidget)
+        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
+                                              size=(self._scroll_width,
+                                                    self._height - 200),
+                                              position=(30, 80),
+                                              color=(0.4, 0.6, 0.3))
+        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
+                                              border=2,
+                                              margin=0)
+        bui.widget(edit=self._menu_button, down_widget=self._columnwidget)
 
-        self._muted_text = ba.textwidget(
+        self._muted_text = bui.textwidget(
             parent=self._root_widget,
             position=(self._width * 0.5, self._height * 0.5),
             size=(0, 0),
             h_align='center',
             v_align='center',
             text="")
-        self._chat_texts: List[ba.Widget] = []
-        self._chat_texts_haxx: List[ba.Widget] = []
+        self._chat_texts: List[bui.Widget] = []
+        self._chat_texts_haxx: List[bui.Widget] = []
 
         # add all existing messages if chat is not muted
         # print("updates")
         if True:  # smoothy - always show chat in partywindow
-            msgs = _ba.get_chat_messages()
+            msgs = bs.get_chat_messages()
             for msg in msgs:
                 self._add_msg(msg)
                 # print(msg)
         # else:
-        #   msgs=_ba.get_chat_messages()
+        #   msgs=_babase.get_chat_messages()
         #   for msg in msgs:
         #     print(msg);
-        #     txt = ba.textwidget(parent=self._columnwidget,
+        #     txt = bui.textwidget(parent=self._columnwidget,
         #                         text=msg,
         #                         h_align='left',
         #                         v_align='center',
@@ -538,8 +530,8 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             # if len(self._chat_texts) > 40:
             #     first = self._chat_texts.pop(0)
             #     first.delete()
-            # ba.containerwidget(edit=self._columnwidget, visible_child=txt)
-        self.ping_widget = txt = ba.textwidget(
+            # bui.containerwidget(edit=self._columnwidget, visible_child=txt)
+        self.ping_widget = txt = bui.textwidget(
             parent=self._root_widget,
             scale=0.6,
             size=(20, 5),
@@ -549,12 +541,12 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             selectable=True,
             autoselect=False,
             v_align='center')
-        _ba.ping_widget = self.ping_widget
+        _babase.ping_widget = self.ping_widget
 
         def enable_chat_mode():
             pass
 
-        self._text_field = txt = ba.textwidget(
+        self._text_field = txt = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(530-80, 40),
@@ -563,14 +555,14 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             maxwidth=494,
             shadow=0.3,
             flatness=1.0,
-            description=ba.Lstr(resource=self._r + '.chatMessageText'),
+            description=babase.Lstr(resource=self._r + '.chatMessageText'),
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
 
-        # for m in  _ba.get_chat_messages():
+        # for m in  _babase.get_chat_messages():
         #   if m:
-        #     ttchat=ba.textwidget(
+        #     ttchat=bui.textwidget(
         #               parent=self._columnwidget,
         #               size=(10,10),
         #               h_align='left',
@@ -583,27 +575,27 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         #               always_highlight=True
 
         #               )
-        ba.widget(edit=self._scrollwidget,
-                  autoselect=True,
-                  left_widget=self._cancel_button,
-                  up_widget=self._cancel_button,
-                  down_widget=self._text_field)
-        ba.widget(edit=self._columnwidget,
-                  autoselect=True,
-                  up_widget=self._cancel_button,
-                  down_widget=self._text_field)
-        ba.containerwidget(edit=self._root_widget, selected_child=txt)
-        btn = ba.buttonwidget(parent=self._root_widget,
-                              size=(50, 35),
-                              label=ba.Lstr(resource=self._r + '.sendText'),
-                              button_type='square',
-                              autoselect=True,
-                              position=(self._width - 70, 35),
-                              on_activate_call=self._send_chat_message)
+        bui.widget(edit=self._scrollwidget,
+                   autoselect=True,
+                   left_widget=self._cancel_button,
+                   up_widget=self._cancel_button,
+                   down_widget=self._text_field)
+        bui.widget(edit=self._columnwidget,
+                   autoselect=True,
+                   up_widget=self._cancel_button,
+                   down_widget=self._text_field)
+        bui.containerwidget(edit=self._root_widget, selected_child=txt)
+        btn = bui.buttonwidget(parent=self._root_widget,
+                               size=(50, 35),
+                               label=babase.Lstr(resource=self._r + '.sendText'),
+                               button_type='square',
+                               autoselect=True,
+                               position=(self._width - 70, 35),
+                               on_activate_call=self._send_chat_message)
 
         def _times_button_on_click():
             # self._popup_type = "send_Times_Press"
-            # allow_range = 100 if _ba.get_foreground_host_session() is not None else 4
+            # allow_range = 100 if _babase.get_foreground_host_session() is not None else 4
             # PopupMenuWindow(position=self._times_button.get_screen_space_center(),
             #                             scale=_get_popup_window_scale(),
             #                             choices=[str(index) for index in range(1,allow_range + 1)],
@@ -622,24 +614,23 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
 
         self._send_msg_times = 1
 
-        self._times_button = ba.buttonwidget(parent=self._root_widget,
-                                             size=(50, 35),
-                                             label="Quick",
-                                             button_type='square',
-                                             autoselect=True,
-                                             position=(30, 35),
-                                             on_activate_call=_times_button_on_click)
+        self._times_button = bui.buttonwidget(parent=self._root_widget,
+                                              size=(50, 35),
+                                              label="Quick",
+                                              button_type='square',
+                                              autoselect=True,
+                                              position=(30, 35),
+                                              on_activate_call=_times_button_on_click)
 
-        ba.textwidget(edit=txt, on_return_press_call=btn.activate)
-        self._name_widgets: List[ba.Widget] = []
+        bui.textwidget(edit=txt, on_return_press_call=btn.activate)
+        self._name_widgets: List[bui.Widget] = []
         self._roster: Optional[List[Dict[str, Any]]] = None
 
         self.smoothy_mode = 1
         self.full_chat_mode = False
-        self._update_timer = ba.Timer(1.0,
-                                      ba.WeakCall(self._update),
-                                      repeat=True,
-                                      timetype=ba.TimeType.REAL)
+        self._update_timer = babase.AppTimer(1.0,
+                                             bs.WeakCall(self._update),
+                                             repeat=True)
 
         self._update()
 
@@ -678,105 +669,105 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         self.msg_user_selected = msg.split(":")[0]
         self._popup_type = "chatmessagepress"
 
-        # _ba.chatmessage("pressed")
+        # bs.chatmessage("pressed")
 
     def _add_msg(self, msg: str) -> None:
         try:
-            if ba.app.config.resolve('Chat Muted'):
+            if babase.app.config.resolve('Chat Muted'):
 
-                txt = ba.textwidget(parent=self._columnwidget,
-                                    text=msg,
-                                    h_align='left',
-                                    v_align='center',
-                                    size=(130, 13),
-                                    scale=0.55,
-                                    position=(-0.6, 0),
-                                    selectable=True,
-                                    click_activate=True,
-                                    maxwidth=self._scroll_width * 0.94,
-                                    shadow=0.3,
-                                    flatness=1.0)
-                ba.textwidget(edit=txt,
-                              on_activate_call=ba.Call(
-                                  self._on_chat_press,
-                                  msg, txt))
+                txt = bui.textwidget(parent=self._columnwidget,
+                                     text=msg,
+                                     h_align='left',
+                                     v_align='center',
+                                     size=(130, 13),
+                                     scale=0.55,
+                                     position=(-0.6, 0),
+                                     selectable=True,
+                                     click_activate=True,
+                                     maxwidth=self._scroll_width * 0.94,
+                                     shadow=0.3,
+                                     flatness=1.0)
+                bui.textwidget(edit=txt,
+                               on_activate_call=babase.Call(
+                                   self._on_chat_press,
+                                   msg, txt))
             else:
-                txt = ba.textwidget(parent=self._columnwidget,
-                                    text=msg,
-                                    h_align='left',
-                                    v_align='center',
-                                    size=(0, 13),
-                                    scale=0.55,
+                txt = bui.textwidget(parent=self._columnwidget,
+                                     text=msg,
+                                     h_align='left',
+                                     v_align='center',
+                                     size=(0, 13),
+                                     scale=0.55,
 
 
 
-                                    maxwidth=self._scroll_width * 0.94,
-                                    shadow=0.3,
-                                    flatness=1.0)
+                                     maxwidth=self._scroll_width * 0.94,
+                                     shadow=0.3,
+                                     flatness=1.0)
 
-          # btn = ba.buttonwidget(parent=self._columnwidget,
+          # btn = bui.buttonwidget(parent=self._columnwidget,
           #                       scale=0.7,
           #                       size=(100,20),
           #                       label="smoothy buttin",
-          #                       icon=ba.gettexture('replayIcon'),
+          #                       icon=bs.gettexture('replayIcon'),
           #                       texture=None,
           #                       )
             self._chat_texts_haxx.append(txt)
             if len(self._chat_texts_haxx) > 40:
                 first = self._chat_texts_haxx.pop(0)
                 first.delete()
-            ba.containerwidget(edit=self._columnwidget, visible_child=txt)
+            bui.containerwidget(edit=self._columnwidget, visible_child=txt)
         except Exception:
             pass
 
     def _add_msg_when_muted(self, msg: str) -> None:
 
-        txt = ba.textwidget(parent=self._columnwidget,
-                            text=msg,
-                            h_align='left',
-                            v_align='center',
-                            size=(0, 13),
-                            scale=0.55,
-                            maxwidth=self._scroll_width * 0.94,
-                            shadow=0.3,
-                            flatness=1.0)
+        txt = bui.textwidget(parent=self._columnwidget,
+                             text=msg,
+                             h_align='left',
+                             v_align='center',
+                             size=(0, 13),
+                             scale=0.55,
+                             maxwidth=self._scroll_width * 0.94,
+                             shadow=0.3,
+                             flatness=1.0)
         self._chat_texts.append(txt)
         if len(self._chat_texts) > 40:
             first = self._chat_texts.pop(0)
             first.delete()
-        ba.containerwidget(edit=self._columnwidget, visible_child=txt)
+        bui.containerwidget(edit=self._columnwidget, visible_child=txt)
 
     def color_picker_closing(self, picker) -> None:
-        ba._appconfig.commit_app_config()
+        babase._appconfig.commit_app_config()
 
     def color_picker_selected_color(self, picker, color) -> None:
         # bs.animateArray(self._root_widget,"color",3,{0:self._bg_color,1500:color})
-        ba.containerwidget(edit=self._root_widget, color=color)
+        bui.containerwidget(edit=self._root_widget, color=color)
         self._bg_color = color
-        ba.app.config["PartyWindow_Main_Color"] = color
+        babase.app.config["PartyWindow_Main_Color"] = color
 
     def _on_nick_rename_press(self, arg) -> None:
 
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
         c_width = 600
         c_height = 250
-        uiscale = ba.app.ui.uiscale
-        self._nick_rename_window = cnt = ba.containerwidget(
+        uiscale = bui.app.ui_v1.uiscale
+        self._nick_rename_window = cnt = bui.containerwidget(
 
-            scale=(1.8 if uiscale is ba.UIScale.SMALL else
-                   1.55 if uiscale is ba.UIScale.MEDIUM else 1.0),
+            scale=(1.8 if uiscale is babase.UIScale.SMALL else
+                   1.55 if uiscale is babase.UIScale.MEDIUM else 1.0),
             size=(c_width, c_height),
             transition='in_scale')
 
-        ba.textwidget(parent=cnt,
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text='Enter nickname',
-                      maxwidth=c_width * 0.8,
-                      position=(c_width * 0.5, c_height - 60))
+        bui.textwidget(parent=cnt,
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text='Enter nickname',
+                       maxwidth=c_width * 0.8,
+                       position=(c_width * 0.5, c_height - 60))
         id = self._get_nick(arg)
-        self._player_nick_text = txt89 = ba.textwidget(
+        self._player_nick_text = txt89 = bui.textwidget(
             parent=cnt,
             size=(c_width * 0.8, 40),
             h_align='left',
@@ -788,41 +779,41 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             autoselect=True,
             maxwidth=c_width * 0.7,
             max_chars=200)
-        cbtn = ba.buttonwidget(
+        cbtn = bui.buttonwidget(
             parent=cnt,
-            label=ba.Lstr(resource='cancelText'),
-            on_activate_call=ba.Call(
-                lambda c: ba.containerwidget(edit=c, transition='out_scale'),
+            label=babase.Lstr(resource='cancelText'),
+            on_activate_call=babase.Call(
+                lambda c: bui.containerwidget(edit=c, transition='out_scale'),
                 cnt),
             size=(180, 60),
             position=(30, 30),
             autoselect=True)
-        okb = ba.buttonwidget(parent=cnt,
-                              label='Rename',
-                              size=(180, 60),
-                              position=(c_width - 230, 30),
-                              on_activate_call=ba.Call(
-                                  self._add_nick, arg),
-                              autoselect=True)
-        ba.widget(edit=cbtn, right_widget=okb)
-        ba.widget(edit=okb, left_widget=cbtn)
-        ba.textwidget(edit=txt89, on_return_press_call=okb.activate)
-        ba.containerwidget(edit=cnt, cancel_button=cbtn, start_button=okb)
+        okb = bui.buttonwidget(parent=cnt,
+                               label='Rename',
+                               size=(180, 60),
+                               position=(c_width - 230, 30),
+                               on_activate_call=babase.Call(
+                                   self._add_nick, arg),
+                               autoselect=True)
+        bui.widget(edit=cbtn, right_widget=okb)
+        bui.widget(edit=okb, left_widget=cbtn)
+        bui.textwidget(edit=txt89, on_return_press_call=okb.activate)
+        bui.containerwidget(edit=cnt, cancel_button=cbtn, start_button=okb)
 
     def _add_nick(self, arg):
-        config = ba.app.config
-        new_name_raw = cast(str, ba.textwidget(query=self._player_nick_text))
+        config = babase.app.config
+        new_name_raw = cast(str, bui.textwidget(query=self._player_nick_text))
         if arg:
             if not isinstance(config.get('players nick'), dict):
                 config['players nick'] = {}
             config['players nick'][arg] = new_name_raw
             config.commit()
-        ba.containerwidget(edit=self._nick_rename_window,
-                           transition='out_scale')
-        # ba.containerwidget(edit=self._root_widget,transition='in_scale')
+        bui.containerwidget(edit=self._nick_rename_window,
+                            transition='out_scale')
+        # bui.containerwidget(edit=self._root_widget,transition='in_scale')
 
     def _get_nick(self, id):
-        config = ba.app.config
+        config = babase.app.config
         if not isinstance(config.get('players nick'), dict):
             return "add nick"
         elif id in config['players nick']:
@@ -832,23 +823,22 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
 
     def _reset_game_record(self) -> None:
         try:
-            dir_path = _ba.get_replays_dir()
+            dir_path = _babase.get_replays_dir()
             curFilePath = os.path.join(dir_path+os.sep, "__lastReplay.brp").encode(SystemEncode)
-            newFileName = str(ba.Lstr(resource="replayNameDefaultText").evaluate(
+            newFileName = str(babase.Lstr(resource="replayNameDefaultText").evaluate(
             )+" (%s)" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y_%m_%d_%H_%M_%S"))+".brp")
             newFilePath = os.path.join(dir_path+os.sep, newFileName).encode(SystemEncode)
             #print(curFilePath, newFilePath)
             # os.rename(curFilePath,newFilePath)
             shutil.copyfile(curFilePath, newFilePath)
-            _ba.reset_game_activity_tracking()
-            ba.screenmessage(_getTransText("Game_Record_Saved") % newFileName, color=(1, 1, 1))
+            bs.broadcastmessage(_getTransText("Game_Record_Saved") % newFileName, color=(1, 1, 1))
         except:
-            ba.print_exception()
-            ba.screenmessage(ba.Lstr(resource="replayWriteErrorText").evaluate() +
-                             ""+traceback.format_exc(), color=(1, 0, 0))
+            babase.print_exception()
+            bs.broadcastmessage(babase.Lstr(resource="replayWriteErrorText").evaluate() +
+                                ""+traceback.format_exc(), color=(1, 0, 0))
 
     def _on_menu_button_press(self) -> None:
-        is_muted = ba.app.config.resolve('Chat Muted')
+        is_muted = babase.app.config.resolve('Chat Muted')
         global chatlogger
         choices = ["unmute" if is_muted else "mute", "screenmsg",
                    "addQuickReply", "removeQuickReply", "chatlogger", "credits"]
@@ -862,10 +852,6 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                           "chatloggeron", isBaLstr=True),
                       _getTransText("Credits_for_This", isBaLstr=True)
                       ]
-
-        if len(tranTypes) > 0:
-            choices.append("translator")
-            DisChoices.append(_getTransText("Translator", isBaLstr=True))
 
         choices.append("resetGameRecord")
         DisChoices.append(_getTransText("Restart_Game_Record", isBaLstr=True))
@@ -882,23 +868,23 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         self._popup_type = "menu"
 
     def _on_party_member_press(self, client_id: int, is_host: bool,
-                               widget: ba.Widget) -> None:
+                               widget: bui.Widget) -> None:
         # if we"re the host, pop up "kick" options for all non-host members
-        if _ba.get_foreground_host_session() is not None:
-            kick_str = ba.Lstr(resource="kickText")
+        if bs.get_foreground_host_session() is not None:
+            kick_str = babase.Lstr(resource="kickText")
         else:
-            kick_str = ba.Lstr(resource="kickVoteText")
+            kick_str = babase.Lstr(resource="kickVoteText")
         choices = ["kick", "@ this guy", "info", "adminkick"]
 
-        choices_display = [kick_str, _getTransText("Mention_this_guy", isBaLstr=True), ba.Lstr(resource="??Unknown??", fallback_value="Info"),
-                           ba.Lstr(resource="??Unknown??", fallback_value=_getTransText("Kick_ID") % client_id)]
+        choices_display = [kick_str, _getTransText("Mention_this_guy", isBaLstr=True), babase.Lstr(resource="??Unknown??", fallback_value="Info"),
+                           babase.Lstr(resource="??Unknown??", fallback_value=_getTransText("Kick_ID") % client_id)]
 
         try:
             if len(self._getCustomSets().get("partyMemberPress_Custom") if isinstance(self._getCustomSets().get("partyMemberPress_Custom"), dict) else {}) > 0:
                 choices.append("customAction")
                 choices_display.append(_getTransText("Custom_Action", isBaLstr=True))
         except:
-            ba.print_exception()
+            babase.print_exception()
 
         PopupMenuWindow(position=widget.get_screen_space_center(),
                         scale=_get_popup_window_scale(),
@@ -911,17 +897,17 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         self._popup_type = "partyMemberPress"
 
     def _send_chat_message(self) -> None:
-        sendtext = ba.textwidget(query=self._text_field)
+        sendtext = bui.textwidget(query=self._text_field)
         if sendtext == ".ip":
-            _ba.chatmessage("IP "+ip_add+" PORT "+str(p_port))
+            bs.chatmessage("IP "+ip_add+" PORT "+str(p_port))
 
-            ba.textwidget(edit=self._text_field, text="")
+            bui.textwidget(edit=self._text_field, text="")
             return
         elif sendtext == ".info":
-            if _ba.get_connection_to_host_info() == {}:
+            if bs.get_connection_to_host_info() == {}:
                 s_build = 0
             else:
-                s_build = _ba.get_connection_to_host_info()['build_number']
+                s_build = bs.get_connection_to_host_info()['build_number']
             s_v = "0"
             if s_build <= 14365:
                 s_v = " 1.4.148 or below"
@@ -933,16 +919,16 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 s_v = "1.6 "
             else:
                 s_v = "1.7 and above "
-            _ba.chatmessage("script version "+s_v+"- build "+str(s_build))
-            ba.textwidget(edit=self._text_field, text="")
+            bs.chatmessage("script version "+s_v+"- build "+str(s_build))
+            bui.textwidget(edit=self._text_field, text="")
             return
         elif sendtext == ".ping":
-            _ba.chatmessage("My ping:"+str(current_ping))
-            ba.textwidget(edit=self._text_field, text="")
+            bs.chatmessage("My ping:"+str(current_ping))
+            bui.textwidget(edit=self._text_field, text="")
             return
         elif sendtext == ".save":
-            info = _ba.get_connection_to_host_info()
-            config = ba.app.config
+            info = bs.get_connection_to_host_info()
+            config = babase.app.config
             if info.get('name', '') != '':
                 title = info['name']
                 if not isinstance(config.get('Saved Servers'), dict):
@@ -953,9 +939,9 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     'name': title
                 }
                 config.commit()
-                ba.screenmessage("Server saved to manual")
-                ba.playsound(ba.getsound('gunCocking'))
-                ba.textwidget(edit=self._text_field, text="")
+                bs.broadcastmessage("Server saved to manual")
+                bui.getsound('gunCocking').play()
+                bui.textwidget(edit=self._text_field, text="")
                 return
         # elif sendtext != "":
         #     for index in range(getattr(self,"_send_msg_times",1)):
@@ -987,16 +973,16 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             for m in range(0, hp):
                 ms2 = ms2+" "+msg1[m]
 
-            _ba.chatmessage(ms2)
+            bs.chatmessage(ms2)
 
             ms2 = ""
             for m in range(hp, len(msg1)):
                 ms2 = ms2+" "+msg1[m]
-            _ba.chatmessage(ms2)
+            bs.chatmessage(ms2)
         else:
-            _ba.chatmessage(msg)
+            bs.chatmessage(msg)
 
-        ba.textwidget(edit=self._text_field, text="")
+        bui.textwidget(edit=self._text_field, text="")
         # else:
         #     Quickreply = self._get_quick_responds()
         #     if len(Quickreply) > 0:
@@ -1008,8 +994,8 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         #                                     delegate=self)
         #         self._popup_type = "QuickMessageSelect"
         #     else:
-        #         _ba.chatmessage(sendtext)
-        #         ba.textwidget(edit=self._text_field,text="")
+        #         bs.chatmessage(sendtext)
+        #         bui.textwidget(edit=self._text_field,text="")
 
     def _get_quick_responds(self):
         if not hasattr(self, "_caches") or not isinstance(self._caches, dict):
@@ -1024,9 +1010,9 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 with open(filePath, "wb") as writer:
                     writer.write(({"Chinese": u"\xe5\x8e\x89\xe5\xae\xb3\xef\xbc\x8c\xe8\xbf\x98\xe6\x9c\x89\xe8\xbf\x99\xe7\xa7\x8d\xe9\xaa\x9a\xe6\x93\x8d\xe4\xbd\x9c!\
 \xe4\xbd\xa0\xe2\x84\xa2\xe8\x83\xbd\xe5\x88\xab\xe6\x89\x93\xe9\x98\x9f\xe5\x8f\x8b\xe5\x90\x97\xef\xbc\x9f\
-\xe5\x8f\xaf\xe4\xbb\xa5\xe5\x95\x8a\xe5\xb1\x85\xe7\x84\xb6\xe8\x83\xbd\xe8\xbf\x99\xe4\xb9\x88\xe7\x8e\xa9\xef\xbc\x9f"}.get(Current_Lang, "What the hell?\nDude that's amazing!")).encode("UTF-8"))
+\xe5\x8f\xaf\xe4\xbb\xa5\xe5\x95\x8a\xe5\xb1\x85\xe7\x84\xb6\xe8\x83\xbd\xe8\xbf\x99\xe4\xb9\x88\xe7\x8e\xa9\xef\xbc\x9f"}.get(Current_Lang, "Thats Amazing !")).encode("UTF-8"))
             if os.path.getmtime(filePath) != self._caches.get("Vertify_Quickresponse_Text"):
-                with open(filePath, "rU", encoding="UTF-8-sig") as Reader:
+                with open(filePath, "r+", encoding="utf-8") as Reader:
                     Text = Reader.read()
                     if Text.startswith(str(codecs.BOM_UTF8)):
                         Text = Text[3:]
@@ -1034,18 +1020,18 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     self._caches["Vertify_Quickresponse_Text"] = os.path.getmtime(filePath)
             return (self._caches.get("quickReplys", []))
         except:
-            ba.print_exception()
-            ba.screenmessage(ba.Lstr(resource="errorText"), (1, 0, 0))
-            ba.playsound(ba.getsound("error"))
+            babase.print_exception()
+            bs.broadcastmessage(babase.Lstr(resource="errorText"), (1, 0, 0))
+            bui.getsound("error").play()
 
     def _write_quick_responds(self, data):
         try:
             with open(os.path.join(RecordFilesDir, "Quickmessage.txt"), "wb") as writer:
                 writer.write("\\n".join(data).encode("utf-8"))
         except:
-            ba.print_exception()
-            ba.screenmessage(ba.Lstr(resource="errorText"), (1, 0, 0))
-            ba.playsound(ba.getsound("error"))
+            babase.print_exception()
+            bs.broadcastmessage(babase.Lstr(resource="errorText"), (1, 0, 0))
+            bui.getsound("error").play()
 
     def _getCustomSets(self):
         try:
@@ -1061,7 +1047,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     filePath = os.path.join(RecordFilesDir, "Settings.json")
                     if os.path.isfile(filePath):
                         if os.path.getmtime(filePath) != self._caches.get("Vertify_MainSettings.json_Text"):
-                            with open(filePath, "rU", encoding="UTF-8-sig") as Reader:
+                            with open(filePath, "r+", encoding="utf-8") as Reader:
                                 Text = Reader.read()
                                 if Text.startswith(str(codecs.BOM_UTF8)):
                                     Text = Text[3:]
@@ -1070,11 +1056,11 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             self._caches["Vertify_MainSettings.json_Text"] = os.path.getmtime(
                                 filePath)
                 except:
-                    ba.print_exception()
+                    babase.print_exception()
             return (self._caches.get("PartyWindow_Sets") if isinstance(self._caches.get("PartyWindow_Sets"), dict) else {})
 
         except:
-            ba.print_exception()
+            babase.print_exception()
 
     def _getObjectByID(self, type="playerName", ID=None):
         if ID is None:
@@ -1116,7 +1102,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     elif type.lower() in ("account", "displaystring"):
                         return ((roster["display_string"]))
                 except:
-                    ba.print_exception()
+                    babase.print_exception()
 
         return (None if len(output) == 0 else output)
 
@@ -1126,37 +1112,37 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         type = type.lower()
         text = (text)
         if type.find("add") != -1:
-            ba.textwidget(edit=self._text_field, text=ba.textwidget(query=self._text_field)+text)
+            bui.textwidget(edit=self._text_field, text=bui.textwidget(query=self._text_field)+text)
         else:
-            ba.textwidget(edit=self._text_field, text=text)
+            bui.textwidget(edit=self._text_field, text=text)
 
-    def _send_admin_kick_command(self): _ba.chatmessage(
+    def _send_admin_kick_command(self): bs.chatmessage(
         "/kick " + str(self._popup_party_member_client_id))
 
     def new_input_window_callback(self, got_text, flag, code):
         if got_text:
             if flag.startswith("Host_Kick_Player:"):
                 try:
-                    result = _ba.disconnect_client(
+                    result = _babase.disconnect_client(
                         self._popup_party_member_client_id, ban_time=int(code))
                     if not result:
-                        ba.playsound(ba.getsound('error'))
-                        ba.screenmessage(
-                            ba.Lstr(resource='getTicketsWindow.unavailableText'),
+                        bui.getsound('error').play()
+                        bs.broadcastmessage(
+                            babase.Lstr(resource='getTicketsWindow.unavailableText'),
                             color=(1, 0, 0))
                 except:
-                    ba.playsound(ba.getsound('error'))
+                    bui.getsound('error').play()
                     print(traceback.format_exc())
 
     def _kick_selected_player(self):
         """
-        result = _ba._disconnectClient(self._popup_party_member_client_id,banTime)
+        result = _babase._disconnectClient(self._popup_party_member_client_id,banTime)
         if not result:
-            ba.playsound(ba.getsound("error"))
-            ba.screenmessage(ba.Lstr(resource="getTicketsWindow.unavailableText"),color=(1,0,0))
+            bs.getsound("error").play()
+            bs.broadcastmessage(babase.Lstr(resource="getTicketsWindow.unavailableText"),color=(1,0,0))
         """
         if self._popup_party_member_client_id != -1:
-            if _ba.get_foreground_host_session() is not None:
+            if bs.get_foreground_host_session() is not None:
                 self._popup_type = "banTimePress"
                 choices = [0, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 99999999] if not (isinstance(self._getCustomSets().get("Ban_Time_List"), list)
                                                                                               and all([isinstance(item, int) for item in self._getCustomSets().get("Ban_Time_List")])) else self._getCustomSets().get("Ban_Time_List")
@@ -1174,33 +1160,32 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 """
             else:
                 # kick-votes appeared in build 14248
-                if (_ba.get_connection_to_host_info().get('build_number', 0) <
+                if (bs.get_connection_to_host_info().get('build_number', 0) <
                         14248):
-                    ba.playsound(ba.getsound('error'))
-                    ba.screenmessage(
-                        ba.Lstr(resource='getTicketsWindow.unavailableText'),
+                    bui.getsound('error').play()
+                    bs.broadcastmessage(
+                        babase.Lstr(resource='getTicketsWindow.unavailableText'),
                         color=(1, 0, 0))
                 else:
 
                     # Ban for 5 minutes.
-                    result = _ba.disconnect_client(
+                    result = bs.disconnect_client(
                         self._popup_party_member_client_id, ban_time=5 * 60)
                     if not result:
-                        ba.playsound(ba.getsound('error'))
-                        ba.screenmessage(
-                            ba.Lstr(resource='getTicketsWindow.unavailableText'),
+                        bui.getsound('error').play()
+                        bs.broadcastmessage(
+                            babase.Lstr(resource='getTicketsWindow.unavailableText'),
                             color=(1, 0, 0))
         else:
-            ba.playsound(ba.getsound('error'))
-            ba.screenmessage(
-                ba.Lstr(resource='internal.cantKickHostError'),
+            bui.getsound('error').play()
+            bs.broadcastmessage(
+                babase.Lstr(resource='internal.cantKickHostError'),
                 color=(1, 0, 0))
 
-        #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_ba._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
+        #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_babase._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
     def joinbombspot(self):
-        import random
-        url = ['https://discord.gg/CbxhJTrRta', 'https://discord.gg/ucyaesh']
-        ba.open_url(url[random.randint(0, 1)])
+
+        bui.open_url("https://discord.gg/ucyaesh")
 
     def _update(self) -> None:
         # pylint: disable=too-many-locals
@@ -1209,19 +1194,19 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         # pylint: disable=too-many-nested-blocks
 
         # # update muted state
-        # if ba.app.config.resolve('Chat Muted'):
-        #     ba.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.3))
+        # if babase.app.config.resolve('Chat Muted'):
+        #     bui.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.3))
         #     # clear any chat texts we're showing
         #     if self._chat_texts:
         #         while self._chat_texts:
         #             first = self._chat_texts.pop()
         #             first.delete()
         # else:
-        #     ba.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.0))
+        #     bui.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.0))
 
         # update roster section
 
-        roster = _ba.get_game_roster()
+        roster = bs.get_game_roster()
         global f_chat
         global smo_mode
         if roster != self._roster or smo_mode != self.smoothy_mode or f_chat != self.full_chat_mode:
@@ -1235,18 +1220,18 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
 
             if not self._roster:
                 top_section_height = 60
-                ba.textwidget(edit=self._empty_str,
-                              text=ba.Lstr(resource=self._r + '.emptyText'))
-                ba.scrollwidget(edit=self._scrollwidget,
-                                size=(self._width - 50,
-                                      self._height - top_section_height - 110),
-                                position=(30, 80))
+                bui.textwidget(edit=self._empty_str,
+                               text=babase.Lstr(resource=self._r + '.emptyText'))
+                bui.scrollwidget(edit=self._scrollwidget,
+                                 size=(self._width - 50,
+                                       self._height - top_section_height - 110),
+                                 position=(30, 80))
             elif self.full_chat_mode:
                 top_section_height = 60
-                ba.scrollwidget(edit=self._scrollwidget,
-                                size=(self._width - 50,
-                                      self._height - top_section_height - 75),
-                                position=(30, 80))
+                bui.scrollwidget(edit=self._scrollwidget,
+                                 size=(self._width - 50,
+                                       self._height - top_section_height - 75),
+                                 position=(30, 80))
 
             else:
                 columns = 1 if len(
@@ -1293,24 +1278,24 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                         'display_string']
 
                             except Exception:
-                                ba.print_exception(
+                                babase.print_exception(
                                     'Error calcing client name str.')
                                 p_str = '???'
                             try:
-                                widget = ba.textwidget(parent=self._root_widget,
-                                                       position=(pos[0], pos[1]),
-                                                       scale=t_scale,
-                                                       size=(c_width * 0.85, 30),
-                                                       maxwidth=c_width * 0.85,
-                                                       color=(1, 1,
-                                                              1) if index == 0 else
-                                                       (1, 1, 1),
-                                                       selectable=True,
-                                                       autoselect=True,
-                                                       click_activate=True,
-                                                       text=ba.Lstr(value=p_str),
-                                                       h_align='left',
-                                                       v_align='center')
+                                widget = bui.textwidget(parent=self._root_widget,
+                                                        position=(pos[0], pos[1]),
+                                                        scale=t_scale,
+                                                        size=(c_width * 0.85, 30),
+                                                        maxwidth=c_width * 0.85,
+                                                        color=(1, 1,
+                                                               1) if index == 0 else
+                                                        (1, 1, 1),
+                                                        selectable=True,
+                                                        autoselect=True,
+                                                        click_activate=True,
+                                                        text=babase.Lstr(value=p_str),
+                                                        h_align='left',
+                                                        v_align='center')
                                 self._name_widgets.append(widget)
                             except Exception:
                                 pass
@@ -1328,11 +1313,11 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             #  calls; not spec-string (perhaps should wait till
                             #  client_id is more readily available though).
                             try:
-                                ba.textwidget(edit=widget,
-                                              on_activate_call=ba.Call(
-                                                  self._on_party_member_press,
-                                                  self._roster[index]['client_id'],
-                                                  is_host, widget))
+                                bui.textwidget(edit=widget,
+                                               on_activate_call=babase.Call(
+                                                   self._on_party_member_press,
+                                                   self._roster[index]['client_id'],
+                                                   is_host, widget))
                             except Exception:
                                 pass
                             pos = (self._width * 0.53 - c_width_total * 0.5 +
@@ -1345,12 +1330,12 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             if is_host:
                                 twd = min(
                                     c_width * 0.85,
-                                    _ba.get_string_width(
+                                    _babase.get_string_width(
                                         p_str, suppress_warning=True) *
                                     t_scale)
                                 try:
                                     self._name_widgets.append(
-                                        ba.textwidget(
+                                        bui.textwidget(
                                             parent=self._root_widget,
                                             position=(pos[0] + twd + 1,
                                                       pos[1] - 0.5),
@@ -1359,20 +1344,20 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                             v_align='center',
                                             maxwidth=c_width * 0.96 - twd,
                                             color=(0.1, 1, 0.1, 0.5),
-                                            text=ba.Lstr(resource=self._r +
-                                                         '.hostText'),
+                                            text=babase.Lstr(resource=self._r +
+                                                             '.hostText'),
                                             scale=0.4,
                                             shadow=0.1,
                                             flatness=1.0))
                                 except Exception:
                                     pass
                 try:
-                    ba.textwidget(edit=self._empty_str, text='')
-                    ba.scrollwidget(edit=self._scrollwidget,
-                                    size=(self._width - 50,
-                                          max(100, self._height - 139 -
-                                              c_height_total)),
-                                    position=(30, 80))
+                    bui.textwidget(edit=self._empty_str, text='')
+                    bui.scrollwidget(edit=self._scrollwidget,
+                                     size=(self._width - 50,
+                                           max(100, self._height - 139 -
+                                               c_height_total)),
+                                     position=(30, 80))
                 except Exception:
                     pass
 
@@ -1395,7 +1380,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         file = open('ba_data/data/languages/english.json', "w")
         json.dump(eng, file)
         file.close()
-        ba.app.lang.setlanguage(None)
+        bs.app.lang.setlanguage(None)
 
     def restore_screen_msg(self):
         file = open('ba_data/data/languages/english.json')
@@ -1416,22 +1401,23 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
         file = open('ba_data/data/languages/english.json', "w")
         json.dump(eng, file)
         file.close()
-        ba.app.lang.setlanguage(None)
+        bs.app.lang.setlanguage(None)
     def popup_menu_selected_choice(self, popup_window: PopupMenuWindow,
                                    choice: str) -> None:
         """Called when a choice is selected in the popup."""
         global unmuted_names
         if self._popup_type == "banTimePress":
-            result = _ba.disconnect_client(self._popup_party_member_client_id, ban_time=int(choice))
+            result = _babase.disconnect_client(
+                self._popup_party_member_client_id, ban_time=int(choice))
             if not result:
-                ba.playsound(ba.getsound('error'))
-                ba.screenmessage(
-                    ba.Lstr(resource='getTicketsWindow.unavailableText'),
+                bui.getsound('error').play()
+                bs.broadcastmessage(
+                    babase.Lstr(resource='getTicketsWindow.unavailableText'),
                     color=(1, 0, 0))
         elif self._popup_type == "send_Times_Press":
             self._send_msg_times = int(choice)
-            ba.buttonwidget(edit=self._times_button, label="%s:%d" %
-                            (_getTransText("Times"), getattr(self, "_send_msg_times", 1)))
+            bui.buttonwidget(edit=self._times_button, label="%s:%d" %
+                             (_getTransText("Times"), getattr(self, "_send_msg_times", 1)))
 
         elif self._popup_type == "chatmessagepress":
             if choice == "mute":
@@ -1508,12 +1494,12 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                         delegate=self)
                     self._popup_type = "customAction_partyMemberPress"
                 else:
-                    ba.playsound(ba.getsound("error"))
-                    ba.screenmessage(
-                        ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
+                    bui.getsound("error").play()
+                    bs.broadcastmessage(
+                        babase.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
         elif self._popup_type == "menu":
             if choice in ("mute", "unmute"):
-                cfg = ba.app.config
+                cfg = babase.app.config
                 cfg['Chat Muted'] = (choice == 'mute')
                 cfg.apply_and_commit()
                 if cfg['Chat Muted']:
@@ -1531,11 +1517,11 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 global chatlogger
                 if chatlogger:
                     chatlogger = False
-                    ba.screenmessage("Chat logger turned OFF")
+                    bs.broadcastmessage("Chat logger turned OFF")
                 else:
                     chatlogger = True
                     chatloggThread().run()
-                    ba.screenmessage("Chat logger turned ON")
+                    bs.broadcastmessage("Chat logger turned ON")
             elif choice == 'screenmsg':
                 global screenmsg
                 if screenmsg:
@@ -1546,15 +1532,15 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                     self.restore_screen_msg()
             elif choice == "addQuickReply":
                 try:
-                    newReply = ba.textwidget(query=self._text_field)
+                    newReply = bui.textwidget(query=self._text_field)
                     data = self._get_quick_responds()
                     data.append(newReply)
                     self._write_quick_responds(data)
-                    ba.screenmessage(_getTransText("Something_is_added") %
-                                     newReply, color=(0, 1, 0))
-                    ba.playsound(ba.getsound("dingSmallHigh"))
+                    bs.broadcastmessage(_getTransText("Something_is_added") %
+                                        newReply, color=(0, 1, 0))
+                    bui.getsound("dingSmallHigh").play()
                 except:
-                    ba.print_exception()
+                    babase.print_exception()
             elif choice == "removeQuickReply":
                 Quickreply = self._get_quick_responds()
                 PopupMenuWindow(position=self._text_field.get_screen_space_center(),
@@ -1564,12 +1550,12 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                 current_choice=Quickreply[0],
                                 delegate=self)
                 self._popup_type = "removeQuickReplySelect"
-            elif choice in ("hostInfo_Debug",) and isinstance(_ba.get_connection_to_host_info(), dict):
-                if len(_ba.get_connection_to_host_info()) > 0:
-                    # print(_ba.get_connection_to_host_info(),type(_ba.get_connection_to_host_info()))
+            elif choice in ("hostInfo_Debug",) and isinstance(bs.get_connection_to_host_info(), dict):
+                if len(bs.get_connection_to_host_info()) > 0:
+                    # print(_babase.get_connection_to_host_info(),type(_babase.get_connection_to_host_info()))
 
-                    ChoiceDis = list(_ba.get_connection_to_host_info().keys())
-                    NewChoices = ["ba.screenmessage(str(_ba.get_connection_to_host_info().get('%s')))" % (
+                    ChoiceDis = list(bs.get_connection_to_host_info().keys())
+                    NewChoices = ["bs.broadcastmessage(str(bs.get_connection_to_host_info().get('%s')))" % (
                         (str(i)).replace("'", r"'").replace('"', r'\\"')) for i in ChoiceDis]
                     PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
                                     scale=_get_popup_window_scale(),
@@ -1580,11 +1566,11 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
 
                     self._popup_type = "Custom_Exec_Choice"
                 else:
-                    ba.playsound(ba.getsound("error"))
-                    ba.screenmessage(
-                        ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
+                    bui.getsound("error").play()
+                    bs.broadcastmessage(
+                        babase.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
             elif choice == "translator":
-                chats = _ba._getChatMessages()
+                chats = _babase._getChatMessages()
                 if len(chats) > 0:
                     choices = [(item) for item in chats[::-1]]
                     PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
@@ -1595,34 +1581,17 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                                     delegate=self)
                     self._popup_type = "translator_Press"
                 else:
-                    ba.playsound(ba.getsound("error"))
-                    ba.screenmessage(
-                        ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
+                    bui.getsound("error").play()
+                    bs.broadcastmessage(
+                        babase.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
             elif choice == "resetGameRecord":
                 ConfirmWindow(text=_getTransText("Restart_Game_Record_Confirm"),
                               action=self._reset_game_record, cancel_button=True, cancel_is_selected=True,
                               color=self._bg_color, text_scale=1.0,
                               origin_widget=self.get_root_widget())
         elif self._popup_type == "translator_Press":
+            pass
 
-            if len(tranTypes) == 1:
-                exec("start_new_thread(OnlineTranslator.%s,(u'%s',))" %
-                     (tranTypes[0], choice.replace("'", r"'").replace('"', r'\\"')))
-            elif len(tranTypes) > 1:
-                choices = ["start_new_thread(OnlineTranslator.%s,(u'%s',))" % (
-                    item, choice.replace("'", r"'").replace('"', r'\\"')) for item in tranTypes]
-
-                PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
-                                scale=_get_popup_window_scale(),
-                                choices=choices,
-                                choices_display=_creat_Lstr_list(tranTypes),
-                                current_choice=choices[0],
-                                delegate=self)
-                self._popup_type = "Custom_Exec_Choice"
-            else:
-                ba.playsound(ba.getsound("error"))
-                ba.screenmessage(
-                    ba.Lstr(resource="getTicketsWindow.unavailableText"), color=(1, 0, 0))
         elif self._popup_type == "customAction_partyMemberPress":
 
             try:
@@ -1658,8 +1627,8 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             self.popup_menu_selected_choice(popup_window, choice.replace(
                                 curKeyWord, (playerName.replace("'", r"'").replace('"', r'\\"')), 1))
                         else:
-                            ba.screenmessage(_getTransText("No_valid_player_found"), (1, 0, 0))
-                            ba.playsound(ba.getsound("error"))
+                            bs.broadcastmessage(_getTransText("No_valid_player_found"), (1, 0, 0))
+                            bui.getsound("error").play()
                     elif curKeyWord in (r"{$PlayerID}",) != 0:
                         playerID = self._getObjectByID("PlayerID")
                         playerName = self._getObjectByID("PlayerName")
@@ -1682,28 +1651,29 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                             self.popup_menu_selected_choice(popup_window, choice.replace(
                                 r"{$PlayerID}", str(playerID).replace("'", r"'").replace('"', r'\\"')))
                         else:
-                            ba.screenmessage(_getTransText("No_valid_player_id_found"), (1, 0, 0))
-                            ba.playsound(ba.getsound("error"))
+                            bs.broadcastmessage(_getTransText(
+                                "No_valid_player_id_found"), (1, 0, 0))
+                            bui.getsound("error").play()
                     elif curKeyWord in (r"{$AccountInfo}",) != 0:
                         self.popup_menu_selected_choice(popup_window, choice.replace(
                             r"{$AccountInfo}", (str(self._getObjectByID("roster"))).replace("'", r"'").replace('"', r'\\"'), 1))
                 else:
                     exec(choice)
             except Exception as e:
-                ba.screenmessage(repr(e), (1, 0, 0))
+                bs.broadcastmessage(repr(e), (1, 0, 0))
         elif self._popup_type == "QuickMessageSelect":
-            # ba.textwidget(edit=self._text_field,text=self._get_quick_responds()[index])
+            # bui.textwidget(edit=self._text_field,text=self._get_quick_responds()[index])
             self._edit_text_msg_box(choice, "add")
         elif self._popup_type == "removeQuickReplySelect":
             data = self._get_quick_responds()
             if len(data) > 0 and choice in data:
                 data.remove(choice)
                 self._write_quick_responds(data)
-                ba.screenmessage(_getTransText("Something_is_removed") % choice, (1, 0, 0))
-                ba.playsound(ba.getsound("shieldDown"))
+                bs.broadcastmessage(_getTransText("Something_is_removed") % choice, (1, 0, 0))
+                bui.getsound("shieldDown").play()
             else:
-                ba.screenmessage(ba.Lstr(resource="errorText"), (1, 0, 0))
-                ba.playsound(ba.getsound("error"))
+                bs.broadcastmessage(babase.Lstr(resource="errorText"), (1, 0, 0))
+                bui.getsound("error").play()
         elif choice.startswith("custom_Exec_Choice_") or self._popup_type == "Custom_Exec_Choice":
             exec(choice[len("custom_Exec_Choice_"):]
                  if choice.startswith("custom_Exec_Choice_") else choice)
@@ -1724,16 +1694,18 @@ def fetchAccountInfo(account, loading_widget):
         if account in fdata:
             servers = fdata[account]
         url = f'https://{BCSSERVER}/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true'
-
-        data = urllib.request.urlopen(url)
+        req = urllib.request.Request(url, headers={
+                                     "User-Agent": f'BS{_babase.env().get("build_number", 0)}', "Accept-Language": "en-US,en;q=0.9", })
+        data = urllib.request.urlopen(req)
         account_data = json.loads(data.read().decode('utf-8'))[0]
         pbid = account_data["pbid"]
 
-    except:
+    except Exception as e:
+        print(e)
         pass
-    # _ba.pushcall(Call(updateAccountWindow,loading_widget,accounts[0]),from_other_thread=True)
-    _ba.pushcall(Call(CustomAccountViewerWindow, pbid, account_data,
-                 servers, loading_widget), from_other_thread=True)
+    # _babase.pushcall(Call(updateAccountWindow,loading_widget,accounts[0]),from_other_thread=True)
+    _babase.pushcall(Call(CustomAccountViewerWindow, pbid, account_data,
+                          servers, loading_widget), from_other_thread=True)
 
 
 class CustomAccountViewerWindow(viewer.AccountViewerWindow):
@@ -1748,33 +1720,33 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
         self.servers = servers
 
     def _copy_pb(self):
-        ba.clipboard_set_text(self.pb_id)
-        ba.screenmessage(ba.Lstr(resource='gatherWindow.copyCodeConfirmText'))
+        babase.clipboard_set_text(self.pb_id)
+        bs.broadcastmessage(babase.Lstr(resource='gatherWindow.copyCodeConfirmText'))
 
     def _on_query_response(self, data):
 
         if data is None:
-            ba.textwidget(edit=self._loading_text, text="")
-            ba.textwidget(parent=self._scrollwidget,
-                          size=(0, 0),
-                          position=(170, 200),
-                          flatness=1.0,
-                          h_align='center',
-                          v_align='center',
-                          scale=0.5,
-                          color=ba.app.ui.infotextcolor,
-                          text="Mutual servers",
-                          maxwidth=300)
+            bui.textwidget(edit=self._loading_text, text="")
+            bui.textwidget(parent=self._scrollwidget,
+                           size=(0, 0),
+                           position=(170, 200),
+                           flatness=1.0,
+                           h_align='center',
+                           v_align='center',
+                           scale=0.5,
+                           color=bui.app.ui_v1.infotextcolor,
+                           text="Mutual servers",
+                           maxwidth=300)
             v = 200-21
             for server in self.servers:
-                ba.textwidget(parent=self._scrollwidget,
-                              size=(0, 0),
-                              position=(170, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=server,
-                              maxwidth=300)
+                bui.textwidget(parent=self._scrollwidget,
+                               size=(0, 0),
+                               position=(170, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=server,
+                               maxwidth=300)
                 v -= 23
         else:
             for account in self.custom_data["accounts"]:
@@ -1794,15 +1766,15 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                     if trophystr == '':
                         trophystr = '-'
                 except Exception:
-                    ba.print_exception('Error displaying trophies.')
+                    babase.print_exception('Error displaying trophies.')
                 account_name_spacing = 15
                 tscale = 0.65
-                ts_height = _ba.get_string_height(trophystr,
-                                                  suppress_warning=True)
+                ts_height = _babase.get_string_height(trophystr,
+                                                      suppress_warning=True)
                 sub_width = self._width - 80
                 sub_height = 500 + ts_height * tscale + \
                     account_name_spacing * len(data['accountDisplayStrings'])
-                self._subcontainer = ba.containerwidget(
+                self._subcontainer = bui.containerwidget(
                     parent=self._scrollwidget,
                     size=(sub_width, sub_height),
                     background=False)
@@ -1817,7 +1789,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                     try:
                         if data['profile'] is not None:
                             profile = data['profile']
-                            character = ba.app.spaz_appearances.get(
+                            character = babase.app.spaz_appearances.get(
                                 profile['character'], None)
                             if character is not None:
                                 tint_color = (profile['color'] if 'color'
@@ -1827,31 +1799,31 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                                                (1, 1, 1))
                                 icon_tex = character.icon_texture
                                 tint_tex = character.icon_mask_texture
-                                mask_texture = ba.gettexture(
+                                mask_texture = bui.gettexture(
                                     'characterIconMask')
-                                ba.imagewidget(
+                                bui.imagewidget(
                                     parent=self._subcontainer,
                                     position=(sub_width * center - 40, v - 80),
                                     size=(80, 80),
                                     color=(1, 1, 1),
                                     mask_texture=mask_texture,
-                                    texture=ba.gettexture(icon_tex),
-                                    tint_texture=ba.gettexture(tint_tex),
+                                    texture=bui.gettexture(icon_tex),
+                                    tint_texture=bui.gettexture(tint_tex),
                                     tint_color=tint_color,
                                     tint2_color=tint2_color)
                                 v -= 95
                     except Exception:
-                        ba.print_exception('Error displaying character.')
-                    ba.textwidget(
+                        babase.print_exception('Error displaying character.')
+                    bui.textwidget(
                         parent=self._subcontainer,
                         size=(0, 0),
                         position=(sub_width * center, v),
                         h_align='center',
                         v_align='center',
                         scale=0.9,
-                        color=ba.safecolor(tint_color, 0.7),
+                        color=babase.safecolor(tint_color, 0.7),
                         shadow=1.0,
-                        text=ba.Lstr(value=data['profileDisplayString']),
+                        text=babase.Lstr(value=data['profileDisplayString']),
                         maxwidth=sub_width * maxwidth_scale * 0.75)
                     showing_character = True
                     v -= 33
@@ -1861,50 +1833,50 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
 
                 v = sub_height - 20
                 if len(data['accountDisplayStrings']) <= 1:
-                    account_title = ba.Lstr(
+                    account_title = babase.Lstr(
                         resource='settingsWindow.accountText')
                 else:
-                    account_title = ba.Lstr(
+                    account_title = babase.Lstr(
                         resource='accountSettingsWindow.accountsText',
                         fallback_resource='settingsWindow.accountText')
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text=account_title,
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=account_title,
+                               maxwidth=sub_width * maxwidth_scale)
                 draw_small = (showing_character
                               or len(data['accountDisplayStrings']) > 1)
                 v -= 14 if draw_small else 20
                 for account_string in data['accountDisplayStrings']:
-                    ba.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.55 if draw_small else 0.8,
-                                  text=account_string,
-                                  maxwidth=sub_width * maxwidth_scale)
+                    bui.textwidget(parent=self._subcontainer,
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.55 if draw_small else 0.8,
+                                   text=account_string,
+                                   maxwidth=sub_width * maxwidth_scale)
                     v -= account_name_spacing
 
                 v += account_name_spacing
                 v -= 25 if showing_character else 29
                 # =======================================================================
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text=str(self.pb_id),
-                              maxwidth=sub_width * maxwidth_scale)
-                self._copy_btn = ba.buttonwidget(
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=str(self.pb_id),
+                               maxwidth=sub_width * maxwidth_scale)
+                self._copy_btn = bui.buttonwidget(
                     parent=self._subcontainer,
                     position=(sub_width * center - 120, v - 9),
                     size=(60, 30),
@@ -1915,125 +1887,125 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                     autoselect=True)
 
                 v -= 24
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text="Name",
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Name",
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 26
                 for name in self.custom_data["names"]:
-                    ba.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.51,
-                                  text=name,
-                                  maxwidth=sub_width * maxwidth_scale)
+                    bui.textwidget(parent=self._subcontainer,
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.51,
+                                   text=name,
+                                   maxwidth=sub_width * maxwidth_scale)
                     v -= 13
                 v -= 8
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text="Created On",
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Created On",
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
                 d = self.custom_data["createdOn"]
 
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=d[:d.index("T")],
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=d[:d.index("T")],
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 29
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text="Discord",
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Discord",
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
                 if len(self.custom_data["discord"]) > 0:
-                    ba.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.55,
-                                  text=self.custom_data["discord"][0]["username"] +
-                                  ","+self.custom_data["discord"][0]["id"],
-                                  maxwidth=sub_width * maxwidth_scale)
+                    bui.textwidget(parent=self._subcontainer,
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.55,
+                                   text=self.custom_data["discord"][0]["username"] +
+                                   ","+self.custom_data["discord"][0]["id"],
+                                   maxwidth=sub_width * maxwidth_scale)
                 v -= 26
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text="Mutual servers",
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Mutual servers",
+                               maxwidth=sub_width * maxwidth_scale)
                 v = -19
                 v = 270
                 for server in self.servers:
-                    ba.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.55,
-                                  text=server,
-                                  maxwidth=sub_width * maxwidth_scale)
+                    bui.textwidget(parent=self._subcontainer,
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.55,
+                                   text=server,
+                                   maxwidth=sub_width * maxwidth_scale)
                     v -= 13
 
                 v -= 16
                 # ==================================================================
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text=ba.Lstr(resource='rankText'),
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=babase.Lstr(resource='rankText'),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 14
                 if data['rank'] is None:
                     rank_str = '-'
                     suffix_offset = None
                 else:
-                    str_raw = ba.Lstr(
+                    str_raw = babase.Lstr(
                         resource='league.rankInLeagueText').evaluate()
                     # FIXME: Would be nice to not have to eval this.
-                    rank_str = ba.Lstr(
+                    rank_str = babase.Lstr(
                         resource='league.rankInLeagueText',
                         subs=[('${RANK}', str(data['rank'][2])),
                               ('${NAME}',
-                               ba.Lstr(translate=('leagueNames',
-                                                  data['rank'][0]))),
+                               babase.Lstr(translate=('leagueNames',
+                                                      data['rank'][0]))),
                               ('${SUFFIX}', '')]).evaluate()
                     rank_str_width = min(
                         sub_width * maxwidth_scale,
-                        _ba.get_string_width(rank_str, suppress_warning=True) *
+                        _babase.get_string_width(rank_str, suppress_warning=True) *
                         0.55)
 
                     # Only tack our suffix on if its at the end and only for
@@ -2044,49 +2016,49 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                     else:
                         suffix_offset = None
 
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=rank_str,
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=rank_str,
+                               maxwidth=sub_width * maxwidth_scale)
                 if suffix_offset is not None:
                     assert data['rank'] is not None
-                    ba.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center + suffix_offset,
-                                            v + 3),
-                                  h_align='left',
-                                  v_align='center',
-                                  scale=0.29,
-                                  flatness=1.0,
-                                  text='[' + str(data['rank'][1]) + ']')
+                    bui.textwidget(parent=self._subcontainer,
+                                   size=(0, 0),
+                                   position=(sub_width * center + suffix_offset,
+                                             v + 3),
+                                   h_align='left',
+                                   v_align='center',
+                                   scale=0.29,
+                                   flatness=1.0,
+                                   text='[' + str(data['rank'][1]) + ']')
                 v -= 14
 
-                str_raw = ba.Lstr(
+                str_raw = babase.Lstr(
                     resource='league.rankInLeagueText').evaluate()
                 old_offs = -50
                 prev_ranks_shown = 0
                 for prev_rank in data['prevRanks']:
-                    rank_str = ba.Lstr(
+                    rank_str = babase.Lstr(
                         value='${S}:    ${I}',
                         subs=[
                             ('${S}',
-                             ba.Lstr(resource='league.seasonText',
-                                     subs=[('${NUMBER}', str(prev_rank[0]))])),
+                             babase.Lstr(resource='league.seasonText',
+                                         subs=[('${NUMBER}', str(prev_rank[0]))])),
                             ('${I}',
-                             ba.Lstr(resource='league.rankInLeagueText',
-                                     subs=[('${RANK}', str(prev_rank[3])),
-                                           ('${NAME}',
-                                            ba.Lstr(translate=('leagueNames',
-                                                               prev_rank[1]))),
-                                           ('${SUFFIX}', '')]))
+                             babase.Lstr(resource='league.rankInLeagueText',
+                                         subs=[('${RANK}', str(prev_rank[3])),
+                                               ('${NAME}',
+                                                babase.Lstr(translate=('leagueNames',
+                                                                       prev_rank[1]))),
+                                               ('${SUFFIX}', '')]))
                         ]).evaluate()
                     rank_str_width = min(
                         sub_width * maxwidth_scale,
-                        _ba.get_string_width(rank_str, suppress_warning=True) *
+                        _babase.get_string_width(rank_str, suppress_warning=True) *
                         0.3)
 
                     # Only tack our suffix on if its at the end and only for
@@ -2096,50 +2068,50 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                         suffix_offset = rank_str_width + 2
                     else:
                         suffix_offset = None
-                    ba.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center + old_offs, v),
-                                  h_align='left',
-                                  v_align='center',
-                                  scale=0.3,
-                                  text=rank_str,
-                                  flatness=1.0,
-                                  maxwidth=sub_width * maxwidth_scale)
+                    bui.textwidget(parent=self._subcontainer,
+                                   size=(0, 0),
+                                   position=(sub_width * center + old_offs, v),
+                                   h_align='left',
+                                   v_align='center',
+                                   scale=0.3,
+                                   text=rank_str,
+                                   flatness=1.0,
+                                   maxwidth=sub_width * maxwidth_scale)
                     if suffix_offset is not None:
-                        ba.textwidget(parent=self._subcontainer,
-                                      size=(0, 0),
-                                      position=(sub_width * center + old_offs +
-                                                suffix_offset, v + 1),
-                                      h_align='left',
-                                      v_align='center',
-                                      scale=0.20,
-                                      flatness=1.0,
-                                      text='[' + str(prev_rank[2]) + ']')
+                        bui.textwidget(parent=self._subcontainer,
+                                       size=(0, 0),
+                                       position=(sub_width * center + old_offs +
+                                                 suffix_offset, v + 1),
+                                       h_align='left',
+                                       v_align='center',
+                                       scale=0.20,
+                                       flatness=1.0,
+                                       text='[' + str(prev_rank[2]) + ']')
                     prev_ranks_shown += 1
                     v -= 10
 
                 v -= 13
 
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              text=ba.Lstr(resource='achievementsText'),
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=babase.Lstr(resource='achievementsText'),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 14
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=str(data['achievementsCompleted']) + ' / ' +
-                              str(len(ba.app.ach.achievements)),
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=str(data['achievementsCompleted']) + ' / ' +
+                               str(len(bui.app.classic.ach.achievements)),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 25
 
                 if prev_ranks_shown == 0 and showing_character:
@@ -2150,37 +2122,34 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                 center = 0.5
                 maxwidth_scale = 0.9
 
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=ba.app.ui.infotextcolor,
-                              flatness=1.0,
-                              text=ba.Lstr(resource='trophiesThisSeasonText',
-                                           fallback_resource='trophiesText'),
-                              maxwidth=sub_width * maxwidth_scale)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               flatness=1.0,
+                               text=babase.Lstr(resource='trophiesThisSeasonText',
+                                                fallback_resource='trophiesText'),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
-                ba.textwidget(parent=self._subcontainer,
-                              size=(0, ts_height),
-                              position=(sub_width * 0.5,
-                                        v - ts_height * tscale),
-                              h_align='center',
-                              v_align='top',
-                              corner_scale=tscale,
-                              text=trophystr)
+                bui.textwidget(parent=self._subcontainer,
+                               size=(0, ts_height),
+                               position=(sub_width * 0.5,
+                                         v - ts_height * tscale),
+                               h_align='center',
+                               v_align='top',
+                               corner_scale=tscale,
+                               text=trophystr)
 
             except Exception:
-                ba.print_exception('Error displaying account info.')
+                babase.print_exception('Error displaying account info.')
 
 # ba_meta export plugin
 
 
-class bySmoothy(ba.Plugin):
+class bySmoothy(babase.Plugin):
     def __init__(self):
-        if _ba.env().get("build_number", 0) >= 20577:
-            ba.internal.connect_to_party = newconnect_to_party
-            bastd_party.PartyWindow = ModifiedPartyWindow
-        else:
-            print("AdvancePartyWindow only runs with BombSquad version equal or higher than 1.7")
+        bs.connect_to_party = newconnect_to_party
+        bascenev1lib_party.PartyWindow = ModifiedPartyWindow
