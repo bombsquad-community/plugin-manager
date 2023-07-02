@@ -20,7 +20,7 @@ https://bombsquad-community.web.app/mods
 '''
 
 #  added advanced ID revealer
-# live ping 
+# live ping
 
 # Made by Mr.Smoothy - Plasma Boson
 import traceback
@@ -193,10 +193,7 @@ if not isinstance(SystemEncode, str):
     SystemEncode = "utf-8"
 
 
-
 PingThread().start()
-
-
 
 
 class chatloggThread():
@@ -424,27 +421,27 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                 240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20)))
 
         self._cancel_button = bui.buttonwidget(parent=self._root_widget,
-                                              scale=0.7,
-                                              position=(30, self._height - 47),
-                                              size=(50, 50),
-                                              label='',
-                                              on_activate_call=self.close,
-                                              autoselect=True,
-                                              color=(0.45, 0.63, 0.15),
-                                              icon=bui.gettexture('crossOut'),
-                                              iconscale=1.2)
-        self._smoothy_button = bui.buttonwidget(parent=self._root_widget,
-                                               scale=0.6,
-                                               position=(5, self._height - 47 - 40),
+                                               scale=0.7,
+                                               position=(30, self._height - 47),
                                                size=(50, 50),
-                                               label='69',
-                                               on_activate_call=self.smoothy_roster_changer,
+                                               label='',
+                                               on_activate_call=self.close,
                                                autoselect=True,
                                                color=(0.45, 0.63, 0.15),
-                                               icon=bui.gettexture('replayIcon'),
+                                               icon=bui.gettexture('crossOut'),
                                                iconscale=1.2)
+        self._smoothy_button = bui.buttonwidget(parent=self._root_widget,
+                                                scale=0.6,
+                                                position=(5, self._height - 47 - 40),
+                                                size=(50, 50),
+                                                label='69',
+                                                on_activate_call=self.smoothy_roster_changer,
+                                                autoselect=True,
+                                                color=(0.45, 0.63, 0.15),
+                                                icon=bui.gettexture('replayIcon'),
+                                                iconscale=1.2)
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=self._cancel_button)
+                            cancel_button=self._cancel_button)
 
         self._menu_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -466,37 +463,37 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             title = babase.Lstr(resource=self._r + '.titleText')
 
         self._title_text = bui.textwidget(parent=self._root_widget,
-                                         scale=0.9,
-                                         color=(0.5, 0.7, 0.5),
-                                         text=title,
-                                         size=(120, 20),
-                                         position=(self._width * 0.5-60,
-                                                   self._height - 29),
-                                         on_select_call=self.title_selected,
-                                         selectable=True,
-                                         maxwidth=self._width * 0.7,
+                                          scale=0.9,
+                                          color=(0.5, 0.7, 0.5),
+                                          text=title,
+                                          size=(120, 20),
+                                          position=(self._width * 0.5-60,
+                                                    self._height - 29),
+                                          on_select_call=self.title_selected,
+                                          selectable=True,
+                                          maxwidth=self._width * 0.7,
+                                          h_align='center',
+                                          v_align='center')
+
+        self._empty_str = bui.textwidget(parent=self._root_widget,
+                                         scale=0.75,
+                                         size=(0, 0),
+                                         position=(self._width * 0.5,
+                                                   self._height - 65),
+                                         maxwidth=self._width * 0.85,
+                                         text="no one",
                                          h_align='center',
                                          v_align='center')
 
-        self._empty_str = bui.textwidget(parent=self._root_widget,
-                                        scale=0.75,
-                                        size=(0, 0),
-                                        position=(self._width * 0.5,
-                                                  self._height - 65),
-                                        maxwidth=self._width * 0.85,
-                                        text="no one",
-                                        h_align='center',
-                                        v_align='center')
-
         self._scroll_width = self._width - 50
         self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
-                                             size=(self._scroll_width,
-                                                   self._height - 200),
-                                             position=(30, 80),
-                                             color=(0.4, 0.6, 0.3))
+                                              size=(self._scroll_width,
+                                                    self._height - 200),
+                                              position=(30, 80),
+                                              color=(0.4, 0.6, 0.3))
         self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
-                                             border=2,
-                                             margin=0)
+                                              border=2,
+                                              margin=0)
         bui.widget(edit=self._menu_button, down_widget=self._columnwidget)
 
         self._muted_text = bui.textwidget(
@@ -579,22 +576,22 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
 
         #               )
         bui.widget(edit=self._scrollwidget,
-                  autoselect=True,
-                  left_widget=self._cancel_button,
-                  up_widget=self._cancel_button,
-                  down_widget=self._text_field)
+                   autoselect=True,
+                   left_widget=self._cancel_button,
+                   up_widget=self._cancel_button,
+                   down_widget=self._text_field)
         bui.widget(edit=self._columnwidget,
-                  autoselect=True,
-                  up_widget=self._cancel_button,
-                  down_widget=self._text_field)
+                   autoselect=True,
+                   up_widget=self._cancel_button,
+                   down_widget=self._text_field)
         bui.containerwidget(edit=self._root_widget, selected_child=txt)
         btn = bui.buttonwidget(parent=self._root_widget,
-                              size=(50, 35),
-                              label=babase.Lstr(resource=self._r + '.sendText'),
-                              button_type='square',
-                              autoselect=True,
-                              position=(self._width - 70, 35),
-                              on_activate_call=self._send_chat_message)
+                               size=(50, 35),
+                               label=babase.Lstr(resource=self._r + '.sendText'),
+                               button_type='square',
+                               autoselect=True,
+                               position=(self._width - 70, 35),
+                               on_activate_call=self._send_chat_message)
 
         def _times_button_on_click():
             # self._popup_type = "send_Times_Press"
@@ -618,12 +615,12 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         self._send_msg_times = 1
 
         self._times_button = bui.buttonwidget(parent=self._root_widget,
-                                             size=(50, 35),
-                                             label="Quick",
-                                             button_type='square',
-                                             autoselect=True,
-                                             position=(30, 35),
-                                             on_activate_call=_times_button_on_click)
+                                              size=(50, 35),
+                                              label="Quick",
+                                              button_type='square',
+                                              autoselect=True,
+                                              position=(30, 35),
+                                              on_activate_call=_times_button_on_click)
 
         bui.textwidget(edit=txt, on_return_press_call=btn.activate)
         self._name_widgets: List[bui.Widget] = []
@@ -632,8 +629,8 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         self.smoothy_mode = 1
         self.full_chat_mode = False
         self._update_timer = babase.AppTimer(1.0,
-                                      bs.WeakCall(self._update),
-                                      repeat=True)
+                                             bs.WeakCall(self._update),
+                                             repeat=True)
 
         self._update()
 
@@ -679,34 +676,34 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             if babase.app.config.resolve('Chat Muted'):
 
                 txt = bui.textwidget(parent=self._columnwidget,
-                                    text=msg,
-                                    h_align='left',
-                                    v_align='center',
-                                    size=(130, 13),
-                                    scale=0.55,
-                                    position=(-0.6, 0),
-                                    selectable=True,
-                                    click_activate=True,
-                                    maxwidth=self._scroll_width * 0.94,
-                                    shadow=0.3,
-                                    flatness=1.0)
+                                     text=msg,
+                                     h_align='left',
+                                     v_align='center',
+                                     size=(130, 13),
+                                     scale=0.55,
+                                     position=(-0.6, 0),
+                                     selectable=True,
+                                     click_activate=True,
+                                     maxwidth=self._scroll_width * 0.94,
+                                     shadow=0.3,
+                                     flatness=1.0)
                 bui.textwidget(edit=txt,
-                              on_activate_call=babase.Call(
-                                  self._on_chat_press,
-                                  msg, txt))
+                               on_activate_call=babase.Call(
+                                   self._on_chat_press,
+                                   msg, txt))
             else:
                 txt = bui.textwidget(parent=self._columnwidget,
-                                    text=msg,
-                                    h_align='left',
-                                    v_align='center',
-                                    size=(0, 13),
-                                    scale=0.55,
+                                     text=msg,
+                                     h_align='left',
+                                     v_align='center',
+                                     size=(0, 13),
+                                     scale=0.55,
 
 
 
-                                    maxwidth=self._scroll_width * 0.94,
-                                    shadow=0.3,
-                                    flatness=1.0)
+                                     maxwidth=self._scroll_width * 0.94,
+                                     shadow=0.3,
+                                     flatness=1.0)
 
           # btn = bui.buttonwidget(parent=self._columnwidget,
           #                       scale=0.7,
@@ -726,14 +723,14 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
     def _add_msg_when_muted(self, msg: str) -> None:
 
         txt = bui.textwidget(parent=self._columnwidget,
-                            text=msg,
-                            h_align='left',
-                            v_align='center',
-                            size=(0, 13),
-                            scale=0.55,
-                            maxwidth=self._scroll_width * 0.94,
-                            shadow=0.3,
-                            flatness=1.0)
+                             text=msg,
+                             h_align='left',
+                             v_align='center',
+                             size=(0, 13),
+                             scale=0.55,
+                             maxwidth=self._scroll_width * 0.94,
+                             shadow=0.3,
+                             flatness=1.0)
         self._chat_texts.append(txt)
         if len(self._chat_texts) > 40:
             first = self._chat_texts.pop(0)
@@ -763,12 +760,12 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             transition='in_scale')
 
         bui.textwidget(parent=cnt,
-                      size=(0, 0),
-                      h_align='center',
-                      v_align='center',
-                      text='Enter nickname',
-                      maxwidth=c_width * 0.8,
-                      position=(c_width * 0.5, c_height - 60))
+                       size=(0, 0),
+                       h_align='center',
+                       v_align='center',
+                       text='Enter nickname',
+                       maxwidth=c_width * 0.8,
+                       position=(c_width * 0.5, c_height - 60))
         id = self._get_nick(arg)
         self._player_nick_text = txt89 = bui.textwidget(
             parent=cnt,
@@ -792,12 +789,12 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             position=(30, 30),
             autoselect=True)
         okb = bui.buttonwidget(parent=cnt,
-                              label='Rename',
-                              size=(180, 60),
-                              position=(c_width - 230, 30),
-                              on_activate_call=babase.Call(
-                                  self._add_nick, arg),
-                              autoselect=True)
+                               label='Rename',
+                               size=(180, 60),
+                               position=(c_width - 230, 30),
+                               on_activate_call=babase.Call(
+                                   self._add_nick, arg),
+                               autoselect=True)
         bui.widget(edit=cbtn, right_widget=okb)
         bui.widget(edit=okb, left_widget=cbtn)
         bui.textwidget(edit=txt89, on_return_press_call=okb.activate)
@@ -812,7 +809,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             config['players nick'][arg] = new_name_raw
             config.commit()
         bui.containerwidget(edit=self._nick_rename_window,
-                           transition='out_scale')
+                            transition='out_scale')
         # bui.containerwidget(edit=self._root_widget,transition='in_scale')
 
     def _get_nick(self, id):
@@ -838,7 +835,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         except:
             babase.print_exception()
             bs.broadcastmessage(babase.Lstr(resource="replayWriteErrorText").evaluate() +
-                             ""+traceback.format_exc(), color=(1, 0, 0))
+                                ""+traceback.format_exc(), color=(1, 0, 0))
 
     def _on_menu_button_press(self) -> None:
         is_muted = babase.app.config.resolve('Chat Muted')
@@ -1187,7 +1184,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
 
         #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_babase._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
     def joinbombspot(self):
-        
+
         bui.open_url("https://discord.gg/ucyaesh")
 
     def _update(self) -> None:
@@ -1224,17 +1221,17 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             if not self._roster:
                 top_section_height = 60
                 bui.textwidget(edit=self._empty_str,
-                              text=babase.Lstr(resource=self._r + '.emptyText'))
+                               text=babase.Lstr(resource=self._r + '.emptyText'))
                 bui.scrollwidget(edit=self._scrollwidget,
-                                size=(self._width - 50,
-                                      self._height - top_section_height - 110),
-                                position=(30, 80))
+                                 size=(self._width - 50,
+                                       self._height - top_section_height - 110),
+                                 position=(30, 80))
             elif self.full_chat_mode:
                 top_section_height = 60
                 bui.scrollwidget(edit=self._scrollwidget,
-                                size=(self._width - 50,
-                                      self._height - top_section_height - 75),
-                                position=(30, 80))
+                                 size=(self._width - 50,
+                                       self._height - top_section_height - 75),
+                                 position=(30, 80))
 
             else:
                 columns = 1 if len(
@@ -1286,19 +1283,19 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                 p_str = '???'
                             try:
                                 widget = bui.textwidget(parent=self._root_widget,
-                                                       position=(pos[0], pos[1]),
-                                                       scale=t_scale,
-                                                       size=(c_width * 0.85, 30),
-                                                       maxwidth=c_width * 0.85,
-                                                       color=(1, 1,
-                                                              1) if index == 0 else
-                                                       (1, 1, 1),
-                                                       selectable=True,
-                                                       autoselect=True,
-                                                       click_activate=True,
-                                                       text=babase.Lstr(value=p_str),
-                                                       h_align='left',
-                                                       v_align='center')
+                                                        position=(pos[0], pos[1]),
+                                                        scale=t_scale,
+                                                        size=(c_width * 0.85, 30),
+                                                        maxwidth=c_width * 0.85,
+                                                        color=(1, 1,
+                                                               1) if index == 0 else
+                                                        (1, 1, 1),
+                                                        selectable=True,
+                                                        autoselect=True,
+                                                        click_activate=True,
+                                                        text=babase.Lstr(value=p_str),
+                                                        h_align='left',
+                                                        v_align='center')
                                 self._name_widgets.append(widget)
                             except Exception:
                                 pass
@@ -1317,10 +1314,10 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                             #  client_id is more readily available though).
                             try:
                                 bui.textwidget(edit=widget,
-                                              on_activate_call=babase.Call(
-                                                  self._on_party_member_press,
-                                                  self._roster[index]['client_id'],
-                                                  is_host, widget))
+                                               on_activate_call=babase.Call(
+                                                   self._on_party_member_press,
+                                                   self._roster[index]['client_id'],
+                                                   is_host, widget))
                             except Exception:
                                 pass
                             pos = (self._width * 0.53 - c_width_total * 0.5 +
@@ -1348,7 +1345,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                             maxwidth=c_width * 0.96 - twd,
                                             color=(0.1, 1, 0.1, 0.5),
                                             text=babase.Lstr(resource=self._r +
-                                                         '.hostText'),
+                                                             '.hostText'),
                                             scale=0.4,
                                             shadow=0.1,
                                             flatness=1.0))
@@ -1357,10 +1354,10 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                 try:
                     bui.textwidget(edit=self._empty_str, text='')
                     bui.scrollwidget(edit=self._scrollwidget,
-                                    size=(self._width - 50,
-                                          max(100, self._height - 139 -
-                                              c_height_total)),
-                                    position=(30, 80))
+                                     size=(self._width - 50,
+                                           max(100, self._height - 139 -
+                                               c_height_total)),
+                                     position=(30, 80))
                 except Exception:
                     pass
 
@@ -1410,7 +1407,8 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         """Called when a choice is selected in the popup."""
         global unmuted_names
         if self._popup_type == "banTimePress":
-            result = _babase.disconnect_client(self._popup_party_member_client_id, ban_time=int(choice))
+            result = _babase.disconnect_client(
+                self._popup_party_member_client_id, ban_time=int(choice))
             if not result:
                 bui.getsound('error').play()
                 bs.broadcastmessage(
@@ -1419,7 +1417,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         elif self._popup_type == "send_Times_Press":
             self._send_msg_times = int(choice)
             bui.buttonwidget(edit=self._times_button, label="%s:%d" %
-                            (_getTransText("Times"), getattr(self, "_send_msg_times", 1)))
+                             (_getTransText("Times"), getattr(self, "_send_msg_times", 1)))
 
         elif self._popup_type == "chatmessagepress":
             if choice == "mute":
@@ -1539,7 +1537,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                     data.append(newReply)
                     self._write_quick_responds(data)
                     bs.broadcastmessage(_getTransText("Something_is_added") %
-                                     newReply, color=(0, 1, 0))
+                                        newReply, color=(0, 1, 0))
                     bui.getsound("dingSmallHigh").play()
                 except:
                     babase.print_exception()
@@ -1653,7 +1651,8 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                             self.popup_menu_selected_choice(popup_window, choice.replace(
                                 r"{$PlayerID}", str(playerID).replace("'", r"'").replace('"', r'\\"')))
                         else:
-                            bs.broadcastmessage(_getTransText("No_valid_player_id_found"), (1, 0, 0))
+                            bs.broadcastmessage(_getTransText(
+                                "No_valid_player_id_found"), (1, 0, 0))
                             bui.getsound("error").play()
                     elif curKeyWord in (r"{$AccountInfo}",) != 0:
                         self.popup_menu_selected_choice(popup_window, choice.replace(
@@ -1695,7 +1694,8 @@ def fetchAccountInfo(account, loading_widget):
         if account in fdata:
             servers = fdata[account]
         url = f'https://{BCSSERVER}/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true'
-        req = urllib.request.Request(url, headers={"User-Agent": f'BS{_babase.env().get("build_number", 0)}',"Accept-Language": "en-US,en;q=0.9",})
+        req = urllib.request.Request(url, headers={
+                                     "User-Agent": f'BS{_babase.env().get("build_number", 0)}', "Accept-Language": "en-US,en;q=0.9", })
         data = urllib.request.urlopen(req)
         account_data = json.loads(data.read().decode('utf-8'))[0]
         pbid = account_data["pbid"]
@@ -1705,7 +1705,7 @@ def fetchAccountInfo(account, loading_widget):
         pass
     # _babase.pushcall(Call(updateAccountWindow,loading_widget,accounts[0]),from_other_thread=True)
     _babase.pushcall(Call(CustomAccountViewerWindow, pbid, account_data,
-                 servers, loading_widget), from_other_thread=True)
+                          servers, loading_widget), from_other_thread=True)
 
 
 class CustomAccountViewerWindow(viewer.AccountViewerWindow):
@@ -1728,25 +1728,25 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
         if data is None:
             bui.textwidget(edit=self._loading_text, text="")
             bui.textwidget(parent=self._scrollwidget,
-                          size=(0, 0),
-                          position=(170, 200),
-                          flatness=1.0,
-                          h_align='center',
-                          v_align='center',
-                          scale=0.5,
-                          color=bui.app.ui_v1.infotextcolor,
-                          text="Mutual servers",
-                          maxwidth=300)
+                           size=(0, 0),
+                           position=(170, 200),
+                           flatness=1.0,
+                           h_align='center',
+                           v_align='center',
+                           scale=0.5,
+                           color=bui.app.ui_v1.infotextcolor,
+                           text="Mutual servers",
+                           maxwidth=300)
             v = 200-21
             for server in self.servers:
                 bui.textwidget(parent=self._scrollwidget,
-                              size=(0, 0),
-                              position=(170, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=server,
-                              maxwidth=300)
+                               size=(0, 0),
+                               position=(170, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=server,
+                               maxwidth=300)
                 v -= 23
         else:
             for account in self.custom_data["accounts"]:
@@ -1770,7 +1770,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                 account_name_spacing = 15
                 tscale = 0.65
                 ts_height = _babase.get_string_height(trophystr,
-                                                  suppress_warning=True)
+                                                      suppress_warning=True)
                 sub_width = self._width - 80
                 sub_height = 500 + ts_height * tscale + \
                     account_name_spacing * len(data['accountDisplayStrings'])
@@ -1840,42 +1840,42 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                         resource='accountSettingsWindow.accountsText',
                         fallback_resource='settingsWindow.accountText')
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text=account_title,
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=account_title,
+                               maxwidth=sub_width * maxwidth_scale)
                 draw_small = (showing_character
                               or len(data['accountDisplayStrings']) > 1)
                 v -= 14 if draw_small else 20
                 for account_string in data['accountDisplayStrings']:
                     bui.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.55 if draw_small else 0.8,
-                                  text=account_string,
-                                  maxwidth=sub_width * maxwidth_scale)
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.55 if draw_small else 0.8,
+                                   text=account_string,
+                                   maxwidth=sub_width * maxwidth_scale)
                     v -= account_name_spacing
 
                 v += account_name_spacing
                 v -= 25 if showing_character else 29
                 # =======================================================================
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text=str(self.pb_id),
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=str(self.pb_id),
+                               maxwidth=sub_width * maxwidth_scale)
                 self._copy_btn = bui.buttonwidget(
                     parent=self._subcontainer,
                     position=(sub_width * center - 120, v - 9),
@@ -1888,106 +1888,106 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
 
                 v -= 24
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text="Name",
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Name",
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 26
                 for name in self.custom_data["names"]:
                     bui.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.51,
-                                  text=name,
-                                  maxwidth=sub_width * maxwidth_scale)
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.51,
+                                   text=name,
+                                   maxwidth=sub_width * maxwidth_scale)
                     v -= 13
                 v -= 8
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text="Created On",
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Created On",
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
                 d = self.custom_data["createdOn"]
 
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=d[:d.index("T")],
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=d[:d.index("T")],
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 29
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text="Discord",
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Discord",
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
                 if len(self.custom_data["discord"]) > 0:
                     bui.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.55,
-                                  text=self.custom_data["discord"][0]["username"] +
-                                  ","+self.custom_data["discord"][0]["id"],
-                                  maxwidth=sub_width * maxwidth_scale)
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.55,
+                                   text=self.custom_data["discord"][0]["username"] +
+                                   ","+self.custom_data["discord"][0]["id"],
+                                   maxwidth=sub_width * maxwidth_scale)
                 v -= 26
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text="Mutual servers",
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text="Mutual servers",
+                               maxwidth=sub_width * maxwidth_scale)
                 v = -19
                 v = 270
                 for server in self.servers:
                     bui.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center, v),
-                                  h_align='center',
-                                  v_align='center',
-                                  scale=0.55,
-                                  text=server,
-                                  maxwidth=sub_width * maxwidth_scale)
+                                   size=(0, 0),
+                                   position=(sub_width * center, v),
+                                   h_align='center',
+                                   v_align='center',
+                                   scale=0.55,
+                                   text=server,
+                                   maxwidth=sub_width * maxwidth_scale)
                     v -= 13
 
                 v -= 16
                 # ==================================================================
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text=babase.Lstr(resource='rankText'),
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=babase.Lstr(resource='rankText'),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 14
                 if data['rank'] is None:
                     rank_str = '-'
@@ -2001,7 +2001,7 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                         subs=[('${RANK}', str(data['rank'][2])),
                               ('${NAME}',
                                babase.Lstr(translate=('leagueNames',
-                                                  data['rank'][0]))),
+                                                      data['rank'][0]))),
                               ('${SUFFIX}', '')]).evaluate()
                     rank_str_width = min(
                         sub_width * maxwidth_scale,
@@ -2017,24 +2017,24 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                         suffix_offset = None
 
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=rank_str,
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=rank_str,
+                               maxwidth=sub_width * maxwidth_scale)
                 if suffix_offset is not None:
                     assert data['rank'] is not None
                     bui.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center + suffix_offset,
-                                            v + 3),
-                                  h_align='left',
-                                  v_align='center',
-                                  scale=0.29,
-                                  flatness=1.0,
-                                  text='[' + str(data['rank'][1]) + ']')
+                                   size=(0, 0),
+                                   position=(sub_width * center + suffix_offset,
+                                             v + 3),
+                                   h_align='left',
+                                   v_align='center',
+                                   scale=0.29,
+                                   flatness=1.0,
+                                   text='[' + str(data['rank'][1]) + ']')
                 v -= 14
 
                 str_raw = babase.Lstr(
@@ -2047,14 +2047,14 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                         subs=[
                             ('${S}',
                              babase.Lstr(resource='league.seasonText',
-                                     subs=[('${NUMBER}', str(prev_rank[0]))])),
+                                         subs=[('${NUMBER}', str(prev_rank[0]))])),
                             ('${I}',
                              babase.Lstr(resource='league.rankInLeagueText',
-                                     subs=[('${RANK}', str(prev_rank[3])),
-                                           ('${NAME}',
-                                            babase.Lstr(translate=('leagueNames',
-                                                               prev_rank[1]))),
-                                           ('${SUFFIX}', '')]))
+                                         subs=[('${RANK}', str(prev_rank[3])),
+                                               ('${NAME}',
+                                                babase.Lstr(translate=('leagueNames',
+                                                                       prev_rank[1]))),
+                                               ('${SUFFIX}', '')]))
                         ]).evaluate()
                     rank_str_width = min(
                         sub_width * maxwidth_scale,
@@ -2069,49 +2069,49 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                     else:
                         suffix_offset = None
                     bui.textwidget(parent=self._subcontainer,
-                                  size=(0, 0),
-                                  position=(sub_width * center + old_offs, v),
-                                  h_align='left',
-                                  v_align='center',
-                                  scale=0.3,
-                                  text=rank_str,
-                                  flatness=1.0,
-                                  maxwidth=sub_width * maxwidth_scale)
+                                   size=(0, 0),
+                                   position=(sub_width * center + old_offs, v),
+                                   h_align='left',
+                                   v_align='center',
+                                   scale=0.3,
+                                   text=rank_str,
+                                   flatness=1.0,
+                                   maxwidth=sub_width * maxwidth_scale)
                     if suffix_offset is not None:
                         bui.textwidget(parent=self._subcontainer,
-                                      size=(0, 0),
-                                      position=(sub_width * center + old_offs +
-                                                suffix_offset, v + 1),
-                                      h_align='left',
-                                      v_align='center',
-                                      scale=0.20,
-                                      flatness=1.0,
-                                      text='[' + str(prev_rank[2]) + ']')
+                                       size=(0, 0),
+                                       position=(sub_width * center + old_offs +
+                                                 suffix_offset, v + 1),
+                                       h_align='left',
+                                       v_align='center',
+                                       scale=0.20,
+                                       flatness=1.0,
+                                       text='[' + str(prev_rank[2]) + ']')
                     prev_ranks_shown += 1
                     v -= 10
 
                 v -= 13
 
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              flatness=1.0,
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              text=babase.Lstr(resource='achievementsText'),
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               flatness=1.0,
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               text=babase.Lstr(resource='achievementsText'),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 14
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=0.55,
-                              text=str(data['achievementsCompleted']) + ' / ' +
-                              str(len(bui.app.classic.ach.achievements)),
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=0.55,
+                               text=str(data['achievementsCompleted']) + ' / ' +
+                               str(len(bui.app.classic.ach.achievements)),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 25
 
                 if prev_ranks_shown == 0 and showing_character:
@@ -2123,30 +2123,32 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                 maxwidth_scale = 0.9
 
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, 0),
-                              position=(sub_width * center, v),
-                              h_align='center',
-                              v_align='center',
-                              scale=title_scale,
-                              color=bui.app.ui_v1.infotextcolor,
-                              flatness=1.0,
-                              text=babase.Lstr(resource='trophiesThisSeasonText',
-                                           fallback_resource='trophiesText'),
-                              maxwidth=sub_width * maxwidth_scale)
+                               size=(0, 0),
+                               position=(sub_width * center, v),
+                               h_align='center',
+                               v_align='center',
+                               scale=title_scale,
+                               color=bui.app.ui_v1.infotextcolor,
+                               flatness=1.0,
+                               text=babase.Lstr(resource='trophiesThisSeasonText',
+                                                fallback_resource='trophiesText'),
+                               maxwidth=sub_width * maxwidth_scale)
                 v -= 19
                 bui.textwidget(parent=self._subcontainer,
-                              size=(0, ts_height),
-                              position=(sub_width * 0.5,
-                                        v - ts_height * tscale),
-                              h_align='center',
-                              v_align='top',
-                              corner_scale=tscale,
-                              text=trophystr)
+                               size=(0, ts_height),
+                               position=(sub_width * 0.5,
+                                         v - ts_height * tscale),
+                               h_align='center',
+                               v_align='top',
+                               corner_scale=tscale,
+                               text=trophystr)
 
             except Exception:
                 babase.print_exception('Error displaying account info.')
 
 # ba_meta export plugin
+
+
 class bySmoothy(babase.Plugin):
     def __init__(self):
         bs.connect_to_party = newconnect_to_party
