@@ -40,8 +40,14 @@ There are two different ways the plugin manager can be installed:
 
 1. [Download plugin_manager.py][DownloadLink] to your mods directory (check it out by going into your game's
    Settings -> Advanced -> Show Mods Folder). This is the recommended way (read next method to know why).
+   If you're on a newer version of Android (11 or above) and not rooted, it probably won't be possible to copy
+   mods to game's mods folder. In this case, you can connect your Android phone to a computer and push `plugin_manager.py`
+   [using `adb`](https://www.xda-developers.com/install-adb-windows-macos-linux/):
+   ```bash
+   $ adb push plugin_manager.py /sdcard/Android/data/net.froemling.bombsquad/files/mods/plugin_manager.py
+   ```
 
-2. Another way is to add
+3. Another way is to add
    [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
    to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
    will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
