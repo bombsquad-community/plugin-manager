@@ -1,4 +1,4 @@
-# ba_meta require api 7
+# ba_meta require api 8
 
 '''
 Character Chooser by Mr.Smoothy
@@ -34,41 +34,41 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-import _ba
-from bastd.actor.playerspaz import PlayerSpaz
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import _babase
+from bascenev1lib.actor.playerspaz import PlayerSpaz
 
 
-from ba._error import print_exception, print_error, NotFoundError
-from ba._gameutils import animate, animate_array
-from ba._language import Lstr
-from ba._generated.enums import SpecialChar, InputType
-from ba._profile import get_player_profile_colors
+from babase._error import print_exception, print_error, NotFoundError
+
+from babase._language import Lstr
+
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
 import weakref
 import os
 import json
-from ba import _lobby
-from bastd.actor.spazappearance import *
-from ba._lobby import ChangeMessage
-from ba._lobby import PlayerReadyMessage
+from bascenev1._lobby import ChangeMessage, PlayerReadyMessage
+from bascenev1 import _lobby
+from bascenev1lib.actor.spazappearance import *
 
 
-def __init__(self, vpos: float, sessionplayer: _ba.SessionPlayer,
+def __init__(self, vpos: float, sessionplayer: bs.SessionPlayer,
              lobby: 'Lobby') -> None:
-    self._deek_sound = _ba.getsound('deek')
-    self._click_sound = _ba.getsound('click01')
-    self._punchsound = _ba.getsound('punch01')
-    self._swish_sound = _ba.getsound('punchSwish')
-    self._errorsound = _ba.getsound('error')
-    self._mask_texture = _ba.gettexture('characterIconMask')
+    self._deek_sound = bs.getsound('deek')
+    self._click_sound = bs.getsound('click01')
+    self._punchsound = bs.getsound('punch01')
+    self._swish_sound = bs.getsound('punchSwish')
+    self._errorsound = bs.getsound('error')
+    self._mask_texture = bs.gettexture('characterIconMask')
     self._vpos = vpos
     self._lobby = weakref.ref(lobby)
     self._sessionplayer = sessionplayer
     self._inited = False
     self._dead = False
-    self._text_node: Optional[ba.Node] = None
+    self._text_node: Optional[bs.Node] = None
     self._profilename = ''
     self._profilenames: List[str] = []
     self._ready: bool = False
@@ -76,7 +76,7 @@ def __init__(self, vpos: float, sessionplayer: _ba.SessionPlayer,
     self._last_change: Sequence[Union[float, int]] = (0, 0)
     self._profiles: Dict[str, Dict[str, Any]] = {}
 
-    app = _ba.app
+    app = babase.app
 
     self.bakwas_chars = ["Lee", "Todd McBurton", "Zola", "Butch", "Witch", "warrior",
                          "Middle-Man", "Alien", "OldLady", "Gladiator", "Wrestler", "Gretel", "Robot"]
@@ -84,7 +84,7 @@ def __init__(self, vpos: float, sessionplayer: _ba.SessionPlayer,
     # Load available player profiles either from the local config or
     # from the remote device.
     self.reload_profiles()
-    for name in _ba.app.spaz_appearances:
+    for name in bs.app.classic.spaz_appearances:
         if name not in self._character_names and name not in self.bakwas_chars:
             self._character_names.append(name)
     # Note: this is just our local index out of available teams; *not*
@@ -96,12 +96,12 @@ def __init__(self, vpos: float, sessionplayer: _ba.SessionPlayer,
     # it. This will give a persistent character for them between games
     # and will distribute characters nicely if everyone is random.
     self._random_color, self._random_highlight = (
-        get_player_profile_colors(None))
+        bs.get_player_profile_colors(None))
 
     # To calc our random character we pick a random one out of our
     # unlocked list and then locate that character's index in the full
     # list.
-    char_index_offset = app.lobby_random_char_index_offset
+    char_index_offset = app.classic.lobby_random_char_index_offset
     self._random_character_index = (
         (sessionplayer.inputdevice.id + char_index_offset) %
         len(self._character_names))
@@ -111,28 +111,28 @@ def __init__(self, vpos: float, sessionplayer: _ba.SessionPlayer,
     self._profileindex = self._select_initial_profile()
     self._profilename = self._profilenames[self._profileindex]
 
-    self._text_node = _ba.newnode('text',
-                                  delegate=self,
-                                  attrs={
-                                      'position': (-100, self._vpos),
-                                      'maxwidth': 190,
-                                      'shadow': 0.5,
-                                      'vr_depth': -20,
-                                      'h_align': 'left',
-                                      'v_align': 'center',
-                                      'v_attach': 'top'
-                                  })
-    animate(self._text_node, 'scale', {0: 0, 0.1: 1.0})
-    self.icon = _ba.newnode('image',
-                            owner=self._text_node,
-                            attrs={
-                                'position': (-130, self._vpos + 20),
-                                'mask_texture': self._mask_texture,
-                                'vr_depth': -10,
-                                'attach': 'topCenter'
-                            })
+    self._text_node = bs.newnode('text',
+                                 delegate=self,
+                                 attrs={
+                                     'position': (-100, self._vpos),
+                                     'maxwidth': 190,
+                                     'shadow': 0.5,
+                                     'vr_depth': -20,
+                                     'h_align': 'left',
+                                     'v_align': 'center',
+                                     'v_attach': 'top'
+                                 })
+    bs.animate(self._text_node, 'scale', {0: 0, 0.1: 1.0})
+    self.icon = bs.newnode('image',
+                           owner=self._text_node,
+                           attrs={
+                               'position': (-130, self._vpos + 20),
+                               'mask_texture': self._mask_texture,
+                               'vr_depth': -10,
+                               'attach': 'topCenter'
+                           })
 
-    animate_array(self.icon, 'scale', 2, {0: (0, 0), 0.1: (45, 45)})
+    bs.animate_array(self.icon, 'scale', 2, {0: (0, 0), 0.1: (45, 45)})
 
     # Set our initial name to '<choosing player>' in case anyone asks.
     self._sessionplayer.setname(
@@ -154,39 +154,39 @@ def __init__(self, vpos: float, sessionplayer: _ba.SessionPlayer,
 def _set_ready(self, ready: bool) -> None:
 
     # pylint: disable=cyclic-import
-    from bastd.ui.profile import browser as pbrowser
-    from ba._general import Call
+    from bauiv1lib.profile import browser as pbrowser
+    from babase._general import Call
     profilename = self._profilenames[self._profileindex]
 
     # Handle '_edit' as a special case.
     if profilename == '_edit' and ready:
-        with _ba.Context('ui'):
+        with _babase.Context('ui'):
             pbrowser.ProfileBrowserWindow(in_main_menu=False)
 
             # Give their input-device UI ownership too
             # (prevent someone else from snatching it in crowded games)
-            _ba.set_ui_input_device(self._sessionplayer.inputdevice)
+            _babase.set_ui_input_device(self._sessionplayer.inputdevice)
         return
 
     if ready == False:
         self._sessionplayer.assigninput(
-            InputType.LEFT_PRESS,
+            babase.InputType.LEFT_PRESS,
             Call(self.handlemessage, ChangeMessage('team', -1)))
         self._sessionplayer.assigninput(
-            InputType.RIGHT_PRESS,
+            babase.InputType.RIGHT_PRESS,
             Call(self.handlemessage, ChangeMessage('team', 1)))
         self._sessionplayer.assigninput(
-            InputType.BOMB_PRESS,
+            babase.InputType.BOMB_PRESS,
             Call(self.handlemessage, ChangeMessage('character', 1)))
         self._sessionplayer.assigninput(
-            InputType.UP_PRESS,
+            babase.InputType.UP_PRESS,
             Call(self.handlemessage, ChangeMessage('profileindex', -1)))
         self._sessionplayer.assigninput(
-            InputType.DOWN_PRESS,
+            babase.InputType.DOWN_PRESS,
             Call(self.handlemessage, ChangeMessage('profileindex', 1)))
         self._sessionplayer.assigninput(
-            (InputType.JUMP_PRESS, InputType.PICK_UP_PRESS,
-             InputType.PUNCH_PRESS),
+            (babase.InputType.JUMP_PRESS, babase.InputType.PICK_UP_PRESS,
+             babase.InputType.PUNCH_PRESS),
             Call(self.handlemessage, ChangeMessage('ready', 1)))
         self._ready = False
         self._update_text()
@@ -194,26 +194,26 @@ def _set_ready(self, ready: bool) -> None:
     elif ready == True:
         self.characterchooser = True
         self._sessionplayer.assigninput(
-            (InputType.LEFT_PRESS, InputType.RIGHT_PRESS,
-             InputType.UP_PRESS, InputType.DOWN_PRESS,
-             InputType.JUMP_PRESS, InputType.BOMB_PRESS,
-             InputType.PICK_UP_PRESS), self._do_nothing)
+            (babase.InputType.LEFT_PRESS, babase.InputType.RIGHT_PRESS,
+             babase.InputType.UP_PRESS, babase.InputType.DOWN_PRESS,
+             babase.InputType.JUMP_PRESS, babase.InputType.BOMB_PRESS,
+             babase.InputType.PICK_UP_PRESS), self._do_nothing)
         self._sessionplayer.assigninput(
-            (InputType.UP_PRESS), Call(self.handlemessage, ChangeMessage('characterchooser', -1)))
+            (babase.InputType.UP_PRESS), Call(self.handlemessage, ChangeMessage('characterchooser', -1)))
         self._sessionplayer.assigninput(
-            (InputType.DOWN_PRESS), Call(self.handlemessage, ChangeMessage('characterchooser', 1)))
+            (babase.InputType.DOWN_PRESS), Call(self.handlemessage, ChangeMessage('characterchooser', 1)))
         self._sessionplayer.assigninput(
-            (InputType.BOMB_PRESS), Call(self.handlemessage, ChangeMessage('ready', 0)))
+            (babase.InputType.BOMB_PRESS), Call(self.handlemessage, ChangeMessage('ready', 0)))
 
         self._sessionplayer.assigninput(
-            (InputType.JUMP_PRESS, InputType.PICK_UP_PRESS, InputType.PUNCH_PRESS),
+            (babase.InputType.JUMP_PRESS, babase.InputType.PICK_UP_PRESS, babase.InputType.PUNCH_PRESS),
             Call(self.handlemessage, ChangeMessage('ready', 2)))
 
         # Store the last profile picked by this input for reuse.
         input_device = self._sessionplayer.inputdevice
         name = input_device.name
         unique_id = input_device.unique_identifier
-        device_profiles = _ba.app.config.setdefault(
+        device_profiles = _babase.app.config.setdefault(
             'Default Player Profiles', {})
 
         # Make an exception if we have no custom profiles and are set
@@ -229,7 +229,7 @@ def _set_ready(self, ready: bool) -> None:
                 del device_profiles[profilekey]
         else:
             device_profiles[profilekey] = profilename
-        _ba.app.config.commit()
+        _babase.app.config.commit()
 
         # Set this player's short and full name.
         self._sessionplayer.setname(self._getname(),
@@ -240,7 +240,7 @@ def _set_ready(self, ready: bool) -> None:
     else:
 
         # Inform the session that this player is ready.
-        _ba.getsession().handlemessage(PlayerReadyMessage(self))
+        bs.getsession().handlemessage(PlayerReadyMessage(self))
 
 
 def handlemessage(self, msg: Any) -> Any:
@@ -258,7 +258,7 @@ def handlemessage(self, msg: Any) -> Any:
             print_error('got ChangeMessage after nodes died')
             return
         if msg.what == 'characterchooser':
-            _ba.playsound(self._click_sound)
+            self._click_sound.play()
             # update our index in our local list of characters
             self._character_index = ((self._character_index + msg.value) %
                                      len(self._character_names))
@@ -268,7 +268,7 @@ def handlemessage(self, msg: Any) -> Any:
         if msg.what == 'team':
             sessionteams = self.lobby.sessionteams
             if len(sessionteams) > 1:
-                _ba.playsound(self._swish_sound)
+                self._swish_sound.play()
             self._selected_team_index = (
                 (self._selected_team_index + msg.value) %
                 len(sessionteams))
@@ -281,18 +281,18 @@ def handlemessage(self, msg: Any) -> Any:
 
                 # This should be pretty hard to hit now with
                 # automatic local accounts.
-                _ba.playsound(_ba.getsound('error'))
+                bui.getsound('error').play()
             else:
 
                 # Pick the next player profile and assign our name
                 # and character based on that.
-                _ba.playsound(self._deek_sound)
+                self._deek_sound.play()
                 self._profileindex = ((self._profileindex + msg.value) %
                                       len(self._profilenames))
                 self.update_from_profile()
 
         elif msg.what == 'character':
-            _ba.playsound(self._click_sound)
+            self._click_sound.play()
             self.characterchooser = True
             # update our index in our local list of characters
             self._character_index = ((self._character_index + msg.value) %
@@ -327,9 +327,9 @@ def _update_text(self) -> None:
     can_switch_teams = len(self.lobby.sessionteams) > 1
 
     # Flash as we're coming in.
-    fin_color = _ba.safecolor(self.get_color()) + (1, )
+    fin_color = _babase.safecolor(self.get_color()) + (1, )
     if not self._inited:
-        animate_array(self._text_node, 'color', 4, {
+        bs.animate_array(self._text_node, 'color', 4, {
             0.15: fin_color,
             0.25: (2, 2, 2, 1),
             0.35: fin_color
@@ -338,7 +338,7 @@ def _update_text(self) -> None:
 
         # Blend if we're in teams mode; switch instantly otherwise.
         if can_switch_teams:
-            animate_array(self._text_node, 'color', 4, {
+            bs.animate_array(self._text_node, 'color', 4, {
                 0: self._text_node.color,
                 0.1: fin_color
             })
@@ -350,7 +350,7 @@ def _update_text(self) -> None:
 # ba_meta export plugin
 
 
-class HeySmoothy(ba.Plugin):
+class HeySmoothy(babase.Plugin):
 
     def __init__(self):
         _lobby.Chooser.__init__ = __init__
