@@ -279,7 +279,7 @@ class AllianceEliminationGame(bs.TeamGameActivity[Player, Team]):
                 player.team.survival_seconds = 0
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return
