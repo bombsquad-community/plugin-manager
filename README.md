@@ -199,7 +199,8 @@ That's it! Now you can make a [pull request](../../compare) with both the update
   will also help us to notify the maintainers of any future breaking changes in plugin manager that could affect 3rd party
   plugin sources.
 
-  [rikkolovescats/sahilp-plugins](https://github.com/rikkolovescats/sahilp-plugins)
+  - [rikkolovescats/sahilp-plugins](https://github.com/rikkolovescats/sahilp-plugins)
+  - [Aeliux/arcane](https://github.com/Aeliux/arcane)
 
 
 ## Tests
