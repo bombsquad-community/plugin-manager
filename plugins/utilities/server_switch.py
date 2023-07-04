@@ -171,23 +171,23 @@ def new_refresh_in_game(
         h, v, scale = positions[self._p_index]
         v += 35
         bui.textwidget(parent=self._root_widget,
-                      position=(h - self._button_width / 2, v),
-                      size=(self._button_width, self._button_height),
-                      color=(1, 1, 1, 0.5),
-                      scale=0.7,
-                      h_align='center',
-                      text=bs.Lstr(value=player_name))
+                       position=(h - self._button_width / 2, v),
+                       size=(self._button_width, self._button_height),
+                       color=(1, 1, 1, 0.5),
+                       scale=0.7,
+                       h_align='center',
+                       text=bs.Lstr(value=player_name))
     else:
         player_name = ''
     h, v, scale = positions[self._p_index]
     self._p_index += 1
     btn = bui.buttonwidget(parent=self._root_widget,
-                          position=(h - self._button_width / 2, v),
-                          size=(self._button_width, self._button_height),
-                          scale=scale,
-                          label=bs.Lstr(resource=self._r + '.resumeText'),
-                          autoselect=self._use_autoselect,
-                          on_activate_call=self._resume)
+                           position=(h - self._button_width / 2, v),
+                           size=(self._button_width, self._button_height),
+                           scale=scale,
+                           label=bs.Lstr(resource=self._r + '.resumeText'),
+                           autoselect=self._use_autoselect,
+                           on_activate_call=self._resume)
     bui.containerwidget(edit=self._root_widget, cancel_button=btn)
 
     # Add any custom options defined by the current game.
@@ -205,25 +205,25 @@ def new_refresh_in_game(
             call = bs.Call(entry['call'], bs.WeakCall(self._resume))
 
         bui.buttonwidget(parent=self._root_widget,
-                        position=(h - self._button_width / 2, v),
-                        size=(self._button_width, self._button_height),
-                        scale=scale,
-                        on_activate_call=call,
-                        label=entry['label'],
-                        autoselect=self._use_autoselect)
+                         position=(h - self._button_width / 2, v),
+                         size=(self._button_width, self._button_height),
+                         scale=scale,
+                         on_activate_call=call,
+                         label=entry['label'],
+                         autoselect=self._use_autoselect)
     # Add a 'leave' button if the menu-owner has a player.
     if ((self._input_player or self._connected_to_remote_player)
             and not (self._is_demo or self._is_arcade)):
         h, v, scale = positions[self._p_index]
         self._p_index += 1
         btn = bui.buttonwidget(parent=self._root_widget,
-                              position=(h - self._button_width / 2, v),
-                              size=(self._button_width,
-                                    self._button_height),
-                              scale=scale,
-                              on_activate_call=self._leave,
-                              label='',
-                              autoselect=self._use_autoselect)
+                               position=(h - self._button_width / 2, v),
+                               size=(self._button_width,
+                                     self._button_height),
+                               scale=scale,
+                               on_activate_call=self._leave,
+                               label='',
+                               autoselect=self._use_autoselect)
 
         if (player_name != '' and player_name[0] != '<'
                 and player_name[-1] != '>'):
@@ -232,26 +232,26 @@ def new_refresh_in_game(
         else:
             txt = bs.Lstr(value=player_name)
         bui.textwidget(parent=self._root_widget,
-                      position=(h, v + self._button_height *
-                                (0.64 if player_name != '' else 0.5)),
-                      size=(0, 0),
-                      text=bs.Lstr(resource=self._r + '.leaveGameText'),
-                      scale=(0.83 if player_name != '' else 1.0),
-                      color=(0.75, 1.0, 0.7),
-                      h_align='center',
-                      v_align='center',
-                      draw_controller=btn,
-                      maxwidth=self._button_width * 0.9)
+                       position=(h, v + self._button_height *
+                                 (0.64 if player_name != '' else 0.5)),
+                       size=(0, 0),
+                       text=bs.Lstr(resource=self._r + '.leaveGameText'),
+                       scale=(0.83 if player_name != '' else 1.0),
+                       color=(0.75, 1.0, 0.7),
+                       h_align='center',
+                       v_align='center',
+                       draw_controller=btn,
+                       maxwidth=self._button_width * 0.9)
         bui.textwidget(parent=self._root_widget,
-                      position=(h, v + self._button_height * 0.27),
-                      size=(0, 0),
-                      text=txt,
-                      color=(0.75, 1.0, 0.7),
-                      h_align='center',
-                      v_align='center',
-                      draw_controller=btn,
-                      scale=0.45,
-                      maxwidth=self._button_width * 0.9)
+                       position=(h, v + self._button_height * 0.27),
+                       size=(0, 0),
+                       text=txt,
+                       color=(0.75, 1.0, 0.7),
+                       h_align='center',
+                       v_align='center',
+                       draw_controller=btn,
+                       scale=0.45,
+                       maxwidth=self._button_width * 0.9)
     return h, v, scale
 
 
@@ -366,16 +366,16 @@ def new_refresh(self) -> None:
 
     # Scattered eggs on easter.
     if _baplus.get_v1_account_misc_read_val('easter',
-                                     False) and not self._in_game:
+                                            False) and not self._in_game:
         icon_size = 34
         bui.imagewidget(parent=self._root_widget,
-                       position=(h - icon_size * 0.5 - 15,
-                                 v + self._button_height * scale -
-                                 icon_size * 0.24 + 1.5),
-                       transition_delay=self._tdelay,
-                       size=(icon_size, icon_size),
-                       texture=bui.gettexture('egg3'),
-                       tilt_scale=0.0)
+                        position=(h - icon_size * 0.5 - 15,
+                                  v + self._button_height * scale -
+                                  icon_size * 0.24 + 1.5),
+                        transition_delay=self._tdelay,
+                        size=(icon_size, icon_size),
+                        texture=bui.gettexture('egg3'),
+                        tilt_scale=0.0)
 
     self._tdelay += self._t_delay_inc
 
@@ -386,13 +386,13 @@ def new_refresh(self) -> None:
         # If we're in a replay, we have a 'Leave Replay' button.
         if _bs.is_in_replay():
             bui.buttonwidget(parent=self._root_widget,
-                            position=(h - self._button_width * 0.5 * scale,
-                                      v),
-                            scale=scale,
-                            size=(self._button_width, self._button_height),
-                            autoselect=self._use_autoselect,
-                            label=bs.Lstr(resource='replayEndText'),
-                            on_activate_call=self._confirm_end_replay)
+                             position=(h - self._button_width * 0.5 * scale,
+                                       v),
+                             scale=scale,
+                             size=(self._button_width, self._button_height),
+                             autoselect=self._use_autoselect,
+                             label=bs.Lstr(resource='replayEndText'),
+                             on_activate_call=self._confirm_end_replay)
         elif _bs.get_foreground_host_session() is not None:
             bui.buttonwidget(
                 parent=self._root_widget,
@@ -465,16 +465,16 @@ def new_refresh(self) -> None:
         if _baplus.get_v1_account_misc_read_val('easter', False):
             icon_size = 30
             bui.imagewidget(parent=self._root_widget,
-                           position=(h - icon_size * 0.5 + 25,
-                                     v + self._button_height * scale -
-                                     icon_size * 0.24 + 1.5),
-                           transition_delay=self._tdelay,
-                           size=(icon_size, icon_size),
-                           texture=bui.gettexture('egg1'),
-                           tilt_scale=0.0)
+                            position=(h - icon_size * 0.5 + 25,
+                                      v + self._button_height * scale -
+                                      icon_size * 0.24 + 1.5),
+                            transition_delay=self._tdelay,
+                            size=(icon_size, icon_size),
+                            texture=bui.gettexture('egg1'),
+                            tilt_scale=0.0)
 
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=quit_button)
+                            cancel_button=quit_button)
         self._tdelay += self._t_delay_inc
     else:
         self._quit_button = None
@@ -488,7 +488,7 @@ def new_refresh(self) -> None:
                 QuitWindow(swish=True, back=True)
 
             bui.containerwidget(edit=self._root_widget,
-                               on_cancel_call=_do_quit)
+                                on_cancel_call=_do_quit)
 
     # Add speed-up/slow-down buttons for replays.
     # (ideally this should be part of a fading-out playback bar like most
@@ -526,14 +526,14 @@ def new_refresh(self) -> None:
             bs.WeakCall(self._change_replay_speed, 0),
             repeat=True)
         btn = bui.buttonwidget(parent=self._root_widget,
-                              position=(h - b_size - b_buffer,
-                                        v - b_size - b_buffer + v_offs),
-                              button_type='square',
-                              size=(b_size, b_size),
-                              label='',
-                              autoselect=True,
-                              on_activate_call=bs.Call(
-                                  self._change_replay_speed, -1))
+                               position=(h - b_size - b_buffer,
+                                         v - b_size - b_buffer + v_offs),
+                               button_type='square',
+                               size=(b_size, b_size),
+                               label='',
+                               autoselect=True,
+                               on_activate_call=bs.Call(
+                                   self._change_replay_speed, -1))
         bui.textwidget(
             parent=self._root_widget,
             draw_controller=btn,
