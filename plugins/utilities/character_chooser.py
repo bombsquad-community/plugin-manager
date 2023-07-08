@@ -55,6 +55,7 @@ from bascenev1 import _lobby
 from bascenev1lib.actor.spazappearance import *
 
 
+
 def __init__(self, vpos: float, sessionplayer: bs.SessionPlayer,
              lobby: 'Lobby') -> None:
     self._deek_sound = bs.getsound('deek')
@@ -112,25 +113,25 @@ def __init__(self, vpos: float, sessionplayer: bs.SessionPlayer,
     self._profilename = self._profilenames[self._profileindex]
 
     self._text_node = bs.newnode('text',
-                                 delegate=self,
-                                 attrs={
-                                     'position': (-100, self._vpos),
-                                     'maxwidth': 190,
-                                     'shadow': 0.5,
-                                     'vr_depth': -20,
-                                     'h_align': 'left',
-                                     'v_align': 'center',
-                                     'v_attach': 'top'
-                                 })
+                                  delegate=self,
+                                  attrs={
+                                      'position': (-100, self._vpos),
+                                      'maxwidth': 190,
+                                      'shadow': 0.5,
+                                      'vr_depth': -20,
+                                      'h_align': 'left',
+                                      'v_align': 'center',
+                                      'v_attach': 'top'
+                                  })
     bs.animate(self._text_node, 'scale', {0: 0, 0.1: 1.0})
     self.icon = bs.newnode('image',
-                           owner=self._text_node,
-                           attrs={
-                               'position': (-130, self._vpos + 20),
-                               'mask_texture': self._mask_texture,
-                               'vr_depth': -10,
-                               'attach': 'topCenter'
-                           })
+                            owner=self._text_node,
+                            attrs={
+                                'position': (-130, self._vpos + 20),
+                                'mask_texture': self._mask_texture,
+                                'vr_depth': -10,
+                                'attach': 'topCenter'
+                            })
 
     bs.animate_array(self.icon, 'scale', 2, {0: (0, 0), 0.1: (45, 45)})
 
