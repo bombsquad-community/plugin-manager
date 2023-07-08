@@ -4,8 +4,8 @@ import _baplus
 import babase
 
 
-
 original_get_purchased = _baplus.get_purchased
+
 
 def get_purchased(item):
     if item.startswith('characters.') or item.startswith('icons.'):
@@ -18,4 +18,3 @@ class Unlock(babase.Plugin):
     def on_app_running(self):
         babase.app.classic.accounts.have_pro = lambda: True
         _baplus.get_purchased = get_purchased
-       

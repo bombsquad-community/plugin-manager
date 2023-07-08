@@ -15,13 +15,13 @@
 # .................___________________________________________
 
 # Have any idea/suggestion/bug report  >  send message on discord mr.smoothy#5824
-# Download modshttps://bombsquad-community.web.app/mods   
+# Download modshttps://bombsquad-community.web.app/mods
 # Discord:-
 # mr.smoothy#5824
 
 # DONT EDIT ANYTHING WITHOUT PERMISSION
 
-# join Bombsquad Community Server - 
+# join Bombsquad Community Server -
 
 # https://discord.gg/ucyaesh
 
@@ -73,7 +73,6 @@ def is_game_version_lower_than(version):
     return game_version < version
 
 
-
 def updateBannedServersCache():
     response = None
     config = babase.app.config
@@ -112,7 +111,7 @@ class _HostLookupThread(threading.Thread):
         except Exception:
             result = None
         babase.pushcall(lambda: self._call(result, self._port),
-                    from_other_thread=True)
+                        from_other_thread=True)
 
 
 def newbuild_favorites_tab(self, region_height: float) -> None:
@@ -148,45 +147,45 @@ def newbuild_favorites_tab(self, region_height: float) -> None:
     # ================= smoothy =============
 
     bui.textwidget(parent=self._container,
-                  position=(90 if uiscale is babase.UIScale.SMALL else 120, btnv +
-                            120 if uiscale is babase.UIScale.SMALL else btnv+90),
-                  size=(0, 0),
-                  h_align='center',
-                  color=(0.8, 0.8, 0.8),
-                  v_align='top',
-                  text="Auto")
+                   position=(90 if uiscale is babase.UIScale.SMALL else 120, btnv +
+                             120 if uiscale is babase.UIScale.SMALL else btnv+90),
+                   size=(0, 0),
+                   h_align='center',
+                   color=(0.8, 0.8, 0.8),
+                   v_align='top',
+                   text="Auto")
     btnv += 50 if uiscale is babase.UIScale.SMALL else 0
 
     bui.buttonwidget(parent=self._container,
-                    size=(30, 30),
-                    position=(25 if uiscale is babase.UIScale.SMALL else 40,
-                              btnv+10),
+                     size=(30, 30),
+                     position=(25 if uiscale is babase.UIScale.SMALL else 40,
+                               btnv+10),
 
-                    color=(0.6, 0.53, 0.63),
-                    textcolor=(0.75, 0.7, 0.8),
-                    on_activate_call=self.auto_retry_dec,
-                    text_scale=1.3 if uiscale is babase.UIScale.SMALL else 1.2,
-                    label="-",
-                    autoselect=True)
+                     color=(0.6, 0.53, 0.63),
+                     textcolor=(0.75, 0.7, 0.8),
+                     on_activate_call=self.auto_retry_dec,
+                     text_scale=1.3 if uiscale is babase.UIScale.SMALL else 1.2,
+                     label="-",
+                     autoselect=True)
     self.retry_inter_text = bui.textwidget(parent=self._container,
-                                          position=(
-                                              90 if uiscale is babase.UIScale.SMALL else 120, btnv+25),
-                                          size=(0, 0),
-                                          h_align='center',
-                                          color=(0.8, 0.8, 0.8),
-                                          v_align='center',
-                                          text=str(self.retry_inter) if self.retry_inter > 0.0 else 'off')
+                                           position=(
+                                               90 if uiscale is babase.UIScale.SMALL else 120, btnv+25),
+                                           size=(0, 0),
+                                           h_align='center',
+                                           color=(0.8, 0.8, 0.8),
+                                           v_align='center',
+                                           text=str(self.retry_inter) if self.retry_inter > 0.0 else 'off')
     bui.buttonwidget(parent=self._container,
-                    size=(30, 30),
-                    position=(125 if uiscale is babase.UIScale.SMALL else 155,
-                              btnv+10),
+                     size=(30, 30),
+                     position=(125 if uiscale is babase.UIScale.SMALL else 155,
+                               btnv+10),
 
-                    color=(0.6, 0.53, 0.63),
-                    textcolor=(0.75, 0.7, 0.8),
-                    on_activate_call=self.auto_retry_inc,
-                    text_scale=1.3 if uiscale is babase.UIScale.SMALL else 1.2,
-                    label="+",
-                    autoselect=True)
+                     color=(0.6, 0.53, 0.63),
+                     textcolor=(0.75, 0.7, 0.8),
+                     on_activate_call=self.auto_retry_inc,
+                     text_scale=1.3 if uiscale is babase.UIScale.SMALL else 1.2,
+                     label="+",
+                     autoselect=True)
 
     btnv -= b_height + b_space_extra
 
@@ -203,31 +202,31 @@ def newbuild_favorites_tab(self, region_height: float) -> None:
         autoselect=True)
     if uiscale is babase.UIScale.SMALL and bui.app.ui_v1.use_toolbars:
         bui.widget(edit=btn1,
-                  left_widget=bui.get_special_widget('back_button'))
+                   left_widget=bui.get_special_widget('back_button'))
     btnv -= b_height + b_space_extra
     bui.buttonwidget(parent=self._container,
-                    size=(b_width, b_height),
-                    position=(25 if uiscale is babase.UIScale.SMALL else 40,
-                              btnv),
-                    button_type='square',
-                    color=(0.6, 0.53, 0.63),
-                    textcolor=(0.75, 0.7, 0.8),
-                    on_activate_call=self._on_favorites_edit_press,
-                    text_scale=1.0 if uiscale is babase.UIScale.SMALL else 1.2,
-                    label=babase.Lstr(resource='editText'),
-                    autoselect=True)
+                     size=(b_width, b_height),
+                     position=(25 if uiscale is babase.UIScale.SMALL else 40,
+                               btnv),
+                     button_type='square',
+                     color=(0.6, 0.53, 0.63),
+                     textcolor=(0.75, 0.7, 0.8),
+                     on_activate_call=self._on_favorites_edit_press,
+                     text_scale=1.0 if uiscale is babase.UIScale.SMALL else 1.2,
+                     label=babase.Lstr(resource='editText'),
+                     autoselect=True)
     btnv -= b_height + b_space_extra
     bui.buttonwidget(parent=self._container,
-                    size=(b_width, b_height),
-                    position=(25 if uiscale is babase.UIScale.SMALL else 40,
-                              btnv),
-                    button_type='square',
-                    color=(0.6, 0.53, 0.63),
-                    textcolor=(0.75, 0.7, 0.8),
-                    on_activate_call=self._on_favorite_delete_press,
-                    text_scale=1.0 if uiscale is babase.UIScale.SMALL else 1.2,
-                    label=babase.Lstr(resource='deleteText'),
-                    autoselect=True)
+                     size=(b_width, b_height),
+                     position=(25 if uiscale is babase.UIScale.SMALL else 40,
+                               btnv),
+                     button_type='square',
+                     color=(0.6, 0.53, 0.63),
+                     textcolor=(0.75, 0.7, 0.8),
+                     on_activate_call=self._on_favorite_delete_press,
+                     text_scale=1.0 if uiscale is babase.UIScale.SMALL else 1.2,
+                     label=babase.Lstr(resource='deleteText'),
+                     autoselect=True)
 
     v -= sub_scroll_height + 23
     self._scrollwidget = scrlw = bui.scrollwidget(
@@ -236,12 +235,12 @@ def newbuild_favorites_tab(self, region_height: float) -> None:
         size=(sub_scroll_width, sub_scroll_height),
         claims_left_right=True)
     bui.widget(edit=self._favorites_connect_button,
-              right_widget=self._scrollwidget)
+               right_widget=self._scrollwidget)
     self._columnwidget = bui.columnwidget(parent=scrlw,
-                                         left_border=10,
-                                         border=2,
-                                         margin=0,
-                                         claims_left_right=True)
+                                          left_border=10,
+                                          border=2,
+                                          margin=0,
+                                          claims_left_right=True)
 
     self._favorite_selected = None
     self._refresh_favorites()
@@ -323,9 +322,8 @@ def _clear(self) -> None:
             self._stats_button
     ]:
         if widget:
-            
+
             widget.delete()
-            
 
 
 def update(self, index: int, party: PartyEntry, sub_scroll_width: float,
@@ -333,127 +331,128 @@ def update(self, index: int, party: PartyEntry, sub_scroll_width: float,
            columnwidget: bui.Widget, join_text: bui.Widget,
            filter_text: bui.Widget, existing_selection: Optional[Selection],
            tab: PublicGatherTab) -> None:
-        """Update for the given data."""
-        # pylint: disable=too-many-locals
+    """Update for the given data."""
+    # pylint: disable=too-many-locals
 
-        # Quick-out: if we've been marked clean for a certain index and
-        # we're still at that index, we're done.
-        plus = bui.app.plus
-        assert plus is not None
+    # Quick-out: if we've been marked clean for a certain index and
+    # we're still at that index, we're done.
+    plus = bui.app.plus
+    assert plus is not None
 
-        # Quick-out: if we've been marked clean for a certain index and
-        # we're still at that index, we're done.
-        if party.clean_display_index == index:
-            return
+    # Quick-out: if we've been marked clean for a certain index and
+    # we're still at that index, we're done.
+    if party.clean_display_index == index:
+        return
 
-        ping_good = plus.get_v1_account_misc_read_val('pingGood', 100)
-        ping_med = plus.get_v1_account_misc_read_val('pingMed', 500)
+    ping_good = plus.get_v1_account_misc_read_val('pingGood', 100)
+    ping_med = plus.get_v1_account_misc_read_val('pingMed', 500)
 
-        self._clear()
-        hpos = 20
-        vpos = sub_scroll_height - lineheight * index - 50
-        self._name_widget = bui.textwidget(
-            text=bui.Lstr(value=party.name),
+    self._clear()
+    hpos = 20
+    vpos = sub_scroll_height - lineheight * index - 50
+    self._name_widget = bui.textwidget(
+        text=bui.Lstr(value=party.name),
+        parent=columnwidget,
+        size=(sub_scroll_width * 0.63, 20),
+        position=(0 + hpos, 4 + vpos),
+        selectable=True,
+        on_select_call=bui.WeakCall(
+            tab.set_public_party_selection,
+            Selection(party.get_key(), SelectionComponent.NAME),
+        ),
+        on_activate_call=bui.WeakCall(tab.on_public_party_activate, party),
+        click_activate=True,
+        maxwidth=sub_scroll_width * 0.45,
+        corner_scale=1.4,
+        autoselect=True,
+        color=(1, 1, 1, 0.3 if party.ping is None else 1.0),
+        h_align='left',
+        v_align='center',
+    )
+    bui.widget(
+        edit=self._name_widget,
+        left_widget=join_text,
+        show_buffer_top=64.0,
+        show_buffer_bottom=64.0,
+    )
+    if existing_selection == Selection(
+        party.get_key(), SelectionComponent.NAME
+    ):
+        bui.containerwidget(
+            edit=columnwidget, selected_child=self._name_widget
+        )
+    if party.stats_addr or True:
+        url = party.stats_addr.replace(
+            '${ACCOUNT}',
+            plus.get_v1_account_misc_read_val_2(
+                'resolvedAccountID', 'UNKNOWN'
+            ),
+        )
+        self._stats_button = bui.buttonwidget(
+            color=(0.3, 0.6, 0.94),
+            textcolor=(1.0, 1.0, 1.0),
+            label='....',
             parent=columnwidget,
-            size=(sub_scroll_width * 0.63, 20),
-            position=(0 + hpos, 4 + vpos),
-            selectable=True,
+            autoselect=True,
+            on_activate_call=bui.Call(bui.open_url, url),
             on_select_call=bui.WeakCall(
                 tab.set_public_party_selection,
-                Selection(party.get_key(), SelectionComponent.NAME),
+                Selection(party.get_key(), SelectionComponent.STATS_BUTTON),
             ),
-            on_activate_call=bui.WeakCall(tab.on_public_party_activate, party),
-            click_activate=True,
-            maxwidth=sub_scroll_width * 0.45,
-            corner_scale=1.4,
-            autoselect=True,
-            color=(1, 1, 1, 0.3 if party.ping is None else 1.0),
-            h_align='left',
-            v_align='center',
+            size=(120, 40),
+            position=(sub_scroll_width * 0.66 + hpos, 1 + vpos),
+            scale=0.9,
         )
-        bui.widget(
-            edit=self._name_widget,
-            left_widget=join_text,
-            show_buffer_top=64.0,
-            show_buffer_bottom=64.0,
-        )
+        bui.buttonwidget(edit=self._stats_button, on_activate_call=bui.WeakCall(
+            self.on_stats_click, self._stats_button, party))
         if existing_selection == Selection(
-            party.get_key(), SelectionComponent.NAME
+            party.get_key(), SelectionComponent.STATS_BUTTON
         ):
             bui.containerwidget(
-                edit=columnwidget, selected_child=self._name_widget
+                edit=columnwidget, selected_child=self._stats_button
             )
-        if party.stats_addr or True:
-            url = party.stats_addr.replace(
-                '${ACCOUNT}',
-                plus.get_v1_account_misc_read_val_2(
-                    'resolvedAccountID', 'UNKNOWN'
-                ),
-            )
-            self._stats_button = bui.buttonwidget(
-                color=(0.3, 0.6, 0.94),
-                textcolor=(1.0, 1.0, 1.0),
-                label='....',
-                parent=columnwidget,
-                autoselect=True,
-                on_activate_call=bui.Call(bui.open_url, url),
-                on_select_call=bui.WeakCall(
-                    tab.set_public_party_selection,
-                    Selection(party.get_key(), SelectionComponent.STATS_BUTTON),
-                ),
-                size=(120, 40),
-                position=(sub_scroll_width * 0.66 + hpos, 1 + vpos),
-                scale=0.9,
-            )
-            bui.buttonwidget(edit=self._stats_button, on_activate_call=bui.WeakCall(
-            self.on_stats_click, self._stats_button, party))
-            if existing_selection == Selection(
-                party.get_key(), SelectionComponent.STATS_BUTTON
-            ):
-                bui.containerwidget(
-                    edit=columnwidget, selected_child=self._stats_button
-                )
 
-        self._size_widget = bui.textwidget(
-            text=str(party.size) + '/' + str(party.size_max),
-            parent=columnwidget,
-            size=(0, 0),
-            position=(sub_scroll_width * 0.86 + hpos, 20 + vpos),
-            scale=0.7,
-            color=(0.8, 0.8, 0.8),
-            h_align='right',
-            v_align='center',
+    self._size_widget = bui.textwidget(
+        text=str(party.size) + '/' + str(party.size_max),
+        parent=columnwidget,
+        size=(0, 0),
+        position=(sub_scroll_width * 0.86 + hpos, 20 + vpos),
+        scale=0.7,
+        color=(0.8, 0.8, 0.8),
+        h_align='right',
+        v_align='center',
+    )
+
+    if index == 0:
+        bui.widget(edit=self._name_widget, up_widget=filter_text)
+        if self._stats_button:
+            bui.widget(edit=self._stats_button, up_widget=filter_text)
+
+    self._ping_widget = bui.textwidget(
+        parent=columnwidget,
+        size=(0, 0),
+        position=(sub_scroll_width * 0.94 + hpos, 20 + vpos),
+        scale=0.7,
+        h_align='right',
+        v_align='center',
+    )
+    if party.ping is None:
+        bui.textwidget(
+            edit=self._ping_widget, text='-', color=(0.5, 0.5, 0.5)
+        )
+    else:
+        bui.textwidget(
+            edit=self._ping_widget,
+            text=str(int(party.ping)),
+            color=(0, 1, 0)
+            if party.ping <= ping_good
+            else (1, 1, 0)
+            if party.ping <= ping_med
+            else (1, 0, 0),
         )
 
-        if index == 0:
-            bui.widget(edit=self._name_widget, up_widget=filter_text)
-            if self._stats_button:
-                bui.widget(edit=self._stats_button, up_widget=filter_text)
+    party.clean_display_index = index
 
-        self._ping_widget = bui.textwidget(
-            parent=columnwidget,
-            size=(0, 0),
-            position=(sub_scroll_width * 0.94 + hpos, 20 + vpos),
-            scale=0.7,
-            h_align='right',
-            v_align='center',
-        )
-        if party.ping is None:
-            bui.textwidget(
-                edit=self._ping_widget, text='-', color=(0.5, 0.5, 0.5)
-            )
-        else:
-            bui.textwidget(
-                edit=self._ping_widget,
-                text=str(int(party.ping)),
-                color=(0, 1, 0)
-                if party.ping <= ping_good
-                else (1, 1, 0)
-                if party.ping <= ping_med
-                else (1, 0, 0),
-            )
-
-        party.clean_display_index = index
 
 def _get_popup_window_scale() -> float:
     uiscale = bui.app.ui_v1.uiscale
@@ -501,7 +500,7 @@ def popup_menu_selected_choice(self, window: popup.PopupMenu,
         url = _party.stats_addr.replace(
             '${ACCOUNT}',
             plus.get_v1_account_misc_read_val_2('resolvedAccountID',
-                                                       'UNKNOWN'))
+                                                'UNKNOWN'))
         bui.open_url(url)
     elif choice == 'connect':
         PartyQuickConnect(_party.address, _party.port)
@@ -614,17 +613,17 @@ class PartyQuickConnect(bui.Window):
             scale=(1.4 if uiscale is babase.UIScale.SMALL else
                    1.2 if uiscale is babase.UIScale.MEDIUM else 1.0)))
         self._cancel_button = bui.buttonwidget(parent=self._root_widget,
-                                              scale=1.0,
-                                              position=(60, self._height - 80),
-                                              size=(50, 50),
-                                              label='',
-                                              on_activate_call=self.close,
-                                              autoselect=True,
-                                              color=(0.45, 0.63, 0.15),
-                                              icon=bui.gettexture('crossOut'),
-                                              iconscale=1.2)
+                                               scale=1.0,
+                                               position=(60, self._height - 80),
+                                               size=(50, 50),
+                                               label='',
+                                               on_activate_call=self.close,
+                                               autoselect=True,
+                                               color=(0.45, 0.63, 0.15),
+                                               icon=bui.gettexture('crossOut'),
+                                               iconscale=1.2)
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=self._cancel_button)
+                            cancel_button=self._cancel_button)
 
         self.IP = bui.textwidget(
             parent=self._root_widget,
