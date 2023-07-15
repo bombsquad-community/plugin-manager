@@ -21,15 +21,14 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 """
 
-# ba_meta require api 7
+# ba_meta require api 8
 
 from typing import List, Dict, Any
 
-import ba
-import ba._store
-import ba.internal
+import babase
+import bauiv1 as bui
 
-original_get_store_layout = ba._store.get_store_layout
+original_get_store_layout = bui.app.classic.store.get_store_layout
 
 
 def add_special_characters(layout:
@@ -62,6 +61,6 @@ def modified_get_store_layout() -> Dict[str, List[Dict[str, Any]]]:
 
 
 # ba_meta export plugin
-class Main(ba.Plugin):
+class Main(babase.Plugin):
     def on_app_running(self) -> None:
-        ba.internal.get_store_layout = modified_get_store_layout
+        bui.app.classic.store.get_store_layout = modified_get_store_layout
