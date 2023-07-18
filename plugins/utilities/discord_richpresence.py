@@ -761,7 +761,7 @@ class DiscordRP(babase.Plugin):
                     offlinename = json.loads(bs.get_game_roster()[0]["spec_string"])[
                         "n"
                     ]
-                    if len(offlinename > 19):
+                    if len(offlinename) > 19: # Thanks Rikko
                         self.rpc_thread.state = offlinename[slice(19)] + "..."
                     else:
                         self.rpc_thread.state = offlinename
