@@ -20,6 +20,7 @@ from bascenev1lib.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
+
 class PuckDiedMessage:
     """Inform something that a puck has died."""
 
