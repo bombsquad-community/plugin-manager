@@ -767,7 +767,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
+        "1.1.0": {
           "api_version": 8,
           "commit_sha": "230d12d",
           "released_on": "18-07-2023",
