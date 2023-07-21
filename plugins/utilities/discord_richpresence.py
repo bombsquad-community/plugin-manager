@@ -250,7 +250,7 @@ def get_event_loop(force_fresh=False):
                 return running
             else:
                 return loop"""
-    
+
             with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "w") as file:
                 for number, line in enumerate(data):
                     if number not in range(46, 56):
