@@ -227,11 +227,11 @@ if not ANDROID:
             except:
                 pass
 
-        # Make modifications for it to work on windows
-        if babase.app.classic.platform == "windows":
-            with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "r") as file:
-                data = file.readlines()
-                data[45] = """
+            # Make modifications for it to work on windows
+            if babase.app.classic.platform == "windows":
+                with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "r") as file:
+                    data = file.readlines()
+                    data[45] = """
 def get_event_loop(force_fresh=False):
     loop = asyncio.ProactorEventLoop() if sys.platform == 'win32' else asyncio.new_event_loop()
     if force_fresh:
@@ -250,11 +250,11 @@ def get_event_loop(force_fresh=False):
                 return running
             else:
                 return loop"""
-
-        with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "w") as file:
-            for number, line in enumerate(data):
-                if number not in range(46, 56):
-                    file.write(line)
+    
+            with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "w") as file:
+                for number, line in enumerate(data):
+                    if number not in range(46, 56):
+                        file.write(line)
     get_module()
 
     from pypresence import PipeClosed, DiscordError, DiscordNotFound
