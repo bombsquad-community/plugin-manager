@@ -730,10 +730,10 @@ class DiscordRP(babase.Plugin):
         if not ANDROID and self.rpc_thread.is_discord_running():
             self.rpc_thread.rpc.close()
             self.rpc_thread.should_close = True
-        else:
-            raise NotImplementedError("This function does not work on android")
-            # stupid code
-            # ws.close()
+        # else:
+        #     raise NotImplementedError("This function does not work on android")
+        #     # stupid code
+        #     # ws.close()
 
     # def on_app_pause(self) -> None:
     #     ws.close()
