@@ -737,6 +737,8 @@ class DiscordRP(babase.Plugin):
         self.rpc_thread.close()
 
     def on_app_resume(self) -> None:
+        global start_time 
+        start_time = time.time()
         self.rpc_thread.start()
 
     def _get_current_activity_name(self) -> str | None:
