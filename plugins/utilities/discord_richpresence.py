@@ -10,7 +10,6 @@ from __future__ import annotations
 from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
-from zipfile import ZipFile
 from bauiv1lib.popup import PopupWindow
 from babase._mgen.enums import TimeType
 
@@ -22,6 +21,7 @@ import json
 import time
 import threading
 import shutil
+import hashlib
 import babase
 import _babase
 import bascenev1 as bs
@@ -42,17 +42,19 @@ if ANDROID:  # !can add ios in future
     # Installing websocket
     def get_module():
         install_path = Path(f"{getcwd()}/ba_data/python")  # For the guys like me on windows
-        path = Path(f"{install_path}/websocket.zip")
+        path = Path(f"{install_path}/websocket.tar.gz")
         file_path = Path(f"{install_path}/websocket")
         source_dir = Path(f"{install_path}/websocket-client-1.6.1/websocket")
         if not file_path.exists():
-            url = "https://github.com/websocket-client/websocket-client/archive/refs/tags/v1.6.1.zip"
+            url = "https://files.pythonhosted.org/packages/b1/34/3a5cae1e07d9566ad073fa6d169bf22c03a3ba7b31b3c3422ec88d039108/websocket-client-1.6.1.tar.gz"
             try:
                 filename, headers = urlretrieve(url, filename=path)
-                with ZipFile(filename) as f:
-                    f.extractall(install_path)
-                    shutil.copytree(source_dir, file_path)
-                    shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
+                with open(filename, "rb") as f:
+                    content = f.read()
+                    assert hashlib.md5(content).hexdigest() == "86bc69b61947943627afc1b351c0b5db"
+                shutil.unpack_archive( filename, install_path)
+                shutil.copytree(source_dir, file_path)
+                shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
                 remove(path)
             except Exception as e:
                 if type(e) == shutil.Error:
@@ -223,17 +225,19 @@ if not ANDROID:
     # installing pypresence
     def get_module():
         install_path = Path(f"{getcwd()}/ba_data/python")
-        path = Path(f"{install_path}/pypresence.zip")
+        path = Path(f"{install_path}/pypresence.tar.gz")
         file_path = Path(f"{install_path}/pypresence")
         source_dir = Path(f"{install_path}/pypresence-4.3.0/pypresence")
         if not file_path.exists():
-            url = "https://github.com/qwertyquerty/pypresence/archive/refs/tags/v4.3.0.zip"
+            url = "https://files.pythonhosted.org/packages/f4/2e/d110f862720b5e3ba1b0b719657385fc4151929befa2c6981f48360aa480/pypresence-4.3.0.tar.gz"
             try:
                 filename, headers = urlretrieve(url, filename=path)
-                with ZipFile(filename) as f:
-                    f.extractall(install_path)
-                    shutil.copytree(source_dir, file_path)
-                    shutil.rmtree(Path(f"{install_path}/pypresence-4.3.0"))
+                with open(filename, "rb") as f:
+                    content = f.read()
+                    assert hashlib.md5(content).hexdigest() == "f7c163cdd001af2456c09e241b90bad7"
+                shutil.unpack_archive( filename, install_path)
+                shutil.copytree(source_dir, file_path)
+                shutil.rmtree(Path(f"{install_path}/pypresence-4.3.0"))
                 remove(path)
             except:
                 pass
