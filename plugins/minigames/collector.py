@@ -1,4 +1,4 @@
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 '''
@@ -31,19 +31,21 @@ import weakref
 from enum import Enum
 from typing import TYPE_CHECKING
 
-import ba
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
 import random
-from bastd.actor.flag import Flag
-from bastd.actor.popuptext import PopupText
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.gameutils import SharedObjects
+from bascenev1lib.actor.flag import Flag
+from bascenev1lib.actor.popuptext import PopupText
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
 
 
-lang = ba.app.lang.language
+lang = bs.app.lang.language
 if lang == 'Spanish':
     name = 'Coleccionista'
     description = ('Elimina a tus oponentes para robar sus cápsulas.\n'
@@ -99,7 +101,7 @@ class FlagState(Enum):
     HELD = 3
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
@@ -108,15 +110,15 @@ class Player(ba.Player['Team']):
         self.light = None
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
         self.score = 0
 
 
-# ba_meta export game
-class CollectorGame(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class CollectorGame(bs.TeamGameActivity[Player, Team]):
 
     name = name
     description = description
@@ -127,23 +129,23 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[ba.Session]
-    ) -> list[ba.Setting]:
+            cls, sessiontype: type[bs.Session]
+    ) -> list[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 capsules_to_win,
                 min_value=1,
                 default=10,
                 increment=1,
             ),
-            ba.IntSetting(
+            bs.IntSetting(
                 capsules_death,
                 min_value=1,
                 max_value=10,
                 default=2,
                 increment=1,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -155,7 +157,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -166,33 +168,33 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting(lucky_capsules, default=True),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting(lucky_capsules, default=True),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.DualTeamSession) or issubclass(
-            sessiontype, ba.FreeForAllSession
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.DualTeamSession) or issubclass(
+            sessiontype, bs.FreeForAllSession
         )
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
-        return ba.getmaps('keep_away')
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
+        return bs.app.classic.getmaps('keep_away')
 
     def __init__(self, settings: dict):
         super().__init__(settings)
         shared = SharedObjects.get()
         self._scoreboard = Scoreboard()
         self._score_to_win: int | None = None
-        self._swipsound = ba.getsound('swip')
-        self._lucky_sound = ba.getsound('ding')
+        self._swipsound = bs.getsound('swip')
+        self._lucky_sound = bs.getsound('ding')
 
         self._flag_pos: Sequence[float] | None = None
         self._flag_state: FlagState | None = None
         self._flag: Flag | None = None
-        self._flag_light: ba.Node | None = None
+        self._flag_light: bs.Node | None = None
         self._scoring_team: weakref.ref[Team] | None = None
         self._time_limit = float(settings['Time Limit'])
         self._epic_mode = bool(settings['Epic Mode'])
@@ -202,19 +204,19 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         self._lucky_capsules = bool(settings[lucky_capsules])
         self._capsules: list[Any] = []
 
-        self._capsule_model = ba.getmodel('bomb')
-        self._capsule_tex = ba.gettexture('bombColor')
-        self._capsule_lucky_tex = ba.gettexture('bombStickyColor')
-        self._collect_sound = ba.getsound('powerup01')
-        self._lucky_collect_sound = ba.getsound('cashRegister2')
+        self._capsule_mesh = bs.getmesh('bomb')
+        self._capsule_tex = bs.gettexture('bombColor')
+        self._capsule_lucky_tex = bs.gettexture('bombStickyColor')
+        self._collect_sound = bs.getsound('powerup01')
+        self._lucky_collect_sound = bs.getsound('cashRegister2')
 
-        self._capsule_material = ba.Material()
+        self._capsule_material = bs.Material()
         self._capsule_material.add_actions(
             conditions=('they_have_material', shared.player_material),
             actions=('call', 'at_connect', self._on_capsule_player_collide),
         )
 
-        self._flag_region_material = ba.Material()
+        self._flag_region_material = bs.Material()
         self._flag_region_material.add_actions(
             conditions=('they_have_material', shared.player_material),
             actions=(
@@ -223,12 +225,12 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
                 (
                     'call',
                     'at_connect',
-                    ba.Call(self._handle_player_flag_region_collide, True),
+                    babase.Call(self._handle_player_flag_region_collide, True),
                 ),
                 (
                     'call',
                     'at_disconnect',
-                    ba.Call(self._handle_player_flag_region_collide, False),
+                    babase.Call(self._handle_player_flag_region_collide, False),
                 ),
             ),
         )
@@ -236,7 +238,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         # Base class overrides.
         self.slow_motion = self._epic_mode
         self.default_music = (
-            ba.MusicType.EPIC if self._epic_mode else ba.MusicType.SCARY
+            bs.MusicType.EPIC if self._epic_mode else bs.MusicType.SCARY
         )
 
     def get_instance_description(self) -> str | Sequence:
@@ -245,7 +247,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
     def get_instance_description_short(self) -> str | Sequence:
         return description_short, self._score_to_win
 
-    def create_team(self, sessionteam: ba.SessionTeam) -> Team:
+    def create_team(self, sessionteam: bs.SessionTeam) -> Team:
         return Team()
 
     def on_team_join(self, team: Team) -> None:
@@ -263,18 +265,18 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         )
         self._update_scoreboard()
 
-        if isinstance(self.session, ba.FreeForAllSession):
+        if isinstance(self.session, bs.FreeForAllSession):
             self._flag_pos = self.map.get_flag_position(random.randint(0, 1))
         else:
             self._flag_pos = self.map.get_flag_position(None)
 
-        ba.timer(1.0, self._tick, repeat=True)
+        bs.timer(1.0, self._tick, repeat=True)
         self._flag_state = FlagState.NEW
         Flag.project_stand(self._flag_pos)
         self._flag = Flag(
             position=self._flag_pos, touchable=False, color=(1, 1, 1)
         )
-        self._flag_light = ba.newnode(
+        self._flag_light = bs.newnode(
             'light',
             attrs={
                 'position': self._flag_pos,
@@ -286,7 +288,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         )
         # Flag region.
         flagmats = [self._flag_region_material, shared.region_material]
-        ba.newnode(
+        bs.newnode(
             'region',
             attrs={
                 'position': self._flag_pos,
@@ -308,7 +310,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         if not scoring_team:
             return
 
-        if isinstance(self.session, ba.FreeForAllSession):
+        if isinstance(self.session, bs.FreeForAllSession):
             players = self.players
         else:
             players = scoring_team.players
@@ -331,10 +333,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
                         self._flag_pos[1]+1,
                         self._flag_pos[2]
                     ), player)
-                    ba.playsound(
-                        self._collect_sound,
-                        0.8,
-                        position=self._flag_pos)
+                    self._collect_sound.play(0.8, position=self._flag_pos)
 
                     self._update_scoreboard()
                     if player.capsules > 0:
@@ -347,7 +346,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
                         self.end_game()
 
     def end_game(self) -> None:
-        results = ba.GameResults()
+        results = bs.GameResults()
         for team in self.teams:
             results.set_team_score(team, team.score)
         self.end(results=results, announce_delay=0)
@@ -369,7 +368,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
             holding_team = list(holding_teams)[0]
             self._flag_state = FlagState.HELD
             self._scoring_team = weakref.ref(holding_team)
-            self._flag_light.color = ba.normalized_color(holding_team.color)
+            self._flag_light.color = babase.normalized_color(holding_team.color)
             self._flag.node.color = holding_team.color
         else:
             self._flag_state = FlagState.UNCONTESTED
@@ -377,12 +376,12 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
             self._flag_light.color = (0.2, 0.2, 0.2)
             self._flag.node.color = (1, 1, 1)
         if self._flag_state != prev_state:
-            ba.playsound(self._swipsound)
+            self._swipsound.play()
 
     def _handle_player_flag_region_collide(self, colliding: bool) -> None:
         try:
-            spaz = ba.getcollision().opposingnode.getdelegate(PlayerSpaz, True)
-        except ba.NotFoundError:
+            spaz = bs.getcollision().opposingnode.getdelegate(PlayerSpaz, True)
+        except bs.NotFoundError:
             return
 
         if not spaz.is_alive():
@@ -442,7 +441,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
     def _on_capsule_player_collide(self) -> None:
         if self.has_ended():
             return
-        collision = ba.getcollision()
+        collision = bs.getcollision()
 
         # Be defensive here; we could be hitting the corpse of a player
         # who just left/etc.
@@ -451,7 +450,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
             player = collision.opposingnode.getdelegate(
                 PlayerSpaz, True
             ).getplayer(Player, True)
-        except ba.NotFoundError:
+        except bs.NotFoundError:
             return
 
         if not player.is_alive():
@@ -465,30 +464,24 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
                 scale=1.5,
                 position=capsule.node.position
             ).autoretain()
-            ba.playsound(
-                self._lucky_collect_sound,
-                1.0,
-                position=capsule.node.position)
-            ba.emitfx(
+            self._lucky_collect_sound.play(1.0, position=capsule.node.position)
+            bs.emitfx(
                 position=capsule.node.position,
                 velocity=(0, 0, 0),
                 count=int(6.4+random.random()*24),
                 scale=1.2,
                 spread=2.0,
                 chunk_type='spark')
-            ba.emitfx(
+            bs.emitfx(
                 position=capsule.node.position,
                 velocity=(0, 0, 0),
                 count=int(4.0+random.random()*6),
                 emit_type='tendrils')
         else:
             player.capsules += 1
-            ba.playsound(
-                self._collect_sound,
-                0.6,
-                position=capsule.node.position)
+            self._collect_sound.play(0.6, position=capsule.node.position)
         # create a flash
-        light = ba.newnode(
+        light = bs.newnode(
             'light',
             attrs={
                 'position': capsule.node.position,
@@ -499,27 +492,27 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         # Create a short text informing about your inventory
         self._handle_capsule_storage(player.position, player)
 
-        ba.animate(light, 'intensity', {
+        bs.animate(light, 'intensity', {
             0: 0,
             0.1: 0.5,
             0.2: 0
         }, loop=False)
-        ba.timer(0.2, light.delete)
-        capsule.handlemessage(ba.DieMessage())
+        bs.timer(0.2, light.delete)
+        capsule.handlemessage(bs.DieMessage())
 
     def _update_player_light(self, player: Player, capsules: int) -> None:
         if player.light:
             intensity = 0.04 * capsules
-            ba.animate(player.light, 'intensity', {
+            bs.animate(player.light, 'intensity', {
                 0.0: player.light.intensity,
                 0.1: intensity
             })
 
             def newintensity():
                 player.light.intensity = intensity
-            ba.timer(0.1, newintensity)
+            bs.timer(0.1, newintensity)
         else:
-            player.light = ba.newnode(
+            player.light = bs.newnode(
                 'light',
                 attrs={
                     'height_attenuated': False,
@@ -558,7 +551,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
         self._update_player_light(player, capsules)
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             super().handlemessage(msg)  # Augment default.
             # No longer can count as time_at_flag once dead.
             player = msg.getplayer(Player)
@@ -572,7 +565,7 @@ class CollectorGame(ba.TeamGameActivity[Player, Team]):
             return super().handlemessage(msg)
 
 
-class Capsule(ba.Actor):
+class Capsule(bs.Actor):
 
     def __init__(self,
                  position: Sequence[float] = (0.0, 1.0, 0.0),
@@ -586,12 +579,12 @@ class Capsule(ba.Actor):
         self._spawn_pos = (position[0], position[1], position[2])
 
         if lucky:
-            ba.playsound(activity._lucky_sound, 1.0, self._spawn_pos)
+            activity._lucky_sound.play(1.0, self._spawn_pos)
 
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'prop',
             attrs={
-                'model': activity._capsule_model,
+                'mesh': activity._capsule_mesh,
                 'color_texture': activity._capsule_lucky_tex if lucky else (
                     activity._capsule_tex),
                 'body': 'crate' if lucky else 'capsule',
@@ -606,12 +599,12 @@ class Capsule(ba.Actor):
                         shared.object_material, activity._capsule_material]
             },
             delegate=self)
-        ba.animate(self.node, 'model_scale', {
+        bs.animate(self.node, 'mesh_scale', {
             0.0: 0.0,
             0.1: 0.9 if lucky else 0.6,
             0.16: 0.8 if lucky else 0.5
         })
-        self._light_capsule = ba.newnode(
+        self._light_capsule = bs.newnode(
             'light',
             attrs={
                 'position': self._spawn_pos,
@@ -622,16 +615,16 @@ class Capsule(ba.Actor):
         self.node.connectattr('position', self._light_capsule, 'position')
 
     def handlemessage(self, msg: Any):
-        if isinstance(msg, ba.DieMessage):
+        if isinstance(msg, bs.DieMessage):
             self.node.delete()
-            ba.animate(self._light_capsule, 'intensity', {
+            bs.animate(self._light_capsule, 'intensity', {
                 0: 1.0,
                 0.05: 0.0
             }, loop=False)
-            ba.timer(0.05, self._light_capsule.delete)
-        elif isinstance(msg, ba.OutOfBoundsMessage):
-            self.handlemessage(ba.DieMessage())
-        elif isinstance(msg, ba.HitMessage):
+            bs.timer(0.05, self._light_capsule.delete)
+        elif isinstance(msg, bs.OutOfBoundsMessage):
+            self.handlemessage(bs.DieMessage())
+        elif isinstance(msg, bs.HitMessage):
             self.node.handlemessage(
                 'impulse',
                 msg.pos[0], msg.pos[1], msg.pos[2],
