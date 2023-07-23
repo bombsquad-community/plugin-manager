@@ -1,20 +1,22 @@
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.game.deathmatch import DeathMatchGame
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.game.deathmatch import DeathMatchGame
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
 
 
-lang = ba.app.lang.language
+lang = bs.app.lang.language
 
 if lang == 'Spanish':
     name = 'Super Boxeo'
@@ -33,7 +35,7 @@ else:
 class NewPlayerSpaz(PlayerSpaz):
 
     def __init__(self,
-                 player: ba.Player,
+                 player: bs.Player,
                  color: Sequence[float] = (1.0, 1.0, 1.0),
                  highlight: Sequence[float] = (0.5, 0.5, 0.5),
                  character: str = 'Spaz',
@@ -44,16 +46,16 @@ class NewPlayerSpaz(PlayerSpaz):
                          highlight=highlight,
                          character=character,
                          powerups_expire=powerups_expire)
-        from bastd.gameutils import SharedObjects
+        from bascenev1lib.gameutils import SharedObjects
         shared = SharedObjects.get()
         self._super_jump = super_jump
         self.jump_mode = False
-        self.super_jump_material = ba.Material()
+        self.super_jump_material = bs.Material()
         self.super_jump_material.add_actions(
             conditions=('they_have_material', shared.footing_material),
             actions=(
-                ('call', 'at_connect', ba.Call(self.jump_state, True)),
-                ('call', 'at_disconnect', ba.Call(self.jump_state, False))
+                ('call', 'at_connect', babase.Call(self.jump_state, True)),
+                ('call', 'at_disconnect', babase.Call(self.jump_state, False))
             ),
         )
         self.node.roller_materials += (self.super_jump_material, )
@@ -68,7 +70,7 @@ class NewPlayerSpaz(PlayerSpaz):
         """
         if not self.node:
             return
-        t_ms = ba.time(timeformat=ba.TimeFormat.MILLISECONDS)
+        t_ms = int(bs.time() * 1000.0)
         assert isinstance(t_ms, int)
         if t_ms - self.last_jump_time_ms >= self._jump_cooldown:
             self.node.jump_pressed = True
@@ -81,15 +83,15 @@ class NewPlayerSpaz(PlayerSpaz):
                         self.node.position[0],
                         self.node.position[1],
                         self.node.position[2],
-                        0, 0, 0, 150, 150, 0, 0, 0, 1, 0
+                        0, 0, 0, 95, 95, 0, 0, 0, 1, 0
                     )
-                ba.timer(0.0, do_jump)
-                ba.timer(0.1, do_jump)
-                ba.timer(0.2, do_jump)
+                bs.timer(0.0, do_jump)
+                bs.timer(0.1, do_jump)
+                bs.timer(0.2, do_jump)
         self._turbo_filter_add_press('jump')
 
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 class BoxingGame(DeathMatchGame):
 
     name = name
@@ -97,16 +99,16 @@ class BoxingGame(DeathMatchGame):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[ba.Session]
-    ) -> list[ba.Setting]:
+            cls, sessiontype: type[bs.Session]
+    ) -> list[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Kills to Win Per Player',
                 min_value=1,
                 default=5,
                 increment=1,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -118,7 +120,7 @@ class BoxingGame(DeathMatchGame):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -129,9 +131,9 @@ class BoxingGame(DeathMatchGame):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting(super_jump_text, default=False),
-            ba.BoolSetting(enable_powerups, default=False),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting(super_jump_text, default=False),
+            bs.BoolSetting(enable_powerups, default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
 
         # In teams mode, a suicide gives a point to the other team, but in
@@ -139,9 +141,9 @@ class BoxingGame(DeathMatchGame):
         # this at zero to benefit new players, but pro players might like to
         # be able to go negative. (to avoid a strategy of just
         # suiciding until you get a good drop)
-        if issubclass(sessiontype, ba.FreeForAllSession):
+        if issubclass(sessiontype, bs.FreeForAllSession):
             settings.append(
-                ba.BoolSetting('Allow Negative Scores', default=False)
+                bs.BoolSetting('Allow Negative Scores', default=False)
             )
 
         return settings
@@ -150,7 +152,7 @@ class BoxingGame(DeathMatchGame):
         super().__init__(settings)
         self._scoreboard = Scoreboard()
         self._score_to_win: int | None = None
-        self._dingsound = ba.getsound('dingSmall')
+        self._dingsound = bs.getsound('dingSmall')
         self._epic_mode = bool(settings['Epic Mode'])
         self._kills_to_win_per_player = int(settings['Kills to Win Per Player'])
         self._time_limit = float(settings['Time Limit'])
@@ -163,11 +165,11 @@ class BoxingGame(DeathMatchGame):
         # Base class overrides.
         self.slow_motion = self._epic_mode
         self.default_music = (
-            ba.MusicType.EPIC if self._epic_mode else ba.MusicType.TO_THE_DEATH
+            bs.MusicType.EPIC if self._epic_mode else bs.MusicType.TO_THE_DEATH
         )
 
     def on_begin(self) -> None:
-        ba.TeamGameActivity.on_begin(self)
+        bs.TeamGameActivity.on_begin(self)
         self.setup_standard_time_limit(self._time_limit)
         if self._enable_powerups:
             self.setup_standard_powerup_drops()
@@ -180,7 +182,7 @@ class BoxingGame(DeathMatchGame):
 
     def _standard_drop_powerup(self, index: int, expire: bool = True) -> None:
         # pylint: disable=cyclic-import
-        from bastd.actor.powerupbox import PowerupBox, PowerupBoxFactory
+        from bascenev1lib.actor.powerupbox import PowerupBox, PowerupBoxFactory
 
         PowerupBox(
             position=self.map.powerup_spawn_points[index],
@@ -191,13 +193,13 @@ class BoxingGame(DeathMatchGame):
             expire=expire,
         ).autoretain()
 
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         import random
-        from ba import _math
-        from ba._gameutils import animate
-        from ba._coopsession import CoopSession
+        from babase import _math
+        from bascenev1._gameutils import animate
+        from bascenev1._coopsession import CoopSession
 
-        if isinstance(self.session, ba.DualTeamSession):
+        if isinstance(self.session, bs.DualTeamSession):
             position = self.map.get_start_position(player.team.id)
         else:
             # otherwise do free-for-all spawn locations
@@ -208,7 +210,7 @@ class BoxingGame(DeathMatchGame):
         highlight = player.highlight
 
         light_color = _math.normalized_color(color)
-        display_color = ba.safecolor(color, target_intensity=0.75)
+        display_color = babase.safecolor(color, target_intensity=0.75)
 
         spaz = NewPlayerSpaz(color=color,
                              highlight=highlight,
@@ -224,14 +226,14 @@ class BoxingGame(DeathMatchGame):
 
         # Move to the stand position and add a flash of light.
         spaz.handlemessage(
-            ba.StandMessage(
+            bs.StandMessage(
                 position,
                 angle if angle is not None else random.uniform(0, 360)))
-        ba.playsound(self._spawn_sound, 1, position=spaz.node.position)
-        light = ba.newnode('light', attrs={'color': light_color})
+        self._spawn_sound.play(1, position=spaz.node.position)
+        light = bs.newnode('light', attrs={'color': light_color})
         spaz.node.connectattr('position', light, 'position')
         animate(light, 'intensity', {0: 0, 0.25: 1, 0.5: 0})
-        ba.timer(0.5, light.delete)
+        bs.timer(0.5, light.delete)
 
         # custom
         spaz.connect_controls_to_player(enable_bomb=False)
