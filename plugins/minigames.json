@@ -654,5 +654,24 @@
         "md5sum": "197a377652ab0c3bfbe1ca07833924b4"
       }
     }
+  },
+  "supersmash": {
+    "description": "SuperSmash",
+    "external_url": "",
+    "authors": [
+      {
+        "name": "Mrmaxmeier",
+        "email": "",
+        "discord": ""
+      },
+      {
+        "name": "JoseAngel",
+        "email": "",
+        "discord": "joseang3l"
+      }
+    ],
+    "versions": {
+      "1.0.0": null
+    }
   }
 }
