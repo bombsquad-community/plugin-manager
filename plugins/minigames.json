@@ -654,6 +654,20 @@
         }
       }
     },
+    "handball": {
+      "description": "Score some goals with handball",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0":null
+      }
+    },
     "supersmash": {
       "description": "Blow up your enemies off the map!",
       "external_url": "",
