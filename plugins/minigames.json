@@ -654,6 +654,25 @@
         }
       }
     },
+    "handball": {
+      "description": "Score some goals with handball",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "2309aab",
+          "released_on": "24-07-2023",
+          "md5sum": "01b85dc9ef1d464ab604387af09f05dc"
+        }
+      }
+    },
     "supersmash": {
       "description": "Blow up your enemies off the map!",
       "external_url": "",
