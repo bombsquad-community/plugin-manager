@@ -597,42 +597,61 @@
         }
       }
     },
-    "ufo_fight": {
-      "description": "Fight the UFO boss!",
+    "quake_original": {
+      "description": "Good ol' Quake minigame",
       "external_url": "",
       "authors": [
         {
-          "name": "Cross Joy",
-          "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
         "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7219487",
-          "released_on": "15-05-2023",
-          "md5sum": "81617b130716996368b7d8f20f3a5154"
+          "api_version": 8,
+          "commit_sha": "185480d",
+          "released_on": "24-07-2023",
+          "md5sum": "f68395cc90dc8cddb166a23b2da81b7b"
         }
       }
-    },
-    "yeeting_party": {
-      "description": "Yeet your enemies out of the map!",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "Freaku",
-          "email": "",
-          "discord": "[Just] Freak#4999"
-        }
-      ],
-      "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "7219487",
-          "released_on": "15-05-2023",
-          "md5sum": "197a377652ab0c3bfbe1ca07833924b4"
-        }
+    }
+  },
+  "ufo_fight": {
+    "description": "Fight the UFO boss!",
+    "external_url": "",
+    "authors": [
+      {
+        "name": "Cross Joy",
+        "email": "cross.joy.official@gmail.com",
+        "discord": "Cross Joy#0721"
+      }
+    ],
+    "versions": {
+      "1.0.0": {
+        "api_version": 7,
+        "commit_sha": "7219487",
+        "released_on": "15-05-2023",
+        "md5sum": "81617b130716996368b7d8f20f3a5154"
+      }
+    }
+  },
+  "yeeting_party": {
+    "description": "Yeet your enemies out of the map!",
+    "external_url": "",
+    "authors": [
+      {
+        "name": "Freaku",
+        "email": "",
+        "discord": "[Just] Freak#4999"
+      }
+    ],
+    "versions": {
+      "1.0.0": {
+        "api_version": 7,
+        "commit_sha": "7219487",
+        "released_on": "15-05-2023",
+        "md5sum": "197a377652ab0c3bfbe1ca07833924b4"
       }
     }
   }
