@@ -597,6 +597,21 @@
         }
       }
     },
+    "quake_original": {
+      "description": "Good ol' Quake minigame",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0":null
+        }
+      }
+    },
     "ufo_fight": {
       "description": "Fight the UFO boss!",
       "external_url": "",
