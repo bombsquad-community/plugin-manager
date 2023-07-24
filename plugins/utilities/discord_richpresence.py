@@ -53,9 +53,9 @@ if ANDROID:  # !can add ios in future
                     content = f.read()
                     assert hashlib.md5(content).hexdigest() == "86bc69b61947943627afc1b351c0b5db"
                 shutil.unpack_archive(filename, install_path)
+                remove(path)
                 shutil.copytree(source_dir, file_path)
                 shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
-                remove(path)
             except Exception as e:
                 if type(e) == shutil.Error:
                     shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
