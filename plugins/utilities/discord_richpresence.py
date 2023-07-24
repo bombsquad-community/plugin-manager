@@ -10,7 +10,6 @@ from __future__ import annotations
 from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
-from zipfile import ZipFile
 from bauiv1lib.popup import PopupWindow
 from babase._mgen.enums import TimeType
 
@@ -22,6 +21,7 @@ import json
 import time
 import threading
 import shutil
+import hashlib
 import babase
 import _babase
 import bascenev1 as bs
@@ -42,29 +42,44 @@ if ANDROID:  # !can add ios in future
     # Installing websocket
     def get_module():
         install_path = Path(f"{getcwd()}/ba_data/python")  # For the guys like me on windows
-        path = Path(f"{install_path}/websocket.zip")
+        path = Path(f"{install_path}/websocket.tar.gz")
         file_path = Path(f"{install_path}/websocket")
+        source_dir = Path(f"{install_path}/websocket-client-1.6.1/websocket")
         if not file_path.exists():
-            url = "https://github.com/brostosjoined/bombsquadrpc/releases/download/presence-1.0/websocket.zip"
+            url = "https://files.pythonhosted.org/packages/b1/34/3a5cae1e07d9566ad073fa6d169bf22c03a3ba7b31b3c3422ec88d039108/websocket-client-1.6.1.tar.gz"
             try:
                 filename, headers = urlretrieve(url, filename=path)
-                with ZipFile(filename) as f:
-                    f.extractall(install_path)
+                with open(filename, "rb") as f:
+                    content = f.read()
+                    assert hashlib.md5(content).hexdigest() == "86bc69b61947943627afc1b351c0b5db"
+                shutil.unpack_archive(filename, install_path)
+                shutil.copytree(source_dir, file_path)
+                shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
                 remove(path)
-            except:
-                pass
+            except Exception as e:
+                if type(e) == shutil.Error:
+                    shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
+                else:
+                    pass
     get_module()
 
+    from websocket import WebSocketConnectionClosedException
     import websocket
-
-    heartbeat_interval = int(41250)
-    resume_gateway_url: str | None = None
-    session_id: str | None = None
 
     start_time = time.time()
 
     class PresenceUpdate:
         def __init__(self):
+            self.ws = websocket.WebSocketApp("wss://gateway.discord.gg/?encoding=json&v=10",
+                                             on_open=self.on_open,
+                                             on_message=self.on_message,
+                                             on_error=self.on_error,
+                                             on_close=self.on_close)
+            self.heartbeat_interval = int(41250)
+            self.resume_gateway_url: str | None = None
+            self.session_id: str | None = None
+            self.stop_heartbeat_thread = threading.Event()
+            self.do_once = True
             self.state: str | None = "In Game"
             self.details: str | None = "Main Menu"
             self.start_timestamp = time.time()
@@ -127,102 +142,137 @@ if ANDROID:  # !can add ios in future
                     ],
                 },
             }
-            ws.send(json.dumps(presencepayload))
+            try:
+                self.ws.send(json.dumps(presencepayload))
+            except WebSocketConnectionClosedException:
+                pass
 
-    def on_message(ws, message):
-        global heartbeat_interval, resume_gateway_url, session_id
-        message = json.loads(message)
-        try:
-            heartbeat_interval = message["d"]["heartbeat_interval"]
-        except:
-            pass
-        try:
-            resume_gateway_url = message["d"]["resume_gateway_url"]
-            session_id = message["d"]["session_id"]
-        except:
-            pass
+        def on_message(self, ws, message):
+            message = json.loads(message)
+            try:
+                self.heartbeat_interval = message["d"]["heartbeat_interval"]
+            except:
+                pass
+            try:
+                self.resume_gateway_url = message["d"]["resume_gateway_url"]
+                self.session_id = message["d"]["session_id"]
+            except:
+                pass
 
-    def on_error(ws, error):
-        babase.print_exception(error)
+        def on_error(self, ws, error):
+            babase.print_exception(error)
 
-    def on_close(ws, close_status_code, close_msg):
-        # print("### closed ###")
-        pass
+        def on_close(self, ws, close_status_code, close_msg):
+            print("Closed Discord Connection Successfully")
 
-    def on_open(ws):
-        print("Connected to Discord Websocket")
+        def on_open(self, ws):
+            print("Connected to Discord Websocket")
 
-        def heartbeats():
-            """Sending heartbeats to keep the connection alive"""
-            global heartbeat_interval
-            if babase.do_once():
-                heartbeat_payload = {
-                    "op": 1,
-                    "d": 251,
-                }  # step two keeping connection alive by sending heart beats and receiving opcode 11
-                ws.send(json.dumps(heartbeat_payload))
+            def heartbeats():
+                """Sending heartbeats to keep the connection alive"""
+                if self.do_once:
+                    heartbeat_payload = {
+                        "op": 1,
+                        "d": 251,
+                    }  # step two keeping connection alive by sending heart beats and receiving opcode 11
+                    self.ws.send(json.dumps(heartbeat_payload))
+                    self.do_once = False
 
-                def identify():
-                    """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
-                    with open(f"{getcwd()}/token.txt", 'r') as f:
-                        token = bytes.fromhex(f.read()).decode('utf-8')
-                    identify_payload = {
-                        "op": 2,
-                        "d": {
-                            "token": token,
-                            "properties": {
-                                "os": "linux",
-                                "browser": "Discord Android",
-                                "device": "android",
+                    def identify():
+                        """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
+                        with open(f"{getcwd()}/token.txt", 'r') as f:
+                            token = bytes.fromhex(f.read()).decode('utf-8')
+                        identify_payload = {
+                            "op": 2,
+                            "d": {
+                                "token": token,
+                                "properties": {
+                                    "os": "linux",
+                                    "browser": "Discord Android",
+                                    "device": "android",
+                                },
+                                "intents": 256,
                             },
-                            "intents": 256,
-                        },
-                    }  # step 3 send an identify
-                    ws.send(json.dumps(identify_payload))
-                identify()
-            while True:
-                heartbeat_payload = {"op": 1, "d": heartbeat_interval}
-                ws.send(json.dumps(heartbeat_payload))
-                time.sleep(heartbeat_interval / 1000)
+                        }  # step 3 send an identify
+                        self.ws.send(json.dumps(identify_payload))
+                    identify()
+                while True:
+                    heartbeat_payload = {"op": 1, "d": self.heartbeat_interval}
 
-        threading.Thread(target=heartbeats, daemon=True, name="heartbeat").start()
+                    try:
+                        self.ws.send(json.dumps(heartbeat_payload))
+                        time.sleep(self.heartbeat_interval / 1000)
+                    except:
+                        pass
 
-    # websocket.enableTrace(True)
-    ws = websocket.WebSocketApp(
-        "wss://gateway.discord.gg/?encoding=json&v=10",
-        on_open=on_open,
-        on_message=on_message,
-        on_error=on_error,
-        on_close=on_close,
-    )
-    if Path(f"{getcwd()}/token.txt").exists():
-        threading.Thread(target=ws.run_forever, daemon=True, name="websocket").start()
+                    if self.stop_heartbeat_thread.is_set():
+                        self.stop_heartbeat_thread.clear()
+                        break
+
+            threading.Thread(target=heartbeats, daemon=True, name="heartbeat").start()
+
+        def start(self):
+            if Path(f"{getcwd()}/token.txt").exists():
+                threading.Thread(target=self.ws.run_forever, daemon=True, name="websocket").start()
+
+        def close(self):
+            self.stop_heartbeat_thread.set()
+            self.do_once = True
+            self.ws.close()
 
 
 if not ANDROID:
     # installing pypresence
     def get_module():
         install_path = Path(f"{getcwd()}/ba_data/python")
-        path = Path(f"{install_path}/pypresence.zip")
+        path = Path(f"{install_path}/pypresence.tar.gz")
         file_path = Path(f"{install_path}/pypresence")
+        source_dir = Path(f"{install_path}/pypresence-4.3.0/pypresence")
         if not file_path.exists():
-            url = "https://github.com/brostosjoined/bombsquadrpc/releases/download/presence-1.0/pypresence.zip"
+            url = "https://files.pythonhosted.org/packages/f4/2e/d110f862720b5e3ba1b0b719657385fc4151929befa2c6981f48360aa480/pypresence-4.3.0.tar.gz"
             try:
                 filename, headers = urlretrieve(url, filename=path)
-                with ZipFile(filename) as f:
-                    f.extractall(install_path)
+                with open(filename, "rb") as f:
+                    content = f.read()
+                    assert hashlib.md5(content).hexdigest() == "f7c163cdd001af2456c09e241b90bad7"
+                shutil.unpack_archive(filename, install_path)
+                shutil.copytree(source_dir, file_path)
+                shutil.rmtree(Path(f"{install_path}/pypresence-4.3.0"))
                 remove(path)
             except:
                 pass
+
+            # Make modifications for it to work on windows
+            if babase.app.classic.platform == "windows":
+                with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "r") as file:
+                    data = file.readlines()
+                    data[45] = """
+def get_event_loop(force_fresh=False):
+    loop = asyncio.ProactorEventLoop() if sys.platform == 'win32' else asyncio.new_event_loop()
+    if force_fresh:
+        return loop
+    try:
+        running = asyncio.get_running_loop()
+    except RuntimeError:
+        return loop
+    if running.is_closed():
+        return loop
+    else:
+        if sys.platform in ('linux', 'darwin'):
+            return running
+        if sys.platform == 'win32':
+            if isinstance(running, asyncio.ProactorEventLoop):
+                return running
+            else:
+                return loop"""
+
+            with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "w") as file:
+                for number, line in enumerate(data):
+                    if number not in range(46, 56):
+                        file.write(line)
     get_module()
 
-    # Updating pypresence
-    try:
-        from pypresence import PipeClosed, DiscordError, DiscordNotFound
-    except ImportError:
-        shutil.rmtree(Path(f"{getcwd()}/ba_data/python/pypresence"))
-        get_module()
-
+    from pypresence import PipeClosed, DiscordError, DiscordNotFound
     from pypresence.utils import get_event_loop
     import pypresence
     import socket
@@ -608,7 +658,7 @@ class Discordlogin(PopupWindow):
             bui.getsound('shieldDown').play()
             bui.screenmessage("Account successfully removed!!", (0.10, 0.10, 1.00))
             self.on_bascenev1libup_cancel()
-            ws.close()
+            PresenceUpdate().ws.close()
 
 
 run_once = False
@@ -667,6 +717,7 @@ class DiscordRP(babase.Plugin):
                 1, bs.WeakCall(self.update_status), repeat=True
             )
         if ANDROID:
+            self.rpc_thread.start()
             self.update_timer = bs.AppTimer(
                 4, bs.WeakCall(self.update_status), repeat=True
             )
@@ -685,9 +736,14 @@ class DiscordRP(babase.Plugin):
         if not ANDROID and self.rpc_thread.is_discord_running():
             self.rpc_thread.rpc.close()
             self.rpc_thread.should_close = True
-        else:
-            # stupid code
-            ws.close()
+
+    def on_app_pause(self) -> None:
+        self.rpc_thread.close()
+
+    def on_app_resume(self) -> None:
+        global start_time
+        start_time = time.time()
+        self.rpc_thread.start()
 
     def _get_current_activity_name(self) -> str | None:
         act = bs.get_foreground_host_activity()
