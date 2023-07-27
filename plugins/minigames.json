@@ -698,6 +698,20 @@
         }
       }
     },
+    "super_duel": {
+      "description": "Crush your enemy in a 1v1",
+      "external_url": "https://www.youtube.com/watch?v=hvRtiXR-oC0",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0":null
+      }
+    },
     "supersmash": {
       "description": "Blow up your enemies off the map!",
       "external_url": "",
