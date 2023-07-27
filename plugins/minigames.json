@@ -660,6 +660,19 @@
         }
       }
     },
+    "big_ball": {
+      "description": "Score some goals with Big Ball on Football map",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "MythB",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0":null
+      }
     "handball": {
       "description": "Score some goals with handball",
       "external_url": "",
