@@ -50,9 +50,9 @@ class SuperSpaz(PlayerSpaz):
                     bs.getsound('superPunch').play()
                     bs.getsound('punchStrong02').play()
                     Blast(position=node.position,
-                                  velocity=node.velocity,
-                                  blast_radius=0.0,
-                                  blast_type='normal').autoretain()
+                          velocity=node.velocity,
+                          blast_radius=0.0,
+                          blast_type='normal').autoretain()
         else:
             return super().handlemessage(msg)
         return None
@@ -60,6 +60,7 @@ class SuperSpaz(PlayerSpaz):
 
 class Player(bs.Player['Team']):
     """Our player type for this game."""
+
     def __init__(self) -> None:
         self.icons: List[Icon] = []
         self.in_game: bool = False
@@ -103,6 +104,8 @@ else:
     boxing_gloves = 'Boxing Gloves'
 
 # ba_meta export bascenev1.GameActivity
+
+
 class NewDuelGame(bs.TeamGameActivity[Player, Team]):
     """A game type based on acquiring kills."""
 
@@ -225,19 +228,19 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
         if self._enable_powerups:
             self.setup_standard_powerup_drops()
         self._vs_text = bs.NodeActor(
-        bs.newnode('text',
-                   attrs={
-                       'position': (0, 105),
-                       'h_attach': 'center',
-                       'h_align': 'center',
-                       'maxwidth': 200,
-                       'shadow': 0.5,
-                       'vr_depth': 390,
-                       'scale': 0.6,
-                       'v_attach': 'bottom',
-                       'color': (0.8, 0.8, 0.3, 1.0),
-                       'text': babase.Lstr(resource='vsText')
-                   }))
+            bs.newnode('text',
+                       attrs={
+                           'position': (0, 105),
+                           'h_attach': 'center',
+                           'h_align': 'center',
+                           'maxwidth': 200,
+                           'shadow': 0.5,
+                           'vr_depth': 390,
+                           'scale': 0.6,
+                           'v_attach': 'bottom',
+                           'color': (0.8, 0.8, 0.3, 1.0),
+                           'text': babase.Lstr(resource='vsText')
+                       }))
 
         # Base kills needed to win on the size of the largest team.
         self._score_to_win = (self._kills_to_win_per_player *
@@ -248,8 +251,6 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
     def _update(self) -> None:
         if len(self.players) == 1:
             'self.end_game()'
-
-   
 
     def spawn_player(self, player: PlayerType) -> bs.Actor:
         # pylint: disable=too-many-locals
@@ -298,18 +299,20 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
         pos1 = [self.map.get_start_position(0), 90]
         pos2 = [self.map.get_start_position(1), 270]
         pos3 = []
-        
+
         for x in self.players:
             if x.is_alive():
-                if x is player: continue
+                if x is player:
+                    continue
                 p = x.actor.node.position
                 if 0.0 not in (p[0], p[2]):
                     if p[0] <= 0:
                         pos3.append(pos2[0])
-                    else: pos3.append(pos1[0])
-                    
+                    else:
+                        pos3.append(pos1[0])
+
         spaz.handlemessage(bs.StandMessage(pos1[0] if player.playervs1 else pos2[0],
-                        pos1[1] if player.playervs1 else pos2[1]))
+                                           pos1[1] if player.playervs1 else pos2[1]))
 
         if any(pos3):
             spaz.handlemessage(bs.StandMessage(pos3[0]))
@@ -323,6 +326,7 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
                     'color': color,
                     'radius': 0.3,
                     'intensity': 0.3})
+
             def sp_fx():
                 if not spaz.node:
                     lfx.delete()
@@ -364,7 +368,7 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
                     if not player.is_alive():
                         self.spawn_player(player)
                        # player.actor.disconnect_controls_from_player()
-                        
+
                         if self._night_mode:
                             if not player.light:
                                 player.light = True
@@ -381,7 +385,7 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
                                     'position', light, 'position')
                     else:
                         player.actor.disconnect_controls_from_player()
-                        
+
                     bs.timer(0.0, self._countdown)
                   #  bs.timer(0.1, self._clear_all_objects)
 
@@ -436,13 +440,13 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
                                })
         if self._fight_delay == 0.7:
             bs.animate(self.node, 'scale',
-                      {0: 0, 0.1: 3.9, 0.64: 4.3, 0.68: 0})
+                       {0: 0, 0.1: 3.9, 0.64: 4.3, 0.68: 0})
         elif self._fight_delay == 0.4:
             bs.animate(self.node, 'scale',
-                      {0: 0, 0.1: 3.9, 0.34: 4.3, 0.38: 0})
+                       {0: 0, 0.1: 3.9, 0.34: 4.3, 0.38: 0})
         else:
             bs.animate(self.node, 'scale',
-                      {0: 0, 0.1: 3.9, 0.92: 4.3, 0.96: 0})
+                       {0: 0, 0.1: 3.9, 0.92: 4.3, 0.96: 0})
         cmb = bs.newnode('combine', owner=self.node, attrs={'size': 4})
         cmb.connectattr('output', self.node, 'color')
         bs.animate(cmb, 'input0', {0: 1.0, 0.15: 1.0}, loop=True)
