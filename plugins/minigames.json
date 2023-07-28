@@ -14,11 +14,55 @@
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "a941899",
+          "released_on": "20-07-2023",
+          "md5sum": "19f033445a8fe30fc7f4f62d94a54444"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "e59073b",
           "released_on": "02-11-2022",
           "md5sum": "ceb7ac417c85396722fa9f7fee3cfc01"
+        }
+      }
+    },
+    "icy_emits": {
+      "description": "Survice from icy bombs emitting through cold platform. Playable in teams/ffa/co-op",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "cedc448a3d625065d586445e115fcd1f"
+        }
+      }
+    },
+    "frozen_one": {
+      "description": "Survive until the timer runs out",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "529c8b9c9a450317d5aa75e8eab47497"
         }
       }
     },
@@ -109,6 +153,12 @@
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "6263872",
+          "released_on": "23-07-2023",
+          "md5sum": "9789ad3583f1d92d4e4b7bc03d09591d"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -187,10 +237,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "2c457b80b5a35adf0cad1436af4ab3fe"
+        },
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "0bc9522",
@@ -206,10 +262,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "49ae645a5afc390ead44d7219b388c78"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -225,10 +287,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "4cb6510f9f3ce151720a53a957986864"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -316,6 +384,12 @@
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "f54c993",
+          "released_on": "27-07-2023",
+          "md5sum": "7699483f4c379db809676ac917943d3c"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2aa1e50",
@@ -412,15 +486,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
-        },
-        {
-          "name": "LoupGarou",
-          "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "22b51a147524d84fbc249e61f21ae424"
+        },
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "2e2540a",
@@ -451,6 +526,12 @@
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "e8bbb61",
+          "released_on": "23-07-2023",
+          "md5sum": "1acbeecffada937bdd745f4e4d43f1be"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -470,6 +551,12 @@
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "1a8037e",
+          "released_on": "23-07-2023",
+          "md5sum": "916e37f6e1a8a5be3dd0389ed2c4b261"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -573,6 +660,25 @@
         }
       }
     },
+    "quake_original": {
+      "description": "Good ol' Quake minigame",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "185480d",
+          "released_on": "24-07-2023",
+          "md5sum": "f68395cc90dc8cddb166a23b2da81b7b"
+        }
+      }
+    },
     "ufo_fight": {
       "description": "Fight the UFO boss!",
       "external_url": "",
@@ -599,7 +705,7 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
@@ -608,6 +714,87 @@
           "commit_sha": "7219487",
           "released_on": "15-05-2023",
           "md5sum": "197a377652ab0c3bfbe1ca07833924b4"
+        }
+      }
+    },
+    "big_ball": {
+      "description": "Score some goals with Big Ball on Football map",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "MythB",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ca3221b",
+          "released_on": "27-07-2023",
+          "md5sum": "39c5b18efd5d5314f30c12fc0bec4931"
+        }
+      }
+    },
+    "handball": {
+      "description": "Score some goals with handball",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Unknown",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "2309aab",
+          "released_on": "24-07-2023",
+          "md5sum": "01b85dc9ef1d464ab604387af09f05dc"
+        }
+      }
+    },
+    "super_duel": {
+      "description": "Crush your enemy in a 1v1",
+      "external_url": "https://www.youtube.com/watch?v=hvRtiXR-oC0",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ab26786",
+          "released_on": "27-07-2023",
+          "md5sum": "d0c9c0472d7b145eadf535957a462fdf"
+        }
+      }
+    },
+    "supersmash": {
+      "description": "Blow up your enemies off the map!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Mrmaxmeier",
+          "email": "",
+          "discord": ""
+        },
+        {
+          "name": "JoseAngel",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "68e77f2",
+          "released_on": "24-07-2023",
+          "md5sum": "1cbe5b3e85b5dfcee1eb322f33568fd4"
         }
       }
     }

@@ -1,22 +1,19 @@
-# Released under the MIT License. See LICENSE for details.
-# BY Stary_Agent
-"""Hockey game and support classes."""
+# Made by MythB
+# Ported by: MysteriousBoi
+
 
 # ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
-
 from __future__ import annotations
-
 from typing import TYPE_CHECKING
-
 import babase
 import bauiv1 as bui
 import bascenev1 as bs
+import random
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
 from bascenev1lib.actor.powerupbox import PowerupBoxFactory
 from bascenev1lib.gameutils import SharedObjects
-
+from bascenev1lib.actor.flag import Flag
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
@@ -27,10 +24,33 @@ class PuckDiedMessage:
     def __init__(self, puck: Puck):
         self.puck = puck
 
+# goalpost
+
+
+class FlagKale(bs.Actor):
+    def __init__(self, position=(0, 2.5, 0), color=(1, 1, 1)):
+        super().__init__()
+        activity = self.getactivity()
+        shared = SharedObjects.get()
+        self.node = bs.newnode('flag',
+                               attrs={'position': (position[0], position[1]+0.75, position[2]),
+                                      'color_texture': activity._flagKaleTex,
+                                      'color': color,
+                                      'materials': [shared.object_material, activity._kaleMaterial],
+                                      },
+                               delegate=self)
+
+    def handleMessage(self, m):
+        if isinstance(m, bs.DieMessage):
+            if self.node.exists():
+                self.node.delete()
+        elif isinstance(m, bs.OutOfBoundsMessage):
+            self.handlemessage(bs.DieMessage())
+        else:
+            super().handlemessage(msg)
+
 
 class Puck(bs.Actor):
-    """A lovely giant hockey puck."""
-
     def __init__(self, position: Sequence[float] = (0.0, 1.0, 0.0)):
         super().__init__()
         shared = SharedObjects.get()
@@ -41,21 +61,23 @@ class Puck(bs.Actor):
         self.last_players_to_touch: Dict[int, Player] = {}
         self.scored = False
         assert activity is not None
-        assert isinstance(activity, HockeyGame)
+        assert isinstance(activity, BBGame)
         pmats = [shared.object_material, activity.puck_material]
         self.node = bs.newnode('prop',
                                delegate=self,
                                attrs={
-                                   'mesh': activity.puck_model,
-                                   'color_texture': activity.puck_tex,
+                                   'mesh': activity._ballModel,
+                                   'color_texture': activity._ballTex,
                                    'body': 'sphere',
                                    'reflection': 'soft',
                                    'reflection_scale': [0.2],
-                                   'shadow_size': 0.5,
+                                   'shadow_size': 0.8,
                                    'is_area_of_interest': True,
                                    'position': self._spawn_pos,
-                                   'materials': pmats
-                               })
+                                   'materials': pmats,
+                                   'body_scale': 4,
+                                   'mesh_scale': 1,
+                                   'density': 0.02})
         bs.animate(self.node, 'mesh_scale', {0: 0, 0.2: 1.3, 0.26: 1})
 
     def handlemessage(self, msg: Any) -> Any:
@@ -91,6 +113,35 @@ class Puck(bs.Actor):
         else:
             super().handlemessage(msg)
 
+# for night mode: using a actor with large shadow and little mesh scale. Better then tint i think, players and objects more visible
+
+
+class NightMod(bs.Actor):
+    def __init__(self, position=(0, 0, 0)):
+        super().__init__()
+        shared = SharedObjects.get()
+        activity = self.getactivity()
+        # spawn just above the provided point
+        self._spawnPos = (position[0], position[1], position[2])
+        self.node = bs.newnode("prop",
+                               attrs={'mesh': activity._nightModel,
+                                      'color_texture': activity._nightTex,
+                                      'body': 'sphere',
+                                      'reflection': 'soft',
+                                      'body_scale': 0.1,
+                                      'mesh_scale': 0.001,
+                                      'density': 0.010,
+                                      'reflection_scale': [0.23],
+                                      'shadow_size': 999999.0,
+                                      'is_area_of_interest': True,
+                                      'position': self._spawnPos,
+                                      'materials': [activity._nightMaterial]
+                                      },
+                               delegate=self)
+
+    def handlemssage(self, m):
+        super().handlemessage(m)
+
 
 class Player(bs.Player['Team']):
     """Our player type for this game."""
@@ -104,11 +155,9 @@ class Team(bs.Team[Player]):
 
 
 # ba_meta export bascenev1.GameActivity
-class HockeyGame(bs.TeamGameActivity[Player, Team]):
-    """Ice hockey game."""
-
-    name = 'Epic Soccer'
-    description = 'Score some goals.'
+class BBGame(bs.TeamGameActivity[Player, Team]):
+    name = 'Big Ball'
+    description = 'Score some goals.\nFlags are goalposts.\nScored team players get boxing gloves,\nNon-scored team players getting shield (if Grant Powers on Score).\nYou can also set Night Mode!'
     available_settings = [
         bs.IntSetting(
             'Score to Win',
@@ -131,7 +180,7 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
         bs.FloatChoiceSetting(
             'Respawn Times',
             choices=[
-                ('Shorter', 0.1),
+                ('Shorter', 0.25),
                 ('Short', 0.5),
                 ('Normal', 1.0),
                 ('Long', 2.0),
@@ -139,6 +188,9 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
             ],
             default=1.0,
         ),
+        bs.BoolSetting('Epic Mode', True),
+        bs.BoolSetting('Night Mode', False),
+        bs.BoolSetting('Grant Powers on Score', False)
     ]
     default_music = bs.MusicType.HOCKEY
 
@@ -148,30 +200,54 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
-        assert babase.app.classic is not None
-        return babase.app.classic.getmaps('football')
+        return ['Football Stadium']
 
     def __init__(self, settings: dict):
         super().__init__(settings)
         shared = SharedObjects.get()
-        self.slow_motion = True
         self._scoreboard = Scoreboard()
-        self._cheer_sound = bui.getsound('cheer')
-        self._chant_sound = bui.getsound('crowdChant')
-        self._foghorn_sound = bui.getsound('foghorn')
-        self._swipsound = bui.getsound('swip')
-        self._whistle_sound = bui.getsound('refWhistle')
-        self.puck_model = bs.getmesh('bomb')
-        self.puck_tex = bs.gettexture('landMine')
-        self.puck_scored_tex = bs.gettexture('landMineLit')
-        self._puck_sound = bs.getsound('metalHit')
+        self._cheer_sound = bs.getsound('cheer')
+        self._chant_sound = bs.getsound('crowdChant')
+        self._foghorn_sound = bs.getsound('foghorn')
+        self._swipsound = bs.getsound('swip')
+        self._whistle_sound = bs.getsound('refWhistle')
+        self._ballModel = bs.getmesh("shield")
+        self._ballTex = bs.gettexture("eggTex1")
+        self._ballSound = bs.getsound("impactMedium2")
+        self._flagKaleTex = bs.gettexture("star")
+        self._kaleSound = bs.getsound("metalHit")
+        self._nightModel = bs.getmesh("shield")
+        self._nightTex = bs.gettexture("black")
+        self._kaleMaterial = bs.Material()
+        # add friction to flags for standing our position (as far as)
+        self._kaleMaterial.add_actions(conditions=("they_have_material", shared.footing_material),
+                                       actions=(("modify_part_collision", "friction", 9999.5)))
+        self._kaleMaterial.add_actions(conditions=(("we_are_younger_than", 1), 'and',
+                                                   ("they_have_material", shared.object_material)),
+                                       actions=(("modify_part_collision", "collide", False)))
+        self._kaleMaterial.add_actions(conditions=("they_have_material", shared.pickup_material),
+                                       actions=(("modify_part_collision", "collide", False)))
+        self._kaleMaterial.add_actions(
+            conditions=('they_have_material', shared.object_material),
+            actions=(('impact_sound', self._kaleSound, 2, 5)))
+        # we dont wanna hit the night so
+        self._nightMaterial = bs.Material()
+        self._nightMaterial.add_actions(conditions=(('they_have_material', shared.pickup_material), 'or',
+                                                    ('they_have_material', shared.attack_material)),
+                                        actions=(('modify_part_collision', 'collide', False)))
+        # we also dont want anything moving it
+        self._nightMaterial.add_actions(
+            conditions=(('they_have_material', shared.object_material), 'or',
+                        ('they_dont_have_material', shared.footing_material)),
+            actions=(('modify_part_collision', 'collide', False),
+                     ('modify_part_collision', 'physical', False)))
         self.puck_material = bs.Material()
         self.puck_material.add_actions(actions=(('modify_part_collision',
                                                  'friction', 0.5)))
         self.puck_material.add_actions(conditions=('they_have_material',
                                                    shared.pickup_material),
                                        actions=('modify_part_collision',
-                                                'collide', True))
+                                                'collide', False))
         self.puck_material.add_actions(
             conditions=(
                 ('we_are_younger_than', 100),
@@ -183,7 +259,7 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
         self.puck_material.add_actions(conditions=('they_have_material',
                                                    shared.footing_material),
                                        actions=('impact_sound',
-                                                self._puck_sound, 0.2, 5))
+                                                self._ballSound, 0.2, 5))
 
         # Keep track of which player last touched the puck
         self.puck_material.add_actions(
@@ -208,6 +284,11 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
         self._puck: Optional[Puck] = None
         self._score_to_win = int(settings['Score to Win'])
         self._time_limit = float(settings['Time Limit'])
+        self._nm = bool(settings['Night Mode'])
+        self._grant_power = bool(settings['Grant Powers on Score'])
+        self._epic_mode = bool(settings['Epic Mode'])
+        # Base class overrides.
+        self.slow_motion = self._epic_mode
 
     def get_instance_description(self) -> Union[str, Sequence]:
         if self._score_to_win == 1:
@@ -226,6 +307,9 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
         self.setup_standard_powerup_drops()
         self._puck_spawn_pos = self.map.get_flag_position(None)
         self._spawn_puck()
+        # for night mode we need night actor. And same goodies for nigh mode
+        if self._nm:
+            self._nightSpawny(), self._flagKaleFlash()
 
         # Set up the two score regions.
         defs = self.map.defs
@@ -234,8 +318,8 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
             bs.NodeActor(
                 bs.newnode('region',
                            attrs={
-                               'position': defs.boxes['goal1'][0:3],
-                               'scale': defs.boxes['goal1'][6:9],
+                               'position': (13.75, 0.85744967453, 0.1095578275),
+                               'scale': (1.05, 1.1, 3.8),
                                'type': 'box',
                                'materials': [self._score_region_material]
                            })))
@@ -243,13 +327,57 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
             bs.NodeActor(
                 bs.newnode('region',
                            attrs={
-                               'position': defs.boxes['goal2'][0:3],
-                               'scale': defs.boxes['goal2'][6:9],
+                               'position': (-13.55, 0.85744967453, 0.1095578275),
+                               'scale': (1.05, 1.1, 3.8),
                                'type': 'box',
                                'materials': [self._score_region_material]
                            })))
         self._update_scoreboard()
         self._chant_sound.play()
+
+    def _nightSpawny(self):
+        self.MythBrk = NightMod(position=(0, 0.05744967453, 0))
+
+    # spawn some goodies on nightmode for pretty visuals
+    def _flagKaleFlash(self):
+        # flags positions
+        kale1 = (-12.45, 0.05744967453, -2.075)
+        kale2 = (-12.45, 0.05744967453, 2.075)
+        kale3 = (12.66, 0.03986567039, 2.075)
+        kale4 = (12.66, 0.03986567039, -2.075)
+
+        flash = bs.newnode("light",
+                           attrs={'position': kale1,
+                                  'radius': 0.15,
+                                  'color': (1.0, 1.0, 0.7)})
+
+        flash = bs.newnode("light",
+                           attrs={'position': kale2,
+                                  'radius': 0.15,
+                                  'color': (1.0, 1.0, 0.7)})
+
+        flash = bs.newnode("light",
+                           attrs={'position': kale3,
+                                  'radius': 0.15,
+                                  'color': (0.7, 1.0, 1.0)})
+
+        flash = bs.newnode("light",
+                           attrs={'position': kale4,
+                                  'radius': 0.15,
+                                  'color': (0.7, 1.0, 1.0)})
+    # flags positions
+
+    def _flagKalesSpawn(self):
+        for team in self.teams:
+            if team.id == 0:
+                _colorTeam0 = team.color
+            if team.id == 1:
+                _colorTeam1 = team.color
+
+        self._MythB = FlagKale(position=(-12.45, 0.05744967453, -2.075), color=_colorTeam0)
+        self._MythB2 = FlagKale(position=(-12.45, 0.05744967453, 2.075), color=_colorTeam0)
+        self._MythB3 = FlagKale(position=(12.66, 0.03986567039, 2.075), color=_colorTeam1)
+        self._MythB4 = FlagKale(position=(12.66, 0.03986567039, -2.075), color=_colorTeam1)
 
     def on_team_join(self, team: Team) -> None:
         self._update_scoreboard()
@@ -291,6 +419,14 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
                 scoring_team = team
                 team.score += 1
 
+                # tell scored team players to celebrate and give them to boxing gloves
+                if self._grant_power:
+                    for player in team.players:
+                        try:
+                            player.actor.node.handlemessage(bs.PowerupMessage('punch'))
+                        except:
+                            pass
+
                 # Tell all players to celebrate.
                 for player in team.players:
                     if player.actor:
@@ -302,20 +438,25 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
                         and self._puck.last_players_to_touch[scoring_team.id]):
                     self.stats.player_scored(
                         self._puck.last_players_to_touch[scoring_team.id],
-                        20,
+                        100,
                         big_message=True)
 
                 # End game if we won.
                 if team.score >= self._score_to_win:
                     self.end_game()
+            else:
+                if self._grant_power:
+                    for player in team.players:
+                        try:
+                            player.actor.node.handlemessage(bs.PowerupMessage('shield'))
+                        except:
+                            pass
 
         self._foghorn_sound.play()
         self._cheer_sound.play()
 
         self._puck.scored = True
 
-        # Change puck texture to something cool
-        self._puck.node.color_texture = self.puck_scored_tex
         # Kill the puck (it'll respawn itself shortly).
         bs.timer(1.0, self._kill_puck)
 
@@ -370,6 +511,14 @@ class HockeyGame(bs.TeamGameActivity[Player, Team]):
     def _spawn_puck(self) -> None:
         self._swipsound.play()
         self._whistle_sound.play()
+        self._flagKalesSpawn()
         self._flash_puck_spawn()
         assert self._puck_spawn_pos is not None
         self._puck = Puck(position=self._puck_spawn_pos)
+        self._puck.light = bs.newnode('light',
+                                      owner=self._puck.node,
+                                      attrs={'intensity': 0.3,
+                                             'height_attenuated': False,
+                                             'radius': 0.2,
+                                             'color': (0.9, 0.2, 0.9)})
+        self._puck.node.connectattr('position', self._puck.light, 'position')

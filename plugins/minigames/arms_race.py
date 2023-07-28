@@ -1,17 +1,18 @@
-# Ported by: Freaku / @[Just] Freak#4999
+# Ported by your friend: Freaku
 
 # Join BCS:
 # https://discord.gg/ucyaesh
 
 
-# ba_meta require api 7
+# ba_meta require api 8
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.actor.playerspaz import PlayerSpaz
+import babase
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
 
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
@@ -30,8 +31,7 @@ class State:
         self.next = None
         self.index = None
 
-    def apply(self, player, spaz):
-
+    def apply(self, spaz):
         spaz.disconnect_controls_from_player()
         spaz.connect_controls_to_player(enable_punch=self.punch,
                                         enable_bomb=self.bomb,
@@ -42,18 +42,6 @@ class State:
         if self.bomb:
             spaz.bomb_type = self.bomb
         spaz.set_score_text(self.name)
-
-        def set_controls():
-            player.actor.node.bomb_pressed = True
-            player.actor.on_bomb_release()
-
-        release_input = (ba.InputType.PUNCH_RELEASE, ba.InputType.PICK_UP_RELEASE)
-        if not self.bomb is None:
-            for release in release_input:
-                player.assigninput(
-                    release,
-                    set_controls
-                )
 
     def get_setting(self):
         return (self.name)
@@ -68,22 +56,22 @@ states = [State(bomb='normal', name='Basic Bombs'),
           State(curse=True, name='Cursed', final=True)]
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self):
         self.state = None
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
         self.score = 0
 
 
-# ba_meta export game
-class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class ArmsRaceGame(bs.TeamGameActivity[Player, Team]):
     """A game type based on acquiring kills."""
 
     name = 'Arms Race'
@@ -94,9 +82,9 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[ba.Session]) -> List[ba.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
         settings = [
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -108,7 +96,7 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -119,21 +107,21 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False)]
+            bs.BoolSetting('Epic Mode', default=False)]
         for state in states:
             if not state.required:
-                settings.append(ba.BoolSetting(state.get_setting(), default=True))
+                settings.append(bs.BoolSetting(state.get_setting(), default=True))
 
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.DualTeamSession)
-                or issubclass(sessiontype, ba.FreeForAllSession))
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return (issubclass(sessiontype, bs.DualTeamSession)
+                or issubclass(sessiontype, bs.FreeForAllSession))
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
-        return ba.getmaps('melee')
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
+        return bs.app.classic.getmaps('melee')
 
     def __init__(self, settings: dict):
         super().__init__(settings)
@@ -142,14 +130,14 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
             if i < len(self.states) and not state.final:
                 state.next = self.states[i + 1]
             state.index = i
-        self._dingsound = ba.getsound('dingSmall')
+        self._dingsound = bs.getsound('dingSmall')
         self._epic_mode = bool(settings['Epic Mode'])
         self._time_limit = float(settings['Time Limit'])
 
         # Base class overrides.
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC if self._epic_mode else
-                              ba.MusicType.TO_THE_DEATH)
+        self.default_music = (bs.MusicType.EPIC if self._epic_mode else
+                              bs.MusicType.TO_THE_DEATH)
 
     def get_instance_description(self) -> Union[str, Sequence]:
         return 'Upgrade your weapon by eliminating enemies.'
@@ -168,12 +156,11 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
         self.spawn_player(player)
 
     # overriding the default character spawning..
-
     def spawn_player(self, player):
         if player.state is None:
             player.state = self.states[0]
         super().spawn_player(player)
-        player.state.apply(player, player.actor)
+        player.state.apply(player.actor)
 
     def isValidKill(self, m):
         if m.getkillerplayer(Player) is None:
@@ -186,13 +173,12 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
 
     def handlemessage(self, msg: Any) -> Any:
 
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             if self.isValidKill(msg):
                 self.stats.player_scored(msg.getkillerplayer(Player), 10, kill=True)
                 if not msg.getkillerplayer(Player).state.final:
                     msg.getkillerplayer(Player).state = msg.getkillerplayer(Player).state.next
-                    msg.getkillerplayer(Player).state.apply(
-                        msg.getkillerplayer(Player), msg.getkillerplayer(Player).actor)
+                    msg.getkillerplayer(Player).state.apply(msg.getkillerplayer(Player).actor)
                 else:
                     msg.getkillerplayer(Player).team.score += 1
                     self.end_game()
@@ -203,7 +189,7 @@ class ArmsRaceGame(ba.TeamGameActivity[Player, Team]):
         return None
 
     def end_game(self) -> None:
-        results = ba.GameResults()
+        results = bs.GameResults()
         for team in self.teams:
             results.set_team_score(team, team.score)
         self.end(results=results)

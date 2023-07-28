@@ -149,17 +149,17 @@ diff --git a/plugins/utilities/sample_plugin.py b/plugins/utilities/sample_plugi
 index ebb7dcc..da2b312 100644
 --- a/plugins/utilities/sample_plugin.py
 +++ b/plugins/utilities/sample_plugin.py
-@@ -5,6 +5,7 @@ import ba
- class Main(ba.Plugin):
+@@ -5,6 +5,7 @@ import babase
+ class Main(babase.Plugin):
      def on_app_running(self):
-         ba.screenmessage("Hi! I am a sample plugin!")
+         babase.screenmessage("Hi! I am a sample plugin!")
 
      def has_settings_ui(self):
          return True
 
      def show_settings_ui(self, source_widget):
--        ba.screenmessage("You tapped my settings!")
-+        ba.screenmessage("Hey! This is my new screenmessage!")
+-        babase.screenmessage("You tapped my settings!")
++        babase.screenmessage("Hey! This is my new screenmessage!")
 ```
 
 To name this new version as `1.1.0`, add `"1.1.0": null,` just above the previous plugin version in `utilities.json`:

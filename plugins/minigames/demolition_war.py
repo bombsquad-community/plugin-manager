@@ -1,5 +1,5 @@
 
-# ba_meta require api 7
+# ba_meta require api 8
 """
 DemolitionWar - BombFight on wooden floor flying in air.
 Author: Mr.Smoothy
@@ -12,23 +12,26 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.game.elimination import EliminationGame, Player
-from bastd.gameutils import SharedObjects
-from bastd.actor.bomb import BombFactory
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1 import _map
+from bascenev1lib.game.elimination import EliminationGame, Player
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.actor.bomb import BombFactory
 import random
-from bastd.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.playerspaz import PlayerSpaz
 if TYPE_CHECKING:
     from typing import Any, Sequence
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 
 
 class DemolitionWar(EliminationGame):
     name = 'DemolitionWar'
     description = 'Last remaining alive wins.'
-    scoreconfig = ba.ScoreConfig(
-        label='Survived', scoretype=ba.ScoreType.SECONDS, none_is_winner=True
+    scoreconfig = bs.ScoreConfig(
+        label='Survived', scoretype=bs.ScoreType.SECONDS, none_is_winner=True
     )
     # Show messages when players die since it's meaningful here.
     announce_player_deaths = True
@@ -37,17 +40,17 @@ class DemolitionWar(EliminationGame):
 
     @classmethod
     def get_available_settings(
-        cls, sessiontype: type[ba.Session]
-    ) -> list[ba.Setting]:
+        cls, sessiontype: type[bs.Session]
+    ) -> list[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Lives Per Player',
                 default=1,
                 min_value=1,
                 max_value=10,
                 increment=1,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -59,7 +62,7 @@ class DemolitionWar(EliminationGame):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -70,23 +73,23 @@ class DemolitionWar(EliminationGame):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
-        if issubclass(sessiontype, ba.DualTeamSession):
-            settings.append(ba.BoolSetting('Solo Mode', default=False))
+        if issubclass(sessiontype, bs.DualTeamSession):
+            settings.append(bs.BoolSetting('Solo Mode', default=False))
             settings.append(
-                ba.BoolSetting('Balance Total Lives', default=False)
+                bs.BoolSetting('Balance Total Lives', default=False)
             )
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.DualTeamSession) or issubclass(
-            sessiontype, ba.FreeForAllSession
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.DualTeamSession) or issubclass(
+            sessiontype, bs.FreeForAllSession
         )
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return ['Wooden Floor']
 
     def __init__(self, settings: dict):
@@ -95,7 +98,7 @@ class DemolitionWar(EliminationGame):
         self._solo_mode = False
         self._balance_total_lives = False
 
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         p = [-6, -4.3, -2.6, -0.9, 0.8, 2.5, 4.2, 5.9]
         q = [-4, -2.3, -0.6, 1.1, 2.8, 4.5]
 
@@ -118,23 +121,23 @@ class DemolitionWar(EliminationGame):
         self.map_extend()
 
     def on_blast(self):
-        node = ba.getcollision().sourcenode
-        ba.emitfx((node.position[0], 0.9, node.position[2]),
+        node = bs.getcollision().sourcenode
+        bs.emitfx((node.position[0], 0.9, node.position[2]),
                   (0, 2, 0), 30, 1, spread=1, chunk_type='splinter')
-        ba.timer(0.1, ba.Call(node.delete))
+        bs.timer(0.1, babase.Call(node.delete))
 
     def map_extend(self):
         # TODO need to improve here , so we can increase size of map easily with settings
         p = [-6, -4.3, -2.6, -0.9, 0.8, 2.5, 4.2, 5.9]
         q = [-4, -2.3, -0.6, 1.1, 2.8, 4.5]
         factory = BombFactory.get()
-        self.ramp_bomb = ba.Material()
+        self.ramp_bomb = bs.Material()
         self.ramp_bomb.add_actions(
             conditions=('they_have_material', factory.bomb_material),
             actions=(
                 ('modify_part_collision', 'collide', True),
                 ('modify_part_collision', 'physical', True),
-                ('call', 'at_connect', ba.Call(self.on_blast))
+                ('call', 'at_connect', babase.Call(self.on_blast))
             ))
         self.ramps = []
         for i in p:
@@ -144,7 +147,7 @@ class DemolitionWar(EliminationGame):
     def create_ramp(self, x, z):
 
         shared = SharedObjects.get()
-        self._real_collied_material = ba.Material()
+        self._real_collied_material = bs.Material()
 
         self._real_collied_material.add_actions(
             actions=(
@@ -152,32 +155,32 @@ class DemolitionWar(EliminationGame):
                 ('modify_part_collision', 'physical', True)
 
             ))
-        self.mat = ba.Material()
+        self.mat = bs.Material()
         self.mat.add_actions(
             actions=(('modify_part_collision', 'physical', False),
                      ('modify_part_collision', 'collide', False))
         )
         pos = (x, 0, z)
-        ud_1_r = ba.newnode('region', attrs={'position': pos, 'scale': (1.5, 1, 1.5), 'type': 'box', 'materials': [
+        ud_1_r = bs.newnode('region', attrs={'position': pos, 'scale': (1.5, 1, 1.5), 'type': 'box', 'materials': [
                             shared.footing_material, self._real_collied_material, self.ramp_bomb]})
 
-        node = ba.newnode('prop',
+        node = bs.newnode('prop',
                           owner=ud_1_r,
                           attrs={
-                              'model': ba.getmodel('image1x1'),
-                              'light_model': ba.getmodel('powerupSimple'),
+                              'mesh': bs.getmesh('image1x1'),
+                              'light_mesh': bs.getmesh('powerupSimple'),
                               'position': (2, 7, 2),
                               'body': 'puck',
                               'shadow_size': 0.0,
                               'velocity': (0, 0, 0),
-                              'color_texture': ba.gettexture('tnt'),
-                              'model_scale': 1.5,
+                              'color_texture': bs.gettexture('tnt'),
+                              'mesh_scale': 1.5,
                               'reflection_scale': [1.5],
                               'materials': [self.mat, shared.object_material, shared.footing_material],
                               'density': 9000000000
                           })
-        node.changerotation(1, 0, 0)
-        mnode = ba.newnode('math',
+        # node.changerotation(1, 0, 0)
+        mnode = bs.newnode('math',
                            owner=ud_1_r,
                            attrs={
                                'input1': (0, 0.6, 0),
@@ -218,7 +221,7 @@ class mapdefs:
     points['tnt1'] = (-0.08421587483, 0.9515026107, -0.7762602271)
 
 
-class WoodenFloor(ba.Map):
+class WoodenFloor(bs._map.Map):  # ahdunno if this is correct way, change if u find better way
     """Stadium map for football games."""
     defs = mapdefs
     defs.points['spawn1'] = (-12.03866341, 0.02275111462, 0.0) + (0.5, 1.0, 4.0)
@@ -238,15 +241,15 @@ class WoodenFloor(ba.Map):
     def on_preload(cls) -> Any:
         data: dict[str, Any] = {
 
-            'model_bg': ba.getmodel('doomShroomBG'),
-            'bg_vr_fill_model': ba.getmodel('natureBackgroundVRFill'),
-            'collide_model': ba.getcollidemodel('bridgitLevelCollide'),
-            'tex': ba.gettexture('bridgitLevelColor'),
-            'model_bg_tex': ba.gettexture('doomShroomBGColor'),
-            'collide_bg': ba.getcollidemodel('natureBackgroundCollide'),
-            'railing_collide_model':
-                (ba.getcollidemodel('bridgitLevelRailingCollide')),
-            'bg_material': ba.Material()
+            'mesh_bg': bs.getmesh('doomShroomBG'),
+            'bg_vr_fill_mesh': bs.getmesh('natureBackgroundVRFill'),
+            'collide_mesh': bs.getcollisionmesh('bridgitLevelCollide'),
+            'tex': bs.gettexture('bridgitLevelColor'),
+            'mesh_bg_tex': bs.gettexture('doomShroomBGColor'),
+            'collide_bg': bs.getcollisionmesh('natureBackgroundCollide'),
+            'railing_collide_mesh':
+                (bs.getcollisionmesh('bridgitLevelRailingCollide')),
+            'bg_material': bs.Material()
         }
         data['bg_material'].add_actions(actions=('modify_part_collision',
                                                  'friction', 10.0))
@@ -255,23 +258,23 @@ class WoodenFloor(ba.Map):
     def __init__(self) -> None:
         super().__init__()
         shared = SharedObjects.get()
-        self.background = ba.newnode(
+        self.background = bs.newnode(
             'terrain',
             attrs={
-                'model': self.preloaddata['model_bg'],
+                'mesh': self.preloaddata['mesh_bg'],
                 'lighting': False,
                 'background': True,
-                'color_texture': self.preloaddata['model_bg_tex']
+                'color_texture': self.preloaddata['mesh_bg_tex']
             })
-        self.vr = ba.newnode('terrain',
+        self.vr = bs.newnode('terrain',
                              attrs={
-                                 'model': self.preloaddata['bg_vr_fill_model'],
+                                 'mesh': self.preloaddata['bg_vr_fill_mesh'],
                                  'lighting': False,
                                  'vr_only': True,
                                  'background': True,
-                                 'color_texture': self.preloaddata['model_bg_tex']
+                                 'color_texture': self.preloaddata['mesh_bg_tex']
                              })
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.tint = (1.3, 1.2, 1.0)
         gnode.ambient_color = (1.3, 1.2, 1.0)
         gnode.vignette_outer = (0.57, 0.57, 0.57)
@@ -280,7 +283,7 @@ class WoodenFloor(ba.Map):
         gnode.vr_near_clip = 0.5
 
     def is_point_near_edge(self,
-                           point: ba.Vec3,
+                           point: babase.Vec3,
                            running: bool = False) -> bool:
         box_position = self.defs.boxes['edge_box'][0:3]
         box_scale = self.defs.boxes['edge_box'][6:9]
@@ -290,15 +293,15 @@ class WoodenFloor(ba.Map):
 
     def _handle_player_collide(self):
         try:
-            player = ba.getcollision().opposingnode.getdelegate(
+            player = bs.getcollision().opposingnode.getdelegate(
                 PlayerSpaz, True)
-        except ba.NotFoundError:
+        except bs.NotFoundError:
             return
         if player.is_alive():
             player.shatter(True)
 
 
 try:
-    ba._map.register_map(WoodenFloor)
+    bs._map.register_map(WoodenFloor)
 except:
     pass

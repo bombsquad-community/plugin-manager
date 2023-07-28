@@ -6,18 +6,20 @@
 
 # Feel free to edit.
 
-# ba_meta require api 7
+# ba_meta require api 8
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-import ba
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
 from random import choice
 from enum import Enum
-from bastd.actor.bomb import Blast
-from bastd.actor.popuptext import PopupText
-from bastd.actor.powerupbox import PowerupBox
-from bastd.actor.onscreencountdown import OnScreenCountdown
-from bastd.gameutils import SharedObjects
+from bascenev1lib.actor.bomb import Blast
+from bascenev1lib.actor.popuptext import PopupText
+from bascenev1lib.actor.powerupbox import PowerupBox
+from bascenev1lib.actor.onscreencountdown import OnScreenCountdown
+from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import NoReturn, Sequence, Any
@@ -48,13 +50,13 @@ ball_type_dict: dict[BallType, int] = {
 }
 
 
-class Ball(ba.Actor):
+class Ball(bs.Actor):
     """ Shooting Ball """
 
     def __init__(self,
                  position: Sequence[float],
                  velocity: Sequence[float],
-                 texture: ba.Texture,
+                 texture: babase.Texture,
                  body_scale: float = 1.0,
                  gravity_scale: float = 1.0,
                  ) -> NoReturn:
@@ -63,7 +65,7 @@ class Ball(ba.Actor):
 
         shared = SharedObjects.get()
 
-        ball_material = ba.Material()
+        ball_material = bs.Material()
         ball_material.add_actions(
             conditions=(
                 (
@@ -77,7 +79,7 @@ class Ball(ba.Actor):
             actions=('modify_node_collision', 'collide', False),
         )
 
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'prop',
             delegate=self,
             attrs={
@@ -85,8 +87,8 @@ class Ball(ba.Actor):
                 'position': position,
                 'velocity': velocity,
                 'body_scale': body_scale,
-                'model': ba.getmodel('frostyPelvis'),
-                'model_scale': body_scale,
+                'mesh': bs.getmesh('frostyPelvis'),
+                'mesh_scale': body_scale,
                 'color_texture': texture,
                 'gravity_scale': gravity_scale,
                 'density': 4.0,  # increase density of ball so ball collide with player with heavy force. # ammm very bad grammer
@@ -95,19 +97,19 @@ class Ball(ba.Actor):
         )
 
         # die the ball manually incase the ball doesn't fall the outside of the map
-        ba.timer(2.5, ba.WeakCall(self.handlemessage, ba.DieMessage()))
+        bs.timer(2.5, bs.WeakCall(self.handlemessage, bs.DieMessage()))
 
     # i am not handling anything in this ball Class(except for diemessage).
     # all game things and logics going to be in the box class
     def handlemessage(self, msg: Any) -> Any:
 
-        if isinstance(msg, ba.DieMessage):
+        if isinstance(msg, bs.DieMessage):
             self.node.delete()
         else:
             super().handlemessage(msg)
 
 
-class Box(ba.Actor):
+class Box(bs.Actor):
     """ A box that spawn midle of map as a decoration perpose """
 
     def __init__(self,
@@ -119,7 +121,7 @@ class Box(ba.Actor):
 
         shared = SharedObjects.get()
         # self.ball_jump = 0.0;
-        no_hit_material = ba.Material()
+        no_hit_material = bs.Material()
         # we don't need that the box was move and collide with objects.
         no_hit_material.add_actions(
             conditions=(
@@ -142,25 +144,25 @@ class Box(ba.Actor):
             ),
         )
 
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'prop',
             delegate=self,
             attrs={
                 'body': 'box',
                 'position': position,
-                'model': ba.getmodel('powerup'),
-                'light_model': ba.getmodel('powerupSimple'),
+                'mesh': bs.getmesh('powerup'),
+                'light_mesh': bs.getmesh('powerupSimple'),
                 'shadow_size': 0.5,
                 'body_scale': 1.4,
-                'model_scale': 1.4,
-                'color_texture': ba.gettexture('landMineLit'),
+                'mesh_scale': 1.4,
+                'color_texture': bs.gettexture('landMineLit'),
                 'reflection': 'powerup',
                 'reflection_scale': [1.0],
                 'materials': (no_hit_material,),
             },
         )
         # light
-        self.light = ba.newnode(
+        self.light = bs.newnode(
             "light",
             owner=self.node,
             attrs={
@@ -173,7 +175,7 @@ class Box(ba.Actor):
         # Drawing circle and circleOutline in radius of 3,
         # so player can see that how close he is to the box.
         # If player is inside this circle the ball speed will increase.
-        circle = ba.newnode(
+        circle = bs.newnode(
             "locator",
             owner=self.node,
             attrs={
@@ -187,7 +189,7 @@ class Box(ba.Actor):
         )
         self.node.connectattr("position", circle, "position")
         # also adding a outline cause its look nice.
-        circle_outline = ba.newnode(
+        circle_outline = bs.newnode(
             "locator",
             owner=self.node,
             attrs={
@@ -203,17 +205,17 @@ class Box(ba.Actor):
 
         # all ball attribute that we need.
         self.ball_type: BallType = BallType.EASY
-        self.shoot_timer: ba.Timer | None = None
+        self.shoot_timer: bs.Timer | None = None
         self.shoot_speed: float = 0.0
         # this force the shoot if player is inside the red circle.
         self.force_shoot_speed: float = 0.0
         self.ball_mag = 3000
         self.ball_gravity: float = 1.0
-        self.ball_tex: ba.Texture | None = None
+        self.ball_tex: babase.Texture | None = None
         # only for Hard ball_type
         self.player_facing_direction: list[float, float] = [0.0, 0.0]
         # ball shoot soound.
-        self.shoot_sound = ba.getsound('laserReverse')
+        self.shoot_sound = bs.getsound('laserReverse')
 
         # same as "powerupdist"
         self.ball_type_dist: list[BallType] = []
@@ -240,7 +242,7 @@ class Box(ba.Actor):
             # to finding difference between player and box.
             # we just need to subtract player pos and ball pos.
             # Same logic as eric applied in Target Practice Gamemode.
-            difference = ba.Vec3(target_player.position) - ba.Vec3(self.node.position)
+            difference = babase.Vec3(target_player.position) - babase.Vec3(self.node.position)
 
             # discard Y position so ball shoot more straight.
             difference[1] = 0.0
@@ -301,7 +303,7 @@ class Box(ba.Actor):
                 difference[2] + self.player_facing_direction[1],  # force direction Z
             )
             # creating our timer and shoot the ball again.(and we create a loop)
-            self.shoot_timer = ba.Timer(self.shoot_speed, self.start_shoot)
+            self.shoot_timer = bs.Timer(self.shoot_speed, self.start_shoot)
 
     def upgrade_ball_type(self, ball_type: BallType) -> NoReturn:
 
@@ -316,7 +318,7 @@ class Box(ba.Actor):
             self.ball_mag = 3000
             # box light color and ball tex
             self.light.color = (1.0, 1.0, 0.0)
-            self.ball_tex = ba.gettexture('egg4')
+            self.ball_tex = bs.gettexture('egg4')
         elif ball_type == BallType.MEDIUM:
             self.ball_mag = 3000
             # decrease the gravity scale so, ball shoot without falling and straight.
@@ -325,7 +327,7 @@ class Box(ba.Actor):
             self.shoot_speed = 0.4
             # box light color and ball tex.
             self.light.color = (1.0, 0.0, 1.0)
-            self.ball_tex = ba.gettexture('egg3')
+            self.ball_tex = bs.gettexture('egg3')
         elif ball_type == BallType.HARD:
             self.ball_mag = 2500
             self.ball_gravity = 0.0
@@ -333,25 +335,26 @@ class Box(ba.Actor):
             self.shoot_speed = 0.6
             # box light color and ball tex.
             self.light.color = (1.0, 0.2, 1.0)
-            self.ball_tex = ba.gettexture('egg1')
+            self.ball_tex = bs.gettexture('egg1')
 
     def shoot_animation(self) -> NoReturn:
 
-        ba.animate(
+        bs.animate(
             self.node,
-            "model_scale", {
+            "mesh_scale", {
                 0.00: 1.4,
                 0.05: 1.7,
                 0.10: 1.4,
             }
         )
         # playing shoot sound.
-        ba.playsound(self.shoot_sound, position=self.node.position)
+        # self.shoot_sound, position = self.node.position.play();
+        self.shoot_sound.play()
 
-    def highlight_target_player(self, player: ba.Player) -> NoReturn:
+    def highlight_target_player(self, player: bs.Player) -> NoReturn:
 
         # adding light
-        light = ba.newnode(
+        light = bs.newnode(
             "light",
             owner=self.node,
             attrs={
@@ -360,7 +363,7 @@ class Box(ba.Actor):
                 'color': (1.0, 0.0, 0.0),
             }
         )
-        ba.animate(
+        bs.animate(
             light,
             "radius", {
                 0.05: 0.02,
@@ -374,7 +377,7 @@ class Box(ba.Actor):
             }
         )
         # And a circle outline with ugly animation.
-        circle_outline = ba.newnode(
+        circle_outline = bs.newnode(
             "locator",
             owner=player.actor.node,
             attrs={
@@ -385,7 +388,7 @@ class Box(ba.Actor):
                 'additive': True,
             },
         )
-        ba.animate_array(
+        bs.animate_array(
             circle_outline,
             'size',
             1, {
@@ -406,10 +409,10 @@ class Box(ba.Actor):
 
         # immediately delete the node after another player has been targeted.
         self.shoot_speed = 0.5 if self.shoot_speed == 0.0 else self.shoot_speed
-        ba.timer(self.shoot_speed, light.delete)
-        ba.timer(self.shoot_speed, circle_outline.delete)
+        bs.timer(self.shoot_speed, light.delete)
+        bs.timer(self.shoot_speed, circle_outline.delete)
 
-    def calculate_player_analog_stick(self, player: ba.Player, distance: float) -> NoReturn:
+    def calculate_player_analog_stick(self, player: bs.Player, distance: float) -> NoReturn:
         # at first i was very confused how i can read the player analog stick \
         # then i saw TheMikirog#1984 autorun plugin code.
         # and i got it how analog stick values are works.
@@ -461,48 +464,48 @@ class Box(ba.Actor):
         self.shoot_timer = None
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
 # almost 80 % for game we done in box class.
 # now remain things, like name, seetings, scoring, cooldonw,
 # and main thing don't allow player to camp inside of box are going in this class.
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 
 
-class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
+class DodgeTheBall(bs.TeamGameActivity[Player, Team]):
 
     # defining name, description and settings..
     name = 'Dodge the ball'
     description = 'Survive from shooting balls'
 
     available_settings = [
-        ba.IntSetting(
+        bs.IntSetting(
             'Cooldown',
             min_value=20,
             default=45,
             increment=5,
         ),
-        ba.BoolSetting('Epic Mode', default=False)
+        bs.BoolSetting('Epic Mode', default=False)
     ]
 
     # Don't allow joining after we start.
     allow_mid_activity_joins = False
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
         # We support team and ffa sessions.
-        return issubclass(sessiontype, ba.FreeForAllSession) or issubclass(
-            sessiontype, ba.DualTeamSession,
+        return issubclass(sessiontype, bs.FreeForAllSession) or issubclass(
+            sessiontype, bs.DualTeamSession,
         )
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         # This Game mode need a flat and perfect shape map where can player fall outside map.
         # bombsquad have "Doom Shroom" map.
         # Not perfect map for this game mode but its fine for this gamemode.
@@ -514,21 +517,21 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
         self._epic_mode = bool(settings['Epic Mode'])
         self.countdown_time = int(settings['Cooldown'])
 
-        self.check_player_pos_timer: ba.Timer | None = None
-        self.shield_drop_timer: ba.Timer | None = None
+        self.check_player_pos_timer: bs.Timer | None = None
+        self.shield_drop_timer: bs.Timer | None = None
         # cooldown and Box
         self._countdown: OnScreenCountdown | None = None
         self.box: Box | None = None
 
         # this lists for scoring.
-        self.joined_player_list: list[ba.Player] = []
-        self.dead_player_list: list[ba.Player] = []
+        self.joined_player_list: list[bs.Player] = []
+        self.dead_player_list: list[bs.Player] = []
 
         # normally play RUN AWAY music cause is match with our gamemode at.. my point,
         # but in epic switch to EPIC.
         self.slow_motion = self._epic_mode
         self.default_music = (
-            ba.MusicType.EPIC if self._epic_mode else ba.MusicType.RUN_AWAY
+            bs.MusicType.EPIC if self._epic_mode else bs.MusicType.RUN_AWAY
         )
 
     def get_instance_description(self) -> str | Sequence:
@@ -554,19 +557,19 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
         )
 
         # and starts the cooldown and shootes.
-        ba.timer(5.0, self._countdown.start)
-        ba.timer(5.0, self.box.start_shoot)
+        bs.timer(5.0, self._countdown.start)
+        bs.timer(5.0, self.box.start_shoot)
 
         # start checking all player pos.
-        ba.timer(5.0, self.check_player_pos)
+        bs.timer(5.0, self.check_player_pos)
 
         # drop shield every ten Seconds
         # need five seconds delay Because shootes start after 5 seconds.
-        ba.timer(15.0, self.drop_shield)
+        bs.timer(15.0, self.drop_shield)
 
     # This function returns all alive players in game.
     # i thinck you see this function in Box class.
-    def get_alive_players(self) -> Sequence[ba.Player]:
+    def get_alive_players(self) -> Sequence[bs.Player]:
 
         alive_players = []
 
@@ -583,7 +586,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
         for player in self.get_alive_players():
 
             # same logic as applied for the ball
-            difference = ba.Vec3(player.position) - ba.Vec3(self.box.node.position)
+            difference = babase.Vec3(player.position) - babase.Vec3(self.box.node.position)
 
             distance = difference.length()
 
@@ -609,7 +612,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
                 ).autoretain()
 
         # create our timer and start looping it
-        self.check_player_pos_timer = ba.Timer(0.1, self.check_player_pos)
+        self.check_player_pos_timer = bs.Timer(0.1, self.check_player_pos)
 
     # drop useless shield's too give player temptation.
     def drop_shield(self) -> NoReturn:
@@ -626,7 +629,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
             poweruptype='shield',
         ).autoretain()
 
-        self.shield_drop_timer = ba.Timer(10.0, self.drop_shield)
+        self.shield_drop_timer = bs.Timer(10.0, self.drop_shield)
 
     # when cooldown time up i don't want that the game end immediately.
     def play_victory_sound_and_end(self) -> NoReturn:
@@ -636,7 +639,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
         self.check_player_pos_timer = None
         self.shield_drop_timer = None
 
-        ba.timer(2.0, self.end_game)
+        bs.timer(2.0, self.end_game)
 
     # this function runs when A player spawn in map
     def spawn_player(self, player: Player) -> NoReturn:
@@ -682,7 +685,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
     # this gamemode needs to handle only one msg "PlayerDiedMessage".
     def handlemessage(self, msg: Any) -> Any:
 
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
 
             # Augment standard behavior.
             super().handlemessage(msg)
@@ -691,7 +694,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
             self.dead_player_list.append(msg.getplayer(Player))
 
             # check the end game.
-            ba.timer(1.0, self._check_end_game)
+            bs.timer(1.0, self._check_end_game)
 
     def end_game(self):
         # kill timers
@@ -736,7 +739,7 @@ class DodgeTheBall(ba.TeamGameActivity[Player, Team]):
 
         # Ok now calc game results: set a score for each team and then tell \
         # the game to end.
-        results = ba.GameResults()
+        results = bs.GameResults()
 
         # Remember that 'free-for-all' mode is simply a special form \
         # of 'teams' mode where each player gets their own team, so we can \
