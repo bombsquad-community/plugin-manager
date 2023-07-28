@@ -34,16 +34,12 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "7dcf3c7",
-          "released_on": "28-07-2023",
-          "md5sum": "cedc448a3d625065d586445e115fcd1f"
-        }
+        "1.0.0": null
       }
     },
     "frozen_one": {
@@ -52,16 +48,12 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "7dcf3c7",
-          "released_on": "28-07-2023",
-          "md5sum": "529c8b9c9a450317d5aa75e8eab47497"
-        }
+        "1.0.0": null
       }
     },
     "simon_says": {
@@ -234,16 +226,12 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
-        "2.0.0": {
-          "api_version": 8,
-          "commit_sha": "7dcf3c7",
-          "released_on": "28-07-2023",
-          "md5sum": "2c457b80b5a35adf0cad1436af4ab3fe"
-        },
+        "2.0.0": null,
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "0bc9522",
@@ -258,16 +246,12 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
-        "2.0.0": {
-          "api_version": 8,
-          "commit_sha": "7dcf3c7",
-          "released_on": "28-07-2023",
-          "md5sum": "49ae645a5afc390ead44d7219b388c78"
-        },
+        "2.0.0": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -282,16 +266,12 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
-        "2.0.0": {
-          "api_version": 8,
-          "commit_sha": "7dcf3c7",
-          "released_on": "28-07-2023",
-          "md5sum": "4cb6510f9f3ce151720a53a957986864"
-        },
+        "2.0.0": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -480,16 +460,12 @@
         },
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
-        "2.0.0": {
-          "api_version": 8,
-          "commit_sha": "7dcf3c7",
-          "released_on": "28-07-2023",
-          "md5sum": "22b51a147524d84fbc249e61f21ae424"
-        },
+        "2.0.0": null,
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "2e2540a",
@@ -698,7 +674,8 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": ""
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
