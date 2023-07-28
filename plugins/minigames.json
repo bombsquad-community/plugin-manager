@@ -328,6 +328,12 @@
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "f54c993",
+          "released_on": "27-07-2023",
+          "md5sum": "7699483f4c379db809676ac917943d3c"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2aa1e50",
@@ -695,6 +701,25 @@
           "commit_sha": "2309aab",
           "released_on": "24-07-2023",
           "md5sum": "01b85dc9ef1d464ab604387af09f05dc"
+        }
+      }
+    },
+    "super_duel": {
+      "description": "Crush your enemy in a 1v1",
+      "external_url": "https://www.youtube.com/watch?v=hvRtiXR-oC0",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ab26786",
+          "released_on": "27-07-2023",
+          "md5sum": "d0c9c0472d7b145eadf535957a462fdf"
         }
       }
     },
