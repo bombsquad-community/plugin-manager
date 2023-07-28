@@ -1,4 +1,4 @@
-"""Practice Tools Mod: V1.2
+"""Practice Tools Mod: V2.0
 Made by Cross Joy"""
 
 # If anyone who want to help me on giving suggestion/ fix bugs/ creating PR,
@@ -12,6 +12,9 @@ Made by Cross Joy"""
 # Support link: https://www.buymeacoffee.com/CrossJoy
 
 # ----------------------------------------------------------------------------
+# V2.0 update
+# - Updated to API 8 (1.7.20+)
+
 # V1.2 update
 # - Added New Bot: Bomber Lite and Brawler Lite.
 # - Added New Setting: Epic Mode Toggle.
@@ -53,95 +56,86 @@ Made by Cross Joy"""
 
 from __future__ import annotations
 
+import math
 import random
 import weakref
 from enum import Enum
 from typing import TYPE_CHECKING
-import ba
-import _ba
-import ba.internal
-import bastd
-from bastd.actor.powerupbox import PowerupBox
-from bastd.actor.spaz import Spaz
-from bastd.actor.spazbot import (SpazBotSet, SpazBot, BrawlerBot, TriggerBot,
-                                 ChargerBot, StickyBot, ExplodeyBot, BouncyBot,
-                                 BomberBotPro, BrawlerBotPro, TriggerBotPro,
-                                 ChargerBotPro, BomberBotProShielded,
-                                 BrawlerBotProShielded, TriggerBotProShielded,
-                                 ChargerBotProShielded, BomberBotLite, BrawlerBotLite)
-from bastd.mainmenu import MainMenuSession
-from bastd.ui.party import PartyWindow as OriginalPartyWindow
-from ba import app, Plugin
-from bastd.ui import popup
-from bastd.actor.bomb import Bomb
-import math
 
-from bastd.ui.tabs import TabRow
+import babase
+import bascenev1 as bs
+import bascenev1lib
+import bauiv1 as bui
+import bauiv1lib as buil
+from babase import app, Plugin
+from bascenev1lib.actor.powerupbox import PowerupBox
+from bascenev1lib.actor.spaz import Spaz
+from bascenev1lib.actor import spawner
+from bascenev1lib.actor.spazbot import (SpazBotSet, SpazBot, BrawlerBot,
+                                        TriggerBot,
+                                        ChargerBot, StickyBot, ExplodeyBot,
+                                        BouncyBot,
+                                        BomberBotPro, BrawlerBotPro,
+                                        TriggerBotPro,
+                                        ChargerBotPro, BomberBotProShielded,
+                                        BrawlerBotProShielded,
+                                        TriggerBotProShielded,
+                                        ChargerBotProShielded, BomberBotLite,
+                                        BrawlerBotLite)
+from bascenev1lib.mainmenu import MainMenuSession
+from bauiv1lib import popup
+from bauiv1lib.party import PartyWindow as OriginalPartyWindow
+from bauiv1lib.tabs import TabRow
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, Optional
 
-try:
-    if ba.app.config.get("bombCountdown") is None:
-        ba.app.config["bombCountdown"] = False
-    else:
-        ba.app.config.get("bombCountdown")
-except:
-    ba.app.config["bombCountdown"] = False
+version = '2.0'
 
 try:
-    if ba.app.config.get("bombRadiusVisual") is None:
-        ba.app.config["bombRadiusVisual"] = False
+    if babase.app.config.get("bombCountdown") is None:
+        babase.app.config["bombCountdown"] = False
     else:
-        ba.app.config.get("bombRadiusVisual")
+        babase.app.config.get("bombCountdown")
 except:
-    ba.app.config["bombRadiusVisual"] = False
+    babase.app.config["bombCountdown"] = False
 
 try:
-    if ba.app.config.get("stopBots") is None:
-        ba.app.config["stopBots"] = False
+    if babase.app.config.get("bombRadiusVisual") is None:
+        babase.app.config["bombRadiusVisual"] = False
     else:
-        ba.app.config.get("stopBots")
+        babase.app.config.get("bombRadiusVisual")
 except:
-    ba.app.config["stopBots"] = False
+    babase.app.config["bombRadiusVisual"] = False
 
 try:
-    if ba.app.config.get("immortalDummy") is None:
-        ba.app.config["immortalDummy"] = False
+    if babase.app.config.get("stopBots") is None:
+        babase.app.config["stopBots"] = False
     else:
-        ba.app.config.get("immortalDummy")
+        babase.app.config.get("stopBots")
 except:
-    ba.app.config["immortalDummy"] = False
+    babase.app.config["stopBots"] = False
 
 try:
-    if ba.app.config.get("invincible") is None:
-        ba.app.config["invincible"] = False
+    if babase.app.config.get("immortalDummy") is None:
+        babase.app.config["immortalDummy"] = False
     else:
-        ba.app.config.get("invincible")
+        babase.app.config.get("immortalDummy")
 except:
-    ba.app.config["invincible"] = False
+    babase.app.config["immortalDummy"] = False
 
-_ba.set_party_icon_always_visible(True)
+try:
+    if babase.app.config.get("invincible") is None:
+        babase.app.config["invincible"] = False
+    else:
+        babase.app.config.get("invincible")
+except:
+    babase.app.config["invincible"] = False
 
-
-def is_game_version_lower_than(version):
-    """
-    Returns a boolean value indicating whether the current game
-    version is lower than the passed version. Useful for addressing
-    any breaking changes within game versions.
-    """
-    game_version = tuple(map(int, ba.app.version.split(".")))
-    version = tuple(map(int, version.split(".")))
-    return game_version < version
+bui.set_party_icon_always_visible(True)
 
 
-if is_game_version_lower_than("1.7.7"):
-    ba_internal = _ba
-else:
-    ba_internal = ba.internal
-
-
-class PartyWindow(ba.Window):
+class PartyWindow(bui.Window):
     _redefine_methods = ['__init__']
 
     def __init__(self, *args, **kwargs):
@@ -149,7 +143,7 @@ class PartyWindow(ba.Window):
 
         self.bg_color = (.5, .5, .5)
 
-        self._edit_movements_button = ba.buttonwidget(
+        self._edit_movements_button = bui.buttonwidget(
             parent=self._root_widget,
             scale=0.7,
             position=(360, self._height - 47),
@@ -158,7 +152,7 @@ class PartyWindow(ba.Window):
             label='Practice',
             autoselect=True,
             button_type='square',
-            on_activate_call=ba.Call(doTestButton, self),
+            on_activate_call=bs.Call(doTestButton, self),
             color=self.bg_color,
             iconscale=1.2)
 
@@ -183,16 +177,16 @@ def main(plugin: Plugin) -> None:
     redefine_class(OriginalPartyWindow, PartyWindow)
 
 
-# ba_meta require api 7
+# ba_meta require api 8
 # ba_meta export plugin
 class Practice(Plugin):
-    __version__ = '1.2'
+    __version__ = '2.0'
 
     def on_app_running(self) -> None:
         """Plugin start point."""
 
         if app.build_number < 20427:
-            ba.screenmessage(
+            bui.screenmessage(
                 'ok',
                 color=(.8, .1, .1))
             raise RuntimeError(
@@ -207,8 +201,8 @@ class Practice(Plugin):
             bomb_type = args[0].bomb_type
             fuse_bomb = ('land_mine', 'tnt', 'impact')
 
-            if ba.app.config.get("bombRadiusVisual"):
-                args[0].radius_visualizer = ba.newnode('locator',
+            if babase.app.config.get("bombRadiusVisual"):
+                args[0].radius_visualizer = bs.newnode('locator',
                                                        owner=args[0].node,
                                                        # Remove itself when the bomb node dies.
                                                        attrs={
@@ -221,13 +215,13 @@ class Practice(Plugin):
                 args[0].node.connectattr('position', args[0].radius_visualizer,
                                          'position')
 
-                ba.animate_array(args[0].radius_visualizer, 'size', 1, {
+                bs.animate_array(args[0].radius_visualizer, 'size', 1, {
                     0.0: [0.0],
                     0.2: [args[0].blast_radius * 2.2],
                     0.25: [args[0].blast_radius * 2.0]
                 })
 
-                args[0].radius_visualizer_circle = ba.newnode(
+                args[0].radius_visualizer_circle = bs.newnode(
                     'locator',
                     owner=args[
                         0].node,
@@ -247,14 +241,14 @@ class Practice(Plugin):
                                          args[0].radius_visualizer_circle,
                                          'position')
 
-                ba.animate(
+                bs.animate(
                     args[0].radius_visualizer_circle, 'opacity', {
                         0: 0.0,
                         0.4: 0.1
                     })
 
                 if bomb_type == 'tnt':
-                    args[0].fatal = ba.newnode('locator',
+                    args[0].fatal = bs.newnode('locator',
                                                owner=args[0].node,
                                                # Remove itself when the bomb node dies.
                                                attrs={
@@ -269,25 +263,25 @@ class Practice(Plugin):
                                              args[0].fatal,
                                              'position')
 
-                    ba.animate_array(args[0].fatal, 'size', 1, {
+                    bs.animate_array(args[0].fatal, 'size', 1, {
                         0.0: [0.0],
                         0.2: [args[0].blast_radius * 2.2 * 0.7],
                         0.25: [args[0].blast_radius * 2.0 * 0.7]
                     })
 
-            if ba.app.config.get(
+            if babase.app.config.get(
                     "bombCountdown") and bomb_type not in fuse_bomb:
                 color = (1.0, 1.0, 0.0)
                 count_bomb(*args, count='3', color=color)
                 color = (1.0, 0.5, 0.0)
-                ba.timer(1, ba.Call(count_bomb, *args, count='2', color=color))
+                bs.timer(1, bs.Call(count_bomb, *args, count='2', color=color))
                 color = (1.0, 0.15, 0.15)
-                ba.timer(2, ba.Call(count_bomb, *args, count='1', color=color))
+                bs.timer(2, bs.Call(count_bomb, *args, count='1', color=color))
 
         return setting
 
-    bastd.actor.bomb.Bomb.__init__ = new_bomb_init(
-        bastd.actor.bomb.Bomb.__init__)
+    bascenev1lib.actor.bomb.Bomb.__init__ = new_bomb_init(
+        bascenev1lib.actor.bomb.Bomb.__init__)
 
 
 Spaz._pm2_spz_old = Spaz.__init__
@@ -295,7 +289,7 @@ Spaz._pm2_spz_old = Spaz.__init__
 
 def _init_spaz_(self, *args, **kwargs):
     self._pm2_spz_old(*args, **kwargs)
-    self.bot_radius = ba.newnode('locator',
+    self.bot_radius = bs.newnode('locator',
                                  owner=self.node,
                                  # Remove itself when the bomb node dies.
                                  attrs={
@@ -309,7 +303,7 @@ def _init_spaz_(self, *args, **kwargs):
                           self.bot_radius,
                           'position')
 
-    self.radius_visualizer_circle = ba.newnode(
+    self.radius_visualizer_circle = bs.newnode(
         'locator',
         owner=self.node,
         # Remove itself when the bomb node dies.
@@ -325,7 +319,7 @@ def _init_spaz_(self, *args, **kwargs):
     self.node.connectattr('position', self.radius_visualizer_circle,
                           'position')
 
-    self.curse_visualizer = ba.newnode('locator',
+    self.curse_visualizer = bs.newnode('locator',
                                        owner=self.node,
                                        # Remove itself when the bomb node dies.
                                        attrs={
@@ -339,7 +333,7 @@ def _init_spaz_(self, *args, **kwargs):
     self.node.connectattr('position', self.curse_visualizer,
                           'position')
 
-    self.curse_visualizer_circle = ba.newnode(
+    self.curse_visualizer_circle = bs.newnode(
         'locator',
         owner=self.node,
         # Remove itself when the bomb node dies.
@@ -357,7 +351,7 @@ def _init_spaz_(self, *args, **kwargs):
                           self.curse_visualizer_circle,
                           'position')
 
-    self.curse_visualizer_fatal = ba.newnode('locator',
+    self.curse_visualizer_fatal = bs.newnode('locator',
                                              owner=self.node,
                                              # Remove itself when the bomb node dies.
                                              attrs={
@@ -374,17 +368,17 @@ def _init_spaz_(self, *args, **kwargs):
                           'position')
 
     def invincible() -> None:
-        for i in _ba.get_foreground_host_activity().players:
+        for i in bs.get_foreground_host_activity().players:
             try:
                 if i.node:
-                    if ba.app.config.get("invincible"):
+                    if babase.app.config.get("invincible"):
                         i.actor.node.invincible = True
                     else:
                         i.actor.node.invincible = False
             except:
                 pass
 
-    ba.timer(1.001, ba.Call(invincible))
+    bs.timer(1.001, bs.Call(invincible))
 
 
 Spaz.__init__ = _init_spaz_
@@ -396,8 +390,8 @@ def new_cursed(self):
     if self.node.invincible:
         return
     self.super_curse()
-    if ba.app.config.get("bombRadiusVisual"):
-        ba.animate_array(self.curse_visualizer, 'size', 1, {
+    if babase.app.config.get("bombRadiusVisual"):
+        bs.animate_array(self.curse_visualizer, 'size', 1, {
             0.0: [0.0],
             0.2: [3 * 2.2],
             0.5: [3 * 2.0],
@@ -405,7 +399,7 @@ def new_cursed(self):
             5.1: [0.0],
         })
 
-        ba.animate(
+        bs.animate(
             self.curse_visualizer_circle, 'opacity', {
                 0: 0.0,
                 0.4: 0.1,
@@ -413,7 +407,7 @@ def new_cursed(self):
                 5.1: 0.0,
             })
 
-        ba.animate_array(self.curse_visualizer_fatal, 'size', 1, {
+        bs.animate_array(self.curse_visualizer_fatal, 'size', 1, {
             0.0: [0.0],
             0.2: [2.2],
             0.5: [2.0],
@@ -428,41 +422,41 @@ Spaz.super_handlemessage = Spaz.handlemessage
 
 
 def bot_handlemessage(self, msg: Any):
-    if isinstance(msg, ba.PowerupMessage):
+    if isinstance(msg, bs.PowerupMessage):
         if msg.poweruptype == 'health':
-            if ba.app.config.get("bombRadiusVisual"):
+            if babase.app.config.get("bombRadiusVisual"):
                 if self._cursed:
-                    ba.animate_array(self.curse_visualizer, 'size', 1, {
+                    bs.animate_array(self.curse_visualizer, 'size', 1, {
                         0.0: [3 * 2.0],
                         0.2: [0.0],
                     })
 
-                    ba.animate(
+                    bs.animate(
                         self.curse_visualizer_circle, 'opacity', {
                             0.0: 0.1,
                             0.2: 0.0,
                         })
 
-                    ba.animate_array(self.curse_visualizer_fatal, 'size', 1, {
+                    bs.animate_array(self.curse_visualizer_fatal, 'size', 1, {
                         0.0: [2.0],
                         0.2: [0.0],
                     })
 
-                ba.animate_array(self.bot_radius, 'size', 1, {
+                bs.animate_array(self.bot_radius, 'size', 1, {
                     0.0: [0],
                     0.25: [0]
                 })
-                ba.animate(self.bot_radius, 'opacity', {
+                bs.animate(self.bot_radius, 'opacity', {
                     0.0: 0.00,
                     0.25: 0.0
                 })
 
-                ba.animate_array(self.radius_visualizer_circle, 'size', 1, {
+                bs.animate_array(self.radius_visualizer_circle, 'size', 1, {
                     0.0: [0],
                     0.25: [0]
                 })
 
-                ba.animate(
+                bs.animate(
                     self.radius_visualizer_circle, 'opacity', {
                         0.0: 0.00,
                         0.25: 0.0
@@ -470,32 +464,32 @@ def bot_handlemessage(self, msg: Any):
 
     self.super_handlemessage(msg)
 
-    if isinstance(msg, ba.HitMessage):
+    if isinstance(msg, bs.HitMessage):
         if self.hitpoints <= 0:
-            ba.animate(self.bot_radius, 'opacity', {
+            bs.animate(self.bot_radius, 'opacity', {
                 0.0: 0.00
             })
-            ba.animate(
+            bs.animate(
                 self.radius_visualizer_circle, 'opacity', {
                     0.0: 0.00
                 })
-        elif ba.app.config.get('bombRadiusVisual'):
+        elif babase.app.config.get('bombRadiusVisual'):
 
-            ba.animate_array(self.bot_radius, 'size', 1, {
+            bs.animate_array(self.bot_radius, 'size', 1, {
                 0.0: [(self.hitpoints_max - self.hitpoints) * 0.0045],
                 0.25: [(self.hitpoints_max - self.hitpoints) * 0.0045]
             })
-            ba.animate(self.bot_radius, 'opacity', {
+            bs.animate(self.bot_radius, 'opacity', {
                 0.0: 0.00,
                 0.25: 0.05
             })
 
-            ba.animate_array(self.radius_visualizer_circle, 'size', 1, {
+            bs.animate_array(self.radius_visualizer_circle, 'size', 1, {
                 0.0: [(self.hitpoints_max - self.hitpoints) * 0.0045],
                 0.25: [(self.hitpoints_max - self.hitpoints) * 0.0045]
             })
 
-            ba.animate(
+            bs.animate(
                 self.radius_visualizer_circle, 'opacity', {
                     0.0: 0.00,
                     0.25: 0.1
@@ -506,11 +500,11 @@ Spaz.handlemessage = bot_handlemessage
 
 
 def count_bomb(*args, count, color):
-    text = ba.newnode('math', owner=args[0].node,
+    text = bs.newnode('math', owner=args[0].node,
                       attrs={'input1': (0, 0.7, 0),
                              'operation': 'add'})
     args[0].node.connectattr('position', text, 'input2')
-    args[0].spaztext = ba.newnode('text',
+    args[0].spaztext = bs.newnode('text',
                                   owner=args[0].node,
                                   attrs={
                                       'text': count,
@@ -524,20 +518,17 @@ def count_bomb(*args, count, color):
 
     args[0].node.connectattr('position', args[0].spaztext,
                              'position')
-    ba.animate(args[0].spaztext, 'scale',
+    bs.animate(args[0].spaztext, 'scale',
                {0: 0, 0.3: 0.03, 0.5: 0.025, 0.8: 0.025, 1.0: 0.0})
 
 
 def doTestButton(self):
-    if isinstance(_ba.get_foreground_host_session(), MainMenuSession):
-        ba.screenmessage('Join any map to start using it.', color=(.8, .8, .1))
+    if isinstance(bs.get_foreground_host_session(), MainMenuSession):
+        bui.screenmessage('Join any map to start using it.', color=(.8, .8, .1))
         return
 
-    if ba.app.config.get("disablePractice"):
-        ba.containerwidget(edit=self._root_widget, transition='out_left')
-        ba.Call(PracticeWindow())
-    else:
-        ba.screenmessage('Only works on local games.', color=(.8, .8, .1))
+    bui.containerwidget(edit=self._root_widget, transition='out_left')
+    bs.Call(PracticeWindow())
 
 
 # ---------------------------------------------------------------
@@ -546,64 +537,68 @@ def doTestButton(self):
 class NewBotSet(SpazBotSet):
 
     def __init__(self):
+        """Create a bot-set."""
+
+        # We spread our bots out over a few lists so we can update
+        # them in a staggered fashion.
         super().__init__()
 
+    def start_moving(self) -> None:
+        """Start processing bot AI updates so they start doing their thing."""
+        self._bot_update_timer = bui.AppTimer(
+            0.05, bs.WeakCall(self._update), repeat=True
+        )
+
     def _update(self) -> None:
+
+        # Update one of our bot lists each time through.
+        # First off, remove no-longer-existing bots from the list.
         try:
-            with ba.Context(_ba.get_foreground_host_activity()):
-                # Update one of our bot lists each time through.
-                # First off, remove no-longer-existing bots from the list.
-                try:
-                    bot_list = self._bot_lists[self._bot_update_list] = ([
-                        b for b in self._bot_lists[self._bot_update_list] if b
-                    ])
-                except Exception:
-                    bot_list = []
-                    ba.print_exception('Error updating bot list: ' +
-                                       str(self._bot_lists[
-                                           self._bot_update_list]))
-                self._bot_update_list = (self._bot_update_list +
-                                         1) % self._bot_list_count
+            bot_list = self._bot_lists[self._bot_update_list] = ([
+                b for b in self._bot_lists[self._bot_update_list] if b
+            ])
+        except Exception:
+            bot_list = []
+            babase.print_exception('Error updating bot list: ' +
+                                   str(self._bot_lists[
+                                       self._bot_update_list]))
+        self._bot_update_list = (self._bot_update_list +
+                                 1) % self._bot_list_count
 
-                # Update our list of player points for the bots to use.
-                player_pts = []
-                for player in ba.getactivity().players:
-                    assert isinstance(player, ba.Player)
-                    try:
-                        # TODO: could use abstracted player.position here so we
-                        # don't have to assume their actor type, but we have no
-                        # abstracted velocity as of yet.
-                        if player.is_alive():
-                            assert isinstance(player.actor, Spaz)
-                            assert player.actor.node
-                            player_pts.append(
-                                (ba.Vec3(player.actor.node.position),
-                                 ba.Vec3(
-                                     player.actor.node.velocity)))
-                    except Exception:
-                        ba.print_exception('Error on bot-set _update.')
+        # Update our list of player points for the bots to use.
+        player_pts = []
+        for player in bs.getactivity().players:
+            assert isinstance(player, bs.Player)
+            try:
+                # TODO: could use abstracted player.position here so we
+                # don't have to assume their actor type, but we have no
+                # abstracted velocity as of yet.
+                if player.is_alive():
+                    assert isinstance(player.actor, Spaz)
+                    assert player.actor.node
+                    player_pts.append(
+                        (bs.Vec3(player.actor.node.position),
+                         bs.Vec3(
+                             player.actor.node.velocity)))
+            except Exception:
+                babase.print_exception('Error on bot-set _update.')
 
-                for bot in bot_list:
-                    if not ba.app.config.get('stopBots'):
-                        bot.set_player_points(player_pts)
-                        bot.update_ai()
-
-                ba.app.config["disablePractice"] = True
-        except:
-            ba.app.config["disablePractice"] = False
+        for bot in bot_list:
+            if not babase.app.config.get('stopBots'):
+                bot.set_player_points(player_pts)
+                bot.update_ai()
 
     def clear(self) -> None:
         """Immediately clear out any bots in the set."""
-        with ba.Context(_ba.get_foreground_host_activity()):
-            # Don't do this if the activity is shutting down or dead.
-            activity = ba.getactivity(doraise=False)
-            if activity is None or activity.expired:
-                return
+        # Don't do this if the activity is shutting down or dead.
+        activity = bs.getactivity(doraise=False)
+        if activity is None or activity.expired:
+            return
 
-            for i, bot_list in enumerate(self._bot_lists):
-                for bot in bot_list:
-                    bot.handlemessage(ba.DieMessage(immediate=True))
-                self._bot_lists[i] = []
+        for i, bot_list in enumerate(self._bot_lists):
+            for bot in bot_list:
+                bot.handlemessage(bs.DieMessage(immediate=True))
+            self._bot_lists[i] = []
 
     def spawn_bot(
             self,
@@ -612,22 +607,25 @@ class NewBotSet(SpazBotSet):
             spawn_time: float = 3.0,
             on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
         """Spawn a bot from this set."""
-        from bastd.actor import spawner
-        spawner.Spawner(pt=pos,
-                        spawn_time=spawn_time,
-                        send_spawn_message=False,
-                        spawn_callback=ba.Call(self._spawn_bot, bot_type, pos,
-                                               on_spawn_call))
+
+        spawner.Spawner(
+            pt=pos,
+            spawn_time=spawn_time,
+            send_spawn_message=False,
+            spawn_callback=bs.Call(
+                self._spawn_bot, bot_type, pos, on_spawn_call
+            ),
+        )
         self._spawning_count += 1
 
     def _spawn_bot(self, bot_type: type[SpazBot], pos: Sequence[float],
                    on_spawn_call: Callable[[SpazBot], Any] | None) -> None:
         spaz = bot_type().autoretain()
-        ba.playsound(ba.getsound('spawn'), position=pos)
+        bs.getsound('spawn').play(position=pos)
         assert spaz.node
         spaz.node.handlemessage('flash')
         spaz.node.is_area_of_interest = False
-        spaz.handlemessage(ba.StandMessage(pos, random.uniform(0, 360)))
+        spaz.handlemessage(bs.StandMessage(pos, random.uniform(0, 360)))
         self.add_bot(spaz)
         self._spawning_count -= 1
         if on_spawn_call is not None:
@@ -639,19 +637,18 @@ class DummyBotSet(NewBotSet):
     def _update(self) -> None:
 
         try:
-            with ba.Context(_ba.get_foreground_host_activity()):
-                # Update one of our bot lists each time through.
-                # First off, remove no-longer-existing bots from the list.
-                try:
-                    bot_list = self._bot_lists[self._bot_update_list] = ([
-                        b for b in self._bot_lists[self._bot_update_list] if b
-                    ])
-                except Exception:
-                    ba.print_exception('Error updating bot list: ' +
+            # Update one of our bot lists each time through.
+            # First off, remove no-longer-existing bots from the list.
+            try:
+                bot_list = self._bot_lists[self._bot_update_list] = ([
+                    b for b in self._bot_lists[self._bot_update_list] if b
+                ])
+            except Exception:
+                babase.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
                                            self._bot_update_list]))
-                self._bot_update_list = (self._bot_update_list +
-                                         1) % self._bot_list_count
+            self._bot_update_list = (self._bot_update_list +
+                                     1) % self._bot_list_count
 
         except:
             pass
@@ -662,16 +659,19 @@ class DummyBot(SpazBot):
 
     def __init__(self):
         super().__init__()
-        if ba.app.config.get('immortalDummy'):
-            ba.timer(0.2, self.immortal,
+        if babase.app.config.get('immortalDummy'):
+            bs.timer(0.2, self.immortal,
                      repeat=True)
 
     def immortal(self):
         self.hitpoints = self.hitpoints_max = 10000
-        ba.emitfx(
-            position=self.node.position,
-            count=20,
-            emit_type='fairydust')
+        try:
+            bs.emitfx(
+                position=self.node.position,
+                count=20,
+                emit_type='fairydust')
+        except:
+            pass
 
 
 class NewChargerBotPro(ChargerBotPro):
@@ -691,18 +691,18 @@ class PracticeTab:
         """The GatherWindow that this tab belongs to."""
         window = self._window()
         if window is None:
-            raise ba.NotFoundError("PracticeTab's window no longer exists.")
+            raise bs.NotFoundError("PracticeTab's window no longer exists.")
         return window
 
     def on_activate(
-            self,
-            parent_widget: ba.Widget,
-            tab_button: ba.Widget,
-            region_width: float,
-            region_height: float,
-            scroll_widget: ba.Widget,
-            extra_x: float,
-    ) -> ba.Widget:
+        self,
+        parent_widget: bs.Widget,
+        tab_button: bs.Widget,
+        region_width: float,
+        region_height: float,
+        scroll_widget: bs.Widget,
+        extra_x: float,
+    ) -> bs.Widget:
         """Called when the tab becomes the active one.
 
         The tab should create and return a container widget covering the
@@ -720,41 +720,52 @@ class PracticeTab:
         """Called when the parent window is restoring state."""
 
 
-def _check_value_change(setting: int, widget: ba.Widget,
+def _check_value_change(setting: int, widget: bs.Widget,
                         value: str) -> None:
-    ba.textwidget(edit=widget,
-                  text=ba.Lstr(resource='onText') if value else ba.Lstr(
-                      resource='offText'))
+    bui.textwidget(edit=widget,
+                   text=bs.Lstr(resource='onText') if value else bs.Lstr(
+                       resource='offText'))
 
     if setting == 0:
         if value:
-            ba.app.config["stopBots"] = True
+            babase.app.config["stopBots"] = True
         else:
-            ba.app.config["stopBots"] = False
+            babase.app.config["stopBots"] = False
     elif setting == 1:
         if value:
-            ba.app.config["immortalDummy"] = True
+            babase.app.config["immortalDummy"] = True
         else:
-            ba.app.config["immortalDummy"] = False
+            babase.app.config["immortalDummy"] = False
 
 
 class BotsPracticeTab(PracticeTab):
     """The about tab in the practice UI"""
 
-    def __init__(self, window: PracticeWindow,
-                 bot1=DummyBotSet(), bot2=NewBotSet()) -> None:
+    def __init__(self, window: PracticeWindow
+                 ) -> None:
+
         super().__init__(window)
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            try:
+                if not activity.bot1 or not activity.bot2:
+                    activity.bot1 = DummyBotSet()
+                    activity.bot2 = NewBotSet()
+            except:
+                activity.bot1 = DummyBotSet()
+                activity.bot2 = NewBotSet()
         bot_index, count, radius = self.load_settings()
-        self._container: ba.Widget | None = None
+        self._container: bs.Widget | None = None
         self.count = count
         self.radius = radius
         self.radius_array = (['Small', 'Medium', 'Big'])
         self.parent_widget = None
-        self.bot1 = bot1
-        self.bot2 = bot2
-        self.activity = _ba.get_foreground_host_activity()
+        self.bot1 = activity.bot1
+        self.bot2 = activity.bot2
+        self.activity = bs.get_foreground_host_activity()
         self.image_array = (
-            ['bonesIcon', 'neoSpazIcon', 'kronkIcon', 'neoSpazIcon', 'kronkIcon',
+            ['bonesIcon', 'neoSpazIcon', 'kronkIcon', 'neoSpazIcon',
+             'kronkIcon',
              'zoeIcon', 'ninjaIcon', 'melIcon', 'jackIcon', 'bunnyIcon',
              'neoSpazIcon', 'kronkIcon', 'zoeIcon', 'ninjaIcon',
              'neoSpazIcon', 'kronkIcon', 'zoeIcon', 'ninjaIcon'])
@@ -770,7 +781,8 @@ class BotsPracticeTab(PracticeTab):
         self.config = (['stopBots', 'immortalDummy'])
 
         self.bot_array = (
-            [DummyBot, BomberBotLite, BrawlerBotLite, SpazBot, BrawlerBot, TriggerBot,
+            [DummyBot, BomberBotLite, BrawlerBotLite, SpazBot, BrawlerBot,
+             TriggerBot,
              ChargerBot, StickyBot, ExplodeyBot, BouncyBot,
              BomberBotPro, BrawlerBotPro, TriggerBotPro, NewChargerBotPro,
              BomberBotProShielded, BrawlerBotProShielded,
@@ -779,18 +791,18 @@ class BotsPracticeTab(PracticeTab):
         self._icon_index = bot_index
 
     def on_activate(
-            self,
-            parent_widget: ba.Widget,
-            tab_button: ba.Widget,
-            region_width: float,
-            region_height: float,
-            scroll_widget: ba.Widget,
-            extra_x: float,
-    ) -> ba.Widget:
+        self,
+        parent_widget: bs.Widget,
+        tab_button: bs.Widget,
+        region_width: float,
+        region_height: float,
+        scroll_widget: bs.Widget,
+        extra_x: float,
+    ) -> bui.Widget:
 
         b_size_2 = 100
         spacing_h = -50
-        mask_texture = ba.gettexture('characterIconMask')
+        mask_texture = bui.gettexture('characterIconMask')
         spacing_v = 60
 
         self.parent_widget = parent_widget
@@ -806,26 +818,26 @@ class BotsPracticeTab(PracticeTab):
         self.container_h = 600
         bots_height = self.container_h - 50
 
-        self._subcontainer = ba.containerwidget(
+        self._subcontainer = bui.containerwidget(
             parent=scroll_widget,
             size=(self._sub_width, self.container_h),
             background=False,
             selection_loops_to_parent=True)
 
-        ba.textwidget(parent=self._subcontainer,
-                      position=(self._sub_width * 0.5,
-                                bots_height),
-                      size=(0, 0),
-                      color=(1.0, 1.0, 1.0),
-                      scale=1.3,
-                      h_align='center',
-                      v_align='center',
-                      text='Spawn Bot',
-                      maxwidth=200)
+        bui.textwidget(parent=self._subcontainer,
+                       position=(self._sub_width * 0.5,
+                                 bots_height),
+                       size=(0, 0),
+                       color=(1.0, 1.0, 1.0),
+                       scale=1.3,
+                       h_align='center',
+                       v_align='center',
+                       text='Spawn Bot',
+                       maxwidth=200)
 
         tint1, tint2, color = self.check_color()
 
-        self._bot_button = bot = ba.buttonwidget(
+        self._bot_button = bot = bui.buttonwidget(
             parent=self._subcontainer,
             autoselect=True,
             position=(self._sub_width * 0.5 - b_size_2 * 0.5,
@@ -834,14 +846,14 @@ class BotsPracticeTab(PracticeTab):
             size=(b_size_2, b_size_2),
             label='',
             color=color,
-            tint_texture=(ba.gettexture(
+            tint_texture=(bui.gettexture(
                 self.image_array[self._icon_index] + 'ColorMask')),
             tint_color=tint1,
             tint2_color=tint2,
-            texture=ba.gettexture(self.image_array[self._icon_index]),
+            texture=bui.gettexture(self.image_array[self._icon_index]),
             mask_texture=mask_texture)
 
-        ba.textwidget(
+        bui.textwidget(
             parent=self._subcontainer,
             h_align='center',
             v_align='center',
@@ -851,34 +863,34 @@ class BotsPracticeTab(PracticeTab):
             draw_controller=bot,
             text='Bot Type',
             scale=1.0,
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             maxwidth=130)
 
-        ba.textwidget(parent=self._subcontainer,
-                      position=(
-                          self._sub_width * 0.005,
-                          bots_height
-                          + spacing_h * 7),
-                      size=(100, 30),
-                      text='Count',
-                      h_align='left',
-                      color=(0.8, 0.8, 0.8),
-                      v_align='center',
-                      maxwidth=200)
-        self.count_text = txt = ba.textwidget(parent=self._subcontainer,
-                                              position=(
-                                                  self._sub_width * 0.85 - spacing_v * 2,
-                                                  bots_height
-                                                  + spacing_h * 7),
-                                              size=(0, 28),
-                                              text=str(self.count),
-                                              editable=False,
-                                              color=(0.6, 1.0, 0.6),
-                                              maxwidth=150,
-                                              h_align='center',
-                                              v_align='center',
-                                              padding=2)
-        self.button_bot_left = btn1 = ba.buttonwidget(
+        bui.textwidget(parent=self._subcontainer,
+                       position=(
+                           self._sub_width * 0.005,
+                           bots_height
+                           + spacing_h * 7),
+                       size=(100, 30),
+                       text='Count',
+                       h_align='left',
+                       color=(0.8, 0.8, 0.8),
+                       v_align='center',
+                       maxwidth=200)
+        self.count_text = txt = bui.textwidget(parent=self._subcontainer,
+                                               position=(
+                                                   self._sub_width * 0.85 - spacing_v * 2,
+                                                   bots_height
+                                                   + spacing_h * 7),
+                                               size=(0, 28),
+                                               text=str(self.count),
+                                               editable=False,
+                                               color=(0.6, 1.0, 0.6),
+                                               maxwidth=150,
+                                               h_align='center',
+                                               v_align='center',
+                                               padding=2)
+        self.button_bot_left = btn1 = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.85 - spacing_v - 14,
@@ -889,7 +901,7 @@ class BotsPracticeTab(PracticeTab):
             autoselect=True,
             on_activate_call=self.decrease_count,
             repeat=True)
-        self.button_bot_right = btn2 = ba.buttonwidget(
+        self.button_bot_right = btn2 = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.85 - 14,
@@ -901,33 +913,33 @@ class BotsPracticeTab(PracticeTab):
             on_activate_call=self.increase_count,
             repeat=True)
 
-        ba.textwidget(parent=self._subcontainer,
-                      position=(
-                          self._sub_width * 0.005,
-                          bots_height
-                          + spacing_h * 8),
-                      size=(100, 30),
-                      text='Spawn Radius',
-                      h_align='left',
-                      color=(0.8, 0.8, 0.8),
-                      v_align='center',
-                      maxwidth=200)
+        bui.textwidget(parent=self._subcontainer,
+                       position=(
+                           self._sub_width * 0.005,
+                           bots_height
+                           + spacing_h * 8),
+                       size=(100, 30),
+                       text='Spawn Radius',
+                       h_align='left',
+                       color=(0.8, 0.8, 0.8),
+                       v_align='center',
+                       maxwidth=200)
 
-        self.radius_text = txt = ba.textwidget(parent=self._subcontainer,
-                                               position=(
-                                                   self._sub_width * 0.85 - spacing_v * 2,
-                                                   bots_height
-                                                   + spacing_h * 8),
-                                               size=(0, 28),
-                                               text=self.radius_array[
-                                                   self.radius],
-                                               editable=False,
-                                               color=(0.6, 1.0, 0.6),
-                                               maxwidth=50,
-                                               h_align='center',
-                                               v_align='center',
-                                               padding=2)
-        self.button_bot_left = btn1 = ba.buttonwidget(
+        self.radius_text = txt = bui.textwidget(parent=self._subcontainer,
+                                                position=(
+                                                    self._sub_width * 0.85 - spacing_v * 2,
+                                                    bots_height
+                                                    + spacing_h * 8),
+                                                size=(0, 28),
+                                                text=self.radius_array[
+                                                    self.radius],
+                                                editable=False,
+                                                color=(0.6, 1.0, 0.6),
+                                                maxwidth=50,
+                                                h_align='center',
+                                                v_align='center',
+                                                padding=2)
+        self.button_bot_left = btn1 = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.85 - spacing_v - 14,
@@ -938,7 +950,7 @@ class BotsPracticeTab(PracticeTab):
             autoselect=True,
             on_activate_call=self.decrease_radius,
             repeat=True)
-        self.button_bot_right = btn2 = ba.buttonwidget(
+        self.button_bot_right = btn2 = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.85 - 14,
@@ -950,7 +962,7 @@ class BotsPracticeTab(PracticeTab):
             on_activate_call=self.increase_radius,
             repeat=True)
 
-        self.button = ba.buttonwidget(
+        self.button = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.25 - 40,
@@ -962,7 +974,7 @@ class BotsPracticeTab(PracticeTab):
             label='Spawn',
             on_activate_call=self.do_spawn_bot)
 
-        self.button = ba.buttonwidget(
+        self.button = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.75 - 40,
@@ -977,23 +989,23 @@ class BotsPracticeTab(PracticeTab):
 
         i = 0
         for name in self.setting_name:
-            ba.textwidget(parent=self._subcontainer,
-                          position=(self._sub_width * 0.005,
-                                    bots_height + spacing_h * (9 + i)),
-                          size=(100, 30),
-                          text=name,
-                          h_align='left',
-                          color=(0.8, 0.8, 0.8),
-                          v_align='center',
-                          maxwidth=200)
-            value = ba.app.config.get(self.config[i])
-            txt2 = ba.textwidget(
+            bui.textwidget(parent=self._subcontainer,
+                           position=(self._sub_width * 0.005,
+                                     bots_height + spacing_h * (9 + i)),
+                           size=(100, 30),
+                           text=name,
+                           h_align='left',
+                           color=(0.8, 0.8, 0.8),
+                           v_align='center',
+                           maxwidth=200)
+            value = babase.app.config.get(self.config[i])
+            txt2 = bui.textwidget(
                 parent=self._subcontainer,
                 position=(self._sub_width * 0.8 - spacing_v / 2,
                           bots_height +
                           spacing_h * (9 + i)),
                 size=(0, 28),
-                text=ba.Lstr(resource='onText') if value else ba.Lstr(
+                text=bs.Lstr(resource='onText') if value else bs.Lstr(
                     resource='offText'),
                 editable=False,
                 color=(0.6, 1.0, 0.6),
@@ -1001,18 +1013,18 @@ class BotsPracticeTab(PracticeTab):
                 h_align='right',
                 v_align='center',
                 padding=2)
-            ba.checkboxwidget(parent=self._subcontainer,
-                              text='',
-                              position=(self._sub_width * 0.8 - 15,
-                                        bots_height +
-                                        spacing_h * (9 + i)),
-                              size=(30, 30),
-                              autoselect=False,
-                              textcolor=(0.8, 0.8, 0.8),
-                              value=value,
-                              on_value_change_call=ba.Call(
-                                  _check_value_change,
-                                  i, txt2))
+            bui.checkboxwidget(parent=self._subcontainer,
+                               text='',
+                               position=(self._sub_width * 0.8 - 15,
+                                         bots_height +
+                                         spacing_h * (9 + i)),
+                               size=(30, 30),
+                               autoselect=False,
+                               textcolor=(0.8, 0.8, 0.8),
+                               value=value,
+                               on_value_change_call=bs.Call(
+                                   _check_value_change,
+                                   i, txt2))
             i += 1
 
         return self._subcontainer
@@ -1026,45 +1038,46 @@ class BotsPracticeTab(PracticeTab):
         if self.count < 10:
             self.count += 1
 
-            ba.textwidget(edit=self.count_text,
-                          text=str(self.count))
+            bui.textwidget(edit=self.count_text,
+                           text=str(self.count))
         self.save_settings()
 
     def decrease_count(self):
         if self.count > 1:
             self.count -= 1
 
-            ba.textwidget(edit=self.count_text,
-                          text=str(self.count))
+            bui.textwidget(edit=self.count_text,
+                           text=str(self.count))
         self.save_settings()
 
     def increase_radius(self):
         if self.radius < 2:
             self.radius += 1
 
-            ba.textwidget(edit=self.radius_text,
-                          text=self.radius_array[self.radius])
+            bui.textwidget(edit=self.radius_text,
+                           text=self.radius_array[self.radius])
         self.save_settings()
 
     def decrease_radius(self):
         if self.radius > 0:
             self.radius -= 1
 
-            ba.textwidget(edit=self.radius_text,
-                          text=self.radius_array[self.radius])
+            bui.textwidget(edit=self.radius_text,
+                           text=self.radius_array[self.radius])
         self.save_settings()
 
     def clear_bot(self):
-        ba.screenmessage('Cleared',
-                         clients=[-1], transient=True, color=(1, 0.1, 0.1))
-        self.bot1.clear()
-        self.bot2.clear()
+        bs.screenmessage('Cleared', color=(1, 0.1, 0.1))
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            self.bot1.clear()
+            self.bot2.clear()
 
     def do_spawn_bot(self, clid: int = -1) -> None:
-        with ba.Context(self.activity):
-            ba.screenmessage('Spawned',
-                             clients=[-1], transient=True, color=(0.2, 1, 0.2))
-            for i in _ba.get_foreground_host_activity().players:
+        bs.screenmessage('Spawned', color=(0.2, 1, 0.2))
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            for i in bs.get_foreground_host_activity().players:
                 if i.sessionplayer.inputdevice.client_id == clid:
                     if i.node:
                         bot_type = self._icon_index
@@ -1100,10 +1113,10 @@ class BotsPracticeTab(PracticeTab):
         if self._bot_button:
             tint1, tint2, color = self.check_color()
 
-            ba.buttonwidget(
+            bui.buttonwidget(
                 edit=self._bot_button,
-                texture=ba.gettexture(self.image_array[self._icon_index]),
-                tint_texture=(ba.gettexture(
+                texture=bui.gettexture(self.image_array[self._icon_index]),
+                tint_texture=(bui.gettexture(
                     self.image_array[self._icon_index] + 'ColorMask')),
                 color=color,
                 tint_color=tint1,
@@ -1112,33 +1125,29 @@ class BotsPracticeTab(PracticeTab):
 
     def load_settings(self):
         try:
-            if ba.app.config.get("botsSpawnSetting") is None:
-                ba.app.config["botsSpawnSetting"] = (0, 1, 0)
-                bot_index, count, radius = ba.app.config.get(
+            if babase.app.config.get("botsSpawnSetting") is None:
+                babase.app.config["botsSpawnSetting"] = (0, 1, 0)
+                bot_index, count, radius = babase.app.config.get(
                     "botsSpawnSetting")
             else:
-                bot_index, count, radius = ba.app.config.get(
+                bot_index, count, radius = babase.app.config.get(
                     "botsSpawnSetting")
-                print(ba.app.config.get("botsSpawnSetting"))
         except:
-            ba.app.config["botsSpawnSetting"] = (0, 1, 0)
-            bot_index, count, radius = ba.app.config.get("botsSpawnSetting")
+            babase.app.config["botsSpawnSetting"] = (0, 1, 0)
+            bot_index, count, radius = babase.app.config.get("botsSpawnSetting")
         values = bot_index, count, radius
-        print("settings loaded")
         return values
 
     def save_settings(self):
-        ba.app.config["botsSpawnSetting"] = (self._icon_index, self.count,
-                                             self.radius)
-        print(ba.app.config.get("botsSpawnSetting"))
-        ba.app.config.commit()
-        print("settings saved")
+        babase.app.config["botsSpawnSetting"] = (self._icon_index, self.count,
+                                                 self.radius)
+        babase.app.config.commit()
 
     def check_color(self):
         if self.bot_array_name[self._icon_index] in (
-                'Pro Bomber', 'Pro Brawler',
-                'Pro Trigger', 'Pro Charger',
-                'S.Pro Bomber', 'S.Pro Brawler',
+            'Pro Bomber', 'Pro Brawler',
+            'Pro Trigger', 'Pro Charger',
+            'S.Pro Bomber', 'S.Pro Brawler',
                 'S.Pro Trigger', 'S.Pro Charger'):
             tint1 = (1.0, 0.2, 0.1)
             tint2 = (0.6, 0.1, 0.05)
@@ -1154,7 +1163,7 @@ class BotsPracticeTab(PracticeTab):
             tint2 = (0.1, 0.3, 0.1)
 
         if self.bot_array_name[self._icon_index] in (
-                'S.Pro Bomber', 'S.Pro Brawler',
+            'S.Pro Bomber', 'S.Pro Brawler',
                 'S.Pro Trigger', 'S.Pro Charger'):
             color = (1.3, 1.2, 3.0)
         else:
@@ -1169,10 +1178,10 @@ class PowerUpPracticeTab(PracticeTab):
 
     def __init__(self, window: PracticeWindow) -> None:
         super().__init__(window)
-        self._container: ba.Widget | None = None
+        self._container: bs.Widget | None = None
         self.count = 1
         self.parent_widget = None
-        self.activity = _ba.get_foreground_host_activity()
+        self.activity = bs.get_foreground_host_activity()
 
         self.power_list = (['Bomb', 'Curse', 'Health', 'IceBombs',
                             'ImpactBombs', 'LandMines', 'Punch',
@@ -1193,14 +1202,14 @@ class PowerUpPracticeTab(PracticeTab):
         self.config = (['bombCountdown', 'bombRadiusVisual'])
 
     def on_activate(
-            self,
-            parent_widget: ba.Widget,
-            tab_button: ba.Widget,
-            region_width: float,
-            region_height: float,
-            scroll_widget: ba.Widget,
-            extra_x: float,
-    ) -> ba.Widget:
+        self,
+        parent_widget: bs.Widget,
+        tab_button: bs.Widget,
+        region_width: float,
+        region_height: float,
+        scroll_widget: bs.Widget,
+        extra_x: float,
+    ) -> bs.Widget:
 
         b_size_2 = 100
         spacing_h = -50
@@ -1219,24 +1228,24 @@ class PowerUpPracticeTab(PracticeTab):
         self.container_h = 450
         power_height = self.container_h - 50
 
-        self._subcontainer = ba.containerwidget(
+        self._subcontainer = bui.containerwidget(
             parent=scroll_widget,
             size=(self._sub_width, self.container_h),
             background=False,
             selection_loops_to_parent=True)
 
-        ba.textwidget(parent=self._subcontainer,
-                      position=(self._sub_width * 0.5,
-                                power_height),
-                      size=(0, 0),
-                      color=(1.0, 1.0, 1.0),
-                      scale=1.3,
-                      h_align='center',
-                      v_align='center',
-                      text='Spawn Power Up',
-                      maxwidth=200)
+        bui.textwidget(parent=self._subcontainer,
+                       position=(self._sub_width * 0.5,
+                                 power_height),
+                       size=(0, 0),
+                       color=(1.0, 1.0, 1.0),
+                       scale=1.3,
+                       h_align='center',
+                       v_align='center',
+                       text='Spawn Power Up',
+                       maxwidth=200)
 
-        self._power_button = bot = ba.buttonwidget(
+        self._power_button = bot = bui.buttonwidget(
             parent=self._subcontainer,
             autoselect=True,
             position=(self._sub_width * 0.5 - b_size_2 * 0.5,
@@ -1245,11 +1254,11 @@ class PowerUpPracticeTab(PracticeTab):
             size=(b_size_2, b_size_2),
             label='',
             color=(1, 1, 1),
-            texture=ba.gettexture('powerup' +
-                                  self.power_list[
-                                      self._icon_index]))
+            texture=bui.gettexture('powerup' +
+                                   self.power_list[
+                                       self._icon_index]))
 
-        ba.textwidget(
+        bui.textwidget(
             parent=self._subcontainer,
             h_align='center',
             v_align='center',
@@ -1259,10 +1268,10 @@ class PowerUpPracticeTab(PracticeTab):
             draw_controller=bot,
             text='Power Up Type',
             scale=1.0,
-            color=ba.app.ui.title_color,
+            color=bui.app.ui_v1.title_color,
             maxwidth=300)
 
-        self.button = ba.buttonwidget(
+        self.button = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.25 - 40,
@@ -1274,7 +1283,7 @@ class PowerUpPracticeTab(PracticeTab):
             label='Spawn',
             on_activate_call=self.get_powerup)
 
-        self.button = ba.buttonwidget(
+        self.button = bui.buttonwidget(
             parent=self._subcontainer,
             position=(
                 self._sub_width * 0.75 - 40,
@@ -1289,23 +1298,23 @@ class PowerUpPracticeTab(PracticeTab):
 
         i = 0
         for name in self.setting_name:
-            ba.textwidget(parent=self._subcontainer,
-                          position=(self._sub_width * 0.005,
-                                    power_height + spacing_h * (7 + i)),
-                          size=(100, 30),
-                          text=name,
-                          h_align='left',
-                          color=(0.8, 0.8, 0.8),
-                          v_align='center',
-                          maxwidth=200)
-            value = ba.app.config.get(self.config[i])
-            txt2 = ba.textwidget(
+            bui.textwidget(parent=self._subcontainer,
+                           position=(self._sub_width * 0.005,
+                                     power_height + spacing_h * (7 + i)),
+                           size=(100, 30),
+                           text=name,
+                           h_align='left',
+                           color=(0.8, 0.8, 0.8),
+                           v_align='center',
+                           maxwidth=200)
+            value = babase.app.config.get(self.config[i])
+            txt2 = bui.textwidget(
                 parent=self._subcontainer,
                 position=(self._sub_width * 0.8 - spacing_v / 2,
                           power_height +
                           spacing_h * (7 + i)),
                 size=(0, 28),
-                text=ba.Lstr(resource='onText') if value else ba.Lstr(
+                text=bs.Lstr(resource='onText') if value else bs.Lstr(
                     resource='offText'),
                 editable=False,
                 color=(0.6, 1.0, 0.6),
@@ -1313,27 +1322,27 @@ class PowerUpPracticeTab(PracticeTab):
                 h_align='right',
                 v_align='center',
                 padding=2)
-            ba.checkboxwidget(parent=self._subcontainer,
-                              text='',
-                              position=(self._sub_width * 0.8 - 15,
-                                        power_height +
-                                        spacing_h * (7 + i)),
-                              size=(30, 30),
-                              autoselect=False,
-                              textcolor=(0.8, 0.8, 0.8),
-                              value=value,
-                              on_value_change_call=ba.Call(
-                                  self._check_value_change,
-                                  i, txt2))
+            bui.checkboxwidget(parent=self._subcontainer,
+                               text='',
+                               position=(self._sub_width * 0.8 - 15,
+                                         power_height +
+                                         spacing_h * (7 + i)),
+                               size=(30, 30),
+                               autoselect=False,
+                               textcolor=(0.8, 0.8, 0.8),
+                               value=value,
+                               on_value_change_call=bs.Call(
+                                   self._check_value_change,
+                                   i, txt2))
             i += 1
 
         return self._subcontainer
 
     def debuff(self):
-        ba.screenmessage('Debuffed',
-                         clients=[-1], transient=True, color=(1, 0.1, 0.1))
-        with ba.Context(_ba.get_foreground_host_activity()):
-            for i in _ba.get_foreground_host_activity().players:
+        bs.screenmessage('Debuffed', color=(1, 0.1, 0.1))
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            for i in activity.players:
                 Spaz._gloves_wear_off(i.actor)
                 Spaz._multi_bomb_wear_off(i.actor)
                 Spaz._bomb_wear_off(i.actor)
@@ -1347,10 +1356,10 @@ class PowerUpPracticeTab(PracticeTab):
                 i.actor.shield_hitpoints = 1
 
     def get_powerup(self, clid: int = -1) -> None:
-        ba.screenmessage('Spawned',
-                         clients=[-1], transient=True, color=(0.2, 1, 0.2))
-        with ba.Context(_ba.get_foreground_host_activity()):
-            for i in _ba.get_foreground_host_activity().players:
+        bs.screenmessage('Spawned', color=(0.2, 1, 0.2))
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            for i in activity.players:
                 if i.sessionplayer.inputdevice.client_id == clid:
                     if i.node:
                         x = (random.choice([-7, 7]) / 10)
@@ -1379,52 +1388,49 @@ class PowerUpPracticeTab(PracticeTab):
 
     def _update_power(self, change: int = 0) -> None:
         if self._power_button:
-            ba.buttonwidget(
+            bui.buttonwidget(
                 edit=self._power_button,
-                texture=(ba.gettexture('powerup' +
-                                       self.power_list[
-                                           self._icon_index])))
+                texture=(bui.gettexture('powerup' +
+                                        self.power_list[
+                                            self._icon_index])))
         self.save_settings()
 
-    def _check_value_change(self, setting: int, widget: ba.Widget,
+    def _check_value_change(self, setting: int, widget: bs.Widget,
                             value: str) -> None:
-        ba.textwidget(edit=widget,
-                      text=ba.Lstr(resource='onText') if value else ba.Lstr(
-                          resource='offText'))
+        bui.textwidget(edit=widget,
+                       text=bs.Lstr(resource='onText') if value else bs.Lstr(
+                           resource='offText'))
 
-        with ba.Context(self.activity):
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
             if setting == 0:
                 if value:
-                    ba.app.config["bombCountdown"] = True
+                    babase.app.config["bombCountdown"] = True
                 else:
-                    ba.app.config["bombCountdown"] = False
+                    babase.app.config["bombCountdown"] = False
             elif setting == 1:
                 if value:
-                    ba.app.config["bombRadiusVisual"] = True
+                    babase.app.config["bombRadiusVisual"] = True
                 else:
-                    ba.app.config["bombRadiusVisual"] = False
+                    babase.app.config["bombRadiusVisual"] = False
 
     def load_settings(self):
         try:
-            if ba.app.config.get("powerSpawnSetting") is None:
-                ba.app.config["powerSpawnSetting"] = 0
-                power_index = ba.app.config.get("powerSpawnSetting")
+            if babase.app.config.get("powerSpawnSetting") is None:
+                babase.app.config["powerSpawnSetting"] = 0
+                power_index = babase.app.config.get("powerSpawnSetting")
             else:
-                power_index = ba.app.config.get(
+                power_index = babase.app.config.get(
                     "powerSpawnSetting")
-                print(ba.app.config.get("powerSpawnSetting"))
         except:
-            ba.app.config["powerSpawnSetting"] = 0
-            power_index = ba.app.config.get("powerSpawnSetting")
+            babase.app.config["powerSpawnSetting"] = 0
+            power_index = babase.app.config.get("powerSpawnSetting")
         values = power_index
-        print("power settings loaded")
         return values
 
     def save_settings(self):
-        ba.app.config["powerSpawnSetting"] = self._icon_index
-        print(ba.app.config.get("powerSpawnSetting"))
-        ba.app.config.commit()
-        print("power settings saved")
+        babase.app.config["powerSpawnSetting"] = self._icon_index
+        babase.app.config.commit()
 
 
 class OthersPracticeTab(PracticeTab):
@@ -1432,22 +1438,22 @@ class OthersPracticeTab(PracticeTab):
 
     def __init__(self, window: PracticeWindow) -> None:
         super().__init__(window)
-        self._container: ba.Widget | None = None
+        self._container: bs.Widget | None = None
         self.count = 1
         self.parent_widget = None
-        self.activity = _ba.get_foreground_host_activity()
+        self.activity = bs.get_foreground_host_activity()
         self.setting_name = (['Pause On Window', 'Invincible', 'Epic Mode'])
         self.config = (['pause', 'invincible'])
 
     def on_activate(
-            self,
-            parent_widget: ba.Widget,
-            tab_button: ba.Widget,
-            region_width: float,
-            region_height: float,
-            scroll_widget: ba.Widget,
-            extra_x: float,
-    ) -> ba.Widget:
+        self,
+        parent_widget: bs.Widget,
+        tab_button: bs.Widget,
+        region_width: float,
+        region_height: float,
+        scroll_widget: bs.Widget,
+        extra_x: float,
+    ) -> bs.Widget:
         spacing_v = 60
         spacing_h = -50
 
@@ -1463,46 +1469,46 @@ class OthersPracticeTab(PracticeTab):
         self.container_h = 300
         other_height = self.container_h - 50
 
-        self._subcontainer = ba.containerwidget(
+        self._subcontainer = bui.containerwidget(
             parent=scroll_widget,
             size=(self._sub_width, self.container_h),
             background=False,
             selection_loops_to_parent=True)
 
-        ba.textwidget(parent=self._subcontainer,
-                      position=(self._sub_width * 0.5,
-                                other_height),
-                      size=(0, 0),
-                      color=(1.0, 1.0, 1.0),
-                      scale=1.3,
-                      h_align='center',
-                      v_align='center',
-                      text='Others',
-                      maxwidth=200)
+        bui.textwidget(parent=self._subcontainer,
+                       position=(self._sub_width * 0.5,
+                                 other_height),
+                       size=(0, 0),
+                       color=(1.0, 1.0, 1.0),
+                       scale=1.3,
+                       h_align='center',
+                       v_align='center',
+                       text='Others',
+                       maxwidth=200)
 
         i = 0
         for name in self.setting_name:
-            ba.textwidget(parent=self._subcontainer,
-                          position=(self._sub_width * 0.005,
-                                    other_height + spacing_h * (2 + i)),
-                          size=(100, 30),
-                          text=name,
-                          h_align='left',
-                          color=(0.8, 0.8, 0.8),
-                          v_align='center',
-                          maxwidth=200)
+            bui.textwidget(parent=self._subcontainer,
+                           position=(self._sub_width * 0.005,
+                                     other_height + spacing_h * (2 + i)),
+                           size=(100, 30),
+                           text=name,
+                           h_align='left',
+                           color=(0.8, 0.8, 0.8),
+                           v_align='center',
+                           maxwidth=200)
             if name == 'Epic Mode':
-                activity = _ba.get_foreground_host_activity()
+                activity = bs.get_foreground_host_activity()
                 value = activity.globalsnode.slow_motion
             else:
-                value = ba.app.config.get(self.config[i])
-            txt2 = ba.textwidget(
+                value = babase.app.config.get(self.config[i])
+            txt2 = bui.textwidget(
                 parent=self._subcontainer,
                 position=(self._sub_width * 0.8 - spacing_v / 2,
                           other_height +
                           spacing_h * (2 + i)),
                 size=(0, 28),
-                text=ba.Lstr(resource='onText') if value else ba.Lstr(
+                text=bs.Lstr(resource='onText') if value else bs.Lstr(
                     resource='offText'),
                 editable=False,
                 color=(0.6, 1.0, 0.6),
@@ -1510,59 +1516,60 @@ class OthersPracticeTab(PracticeTab):
                 h_align='right',
                 v_align='center',
                 padding=2)
-            ba.checkboxwidget(parent=self._subcontainer,
-                              text='',
-                              position=(self._sub_width * 0.8 - 15,
-                                        other_height +
-                                        spacing_h * (2 + i)),
-                              size=(30, 30),
-                              autoselect=False,
-                              textcolor=(0.8, 0.8, 0.8),
-                              value=value,
-                              on_value_change_call=ba.Call(
-                                  self._check_value_change,
-                                  i, txt2))
+            bui.checkboxwidget(parent=self._subcontainer,
+                               text='',
+                               position=(self._sub_width * 0.8 - 15,
+                                         other_height +
+                                         spacing_h * (2 + i)),
+                               size=(30, 30),
+                               autoselect=False,
+                               textcolor=(0.8, 0.8, 0.8),
+                               value=value,
+                               on_value_change_call=bs.Call(
+                                   self._check_value_change,
+                                   i, txt2))
             i += 1
 
         return self._subcontainer
 
-    def _check_value_change(self, setting: int, widget: ba.Widget,
+    def _check_value_change(self, setting: int, widget: bs.Widget,
                             value: str) -> None:
-        ba.textwidget(edit=widget,
-                      text=ba.Lstr(resource='onText') if value else ba.Lstr(
-                          resource='offText'))
+        bui.textwidget(edit=widget,
+                       text=bs.Lstr(resource='onText') if value else bs.Lstr(
+                           resource='offText'))
 
-        with ba.Context(self.activity):
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
             if setting == 0:
                 if value:
-                    ba.app.config["pause"] = True
+                    babase.app.config["pause"] = True
                     self.activity.globalsnode.paused = True
                 else:
-                    ba.app.config["pause"] = False
+                    babase.app.config["pause"] = False
                     self.activity.globalsnode.paused = False
             elif setting == 1:
                 if value:
-                    ba.app.config["invincible"] = True
+                    babase.app.config["invincible"] = True
                 else:
-                    ba.app.config["invincible"] = False
-                for i in _ba.get_foreground_host_activity().players:
+                    babase.app.config["invincible"] = False
+                for i in bs.get_foreground_host_activity().players:
                     try:
                         if i.node:
-                            if ba.app.config.get("invincible"):
+                            if babase.app.config.get("invincible"):
                                 i.actor.node.invincible = True
                             else:
                                 i.actor.node.invincible = False
                     except:
                         pass
             elif setting == 2:
-                activity = _ba.get_foreground_host_activity()
+                activity = bs.get_foreground_host_activity()
                 if value:
                     activity.globalsnode.slow_motion = True
                 else:
                     activity.globalsnode.slow_motion = False
 
 
-class PracticeWindow(ba.Window):
+class PracticeWindow(bui.Window):
     class TabID(Enum):
         """Our available tab types."""
 
@@ -1571,23 +1578,23 @@ class PracticeWindow(ba.Window):
         OTHERS = 'others'
 
     def __del__(self):
-        _ba.set_party_icon_always_visible(True)
+        bui.set_party_icon_always_visible(True)
         self.activity.globalsnode.paused = False
 
     def __init__(self,
                  transition: Optional[str] = 'in_right'):
 
-        self.activity = _ba.get_foreground_host_activity()
-        _ba.set_party_icon_always_visible(False)
-        if ba.app.config.get("pause"):
+        self.activity = bs.get_foreground_host_activity()
+        bui.set_party_icon_always_visible(False)
+        if babase.app.config.get("pause"):
             self.activity.globalsnode.paused = True
-        uiscale = ba.app.ui.uiscale
+        uiscale = bui.app.ui_v1.uiscale
         self.pick = 0
         self._width = 500
 
-        self._height = (578 if uiscale is ba.UIScale.SMALL else
-                        670 if uiscale is ba.UIScale.MEDIUM else 800)
-        extra_x = 100 if uiscale is ba.UIScale.SMALL else 0
+        self._height = (578 if uiscale is babase.UIScale.SMALL else
+                        670 if uiscale is babase.UIScale.MEDIUM else 800)
+        extra_x = 100 if uiscale is babase.UIScale.SMALL else 0
         self.extra_x = extra_x
 
         self._transitioning_out = False
@@ -1601,13 +1608,13 @@ class PracticeWindow(ba.Window):
         v = self._height - 115.0
         v -= spacing_v * 3.0
 
-        super().__init__(root_widget=ba.containerwidget(
+        super().__init__(root_widget=bui.containerwidget(
             size=(self._width, self._height),
             transition=transition,
-            scale=(1.3 if uiscale is ba.UIScale.SMALL else
-                   0.97 if uiscale is ba.UIScale.MEDIUM else 0.8),
-            stack_offset=(0, -10) if uiscale is ba.UIScale.SMALL else (
-                240, 0) if uiscale is ba.UIScale.MEDIUM else (330, 20)))
+            scale=(1.3 if uiscale is babase.UIScale.SMALL else
+                   0.97 if uiscale is babase.UIScale.MEDIUM else 0.8),
+            stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+                240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20)))
 
         self._sub_height = 200
 
@@ -1616,29 +1623,29 @@ class PracticeWindow(ba.Window):
         self._scroll_position = ((self._width - self._scroll_width) * 0.5,
                                  (self._height - self._scroll_height) * 0.5)
 
-        self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
-                                             size=(self._scroll_width,
-                                                   self._scroll_height),
-                                             color=(0.55, 0.55, 0.55),
-                                             highlight=False,
-                                             position=self._scroll_position)
+        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
+                                              size=(self._scroll_width,
+                                                    self._scroll_height),
+                                              color=(0.55, 0.55, 0.55),
+                                              highlight=False,
+                                              position=self._scroll_position)
 
-        ba.containerwidget(edit=self._scrollwidget,
-                           claims_left_right=True)
+        bui.containerwidget(edit=self._scrollwidget,
+                            claims_left_right=True)
 
         # ---------------------------------------------------------
 
-        x_offs = 100 if uiscale is ba.UIScale.SMALL else 0
+        x_offs = 100 if uiscale is babase.UIScale.SMALL else 0
 
         self._current_tab: PracticeWindow.TabID | None = None
-        extra_top = 20 if uiscale is ba.UIScale.SMALL else 0
+        extra_top = 20 if uiscale is babase.UIScale.SMALL else 0
         self._r = 'gatherWindow'
 
         tabdefs: list[tuple[PracticeWindow.TabID, str]] = [
             (self.TabID.BOTS, 'Bots')
         ]
-        if ba_internal.get_v1_account_misc_read_val(
-                'enablePublicParties', True
+        if bui.app.plus.get_v1_account_misc_read_val(
+            'enablePublicParties', True
         ):
             tabdefs.append(
                 (
@@ -1649,9 +1656,9 @@ class PracticeWindow(ba.Window):
             (self.TabID.OTHERS, 'Others')
         )
 
-        condensed = uiscale is not ba.UIScale.LARGE
+        condensed = uiscale is not babase.UIScale.LARGE
         t_offs_y = (
-            0 if not condensed else 25 if uiscale is ba.UIScale.MEDIUM else 17
+            0 if not condensed else 25 if uiscale is babase.UIScale.MEDIUM else 17
         )
 
         tab_buffer_h = (320 if condensed else 250) + 2 * x_offs
@@ -1668,7 +1675,7 @@ class PracticeWindow(ba.Window):
                 self._width * 0.5 - self._sub_width * 0.5,
                 self._height * 0.79),
             size=(self._sub_width, 50),
-            on_select_call=ba.WeakCall(self._set_tab),
+            on_select_call=bui.WeakCall(self._set_tab),
         )
 
         # Now instantiate handlers for these tabs.
@@ -1683,43 +1690,43 @@ class PracticeWindow(ba.Window):
             if tabtype is not None:
                 self._tabs[tab_id] = tabtype(self)
 
-        if ba.app.ui.use_toolbars:
-            ba.widget(
+        if bui.app.ui_v1.use_toolbars:
+            bui.widget(
                 edit=self._tab_row.tabs[tabdefs[-1][0]].button,
-                right_widget=ba_internal.get_special_widget('party_button'),
+                right_widget=babase.get_special_widget('party_button'),
             )
-            if uiscale is ba.UIScale.SMALL:
-                ba.widget(
+            if uiscale is babase.UIScale.SMALL:
+                bui.widget(
                     edit=self._tab_row.tabs[tabdefs[0][0]].button,
-                    left_widget=ba_internal.get_special_widget('back_button'),
+                    left_widget=babase.get_special_widget('back_button'),
                 )
 
         # -----------------------------------------------------------
 
-        self._back_button = btn = ba.buttonwidget(
+        self.back_button = btn = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
             position=(self._width * 0.15 - 30,
                       self._height * 0.95 - 30),
             size=(60, 60),
             scale=1.1,
-            label=ba.charstr(ba.SpecialChar.BACK),
+            label=bui.charstr(bui.SpecialChar.BACK),
             button_type='backSmall',
             on_activate_call=self.close)
-        ba.containerwidget(edit=self._root_widget, cancel_button=btn)
+        bui.containerwidget(edit=self._root_widget, cancel_button=btn)
 
-        ba.textwidget(parent=self._root_widget,
-                      position=(self._width * 0.5,
-                                self._height * 0.95),
-                      size=(0, 0),
-                      color=ba.app.ui.title_color,
-                      scale=1.5,
-                      h_align='center',
-                      v_align='center',
-                      text='Practice Tools',
-                      maxwidth=400)
+        bui.textwidget(parent=self._root_widget,
+                       position=(self._width * 0.5,
+                                 self._height * 0.95),
+                       size=(0, 0),
+                       color=bui.app.ui_v1.title_color,
+                       scale=1.5,
+                       h_align='center',
+                       v_align='center',
+                       text='Practice Tools',
+                       maxwidth=400)
 
-        self.info_button = ba.buttonwidget(
+        self.info_button = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
             position=(self._width * 0.8 - 30,
@@ -1728,16 +1735,16 @@ class PracticeWindow(ba.Window):
             size=(60, 60),
             label='')
 
-        ba.imagewidget(
+        bui.imagewidget(
             parent=self._root_widget,
             position=(self._width * 0.8 - 25,
                       self._height * 0.15 - 25),
             size=(50, 50),
             draw_controller=self.info_button,
-            texture=ba.gettexture('achievementEmpty'),
+            texture=bui.gettexture('achievementEmpty'),
             color=(1.0, 1.0, 1.0))
 
-        self._tab_container: ba.Widget | None = None
+        self._tab_container: bui.Widget | None = None
 
         self._restore_state()
 
@@ -1748,12 +1755,12 @@ class PracticeWindow(ba.Window):
             parent=self._root_widget)
 
     def _button(self) -> None:
-        ba.buttonwidget(edit=None,
-                        color=(0.2, 0.4, 0.8))
+        bui.buttonwidget(edit=None,
+                         color=(0.2, 0.4, 0.8))
 
     def close(self) -> None:
         """Close the window."""
-        ba.containerwidget(edit=self._root_widget, transition='out_right')
+        bui.containerwidget(edit=self._root_widget, transition='out_right')
 
     def _set_tab(self, tab_id: TabID) -> None:
         if self._current_tab is tab_id:
@@ -1762,7 +1769,7 @@ class PracticeWindow(ba.Window):
         self._current_tab = tab_id
 
         # We wanna preserve our current tab between runs.
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Practice Tab'] = tab_id.value
         cfg.commit()
 
@@ -1797,12 +1804,12 @@ class PracticeWindow(ba.Window):
             for tab in self._tabs.values():
                 tab.restore_state()
 
-            sel: ba.Widget | None
-            winstate = ba.app.ui.window_states.get(type(self), {})
+            sel: bui.Widget | None
+            winstate = bui.app.ui_v1.window_states.get(type(self), {})
             sel_name = winstate.get('sel_name', None)
             assert isinstance(sel_name, (str, type(None)))
             current_tab = self.TabID.BOTS
-            gather_tab_val = ba.app.config.get('Practice Tab')
+            gather_tab_val = babase.app.config.get('Practice Tab')
             try:
                 stored_tab = enum_by_value(self.TabID, gather_tab_val)
                 if stored_tab in self._tab_row.tabs:
@@ -1810,8 +1817,8 @@ class PracticeWindow(ba.Window):
             except ValueError:
                 pass
             self._set_tab(current_tab)
-            if sel_name == 'Back':
-                sel = self._back_button
+            if sel_name == 'back':
+                sel = self.back_button
             elif sel_name == 'TabContainer':
                 sel = self._tab_container
             elif isinstance(sel_name, str) and sel_name.startswith('Tab:'):
@@ -1824,38 +1831,38 @@ class PracticeWindow(ba.Window):
                 sel = self._tab_row.tabs[sel_tab_id].button
             else:
                 sel = self._tab_row.tabs[current_tab].button
-            ba.containerwidget(edit=self._root_widget, selected_child=sel)
+            bui.containerwidget(edit=self._root_widget, selected_child=sel)
         except Exception:
-            ba.print_exception('Error restoring gather-win state.')
+            babase.print_exception('Error restoring gather-win state.')
 
 
-org_begin = ba._activity.Activity.on_begin
+org_begin = bs._activity.Activity.on_begin
 
 
 def new_begin(self):
     """Runs when game is began."""
     org_begin(self)
-    _ba.set_party_icon_always_visible(True)
+    bui.set_party_icon_always_visible(True)
 
 
-ba._activity.Activity.on_begin = new_begin
+bs._activity.Activity.on_begin = new_begin
 
 
 class BotPicker(popup.PopupWindow):
     """Popup window for selecting bots to spwan."""
 
     def __init__(self,
-                 parent: ba.Widget,
+                 parent: bui.Widget,
                  position: tuple[float, float] = (0.0, 0.0),
                  delegate: Any = None,
                  scale: float | None = None,
                  offset: tuple[float, float] = (0.0, 0.0),
                  selected_character: str | None = None):
         del parent  # unused here
-        uiscale = ba.app.ui.uiscale
+        uiscale = bui.app.ui_v1.uiscale
         if scale is None:
-            scale = (1.85 if uiscale is ba.UIScale.SMALL else
-                     1.65 if uiscale is ba.UIScale.MEDIUM else 1.23)
+            scale = (1.85 if uiscale is babase.UIScale.SMALL else
+                     1.65 if uiscale is babase.UIScale.MEDIUM else 1.23)
 
         self._delegate = delegate
         self._transitioning_out = False
@@ -1873,7 +1880,7 @@ class BotPicker(popup.PopupWindow):
         self._width = (10 + columns * (button_width + 2 * button_buffer_h) *
                        (1.0 / 0.95) * (1.0 / 0.8))
         self._height = self._width * (0.8
-                                      if uiscale is ba.UIScale.SMALL else 1.06)
+                                      if uiscale is babase.UIScale.SMALL else 1.06)
 
         self._scroll_width = self._width * 0.8
         self._scroll_height = self._height * 0.8
@@ -1891,24 +1898,24 @@ class BotPicker(popup.PopupWindow):
                                    focus_size=(self._scroll_width,
                                                self._scroll_height))
 
-        self._scrollwidget = ba.scrollwidget(parent=self.root_widget,
-                                             size=(self._scroll_width,
-                                                   self._scroll_height),
-                                             color=(0.55, 0.55, 0.55),
-                                             highlight=False,
-                                             position=self._scroll_position)
+        self._scrollwidget = bui.scrollwidget(parent=self.root_widget,
+                                              size=(self._scroll_width,
+                                                    self._scroll_height),
+                                              color=(0.55, 0.55, 0.55),
+                                              highlight=False,
+                                              position=self._scroll_position)
 
-        ba.containerwidget(edit=self._scrollwidget, claims_left_right=True)
+        bui.containerwidget(edit=self._scrollwidget, claims_left_right=True)
 
         self._sub_width = self._scroll_width * 0.95
         self._sub_height = 5 + rows * (button_height +
                                        2 * button_buffer_v) + 100
-        self._subcontainer = ba.containerwidget(parent=self._scrollwidget,
-                                                size=(self._sub_width,
-                                                      self._sub_height),
-                                                background=False)
+        self._subcontainer = bui.containerwidget(parent=self._scrollwidget,
+                                                 size=(self._sub_width,
+                                                       self._sub_height),
+                                                 background=False)
 
-        mask_texture = ba.gettexture('characterIconMask')
+        mask_texture = bui.gettexture('characterIconMask')
 
         bot_list = (['bones', 'neoSpaz', 'kronk', 'neoSpaz', 'kronk', 'zoe',
                      'ninja', 'mel', 'jack', 'bunny',
@@ -1916,11 +1923,13 @@ class BotPicker(popup.PopupWindow):
                      'ninja',
                      'neoSpaz', 'kronk', 'zoe',
                      'ninja'])
-        bot_list_type = (['Dummy', 'Bomber Lite', 'Brawler Lite', 'Bomber', 'Brawler', 'Trigger',
-                          'Charger', 'Sticky', 'Explodey', 'Bouncy',
-                          'Pro Bomber', 'Pro Brawler', 'Pro Trigger',
-                          'Pro Charger', 'S.Pro Bomber', 'S.Pro Brawler',
-                          'S.Pro Trigger', 'S.Pro Charger'])
+        bot_list_type = (
+            ['Dummy', 'Bomber Lite', 'Brawler Lite', 'Bomber', 'Brawler',
+             'Trigger',
+             'Charger', 'Sticky', 'Explodey', 'Bouncy',
+             'Pro Bomber', 'Pro Brawler', 'Pro Trigger',
+             'Pro Charger', 'S.Pro Bomber', 'S.Pro Brawler',
+             'S.Pro Trigger', 'S.Pro Charger'])
 
         index = 0
         for y in range(rows):
@@ -1951,37 +1960,37 @@ class BotPicker(popup.PopupWindow):
                 pos = (x * (button_width + 2 * button_buffer_h) +
                        button_buffer_h, self._sub_height - (y + 1) *
                        (button_height + 2 * button_buffer_v) + 12)
-                btn = ba.buttonwidget(
+                btn = bui.buttonwidget(
                     parent=self._subcontainer,
                     button_type='square',
                     position=(pos[0],
                               pos[1]),
                     size=(button_width, button_height),
                     autoselect=True,
-                    texture=ba.gettexture(bot_list[index] + 'Icon'),
-                    tint_texture=ba.gettexture(
+                    texture=bui.gettexture(bot_list[index] + 'Icon'),
+                    tint_texture=bui.gettexture(
                         bot_list[index] + 'IconColorMask'),
                     mask_texture=mask_texture,
                     label='',
                     color=color,
                     tint_color=tint1,
                     tint2_color=tint2,
-                    on_activate_call=ba.Call(self._select_character,
-                                             character=bot_list_type[index]))
-                ba.widget(edit=btn, show_buffer_top=60, show_buffer_bottom=60)
+                    on_activate_call=bui.Call(self._select_character,
+                                              character=bot_list_type[index]))
+                bui.widget(edit=btn, show_buffer_top=60, show_buffer_bottom=60)
 
                 name = bot_list_type[index]
-                ba.textwidget(parent=self._subcontainer,
-                              text=name,
-                              position=(pos[0] + button_width * 0.5,
-                                        pos[1] - 12),
-                              size=(0, 0),
-                              scale=0.5,
-                              maxwidth=button_width,
-                              draw_controller=btn,
-                              h_align='center',
-                              v_align='center',
-                              color=(0.8, 0.8, 0.8, 0.8))
+                bui.textwidget(parent=self._subcontainer,
+                               text=name,
+                               position=(pos[0] + button_width * 0.5,
+                                         pos[1] - 12),
+                               size=(0, 0),
+                               scale=0.5,
+                               maxwidth=button_width,
+                               draw_controller=btn,
+                               h_align='center',
+                               v_align='center',
+                               color=(0.8, 0.8, 0.8, 0.8))
 
                 index += 1
                 if index >= len(bot_list):
@@ -1997,10 +2006,10 @@ class BotPicker(popup.PopupWindow):
     def _transition_out(self) -> None:
         if not self._transitioning_out:
             self._transitioning_out = True
-            ba.containerwidget(edit=self.root_widget, transition='out_scale')
+            bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
     def on_popup_cancel(self) -> None:
-        ba.playsound(ba.getsound('swish'))
+        bui.getsound('swish').play()
         self._transition_out()
 
 
@@ -2008,7 +2017,7 @@ class PowerPicker(popup.PopupWindow):
     """Popup window for selecting power up."""
 
     def __init__(self,
-                 parent: ba.Widget,
+                 parent: bui.Widget,
                  position: tuple[float, float] = (0.0, 0.0),
                  delegate: Any = None,
                  scale: float | None = None,
@@ -2017,9 +2026,9 @@ class PowerPicker(popup.PopupWindow):
         del parent  # unused here
 
         if scale is None:
-            uiscale = ba.app.ui.uiscale
-            scale = (1.85 if uiscale is ba.UIScale.SMALL else
-                     1.65 if uiscale is ba.UIScale.MEDIUM else 1.23)
+            uiscale = bui.app.ui_v1.uiscale
+            scale = (1.85 if uiscale is babase.UIScale.SMALL else
+                     1.65 if uiscale is babase.UIScale.MEDIUM else 1.23)
 
         self._delegate = delegate
         self._transitioning_out = False
@@ -2037,7 +2046,7 @@ class PowerPicker(popup.PopupWindow):
         self._width = (10 + columns * (button_width + 2 * button_buffer_h) *
                        (1.0 / 0.95) * (1.0 / 0.8))
         self._height = self._width * (0.8
-                                      if uiscale is ba.UIScale.SMALL else 1.06)
+                                      if uiscale is babase.UIScale.SMALL else 1.06)
 
         self._scroll_width = self._width * 0.8
         self._scroll_height = self._height * 0.8
@@ -2055,22 +2064,22 @@ class PowerPicker(popup.PopupWindow):
                                    focus_size=(self._scroll_width,
                                                self._scroll_height))
 
-        self._scrollwidget = ba.scrollwidget(parent=self.root_widget,
-                                             size=(self._scroll_width,
-                                                   self._scroll_height),
-                                             color=(0.55, 0.55, 0.55),
-                                             highlight=False,
-                                             position=self._scroll_position)
+        self._scrollwidget = bui.scrollwidget(parent=self.root_widget,
+                                              size=(self._scroll_width,
+                                                    self._scroll_height),
+                                              color=(0.55, 0.55, 0.55),
+                                              highlight=False,
+                                              position=self._scroll_position)
 
-        ba.containerwidget(edit=self._scrollwidget, claims_left_right=True)
+        bui.containerwidget(edit=self._scrollwidget, claims_left_right=True)
 
         self._sub_width = self._scroll_width * 0.95
         self._sub_height = 5 + rows * (button_height +
                                        2 * button_buffer_v) + 100
-        self._subcontainer = ba.containerwidget(parent=self._scrollwidget,
-                                                size=(self._sub_width,
-                                                      self._sub_height),
-                                                background=False)
+        self._subcontainer = bui.containerwidget(parent=self._scrollwidget,
+                                                 size=(self._sub_width,
+                                                       self._sub_height),
+                                                 background=False)
 
         power_list = (['Bomb', 'Curse', 'Health', 'IceBombs',
                        'ImpactBombs', 'LandMines', 'Punch',
@@ -2086,32 +2095,32 @@ class PowerPicker(popup.PopupWindow):
                 pos = (x * (button_width + 2 * button_buffer_h) +
                        button_buffer_h, self._sub_height - (y + 1) *
                        (button_height + 2 * button_buffer_v) + 12)
-                btn = ba.buttonwidget(
+                btn = bui.buttonwidget(
                     parent=self._subcontainer,
                     button_type='square',
                     position=(pos[0],
                               pos[1]),
                     size=(button_width, button_height),
                     autoselect=True,
-                    texture=ba.gettexture('powerup' + power_list[index]),
+                    texture=bui.gettexture('powerup' + power_list[index]),
                     label='',
                     color=(1, 1, 1),
-                    on_activate_call=ba.Call(self._select_power,
-                                             power=power_list[index]))
-                ba.widget(edit=btn, show_buffer_top=60, show_buffer_bottom=60)
+                    on_activate_call=bui.Call(self._select_power,
+                                              power=power_list[index]))
+                bui.widget(edit=btn, show_buffer_top=60, show_buffer_bottom=60)
 
                 name = power_list_type[index]
-                ba.textwidget(parent=self._subcontainer,
-                              text=name,
-                              position=(pos[0] + button_width * 0.5,
-                                        pos[1] - 12),
-                              size=(0, 0),
-                              scale=0.5,
-                              maxwidth=button_width,
-                              draw_controller=btn,
-                              h_align='center',
-                              v_align='center',
-                              color=(0.8, 0.8, 0.8, 0.8))
+                bui.textwidget(parent=self._subcontainer,
+                               text=name,
+                               position=(pos[0] + button_width * 0.5,
+                                         pos[1] - 12),
+                               size=(0, 0),
+                               scale=0.5,
+                               maxwidth=button_width,
+                               draw_controller=btn,
+                               h_align='center',
+                               v_align='center',
+                               color=(0.8, 0.8, 0.8, 0.8))
 
                 index += 1
                 if index >= len(power_list):
@@ -2127,10 +2136,10 @@ class PowerPicker(popup.PopupWindow):
     def _transition_out(self) -> None:
         if not self._transitioning_out:
             self._transitioning_out = True
-            ba.containerwidget(edit=self.root_widget, transition='out_scale')
+            bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
     def on_popup_cancel(self) -> None:
-        ba.playsound(ba.getsound('swish'))
+        bui.getsound('swish').play()
         self._transition_out()
 
 
@@ -2138,7 +2147,7 @@ class InfoWindow(popup.PopupWindow):
     """Popup window for Infos."""
 
     def __init__(self,
-                 parent: ba.Widget,
+                 parent: bs.Widget,
                  position: tuple[float, float] = (0.0, 0.0),
                  delegate: Any = None,
                  scale: float | None = None,
@@ -2147,16 +2156,16 @@ class InfoWindow(popup.PopupWindow):
         del parent  # unused here
 
         if scale is None:
-            uiscale = ba.app.ui.uiscale
-            scale = (1.85 if uiscale is ba.UIScale.SMALL else
-                     1.65 if uiscale is ba.UIScale.MEDIUM else 1.23)
+            uiscale = bui.app.ui_v1.uiscale
+            scale = (1.85 if uiscale is babase.UIScale.SMALL else
+                     1.65 if uiscale is babase.UIScale.MEDIUM else 1.23)
 
         self._delegate = delegate
         self._transitioning_out = False
 
         self._width = 600
         self._height = self._width * (0.6
-                                      if uiscale is ba.UIScale.SMALL else 0.795)
+                                      if uiscale is babase.UIScale.SMALL else 0.795)
 
         # creates our _root_widget
         popup.PopupWindow.__init__(self,
@@ -2168,20 +2177,20 @@ class InfoWindow(popup.PopupWindow):
                                    focus_size=(self._width,
                                                self._height))
 
-        ba.textwidget(parent=self.root_widget,
-                      position=(self._width * 0.5,
-                                self._height * 0.9),
-                      size=(0, 0),
-                      color=ba.app.ui.title_color,
-                      scale=1.3,
-                      h_align='center',
-                      v_align='center',
-                      text='About',
-                      maxwidth=200)
+        bui.textwidget(parent=self.root_widget,
+                       position=(self._width * 0.5,
+                                 self._height * 0.9),
+                       size=(0, 0),
+                       color=bui.app.ui_v1.title_color,
+                       scale=1.3,
+                       h_align='center',
+                       v_align='center',
+                       text='About',
+                       maxwidth=200)
 
         text = ('Practice Tools Mod\n'
                 'Made By Cross Joy\n'
-                'version 1.2\n'
+                'version v' + version + '\n'
                 '\n'
                 'Thx to\n'
                 'Mikirog for the Bomb radius visualizer mod.\n'
@@ -2200,7 +2209,7 @@ class InfoWindow(popup.PopupWindow):
             else:
                 color = (0.4, 1.0, 1.4, 1.0)
 
-            ba.textwidget(
+            bui.textwidget(
                 parent=self.root_widget,
                 padding=4,
                 color=color,
@@ -2215,7 +2224,7 @@ class InfoWindow(popup.PopupWindow):
 
         text_spacing = 70
 
-        self.button_discord = ba.buttonwidget(
+        self.button_discord = bui.buttonwidget(
             parent=self.root_widget,
             position=(
                 self._width * 0.25 - 40, self._height * 0.2 - 40),
@@ -2225,15 +2234,15 @@ class InfoWindow(popup.PopupWindow):
             color=(0.447, 0.537, 0.854),
             label='',
             on_activate_call=self._discord)
-        ba.imagewidget(
+        bui.imagewidget(
             parent=self.root_widget,
             position=(self._width * 0.25 - 25,
                       self._height * 0.2 - 25),
             size=(50, 50),
             draw_controller=self.button_discord,
-            texture=ba.gettexture('discordLogo'),
+            texture=bui.gettexture('discordLogo'),
             color=(5, 5, 5))
-        ba.textwidget(
+        bui.textwidget(
             parent=self.root_widget,
             position=(self._width * 0.25,
                       self._height * 0.2 + text_spacing),
@@ -2246,7 +2255,7 @@ class InfoWindow(popup.PopupWindow):
             maxwidth=150,
             color=(0.447, 0.537, 0.854))
 
-        self.button_github = ba.buttonwidget(
+        self.button_github = bui.buttonwidget(
             parent=self.root_widget,
             position=(
                 self._width * 0.5 - 40, self._height * 0.2 - 40),
@@ -2256,15 +2265,15 @@ class InfoWindow(popup.PopupWindow):
             color=(0.129, 0.122, 0.122),
             label='',
             on_activate_call=self._github)
-        ba.imagewidget(
+        bui.imagewidget(
             parent=self.root_widget,
             position=(self._width * 0.5 - 25,
                       self._height * 0.2 - 25),
             size=(50, 50),
             draw_controller=self.button_github,
-            texture=ba.gettexture('githubLogo'),
+            texture=bui.gettexture('githubLogo'),
             color=(1, 1, 1))
-        ba.textwidget(
+        bui.textwidget(
             parent=self.root_widget,
             position=(self._width * 0.5,
                       self._height * 0.2 + text_spacing),
@@ -2277,7 +2286,7 @@ class InfoWindow(popup.PopupWindow):
             maxwidth=150,
             color=(0.129, 0.122, 0.122))
 
-        self.button_support = ba.buttonwidget(
+        self.button_support = bui.buttonwidget(
             parent=self.root_widget,
             position=(
                 self._width * 0.75 - 40, self._height * 0.2 - 40),
@@ -2287,15 +2296,15 @@ class InfoWindow(popup.PopupWindow):
             color=(0.83, 0.69, 0.21),
             label='',
             on_activate_call=self._support)
-        ba.imagewidget(
+        bui.imagewidget(
             parent=self.root_widget,
             position=(self._width * 0.75 - 25,
                       self._height * 0.2 - 25),
             size=(50, 50),
             draw_controller=self.button_support,
-            texture=ba.gettexture('heart'),
+            texture=bui.gettexture('heart'),
             color=(1, 1, 1))
-        ba.textwidget(
+        bui.textwidget(
             parent=self.root_widget,
             position=(self._width * 0.75,
                       self._height * 0.2 + text_spacing),
@@ -2309,19 +2318,19 @@ class InfoWindow(popup.PopupWindow):
             color=(0.83, 0.69, 0.21))
 
     def _discord(self):
-        ba.open_url('https://discord.gg/JyBY6haARJ')
+        bui.open_url('https://discord.gg/JyBY6haARJ')
 
     def _github(self):
-        ba.open_url('https://github.com/CrossJoy/Bombsquad-Modding')
+        bui.open_url('https://github.com/CrossJoy/Bombsquad-Modding')
 
     def _support(self):
-        ba.open_url('https://www.buymeacoffee.com/CrossJoy')
+        bui.open_url('https://www.buymeacoffee.com/CrossJoy')
 
     def _transition_out(self) -> None:
         if not self._transitioning_out:
             self._transitioning_out = True
-            ba.containerwidget(edit=self.root_widget, transition='out_scale')
+            bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
     def on_popup_cancel(self) -> None:
-        ba.playsound(ba.getsound('swish'))
+        bui.getsound('swish').play()
         self._transition_out()
