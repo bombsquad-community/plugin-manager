@@ -28,6 +28,32 @@
         }
       }
     },
+    "icy_emits": {
+      "description": "Survice from icy bombs emitting through cold platform. Playable in teams/ffa/co-op",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "frozen_one": {
+      "description": "Survive until the timer runs out",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "simon_says": {
       "description": "You better do what Simon says",
       "external_url": "",
@@ -198,11 +224,11 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": "",
-          "discord": "[Just] Freak#4999"
+          "email": ""
         }
       ],
       "versions": {
+        "2.0.0": null,
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "0bc9522",
@@ -217,11 +243,11 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": "",
-          "discord": "[Just] Freak#4999"
+          "email": ""
         }
       ],
       "versions": {
+        "2.0.0": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -236,11 +262,11 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": "",
-          "discord": "[Just] Freak#4999"
+          "email": ""
         }
       ],
       "versions": {
+        "2.0.0": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -429,22 +455,11 @@
         },
         {
           "name": "Freaku",
-          "email": "",
-          "discord": "[Just] Freak#4999"
-        },
-        {
-          "name": "LoupGarou",
-          "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"
+          "email": ""
         }
       ],
       "versions": {
-        "2.0.0": {
-          "api_version": 8,
-          "commit_sha": "e7a5df9",
-          "released_on": "26-07-2023",
-          "md5sum": "641732ef5c8c97cd5482b8cd56126310"
-        },
+        "2.0.0": null,
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "2e2540a",
@@ -653,8 +668,7 @@
       "authors": [
         {
           "name": "Freaku",
-          "email": "",
-          "discord": "[Just] Freak#4999"
+          "email": ""
         }
       ],
       "versions": {
