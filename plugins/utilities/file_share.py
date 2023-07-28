@@ -8,6 +8,11 @@ by : Mr.Smoothy
 Thanks Dliwk for contributing MultiPartForm.class
 '''
 from __future__ import annotations
+import mimetypes
+import json
+import re
+import io
+import uuid
 
 import bascenev1 as bs
 import _baplus
@@ -27,25 +32,26 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Sequence
 
 app = _babase.app
-            
+
 MODS_DIR = app.python_directory_user
-REPLAYS_DIR =  bui.get_replays_dir()
+REPLAYS_DIR = bui.get_replays_dir()
 HEADERS = {
     'accept': 'application/json',
     'Content-Type': 'application/octet-stream',
     'User-Agent': 'BombSquad Client'
 }
 
+
 class UploadConfirmation(ConfirmWindow):
     def __init__(
         self,
-        file_path = "",
-        status = "init",
+        file_path="",
+        status="init",
         text: str | bui.Lstr = 'Are you sure?',
-        ok_text = "",
+        ok_text="",
         action: Callable[[], Any] | None = None,
         origin_widget: bui.Widget | None = None,
-        
+
     ):
         super().__init__(text=text, action=action, origin_widget=origin_widget, ok_text=ok_text)
         self.status = status
@@ -54,18 +60,19 @@ class UploadConfirmation(ConfirmWindow):
     def _ok(self) -> None:
         if self.status == "init":
             self._cancel()
-            UploadConfirmation("", "uploading", text = "Uploading file wait !", ok_text= "Wait")
+            UploadConfirmation("", "uploading", text="Uploading file wait !", ok_text="Wait")
             self._upload_file()
-            
+
         elif self.status == "uploading":
-             bui.screenmessage("uploading in progress")
+            bui.screenmessage("uploading in progress")
         elif self.status == "uploaded":
             pass
 
     def _upload_file(self):
         self.status = "uploading"
         print(self.root_widget)
-        thread = Thread(target = handle_upload, args = (self.file_path, self.uploaded, self.root_widget,))
+        thread = Thread(target=handle_upload, args=(
+            self.file_path, self.uploaded, self.root_widget,))
         thread.start()
 
     def uploaded(self, url, root_widget):
@@ -73,16 +80,17 @@ class UploadConfirmation(ConfirmWindow):
         from bauiv1lib.url import ShowURLWindow
         ShowURLWindow(url)
 
+
 class InputWindow(PromoCodeWindow):
     def __init__(
-        self, modal: bool = True, origin_widget: bui.Widget | None = None, path = None):
+            self, modal: bool = True, origin_widget: bui.Widget | None = None, path=None):
         super().__init__(modal=modal, origin_widget=origin_widget)
         bui.textwidget(edit=self._text_field, max_chars=300)
         self._path = path
         self.message_widget = bui.textwidget(
             parent=self._root_widget,
             text="put only trusted link",
-            position=(170, 230 - 200 -30 ),
+            position=(170, 230 - 200 - 30),
             color=(0.8, 0.8, 0.8, 1.0),
             size=(90, 30),
             h_align='center',
@@ -93,22 +101,25 @@ class InputWindow(PromoCodeWindow):
         if self._path and self._path != "/bombsquad":
             bui.textwidget(edit=self.message_widget, text="downloading.... wait...")
             bui.screenmessage("Downloading started")
-            thread = Thread(target = handle_download, args = (url, self._path, self.on_download,))
+            thread = Thread(target=handle_download, args=(url, self._path, self.on_download,))
             thread.start()
         else:
             bui.textwidget(edit=self.message_widget, text="First select folder were to save file.")
         self.close()
+
     def on_download(self, output_path):
         bui.screenmessage("File Downloaded to path")
         bui.screenmessage(output_path)
         bui.screenmessage("GO back and reopen to refresh")
+
     def close(self):
         bui.containerwidget(
             edit=self._root_widget, transition=self._transition_out
         )
 
+
 class FileSelectorExtended(FileSelectorWindow):
-        
+
     def __init__(
         self,
         path: str,
@@ -117,7 +128,8 @@ class FileSelectorExtended(FileSelectorWindow):
         valid_file_extensions: Sequence[str] | None = None,
         allow_folders: bool = False,
     ):
-        super().__init__(path, callback = callback, show_base_path = show_base_path, valid_file_extensions = valid_file_extensions, allow_folders = allow_folders)
+        super().__init__(path, callback=callback, show_base_path=show_base_path,
+                         valid_file_extensions=valid_file_extensions, allow_folders=allow_folders)
         self._import_button = bui.buttonwidget(
             parent=self._root_widget,
             button_type='square',
@@ -129,8 +141,9 @@ class FileSelectorExtended(FileSelectorWindow):
             label="Import",
             on_activate_call=self._open_import_menu,
         )
+
     def _open_import_menu(self):
-        InputWindow(origin_widget=self._import_button, path = self._path)
+        InputWindow(origin_widget=self._import_button, path=self._path)
 
     def _on_entry_activated(self, entry: str) -> None:
         # pylint: disable=too-many-branches
@@ -179,20 +192,19 @@ class FileSelectorExtended(FileSelectorWindow):
         if new_path is not None:
             self._set_path(new_path)
 
-org_listdir = os.listdir     
+
+org_listdir = os.listdir
+
+
 def custom_listdir(path):
     if path == "/bombsquad":
-        return ["mods","replays"]
+        return ["mods", "replays"]
     return org_listdir(path)
+
+
 os.listdir = custom_listdir
 
 
-import uuid
-import io
-import re
-import json
-import urllib.request
-import mimetypes
 class MultiPartForm:
     """Accumulate the data to be used when posting a form."""
 
@@ -266,6 +278,7 @@ class MultiPartForm:
         buffer.write(b'--' + self.boundary + b'--\r\n')
         return buffer.getvalue()
 
+
 def handle_upload(file, callback, root_widget):
     file_name = file.split("/")[-1]
     with open(file, "rb") as f:
@@ -287,13 +300,13 @@ def handle_upload(file, callback, root_widget):
     try:
         with urllib.request.urlopen(r) as response:
             if response.getcode() == 200:
-            #    callback(json.loads(response.read().decode('utf-8'))["link"])
-               _babase.pushcall(Call(callback,json.loads(response.read().decode('utf-8'))["link"], root_widget), from_other_thread = True)
+                #    callback(json.loads(response.read().decode('utf-8'))["link"])
+                _babase.pushcall(Call(callback, json.loads(response.read().decode(
+                    'utf-8'))["link"], root_widget), from_other_thread=True)
             else:
                 bui.screenmessage(f"Failed to Upload file. Status code: {response.getcode()}")
     except urllib.error.URLError as e:
         bui.screenmessage(f"Error occurred: {e}")
-    
 
 
 def handle_download(url, path, callback):
@@ -304,9 +317,9 @@ def handle_download(url, path, callback):
                 # Read the filename from the Content-Disposition header
                 filename = None
                 content_disposition = response.headers.get('Content-Disposition', '')
-               
+
                 match = re.search(r'filename\*?=(.+)', content_disposition)
-          
+
                 if match:
                     filename = urllib.parse.unquote(match.group(1), encoding='utf-8')
                     filename = filename.replace("UTF-8''", '')
@@ -315,7 +328,7 @@ def handle_download(url, path, callback):
 
                 with open(output_path, 'wb') as file:
                     file.write(response.read())
-                _babase.pushcall(Call(callback, output_path),from_other_thread= True)
+                _babase.pushcall(Call(callback, output_path), from_other_thread=True)
                 print(f"File downloaded and saved to: {output_path}")
             else:
                 print(f"Failed to download file. Status code: {response.getcode()}")
@@ -324,6 +337,8 @@ def handle_download(url, path, callback):
         print(f"Error occurred: {e}")
 
 # ba_meta export plugin
+
+
 class bySmoothy(babase.Plugin):
     def on_app_running(self):
         pass
@@ -332,17 +347,18 @@ class bySmoothy(babase.Plugin):
         return True
 
     def show_settings_ui(self, source_widget):
-            virtual_directory_path = '/bombsquad'
-            FileSelectorExtended(
-               virtual_directory_path,
-                callback=self.fileSelected,
-                show_base_path=False,
-                valid_file_extensions=[
-                    "txt","py","json","brp"
-                ],
-                allow_folders=False,
-            ).get_root_widget()
-    
+        virtual_directory_path = '/bombsquad'
+        FileSelectorExtended(
+            virtual_directory_path,
+            callback=self.fileSelected,
+            show_base_path=False,
+            valid_file_extensions=[
+                "txt", "py", "json", "brp"
+            ],
+            allow_folders=False,
+        ).get_root_widget()
+
     def fileSelected(self, path):
         if path:
-            UploadConfirmation(path,"init", text= "You want to upload " + path.split("/")[-1], ok_text= "Upload")
+            UploadConfirmation(path, "init", text="You want to upload " +
+                               path.split("/")[-1], ok_text="Upload")
