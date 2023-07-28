@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 ## Original creator: byANG3L ##
-## Made by: Freaku / @[Just] Freak#4999 ##
+## Made by: Freaku ##
 
 ## From: BSWorld Modpack (https://youtu.be/1TN56NLlShE) ##
 
@@ -16,73 +16,63 @@ from __future__ import annotations
 # def spawnAllMap(self)
 
 
-# ba_meta require api 7
+# ba_meta require api 8
 from typing import TYPE_CHECKING, overload
-import _ba
-import ba
+import _babase
+import babase
 import random
-from bastd.gameutils import SharedObjects
+import bascenev1 as bs
+from bascenev1lib.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Optional, List, Dict, Type, Union, Any, Literal
 
 
-class OnTimer(ba.Actor):
+class OnTimer(bs.Actor):
     """Timer which counts but doesn't show on-screen"""
 
     def __init__(self) -> None:
         super().__init__()
-        self._starttime_ms: Optional[int] = None
-        self.node = ba.newnode('text', attrs={'v_attach': 'top', 'h_attach': 'center', 'h_align': 'center', 'color': (
+        self._starttime_ms: int | None = None
+        self.node = bs.newnode('text', attrs={'v_attach': 'top', 'h_attach': 'center', 'h_align': 'center', 'color': (
             1, 1, 0.5, 1), 'flatness': 0.5, 'shadow': 0.5, 'position': (0, -70), 'scale': 0, 'text': ''})
-        self.inputnode = ba.newnode('timedisplay',  attrs={
-                                    'timemin': 0,      'showsubseconds': True})
+        self.inputnode = bs.newnode(
+            'timedisplay', attrs={'timemin': 0, 'showsubseconds': True}
+        )
         self.inputnode.connectattr('output', self.node, 'text')
 
     def start(self) -> None:
-        tval = ba.time(timeformat=ba.TimeFormat.MILLISECONDS)
+        """Start the timer."""
+        tval = int(bs.time() * 1000.0)
         assert isinstance(tval, int)
         self._starttime_ms = tval
         self.inputnode.time1 = self._starttime_ms
-        ba.getactivity().globalsnode.connectattr('time', self.inputnode, 'time2')
+        bs.getactivity().globalsnode.connectattr(
+            'time', self.inputnode, 'time2'
+        )
 
     def has_started(self) -> bool:
+        """Return whether this timer has started yet."""
         return self._starttime_ms is not None
 
-    def stop(self,
-             endtime: Union[int, float] = None,
-             timeformat: ba.TimeFormat = ba.TimeFormat.SECONDS) -> None:
+    def stop(self, endtime: int | float | None = None) -> None:
+        """End the timer.
+
+        If 'endtime' is not None, it is used when calculating
+        the final display time; otherwise the current time is used.
+        """
         if endtime is None:
-            endtime = ba.time(timeformat=ba.TimeFormat.MILLISECONDS)
-            timeformat = ba.TimeFormat.MILLISECONDS
+            endtime = bs.time()
+
         if self._starttime_ms is None:
-            print('Warning: OnTimer.stop() called without start() first')
+            logging.warning(
+                'OnScreenTimer.stop() called without first calling start()'
+            )
         else:
-            endtime_ms: int
-            if timeformat is ba.TimeFormat.SECONDS:
-                endtime_ms = int(endtime * 1000)
-            elif timeformat is ba.TimeFormat.MILLISECONDS:
-                assert isinstance(endtime, int)
-                endtime_ms = endtime
-            else:
-                raise ValueError(f'invalid timeformat: {timeformat}')
-
+            endtime_ms = int(endtime * 1000)
             self.inputnode.timemax = endtime_ms - self._starttime_ms
-    # Overloads so type checker knows our exact return type based in args.
 
-    @overload
-    def getstarttime(self, timeformat: Literal[ba.TimeFormat.SECONDS] = ba.TimeFormat.SECONDS) -> float:
-        ...
-
-    @overload
-    def getstarttime(self,
-                     timeformat: Literal[ba.TimeFormat.MILLISECONDS]) -> int:
-        ...
-
-    def getstarttime(
-        self,
-        timeformat: ba.TimeFormat = ba.TimeFormat.SECONDS
-    ) -> Union[int, float]:
-        """Return the sim-time when start() was called.
+    def getstarttime(self) -> float:
+        """Return the scene-time when start() was called.
 
         Time will be returned in seconds if timeformat is SECONDS or
         milliseconds if it is MILLISECONDS.
@@ -90,15 +80,11 @@ class OnTimer(ba.Actor):
         val_ms: Any
         if self._starttime_ms is None:
             print('WARNING: getstarttime() called on un-started timer')
-            val_ms = ba.time(timeformat=ba.TimeFormat.MILLISECONDS)
+            val_ms = int(bs.time() * 1000.0)
         else:
             val_ms = self._starttime_ms
         assert isinstance(val_ms, int)
-        if timeformat is ba.TimeFormat.SECONDS:
-            return 0.001 * val_ms
-        if timeformat is ba.TimeFormat.MILLISECONDS:
-            return val_ms
-        raise ValueError(f'invalid timeformat: {timeformat}')
+        return 0.001 * val_ms
 
     @property
     def starttime(self) -> float:
@@ -107,12 +93,12 @@ class OnTimer(ba.Actor):
 
     def handlemessage(self, msg: Any) -> Any:
         # if we're asked to die, just kill our node/timer
-        if isinstance(msg, ba.DieMessage):
+        if isinstance(msg, bs.DieMessage):
             if self.node:
                 self.node.delete()
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
@@ -120,33 +106,33 @@ class Player(ba.Player['Team']):
         self.death_time: Optional[float] = None
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
 
-# ba_meta export game
-class MGgame(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class MGgame(bs.TeamGameActivity[Player, Team]):
 
     name = 'Memory Game'
     description = 'Memories tiles and survive till the end!'
-    available_settings = [ba.BoolSetting(
-        'Epic Mode', default=False), ba.BoolSetting('Enable Bottom Credits', True)]
-    scoreconfig = ba.ScoreConfig(label='Survived', scoretype=ba.ScoreType.MILLISECONDS, version='B')
+    available_settings = [bs.BoolSetting(
+        'Epic Mode', default=False), bs.BoolSetting('Enable Bottom Credits', True)]
+    scoreconfig = bs.ScoreConfig(label='Survived', scoretype=bs.ScoreType.MILLISECONDS, version='B')
 
     # Print messages when players die (since its meaningful in this game).
     announce_player_deaths = True
 
     # we're currently hard-coded for one map..
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
         return ['Sky Tiles']
 
     # We support teams, free-for-all, and co-op sessions.
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.DualTeamSession)
-                or issubclass(sessiontype, ba.FreeForAllSession)
-                or issubclass(sessiontype, ba.CoopSession))
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return (issubclass(sessiontype, bs.DualTeamSession)
+                or issubclass(sessiontype, bs.FreeForAllSession)
+                or issubclass(sessiontype, babase.CoopSession))
 
     def __init__(self, settings: dict):
         super().__init__(settings)
@@ -157,14 +143,14 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self.credit_text = bool(settings['Enable Bottom Credits'])
 
         # Some base class overrides:
-        self.default_music = (ba.MusicType.EPIC
-                              if self._epic_mode else ba.MusicType.SURVIVAL)
+        self.default_music = (bs.MusicType.EPIC
+                              if self._epic_mode else bs.MusicType.SURVIVAL)
         if self._epic_mode:
             self.slow_motion = True
         shared = SharedObjects.get()
-        self._collide_with_player = ba.Material()
+        self._collide_with_player = bs.Material()
         self._collide_with_player.add_actions(actions=(('modify_part_collision', 'collide', True)))
-        self.dont_collide = ba.Material()
+        self.dont_collide = bs.Material()
         self.dont_collide.add_actions(actions=(('modify_part_collision', 'collide', False)))
         self._levelStage = 0
 
@@ -172,46 +158,46 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self._lastPlayerDeathTime = None
         self._spawnCenter = (-3.17358, 2.75764, -2.99124)
 
-        self._mapFGPModel = ba.getmodel('buttonSquareOpaque')
-        self._mapFGPDefaultTex = ba.gettexture('achievementOffYouGo')
+        self._mapFGPModel = bs.getmesh('buttonSquareOpaque')
+        self._mapFGPDefaultTex = bs.gettexture('achievementOffYouGo')
 
-        self._mapFGCurseTex = ba.gettexture('powerupCurse')
-        self._mapFGHealthTex = ba.gettexture('powerupHealth')
-        self._mapFGIceTex = ba.gettexture('powerupIceBombs')
-        self._mapFGImpactTex = ba.gettexture('powerupImpactBombs')
-        self._mapFGMinesTex = ba.gettexture('powerupLandMines')
-        self._mapFGPunchTex = ba.gettexture('powerupPunch')
-        self._mapFGShieldTex = ba.gettexture('powerupShield')
-        self._mapFGStickyTex = ba.gettexture('powerupStickyBombs')
+        self._mapFGCurseTex = bs.gettexture('powerupCurse')
+        self._mapFGHealthTex = bs.gettexture('powerupHealth')
+        self._mapFGIceTex = bs.gettexture('powerupIceBombs')
+        self._mapFGImpactTex = bs.gettexture('powerupImpactBombs')
+        self._mapFGMinesTex = bs.gettexture('powerupLandMines')
+        self._mapFGPunchTex = bs.gettexture('powerupPunch')
+        self._mapFGShieldTex = bs.gettexture('powerupShield')
+        self._mapFGStickyTex = bs.gettexture('powerupStickyBombs')
 
-        self._mapFGSpaz = ba.gettexture('neoSpazIcon')
-        self._mapFGZoe = ba.gettexture('zoeIcon')
-        self._mapFGSnake = ba.gettexture('ninjaIcon')
-        self._mapFGKronk = ba.gettexture('kronkIcon')
-        self._mapFGMel = ba.gettexture('melIcon')
-        self._mapFGJack = ba.gettexture('jackIcon')
-        self._mapFGSanta = ba.gettexture('santaIcon')
-        self._mapFGFrosty = ba.gettexture('frostyIcon')
-        self._mapFGBones = ba.gettexture('bonesIcon')
-        self._mapFGBernard = ba.gettexture('bearIcon')
-        self._mapFGPascal = ba.gettexture('penguinIcon')
-        self._mapFGAli = ba.gettexture('aliIcon')
-        self._mapFGRobot = ba.gettexture('cyborgIcon')
-        self._mapFGAgent = ba.gettexture('agentIcon')
-        self._mapFGGrumbledorf = ba.gettexture('wizardIcon')
-        self._mapFGPixel = ba.gettexture('pixieIcon')
+        self._mapFGSpaz = bs.gettexture('neoSpazIcon')
+        self._mapFGZoe = bs.gettexture('zoeIcon')
+        self._mapFGSnake = bs.gettexture('ninjaIcon')
+        self._mapFGKronk = bs.gettexture('kronkIcon')
+        self._mapFGMel = bs.gettexture('melIcon')
+        self._mapFGJack = bs.gettexture('jackIcon')
+        self._mapFGSanta = bs.gettexture('santaIcon')
+        self._mapFGFrosty = bs.gettexture('frostyIcon')
+        self._mapFGBones = bs.gettexture('bonesIcon')
+        self._mapFGBernard = bs.gettexture('bearIcon')
+        self._mapFGPascal = bs.gettexture('penguinIcon')
+        self._mapFGAli = bs.gettexture('aliIcon')
+        self._mapFGRobot = bs.gettexture('cyborgIcon')
+        self._mapFGAgent = bs.gettexture('agentIcon')
+        self._mapFGGrumbledorf = bs.gettexture('wizardIcon')
+        self._mapFGPixel = bs.gettexture('pixieIcon')
 
-        self._imageTextDefault = ba.gettexture('bg')
-        self._circleTex = ba.gettexture('circleShadow')
+        self._imageTextDefault = bs.gettexture('bg')
+        self._circleTex = bs.gettexture('circleShadow')
 
-        self._image = ba.newnode('image',
+        self._image = bs.newnode('image',
                                  attrs={'texture': self._imageTextDefault,
                                         'position': (0, -100),
                                         'scale': (100, 100),
                                         'opacity': 0.0,
                                         'attach': 'topCenter'})
 
-        self._textCounter = ba.newnode('text',
+        self._textCounter = bs.newnode('text',
                                        attrs={'text': '10',
                                               'position': (0, -100),
                                               'scale': 2.3,
@@ -223,7 +209,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
                                               'h_align': 'center',
                                               'v_align': 'center'})
 
-        self._textLevel = ba.newnode('text',
+        self._textLevel = bs.newnode('text',
                                      attrs={'text': 'Level ' + str(self._levelStage),
                                             'position': (0, -28),
                                             'scale': 1.3,
@@ -236,21 +222,21 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
                                             'h_align': 'center',
                                             'v_align': 'center'})
 
-        self._imageCircle = ba.newnode('image',
+        self._imageCircle = bs.newnode('image',
                                        attrs={'texture': self._circleTex,
                                               'position': (75, -75),
                                               'scale': (20, 20),
                                               'color': (0.2, 0.2, 0.2),
                                               'opacity': 0.0,
                                               'attach': 'topCenter'})
-        self._imageCircle2 = ba.newnode('image',
+        self._imageCircle2 = bs.newnode('image',
                                         attrs={'texture': self._circleTex,
                                                'position': (75, -100),
                                                'scale': (20, 20),
                                                'color': (0.2, 0.2, 0.2),
                                                'opacity': 0.0,
                                                'attach': 'topCenter'})
-        self._imageCircle3 = ba.newnode('image',
+        self._imageCircle3 = bs.newnode('image',
                                         attrs={'texture': self._circleTex,
                                                'position': (75, -125),
                                                'scale': (20, 20),
@@ -260,12 +246,12 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
-        self._bellLow = ba.getsound('bellLow')
-        self._bellMed = ba.getsound('bellMed')
-        self._bellHigh = ba.getsound('bellHigh')
-        self._tickSound = ba.getsound('tick')
-        self._tickFinal = ba.getsound('powerup01')
-        self._scoreSound = ba.getsound('score')
+        self._bellLow = bs.getsound('bellLow')
+        self._bellMed = bs.getsound('bellMed')
+        self._bellHigh = bs.getsound('bellHigh')
+        self._tickSound = bs.getsound('tick')
+        self._tickFinal = bs.getsound('powerup01')
+        self._scoreSound = bs.getsound('score')
 
         self._image.opacity = 1
         self._textCounter.opacity = 1
@@ -282,8 +268,8 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
         if self._levelStage == 1:
             timeStart = 6
-        ba.timer(timeStart, self._randomPlatform)
-        ba.timer(timeStart, self.startCounter)
+        bs.timer(timeStart, self._randomPlatform)
+        bs.timer(timeStart, self.startCounter)
 
     def on_begin(self) -> None:
         super().on_begin()
@@ -308,7 +294,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self.coldel15 = True
         self.coldel16 = True
         if self.credit_text:
-            t = ba.newnode('text',
+            t = bs.newnode('text',
                            attrs={'text': "Made by Freaku\nOriginally for 1.4: byANG3L",  # Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
                                   'scale': 0.7,
                                   'position': (0, 0),
@@ -317,13 +303,13 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
                                   'color': (1, 1, 1),
                                   'h_align': 'center',
                                   'v_attach': 'bottom'})
-        self.spawnAllMap()
-        self.flashHide()
+            self.spawnAllMap()
+            self.flashHide()
 
         # Check for immediate end (if we've only got 1 player, etc).
-        ba.timer(5, self._check_end_game)
-        self._dingSound = ba.getsound('dingSmall')
-        self._dingSoundHigh = ba.getsound('dingSmallHigh')
+        bs.timer(5, self._check_end_game)
+        self._dingSound = bs.getsound('dingSmall')
+        self._dingSoundHigh = bs.getsound('dingSmallHigh')
 
     def startCounter(self):
         self._textCounter.text = '10'
@@ -339,44 +325,44 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
                                         def count1():
                                             def countFinal():
                                                 self._textCounter.text = ''
-                                                ba.playsound(self._tickFinal)
+                                                self._tickFinal.play()
                                                 self._stop()
                                             self._textCounter.text = '1'
-                                            ba.playsound(self._tickSound)
-                                            ba.timer(1, countFinal)
+                                            self._tickSound.play()
+                                            bs.timer(1, countFinal)
                                         self._textCounter.text = '2'
-                                        ba.playsound(self._tickSound)
-                                        ba.timer(1, count1)
+                                        self._tickSound.play()
+                                        bs.timer(1, count1)
                                     self._textCounter.text = '3'
-                                    ba.playsound(self._tickSound)
-                                    ba.timer(1, count2)
+                                    self._tickSound.play()
+                                    bs.timer(1, count2)
                                 self._textCounter.text = '4'
-                                ba.playsound(self._tickSound)
-                                ba.timer(1, count3)
+                                self._tickSound.play()
+                                bs.timer(1, count3)
                             self._textCounter.text = '5'
-                            ba.playsound(self._tickSound)
-                            ba.timer(1, count4)
+                            self._tickSound.play()
+                            bs.timer(1, count4)
                         self._textCounter.text = '6'
-                        ba.playsound(self._tickSound)
-                        ba.timer(1, count5)
+                        self._tickSound.play()
+                        bs.timer(1, count5)
                     self._textCounter.text = '7'
-                    ba.playsound(self._tickSound)
-                    ba.timer(1, count6)
+                    self._tickSound.play()
+                    bs.timer(1, count6)
                 self._textCounter.text = '8'
-                ba.playsound(self._tickSound)
-                ba.timer(1, count7)
+                self._tickSound.play()
+                bs.timer(1, count7)
             self._textCounter.text = '9'
-            ba.playsound(self._tickSound)
-            ba.timer(1, count8)
-        ba.timer(1, count9)
+            self._tickSound.play()
+            bs.timer(1, count8)
+        bs.timer(1, count9)
 
     def on_player_join(self, player: Player) -> None:
         # Don't allow joining after we start
         # (would enable leave/rejoin tomfoolery).
         if self.has_begun():
-            ba.screenmessage(
-                ba.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+            bs.broadcastmessage(
+                babase.Lstr(resource='playerDelayedJoinText',
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0), transient=True, clients=[player.sessionplayer.inputdevice.client_id])
             # For score purposes, mark them as having died right as the
             # game started.
@@ -393,12 +379,12 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self._check_end_game()
 
     # overriding the default character spawning..
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         spaz = self.spawn_player_spaz(player)
         pos = (self._spawnCenter[0] + random.uniform(-1.5, 2.5),
                self._spawnCenter[1], self._spawnCenter[2] + random.uniform(-2.5, 1.5))
         spaz.connect_controls_to_player(enable_punch=False, enable_bomb=False, enable_pickup=False)
-        spaz.handlemessage(ba.StandMessage(pos))
+        spaz.handlemessage(bs.StandMessage(pos))
         return spaz
 
     def _randomSelect(self):
@@ -453,17 +439,17 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
                 def circle3():
                     self._imageCircle3.color = (0.0, 1.0, 0.0)
                     self._imageCircle3.opacity = 1.0
-                    ba.playsound(self._bellHigh)
-                    ba.timer(0.2, self._doDelete)
+                    self._bellHigh.play()
+                    bs.timer(0.2, self._doDelete)
                 self._imageCircle2.color = (1.0, 1.0, 0.0)
                 self._imageCircle2.opacity = 1.0
-                ba.playsound(self._bellMed)
-                ba.timer(1, circle3)
+                self._bellMed.play()
+                bs.timer(1, circle3)
             self._imageCircle.color = (1.0, 0.0, 0.0)
             self._imageCircle.opacity = 1.0
-            ba.playsound(self._bellLow)
-            ba.timer(1, circle2)
-        ba.timer(1, circle)
+            self._bellLow.play()
+            bs.timer(1, circle2)
+        bs.timer(1, circle)
 
     def _randomPlatform(self):
         if self._levelStage == 1:
@@ -564,13 +550,13 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         self._mixPlatform()
 
     def _mixPlatform(self):
-        ba.timer(1, self.flashShow)
-        ba.timer(3, self.flashHide)
-        ba.timer(4, self.flashShow)
-        ba.timer(6, self.flashHide)
-        ba.timer(7, self.flashShow)
-        ba.timer(9, self.flashHide)
-        ba.timer(13.2, self.flashShow)
+        bs.timer(1, self.flashShow)
+        bs.timer(3, self.flashHide)
+        bs.timer(4, self.flashShow)
+        bs.timer(6, self.flashHide)
+        bs.timer(7, self.flashShow)
+        bs.timer(9, self.flashHide)
+        bs.timer(13.2, self.flashShow)
 
     def flashHide(self):
         self.mapFGP.color_texture = self._mapFGPDefaultTex
@@ -674,14 +660,14 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
             self.mapFGP16col.delete()
             self.coldel16 = True
 
-        ba.timer(3.3, self._platformTexDefault)
+        bs.timer(3.3, self._platformTexDefault)
 
     def spawnAllMap(self):
         """
         # Here's how it works:
         # First, create prop with a gravity scale of 0
-        # Then use a in-game model which will suit it (For this one I didn't chose box, since it will look kinda weird) Right?
-        # Instead I used a 2d model (which is nothing but a button in menu)
+        # Then use a in-game mesh which will suit it (For this one I didn't chose box, since it will look kinda weird) Right?
+        # Instead I used a 2d mesh (which is nothing but a button in menu)
         # This prop SHOULD NOT collide with anything, since it has gravity_scale of 0 if it'll get weight it will fall down :((
         # These are where we change those color-textures and is seen in-game
 
@@ -696,130 +682,130 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
         """
         shared = SharedObjects.get()
         if self.coldel:
-            self.mapFGP = ba.newnode('prop',
-                                     attrs={'body': 'puck', 'position': (3, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP = bs.newnode('prop',
+                                     attrs={'body': 'puck', 'position': (4.5, 2, -9), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGPTex = None
-            self.mapFGPcol = ba.newnode('region', attrs={'position': (3, 2, -9), 'scale': (
+            self.mapFGPcol = bs.newnode('region', attrs={'position': (4.5, 2, -9), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel = False
 
         if self.coldel2:
-            self.mapFGP2 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (3, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP2 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (4.5, 2, -6), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP2Tex = None
-            self.mapFGP2col = ba.newnode('region', attrs={'position': (3, 2, -6), 'scale': (
+            self.mapFGP2col = bs.newnode('region', attrs={'position': (4.5, 2, -6), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel2 = False
 
         if self.coldel3:
-            self.mapFGP3 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (3, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP3 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (4.5, 2, -3), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP3Tex = None
-            self.mapFGP3col = ba.newnode('region', attrs={'position': (3, 2, -3), 'scale': (
+            self.mapFGP3col = bs.newnode('region', attrs={'position': (4.5, 2, -3), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel3 = False
 
         if self.coldel4:
-            self.mapFGP4 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (3, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP4 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (4.5, 2, 0), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP4Tex = None
-            self.mapFGP4col = ba.newnode('region', attrs={'position': (3, 2, 0), 'scale': (
+            self.mapFGP4col = bs.newnode('region', attrs={'position': (4.5, 2, 0), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel4 = False
 
         if self.coldel5:
-            self.mapFGP5 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (0, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP5 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (1.5, 2, -9), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP5Tex = None
-            self.mapFGP5col = ba.newnode('region', attrs={'position': (0, 2, -9), 'scale': (
+            self.mapFGP5col = bs.newnode('region', attrs={'position': (1.5, 2, -9), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel5 = False
 
         if self.coldel6:
-            self.mapFGP6 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (0, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP6 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (1.5, 2, -6), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP6Tex = None
-            self.mapFGP6col = ba.newnode('region', attrs={'position': (0, 2, -6), 'scale': (
+            self.mapFGP6col = bs.newnode('region', attrs={'position': (1.5, 2, -6), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel6 = False
 
         if self.coldel7:
-            self.mapFGP7 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (0, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP7 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (1.5, 2, -3), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP7Tex = None
-            self.mapFGP7col = ba.newnode('region', attrs={'position': (0, 2, -3), 'scale': (
+            self.mapFGP7col = bs.newnode('region', attrs={'position': (1.5, 2, -3), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel7 = False
 
         if self.coldel8:
-            self.mapFGP8 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (0, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP8 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (1.5, 2, 0), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP8Tex = None
-            self.mapFGP8col = ba.newnode('region', attrs={'position': (0, 2, 0), 'scale': (
+            self.mapFGP8col = bs.newnode('region', attrs={'position': (1.5, 2, 0), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel8 = False
 
         if self.coldel9:
-            self.mapFGP9 = ba.newnode('prop',
-                                      attrs={'body': 'puck', 'position': (-3, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP9 = bs.newnode('prop',
+                                      attrs={'body': 'puck', 'position': (-1.5, 2, -9), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP9Tex = None
-            self.mapFGP9col = ba.newnode('region', attrs={'position': (-3, 2, -9), 'scale': (
+            self.mapFGP9col = bs.newnode('region', attrs={'position': (-1.5, 2, -9), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel9 = False
 
         if self.coldel10:
-            self.mapFGP10 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-3, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP10 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-1.5, 2, -6), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP10Tex = None
-            self.mapFGP10col = ba.newnode('region', attrs={'position': (-3, 2, -6), 'scale': (
+            self.mapFGP10col = bs.newnode('region', attrs={'position': (-1.5, 2, -6), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel10 = False
 
         if self.coldel11:
-            self.mapFGP11 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-3, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP11 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-1.5, 2, -3), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP11Tex = None
-            self.mapFGP11col = ba.newnode('region', attrs={'position': (-3, 2, -3), 'scale': (
+            self.mapFGP11col = bs.newnode('region', attrs={'position': (-1.5, 2, -3), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel11 = False
 
         if self.coldel12:
-            self.mapFGP12 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-3, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP12 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-1.5, 2, 0), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP12Tex = None
-            self.mapFGP12col = ba.newnode('region', attrs={'position': (-3, 2, 0), 'scale': (
+            self.mapFGP12col = bs.newnode('region', attrs={'position': (-1.5, 2, 0), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel12 = False
 
         if self.coldel13:
-            self.mapFGP13 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-6, 2, -9), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP13 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-4.5, 2, -9), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP13Tex = None
-            self.mapFGP13col = ba.newnode('region', attrs={'position': (-6, 2, -9), 'scale': (
+            self.mapFGP13col = bs.newnode('region', attrs={'position': (-4.5, 2, -9), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel13 = False
 
         if self.coldel14:
-            self.mapFGP14 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-6, 2, -6), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP14 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-4.5, 2, -6), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP14Tex = None
-            self.mapFGP14col = ba.newnode('region', attrs={'position': (-6, 2, -6), 'scale': (
+            self.mapFGP14col = bs.newnode('region', attrs={'position': (-4.5, 2, -6), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel14 = False
 
         if self.coldel15:
-            self.mapFGP15 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-6, 2, -3), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP15 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-4.5, 2, -3), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP15Tex = None
-            self.mapFGP15col = ba.newnode('region', attrs={'position': (-6, 2, -3), 'scale': (
+            self.mapFGP15col = bs.newnode('region', attrs={'position': (-4.5, 2, -3), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel15 = False
 
         if self.coldel16:
-            self.mapFGP16 = ba.newnode('prop',
-                                       attrs={'body': 'puck', 'position': (-6, 2, 0), 'model': self._mapFGPModel, 'model_scale': 3.8, 'body_scale': 3.8, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
+            self.mapFGP16 = bs.newnode('prop',
+                                       attrs={'body': 'puck', 'position': (-4.5, 2, 0), 'mesh': self._mapFGPModel, 'mesh_scale': 3.73, 'body_scale': 3.73, 'shadow_size': 0.5, 'gravity_scale': 0.0, 'color_texture': self._mapFGPDefaultTex, 'reflection': 'soft', 'reflection_scale': [1.0], 'is_area_of_interest': True, 'materials': [self.dont_collide]})
             self.mapFGP16Tex = None
-            self.mapFGP16col = ba.newnode('region', attrs={'position': (-6, 2, 0), 'scale': (
+            self.mapFGP16col = bs.newnode('region', attrs={'position': (-4.5, 2, 0), 'scale': (
                 3.5, 0.1, 3.5), 'type': 'box', 'materials': (self._collide_with_player, shared.footing_material)})
             self.coldel16 = False
 
@@ -843,27 +829,27 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
             timeStart = 6
         else:
             timeStart = 2
-            ba.playsound(self._scoreSound)
-            activity = _ba.get_foreground_host_activity()
+            self._scoreSound.play()
+            activity = bs.get_foreground_host_activity()
             for i in activity.players:
                 try:
-                    i.actor.node.handlemessage(ba.CelebrateMessage(2.0))
+                    i.actor.node.handlemessage(bs.CelebrateMessage(2.0))
                 except:
                     pass
-        ba.timer(timeStart, self._randomPlatform)
-        ba.timer(timeStart, self.startCounter)
+        bs.timer(timeStart, self._randomPlatform)
+        bs.timer(timeStart, self.startCounter)
 
         self.spawnAllMap()
         self.flashHide()
 
     # Various high-level game events come through this method.
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
 
             # Augment standard behavior.
             super().handlemessage(msg)
 
-            curtime = ba.time()
+            curtime = bs.time()
 
             # Record the player's moment of death.
             # assert isinstance(msg.spaz.player
@@ -873,15 +859,15 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
             # (more accurate looking).
             # In teams/ffa, allow a one-second fudge-factor so we can
             # get more draws if players die basically at the same time.
-            if isinstance(self.session, ba.CoopSession):
+            if isinstance(self.session, bs.CoopSession):
                 # Teams will still show up if we check now.. check in
                 # the next cycle.
-                ba.pushcall(self._check_end_game)
+                babase.pushcall(self._check_end_game)
 
                 # Also record this for a final setting of the clock.
                 self._last_player_death_time = curtime
             else:
-                ba.timer(1.0, self._check_end_game)
+                bs.timer(1.0, self._check_end_game)
         else:
             # Default handler:
             return super().handlemessage(msg)
@@ -897,7 +883,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
         # In co-op, we go till everyone is dead.. otherwise we go
         # until one team remains.
-        if isinstance(self.session, ba.CoopSession):
+        if isinstance(self.session, bs.CoopSession):
             if living_team_count <= 0:
                 self.end_game()
         else:
@@ -905,7 +891,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
                 self.end_game()
 
     def end_game(self) -> None:
-        cur_time = ba.time()
+        cur_time = bs.time()
         assert self._timer is not None
         start_time = self._timer.getstarttime()
 
@@ -936,7 +922,7 @@ class MGgame(ba.TeamGameActivity[Player, Team]):
 
         # Ok now calc game results: set a score for each team and then tell
         # the game to end.
-        results = ba.GameResults()
+        results = bs.GameResults()
 
         # Remember that 'free-for-all' mode is simply a special form
         # of 'teams' mode where each player gets their own team, so we can
@@ -965,7 +951,7 @@ class MGdefs():
         (0.0, 0.0, 0.0) + (29.23565494, 14.19991443, 29.92689344)
 
 
-class MGmap(ba.Map):
+class MGmap(bs.Map):
     defs = MGdefs()
     name = 'Sky Tiles'
 
@@ -981,23 +967,23 @@ class MGmap(ba.Map):
     @classmethod
     def on_preload(cls) -> Any:
         data: Dict[str, Any] = {
-            'bgtex': ba.gettexture('menuBG'),
-            'bgmodel': ba.getmodel('thePadBG')
+            'bgtex': bs.gettexture('menuBG'),
+            'bgmesh': bs.getmesh('thePadBG')
         }
         return data
 
     def __init__(self) -> None:
         super().__init__()
         shared = SharedObjects.get()
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'terrain',
             attrs={
-                'model': self.preloaddata['bgmodel'],
+                'mesh': self.preloaddata['bgmesh'],
                 'lighting': False,
                 'background': True,
                 'color_texture': self.preloaddata['bgtex']
             })
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.tint = (1.3, 1.2, 1.0)
         gnode.ambient_color = (1.3, 1.2, 1.0)
         gnode.vignette_outer = (0.57, 0.57, 0.57)
@@ -1006,12 +992,12 @@ class MGmap(ba.Map):
         gnode.vr_near_clip = 0.5
 
 
-ba._map.register_map(MGmap)
+bs._map.register_map(MGmap)
 
 
 # ba_meta export plugin
-class byFreaku(ba.Plugin):
+class byFreaku(babase.Plugin):
     def __init__(self):
         ## Campaign support ##
-        ba.app.add_coop_practice_level(ba.Level(name='Memory Game', displayname='${GAME}', gametype=MGgame, settings={
-        }, preview_texture_name='achievementOffYouGo'))
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name='Memory Game', displayname='${GAME}', gametype=MGgame, settings={}, preview_texture_name='achievementOffYouGo'))

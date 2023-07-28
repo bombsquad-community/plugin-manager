@@ -28,6 +28,44 @@
         }
       }
     },
+    "icy_emits": {
+      "description": "Survice from icy bombs emitting through cold platform. Playable in teams/ffa/co-op",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "cedc448a3d625065d586445e115fcd1f"
+        }
+      }
+    },
+    "frozen_one": {
+      "description": "Survive until the timer runs out",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "529c8b9c9a450317d5aa75e8eab47497"
+        }
+      }
+    },
     "simon_says": {
       "description": "You better do what Simon says",
       "external_url": "",
@@ -199,10 +237,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "2c457b80b5a35adf0cad1436af4ab3fe"
+        },
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "0bc9522",
@@ -218,10 +262,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "49ae645a5afc390ead44d7219b388c78"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -237,10 +287,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "4cb6510f9f3ce151720a53a957986864"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "858030b",
@@ -430,20 +486,15 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
-        },
-        {
-          "name": "LoupGarou",
-          "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"
+          "discord": ""
         }
       ],
       "versions": {
         "2.0.0": {
           "api_version": 8,
-          "commit_sha": "e7a5df9",
-          "released_on": "26-07-2023",
-          "md5sum": "641732ef5c8c97cd5482b8cd56126310"
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "22b51a147524d84fbc249e61f21ae424"
         },
         "1.1.0": {
           "api_version": 7,
@@ -654,7 +705,7 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {

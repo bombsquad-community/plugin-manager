@@ -1,8 +1,9 @@
-# By Freaku / @[Just] Freak#4999
+# Made by your friend: Freaku
 
 
-import ba
-from bastd.maps import TowerD
+import babase
+import bascenev1 as bs
+from bascenev1lib.maps import TowerD
 
 
 @classmethod
@@ -11,8 +12,8 @@ def new_play_types(cls):
     return ['melee', 'keep_away', 'team_flag', 'king_of_the_hill']
 
 
-# ba_meta require api 7
+# ba_meta require api 8
 # ba_meta export plugin
-class byFreaku(ba.Plugin):
+class byFreaku(babase.Plugin):
     def on_app_running(self):
         TowerD.get_play_types = new_play_types

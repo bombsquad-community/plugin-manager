@@ -1,4 +1,4 @@
-# Ported by: Freaku / @[Just] Freak#4999
+# Ported by your friend: Freaku
 
 # Join BCS:
 # https://discord.gg/ucyaesh
@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 
