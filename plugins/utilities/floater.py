@@ -1,18 +1,20 @@
 # Ported by your friend: Freaku
 
-#Join BCS:
+# Join BCS:
 # https://discord.gg/ucyaesh
 
 
-#My GitHub:
+# My GitHub:
 # https://github.com/Freaku17/BombSquad-Mods-byFreaku
-
 
 
 # ba_meta require api 8
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import _babase, babase, random, math
+import _babase
+import babase
+import random
+import math
 import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1lib.gameutils import SharedObjects
@@ -110,7 +112,8 @@ class Floater(bs.Actor):
             })
         self.node.connectattr('position', self.node2, 'position')
 
-    def pop(self): PopupText(text="Ported by \ue048Freaku", scale=1.3, position=(self.node.position[0],self.node.position[1]-1,self.node.position[2]), color=(0,1,1)).autoretain()
+    def pop(self): PopupText(text="Ported by \ue048Freaku", scale=1.3, position=(
+        self.node.position[0], self.node.position[1]-1, self.node.position[2]), color=(0, 1, 1)).autoretain()
 
     def checkCanControl(self):
         if not self.node.exists():
@@ -186,7 +189,8 @@ class Floater(bs.Actor):
             np = self.node.position
         except:
             np = (0, 0, 0)
-        self.b = Bomb(bomb_type=random.choice(['normal', 'ice', 'sticky', 'impact', 'land_mine', 'tnt']), source_player=self.source_player, position=(np[0], np[1] - 1, np[2]), velocity=(0, -1, 0)).autoretain()
+        self.b = Bomb(bomb_type=random.choice(['normal', 'ice', 'sticky', 'impact', 'land_mine', 'tnt']),
+                      source_player=self.source_player, position=(np[0], np[1] - 1, np[2]), velocity=(0, -1, 0)).autoretain()
         if self.b.bomb_type in ['impact', 'land_mine']:
             self.b.arm()
 
@@ -198,7 +202,7 @@ class Floater(bs.Actor):
             pn = self.node.position
             dist = self.distance(pn[0], pn[1], pn[2], px, py, pz)
             self.node.velocity = ((px - pn[0]) / dist, (py - pn[1]) / dist, (pz - pn[2]) / dist)
-            bs.timer(dist-1, bs.WeakCall(self.move)) #suppress_format_warning=True)
+            bs.timer(dist-1, bs.WeakCall(self.move))  # suppress_format_warning=True)
 
     def handlemessage(self, msg):
         if isinstance(msg, bs.DieMessage):
@@ -211,21 +215,21 @@ class Floater(bs.Actor):
             super().handlemessage(msg)
 
 
-
-
-
-
 def assignFloInputs(clientID: int):
     activity = bs.get_foreground_host_activity()
     with activity.context:
         if not hasattr(activity, 'flo') or not activity.flo.node.exists():
-            try: activity.flo = Floater(activity.map.get_def_bound_box('map_bounds'))
-            except: return #Perhaps using in main-menu/score-screen
+            try:
+                activity.flo = Floater(activity.map.get_def_bound_box('map_bounds'))
+            except:
+                return  # Perhaps using in main-menu/score-screen
         floater = activity.flo
         if floater.controlled:
-            bs.broadcastmessage('Floater is already being controlled', color=(1, 0, 0), transient=True, clients=[clientID])
+            bs.broadcastmessage('Floater is already being controlled',
+                                color=(1, 0, 0), transient=True, clients=[clientID])
             return
-        bs.broadcastmessage('You Gained Control Over The Floater!\n Press Bomb to Throw Bombs and Punch to leave!', clients=[clientID], transient=True, color=(0, 1, 1))
+        bs.broadcastmessage('You Gained Control Over The Floater!\n Press Bomb to Throw Bombs and Punch to leave!', clients=[
+                            clientID], transient=True, color=(0, 1, 1))
 
         for i in activity.players:
             if i.sessionplayer.inputdevice.client_id == clientID:
@@ -259,20 +263,32 @@ bui.set_party_icon_always_visible(True)
 
 
 old_piv = bui.set_party_icon_always_visible
+
+
 def new_piv(*args, **kwargs):
     # Do not let chat icon go away
     old_piv(True)
+
+
 bui.set_party_icon_always_visible = new_piv
 
 
 old_fcm = bs.chatmessage
+
+
 def new_chat_message(*args, **kwargs):
     old_fcm(*args, **kwargs)
     if args[0] == '/floater':
-        try: assignFloInputs(-1)
-        except: pass
+        try:
+            assignFloInputs(-1)
+        except:
+            pass
+
+
 bs.chatmessage = new_chat_message
 
 # ba_meta export plugin
+
+
 class byFreaku(babase.Plugin):
     def __init__(self): pass
