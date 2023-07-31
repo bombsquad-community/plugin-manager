@@ -668,7 +668,7 @@
       "versions": {
         "2.0.0": {
           "api_version": 8,
-          "commit_sha": "6e995dd",
+          "commit_sha": "9340deb",
           "released_on": "31-07-2023",
           "md5sum": "5cc5d2d1d775c726b6065679dcfe3bda"
         },
