@@ -70,7 +70,7 @@ class UploadConfirmation(ConfirmWindow):
 
     def _upload_file(self):
         self.status = "uploading"
-        print(self.root_widget)
+        # print(self.root_widget)
         thread = Thread(target=handle_upload, args=(
             self.file_path, self.uploaded, self.root_widget,))
         thread.start()
