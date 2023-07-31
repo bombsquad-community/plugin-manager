@@ -1,3 +1,4 @@
 reference.py
 __pycache__
 *.pyc
+.history
