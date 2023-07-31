@@ -348,8 +348,8 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
@@ -385,8 +385,8 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
@@ -416,8 +416,8 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
@@ -429,14 +429,33 @@
         }
       }
     },
+    "file_share": {
+      "description": "share/import mods, replays, custom characters/maps with link or QR code",
+      "external_url": "https://youtu.be/qtGsFU4cgic",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "dbd41c4",
+          "released_on": "31-07-2023",
+          "md5sum": "e1d4852a3c2c2dbf746867016ae9fbdf"
+        }
+      }
+    },
     "server_switch": {
       "description": "Let you switch between recents servers",
       "external_url": "https://www.youtube.com/watch?v=QrES1jQGXF0",
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
@@ -466,8 +485,8 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
@@ -491,8 +510,8 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
