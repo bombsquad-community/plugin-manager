@@ -45,9 +45,14 @@ if ANDROID:  # !can add ios in future
         path = Path(f"{install_path}/websocket.tar.gz")
         file_path = Path(f"{install_path}/websocket")
         source_dir = Path(f"{install_path}/websocket-client-1.6.1/websocket")
-        if not file_path.exists():
+        if not f"{file_path}/__init__.py".exists():
             url = "https://files.pythonhosted.org/packages/b1/34/3a5cae1e07d9566ad073fa6d169bf22c03a3ba7b31b3c3422ec88d039108/websocket-client-1.6.1.tar.gz"
             try:
+                # fix issue where the file delete themselves
+                try:
+                    shutil.rmtree(file_path)
+                except:
+                    pass
                 filename, headers = urlretrieve(url, filename=path)
                 with open(filename, "rb") as f:
                     content = f.read()
@@ -270,6 +275,14 @@ def get_event_loop(force_fresh=False):
                         for number, line in enumerate(data):
                             if number not in range(46, 56):
                                 file.write(line)
+        # fix the mess i did with the previous
+        elif file_path.exists():
+            with open(Path(f"{getcwd()}/ba_data/python/pypresence/utils.py"), "r") as file:
+                data = file.readlines()
+                first_line = data[0].rstrip("\n")
+                if not first_line == '"""Util functions that are needed but messy."""':
+                    shutil.rmtree(file_path)
+                    get_module()
     get_module()
 
     from pypresence import PipeClosed, DiscordError, DiscordNotFound
@@ -723,7 +736,7 @@ class Discordlogin(PopupWindow):
             bui.getsound('shieldDown').play()
             bui.screenmessage("Account successfully removed!!", (0.10, 0.10, 1.00))
             self.on_bascenev1libup_cancel()
-            PresenceUpdate().ws.close()
+            PresenceUpdate().close()
 
 
 run_once = False
