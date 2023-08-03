@@ -178,7 +178,12 @@
         }
       ],
       "versions": {
-        "1.0.1": null,
+        "1.0.1": {
+          "api_version": 7,
+          "commit_sha": "d511c15",
+          "released_on": "03-08-2023",
+          "md5sum": "a352bee7d9be68773bb056d94486a299"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -242,7 +247,12 @@
         }
       ],
       "versions": {
-        "2.0.1": null,
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "d511c15",
+          "released_on": "03-08-2023",
+          "md5sum": "9277227c0f267f0d7d9e9d744f14688b"
+        },
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "48f9302",
