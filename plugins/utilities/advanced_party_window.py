@@ -828,7 +828,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             newFileName = str(babase.Lstr(resource="replayNameDefaultText").evaluate(
             )+" (%s)" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y_%m_%d_%H_%M_%S"))+".brp")
             newFilePath = os.path.join(dir_path+os.sep, newFileName).encode(SystemEncode)
-            #print(curFilePath, newFilePath)
+            # print(curFilePath, newFilePath)
             # os.rename(curFilePath,newFilePath)
             shutil.copyfile(curFilePath, newFilePath)
             bs.broadcastmessage(_getTransText("Game_Record_Saved") % newFileName, color=(1, 1, 1))
@@ -1182,7 +1182,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                 babase.Lstr(resource='internal.cantKickHostError'),
                 color=(1, 0, 0))
 
-        #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_babase._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
+        # NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_babase._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
     def joinbombspot(self):
 
         bui.open_url("https://discord.gg/ucyaesh")
