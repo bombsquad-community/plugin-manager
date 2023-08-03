@@ -45,7 +45,7 @@ if ANDROID:  # !can add ios in future
         path = Path(f"{install_path}/websocket.tar.gz")
         file_path = Path(f"{install_path}/websocket")
         source_dir = Path(f"{install_path}/websocket-client-1.6.1/websocket")
-        if not f"{file_path}/__init__.py".exists():
+        if not Path(f"{file_path}/__init__.py").exists(): #YouKnowDev
             url = "https://files.pythonhosted.org/packages/b1/34/3a5cae1e07d9566ad073fa6d169bf22c03a3ba7b31b3c3422ec88d039108/websocket-client-1.6.1.tar.gz"
             try:
                 # fix issue where the file delete themselves
