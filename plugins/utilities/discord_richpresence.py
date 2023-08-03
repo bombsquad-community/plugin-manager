@@ -850,7 +850,7 @@ class DiscordRP(babase.Plugin):
         if name == this:
             self.rpc_thread.large_image_key = "lobby"
             self.rpc_thread.large_image_text = "Bombing up"
-            #self.rpc_thread.small_image_key = "lobbysmall"
+            # self.rpc_thread.small_image_key = "lobbysmall"
         if name == "Ranking":
             self.rpc_thread.large_image_key = "ranking"
             self.rpc_thread.large_image_text = "Viewing Results"
