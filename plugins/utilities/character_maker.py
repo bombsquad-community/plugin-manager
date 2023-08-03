@@ -1,19 +1,20 @@
 # Released under the MIT License. See LICENSE for details.
 
+# ba_meta require api 8
+
 
 '''
 Character Builder/Maker by Mr.Smoothy
 Plugin helps to mix character models and textures in interactive way.
 
-Watch tutorial : https://www.youtube.com/c/HeySmoothy
+Watch tutorial : https://youtu.be/q0KxY1hfMPQ
 Join discord: https://discord.gg/ucyaesh for help
-https://github.com/imayushsaini/Bombsquad-Ballistica-Modded-Server/
+https://bombsquad-community.web.app/home
 
 > create team playlist and add character maker mini game 
 > Use export command to save character
 > Character will be saved in CustomCharacter folder inside Bombsquad Mods folder
 
-*Only one player in that mini game supported ...
 
 Characters can be used offline or online
 for online you need to share character file with  server owners.
@@ -27,8 +28,8 @@ for online you need to share character file with  server owners.
      You can add more models and texture , check line near 400 and add asset names ,  you can also modify sounds and icon in json file (optional)  .
 
 To share your character with friends ,
-     send them character .json file and tell them to put file in same location i.e Bombsquad/CustomCharacter  or for PC appdata/Local/Bombsquad/Mods/CustomCharacter
-     this plugin should be installed on their device too
+     send them character .json file and tell them to put file in same location i.e mods/CustomCharacter  or for PC appdata/Local/Bombsquad/Mods/CustomCharacter
+     this plugin should be installed on their device too.
 
 Dont forget to share your creativity with me ,
 send your character screenshot discord: mr.smoothy#5824  https://discord.gg/ucyaesh
@@ -37,31 +38,28 @@ Register your character in above discord server , so other server owners can add
 
 
 Released on 28 May 2021 
-
-
 Update 2 june : use import <character-name>
+Update 29 July 2023: updated to API 8 , multiplayer support
 '''
 
-
-# ba_meta require api 7
-
-
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
-import ba
-import _ba
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-
-if TYPE_CHECKING:
-    from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
+from typing import Sequence
+import _babase
+import babase
+import bauiv1 as bui
+from bascenev1lib.actor.spazappearance import *
+from bascenev1lib.actor.text import Text
+from bascenev1lib.actor.image import Image
 
 import os
+import copy
 import json
-from bastd.actor.spazappearance import *
-spazoutfit = {
+
+GAME_USER_DIRECTORY = _babase.env()["python_directory_user"]
+CUSTOM_CHARACTERS = os.path.join(GAME_USER_DIRECTORY, "CustomCharacters")
+os.makedirs(CUSTOM_CHARACTERS, exist_ok=True)
+
+
+SPAZ_PRESET = {
     "color_mask": "neoSpazColorMask",
     "color_texture": "neoSpazColor",
     "head": "neoSpazHead",
@@ -72,7 +70,7 @@ spazoutfit = {
     "forearm": "neoSpazForeArm",
     "upper_leg": "neoSpazUpperLeg",
     "lower_leg": "neoSpazLowerLeg",
-    "toes_model": "neoSpazToes",
+    "toes_mesh": "neoSpazToes",
     "jump_sounds": ['spazJump01', 'spazJump02', 'spazJump03', 'spazJump04'],
     "attack_sounds": ['spazAttack01', 'spazAttack02', 'spazAttack03', 'spazAttack04'],
     "impact_sounds": ['spazImpact01', 'spazImpact02', 'spazImpact03', 'spazImpact04'],
@@ -83,22 +81,21 @@ spazoutfit = {
     "icon_mask_texture": "neoSpazIconColorMask",
     "style": "spaz"
 }
-character = None
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.score = 0
 
 
-# ba_meta export game
-class CharacterBuilder(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
     """A game type based on acquiring kills."""
 
     name = 'Character Maker'
@@ -108,16 +105,15 @@ class CharacterBuilder(ba.TeamGameActivity[Player, Team]):
     announce_player_deaths = True
 
     @classmethod
-    def get_available_settings(
-            cls, sessiontype: Type[ba.Session]) -> List[ba.Setting]:
+    def get_available_settings(cls, sessiontype):
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Kills to Win Per Player',
                 min_value=1,
                 default=5,
                 increment=1,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -129,7 +125,7 @@ class CharacterBuilder(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -140,387 +136,630 @@ class CharacterBuilder(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
 
-        if issubclass(sessiontype, ba.FreeForAllSession):
+        if issubclass(sessiontype, bs.FreeForAllSession):
             settings.append(
-                ba.BoolSetting('Allow Negative Scores', default=False))
+                bs.BoolSetting('Allow Negative Scores', default=False))
 
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.DualTeamSession)
-                or issubclass(sessiontype, ba.FreeForAllSession))
+    def supports_session_type(cls, sessiontype):
+        return (issubclass(sessiontype, bs.DualTeamSession)
+                or issubclass(sessiontype, bs.FreeForAllSession))
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
+    def get_supported_maps(cls, sessiontype):
         return ['Rampage']
 
-    def __init__(self, settings: dict):
-
+    def __init__(self, settings):
         super().__init__(settings)
 
-        self.initdic()
-        _ba.set_party_icon_always_visible(True)
-        self._score_to_win: Optional[int] = None
-        self._dingsound = ba.getsound('dingSmall')
+        self.initialize_meshs()
+        bui.set_party_icon_always_visible(True)
+        self._score_to_win = None
+        self._dingsound = bs.getsound('dingSmall')
         self._epic_mode = bool(settings['Epic Mode'])
         self._kills_to_win_per_player = int(
             settings['Kills to Win Per Player'])
         self._time_limit = float(settings['Time Limit'])
         self._allow_negative_scores = bool(
             settings.get('Allow Negative Scores', False))
-        self.bodyindex = 0
-        self.modelindex = 0
-        self.youtube = ba.newnode(
-            'text',
-            attrs={
-                'text': "youtube.com/c/HeySmoothy",
-                'in_world': True,
-                'scale': 0.02,
-                'color': (1, 0, 0, 0.4),
-                'h_align': 'center',
-                'position': (0, 4, -1.9)
-            })
-        self.discordservere = ba.newnode(
-            'text',
-            attrs={
-                'text': "discord.gg/ucyaesh",
-                'in_world': True,
-                'scale': 0.02,
-                'color': (0.12, 0.3, 0.6, 0.4),
-                'h_align': 'center',
-                'position': (-3, 2.7, -1.9)
-            })
-        # self.discord= ba.newnode(
-        #                 'text',
-        #                 attrs={
-        #                     'text': "mr.smoothy#5824",
-        #                     'in_world': True,
-        #                     'scale': 0.02,
-        #                     'color': (01.2, 0.3, 0.7, 0.4),
-        #                     'h_align': 'center',
-        #                     'position': (4,2.7,-1.9)
-        #                 })
+
+        self._punch_image = Image(
+            bs.gettexture('buttonPunch'),
+            position=(345, 200),
+            scale=(50, 50),
+            color=(0.9, 0.9, 0, 0.9)
+        )
+        self._punch_text = Text(
+            "Model+",
+            scale=0.7,
+            shadow=0.5,
+            flatness=0.5,
+            color=(0.9, 0.9, 0, 0.9),
+            position=(263, 190))
+
+        self._grab_image = Image(
+            bs.gettexture('buttonPickUp'),
+            position=(385, 240),
+            scale=(50, 50),
+            color=(0, 0.7, 0.9)
+        )
+        self._grab_text = Text(
+            "Component-",
+            scale=0.7,
+            shadow=0.5,
+            flatness=0.5,
+            color=(0, 0.7, 1, 0.9),
+            position=(340, 265))
+
+        self._jump_image = Image(
+            bs.gettexture('buttonJump'),
+            position=(385, 160),
+            scale=(50, 50),
+            color=(0.2, 0.9, 0.2, 0.9)
+        )
+        self._jump_text = Text(
+            "Component+",
+            scale=0.7,
+            shadow=0.5,
+            flatness=0.5,
+            color=(0.2, 0.9, 0.2, 0.9),
+            position=(340, 113))
+
+        self._bomb_image = Image(
+            bs.gettexture('buttonBomb'),
+            position=(425, 200),
+            scale=(50, 50),
+            color=(0.9, 0.2, 0.2, 0.9)
+        )
+        self._bomb_text = Text(
+            "Model-",
+            scale=0.7,
+            shadow=0.5,
+            flatness=0.5,
+            color=(0.9, 0.2, 0.2, 0.9),
+            position=(452, 190))
+
+        self._host = Text(
+            "Originally created by \ue020HeySmoothy\nhttps://youtu.be/q0KxY1hfMPQ\nhttps://youtu.be/3l2dxWEhrzE\n\nModified for multiplayer by \ue047Nyaa! :3",
+            flash=False,
+            maxwidth=0,
+            scale=0.65,
+            shadow=0.5,
+            flatness=0.5,
+            h_align=Text.HAlign.RIGHT,
+            v_attach=Text.VAttach.BOTTOM,
+            h_attach=Text.HAttach.RIGHT,
+            color=(1.0, 0.4, 0.95, 0.8),
+            position=(-2, 82))
+        self._discord = Text(
+            "Join discord.gg/ucyaesh to provide feedback or to use this Character Maker offline!",
+            flash=False,
+            maxwidth=0,
+            scale=0.85,
+            shadow=0.5,
+            flatness=0.5,
+            h_align=Text.HAlign.CENTER,
+            v_attach=Text.VAttach.BOTTOM,
+            h_attach=Text.HAttach.CENTER,
+            color=(1.0, 0.4, 0, 1),
+            position=(0, 110))
+        self._website = Text(
+            "check mods folder to get JSON character file ever exported from here!",
+            flash=False,
+            maxwidth=0,
+            scale=0.85,
+            shadow=0.5,
+            flatness=0.5,
+            h_align=Text.HAlign.CENTER,
+            v_attach=Text.VAttach.BOTTOM,
+            h_attach=Text.HAttach.CENTER,
+            color=(0.2, 0.9, 1.0, 1),
+            position=(0, 150))
+        self._commands = Text(
+            "Commands:\n\n\t1. /info\n\t2. /export <character-name>\n\t3. /import <character-name>\n\t",
+            flash=False,
+            maxwidth=0,
+            scale=0.8,
+            shadow=0.5,
+            flatness=0.5,
+            h_align=Text.HAlign.LEFT,
+            v_attach=Text.VAttach.TOP,
+            h_attach=Text.HAttach.LEFT,
+            color=(0.3, 0.9, 0.3, 0.8),
+            position=(30, -112))
         # Base class overrides.
-        self.bodypart = ba.newnode(
-            'text',
-            attrs={
-                'text': "<Choose Body Part>",
-                'in_world': True,
-                'scale': 0.02,
-                'color': (1, 1, 0, 1),
-                'h_align': 'center',
-                'position': (-4, 6, -4)
-            })
-        self.newmodel = ba.newnode(
-            'text',
-            attrs={
-                'text': "<Choose model/tex>",
-                'in_world': True,
-                'scale': 0.02,
-                'color': (1, 1, 0, 1),
-                'h_align': 'center',
-                'position': (6, 6, -4)
-            })
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC if self._epic_mode else
-                              ba.MusicType.TO_THE_DEATH)
+        self.default_music = bs.MusicType.MARCHING
 
-    def get_instance_description(self) -> Union[str, Sequence]:
+    def get_instance_description(self):
         return ''
 
-    def get_instance_description_short(self) -> Union[str, Sequence]:
+    def get_instance_description_short(self):
         return ''
 
-    def on_team_join(self, team: Team) -> None:
+    def on_team_join(self, team: Team):
         if self.has_begun():
             pass
 
-    def on_begin(self) -> None:
+    def on_begin(self):
         super().on_begin()
 
-    def nextBodyPart(self):
-        self.bodyindex = (self.bodyindex+1) % len(self.dic.keys())
-        self.bodypart.delete()
-        PART = list(self.dic.keys())[self.bodyindex]
-        self.bodypart = ba.newnode(
+    def nextBodyPart(self, spaz):
+        spaz.bodyindex = (spaz.bodyindex+1) % len(self.cache.keys())
+        try:
+            spaz.bodypart.delete()
+        except AttributeError:
+            pass
+        part = list(self.cache.keys())[spaz.bodyindex]
+        spaz.bodypart = bs.newnode(
             'text',
+            owner=spaz.node,
             attrs={
-                'text': PART,
+                'text': str(part),
                 'in_world': True,
-                'scale': 0.02,
-                'color': (1, 1, 1, 1),
-                'h_align': 'center',
-                'position': (-4, 6, -4)
-            })
+                'color': (1, 1, 1),
+                'scale': 0.011,
+                'shadow': 0.5,
+                'flatness': 0.5,
+                'h_align': 'center', })
+        math = bs.newnode('math',
+                          owner=spaz.node,
+                          attrs={
+                              'input1': (0, 1.7, 0.5),
+                              'operation': 'add',
+                          })
+        spaz.node.connectattr('position', math, 'input2')
+        math.connectattr('output', spaz.bodypart, 'position')
+        bs.getsound('deek').play()
 
-    def prevBodyPart(self):
-        self.bodyindex = (self.bodyindex-1) % len(self.dic.keys())
-        self.bodypart.delete()
-        PART = list(self.dic.keys())[self.bodyindex]
-        self.bodypart = ba.newnode(
+    def prevBodyPart(self, spaz):
+        spaz.bodyindex = (spaz.bodyindex-1) % len(self.cache.keys())
+        try:
+            spaz.bodypart.delete()
+        except AttributeError:
+            pass
+        part = list(self.cache.keys())[spaz.bodyindex]
+        spaz.bodypart = bs.newnode(
             'text',
+            owner=spaz.node,
             attrs={
-                'text': PART,
+                'text': str(part),
                 'in_world': True,
-                'scale': 0.02,
-                'color': (1, 1, 1, 1),
-                'h_align': 'center',
-                'position': (-4, 6, -4)
-            })
+                'color': (1, 1, 1),
+                'scale': 0.011,
+                'shadow': 0.5,
+                'flatness': 0.5,
+                'h_align': 'center', })
+        math = bs.newnode('math',
+                          owner=spaz.node,
+                          attrs={
+                              'input1': (0, 1.7, 0.5),
+                              'operation': 'add',
+                          })
+        spaz.node.connectattr('position', math, 'input2')
+        math.connectattr('output', spaz.bodypart, 'position')
+        bs.getsound('deek').play()
 
-    def nextModel(self):
-
-        self.newmodel.delete()
-        PART = list(self.dic.keys())[self.bodyindex]
-        self.modelindex = (self.modelindex+1) % len(self.dic[PART])
-        model = self.dic[PART][self.modelindex]
-        self.newmodel = ba.newnode(
+    def nextModel(self, spaz):
+        try:
+            spaz.newmesh.delete()
+        except AttributeError:
+            pass
+        part = list(self.cache.keys())[spaz.bodyindex]
+        spaz.meshindex = (spaz.meshindex+1) % len(self.cache[part])
+        mesh = self.cache[part][spaz.meshindex]
+        spaz.newmesh = bs.newnode(
             'text',
+            owner=spaz.node,
             attrs={
-                'text': model,
+                'text': str(mesh),
                 'in_world': True,
-                'scale': 0.02,
-                'color': (1, 1, 1, 1),
-                'h_align': 'center',
-                'position': (6, 6, -4)
+                'color': (1, 1, 1),
+                'scale': 0.011,
+                'shadow': 0.5,
+                'flatness': 0.5,
+                'h_align': 'center'
             })
+        math = bs.newnode('math',
+                          owner=spaz.node,
+                          attrs={
+                              'input1': (0, -0.6, 0.5),
+                              'operation': 'add',
+                          })
+        spaz.node.connectattr('position', math, 'input2')
+        math.connectattr('output', spaz.newmesh, 'position')
+        if part == "main_color":
+            self.setColor(spaz, mesh)
+        elif part == "highlight_color":
+            self.setHighlight(spaz, mesh)
+        else:
+            self.setModel(spaz, part, mesh)
+        bs.getsound('click01').play()
 
-        self.setModel(PART, model)
-
-    def prevModel(self):
-
-        self.newmodel.delete()
-        PART = list(self.dic.keys())[self.bodyindex]
-        self.modelindex = (self.modelindex-1) % len(self.dic[PART])
-        model = self.dic[PART][self.modelindex]
-        self.newmodel = ba.newnode(
+    def prevModel(self, spaz):
+        try:
+            spaz.newmesh.delete()
+        except AttributeError:
+            pass
+        part = list(self.cache.keys())[spaz.bodyindex]
+        spaz.meshindex = (spaz.meshindex-1) % len(self.cache[part])
+        mesh = self.cache[part][spaz.meshindex]
+        spaz.newmesh = bs.newnode(
             'text',
+            owner=spaz.node,
             attrs={
-                'text': model,
+                'text': str(mesh),
                 'in_world': True,
-                'scale': 0.02,
-                'color': (1, 1, 1, 1),
-                'h_align': 'center',
-                'position': (6, 6, -4)
+                'color': (1, 1, 1),
+                'scale': 0.011,
+                'shadow': 0.5,
+                'flatness': 0.5,
+                'h_align': 'center'
             })
-        self.setModel(PART, model)
+        math = bs.newnode('math',
+                          owner=spaz.node,
+                          attrs={
+                              'input1': (0, -0.6, 0.5),
+                              'operation': 'add',
+                          })
+        spaz.node.connectattr('position', math, 'input2')
+        math.connectattr('output', spaz.newmesh, 'position')
+        if part == "main_color":
+            self.setColor(spaz, mesh)
+        elif part == "highlight_color":
+            self.setHighlight(spaz, mesh)
+        else:
+            self.setModel(spaz, part, mesh)
+        bs.getsound('click01').play()
 
-    def setModel(self, bodypart, modelname):
-        global spazoutfit
-        body = _ba.get_foreground_host_activity().players[0].actor.node
+    def setColor(self, spaz, color):
+        spaz.node.color = color
+
+    def setHighlight(self, spaz, highlight):
+        spaz.node.highlight = highlight
+
+    def setModel(self, spaz, bodypart, meshname):
         if bodypart == 'head':
-            body.head_model = ba.getmodel(modelname)
+            spaz.node.head_mesh = bs.getmesh(meshname)
         elif bodypart == 'torso':
-            body.torso_model = ba.getmodel(modelname)
+            spaz.node.torso_mesh = bs.getmesh(meshname)
         elif bodypart == 'pelvis':
-            body.pelvis_model = ba.getmodel(modelname)
+            spaz.node.pelvis_mesh = bs.getmesh(meshname)
         elif bodypart == 'upper_arm':
-            body.upper_arm_model = ba.getmodel(modelname)
+            spaz.node.upper_arm_mesh = bs.getmesh(meshname)
         elif bodypart == 'forearm':
-            body.forearm_model = ba.getmodel(modelname)
+            spaz.node.forearm_mesh = bs.getmesh(meshname)
         elif bodypart == 'hand':
-            body.hand_model = ba.getmodel(modelname)
+            spaz.node.hand_mesh = bs.getmesh(meshname)
         elif bodypart == 'upper_leg':
-            body.upper_leg_model = ba.getmodel(modelname)
+            spaz.node.upper_leg_mesh = bs.getmesh(meshname)
         elif bodypart == 'lower_leg':
-            body.lower_leg_model = ba.getmodel(modelname)
-        elif bodypart == 'toes_model':
-            body.toes_model = ba.getmodel(modelname)
+            spaz.node.lower_leg_mesh = bs.getmesh(meshname)
+        elif bodypart == 'toes_mesh':
+            spaz.node.toes_mesh = bs.getmesh(meshname)
         elif bodypart == 'style':
-            body.style = modelname
+            spaz.node.style = meshname
         elif bodypart == 'color_texture':
-            body.color_texture = ba.gettexture(modelname)
+            spaz.node.color_texture = bs.gettexture(meshname)
         elif bodypart == 'color_mask':
-            body.color_mask_texture = ba.gettexture(modelname)
-        spazoutfit[bodypart] = modelname
+            spaz.node.color_mask_texture = bs.gettexture(meshname)
 
-    def spawn_player(self, player: Player) -> ba.Actor:
-        global character
-        if character != None:
-            player.character = character
-
-        self.setcurrentcharacter(player.character)
-
+    def spawn_player(self, player):
         spaz = self.spawn_player_spaz(player)
+        spaz.bodyindex = 0
+        spaz.meshindex = 0
+        spaz.bodypart = bs.newnode(
+            'text',
+            owner=spaz.node,
+            attrs={
+                'text': "<Choose Component>",
+                'in_world': True,
+                'scale': 0.011,
+                'color': (1, 0.4, 0.9, 1),
+                'h_align': 'center',
+                'shadow': 0.7,
+                'flatness': 0.5,
+            })
+        math = bs.newnode('math',
+                          owner=spaz.node,
+                          attrs={
+                              'input1': (0, 1.7, 0.5),
+                              'operation': 'add',
+                          })
+        spaz.node.connectattr('position', math, 'input2')
+        math.connectattr('output', spaz.bodypart, 'position')
+        spaz.newmesh = bs.newnode(
+            'text',
+            owner=spaz.node,
+            attrs={
+                'text': "<Choose Model/Tex>",
+                'in_world': True,
+                'scale': 0.011,
+                'color': (1, 0.4, 0.9, 1),
+                'h_align': 'center',
+                'shadow': 0.7,
+                'flatness': 0.5,
+            })
+        math = bs.newnode('math',
+                          owner=spaz.node,
+                          attrs={
+                              'input1': (0, -0.6, 0.5),
+                              'operation': 'add',
+                          })
+        spaz.node.connectattr('position', math, 'input2')
+        math.connectattr('output', spaz.newmesh, 'position')
 
         # Let's reconnect this player's controls to this
         # spaz but *without* the ability to attack or pick stuff up.
-        spaz.connect_controls_to_player(enable_punch=False,
-                                        enable_jump=False,
-                                        enable_bomb=False,
-                                        enable_pickup=False)
-        intp = ba.InputType
-        player.assigninput(intp.JUMP_PRESS, self.nextBodyPart)
-        player.assigninput(intp.PICK_UP_PRESS, self.prevBodyPart)
-        player.assigninput(intp.PUNCH_PRESS, self.nextModel)
-        player.assigninput(intp.BOMB_PRESS, self.prevModel)
+        # spaz.connect_controls_to_player(enable_punch=False,
+        #                                 enable_jump=False,
+        #                                 enable_bomb=False,
+        #                                 enable_pickup=False)
+
+        intp = babase.InputType
+        player.assigninput(intp.JUMP_PRESS, lambda: self.nextBodyPart(spaz))
+        player.assigninput(intp.PICK_UP_PRESS, lambda: self.prevBodyPart(spaz))
+        player.assigninput(intp.PUNCH_PRESS, lambda: self.nextModel(spaz))
+        player.assigninput(intp.BOMB_PRESS, lambda: self.prevModel(spaz))
         # Also lets have them make some noise when they die.
         spaz.play_big_death_sound = True
         return spaz
 
-    def handlemessage(self, msg: Any) -> Any:
-
-        if isinstance(msg, ba.PlayerDiedMessage):
-
+    def handlemessage(self, msg):
+        if isinstance(msg, bs.PlayerDiedMessage):
             # Augment standard behavior.
             super().handlemessage(msg)
-
             player = msg.getplayer(Player)
             self.respawn_player(player)
-
         else:
             return super().handlemessage(msg)
         return None
 
-    def setcurrentcharacter(self, charname):
-        global spazoutfit
-        char = ba.app.spaz_appearances[charname]
-        spazoutfit['head'] = char.head_model
-        spazoutfit['hand'] = char.hand_model
-        spazoutfit['torso'] = char.torso_model
-        spazoutfit['pelvis'] = char.pelvis_model
-        spazoutfit['upper_arm'] = char.upper_arm_model
-        spazoutfit['forearm'] = char.forearm_model
-        spazoutfit['upper_leg'] = char.upper_leg_model
-        spazoutfit['lower_leg'] = char.lower_leg_model
-        spazoutfit['toes_model'] = char.toes_model
-        spazoutfit['style'] = char.style
-        spazoutfit['color_mask'] = char.color_mask_texture
-        spazoutfit['color_texture'] = char.color_texture
-
-    def _update_scoreboard(self) -> None:
+    def _update_scoreboard(self):
         for team in self.teams:
             self._scoreboard.set_team_value(team, team.score,
                                             self._score_to_win)
 
-    def end_game(self) -> None:
-        results = ba.GameResults()
+    def end_game(self):
+        results = bs.GameResults()
         for team in self.teams:
             results.set_team_score(team, team.score)
         self.end(results=results)
 
-    def initdic(self):
-        self.dic = {"head": ["bomb", "landMine", "trees", "wing", "eyeLid", "impactBomb"],
-                    "hand": ["hairTuft3", "bomb", "powerup"],
-                    "torso": ["bomb", "landMine", "bomb"],
-                    "pelvis": ["hairTuft4", "bomb"],
-                    "upper_arm": ["wing", "locator", "bomb"],
-                    "forearm": ["flagPole", "bomb"],
-                    "upper_leg": ["bomb"],
-                    "lower_leg": ["bomb"],
-                    "toes_model": ["bomb"],
-                    "style": ["spaz", "female", "ninja", "kronk", "mel", "pirate", "santa", "frosty", "bones", "bear", "penguin", "ali", "cyborg", "agent", "pixie", "bunny"],
-                    "color_texture": ["kronk", "egg1", "egg2", "egg3", "achievementGotTheMoves", "bombColor", "crossOut", "explosion", "rgbStripes", "powerupCurse", "powerupHealth", "impactBombColorLit"],
-                    "color_mask": ["egg1", "egg2", "egg3", "bombColor", "crossOutMask", "fontExtras3"]
-
-                    }
+    def initialize_meshs(self):
+        self.cache = {
+            "head": ["bomb", "landMine", "wing", "eyeLid", "impactBomb"],
+            "hand": ["hairTuft3", "bomb", "powerup"],
+            "torso": ["bomb", "landMine", "bomb"],
+            "pelvis": ["hairTuft4", "bomb"],
+            "upper_arm": ["wing", "locator", "bomb"],
+            "forearm": ["flagPole", "bomb"],
+            "upper_leg": ["bomb"],
+            "lower_leg": ["bomb"],
+            "toes_mesh": ["bomb"],
+            "style": ["spaz", "female", "ninja", "kronk", "mel", "pirate", "santa", "frosty", "bones", "bear", "penguin", "ali", "cyborg", "agent", "pixie", "bunny"],
+            "color_texture": ["kronk", "egg1", "egg2", "egg3", "achievementGotTheMoves", "bombColor", "crossOut", "explosion", "rgbStripes", "powerupCurse", "powerupHealth", "impactBombColorLit"],
+            "color_mask": ["egg1", "egg2", "egg3", "bombColor", "crossOutMask", "fontExtras3"],
+            "main_color": [(0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1), (0, 1, 1), (1, 1, 1)],
+            "highlight_color": [(0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1), (0, 1, 1), (1, 1, 1)],
+        }
         chars = ["neoSpaz", "zoe", "ninja", "kronk", "mel", "jack", "santa", "frosty",
                  "bones", "bear", "penguin", "ali", "cyborg", "agent", "wizard", "pixie", "bunny"]
+
         for char in chars:
-            self.dic["head"].append(char+"Head")
-            self.dic["hand"].append(char+"Hand")
-            self.dic["torso"].append(char+"Torso")
+            self.cache["head"].append(char + "Head")
+            self.cache["hand"].append(char + "Hand")
+            self.cache["torso"].append(char + "Torso")
             if char not in ['mel', "jack", "santa"]:
-                self.dic["pelvis"].append(char+"Pelvis")
-            self.dic["upper_arm"].append(char+"UpperArm")
-            self.dic["forearm"].append(char+"ForeArm")
-            self.dic["upper_leg"].append(char+"UpperLeg")
-            self.dic["lower_leg"].append(char+"LowerLeg")
-            self.dic["toes_model"].append(char+"Toes")
-            self.dic["color_mask"].append(char+"ColorMask")
+                self.cache["pelvis"].append(char + "Pelvis")
+            self.cache["upper_arm"].append(char + "UpperArm")
+            self.cache["forearm"].append(char + "ForeArm")
+            self.cache["upper_leg"].append(char + "UpperLeg")
+            self.cache["lower_leg"].append(char + "LowerLeg")
+            self.cache["toes_mesh"].append(char + "Toes")
+            self.cache["color_mask"].append(char + "ColorMask")
             if char != "kronk":
-                self.dic["color_texture"].append(char+"Color")
+                self.cache["color_texture"].append(char + "Color")
 
 
-cm = _ba.chatmessage
+def mesh_to_string(mesh):
+    return str(mesh)[17:-2]
 
 
-def _new_chatmessage(msg: str | ba.Lstr, clients: Sequence[int] | None = None, sender_override: str | None = None):
-    if msg.split(" ")[0] == "export":
+def texture_to_string(texture):
+    return str(texture)[20:-2]
+
+
+def spaz_to_json(spaz):
+    spaz_json = copy.deepcopy(SPAZ_PRESET)
+    spaz_json['head'] = mesh_to_string(spaz.node.head_mesh)
+    spaz_json['hand'] = mesh_to_string(spaz.node.hand_mesh)
+    spaz_json['torso'] = mesh_to_string(spaz.node.torso_mesh)
+    spaz_json['pelvis'] = mesh_to_string(spaz.node.pelvis_mesh)
+    spaz_json['upper_arm'] = mesh_to_string(spaz.node.upper_arm_mesh)
+    spaz_json['forearm'] = mesh_to_string(spaz.node.forearm_mesh)
+    spaz_json['upper_leg'] = mesh_to_string(spaz.node.upper_leg_mesh)
+    spaz_json['lower_leg'] = mesh_to_string(spaz.node.lower_leg_mesh)
+    spaz_json['toes_mesh'] = mesh_to_string(spaz.node.toes_mesh)
+    spaz_json['style'] = spaz.node.style
+    spaz_json['color_mask'] = texture_to_string(spaz.node.color_mask_texture)
+    spaz_json['color_texture'] = texture_to_string(spaz.node.color_texture)
+    return spaz_json
+
+
+def import_character(name, spaz):
+    if not name:
+        bs.screenmessage("Inavlid character name")
+        return
+    character = None
+    for appearance_name, appearance_character in bs.app.classic.spaz_appearances.items():
+        if name.lower() == appearance_name.lower():
+            character = appearance_character
+            break
+    if not character:
+        return (False, name)
+    activity = bs.get_foreground_host_activity()
+    with activity.context:
+        spaz.node.head_mesh = bs.getmesh(character.head_mesh)
+        spaz.node.hand_mesh = bs.getmesh(character.hand_mesh)
+        spaz.node.torso_mesh = bs.getmesh(character.torso_mesh)
+        spaz.node.pelvis_mesh = bs.getmesh(character.pelvis_mesh)
+        spaz.node.upper_arm_mesh = bs.getmesh(character.upper_arm_mesh)
+        spaz.node.forearm_mesh = bs.getmesh(character.forearm_mesh)
+        spaz.node.upper_leg_mesh = bs.getmesh(character.upper_leg_mesh)
+        spaz.node.lower_leg_mesh = bs.getmesh(character.lower_leg_mesh)
+        spaz.node.toes_mesh = bs.getmesh(character.toes_mesh)
+        spaz.node.style = character.style
+        spaz.node.color_mask_texture = bs.gettexture(character.color_mask_texture)
+        spaz.node.color_texture = bs.gettexture(character.color_texture)
+    return (True, appearance_name)
+
+
+def export_character(name, spaz):
+    default_characters = tuple(bs.app.classic.spaz_appearances.keys())[:30]
+    os.makedirs(CUSTOM_CHARACTERS, exist_ok=True)
+    character_file = name + ".json"
+    for saved_character_file in os.listdir(CUSTOM_CHARACTERS):
+        if character_file.lower() == saved_character_file.lower():
+            return (False, os.path.splitext(saved_character_file)[0])
+        for default_character in default_characters:
+            if name.lower() == default_character.lower():
+                return (False, default_character)
+    spaz_json = spaz_to_json(spaz)
+    with open(os.path.join(CUSTOM_CHARACTERS, character_file), "w") as fout:
+        json.dump(spaz_json, fout, indent=4)
+    register_character_json(name, spaz_json)
+    return (True, name)
+
+
+def register_character_json(name, character):
+    appearance = Appearance(name)
+    appearance.color_texture = character['color_texture']
+    appearance.color_mask_texture = character['color_mask']
+    appearance.default_color = (0.6, 0.6, 0.6)
+    appearance.default_highlight = (0, 1, 0)
+    appearance.icon_texture = character['icon_texture']
+    appearance.icon_mask_texture = character['icon_mask_texture']
+    appearance.head_mesh = character['head']
+    appearance.torso_mesh = character['torso']
+    appearance.pelvis_mesh = character['pelvis']
+    appearance.upper_arm_mesh = character['upper_arm']
+    appearance.forearm_mesh = character['forearm']
+    appearance.hand_mesh = character['hand']
+    appearance.upper_leg_mesh = character['upper_leg']
+    appearance.lower_leg_mesh = character['lower_leg']
+    appearance.toes_mesh = character['toes_mesh']
+    appearance.jump_sounds = character['jump_sounds']
+    appearance.attack_sounds = character['attack_sounds']
+    appearance.impact_sounds = character['impact_sounds']
+    appearance.death_sounds = character['death_sounds']
+    appearance.pickup_sounds = character['pickup_sounds']
+    appearance.fall_sounds = character['fall_sounds']
+    appearance.style = character['style']
+
+
+cm = bs.chatmessage
+
+
+def _new_chatmessage(msg: str | babase.Lstr, *args, **kwargs):
+    activity = bs.get_foreground_host_activity()
+    if not activity:
+        cm(msg, *args, **kwargs)
+        return
+
+    is_a_command = any(msg.startswith(command) for command in ("/export", "/import", "/info"))
+    if not is_a_command:
+        cm(msg, *args, **kwargs)
+        return
+
+    player = get_player(msg, activity)
+    if not player:
+        cm("no player exists in game, try adding client id at last of command", *args, **kwargs)
+        cm(msg, *args, **kwargs)
+        return
+
+    if msg.startswith("/export"):
         if len(msg.split(" ")) > 1:
-            savecharacter(msg.split(" ")[1])
+            success, character_name = export_character(" ".join(msg.split(" ")[1:]), player.actor)
+            if success:
+                bs.screenmessage(
+                    'Exported character "{}"'.format(character_name),
+                    color=(0, 1, 0)
+                )
+                bui.getsound("gunCocking").play()
+            else:
+                bs.screenmessage(
+                    'Character "{}" already exists'.format(character_name),
+                    color=(1, 0, 0)
+                )
+                bui.getsound("error").play()
         else:
-            _ba.screenmessage("Enter name of character")
-    elif msg.split(" ")[0] == "import":
-        importcharacter(msg[7:])
+            cm("Enter name of character, Usage: /export <character_name>", *args, **kwargs)
+    elif msg.startswith("/import"):
+        if len(msg.split(" ")) > 1:
+            success, character_name = import_character(" ".join(msg.split(" ")[1:]), player.actor)
+            if success:
+                bs.screenmessage(
+                    'Imported character "{}"'.format(character_name),
+                    color=(0, 1, 0)
+                )
+                bui.getsound("gunCocking").play()
+            else:
+                bs.screenmessage(
+                    'Character "{}" doesn\'t exist'.format(character_name),
+                    color=(1, 0, 0)
+                )
+                bui.getsound("error").play()
+        else:
+            cm("Usage: /import <character_name>", *args, **kwargs)
+    elif msg.startswith("/info"):
+        spaz_json = spaz_to_json(player.actor)
+        del spaz_json["jump_sounds"]
+        del spaz_json["attack_sounds"]
+        del spaz_json["impact_sounds"]
+        del spaz_json["death_sounds"]
+        del spaz_json["pickup_sounds"]
+        del spaz_json["fall_sounds"]
+        spaz_str = ""
+        for key, value in spaz_json.items():
+            spaz_str += "{}: {}\n".format(key, value)
+        bs.screenmessage(spaz_str, color=(1, 1, 1))
 
-    else:
-        cm(msg, clients, sender_override)
-
-
-_ba.chatmessage = _new_chatmessage
-
-
-def savecharacter(name):
-    path = os.path.join(_ba.env()["python_directory_user"], "CustomCharacters" + os.sep)
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    if _ba.get_foreground_host_activity() != None:
-
-        with open(path+name+".json", 'w') as f:
-            json.dump(spazoutfit, f, indent=4)
-            registercharacter(name, spazoutfit)
-        ba.playsound(ba.getsound("gunCocking"))
-        _ba.screenmessage("Character Saved")
-    else:
-        _ba.screenmessage("Works offline with Character Maker")
-
-
-def importcharacter(name):
-    if name in ba.app.spaz_appearances:
-        global character
-        character = name
-        try:
-            _ba.get_foreground_host_activity().players[0].actor.node.handlemessage(ba.DieMessage())
-            _ba.screenmessage("Imported")
-        except:
-            _ba.screenmessage("works offline with character maker")
-
-    else:
-        _ba.screenmessage("invalid name check typo \n name is case sensitive")
+    cm(msg, *args, **kwargs)
 
 
-def registercharacter(name, char):
-    t = Appearance(name.split(".")[0])
-    t.color_texture = char['color_texture']
-    t.color_mask_texture = char['color_mask']
-    t.default_color = (0.6, 0.6, 0.6)
-    t.default_highlight = (0, 1, 0)
-    t.icon_texture = char['icon_texture']
-    t.icon_mask_texture = char['icon_mask_texture']
-    t.head_model = char['head']
-    t.torso_model = char['torso']
-    t.pelvis_model = char['pelvis']
-    t.upper_arm_model = char['upper_arm']
-    t.forearm_model = char['forearm']
-    t.hand_model = char['hand']
-    t.upper_leg_model = char['upper_leg']
-    t.lower_leg_model = char['lower_leg']
-    t.toes_model = char['toes_model']
-    t.jump_sounds = char['jump_sounds']
-    t.attack_sounds = char['attack_sounds']
-    t.impact_sounds = char['impact_sounds']
-    t.death_sounds = char['death_sounds']
-    t.pickup_sounds = char['pickup_sounds']
-    t.fall_sounds = char['fall_sounds']
-    t.style = char['style']
+bs.chatmessage = _new_chatmessage
 
+
+def get_player(msg, activity):
+    client_id = -1
+    words = msg.split(" ")
+    last_word = words[-1]
+    if last_word.isdigit():
+        client_id = int(last_word)
+    for player in activity.players:
+        player_client_id = player.sessionplayer.inputdevice.client_id
+        if client_id == player_client_id:
+            return player
 
 # ba_meta export plugin
-class HeySmoothy(ba.Plugin):
 
+
+class bySmoothy(babase.Plugin):
     def __init__(self):
-        _ba.set_party_icon_always_visible(True)
-
-        path = os.path.join(_ba.env()["python_directory_user"], "CustomCharacters" + os.sep)
-        if not os.path.isdir(path):
-            os.makedirs(path)
-        files = os.listdir(path)
-        for file in files:
-            with open(path+file, 'r') as f:
-                character = json.load(f)
-                registercharacter(file, character)
+        bui.set_party_icon_always_visible(True)
+        _babase.import_character = import_character
+        _babase.export_character = export_character
+        _babase.spaz_to_json = spaz_to_json
+        character_files = os.listdir(CUSTOM_CHARACTERS)
+        for character_file in character_files:
+            if character_file.lower().endswith(".json"):
+                name, _ = os.path.splitext(character_file)
+                with open(os.path.join(CUSTOM_CHARACTERS, character_file), "r") as fin:
+                    character = json.load(fin)
+                register_character_json(name, character)
