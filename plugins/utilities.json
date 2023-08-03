@@ -527,6 +527,7 @@
         }
       ],
       "versions": {
+        "2.0.0": null,
         "1.0.1": {
           "api_version": 7,
           "commit_sha": "da10318",
