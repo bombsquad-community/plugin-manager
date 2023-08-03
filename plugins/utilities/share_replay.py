@@ -332,7 +332,7 @@ class ShareTabUi(WatchWindow):
 
 # ++++++++++++++++for keyboard navigation++++++++++++++++
 
-        #ba.widget(edit=self.enable_button, up_widget=decrease_button, down_widget=self.lower_text,left_widget=save_button, right_widget=save_button)
+        # ba.widget(edit=self.enable_button, up_widget=decrease_button, down_widget=self.lower_text,left_widget=save_button, right_widget=save_button)
 
 # ----------------------------------------------------------------------------------------------------
 

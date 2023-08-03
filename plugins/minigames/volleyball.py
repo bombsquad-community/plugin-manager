@@ -743,7 +743,7 @@ class VolleyBallMapH(bs.Map):
         gnode.vignette_inner = (0.93, 0.93, 0.95)
         gnode.vr_camera_offset = (0, -0.8, -1.1)
         gnode.vr_near_clip = 0.5
-        #self.is_hockey = True
+        # self.is_hockey = True
 
 
 bs._map.register_map(VolleyBallMap)
