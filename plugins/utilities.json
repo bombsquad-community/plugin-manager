@@ -27,6 +27,20 @@
         }
       }
     },
+    "manual_camera": {
+      "description": "Adjust the games camera angle/position. Open pause menu and press 'Manual Camera' button. Useable in OFFLINE/ONLINE/REPLAYS",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Droopy",
+          "email": "",
+          "discord": "Droopy#3730"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "share_replay": {
       "description": "Export replays to mods folder and share them with friends or have a backup",
       "external_url": "",
