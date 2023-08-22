@@ -773,6 +773,20 @@
         }
       }
     },
+    "bomb_on_my_head": {
+      "description": "Bomb on your head, Survive as long as you can!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "infection": {
       "description": "It's spreading, avoid the spread!",
       "external_url": "",
