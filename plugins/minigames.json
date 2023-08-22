@@ -773,6 +773,25 @@
         }
       }
     },
+    "infection": {
+      "description": "It's spreading, avoid the spread!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "47a1ca8",
+          "released_on": "22-08-2023",
+          "md5sum": "398cf911195c4904b281ed05767e25f4"
+        }
+      }
+    },
     "super_duel": {
       "description": "Crush your enemy in a 1v1",
       "external_url": "https://www.youtube.com/watch?v=hvRtiXR-oC0",
