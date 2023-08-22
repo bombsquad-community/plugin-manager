@@ -52,19 +52,22 @@ else:
     slow = 'Slow'
     slowest = 'Slowest'
     insane = 'Insane'
-    
+
+
 def ba_get_api_version():
     return 6
 
+
 def ba_get_levels():
-	return [babase._level.Level(
-            name,
-			gametype=Infection,
-			settings={},
-			preview_texture_name='footballStadiumPreview')]
+    return [babase._level.Level(
+        name,
+        gametype=Infection,
+        settings={},
+        preview_texture_name='footballStadiumPreview')]
+
 
 class myMine(Bomb):
-    #reason for the mine class is so we can add the death zone
+    # reason for the mine class is so we can add the death zone
     def __init__(self,
                  pos: Sequence[float] = (0.0, 1.0, 0.0)):
         Bomb.__init__(self, position=pos, bomb_type='land_mine')
@@ -74,17 +77,17 @@ class myMine(Bomb):
         self.zone = bs.newnode(
             'locator',
             attrs={
-                'shape':'circle',
-                'position':self.node.position,
-                'color':(1,0,0),
-                'opacity':0.5,
-                'draw_beauty':showInSpace,
-                'additive':True})
+                'shape': 'circle',
+                'position': self.node.position,
+                'color': (1, 0, 0),
+                'opacity': 0.5,
+                'draw_beauty': showInSpace,
+                'additive': True})
         bs.animate_array(
             self.zone,
             'size',
             1,
-            {0:[0.0], 0.05:[2*self.rad]})
+            {0: [0.0], 0.05: [2*self.rad]})
 
     def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, bs.DieMessage):
@@ -95,17 +98,20 @@ class myMine(Bomb):
                     self.zone,
                     'size',
                     1,
-                    {0:[2*self.rad], 0.05:[0]})
+                    {0: [2*self.rad], 0.05: [0]})
                 self.zone = None
             super().handlemessage(msg)
         else:
             super().handlemessage(msg)
 
+
 class Player(bs.Player['Team']):
     """Our player type for this game."""
+
     def __init__(self) -> None:
         self.survival_seconds: Optional[int] = None
         self.death_time: Optional[float] = None
+
 
 class Team(bs.Team[Player]):
     """Our team type for this game."""
@@ -121,7 +127,6 @@ class Infection(bs.TeamGameActivity[Player, Team]):
     # Print messages when players die since it matters here.
     announce_player_deaths = True
     allow_mid_activity_joins = False
-
 
     @classmethod
     def get_available_settings(
@@ -151,7 +156,7 @@ class Infection(bs.TeamGameActivity[Player, Team]):
                 choices=[
                     ('10s', 10),
                     ('20s', 20),
-                    ('30s',30),
+                    ('30s', 30),
                     ('1 Minute', 60),
                 ],
                 default=20,
@@ -233,7 +238,7 @@ class Infection(bs.TeamGameActivity[Player, Team]):
             player.survival_seconds = self._timer.getstarttime()
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return
@@ -256,35 +261,35 @@ class Infection(bs.TeamGameActivity[Player, Team]):
             if not m.node:
                 self.mines.remove(m)
             else:
-                #First, check if any player is within the current death zone
+                # First, check if any player is within the current death zone
                 for player in self.players:
                     if not player.actor is None:
                         if player.actor.is_alive():
                             p1 = player.actor.node.position
                             p2 = m.node.position
                             diff = (babase.Vec3(p1[0]-p2[0],
-                                            0.0,
-                                            p1[2]-p2[2]))
+                                                0.0,
+                                                p1[2]-p2[2]))
                             dist = (diff.length())
                             if dist < m.rad:
                                 player.actor.handlemessage(bs.DieMessage())
-                #Now tell the circle to grow to the new size
+                # Now tell the circle to grow to the new size
                 if m.rad < self._max_size:
                     bs.animate_array(
-                        m.zone, 'size' ,1,
-                        {0:[m.rad*2],
-                        self._update_rate:[(m.rad+self._growth_rate)*2]})
+                        m.zone, 'size', 1,
+                        {0: [m.rad*2],
+                         self._update_rate: [(m.rad+self._growth_rate)*2]})
                     # Tell the circle to be the new size.
                     # This will be the new check radius next time.
                     m.rad += self._growth_rate
-        #make a new mine if needed.
+        # make a new mine if needed.
         if self.mine_count < self._max_mines:
             pos = self.getRandomPowerupPoint()
             self.mine_count += 1
             self._flash_mine(pos)
             bs.timer(0.95, babase.Call(self._make_mine, pos))
 
-    def _make_mine(self,posn: Sequence[float]) -> None:
+    def _make_mine(self, posn: Sequence[float]) -> None:
         m = myMine(pos=posn)
         m.arm()
         self.mines.append(m)
@@ -390,9 +395,9 @@ class Infection(bs.TeamGameActivity[Player, Team]):
         light_color = babase._math.normalized_color(color)
         display_color = _babase.safecolor(color, target_intensity=0.75)
         spaz = PlayerSpaz(color=color,
-                                    highlight=highlight,
-                                    character=player.character,
-                                    player=player)
+                          highlight=highlight,
+                          character=player.character,
+                          player=player)
 
         player.actor = spaz
         assert spaz.node
@@ -426,45 +431,46 @@ class Infection(bs.TeamGameActivity[Player, Team]):
         return spaz
 
     def getRandomPowerupPoint(self) -> None:
-        #So far, randomized points only figured out for mostly rectangular maps.
-        #Boxes will still fall through holes, but shouldn't be terrible problem (hopefully)
-        #If you add stuff here, need to add to "supported maps" above.
-        #['Doom Shroom', 'Rampage', 'Hockey Stadium', 'Courtyard', 'Crag Castle', 'Big G', 'Football Stadium']
+        # So far, randomized points only figured out for mostly rectangular maps.
+        # Boxes will still fall through holes, but shouldn't be terrible problem (hopefully)
+        # If you add stuff here, need to add to "supported maps" above.
+        # ['Doom Shroom', 'Rampage', 'Hockey Stadium', 'Courtyard', 'Crag Castle', 'Big G', 'Football Stadium']
         myMap = self.map.getname()
-        #print(myMap)
+        # print(myMap)
         if myMap == 'Doom Shroom':
             while True:
-                x = random.uniform(-1.0,1.0)
-                y = random.uniform(-1.0,1.0)
-                if x*x+y*y < 1.0: break
-            return ((8.0*x,2.5,-3.5+5.0*y))
+                x = random.uniform(-1.0, 1.0)
+                y = random.uniform(-1.0, 1.0)
+                if x*x+y*y < 1.0:
+                    break
+            return ((8.0*x, 2.5, -3.5+5.0*y))
         elif myMap == 'Rampage':
-            x = random.uniform(-6.0,7.0)
-            y = random.uniform(-6.0,-2.5)
+            x = random.uniform(-6.0, 7.0)
+            y = random.uniform(-6.0, -2.5)
             return ((x, 5.2, y))
         elif myMap == 'Hockey Stadium':
-            x = random.uniform(-11.5,11.5)
-            y = random.uniform(-4.5,4.5)
+            x = random.uniform(-11.5, 11.5)
+            y = random.uniform(-4.5, 4.5)
             return ((x, 0.2, y))
         elif myMap == 'Courtyard':
-            x = random.uniform(-4.3,4.3)
-            y = random.uniform(-4.4,0.3)
+            x = random.uniform(-4.3, 4.3)
+            y = random.uniform(-4.4, 0.3)
             return ((x, 3.0, y))
         elif myMap == 'Crag Castle':
-            x = random.uniform(-6.7,8.0)
-            y = random.uniform(-6.0,0.0)
+            x = random.uniform(-6.7, 8.0)
+            y = random.uniform(-6.0, 0.0)
             return ((x, 10.0, y))
         elif myMap == 'Big G':
-            x = random.uniform(-8.7,8.0)
-            y = random.uniform(-7.5,6.5)
+            x = random.uniform(-8.7, 8.0)
+            y = random.uniform(-7.5, 6.5)
             return ((x, 3.5, y))
         elif myMap == 'Football Stadium':
-            x = random.uniform(-12.5,12.5)
-            y = random.uniform(-5.0,5.5)
+            x = random.uniform(-12.5, 12.5)
+            y = random.uniform(-5.0, 5.5)
             return ((x, 0.32, y))
         else:
-            x = random.uniform(-5.0,5.0)
-            y = random.uniform(-6.0,0.0)
+            x = random.uniform(-5.0, 5.0)
+            y = random.uniform(-6.0, 0.0)
             return ((x, 8.0, y))
 
     def end_game(self) -> None:
