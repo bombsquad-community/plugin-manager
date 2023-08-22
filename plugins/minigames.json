@@ -773,6 +773,25 @@
         }
       }
     },
+    "bomb_on_my_head": {
+      "description": "Bomb on your head, Survive as long as you can!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "c39664c",
+          "released_on": "22-08-2023",
+          "md5sum": "daf75409557f12146c1a63d61f429e10"
+        }
+      }
+    },
     "infection": {
       "description": "It's spreading, avoid the spread!",
       "external_url": "",
