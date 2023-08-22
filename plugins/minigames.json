@@ -784,7 +784,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "47a1ca8",
+          "released_on": "22-08-2023",
+          "md5sum": "398cf911195c4904b281ed05767e25f4"
+        }
       }
     },
     "super_duel": {
