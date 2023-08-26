@@ -836,6 +836,20 @@
         }
       }
     },
+    "menu_theme": {
+      "description": "A simple UI mod for customizing the Main Menu's appearance. Go to your profiles for use",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yann",
+          "email": "",
+          "discord": "riyukiiyan"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "discord_richpresence": {
       "description": "Discord Rich Presence for Bombsquad.",
       "external_url": "https://youtu.be/SbbG9V74_E4",
