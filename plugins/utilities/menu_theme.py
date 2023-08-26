@@ -30,8 +30,11 @@ from bauiv1lib.colorpicker import ColorPicker, ColorPickerExact
 from bauiv1lib.fileselector import FileSelectorWindow
 from bauiv1lib.popup import PopupMenuWindow
 
-import _babase as _ba, babase as ba, bascenev1 as bs, bauiv1 as bui
-import bascenev1lib.mainmenu as menu 
+import _babase as _ba
+import babase as ba
+import bascenev1 as bs
+import bauiv1 as bui
+import bascenev1lib.mainmenu as menu
 import json
 import os
 import shutil
@@ -50,7 +53,7 @@ ui_small = bs.UIScale.SMALL
 ui_medium = bs.UIScale.MEDIUM
 ui_large = bs.UIScale.LARGE
 
-# method references 
+# method references
 original_unlocked_pro = bs.app.classic.accounts.have_pro
 original_account_init = AccountSettingsWindow.__init__
 
@@ -243,6 +246,7 @@ GLOBALS_MAPDATA = {
     }
 }
 
+
 class CustomColorPicker(ColorPicker):
 
     def _select_other(self):
@@ -260,7 +264,7 @@ class CustomColorPicker(ColorPicker):
 
 
 class CustomColorPickerExact(ColorPickerExact):
-	
+
     def _color_change_press(self, color_name: str, increasing: bool):
         current_time = bui.apptime()
         since_last = current_time - self._last_press_time
@@ -298,7 +302,7 @@ class ConfigCheckBox:
             maxwidth: float | None = None,
             autoselect: bool = True,
             value_change_call: Callable[[Any], Any] | None = None):
-        
+
         if displayname is None:
             displayname = configkey
         self._value_change_call = value_change_call
@@ -329,11 +333,11 @@ class ConfigCheckBox:
 class FreeEditWindow(bui.Window):
 
     def _do_enter(self):
-        
+
         def _error() -> None:
             bui.getsound('error').play(volume=2.0)
             bui.screenmessage('error ' + u'😑😑', color=(1.0, 0.0, 0.0))
-        
+
         try:
             if self.name_only:
                 value = bui.textwidget(query=self._text_field)
@@ -344,7 +348,7 @@ class FreeEditWindow(bui.Window):
             else:
                 value = round(float(bui.textwidget(query=self._text_field)), 4)
                 self.delegate.free_edit_enter(self, c=self.config_name, txt=value)
-                
+
         except ValueError:
             return _error()
         bui.containerwidget(edit=self._root_widget, transition=self._transition_out)
@@ -371,16 +375,16 @@ class FreeEditWindow(bui.Window):
                    1.5 if uiscale is bs.UIScale.MEDIUM else 1.0)))
 
         btn = bui.buttonwidget(parent=self._root_widget,
-                              scale=0.5,
-                              position=(40, height - 40),
-                              size=(60, 60),
-                              label='',
-                              on_activate_call=self._do_back,
-                              autoselect=True,
-                              color=(0.55, 0.5, 0.6),
-                              icon=bui.gettexture('crossOut'),
-                              iconscale=1.2)
-        
+                               scale=0.5,
+                               position=(40, height - 40),
+                               size=(60, 60),
+                               label='',
+                               on_activate_call=self._do_back,
+                               autoselect=True,
+                               color=(0.55, 0.5, 0.6),
+                               icon=bui.gettexture('crossOut'),
+                               iconscale=1.2)
+
         self.config_name, self.delegate, self.name_only = config_name, delegate, name_only
 
         self._text_field = bui.textwidget(
@@ -398,11 +402,11 @@ class FreeEditWindow(bui.Window):
             on_return_press_call=self._activate_enter_button)
 
         bui.textwidget(parent=self._root_widget,
-                      text='Current: ' + str(config[config_name]) if not name_only else 'Save as',
-                      position=(220, height - 44),
-                      color=(0.5, 0.5, 0.5, 1.0),
-                      size=(90, 30),
-                      h_align='right')
+                       text='Current: ' + str(config[config_name]) if not name_only else 'Save as',
+                       position=(220, height - 44),
+                       color=(0.5, 0.5, 0.5, 1.0),
+                       size=(90, 30),
+                       h_align='right')
 
         bui.widget(edit=btn, down_widget=self._text_field)
 
@@ -415,9 +419,9 @@ class FreeEditWindow(bui.Window):
             label='Enter',
             on_activate_call=self._do_enter)
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=btn,
-                           start_button=btn2,
-                           selected_child=self._text_field)
+                            cancel_button=btn,
+                            start_button=btn2,
+                            selected_child=self._text_field)
 
 
 class MenuThemeWindow:
@@ -458,7 +462,7 @@ class MenuThemeWindow:
             claims_left_right=False,
             claims_tab=False
         )
-        
+
         self._back_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(23, 310) if ui_type is ui_small else (80, 511),
@@ -648,7 +652,7 @@ class MenuThemeWindow:
         # >> debugging
         self._menu_configreset_button = bui.buttonwidget(
             parent=self._scroll_parent,
-            position=(5, height - 486) if ui_type is ui_small else (12, height - 765) ,
+            position=(5, height - 486) if ui_type is ui_small else (12, height - 765),
             size=(329, 50) if ui_type is ui_small else (600, 80),
             color=(0.0, 0.67, 0.85),
             textcolor=(0.8, 0.8, 0.8),
@@ -745,7 +749,8 @@ class MenuThemeWindow:
             button_type="regular",
             label=str(config["Menu Reflection Scale"]),
             text_scale=0.6 if ui_type is ui_small else 1.0,
-            on_activate_call=lambda: FreeEditWindow(delegate=self, whitelist=['num'], config_name='Menu Reflection Scale')
+            on_activate_call=lambda: FreeEditWindow(
+                delegate=self, whitelist=['num'], config_name='Menu Reflection Scale')
         )
 
         self._menu_cameramode_button = bui.buttonwidget(
@@ -763,7 +768,7 @@ class MenuThemeWindow:
             configkey="Menu Logo Text",
             position=(151, height - 308) if ui_type is ui_small else (287, height - 520),
             size=(40, 40) if ui_type is ui_small else (56, 56),
-            scale=0.62 if ui_type is ui_small else 1.4, 
+            scale=0.62 if ui_type is ui_small else 1.4,
             displayname=""
         )
 
@@ -800,8 +805,6 @@ class MenuThemeWindow:
             text_scale=0.7 if ui_type is ui_small else 1.0,
             on_activate_call=bs.Call(self.checkbox_window)
         )
-
-        
 
     def checkbox_window(self):
         self._root_widget_checkbox = bui.containerwidget(
@@ -950,15 +953,20 @@ class MenuThemeWindow:
             if config["tint"]:
                 bs.app.config["Menu Tint"] = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Tint")
             if config["ambient_color"]:
-                bs.app.config["Menu Ambient"] = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Ambient")
+                bs.app.config["Menu Ambient"] = GLOBALS_MAPDATA.get(
+                    config["Menu Map"]).get("Ambient")
             if config["vignette_outer"]:
-                bs.app.config["Menu Vignette Outer"] = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Vignette Outer")
+                bs.app.config["Menu Vignette Outer"] = GLOBALS_MAPDATA.get(
+                    config["Menu Map"]).get("Vignette Outer")
             if config["vignette_inner"]:
-                bs.app.config["Menu Vignette Inner"] = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Vignette Inner")
+                bs.app.config["Menu Vignette Inner"] = GLOBALS_MAPDATA.get(
+                    config["Menu Map"]).get("Vignette Inner")
             if config["map_color"]:
-                bs.app.config["Menu Map Color"] = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Map Color")
+                bs.app.config["Menu Map Color"] = GLOBALS_MAPDATA.get(
+                    config["Menu Map"]).get("Map Color")
             if config["map_reflection_scale"]:
-                bs.app.config["Menu Reflection Scale"] = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Map Reflection Scale")
+                bs.app.config["Menu Reflection Scale"] = GLOBALS_MAPDATA.get(
+                    config["Menu Map"]).get("Map Reflection Scale")
             if config["map_reflection_type"]:
                 bs.app.config["Menu Reflection Type"] = 'Soft'
 
@@ -979,12 +987,12 @@ class MenuThemeWindow:
 
     def popup_fileselector(self):
         self._file_selector = FileSelectorWindow(
-                                            path=str(_ba.env()['python_directory_user']),
-                                            callback=self._import,
-                                            show_base_path=True,
-                                            valid_file_extensions=['json'],
-                                            allow_folders=False
-                                            )
+            path=str(_ba.env()['python_directory_user']),
+            callback=self._import,
+            show_base_path=True,
+            valid_file_extensions=['json'],
+            allow_folders=False
+        )
 
     def _import(self, path: str = None):
         try:
@@ -993,67 +1001,71 @@ class MenuThemeWindow:
             with open(self.path, 'r') as imported:
                 selected = json.load(imported)
                 handle_config([
-                        selected["Menu Map"],
-                        selected["Menu Tint"],
-                        selected["Menu Ambient"],
-                        selected["Menu Vignette Outer"],
-                        selected["Menu Vignette Inner"],
-                        selected["Menu Music"],
-                        selected["Menu Map Color"],
-                        selected["Menu Reflection Scale"],
-                        selected["Menu Reflection Type"],
-                        selected["Menu Camera Mode"],
-                        selected["Menu Logo Text"],
-                        selected["vignette_outer"],
-                        selected["vignette_inner"],
-                        selected["ambient_color"],
-                        selected["tint"],
-                        selected["map_reflection_scale"],
-                        selected["map_reflection_type"],
-                        selected["map_color"]],
-                        False
+                    selected["Menu Map"],
+                    selected["Menu Tint"],
+                    selected["Menu Ambient"],
+                    selected["Menu Vignette Outer"],
+                    selected["Menu Vignette Inner"],
+                    selected["Menu Music"],
+                    selected["Menu Map Color"],
+                    selected["Menu Reflection Scale"],
+                    selected["Menu Reflection Type"],
+                    selected["Menu Camera Mode"],
+                    selected["Menu Logo Text"],
+                    selected["vignette_outer"],
+                    selected["vignette_inner"],
+                    selected["ambient_color"],
+                    selected["tint"],
+                    selected["map_reflection_scale"],
+                    selected["map_reflection_type"],
+                    selected["map_color"]],
+                    False
                 )
                 self.update_buttons()
-                bui.screenmessage(f"Loaded {os.path.splitext(os.path.basename(self.path))[0]}!", color=(0.2, 0.4, 1.0))
-        except: pass
+                bui.screenmessage(
+                    f"Loaded {os.path.splitext(os.path.basename(self.path))[0]}!", color=(0.2, 0.4, 1.0))
+        except:
+            pass
         del self._file_selector
 
     def _export(self, window: FreeEditWindow, txt: Any):
         path = _ba.env()['python_directory_user'] + "/_menutheme/"
         try:
             a = _ba.env()['python_directory_user'] + "/_menutheme"
-            os.makedirs(a, exist_ok = False)
-        except: pass
+            os.makedirs(a, exist_ok=False)
+        except:
+            pass
 
         with open(path + txt + '.json', 'w') as file:
             my_config = {
-                        "Menu Map": config["Menu Map"],
-                        "Menu Tint": config["Menu Tint"],
-                        "Menu Ambient": config["Menu Ambient"],
-                        "Menu Vignette Outer": config["Menu Vignette Outer"],
-                        "Menu Vignette Inner": config["Menu Vignette Inner"],
-                        "Menu Music": config["Menu Music"],
-                        "Menu Map Color": config["Menu Map Color"],
-                        "Menu Reflection Scale": config["Menu Reflection Scale"],
-                        "Menu Reflection Type": config["Menu Reflection Type"],
-                        "Menu Camera Mode": config["Menu Camera Mode"],
-                        "Menu Logo Text": config["Menu Logo Text"],
-                        "vignette_outer": config["vignette_outer"],
-                        "vignette_inner": config["vignette_inner"],
-                        "ambient_color": config["ambient_color"],
-                        "tint": config["tint"],
-                        "map_color": config["map_color"],
-                        "map_reflection_scale": config["map_reflection_scale"],
-                        "map_reflection_type": config["map_reflection_type"]
-                        }
+                "Menu Map": config["Menu Map"],
+                "Menu Tint": config["Menu Tint"],
+                "Menu Ambient": config["Menu Ambient"],
+                "Menu Vignette Outer": config["Menu Vignette Outer"],
+                "Menu Vignette Inner": config["Menu Vignette Inner"],
+                "Menu Music": config["Menu Music"],
+                "Menu Map Color": config["Menu Map Color"],
+                "Menu Reflection Scale": config["Menu Reflection Scale"],
+                "Menu Reflection Type": config["Menu Reflection Type"],
+                "Menu Camera Mode": config["Menu Camera Mode"],
+                "Menu Logo Text": config["Menu Logo Text"],
+                "vignette_outer": config["vignette_outer"],
+                "vignette_inner": config["vignette_inner"],
+                "ambient_color": config["ambient_color"],
+                "tint": config["tint"],
+                "map_color": config["map_color"],
+                "map_reflection_scale": config["map_reflection_scale"],
+                "map_reflection_type": config["map_reflection_type"]
+            }
             json.dump(my_config, file, indent=4)
-            bui.screenmessage(f"Saved {os.path.splitext(os.path.basename(path+txt+'.json'))[0]}!", color=(0.2, 0.4, 1.0))
+            bui.screenmessage(
+                f"Saved {os.path.splitext(os.path.basename(path+txt+'.json'))[0]}!", color=(0.2, 0.4, 1.0))
             bui.getsound('gunCocking').play()
 
     def color_picker_popup(self, tag: str):
         bs.app.classic.accounts.have_pro = lambda: True
         CustomColorPicker(parent=self._root_widget,
-                          position=(0,0),
+                          position=(0, 0),
                           initial_color=config[tag],
                           delegate=self,
                           tag=tag)
@@ -1086,7 +1098,8 @@ class MenuThemeWindow:
         bui.buttonwidget(edit=self._menu_rcolor_button, color=config['Menu Map Color'])
 
         # menu values
-        bui.buttonwidget(edit=self._menu_reflections_button, label=str(config['Menu Reflection Scale']))
+        bui.buttonwidget(edit=self._menu_reflections_button,
+                         label=str(config['Menu Reflection Scale']))
         bui.buttonwidget(edit=self._menu_cameramode_button, label=str(config['Menu Camera Mode']))
         bui.checkboxwidget(edit=self._menu_logotext_button.widget, value=config['Menu Logo Text'])
 
@@ -1101,7 +1114,7 @@ class MenuThemeWindow:
             (0.45, 0.55, 0.54), (0.99, 0.98, 0.98), "Menu",
             (1.0, 1.0, 1.0), 0.3, 'None', 'rotate',
             True, True, True, True, True, True, True, True, True
-            ],False
+        ], False
         )
         self.update_buttons()
         bui.screenmessage('Reset Settings', color=(0, 1, 0))
@@ -1132,11 +1145,13 @@ class MainMenuTheme(MainMenuActivity):
             bs.setmusic(music)
 
     def _make_word(self, *args, **kwargs) -> None:
-        if not config['Menu Logo Text']: return
+        if not config['Menu Logo Text']:
+            return
         super()._make_word(*args, **kwargs)
 
     def _make_logo(self, *args, **kwargs) -> None:
-        if not config['Menu Logo Text']: return
+        if not config['Menu Logo Text']:
+            return
         super()._make_logo(*args, **kwargs)
 
     def on_transition_in(self):
@@ -1272,13 +1287,13 @@ class MainMenuTheme(MainMenuActivity):
 
         b = GLOBALS_MAPDATA.get(config["Menu Map"]).get("Camera Bounds")
         b = (
-              b[0] - b[3] / 2.0,
-              b[1] - b[4] / 2.0,
-              b[2] - b[5] / 2.0,
-              b[0] + b[3] / 2.0,
-              b[1] + b[4] / 2.0,
-              b[2] + b[5] / 2.0
-             )
+            b[0] - b[3] / 2.0,
+            b[1] - b[4] / 2.0,
+            b[2] - b[5] / 2.0,
+            b[0] + b[3] / 2.0,
+            b[1] + b[4] / 2.0,
+            b[2] + b[5] / 2.0
+        )
 
         gnode = self.globalsnode
         gnode.camera_mode = 'follow' if config["Menu Camera Mode"] == 'static' else 'rotate'
@@ -1400,465 +1415,466 @@ class MainMenuTheme(MainMenuActivity):
         map_type = config["Menu Map"]
         if map_type == "The Pad (with trees)":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('thePadLevel'),
-                               'color_texture': t('thePadLevelColor'),
-                               'reflection': 'soft',
-                               'reflection_scale': [0.3]
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('thePadLevel'),
+                    'color_texture': t('thePadLevelColor'),
+                    'reflection': 'soft',
+                    'reflection_scale': [0.3]
+                }))
             self.trees = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('trees'),
-                               'lighting': False,
-                               'reflection': 'char',
-                               'reflection_scale': [0.1],
-                               'color_texture': t('treesColor')
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('trees'),
+                    'lighting': False,
+                    'reflection': 'char',
+                    'reflection_scale': [0.1],
+                    'color_texture': t('treesColor')
+                }))
             self.bgterrain = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadBG'),
-                               'color': (0.92, 0.91, 0.9),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('menuBG'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadBG'),
+                    'color': (0.92, 0.91, 0.9),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('menuBG'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadLevelBottom'),
-                               'lighting': False,
-                               'reflection': 'soft',
-                               'reflection_scale': [0.45],
-                               'color_texture': t('thePadLevelColor')
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadLevelBottom'),
+                    'lighting': False,
+                    'reflection': 'soft',
+                    'reflection_scale': [0.45],
+                    'color_texture': t('thePadLevelColor')
+                }))
         elif map_type == "The Pad":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('thePadLevel'),
-                               'color_texture': t('thePadLevelColor'),
-                               'reflection': 'soft',
-                               'reflection_scale': [0.3]
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('thePadLevel'),
+                    'color_texture': t('thePadLevelColor'),
+                    'reflection': 'soft',
+                    'reflection_scale': [0.3]
+                }))
             self.bgterrain = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadBG'),
-                               'color': (0.92, 0.91, 0.9),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t("menuBG")
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadBG'),
+                    'color': (0.92, 0.91, 0.9),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t("menuBG")
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadLevelBottom'),
-                               'lighting': False,
-                               'reflection': 'soft',
-                               'reflection_scale': [0.45],
-                               'color_texture': t('thePadLevelColor')
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadLevelBottom'),
+                    'lighting': False,
+                    'reflection': 'soft',
+                    'reflection_scale': [0.45],
+                    'color_texture': t('thePadLevelColor')
+                }))
         elif map_type == "Hockey Stadium":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('hockeyStadiumOuter'),
-                               'color_texture': t('hockeyStadium'),
-                               'reflection': 'soft',
-                               'reflection_scale': [0.3]
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('hockeyStadiumOuter'),
+                    'color_texture': t('hockeyStadium'),
+                    'reflection': 'soft',
+                    'reflection_scale': [0.3]
+                }))
             self.inner = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('hockeyStadiumInner'),
-                               'opacity': 0.92,
-                               'opacity_in_low_or_ui_medium_quality': 1.0,
-                               'color_texture': t('hockeyStadium')
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('hockeyStadiumInner'),
+                    'opacity': 0.92,
+                    'opacity_in_low_or_ui_medium_quality': 1.0,
+                    'color_texture': t('hockeyStadium')
+                }))
             self.stands = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('hockeyStadiumStands'),
-                               'visible_in_reflections': False,
-                               'color_texture': t('footballStadium')
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('hockeyStadiumStands'),
+                    'visible_in_reflections': False,
+                    'color_texture': t('footballStadium')
+                }))
         elif map_type == "Football Stadium":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('footballStadium'),
-                               'color_texture': t('footballStadium'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('footballStadium'),
+                    'color_texture': t('footballStadium'),
+                }))
         elif map_type == "Bridgit":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('bridgitLevelTop'),
-                               'color_texture': t('bridgitLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('bridgitLevelTop'),
+                    'color_texture': t('bridgitLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('bridgitLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('bridgitLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('bridgitLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('bridgitLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('natureBackground'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('natureBackgroundColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('natureBackground'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('natureBackgroundColor'),
+                }))
         elif map_type == "Big G":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('bigG'),
-                               'color': (0.7, 0.7, 0.7),
-                               'color_texture': t('bigG'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('bigG'),
+                    'color': (0.7, 0.7, 0.7),
+                    'color_texture': t('bigG'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('bigGBottom'),
-                               'lighting': False,
-                               'color': (0.7, 0.7, 0.7),
-                               'color_texture': t('bigG'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('bigGBottom'),
+                    'lighting': False,
+                    'color': (0.7, 0.7, 0.7),
+                    'color_texture': t('bigG'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('natureBackground'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('natureBackgroundColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('natureBackground'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('natureBackgroundColor'),
+                }))
         elif map_type == "Roundabout":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('roundaboutLevel'),
-                               'color': (0.7, 0.7, 0.7),
-                               'color_texture': t('roundaboutLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('roundaboutLevel'),
+                    'color': (0.7, 0.7, 0.7),
+                    'color_texture': t('roundaboutLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('roundaboutLevelBottom'),
-                               'lighting': False,
-                               'color': (0.7, 0.7, 0.7),
-                               'color_texture': t('roundaboutLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('roundaboutLevelBottom'),
+                    'lighting': False,
+                    'color': (0.7, 0.7, 0.7),
+                    'color_texture': t('roundaboutLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('natureBackground'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('natureBackgroundColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('natureBackground'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('natureBackgroundColor'),
+                }))
         elif map_type == "Monkey Face":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('monkeyFaceLevel'),
-                               'color_texture': t('monkeyFaceLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('monkeyFaceLevel'),
+                    'color_texture': t('monkeyFaceLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('monkeyFaceLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('monkeyFaceLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('monkeyFaceLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('monkeyFaceLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('natureBackground'),
-                               'lighting': False,
-                               'color_texture': t('natureBackgroundColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('natureBackground'),
+                    'lighting': False,
+                    'color_texture': t('natureBackgroundColor'),
+                }))
         elif map_type == "Monkey Face":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('monkeyFaceLevel'),
-                               'color_texture': t('monkeyFaceLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('monkeyFaceLevel'),
+                    'color_texture': t('monkeyFaceLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('monkeyFaceLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('monkeyFaceLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('monkeyFaceLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('monkeyFaceLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('natureBackground'),
-                               'lighting': False,
-                               'color_texture': t('natureBackgroundColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('natureBackground'),
+                    'lighting': False,
+                    'color_texture': t('natureBackgroundColor'),
+                }))
         elif map_type == "Zig Zag":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('zigZagLevel'),
-                               'color_texture': t('zigZagLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('zigZagLevel'),
+                    'color_texture': t('zigZagLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('zigZagLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('zigZagLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('zigZagLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('zigZagLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('natureBackground'),
-                               'lighting': False,
-                               'color_texture': t('natureBackgroundColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('natureBackground'),
+                    'lighting': False,
+                    'color_texture': t('natureBackgroundColor'),
+                }))
         elif map_type == "Doom Shroom":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('doomShroomLevel'),
-                               'color_texture': t('doomShroomLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('doomShroomLevel'),
+                    'color_texture': t('doomShroomLevelColor'),
+                }))
             self.stem = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('doomShroomStem'),
-                               'lighting': False,
-                               'color_texture': t('doomShroomLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('doomShroomStem'),
+                    'lighting': False,
+                    'color_texture': t('doomShroomLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('doomShroomBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('doomShroomBGColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('doomShroomBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('doomShroomBGColor'),
+                }))
         elif map_type == "Lake Frigid":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('lakeFrigid'),
-                               'color_texture': t('lakeFrigid'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('lakeFrigid'),
+                    'color_texture': t('lakeFrigid'),
+                }))
             self.top = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('lakeFrigidTop'),
-                               'lighting': False,
-                               'color_texture': t('lakeFrigid'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('lakeFrigidTop'),
+                    'lighting': False,
+                    'color_texture': t('lakeFrigid'),
+                }))
             self.reflections = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('lakeFrigidReflections'),
-                               'lighting': False,
-                               'overlay': True,
-                               'opacity': 0.15,
-                               'color_texture': t('lakeFrigidReflections'),
-                           })) 
+                'terrain',
+                attrs={
+                    'mesh': m('lakeFrigidReflections'),
+                    'lighting': False,
+                    'overlay': True,
+                    'opacity': 0.15,
+                    'color_texture': t('lakeFrigidReflections'),
+                }))
         elif map_type == "Tip Top":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('tipTopLevel'),
-                               'color': (0.7, 0.7, 0.7),
-                               'color_texture': t('tipTopLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('tipTopLevel'),
+                    'color': (0.7, 0.7, 0.7),
+                    'color_texture': t('tipTopLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('tipTopLevelBottom'),
-                               'lighting': False,
-                               'color': (0.7, 0.7, 0.7),
-                               'color_texture': t('tipTopLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('tipTopLevelBottom'),
+                    'lighting': False,
+                    'color': (0.7, 0.7, 0.7),
+                    'color_texture': t('tipTopLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('tipTopBG'),
-                               'lighting': False,
-                               'color': (0.4, 0.4, 0.4),
-                               'background': True,
-                               'color_texture': t('tipTopBGColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('tipTopBG'),
+                    'lighting': False,
+                    'color': (0.4, 0.4, 0.4),
+                    'background': True,
+                    'color_texture': t('tipTopBGColor'),
+                }))
         elif map_type == "Crag Castle":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('cragCastleLevel'),
-                               'color_texture': t('cragCastleLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('cragCastleLevel'),
+                    'color_texture': t('cragCastleLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('cragCastleLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('cragCastleLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('cragCastleLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('cragCastleLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('menuBG'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('menuBG'),
+                }))
         elif map_type == "Tower D":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('towerDLevel'),
-                               'color_texture': t('towerDLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('towerDLevel'),
+                    'color_texture': t('towerDLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('towerDLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('towerDLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('towerDLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('towerDLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('menuBG'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('menuBG'),
+                }))
         elif map_type == "Happy Thoughts":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('alwaysLandLevel'),
-                               'color_texture': t('alwaysLandLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('alwaysLandLevel'),
+                    'color_texture': t('alwaysLandLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('alwaysLandLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('alwaysLandLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('alwaysLandLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('alwaysLandLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('alwaysLandBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('alwaysLandBGColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('alwaysLandBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('alwaysLandBGColor'),
+                }))
         elif map_type == "Step Right Up":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('stepRightUpLevel'),
-                               'color_texture': t('stepRightUpLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('stepRightUpLevel'),
+                    'color_texture': t('stepRightUpLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('stepRightUpLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('stepRightUpLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('stepRightUpLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('stepRightUpLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('menuBG'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('menuBG'),
+                }))
         elif map_type == "Courtyard":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('courtyardLevel'),
-                               'color_texture': t('courtyardLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('courtyardLevel'),
+                    'color_texture': t('courtyardLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('courtyardLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('courtyardLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('courtyardLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('courtyardLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('thePadBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('menuBG'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('thePadBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('menuBG'),
+                }))
         elif map_type == "Rampage":
             self.main = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           delegate=self,
-                           attrs={
-                               'mesh': m('rampageLevel'),
-                               'color_texture': t('rampageLevelColor'),
-                           }))
+                'terrain',
+                delegate=self,
+                attrs={
+                    'mesh': m('rampageLevel'),
+                    'color_texture': t('rampageLevelColor'),
+                }))
             self.bottom = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('rampageLevelBottom'),
-                               'lighting': False,
-                               'color_texture': t('rampageLevelColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('rampageLevelBottom'),
+                    'lighting': False,
+                    'color_texture': t('rampageLevelColor'),
+                }))
             self.background = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('rampageBG'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('rampageBGColor'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('rampageBG'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('rampageBGColor'),
+                }))
             self.background_2 = bs.NodeActor(bs.newnode(
-                           'terrain',
-                           attrs={
-                               'mesh': m('rampageBG2'),
-                               'lighting': False,
-                               'background': True,
-                               'color_texture': t('rampageBGColor2'),
-                           }))
+                'terrain',
+                attrs={
+                    'mesh': m('rampageBG2'),
+                    'lighting': False,
+                    'background': True,
+                    'color_texture': t('rampageBGColor2'),
+                }))
 
 
 def menu_theme(self):
     this_class = self
-    MenuThemeWindow(accounts_window = this_class)
+    MenuThemeWindow(accounts_window=this_class)
+
 
 def handle_config(keys: List[str], adding: bool = False):
     our_config = {
@@ -1883,7 +1899,7 @@ def handle_config(keys: List[str], adding: bool = False):
     }
     config_keys = list(our_config.keys())
     p = 0
-    
+
     for cf in config_keys:
         if cf not in bs.app.config and adding:
             config[cf] = keys[p]
@@ -1930,7 +1946,7 @@ def new_back(self, save_state: bool = True):
     assert bui.app.classic is not None
     if save_state:
         self._save_state()
-    
+
     bui.containerwidget(edit=self._root_widget, transition=self._transition_out)
 
     main_menu_window = MainMenuWindow(transition='in_left').get_root_widget()
@@ -1971,6 +1987,5 @@ class Plugin(ba.Plugin):
             (0.45, 0.55, 0.54), (0.99, 0.98, 0.98), "Menu",
             (1.0, 1.0, 1.0), 0.3, 'None', 'rotate',
             True, True, True, True, True, True, True, True, True
-            ],True
+        ], True
         )
-        
