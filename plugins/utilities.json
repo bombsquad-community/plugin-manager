@@ -847,7 +847,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "f829aca",
+          "released_on": "26-08-2023",
+          "md5sum": "4cca8e04efadf39b2be51b5b95c4e5a4"
+        }
       }
     },
     "discord_richpresence": {
