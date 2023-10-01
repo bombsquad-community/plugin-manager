@@ -799,7 +799,7 @@ class Plugin:
     def latest_compatible_version(self):
         if self._latest_compatible_version is None:
             for number, info in self.info["versions"].items():
-                if info["api_version"] == babase.app.api_version:
+                if info["api_version"] == babase.app.env.api_version:
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
@@ -1233,7 +1233,7 @@ class PluginManager:
     async def get_update_details(self):
         index = await self.get_index()
         for version, info in index["versions"].items():
-            if info["api_version"] != babase.app.api_version:
+            if info["api_version"] != babase.app.env.api_version:
                 # No point checking a version of the API game doesn't support.
                 continue
             if version == PLUGIN_MANAGER_VERSION:
