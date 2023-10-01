@@ -32,7 +32,7 @@ _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
 
 
-PLUGIN_MANAGER_VERSION = "1.0.1"
+PLUGIN_MANAGER_VERSION = "1.0.2"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
