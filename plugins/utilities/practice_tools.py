@@ -185,7 +185,7 @@ class Practice(Plugin):
     def on_app_running(self) -> None:
         """Plugin start point."""
 
-        if app.build_number < 20427:
+        if app.env.build_number < 20427:
             bui.screenmessage(
                 'ok',
                 color=(.8, .1, .1))
