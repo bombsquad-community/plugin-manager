@@ -44,6 +44,7 @@ HEADERS = {
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 
+
 def get_event_loop():
     # loop = asyncio.ProactorEventLoop() if sys.platform == 'win32' else asyncio.new_event_loop()
     return ba._asyncio._asyncio_event_loop
@@ -61,7 +62,8 @@ def get_event_loop():
     #             return running
     #         else:
     #             return loop
-                
+
+
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
 
 
