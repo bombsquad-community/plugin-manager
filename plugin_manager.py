@@ -47,7 +47,7 @@ PLUGIN_DIRECTORY = _env["python_directory_user"]
 
 def get_event_loop():
     # loop = asyncio.ProactorEventLoop() if sys.platform == 'win32' else asyncio.new_event_loop()
-    return ba._asyncio._asyncio_event_loop
+    return babase._asyncio._asyncio_event_loop
     # try:
     #     running = asyncio.get_running_loop()
     # except RuntimeError:
