@@ -45,6 +45,7 @@ HEADERS = {
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 loop = babase._asyncio._asyncio_event_loop
 
+
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
 
 
@@ -101,7 +102,7 @@ def send_network_request(request):
 
 
 async def async_send_network_request(request):
-    
+
     response = await loop.run_in_executor(None, send_network_request, request)
     return response
 
@@ -130,7 +131,7 @@ def stream_network_response_to_file(request, file, md5sum=None, retries=3):
 
 
 async def async_stream_network_response_to_file(request, file, md5sum=None, retries=3):
-    
+
     content = await loop.run_in_executor(
         None,
         stream_network_response_to_file,
@@ -538,7 +539,7 @@ class PluginLocal:
         if self._content is None:
             if not self.is_installed:
                 raise PluginNotInstalled("Plugin is not available locally.")
-            
+
             self._content = await loop.run_in_executor(None, self._get_content)
         return self._content
 
@@ -670,7 +671,7 @@ class PluginLocal:
 
     async def set_content(self, content):
         if not self._content:
-            
+
             await loop.run_in_executor(None, self._set_content, content)
             self._content = content
         return self
@@ -856,7 +857,7 @@ class PluginWindow(popup.PopupWindow):
         self.plugin = plugin
         self.button_callback = button_callback
         self.scale_origin = origin_widget.get_screen_space_center()
-        
+
         loop.create_task(self.draw_ui())
 
     def get_description(self, minimum_character_offset=40):
@@ -1108,7 +1109,7 @@ class PluginWindow(popup.PopupWindow):
 
         def wrapper(self, *args, **kwargs):
             self._ok()
-            
+
             if asyncio.iscoroutinefunction(fn):
                 loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
             else:
@@ -1370,8 +1371,6 @@ class PluginSourcesWindow(popup.PopupWindow):
                                                  # autoselect=True,
                                                  description="Add Source")
 
-        
-
         bui.buttonwidget(parent=self._root_widget,
                          position=(330, 28),
                          size=(37, 37),
@@ -1476,7 +1475,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
                        on_activate_call=self.show_sources_window)
 
     def popup_menu_selected_choice(self, window, choice):
-        
+
         loop.create_task(self._asyncio_callback(choice))
 
     def popup_menu_closing(self, window):
@@ -1498,7 +1497,6 @@ class PluginManagerWindow(bui.Window):
         self.selected_category = None
         self.plugins_in_current_view = {}
 
-        
         loop.create_task(self.draw_index())
 
         self._width = (700 if _uiscale is babase.UIScale.SMALL
@@ -1693,7 +1691,7 @@ class PluginManagerWindow(bui.Window):
                                              description=filter_txt)
         self._last_filter_text = None
         self._last_filter_plugins = []
-        
+
         loop.create_task(self.process_search_term())
 
     async def process_search_term(self):
@@ -1752,7 +1750,7 @@ class PluginManagerWindow(bui.Window):
                          500 if _uiscale is babase.UIScale.MEDIUM else 510)
         refresh_pos_y = (180 if _uiscale is babase.UIScale.SMALL else
                          108 if _uiscale is babase.UIScale.MEDIUM else 120)
-        
+
         controller_button = bui.buttonwidget(parent=self._root_widget,
                                              # autoselect=True,
                                              position=(refresh_pos_x, refresh_pos_y),
@@ -1909,7 +1907,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
         self.settings = babase.app.config["Community Plugin Manager"]["Settings"].copy()
-        
+
         loop.create_task(self.draw_ui())
 
     async def draw_ui(self):
@@ -2029,7 +2027,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             plugin_manager_update_available = False
         if plugin_manager_update_available:
             text_color = (0.75, 0.2, 0.2)
-            
+
             button_size = (95 * s, 32 * s)
             update_button_label = f'Update to v{plugin_manager_update_available[0]}'
             self._update_button = bui.buttonwidget(parent=self._root_widget,
@@ -2484,5 +2482,5 @@ class EntryPoint(babase.Plugin):
         DNSBlockWorkaround.apply()
         asyncio.set_event_loop(babase._asyncio._asyncio_event_loop)
         startup_tasks = StartupTasks()
-        
+
         loop.create_task(startup_tasks.execute())
