@@ -810,7 +810,7 @@ class Plugin:
                     break
         if self._latest_compatible_version is None:
             raise NoCompatibleVersion(
-                f"{self.name} has no version compatible with API {babase.app.api_version}."
+                f"{self.name} has no version compatible with API {babase.app.api_version if build_number < 21282 else babase.app.env.api_version}."
             )
         return self._latest_compatible_version
 
@@ -2072,7 +2072,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        size=(0, 0),
                        h_align='center',
                        v_align='center',
-                       text=f'API Version: {babase.app.api_version}',
+                       text=f'API Version: {babase.app.api_version if build_number < 21282 else babase.app.env.api_version}',
                        scale=text_scale * 0.7,
                        color=(0.4, 0.8, 1),
                        maxwidth=width * 0.95)
