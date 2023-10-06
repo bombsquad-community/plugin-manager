@@ -21,6 +21,7 @@ class TestPluginManagerMetadata(unittest.TestCase):
         self.plugin_manager_version_regexp = re.compile(b"(?<=PLUGIN_MANAGER_VERSION = )(.*)")
 
         self.current_path = pathlib.Path()
+        self.changelog = self.current_path / "CHANGELOG.md"
         self.repository = git.Repo()
 
     def test_keys(self):
@@ -68,6 +69,14 @@ class TestPluginManagerMetadata(unittest.TestCase):
         self.assertEqual(int(api_version.decode("utf-8")), latest_version_metadata["api_version"])
         self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{latest_version_name}"')
 
+    def test_changelog_entries(self):
+        versions = tuple(self.content["versions"].keys())
+        with open(self.changelog, "r") as fin:
+            changelog = fin.read()
+        for version in versions:
+            changelog_version_header = f"## {version}"
+            if changelog_version_header not in changelog:
+                self.fail(f"Changelog entry for plugin manager {version} is missing.")
 
 class TestPluginMetadata(unittest.TestCase):
     def setUp(self):

@@ -78,3 +78,7 @@
 ### 0.1.5 (08-09-2022)
 
 - Plugin files that export classes besides plugin or game, now work.
+
+### 0.1.4 (05-09-2022)
+
+- First public release of plugin manager. 🎉
