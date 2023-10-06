@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.2 (01-10-2023)
+
+- Rename deprecated `babase.app.api_version` -> `babase.app.env.api_version`.
+
 ### 1.0.1 (30-06-2023)
 
 - Allow specifying branch names in custom sources.
