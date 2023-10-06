@@ -1,5 +1,6 @@
 # ba_meta require api 8
 from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
+from baenv import TARGET_BALLISTICA_BUILD
 import babase
 import _babase
 import bauiv1 as bui
@@ -28,20 +29,52 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-_env = _babase.env()
-_uiscale = bui.app.ui_v1.uiscale
 
-
-PLUGIN_MANAGER_VERSION = "1.0.2"
+PLUGIN_MANAGER_VERSION = "1.0.3"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
+
+
+if TARGET_BALLISTICA_BUILD < 21282:
+    # These attributes have been deprecated as of 1.7.27. For more info see:
+    # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
+    # Adding a compatibility layer here so older builds still work fine.
+    class Dummy:
+        pass
+
+    babase.app.env = Dummy()
+
+    babase.app.env.build_number = babase.app.build_number
+    babase.app.env.device_name = babase.app.device_name
+    babase.app.env.config_file_path = babase.app.config_file_path
+    babase.app.env.version = babase.app.version
+    babase.app.env.debug_build = babase.app.debug_build
+    babase.app.env.test_build = babase.app.test_build
+    babase.app.env.data_directory = babase.app.data_directory
+    babase.app.env.python_directory_user = babase.app.python_directory_user
+    babase.app.env.python_directory_app = babase.app.python_directory_app
+    babase.app.env.python_directory_app_site = babase.app.python_directory_app_site
+    babase.app.env.api_version = babase.app.api_version
+    babase.app.env.on_tv = babase.app.on_tv
+    babase.app.env.vr_mode = babase.app.vr_mode
+    babase.app.env.toolbar_test = babase.app.toolbar_test
+    babase.app.env.arcade_mode = babase.app.arcade_mode
+    babase.app.env.headless_mode = babase.app.arcade_mode
+    babase.app.env.demo_mode = babase.app.demo_mode
+    babase.app.env.protocl_version = babase.app.protocol_version
+
+
+_env = _babase.env()
+_uiscale = bui.app.ui_v1.uiscale
+
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["legacy_user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
+loop = babase._asyncio._asyncio_event_loop
 
 
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
@@ -67,6 +100,7 @@ REGEXP = {
     ),
 }
 DISCORD_URL = "https://ballistica.net/discord"
+
 
 _CACHE = {}
 
@@ -100,7 +134,6 @@ def send_network_request(request):
 
 
 async def async_send_network_request(request):
-    loop = asyncio.get_event_loop()
     response = await loop.run_in_executor(None, send_network_request, request)
     return response
 
@@ -129,7 +162,7 @@ def stream_network_response_to_file(request, file, md5sum=None, retries=3):
 
 
 async def async_stream_network_response_to_file(request, file, md5sum=None, retries=3):
-    loop = asyncio.get_event_loop()
+
     content = await loop.run_in_executor(
         None,
         stream_network_response_to_file,
@@ -155,6 +188,9 @@ class DNSBlockWorkaround:
 
     Such as Jio, a pretty popular ISP in India has a DNS block on
     raw.githubusercontent.com (sigh..).
+
+    References:
+      * https://github.com/orgs/community/discussions/42655
 
     Usage:
     -----
@@ -537,7 +573,7 @@ class PluginLocal:
         if self._content is None:
             if not self.is_installed:
                 raise PluginNotInstalled("Plugin is not available locally.")
-            loop = asyncio.get_event_loop()
+
             self._content = await loop.run_in_executor(None, self._get_content)
         return self._content
 
@@ -669,7 +705,7 @@ class PluginLocal:
 
     async def set_content(self, content):
         if not self._content:
-            loop = asyncio.get_event_loop()
+
             await loop.run_in_executor(None, self._set_content, content)
             self._content = content
         return self
@@ -808,7 +844,7 @@ class Plugin:
                     break
         if self._latest_compatible_version is None:
             raise NoCompatibleVersion(
-                f"{self.name} has no version compatible with API {babase.app.api_version}."
+                f"{self.name} has no version compatible with API {babase.app.env.api_version}."
             )
         return self._latest_compatible_version
 
@@ -855,7 +891,7 @@ class PluginWindow(popup.PopupWindow):
         self.plugin = plugin
         self.button_callback = button_callback
         self.scale_origin = origin_widget.get_screen_space_center()
-        loop = asyncio.get_event_loop()
+
         loop.create_task(self.draw_ui())
 
     def get_description(self, minimum_character_offset=40):
@@ -1107,7 +1143,7 @@ class PluginWindow(popup.PopupWindow):
 
         def wrapper(self, *args, **kwargs):
             self._ok()
-            loop = asyncio.get_event_loop()
+
             if asyncio.iscoroutinefunction(fn):
                 loop.create_task(asyncio_handler(fn, self, *args, **kwargs))
             else:
@@ -1369,8 +1405,6 @@ class PluginSourcesWindow(popup.PopupWindow):
                                                  # autoselect=True,
                                                  description="Add Source")
 
-        loop = asyncio.get_event_loop()
-
         bui.buttonwidget(parent=self._root_widget,
                          position=(330, 28),
                          size=(37, 37),
@@ -1475,7 +1509,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
                        on_activate_call=self.show_sources_window)
 
     def popup_menu_selected_choice(self, window, choice):
-        loop = asyncio.get_event_loop()
+
         loop.create_task(self._asyncio_callback(choice))
 
     def popup_menu_closing(self, window):
@@ -1497,7 +1531,6 @@ class PluginManagerWindow(bui.Window):
         self.selected_category = None
         self.plugins_in_current_view = {}
 
-        loop = asyncio.get_event_loop()
         loop.create_task(self.draw_index())
 
         self._width = (700 if _uiscale is babase.UIScale.SMALL
@@ -1692,7 +1725,7 @@ class PluginManagerWindow(bui.Window):
                                              description=filter_txt)
         self._last_filter_text = None
         self._last_filter_plugins = []
-        loop = asyncio.get_event_loop()
+
         loop.create_task(self.process_search_term())
 
     async def process_search_term(self):
@@ -1751,7 +1784,7 @@ class PluginManagerWindow(bui.Window):
                          500 if _uiscale is babase.UIScale.MEDIUM else 510)
         refresh_pos_y = (180 if _uiscale is babase.UIScale.SMALL else
                          108 if _uiscale is babase.UIScale.MEDIUM else 120)
-        loop = asyncio.get_event_loop()
+
         controller_button = bui.buttonwidget(parent=self._root_widget,
                                              # autoselect=True,
                                              position=(refresh_pos_x, refresh_pos_y),
@@ -1908,7 +1941,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
         self.settings = babase.app.config["Community Plugin Manager"]["Settings"].copy()
-        loop = asyncio.get_event_loop()
+
         loop.create_task(self.draw_ui())
 
     async def draw_ui(self):
@@ -2028,7 +2061,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             plugin_manager_update_available = False
         if plugin_manager_update_available:
             text_color = (0.75, 0.2, 0.2)
-            loop = asyncio.get_event_loop()
+
             button_size = (95 * s, 32 * s)
             update_button_label = f'Update to v{plugin_manager_update_available[0]}'
             self._update_button = bui.buttonwidget(parent=self._root_widget,
@@ -2073,7 +2106,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        size=(0, 0),
                        h_align='center',
                        v_align='center',
-                       text=f'API Version: {babase.app.api_version}',
+                       text=f'API Version: {babase.app.env.api_version}',
                        scale=text_scale * 0.7,
                        color=(0.4, 0.8, 1),
                        maxwidth=width * 0.95)
@@ -2483,5 +2516,5 @@ class EntryPoint(babase.Plugin):
         DNSBlockWorkaround.apply()
         asyncio.set_event_loop(babase._asyncio._asyncio_event_loop)
         startup_tasks = StartupTasks()
-        loop = asyncio.get_event_loop()
+
         loop.create_task(startup_tasks.execute())
