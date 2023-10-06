@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.3 (06-10-2023)
+
+- Add a compatibility layer for older builds for API deprecation changes that occured in https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
+
 ### 1.0.2 (01-10-2023)
 
 - Rename deprecated `babase.app.api_version` -> `babase.app.env.api_version`.
