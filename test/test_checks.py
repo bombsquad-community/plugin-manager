@@ -50,7 +50,12 @@ class TestPluginManagerMetadata(unittest.TestCase):
             api_version = self.api_version_regexp.search(content).group()
             plugin_manager_version = self.plugin_manager_version_regexp.search(content).group()
 
-            self.assertEqual(md5sum, version_metadata["md5sum"])
+            if md5sum != version_metadata["md5sum"]:
+                self.fail(
+                    "Plugin manager MD5 checksum changed;\n"
+                    f"{version_metadata['md5sum']} (mentioned in index.json) ->\n"
+                    f"{md5sum} (actual)"
+                )
             self.assertEqual(int(api_version.decode("utf-8")), version_metadata["api_version"])
             self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{version_name}"')
 
@@ -65,7 +70,12 @@ class TestPluginManagerMetadata(unittest.TestCase):
         api_version = self.api_version_regexp.search(content).group()
         plugin_manager_version = self.plugin_manager_version_regexp.search(content).group()
 
-        self.assertEqual(md5sum, latest_version_metadata["md5sum"])
+        if md5sum != latest_version_metadata["md5sum"]:
+            self.fail(
+                "Plugin manager MD5 checksum changed;\n"
+                f"{latest_version_metadata['md5sum']} (mentioned in index.json) ->\n"
+                f"{md5sum} (actual)"
+            )
         self.assertEqual(int(api_version.decode("utf-8")), latest_version_metadata["api_version"])
         self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{latest_version_name}"')
 
@@ -137,14 +147,20 @@ class BaseCategoryMetadataTestCases:
             for plugin_name, plugin_metadata in self.content["plugins"].items():
                 for version_name, version_metadata in plugin_metadata["versions"].items():
                     commit = self.repository.commit(version_metadata["commit_sha"])
-                    plugin = commit.tree / self.category / f"{plugin_name}.py"
-                    with io.BytesIO(plugin.data_stream.read()) as fin:
+                    plugin = os.path.join(self.category, f"{plugin_name}.py")
+                    plugin_commit_sha = commit.tree / plugin
+                    with io.BytesIO(plugin_commit_sha.data_stream.read()) as fin:
                         content = fin.read()
 
                     md5sum = hashlib.md5(content).hexdigest()
                     api_version = self.api_version_regexp.search(content).group()
 
-                    self.assertEqual(md5sum, version_metadata["md5sum"])
+                    if md5sum != version_metadata["md5sum"]:
+                        self.fail(
+                            f"{plugin} checksum changed;\n"
+                            f"{version_metadata['md5sum']} (mentioned in {self.category_metadata_file}) ->\n"
+                            f"{md5sum} (actual)"
+                        )
                     self.assertEqual(int(api_version.decode("utf-8")),
                                      version_metadata["api_version"])
 
@@ -159,6 +175,12 @@ class BaseCategoryMetadataTestCases:
                 md5sum = hashlib.md5(content).hexdigest()
                 api_version = self.api_version_regexp.search(content).group()
 
+                if md5sum != latest_version_metadata["md5sum"]:
+                    self.fail(
+                        f"{plugin} checksum changed;\n"
+                        f"{latest_version_metadata['md5sum']} (mentioned in {self.category_metadata_file}) ->\n"
+                        f"{md5sum} (actual)"
+                    )
                 self.assertEqual(md5sum, latest_version_metadata["md5sum"])
                 self.assertEqual(int(api_version.decode("utf-8")),
                                  latest_version_metadata["api_version"])
@@ -169,7 +191,8 @@ class TestUtilitiesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
         super().setUp()
         self.name = "Utilities"
         self.category = os.path.join("plugins", "utilities")
-        with open(f"{self.category}.json", "rb") as fin:
+        self.category_metadata_file = f"{self.category}.json"
+        with open(self.category_metadata_file, "rb") as fin:
             self.content = json.load(fin)
 
 
@@ -178,7 +201,8 @@ class TestMapsCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
         super().setUp()
         self.name = "Maps"
         self.category = os.path.join("plugins", "maps")
-        with open(f"{self.category}.json", "rb") as fin:
+        self.category_metadata_file = f"{self.category}.json"
+        with open(self.category_metadata_file, "rb") as fin:
             self.content = json.load(fin)
 
 
@@ -187,5 +211,6 @@ class TestMinigamesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):
         super().setUp()
         self.name = "Minigames"
         self.category = os.path.join("plugins", "minigames")
-        with open(f"{self.category}.json", "rb") as fin:
+        self.category_metadata_file = f"{self.category}.json"
+        with open(self.category_metadata_file, "rb") as fin:
             self.content = json.load(fin)
