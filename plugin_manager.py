@@ -1,6 +1,6 @@
 # ba_meta require api 8
 from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
-from baenv import TARGET_BALLISTICA_BUILD as build_number
+from baenv import TARGET_BALLISTICA_BUILD
 import babase
 import _babase
 import bauiv1 as bui
@@ -29,15 +29,46 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-_env = _babase.env()
-_uiscale = bui.app.ui_v1.uiscale
-
 
 PLUGIN_MANAGER_VERSION = "1.0.3"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
+
+
+if TARGET_BALLISTICA_BUILD < 21282:
+    # These attributes have been deprecated as of 1.7.27. For more info see:
+    # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
+    # Adding a compatibility layer here so older builds still work fine.
+    class Dummy:
+        pass
+
+    babase.app.env = Dummy()
+
+    babase.app.env.build_number = babase.app.build_number
+    babase.app.env.device_name = babase.app.device_name
+    babase.app.env.config_file_path = babase.app.config_file_path
+    babase.app.env.version = babase.app.version
+    babase.app.env.debug_build = babase.app.debug_build
+    babase.app.env.test_build = babase.app.test_build
+    babase.app.env.data_directory = babase.app.data_directory
+    babase.app.env.python_directory_user = babase.app.python_directory_user
+    babase.app.env.python_directory_app = babase.app.python_directory_app
+    babase.app.env.python_directory_app_site = babase.app.python_directory_app_site
+    babase.app.env.api_version = babase.app.api_version
+    babase.app.env.on_tv = babase.app.on_tv
+    babase.app.env.vr_mode = babase.app.vr_mode
+    babase.app.env.toolbar_test = babase.app.toolbar_test
+    babase.app.env.arcade_mode = babase.app.arcade_mode
+    babase.app.env.headless_mode = babase.app.arcade_mode
+    babase.app.env.demo_mode = babase.app.demo_mode
+    babase.app.env.protocl_version = babase.app.protocol_version
+
+
+_env = _babase.env()
+_uiscale = bui.app.ui_v1.uiscale
+
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 HEADERS = {
     "User-Agent": _env["legacy_user_agent_string"],
@@ -69,6 +100,7 @@ REGEXP = {
     ),
 }
 DISCORD_URL = "https://ballistica.net/discord"
+
 
 _CACHE = {}
 
@@ -102,7 +134,6 @@ def send_network_request(request):
 
 
 async def async_send_network_request(request):
-
     response = await loop.run_in_executor(None, send_network_request, request)
     return response
 
@@ -157,6 +188,9 @@ class DNSBlockWorkaround:
 
     Such as Jio, a pretty popular ISP in India has a DNS block on
     raw.githubusercontent.com (sigh..).
+
+    References:
+      * https://github.com/orgs/community/discussions/42655
 
     Usage:
     -----
@@ -801,7 +835,7 @@ class Plugin:
     def latest_compatible_version(self):
         if self._latest_compatible_version is None:
             for number, info in self.info["versions"].items():
-                if info["api_version"] == babase.app.api_version if build_number < 21282 else babase.app.env.api_version:
+                if info["api_version"] == babase.app.env.api_version:
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
@@ -810,7 +844,7 @@ class Plugin:
                     break
         if self._latest_compatible_version is None:
             raise NoCompatibleVersion(
-                f"{self.name} has no version compatible with API {babase.app.api_version if build_number < 21282 else babase.app.env.api_version}."
+                f"{self.name} has no version compatible with API {babase.app.env.api_version}."
             )
         return self._latest_compatible_version
 
@@ -1235,7 +1269,7 @@ class PluginManager:
     async def get_update_details(self):
         index = await self.get_index()
         for version, info in index["versions"].items():
-            if info["api_version"] != babase.app.api_version if build_number < 21282 else babase.app.env.api_version:
+            if info["api_version"] != babase.app.env.api_version:
                 # No point checking a version of the API game doesn't support.
                 continue
             if version == PLUGIN_MANAGER_VERSION:
@@ -2072,7 +2106,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        size=(0, 0),
                        h_align='center',
                        v_align='center',
-                       text=f'API Version: {babase.app.api_version if build_number < 21282 else babase.app.env.api_version}',
+                       text=f'API Version: {babase.app.env.api_version}',
                        scale=text_scale * 0.7,
                        color=(0.4, 0.8, 1),
                        maxwidth=width * 0.95)
