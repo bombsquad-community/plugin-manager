@@ -78,6 +78,7 @@ class TestPluginManagerMetadata(unittest.TestCase):
             if changelog_version_header not in changelog:
                 self.fail(f"Changelog entry for plugin manager {version} is missing.")
 
+
 class TestPluginMetadata(unittest.TestCase):
     def setUp(self):
         self.category_directories = tuple(
