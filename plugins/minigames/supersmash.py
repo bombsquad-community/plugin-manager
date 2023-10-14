@@ -78,7 +78,7 @@ class PowBox(Bomb):
         self.explode()
 
     def handlemessage(self, m: Any) -> Any:
-        if isinstance(m, babase.PickedUpMessage):
+        if isinstance(m, bs.PickedUpMessage):
             self._heldBy = m.node
         elif isinstance(m, bs.DroppedMessage):
             bs.timer(0.6, self.pow)
