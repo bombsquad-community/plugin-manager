@@ -360,7 +360,7 @@ command to kick %s?",
                                     "mutethisguy": "mute this guy",
                                     "muteall": "Mute all",
                                     "unmuteall": "Unmute all",
-                                    "copymsg":"copy"
+                                    "copymsg": "copy"
 
             }
         }
@@ -707,7 +707,6 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                on_activate_call=babase.Call(
                                    self._on_chat_press,
                                    msg, txt, showMute))
-          
 
           # btn = bui.buttonwidget(parent=self._columnwidget,
           #                       scale=0.7,
@@ -724,7 +723,6 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         except Exception:
             pass
 
-    
     def _add_msg_when_muted(self, msg: str) -> None:
 
         txt = bui.textwidget(parent=self._columnwidget,
