@@ -76,8 +76,11 @@ ssl._create_default_https_context = ssl._create_unverified_context
 def newconnect_to_party(address, port=43210, print_progress=False):
     global ip_add
     global p_port
-
+    bs.chatmessage(" Joined IP "+ip_add+" PORT "+str(p_port))
     dd = bs.get_connection_to_host_info()
+    if dd.get('name', '') != '':
+        title = dd['name']
+        bs.chatmessage(title)
     if (dd != {}):
         bs.disconnect_from_host()
 
@@ -356,7 +359,8 @@ command to kick %s?",
                                     "unmutethisguy": "unmute this guy",
                                     "mutethisguy": "mute this guy",
                                     "muteall": "Mute all",
-                                    "unmuteall": "Unmute all"
+                                    "unmuteall": "Unmute all",
+                                    "copymsg": "copy"
 
             }
         }
@@ -493,6 +497,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                               color=(0.4, 0.6, 0.3))
         self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
                                               border=2,
+                                              left_border=-200,
                                               margin=0)
         bui.widget(edit=self._menu_button, down_widget=self._columnwidget)
 
@@ -651,38 +656,49 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         if True:
             self._add_msg(msg)
 
-    def _on_chat_press(self, msg, widget):
-        global unmuted_names
-        if msg.split(":")[0] in unmuted_names:
+    def _copy_msg(self, msg: str) -> None:
+        if bui.clipboard_is_supported():
+            bui.clipboard_set_text(msg)
+            bui.screenmessage(
+                bui.Lstr(resource='copyConfirmText'),
+                color=(0, 1, 0)
+            )
 
-            choices = ['mute']
-            choices_display = [_getTransText("mutethisguy", isBaLstr=True)]
-        else:
-            choices = ['unmute']
-            choices_display = [_getTransText("unmutethisguy", isBaLstr=True)]
+    def _on_chat_press(self, msg, widget, showMute):
+        global unmuted_names
+        choices = ['copy']
+        choices_display = [_getTransText("copymsg", isBaLstr=True)]
+        if showMute:
+            if msg.split(":")[0].encode('utf-8') in unmuted_names:
+                choices.append('mute')
+                choices_display.append(_getTransText("mutethisguy", isBaLstr=True))
+            else:
+                choices.append('unmute')
+                choices_display.append(_getTransText("unmutethisguy", isBaLstr=True))
         PopupMenuWindow(position=widget.get_screen_space_center(),
                         scale=_get_popup_window_scale(),
                         choices=choices,
                         choices_display=choices_display,
                         current_choice="@ this guy",
                         delegate=self)
-        self.msg_user_selected = msg.split(":")[0]
+        self.msg_user_selected = msg
         self._popup_type = "chatmessagepress"
 
         # bs.chatmessage("pressed")
 
     def _add_msg(self, msg: str) -> None:
         try:
-            if babase.app.config.resolve('Chat Muted'):
-
+            showMute = babase.app.config.resolve('Chat Muted')
+            if True:
                 txt = bui.textwidget(parent=self._columnwidget,
                                      text=msg,
                                      h_align='left',
                                      v_align='center',
-                                     size=(130, 13),
+                                     size=(900, 13),
                                      scale=0.55,
                                      position=(-0.6, 0),
                                      selectable=True,
+                                     autoselect=True,
                                      click_activate=True,
                                      maxwidth=self._scroll_width * 0.94,
                                      shadow=0.3,
@@ -690,20 +706,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                 bui.textwidget(edit=txt,
                                on_activate_call=babase.Call(
                                    self._on_chat_press,
-                                   msg, txt))
-            else:
-                txt = bui.textwidget(parent=self._columnwidget,
-                                     text=msg,
-                                     h_align='left',
-                                     v_align='center',
-                                     size=(0, 13),
-                                     scale=0.55,
-
-
-
-                                     maxwidth=self._scroll_width * 0.94,
-                                     shadow=0.3,
-                                     flatness=1.0)
+                                   msg, txt, showMute))
 
           # btn = bui.buttonwidget(parent=self._columnwidget,
           #                       scale=0.7,
@@ -1421,10 +1424,11 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
 
         elif self._popup_type == "chatmessagepress":
             if choice == "mute":
-
-                unmuted_names.remove(self.msg_user_selected)
+                unmuted_names.remove(self.msg_user_selected.split(":")[0].encode('utf-8'))
             if choice == "unmute":
-                unmuted_names.append(self.msg_user_selected)
+                unmuted_names.append(self.msg_user_selected.split(":")[0].encode('utf-8'))
+            if choice == "copy":
+                self._copy_msg(self.msg_user_selected)
 
         elif self._popup_type == "partyMemberPress":
             if choice == "kick":
