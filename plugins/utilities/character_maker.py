@@ -750,10 +750,13 @@ def get_player(msg, activity):
 
 old_piv = bui.set_party_icon_always_visible
 
+
 def new_piv(*args, **kwargs):
     old_piv(True)
 
+
 bui.set_party_icon_always_visible = new_piv
+
 
 class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
