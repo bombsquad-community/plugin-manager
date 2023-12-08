@@ -49,6 +49,7 @@ import bauiv1 as bui
 from bascenev1lib.actor.spazappearance import *
 from bascenev1lib.actor.text import Text
 from bascenev1lib.actor.image import Image
+import bauiv1lib.mainmenu
 
 import os
 import copy
@@ -158,7 +159,6 @@ class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
         super().__init__(settings)
 
         self.initialize_meshs()
-        bui.set_party_icon_always_visible(True)
         self._score_to_win = None
         self._dingsound = bs.getsound('dingSmall')
         self._epic_mode = bool(settings['Epic Mode'])
@@ -747,12 +747,28 @@ def get_player(msg, activity):
         if client_id == player_client_id:
             return player
 
+
+old_piv = bui.set_party_icon_always_visible
+
+
+def new_piv(*args, **kwargs):
+    old_piv(True)
+
+
+bui.set_party_icon_always_visible = new_piv
+
+
+class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        bui.set_party_icon_always_visible(True)
+
 # ba_meta export plugin
 
 
 class bySmoothy(babase.Plugin):
     def __init__(self):
-        bui.set_party_icon_always_visible(True)
+        bauiv1lib.mainmenu.MainMenuWindow = NewMainMenuWindow
         _babase.import_character = import_character
         _babase.export_character = export_character
         _babase.spaz_to_json = spaz_to_json
