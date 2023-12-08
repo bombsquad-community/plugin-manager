@@ -30,7 +30,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.3"
+PLUGIN_MANAGER_VERSION = "1.0.4"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1604,10 +1604,12 @@ class PluginManagerWindow(bui.Window):
 
     def _back(self) -> None:
         from bauiv1lib.settings.allsettings import AllSettingsWindow
+        del self._last_filter_plugins
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
         bui.app.ui_v1.set_main_menu_window(
-            AllSettingsWindow(transition='in_left').get_root_widget())
+            AllSettingsWindow(transition='in_left').get_root_widget(),
+            from_window=self._root_widget,)
 
     @contextlib.contextmanager
     def exception_handler(self):
@@ -1723,7 +1725,7 @@ class PluginManagerWindow(bui.Window):
                                              autoselect=True,
                                              maxwidth=search_bar_maxwidth,
                                              description=filter_txt)
-        self._last_filter_text = None
+        self._last_filter_text = ""
         self._last_filter_plugins = []
 
         loop.create_task(self.process_search_term())
@@ -1731,11 +1733,10 @@ class PluginManagerWindow(bui.Window):
     async def process_search_term(self):
         while True:
             await asyncio.sleep(0.2)
-            try:
-                filter_text = bui.textwidget(query=self._filter_widget)
-            except RuntimeError:
+            if not self._filter_widget:
                 # Search filter widget got destroyed. No point checking for filter text anymore.
                 return
+            filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
             if self.selected_category is None:
                 continue
             try:
@@ -1834,8 +1835,10 @@ class PluginManagerWindow(bui.Window):
             raise CategoryDoesNotExist(f"{category} does not exist.")
 
         if search_term:
-            def search_term_filterer(plugin): return self.search_term_filterer(plugin, search_term)
-            plugins = filter(search_term_filterer, category_plugins)
+            plugins = filter(
+                lambda plugin: self.search_term_filterer(plugin, search_term),
+                category_plugins,
+            )
         else:
             plugins = category_plugins
 
@@ -1917,7 +1920,7 @@ class PluginManagerWindow(bui.Window):
         for plugin in self._columnwidget.get_children():
             plugin.delete()
         self.plugins_in_current_view.clear()
-        self._last_filter_text = None
+        self._last_filter_text = ""
         self._last_filter_plugins = []
 
     async def refresh(self):
@@ -2392,8 +2395,8 @@ class NewAllSettingsWindow(bui.Window):
         )
         assert bui.app.classic is not None
         bui.app.ui_v1.set_main_menu_window(
-            MainMenuWindow(transition='in_left').get_root_widget()
-        )
+            MainMenuWindow(transition='in_left').get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_controllers(self) -> None:
         # pylint: disable=cyclic-import
@@ -2405,8 +2408,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             ControlsSettingsWindow(
                 origin_widget=self._controllers_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
@@ -2418,8 +2421,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             GraphicsSettingsWindow(
                 origin_widget=self._graphics_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_audio(self) -> None:
         # pylint: disable=cyclic-import
@@ -2431,8 +2434,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             AudioSettingsWindow(
                 origin_widget=self._audio_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_advanced(self) -> None:
         # pylint: disable=cyclic-import
@@ -2444,8 +2447,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             AdvancedSettingsWindow(
                 origin_widget=self._advanced_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_modmanager(self) -> None:
         self._save_state()
@@ -2453,8 +2456,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             PluginManagerWindow(
                 origin_widget=self._modmgr_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _save_state(self) -> None:
         try:
