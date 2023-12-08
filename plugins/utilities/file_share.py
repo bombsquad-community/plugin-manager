@@ -28,12 +28,14 @@ from threading import Thread
 import logging
 from babase._general import Call
 from typing import TYPE_CHECKING
+from baenv import TARGET_BALLISTICA_BUILD
 if TYPE_CHECKING:
     from typing import Any, Callable, Sequence
 
 app = _babase.app
 
-MODS_DIR = app.python_directory_user
+
+MODS_DIR = app.python_directory_user if TARGET_BALLISTICA_BUILD < 21282 else app.env.python_directory_user
 REPLAYS_DIR = bui.get_replays_dir()
 HEADERS = {
     'accept': 'application/json',
