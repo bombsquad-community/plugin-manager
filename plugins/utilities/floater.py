@@ -259,7 +259,6 @@ def assignFloInputs(clientID: int):
                 i.assigninput(babase.InputType.LEFT_RIGHT, floater.leftright)
 
 
-
 old_piv = bui.set_party_icon_always_visible
 
 
@@ -284,6 +283,7 @@ def new_chat_message(*args, **kwargs):
 
 
 bs.chatmessage = new_chat_message
+
 
 class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
