@@ -1607,7 +1607,8 @@ class PluginManagerWindow(bui.Window):
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
         bui.app.ui_v1.set_main_menu_window(
-            AllSettingsWindow(transition='in_left').get_root_widget())
+            AllSettingsWindow(transition='in_left').get_root_widget(),
+            from_window=self._root_widget,)
 
     @contextlib.contextmanager
     def exception_handler(self):
@@ -2392,8 +2393,8 @@ class NewAllSettingsWindow(bui.Window):
         )
         assert bui.app.classic is not None
         bui.app.ui_v1.set_main_menu_window(
-            MainMenuWindow(transition='in_left').get_root_widget()
-        )
+            MainMenuWindow(transition='in_left').get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_controllers(self) -> None:
         # pylint: disable=cyclic-import
@@ -2405,8 +2406,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             ControlsSettingsWindow(
                 origin_widget=self._controllers_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
@@ -2418,8 +2419,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             GraphicsSettingsWindow(
                 origin_widget=self._graphics_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_audio(self) -> None:
         # pylint: disable=cyclic-import
@@ -2431,8 +2432,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             AudioSettingsWindow(
                 origin_widget=self._audio_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_advanced(self) -> None:
         # pylint: disable=cyclic-import
@@ -2444,8 +2445,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             AdvancedSettingsWindow(
                 origin_widget=self._advanced_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _do_modmanager(self) -> None:
         self._save_state()
@@ -2453,8 +2454,8 @@ class NewAllSettingsWindow(bui.Window):
         bui.app.ui_v1.set_main_menu_window(
             PluginManagerWindow(
                 origin_widget=self._modmgr_button
-            ).get_root_widget()
-        )
+            ).get_root_widget(),
+            from_window=self._root_widget,)
 
     def _save_state(self) -> None:
         try:
