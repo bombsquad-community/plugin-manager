@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 app = _babase.app
 
-MODS_DIR = app.python_directory_user
+MODS_DIR = app.env.python_directory_user
 REPLAYS_DIR = bui.get_replays_dir()
 HEADERS = {
     'accept': 'application/json',
