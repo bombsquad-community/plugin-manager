@@ -159,7 +159,6 @@ class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
         super().__init__(settings)
 
         self.initialize_meshs()
-        bui.set_party_icon_always_visible(True)
         self._score_to_win = None
         self._dingsound = bs.getsound('dingSmall')
         self._epic_mode = bool(settings['Epic Mode'])
@@ -751,13 +750,10 @@ def get_player(msg, activity):
 
 old_piv = bui.set_party_icon_always_visible
 
-
 def new_piv(*args, **kwargs):
     old_piv(True)
 
-
 bui.set_party_icon_always_visible = new_piv
-
 
 class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
