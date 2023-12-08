@@ -21,6 +21,7 @@ from bascenev1lib.gameutils import SharedObjects
 from bascenev1lib.actor.bomb import Bomb
 from bascenev1lib.actor.popuptext import PopupText
 from bauiv1lib.party import PartyWindow
+import bauiv1lib.mainmenu
 if TYPE_CHECKING:
     from typing import Optional
 
@@ -258,10 +259,6 @@ def assignFloInputs(clientID: int):
                 i.assigninput(babase.InputType.LEFT_RIGHT, floater.leftright)
 
 
-# Display chat icon, but if user open/close gather it may disappear
-bui.set_party_icon_always_visible(True)
-
-
 old_piv = bui.set_party_icon_always_visible
 
 
@@ -287,8 +284,15 @@ def new_chat_message(*args, **kwargs):
 
 bs.chatmessage = new_chat_message
 
+
+class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Display chat icon, but if user open/close gather it may disappear
+        bui.set_party_icon_always_visible(True)
+
+
 # ba_meta export plugin
-
-
 class byFreaku(babase.Plugin):
-    def __init__(self): pass
+    def on_app_running(self):
+        bauiv1lib.mainmenu.MainMenuWindow = NewMainMenuWindow
