@@ -27,6 +27,7 @@ import _babase
 import bascenev1 as bs
 import bascenev1lib
 import bauiv1 as bui
+from baenv import TARGET_BALLISTICA_BUILD
 
 from typing import TYPE_CHECKING
 
@@ -35,7 +36,8 @@ if TYPE_CHECKING:
 
 
 ANDROID = babase.app.classic.platform == "android"
-DIRPATH = Path(f"{_babase.app.python_directory_user}/image_id.json")
+DIRPATH = Path(f"{_babase.app.python_directory_user if TARGET_BALLISTICA_BUILD < 21282 else _babase.app.env.python_directory_user}/image_id.json")
+APP_VERSION = _babase.app.version if TARGET_BALLISTICA_BUILD < 21282 else _babase.app.env.version
 
 if ANDROID:  # !can add ios in future
 
@@ -92,7 +94,7 @@ if ANDROID:  # !can add ios in future
             self.large_image_text: str | None = "BombSquad Icon"
             self.small_image_key: str | None = None
             self.small_image_text: str | None = (
-                f"{_babase.app.classic.platform.capitalize()}({_babase.app.version})")
+                f"{_babase.app.classic.platform.capitalize()}({APP_VERSION})")
             self.media_proxy = "mp:/app-assets/963434684669382696/{}.png"
             self.identify: bool = False
             self.party_id: str = str(uuid.uuid4())
@@ -872,7 +874,7 @@ class DiscordRP(babase.Plugin):
         self.rpc_thread.large_image_text = "BombSquad"
         self.rpc_thread.small_image_key = _babase.app.classic.platform
         self.rpc_thread.small_image_text = (
-            f"{_babase.app.classic.platform.capitalize()}({_babase.app.version})"
+            f"{_babase.app.classic.platform.capitalize()}({APP_VERSION})"
         )
         connection_info = bs.get_connection_to_host_info()
         if not ANDROID:
