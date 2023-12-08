@@ -1,5 +1,10 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.4 (08-12-2023)
+
+- Fix a few UI warnings related to 1.7.30.
+- Fix a memory leak.
+
 ### 1.0.3 (06-10-2023)
 
 - Add a compatibility layer for older builds for API deprecation changes that occured in https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30

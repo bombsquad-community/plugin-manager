@@ -30,7 +30,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.3"
+PLUGIN_MANAGER_VERSION = "1.0.4"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1604,6 +1604,7 @@ class PluginManagerWindow(bui.Window):
 
     def _back(self) -> None:
         from bauiv1lib.settings.allsettings import AllSettingsWindow
+        del self._last_filter_plugins
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
         bui.app.ui_v1.set_main_menu_window(
@@ -1724,7 +1725,7 @@ class PluginManagerWindow(bui.Window):
                                              autoselect=True,
                                              maxwidth=search_bar_maxwidth,
                                              description=filter_txt)
-        self._last_filter_text = None
+        self._last_filter_text = ""
         self._last_filter_plugins = []
 
         loop.create_task(self.process_search_term())
@@ -1732,11 +1733,10 @@ class PluginManagerWindow(bui.Window):
     async def process_search_term(self):
         while True:
             await asyncio.sleep(0.2)
-            if self._filter_widget:
-                filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
-            else:
+            if not self._filter_widget:
                 # Search filter widget got destroyed. No point checking for filter text anymore.
                 return
+            filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
             if self.selected_category is None:
                 continue
             try:
@@ -1835,8 +1835,10 @@ class PluginManagerWindow(bui.Window):
             raise CategoryDoesNotExist(f"{category} does not exist.")
 
         if search_term:
-            def search_term_filterer(plugin): return self.search_term_filterer(plugin, search_term)
-            plugins = filter(search_term_filterer, category_plugins)
+            plugins = filter(
+                lambda plugin: self.search_term_filterer(plugin, search_term),
+                category_plugins,
+            )
         else:
             plugins = category_plugins
 
@@ -1918,7 +1920,7 @@ class PluginManagerWindow(bui.Window):
         for plugin in self._columnwidget.get_children():
             plugin.delete()
         self.plugins_in_current_view.clear()
-        self._last_filter_text = None
+        self._last_filter_text = ""
         self._last_filter_plugins = []
 
     async def refresh(self):
