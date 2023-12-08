@@ -1732,9 +1732,9 @@ class PluginManagerWindow(bui.Window):
     async def process_search_term(self):
         while True:
             await asyncio.sleep(0.2)
-            try:
-                filter_text = bui.textwidget(query=self._filter_widget)
-            except RuntimeError:
+            if self._filter_widget:
+                filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
+            else:
                 # Search filter widget got destroyed. No point checking for filter text anymore.
                 return
             if self.selected_category is None:
