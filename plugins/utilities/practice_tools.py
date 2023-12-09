@@ -1,4 +1,4 @@
-"""Practice Tools Mod: V2.0
+"""Practice Tools Mod: V2.1
 Made by Cross Joy"""
 
 # If anyone who want to help me on giving suggestion/ fix bugs/ creating PR,
@@ -12,6 +12,10 @@ Made by Cross Joy"""
 # Support link: https://www.buymeacoffee.com/CrossJoy
 
 # ----------------------------------------------------------------------------
+# V2.1 update
+# - Fix bug where the ui stuck if opened on server side.
+# - Fix a bug to set party icon to always visible for newer bombsquad version.
+
 # V2.0 update
 # - Updated to API 8 (1.7.20+)
 
@@ -66,7 +70,7 @@ import babase
 import bascenev1 as bs
 import bascenev1lib
 import bauiv1 as bui
-import bauiv1lib as buil
+from bauiv1lib import mainmenu
 from babase import app, Plugin
 from bascenev1lib.actor.powerupbox import PowerupBox
 from bascenev1lib.actor.spaz import Spaz
@@ -90,7 +94,7 @@ from bauiv1lib.tabs import TabRow
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, Optional
 
-version = '2.0'
+version = '2.1'
 
 try:
     if babase.app.config.get("bombCountdown") is None:
@@ -131,8 +135,6 @@ try:
         babase.app.config.get("invincible")
 except:
     babase.app.config["invincible"] = False
-
-bui.set_party_icon_always_visible(True)
 
 
 class PartyWindow(bui.Window):
@@ -177,10 +179,18 @@ def main(plugin: Plugin) -> None:
     redefine_class(OriginalPartyWindow, PartyWindow)
 
 
+class NewMainMenuWindow(mainmenu.MainMenuWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Display chat icon, but if user open/close gather it may disappear
+        bui.set_party_icon_always_visible(True)
+
 # ba_meta require api 8
 # ba_meta export plugin
+
+
 class Practice(Plugin):
-    __version__ = '2.0'
+    __version__ = version
 
     def on_app_running(self) -> None:
         """Plugin start point."""
@@ -191,7 +201,7 @@ class Practice(Plugin):
                 color=(.8, .1, .1))
             raise RuntimeError(
                 'sad')
-
+        mainmenu.MainMenuWindow = NewMainMenuWindow
         return main(self)
 
     def new_bomb_init(func):
@@ -527,8 +537,12 @@ def doTestButton(self):
         bui.screenmessage('Join any map to start using it.', color=(.8, .8, .1))
         return
 
-    bui.containerwidget(edit=self._root_widget, transition='out_left')
-    bs.Call(PracticeWindow())
+    activity = bs.get_foreground_host_activity()
+    if activity is not None:
+        bui.containerwidget(edit=self._root_widget, transition='out_left')
+        bs.Call(PracticeWindow())
+    else:
+        bs.screenmessage('Only works on local games.', color=(.8, .8, .1))
 
 
 # ---------------------------------------------------------------
@@ -550,7 +564,6 @@ class NewBotSet(SpazBotSet):
         )
 
     def _update(self) -> None:
-
         # Update one of our bot lists each time through.
         # First off, remove no-longer-existing bots from the list.
         try:
