@@ -178,6 +178,7 @@ def main(plugin: Plugin) -> None:
     app.practice_tool = plugin
     redefine_class(OriginalPartyWindow, PartyWindow)
 
+
 class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -186,6 +187,8 @@ class NewMainMenuWindow(mainmenu.MainMenuWindow):
 
 # ba_meta require api 8
 # ba_meta export plugin
+
+
 class Practice(Plugin):
     __version__ = version
 
@@ -542,7 +545,6 @@ def doTestButton(self):
         bs.screenmessage('Only works on local games.', color=(.8, .8, .1))
 
 
-
 # ---------------------------------------------------------------
 
 
@@ -598,7 +600,6 @@ class NewBotSet(SpazBotSet):
             if not babase.app.config.get('stopBots'):
                 bot.set_player_points(player_pts)
                 bot.update_ai()
-
 
     def clear(self) -> None:
         """Immediately clear out any bots in the set."""
@@ -2346,4 +2347,3 @@ class InfoWindow(popup.PopupWindow):
     def on_popup_cancel(self) -> None:
         bui.getsound('swish').play()
         self._transition_out()
-
