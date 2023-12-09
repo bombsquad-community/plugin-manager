@@ -248,6 +248,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "0b55bc2",
