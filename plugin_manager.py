@@ -63,7 +63,7 @@ if TARGET_BALLISTICA_BUILD < 21282:
     babase.app.env.arcade_mode = babase.app.arcade_mode
     babase.app.env.headless_mode = babase.app.arcade_mode
     babase.app.env.demo_mode = babase.app.demo_mode
-    babase.app.env.protocl_version = babase.app.protocol_version
+    babase.app.env.protocol_version = babase.app.protocol_version
 
 
 _env = _babase.env()
