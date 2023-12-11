@@ -30,7 +30,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.4"
+PLUGIN_MANAGER_VERSION = "1.0.5"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
