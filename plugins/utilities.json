@@ -607,6 +607,12 @@
         }
       ],
       "versions": {
+        "3.0.0": {
+          "api_version": 8,
+          "commit_sha": "02da437",
+          "released_on": "16-12-2023",
+          "md5sum": "ae221a7c2b938eccf63db493c247991e"
+        },
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "48f9302",
