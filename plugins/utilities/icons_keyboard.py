@@ -7,8 +7,6 @@
 # Tap bottom-left bomb button to cycle through different icons
 
 
-
-
 # ba_meta require api 8
 
 import babase
@@ -27,8 +25,8 @@ class IconKeyboard(babase.Keyboard):
     """Keyboard go brrrrrrr"""
     name = 'Icons by \ue048Freaku'
     chars = [(list_of_icons[0:10]),
-    (list_of_icons[10:19]),
-    (list_of_icons[19:26])]
+             (list_of_icons[10:19]),
+             (list_of_icons[19:26])]
     nums = ['‎' for i in range(26)]
     pages = {
         f'icon{i//26+1}': tuple(list_of_icons[i:i+26])
