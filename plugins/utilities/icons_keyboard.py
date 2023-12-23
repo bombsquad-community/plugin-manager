@@ -22,7 +22,7 @@ for i in range(26 - (len(list_of_icons) % 26)):
 
 
 if hasattr(bauiv1, 'Keyboard'):
-# ba_meta export bauiv1.Keyboard
+    # ba_meta export bauiv1.Keyboard
     class IconKeyboard(bauiv1.Keyboard):
         """Keyboard go brrrrrrr"""
         name = 'Icons by \ue048Freaku'
@@ -35,7 +35,7 @@ if hasattr(bauiv1, 'Keyboard'):
             for i in range(26, len(list_of_icons), 26)
         }
 else:
-# ba_meta export keyboard
+    # ba_meta export keyboard
     class IconKeyboard(babase.Keyboard):
         """Keyboard go brrrrrrr"""
         name = 'Icons by \ue048Freaku'
