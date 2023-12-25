@@ -4,6 +4,8 @@ from baenv import TARGET_BALLISTICA_BUILD
 import babase
 import _babase
 import bauiv1 as bui
+import _bauiv1 as _bui
+import _bascenev1 as _bs
 from bauiv1lib import popup, confirm
 
 import urllib.request
@@ -30,7 +32,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.5"
+PLUGIN_MANAGER_VERSION = "1.0.6"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -50,20 +52,23 @@ if TARGET_BALLISTICA_BUILD < 21282:
     babase.app.env.device_name = babase.app.device_name
     babase.app.env.config_file_path = babase.app.config_file_path
     babase.app.env.version = babase.app.version
-    babase.app.env.debug_build = babase.app.debug_build
-    babase.app.env.test_build = babase.app.test_build
+    babase.app.env.debug = babase.app.debug_build
+    babase.app.env.test = babase.app.test_build
     babase.app.env.data_directory = babase.app.data_directory
     babase.app.env.python_directory_user = babase.app.python_directory_user
     babase.app.env.python_directory_app = babase.app.python_directory_app
     babase.app.env.python_directory_app_site = babase.app.python_directory_app_site
     babase.app.env.api_version = babase.app.api_version
-    babase.app.env.on_tv = babase.app.on_tv
-    babase.app.env.vr_mode = babase.app.vr_mode
-    babase.app.env.toolbar_test = babase.app.toolbar_test
-    babase.app.env.arcade_mode = babase.app.arcade_mode
-    babase.app.env.headless_mode = babase.app.arcade_mode
-    babase.app.env.demo_mode = babase.app.demo_mode
-    babase.app.env.protocol_version = babase.app.protocol_version
+    babase.app.env.tv = babase.app.on_tv
+    babase.app.env.vr = babase.app.vr_mode
+    babase.app.env.arcade = babase.app.arcade_mode
+    babase.app.env.headless = babase.app.arcade_mode
+    babase.app.env.demo = babase.app.demo_mode
+    protocol_version = babase.app.protocol_version
+    toolbar_test = babase.app.toolbar_test
+else:
+    protocol_version = _bs.protocol_version()
+    toolbar_test = _bui.toolbar_test()
 
 
 _env = _babase.env()
@@ -1607,10 +1612,17 @@ class PluginManagerWindow(bui.Window):
         del self._last_filter_plugins
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
-        bui.app.ui_v1.set_main_menu_window(
-            AllSettingsWindow(transition='in_left').get_root_widget(),
-            from_window=self._root_widget,)
-
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                AllSettingsWindow(transition='in_left').get_root_widget())
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                AllSettingsWindow(transition='in_left').get_root_widget(),
+                from_window=self._root_widget,)
+            
     @contextlib.contextmanager
     def exception_handler(self):
         try:
@@ -2394,9 +2406,16 @@ class NewAllSettingsWindow(bui.Window):
             edit=self._root_widget, transition=self._transition_out
         )
         assert bui.app.classic is not None
-        bui.app.ui_v1.set_main_menu_window(
-            MainMenuWindow(transition='in_left').get_root_widget(),
-            from_window=self._root_widget,)
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                MainMenuWindow(transition='in_left').get_root_widget(),)
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                MainMenuWindow(transition='in_left').get_root_widget(),
+                from_window=self._root_widget,)
 
     def _do_controllers(self) -> None:
         # pylint: disable=cyclic-import
@@ -2405,12 +2424,21 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.ui_v1.set_main_menu_window(
-            ControlsSettingsWindow(
-                origin_widget=self._controllers_button
-            ).get_root_widget(),
-            from_window=self._root_widget,)
-
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                ControlsSettingsWindow(
+                    origin_widget=self._controllers_button
+                ).get_root_widget(),)
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                ControlsSettingsWindow(
+                    origin_widget=self._controllers_button
+                ).get_root_widget(),
+                from_window=self._root_widget,)
+            
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
         from bauiv1lib.settings.graphics import GraphicsSettingsWindow
@@ -2418,11 +2446,20 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.ui_v1.set_main_menu_window(
-            GraphicsSettingsWindow(
-                origin_widget=self._graphics_button
-            ).get_root_widget(),
-            from_window=self._root_widget,)
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                GraphicsSettingsWindow(
+                    origin_widget=self._graphics_button
+                ).get_root_widget(),)
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                GraphicsSettingsWindow(
+                    origin_widget=self._graphics_button
+                ).get_root_widget(),
+                from_window=self._root_widget,)
 
     def _do_audio(self) -> None:
         # pylint: disable=cyclic-import
@@ -2431,11 +2468,20 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.ui_v1.set_main_menu_window(
-            AudioSettingsWindow(
-                origin_widget=self._audio_button
-            ).get_root_widget(),
-            from_window=self._root_widget,)
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                AudioSettingsWindow(
+                    origin_widget=self._audio_button
+                ).get_root_widget(),)
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                AudioSettingsWindow(
+                    origin_widget=self._audio_button
+                ).get_root_widget(),
+                from_window=self._root_widget,)
 
     def _do_advanced(self) -> None:
         # pylint: disable=cyclic-import
@@ -2444,20 +2490,38 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        bui.app.ui_v1.set_main_menu_window(
-            AdvancedSettingsWindow(
-                origin_widget=self._advanced_button
-            ).get_root_widget(),
-            from_window=self._root_widget,)
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                AdvancedSettingsWindow(
+                    origin_widget=self._advanced_button
+                ).get_root_widget())
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                AdvancedSettingsWindow(
+                    origin_widget=self._advanced_button
+                ).get_root_widget(),
+                from_window=self._root_widget,)
 
     def _do_modmanager(self) -> None:
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition="out_left")
-        bui.app.ui_v1.set_main_menu_window(
-            PluginManagerWindow(
-                origin_widget=self._modmgr_button
-            ).get_root_widget(),
-            from_window=self._root_widget,)
+        if TARGET_BALLISTICA_BUILD < 21697: 
+            # from_window parameter was added in 1.7.30, see changelogs below
+            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
+            # Adding a check here so older builds still work fine.
+            bui.app.ui_v1.set_main_menu_window(
+                PluginManagerWindow(
+                    origin_widget=self._modmgr_button
+                ).get_root_widget(),)
+        else:
+            bui.app.ui_v1.set_main_menu_window(
+                PluginManagerWindow(
+                    origin_widget=self._modmgr_button
+                ).get_root_widget(),
+                from_window=self._root_widget,)
 
     def _save_state(self) -> None:
         try:
