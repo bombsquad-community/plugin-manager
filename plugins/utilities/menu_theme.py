@@ -23,6 +23,7 @@ from __future__ import annotations
 
 from typing import List, Sequence, Callable, Any, cast
 
+from baenv import TARGET_BALLISTICA_BUILD
 from bascenev1lib.mainmenu import MainMenuActivity, NewsDisplay, _preload1
 from bauiv1lib.mainmenu import MainMenuWindow
 from bauiv1lib.account.settings import AccountSettingsWindow
@@ -30,7 +31,10 @@ from bauiv1lib.colorpicker import ColorPicker, ColorPickerExact
 from bauiv1lib.fileselector import FileSelectorWindow
 from bauiv1lib.popup import PopupMenuWindow
 
+import _bauiv1 as _bui
+import _bascenev1 as _bs
 import _babase as _ba
+
 import babase as ba
 import bascenev1 as bs
 import bauiv1 as bui
@@ -44,7 +48,38 @@ import weakref
 
 # defined version and author
 __author__ = "Yann"
-__version__ = "1.0.9"
+__version__ = "1.0.10"
+
+if TARGET_BALLISTICA_BUILD < 21282:
+    # These attributes have been deprecated as of 1.7.27. For more info see:
+    # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
+    # Adding a compatibility layer here so older builds still work fine.
+    class Dummy:
+        pass
+    babase = ba
+    babase.app.env = Dummy()
+
+    babase.app.env.build_number = babase.app.build_number
+    babase.app.env.device_name = babase.app.device_name
+    babase.app.env.config_file_path = babase.app.config_file_path
+    babase.app.env.version = babase.app.version
+    babase.app.env.debug = babase.app.debug_build
+    babase.app.env.test = babase.app.test_build
+    babase.app.env.data_directory = babase.app.data_directory
+    babase.app.env.python_directory_user = babase.app.python_directory_user
+    babase.app.env.python_directory_app = babase.app.python_directory_app
+    babase.app.env.python_directory_app_site = babase.app.python_directory_app_site
+    babase.app.env.api_version = babase.app.api_version
+    babase.app.env.tv = babase.app.on_tv
+    babase.app.env.vr = babase.app.vr_mode
+    babase.app.env.arcade = babase.app.arcade_mode
+    babase.app.env.headless = babase.app.arcade_mode
+    babase.app.env.demo = babase.app.demo_mode
+    protocol_version = babase.app.protocol_version
+    toolbar_test = babase.app.toolbar_test
+else:
+    protocol_version = _bs.protocol_version
+    toolbar_test = _bui.toolbar_test()
 
 # frequently used variables references
 config = bs.app.config
@@ -1158,14 +1193,15 @@ class MainMenuTheme(MainMenuActivity):
         bs.Activity.on_transition_in(self)
         random.seed(123)
         app = bs.app
+        env = ba.app.env
         assert app.classic is not None
 
         plus = bui.app.plus
         assert plus is not None
 
-        vr_mode = bs.app.vr_mode
+        vr_mode = env.vr
 
-        if not bs.app.toolbar_test:
+        if not toolbar_test:
             color = (1.0, 1.0, 1.0, 1.0) if vr_mode else (0.5, 0.6, 0.5, 0.6)
 
             scale = (
@@ -1213,19 +1249,19 @@ class MainMenuTheme(MainMenuActivity):
             assert self.my_name.node
             bs.animate(self.my_name.node, 'opacity', {2.3: 0, 3.0: 1.0})
 
-        vr_mode = app.vr_mode
-        uiscale = app.ui_v1.uiscale
+        vr_mode = env.vr
+        uiscale = bui.UIV1Subsystem.uiscale
 
         force_show_build_number = False
 
-        if not bs.app.toolbar_test:
-            if app.debug_build or app.test_build or force_show_build_number:
-                if app.debug_build:
+        if not toolbar_test:
+            if env.debug or env.test or force_show_build_number:
+                if env.debug:
                     text = bs.Lstr(
                         value='${V} (${B}) (${D})',
                         subs=[
-                            ('${V}', app.version),
-                            ('${B}', str(app.build_number)),
+                            ('${V}', env.version),
+                            ('${B}', str(env.build_number)),
                             ('${D}', bs.Lstr(resource='debugText')),
                         ],
                     )
@@ -1233,12 +1269,12 @@ class MainMenuTheme(MainMenuActivity):
                     text = bs.Lstr(
                         value='${V} (${B})',
                         subs=[
-                            ('${V}', app.version),
-                            ('${B}', str(app.build_number)),
+                            ('${V}', env.version),
+                            ('${B}', str(env.build_number)),
                         ],
                     )
             else:
-                text = bs.Lstr(value='${V}', subs=[('${V}', app.version)])
+                text = bs.Lstr(value='${V}', subs=[('${V}', env.version)])
             scale = 0.9 if (uiscale is bs.UIScale.SMALL or vr_mode) else 0.7
             color = (1, 1, 1, 1) if vr_mode else (0.5, 0.6, 0.5, 0.7)
             self.version = bs.NodeActor(
@@ -1263,7 +1299,7 @@ class MainMenuTheme(MainMenuActivity):
                 bs.animate(self.version.node, 'opacity', {2.3: 0, 3.0: 1.0})
 
         self.beta_info = self.beta_info_2 = None
-        if app.test_build and not (app.demo_mode or app.arcade_mode) and config['Menu Logo Text']:
+        if env.test and not (env.demo or env.arcade) and config['Menu Logo Text']:
             pos = (230, 35)
             self.beta_info = bs.NodeActor(
                 bs.newnode(
@@ -1316,7 +1352,7 @@ class MainMenuTheme(MainMenuActivity):
 
         random.seed()
 
-        if not (app.demo_mode or app.arcade_mode) and not app.toolbar_test:
+        if not (env.demo or env.arcade) and not toolbar_test:
             self._news = NewsDisplay(self)
 
         with bs.ContextRef.empty():
@@ -1332,7 +1368,7 @@ class MainMenuTheme(MainMenuActivity):
 
                 # When coming back from a kiosk-mode game, jump to
                 # the kiosk start screen.
-                if bs.app.demo_mode or bs.app.arcade_mode:
+                if env.demo or env.arcade:
                     # pylint: disable=cyclic-import
                     from bauiv1lib.kiosk import KioskWindow
 
