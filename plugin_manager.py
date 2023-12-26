@@ -1612,7 +1612,7 @@ class PluginManagerWindow(bui.Window):
         del self._last_filter_plugins
         bui.containerwidget(edit=self._root_widget,
                             transition=self._transition_out)
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
@@ -1622,7 +1622,7 @@ class PluginManagerWindow(bui.Window):
             bui.app.ui_v1.set_main_menu_window(
                 AllSettingsWindow(transition='in_left').get_root_widget(),
                 from_window=self._root_widget,)
-            
+
     @contextlib.contextmanager
     def exception_handler(self):
         try:
@@ -2406,7 +2406,7 @@ class NewAllSettingsWindow(bui.Window):
             edit=self._root_widget, transition=self._transition_out
         )
         assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
@@ -2424,7 +2424,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
@@ -2438,7 +2438,7 @@ class NewAllSettingsWindow(bui.Window):
                     origin_widget=self._controllers_button
                 ).get_root_widget(),
                 from_window=self._root_widget,)
-            
+
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
         from bauiv1lib.settings.graphics import GraphicsSettingsWindow
@@ -2446,7 +2446,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
@@ -2468,7 +2468,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
@@ -2490,7 +2490,7 @@ class NewAllSettingsWindow(bui.Window):
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition='out_left')
         assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
@@ -2508,7 +2508,7 @@ class NewAllSettingsWindow(bui.Window):
     def _do_modmanager(self) -> None:
         self._save_state()
         bui.containerwidget(edit=self._root_widget, transition="out_left")
-        if TARGET_BALLISTICA_BUILD < 21697: 
+        if TARGET_BALLISTICA_BUILD < 21697:
             # from_window parameter was added in 1.7.30, see changelogs below
             # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
             # Adding a check here so older builds still work fine.
