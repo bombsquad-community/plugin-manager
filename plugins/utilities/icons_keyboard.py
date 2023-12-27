@@ -37,4 +37,5 @@ class IconKeyboard(babase.Keyboard if hasattr(babase, 'Keyboard') else bauiv1.Ke
 # ba_meta export plugin
 class byFreaku(babase.Plugin):
     def __init__(self):
-        babase.app.meta.scanresults.exports['babase.Keyboard' if hasattr(babase, 'Keyboard') else 'bauiv1.Keyboard'].append(__name__+'.IconKeyboard')
+        babase.app.meta.scanresults.exports['babase.Keyboard' if hasattr(
+            babase, 'Keyboard') else 'bauiv1.Keyboard'].append(__name__+'.IconKeyboard')
