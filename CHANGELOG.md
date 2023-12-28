@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.6 (26-12-2023)
+
+- Fixed plugin manager throwing errors on older builds
+
 ### 1.0.5 (11-12-2023)
 
 - Fix a typo.
