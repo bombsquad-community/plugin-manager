@@ -1375,11 +1375,11 @@ class MainMenuTheme(MainMenuActivity):
                     if TARGET_BALLISTICA_BUILD < 21697:
                         bs.app.ui_v1.set_main_menu_window(
                             KioskWindow().get_root_widget(),
-                    )
+                        )
                     else:
                         bs.app.ui_v1.set_main_menu_window(
-                            KioskWindow().get_root_widget(), from_window = False
-                    )
+                            KioskWindow().get_root_widget(), from_window=False
+                        )
                 # ..or in normal cases go back to the main menu
                 else:
                     if main_menu_location == 'Gather':
@@ -1388,24 +1388,24 @@ class MainMenuTheme(MainMenuActivity):
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            GatherWindow(transition=None).get_root_widget(),
-                        )
+                                GatherWindow(transition=None).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            GatherWindow(transition=None).get_root_widget(), from_window = False
-                        )
+                                GatherWindow(transition=None).get_root_widget(), from_window=False
+                            )
                     elif main_menu_location == 'Watch':
                         # pylint: disable=cyclic-import
                         from bauiv1lib.watch import WatchWindow
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            WatchWindow(transition=None).get_root_widget(),
-                        )
+                                WatchWindow(transition=None).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            WatchWindow(transition=None).get_root_widget(), from_window = False
-                        )
+                                WatchWindow(transition=None).get_root_widget(), from_window=False
+                            )
                     elif main_menu_location == 'Team Game Select':
                         # pylint: disable=cyclic-import
                         from bauiv1lib.playlist.browser import (
@@ -1414,16 +1414,16 @@ class MainMenuTheme(MainMenuActivity):
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            PlaylistBrowserWindow(
-                                sessiontype=bs.DualTeamSession, transition=None
-                            ).get_root_widget(),
-                        )
+                                PlaylistBrowserWindow(
+                                    sessiontype=bs.DualTeamSession, transition=None
+                                ).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            PlaylistBrowserWindow(
-                                sessiontype=bs.DualTeamSession, transition=None
-                            ).get_root_widget(), from_window = False
-                        )
+                                PlaylistBrowserWindow(
+                                    sessiontype=bs.DualTeamSession, transition=None
+                                ).get_root_widget(), from_window=False
+                            )
                     elif main_menu_location == 'Free-for-All Game Select':
                         # pylint: disable=cyclic-import
                         from bauiv1lib.playlist.browser import (
@@ -1432,54 +1432,54 @@ class MainMenuTheme(MainMenuActivity):
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            PlaylistBrowserWindow(
-                                sessiontype=bs.FreeForAllSession,
-                                transition=None,
-                            ).get_root_widget(),
-                        )
+                                PlaylistBrowserWindow(
+                                    sessiontype=bs.FreeForAllSession,
+                                    transition=None,
+                                ).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            PlaylistBrowserWindow(
-                                sessiontype=bs.FreeForAllSession,
-                                transition=None,
-                            ).get_root_widget(), from_window = False
-                        )
+                                PlaylistBrowserWindow(
+                                    sessiontype=bs.FreeForAllSession,
+                                    transition=None,
+                                ).get_root_widget(), from_window=False
+                            )
                     elif main_menu_location == 'Coop Select':
                         # pylint: disable=cyclic-import
                         from bauiv1lib.coop.browser import CoopBrowserWindow
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            CoopBrowserWindow(transition=None).get_root_widget(),
-                        )
+                                CoopBrowserWindow(transition=None).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            CoopBrowserWindow(transition=None).get_root_widget(), from_window = False
-                        )
+                                CoopBrowserWindow(transition=None).get_root_widget(), from_window=False
+                            )
                     elif main_menu_location == 'Benchmarks & Stress Tests':
                         # pylint: disable=cyclic-import
                         from bauiv1lib.debug import DebugWindow
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            DebugWindow(transition=None).get_root_widget(),
-                        )
+                                DebugWindow(transition=None).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            DebugWindow(transition=None).get_root_widget(), from_window = False
-                        )
+                                DebugWindow(transition=None).get_root_widget(), from_window=False
+                            )
                     else:
                         # pylint: disable=cyclic-import
                         from bauiv1lib.mainmenu import MainMenuWindow
 
                         if TARGET_BALLISTICA_BUILD < 21697:
                             bs.app.ui_v1.set_main_menu_window(
-                            MainMenuWindow(transition=None).get_root_widget(),
-                        )
+                                MainMenuWindow(transition=None).get_root_widget(),
+                            )
                         else:
                             bs.app.ui_v1.set_main_menu_window(
-                            MainMenuWindow(transition=None).get_root_widget(), from_window = False
-                        )
+                                MainMenuWindow(transition=None).get_root_widget(), from_window=False
+                            )
 
                 if not specialoffer.show_offer():
 
@@ -2034,7 +2034,7 @@ def new_back(self, save_state: bool = True):
     if TARGET_BALLISTICA_BUILD < 21697:
         bui.app.ui_v1.set_main_menu_window(main_menu_window,)
     else:
-        bui.app.ui_v1.set_main_menu_window(main_menu_window, from_window = False)
+        bui.app.ui_v1.set_main_menu_window(main_menu_window, from_window=False)
 
     current_config = {
         "Menu Map": config["Menu Map"],
