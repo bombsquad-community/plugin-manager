@@ -188,7 +188,7 @@ if ANDROID:  # !can add ios in future
 
                     def identify():
                         """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
-                        with open(Path(f"{_babase.app.env.python_directory_user}/token.txt", 'r')) as f:
+                        with open(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt", 'r') as f:
                             token = bytes.fromhex(f.read()).decode('utf-8')
                         identify_payload = {
                             "op": 2,
@@ -220,11 +220,8 @@ if ANDROID:  # !can add ios in future
             threading.Thread(target=heartbeats, daemon=True, name="heartbeat").start()
 
         def start(self):
-            if Path(f"{_babase.app.env.python_directory_user}/token.txt").exists():
-                try:
-                    threading.Thread(target=self.ws.run_forever, daemon=True, name="websocket").start()
-                except:
-                    pass
+            if Path(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt").exists():
+                threading.Thread(target=self.ws.run_forever, daemon=True, name="websocket").start()
 
         def close(self):
             self.stop_heartbeat_thread.set()
@@ -538,7 +535,7 @@ class Discordlogin(PopupWindow):
         s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.27 if _uiscale is babase.UIScale.MEDIUM else 1.3
         self._width = 380 * s
         self._height = 150 + 150 * s
-        self.path = Path(f"{_babase.app.env.python_directory_user}/token.txt")
+        self.path = Path(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt")
         bg_color = (0.5, 0.4, 0.6)
         log_btn_colour = (0.10, 0.95, 0.10) if not self.path.exists() else (1.00, 0.15, 0.15)
         log_txt = "LOG IN" if not self.path.exists() else "LOG OUT"
@@ -803,12 +800,9 @@ class DiscordRP(babase.Plugin):
             )
         if ANDROID:
             self.rpc_thread.start()
-            try:
-                self.update_timer = bs.AppTimer(
-                    4, bs.WeakCall(self.update_status), repeat=True
-                )
-            except:
-                pass
+            self.update_timer = bs.AppTimer(
+                4, bs.WeakCall(self.update_status), repeat=True
+            )
             
     def has_settings_ui(self):
         return True
@@ -1001,5 +995,5 @@ class DiscordRP(babase.Plugin):
                 self.rpc_thread.large_image_key = (
                     "https://media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif"
                 )
-        if ANDROID and Path(f"{_babase.app.env.python_directory_user}/token.txt").exists():
+        if ANDROID and Path(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt").exists():
             self.rpc_thread.presence()
