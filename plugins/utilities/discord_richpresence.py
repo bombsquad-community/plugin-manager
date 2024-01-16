@@ -370,7 +370,7 @@ def get_event_loop(force_fresh=False):
 
         def _generate_join_secret(self):
             # resp = requests.get('https://legacy.ballistica.net/bsAccessCheck').text
-            connection_info = bs.get_connection_to_host_info()
+            connection_info = bs.get_connection_to_host_info_2()
             if connection_info:
                 addr = _last_server_addr
                 port = _last_server_port
@@ -869,7 +869,7 @@ class DiscordRP(babase.Plugin):
 
     def update_status(self) -> None:
         roster = bs.get_game_roster()
-        connection_info = bs.get_connection_to_host_info()
+        connection_info = bs.get_connection_to_host_info_2()
 
         self.rpc_thread.large_image_key = "bombsquadicon"
         self.rpc_thread.large_image_text = "BombSquad"
@@ -877,14 +877,14 @@ class DiscordRP(babase.Plugin):
         self.rpc_thread.small_image_text = (
             f"{_babase.app.classic.platform.capitalize()}({APP_VERSION})"
         )
-        connection_info = bs.get_connection_to_host_info()
+        connection_info = bs.get_connection_to_host_info_2()
         if not ANDROID:
             svinfo = str(connection_info)
             if self._last_server_info != svinfo:
                 self._last_server_info = svinfo
                 self.rpc_thread.party_id = str(uuid.uuid4())
                 self.rpc_thread._update_secret()
-        if connection_info != {}:
+        if connection_info is not None:
             servername = connection_info["name"]
             self.rpc_thread.details = "Online"
             self.rpc_thread.party_size = max(
