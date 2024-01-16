@@ -928,9 +928,9 @@
       "versions": {
         "1.4.1": {
           "api_version": 8,
-          "commit_sha": "48c8abb",
+          "commit_sha": "b2bdb41",
           "released_on": "08-12-2023",
-          "md5sum": "087728c68fb9505b06beccc9ceb8acbf"
+          "md5sum": "74de6aba3bc7f6562ddfb1168dedc382"
         },
         "1.4.0": {
           "api_version": 8,
