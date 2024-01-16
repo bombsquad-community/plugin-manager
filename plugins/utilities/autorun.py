@@ -1,4 +1,5 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 
 """
     AutoRun by TheMikirog
@@ -18,11 +19,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # Let's import everything we need and nothing more.
-import ba
-import bastd
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import bascenev1lib
 import math
-from ba._generated.enums import TimeType
-from bastd.actor.spaz import Spaz
+from babase._mgen.enums import TimeType
+from bascenev1lib.actor.spaz import Spaz
 
 if TYPE_CHECKING:
     pass
@@ -72,8 +75,7 @@ if TYPE_CHECKING:
 # ba_meta export plugin
 
 
-class AutoRun(ba.Plugin):
-
+class AutoRun(babase.Plugin):
     # During my research and prototyping I figured I'd have to do some linear algebgra.
     # I didn't want to use libraries, since this is supposed to be a standalone mod.
     # Because of this I made certain functions from scratch that are easily accessible.
@@ -109,14 +111,13 @@ class AutoRun(ba.Plugin):
     # Here I'm defining a new spaz init function that'll be replaced.
     def new_init(func):
         def wrapper(*args, **kwargs):
-
             # Here's where we execute the original game's code, so it's not lost.
             # We want to add our code at the end of the existing code, so our code goes under that.
             func(*args, **kwargs)
 
             # We define some variables that we need to keep track of.
             # For future reference, if you see args[0] anywhere, that is "self" in the original function.
-            args[0].autorun_timer: ba.Timer | None = None
+            args[0].autorun_timer: bs.Timer | None = None
             args[0].autorun_override = False
 
             # We wanna do our auto run calculations when the player moves their analog stick to make it responsive.
@@ -140,12 +141,14 @@ class AutoRun(ba.Plugin):
                 # Notice how it's the capital T Timer instead of the small letter.
                 # That's important, because big T returns a timer object we can manipulate.
                 # We need it assigned to a variable, because we have to delete it once it stops being relevant.
-                args[0].autorun_timer = ba.Timer(
-                    0.1, spaz_autorun_update, timetype=TimeType.SIM, repeat=True)
+                args[0].autorun_timer = bs.Timer(0.1, spaz_autorun_update, repeat=True)
 
         return wrapper
+
     # Let's replace the original function with our modified version.
-    bastd.actor.spaz.Spaz.__init__ = new_init(bastd.actor.spaz.Spaz.__init__)
+    bascenev1lib.actor.spaz.Spaz.__init__ = new_init(
+        bascenev1lib.actor.spaz.Spaz.__init__
+    )
 
     # This is the bulk of our mod. Our run_update function.
     # The goal here is to change the self.node.run attribute of our character.
@@ -170,8 +173,10 @@ class AutoRun(ba.Plugin):
         movement_vector = [horizontal, vertical]
 
         # Get our character's facing direction
-        facing_direction = (self.node.position[0] - self.node.position_forward[0],
-                            self.node.position[2] - self.node.position_forward[2])
+        facing_direction = (
+            self.node.position[0] - self.node.position_forward[0],
+            self.node.position[2] - self.node.position_forward[2],
+        )
         # We want our character's facing direction to be a normalized vector (magnitude of 1).
         facing_direction = AutoRun.normalize(facing_direction)
 
@@ -216,9 +221,11 @@ class AutoRun(ba.Plugin):
             args[0].autorun_override = args[1]
             # Here's our original unchanged function
             func(*args, **kwargs)
+
         return wrapper
+
     # We replace the character running function with our modified version.
-    bastd.actor.spaz.Spaz.on_run = new_onrun(bastd.actor.spaz.Spaz.on_run)
+    bascenev1lib.actor.spaz.Spaz.on_run = new_onrun(bascenev1lib.actor.spaz.Spaz.on_run)
 
     # There's two function that are called when our player pushes the analog stick - two for each axis.
     # Here's for the vertical axis.
@@ -229,9 +236,13 @@ class AutoRun(ba.Plugin):
             # If we're not holding the run button and we're a player, run our auto run behavior.
             if not args[0].autorun_override and args[0].source_player:
                 AutoRun.run_update(args[0])
+
         return wrapper
+
     # You get the idea.
-    bastd.actor.spaz.Spaz.on_move_up_down = new_updown(bastd.actor.spaz.Spaz.on_move_up_down)
+    bascenev1lib.actor.spaz.Spaz.on_move_up_down = new_updown(
+        bascenev1lib.actor.spaz.Spaz.on_move_up_down
+    )
 
     # Let's do the same for our horizontal axis.
     # Second verse same as the first.
@@ -240,9 +251,12 @@ class AutoRun(ba.Plugin):
             func(*args, **kwargs)
             if not args[0].autorun_override and args[0].source_player:
                 AutoRun.run_update(args[0])
+
         return wrapper
-    bastd.actor.spaz.Spaz.on_move_left_right = new_leftright(
-        bastd.actor.spaz.Spaz.on_move_left_right)
+
+    bascenev1lib.actor.spaz.Spaz.on_move_left_right = new_leftright(
+        bascenev1lib.actor.spaz.Spaz.on_move_left_right
+    )
 
     # There's one downside to the looping timer - it runs constantly even if the player is dead.
     # We don't want to waste computational power on something like that.
@@ -250,10 +264,14 @@ class AutoRun(ba.Plugin):
     def new_handlemessage(func):
         def wrapper(*args, **kwargs):
             # Only react to the death message.
-            if isinstance(args[1], ba.DieMessage):
+            if isinstance(args[1], bs.DieMessage):
                 # Kill the timer.
                 args[0].autorun_timer = None
             # Original function.
             func(*args, **kwargs)
+
         return wrapper
-    bastd.actor.spaz.Spaz.handlemessage = new_handlemessage(bastd.actor.spaz.Spaz.handlemessage)
+
+    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(
+        bascenev1lib.actor.spaz.Spaz.handlemessage
+    )

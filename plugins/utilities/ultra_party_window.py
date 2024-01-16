@@ -1,7 +1,8 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 __author__ = 'Droopy'
 __version__ = 4.0
 
-# ba_meta require api 7
+# ba_meta require api 8
 import datetime
 import json
 import math
@@ -15,13 +16,17 @@ from threading import Thread
 from typing import List, Tuple, Sequence, Optional, Dict, Any, cast
 from hashlib import md5
 
-import _ba
-import ba
-import bastd.ui.party
-from bastd.ui.colorpicker import ColorPickerExact
-from bastd.ui.confirm import ConfirmWindow
-from bastd.ui.mainmenu import MainMenuWindow
-from bastd.ui.popup import PopupMenuWindow, PopupWindow, PopupMenu
+import _babase
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import bauiv1lib.party
+from bauiv1lib.colorpicker import ColorPickerExact
+from bauiv1lib import mainmenu
+from bauiv1lib.confirm import ConfirmWindow
+from bauiv1lib.mainmenu import MainMenuWindow
+from bauiv1lib.popup import PopupMenuWindow, PopupWindow, PopupMenu
+from baenv import TARGET_BALLISTICA_BUILD as build_number
 
 _ip = '127.0.0.1'
 _port = 43210
@@ -29,7 +34,7 @@ _ping = '-'
 url = 'http://bombsquadprivatechat.ml'
 last_msg = None
 
-my_directory = _ba.env()['python_directory_user'] + '/UltraPartyWindowFiles/'
+my_directory = _babase.env()['python_directory_user'] + '/UltraPartyWindowFiles/'
 quick_msg_file = my_directory + 'QuickMessages.txt'
 cookies_file = my_directory + 'cookies.txt'
 saved_ids_file = my_directory + 'saved_ids.json'
@@ -51,7 +56,7 @@ def initialize():
                        'Translate Destination Language': 'en',
                        'Pronunciation': True
                        }
-    config = ba.app.config
+    config = babase.app.config
     for key in config_defaults:
         if key not in config:
             config[key] = config_defaults[key]
@@ -69,17 +74,17 @@ def initialize():
 
 def display_error(msg=None):
     if msg:
-        ba.screenmessage(msg, (1, 0, 0))
+        bui.screenmessage(msg, (1, 0, 0))
     else:
-        ba.screenmessage('Failed!', (1, 0, 0))
-    ba.playsound(ba.getsound('error'))
+        bui.screenmessage('Failed!', (1, 0, 0))
+    bui.getsound('error').play()
 
 
 def display_success(msg=None):
     if msg:
-        ba.screenmessage(msg, (0, 1, 0))
+        bui.screenmessage(msg, (0, 1, 0))
     else:
-        ba.screenmessage('Successful!', (0, 1, 0))
+        bui.screenmessage('Successful!', (0, 1, 0))
 
 
 class Translate(Thread):
@@ -89,10 +94,10 @@ class Translate(Thread):
         self._callback = callback
 
     def run(self):
-        _ba.pushcall(ba.Call(ba.screenmessage, 'Translating...'), from_other_thread=True)
+        _babase.pushcall(babase.Call(bui.screenmessage, 'Translating...'), from_other_thread=True)
         response = messenger._send_request(f'{url}/translate', self.data)
         if response:
-            _ba.pushcall(ba.Call(self._callback, response), from_other_thread=True)
+            _babase.pushcall(babase.Call(self._callback, response), from_other_thread=True)
 
 
 class ColorTracker:
@@ -103,7 +108,7 @@ class ColorTracker:
         while True:
             color = (random.random(), random.random(), random.random())
             s = 0
-            background = ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
+            background = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
             for i, j in zip(color, background):
                 s += (i - j) ** 2
             if s > 0.1:
@@ -184,7 +189,7 @@ class PrivateChatHandler:
             pickle.dump(cookies, f)
 
     def _cookie_login(self):
-        self.myid = ba.internal.get_v1_account_misc_read_val_2('resolvedAccountID', '')
+        self.myid = bui.app.plus.get_v1_account_misc_read_val_2('resolvedAccountID', '')
         try:
             with open(cookies_file, 'rb') as f:
                 cookies = pickle.load(f)
@@ -202,7 +207,7 @@ class PrivateChatHandler:
                 return True
 
     def _login(self, registration_key):
-        self.myid = ba.internal.get_v1_account_misc_read_val_2('resolvedAccountID', '')
+        self.myid = bui.app.plus.get_v1_account_misc_read_val_2('resolvedAccountID', '')
         data = dict(pb_id=self.myid, registration_key=registration_key)
         response = self._send_request(url=f'{url}/login', data=data)
         if response == 'successful':
@@ -260,8 +265,8 @@ class PrivateChatHandler:
     def _remove_id(self, account_id):
         removed = self.saved_ids.pop(account_id)
         self._dump_ids()
-        ba.screenmessage(f'Removed successfully: {removed}({account_id})', (0, 1, 0))
-        ba.playsound(ba.getsound('shieldDown'))
+        bui.screenmessage(f'Removed successfully: {removed}({account_id})', (0, 1, 0))
+        bui.getsound('shieldDown').play()
 
     def _format_message(self, msg):
         filter = msg['filter']
@@ -284,7 +289,7 @@ class PrivateChatHandler:
         else:
             last_seen = info["last_seen"]
             last_seen = _get_local_time(last_seen)
-            ba.screenmessage(f'Last seen on: {last_seen}')
+            bui.screenmessage(f'Last seen on: {last_seen}')
 
 
 def _get_local_time(utctime):
@@ -296,8 +301,8 @@ def _get_local_time(utctime):
 
 def update_status():
     if messenger.logged_in:
-        if ba.app.config['Self Status'] == 'online':
-            host = _ba.get_connection_to_host_info().get('name', '')
+        if babase.app.config['Self Status'] == 'online':
+            host = bs.get_connection_to_host_info().get('name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().get('name', '')
             if host:
                 my_status = f'Playing in {host}'
             else:
@@ -357,45 +362,45 @@ def check_new_message():
 
 def display_message(msg, msg_type, filter=None, sent=None):
     flag = None
-    notification = ba.app.config['Message Notification']
-    if _ba.app.ui.party_window:
-        if _ba.app.ui.party_window():
-            if _ba.app.ui.party_window()._private_chat:
+    notification = babase.app.config['Message Notification']
+    if bui.app.ui_v1.party_window:
+        if bui.app.ui_v1.party_window():
+            if bui.app.ui_v1.party_window()._private_chat:
                 flag = 1
                 if msg_type == 'private':
                     if messenger.filter == filter or messenger.filter == 'all':
-                        _ba.app.ui.party_window().on_chat_message(msg, sent)
+                        bui.app.ui_v1.party_window().on_chat_message(msg, sent)
                     else:
                         if notification == 'top':
-                            ba.screenmessage(msg, (1, 1, 0), True, ba.gettexture('coin'))
+                            bui.screenmessage(msg, (1, 1, 0), True, bui.gettexture('coin'))
                         else:
-                            ba.screenmessage(msg, (1, 1, 0), False)
+                            bui.screenmessage(msg, (1, 1, 0), False)
                 else:
-                    ba.screenmessage(msg, (0.2, 1.0, 1.0), True, ba.gettexture('circleShadow'))
+                    bui.screenmessage(msg, (0.2, 1.0, 1.0), True, bui.gettexture('circleShadow'))
             else:
                 flag = 1
                 if msg_type == 'private':
                     if notification == 'top':
-                        ba.screenmessage(msg, (1, 1, 0), True, ba.gettexture('coin'))
+                        bui.screenmessage(msg, (1, 1, 0), True, bui.gettexture('coin'))
                     else:
-                        ba.screenmessage(msg, (1, 1, 0), False)
+                        bui.screenmessage(msg, (1, 1, 0), False)
     if not flag:
         if msg_type == 'private':
             if notification == 'top':
-                ba.screenmessage(msg, (1, 1, 0), True, ba.gettexture('coin'))
+                bui.screenmessage(msg, (1, 1, 0), True, bui.gettexture('coin'))
             else:
-                ba.screenmessage(msg, (1, 1, 0), False)
+                bui.screenmessage(msg, (1, 1, 0), False)
         else:
-            ba.screenmessage(msg, (0.2, 1.0, 1.0), True, ba.gettexture('circleShadow'))
+            bui.screenmessage(msg, (0.2, 1.0, 1.0), True, bui.gettexture('circleShadow'))
 
 
 def msg_displayer():
     for msg in messenger.pending_messages:
         display_message(msg[0], 'private', msg[1], msg[2])
         messenger.pending_messages.remove(msg)
-    if ba.app.config['Chat Muted'] and not ba.app.config['Party Chat Muted']:
+    if babase.app.config['Chat Muted'] and not babase.app.config['Party Chat Muted']:
         global last_msg
-        last = _ba.get_chat_messages()
+        last = bs.get_chat_messages()
         lm = last[-1] if last else None
         if lm != last_msg:
             last_msg = lm
@@ -404,45 +409,45 @@ def msg_displayer():
 
 class SortQuickMessages:
     def __init__(self):
-        uiscale = ba.app.ui.uiscale
-        bg_color = ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
-        self._width = 750 if uiscale is ba.UIScale.SMALL else 600
-        self._height = (300 if uiscale is ba.UIScale.SMALL else
-                        325 if uiscale is ba.UIScale.MEDIUM else 350)
-        self._root_widget = ba.containerwidget(
+        uiscale = bui.app.ui_v1.uiscale
+        bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
+        self._width = 750 if uiscale is babase.UIScale.SMALL else 600
+        self._height = (300 if uiscale is babase.UIScale.SMALL else
+                        325 if uiscale is babase.UIScale.MEDIUM else 350)
+        self._root_widget = bui.containerwidget(
             size=(self._width, self._height),
             transition='in_right',
             on_outside_click_call=self._save,
             color=bg_color,
-            parent=_ba.get_special_widget('overlay_stack'),
-            scale=(2.0 if uiscale is ba.UIScale.SMALL else
-                   1.3 if uiscale is ba.UIScale.MEDIUM else 1.0),
-            stack_offset=(0, -16) if uiscale is ba.UIScale.SMALL else (0, 0))
-        ba.textwidget(parent=self._root_widget,
+            parent=bui.get_special_widget('overlay_stack'),
+            scale=(2.0 if uiscale is babase.UIScale.SMALL else
+                   1.3 if uiscale is babase.UIScale.MEDIUM else 1.0),
+            stack_offset=(0, -16) if uiscale is babase.UIScale.SMALL else (0, 0))
+        bui.textwidget(parent=self._root_widget,
                       position=(-10, self._height - 50),
                       size=(self._width, 25),
                       text='Sort Quick Messages',
-                      color=ba.app.ui.title_color,
+                      color=bui.app.ui_v1.title_color,
                       scale=1.05,
                       h_align='center',
                       v_align='center',
                       maxwidth=270)
         b_textcolor = (0.4, 0.75, 0.5)
-        up_button = ba.buttonwidget(parent=self._root_widget,
+        up_button = bui.buttonwidget(parent=self._root_widget,
                                     position=(10, 170),
                                     size=(75, 75),
                                     on_activate_call=self._move_up,
-                                    label=ba.charstr(ba.SpecialChar.UP_ARROW),
+                                    label=babase.charstr(babase.SpecialChar.UP_ARROW),
                                     button_type='square',
                                     color=bg_color,
                                     textcolor=b_textcolor,
                                     autoselect=True,
                                     repeat=True)
-        down_button = ba.buttonwidget(parent=self._root_widget,
+        down_button = bui.buttonwidget(parent=self._root_widget,
                                       position=(10, 75),
                                       size=(75, 75),
                                       on_activate_call=self._move_down,
-                                      label=ba.charstr(ba.SpecialChar.DOWN_ARROW),
+                                      label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
                                       button_type='square',
                                       color=bg_color,
                                       textcolor=b_textcolor,
@@ -450,12 +455,12 @@ class SortQuickMessages:
                                       repeat=True)
         self._scroll_width = self._width - 150
         self._scroll_height = self._height - 110
-        self._scrollwidget = ba.scrollwidget(
+        self._scrollwidget = bui.scrollwidget(
             parent=self._root_widget,
             size=(self._scroll_width, self._scroll_height),
             color=bg_color,
             position=(100, 40))
-        self._columnwidget = ba.columnwidget(
+        self._columnwidget = bui.columnwidget(
             parent=self._scrollwidget,
             border=2,
             margin=0)
@@ -463,25 +468,25 @@ class SortQuickMessages:
             self.msgs = f.read().split('\n')
         self._msg_selected = None
         self._refresh()
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._save)
 
     def _refresh(self):
         for child in self._columnwidget.get_children():
             child.delete()
         for msg in enumerate(self.msgs):
-            txt = ba.textwidget(
+            txt = bui.textwidget(
                 parent=self._columnwidget,
                 size=(self._scroll_width - 10, 30),
                 selectable=True,
                 always_highlight=True,
-                on_select_call=ba.Call(self._on_msg_select, msg),
+                on_select_call=babase.Call(self._on_msg_select, msg),
                 text=msg[1],
                 h_align='left',
                 v_align='center',
                 maxwidth=self._scroll_width)
             if msg == self._msg_selected:
-                ba.columnwidget(edit=self._columnwidget,
+                bui.columnwidget(edit=self._columnwidget,
                                 selected_child=txt,
                                 visible_child=txt)
 
@@ -509,20 +514,20 @@ class SortQuickMessages:
             with open(quick_msg_file, 'w') as f:
                 f.write('\n'.join(self.msgs))
         except:
-            ba.print_exception()
-            ba.screenmessage('Error!', (1, 0, 0))
-        ba.containerwidget(
+            babase.print_exception()
+            bui.screenmessage('Error!', (1, 0, 0))
+        bui.containerwidget(
             edit=self._root_widget,
             transition='out_right')
 
 
 class TranslationSettings:
     def __init__(self):
-        uiscale = ba.app.ui.uiscale
-        height = (300 if uiscale is ba.UIScale.SMALL else
-                  350 if uiscale is ba.UIScale.MEDIUM else 400)
-        width = (500 if uiscale is ba.UIScale.SMALL else
-                 600 if uiscale is ba.UIScale.MEDIUM else 650)
+        uiscale = bui.app.ui_v1.uiscale
+        height = (300 if uiscale is babase.UIScale.SMALL else
+                  350 if uiscale is babase.UIScale.MEDIUM else 400)
+        width = (500 if uiscale is babase.UIScale.SMALL else
+                 600 if uiscale is babase.UIScale.MEDIUM else 650)
         self._transition_out: Optional[str]
         scale_origin: Optional[Tuple[float, float]]
         self._transition_out = 'out_scale'
@@ -530,7 +535,7 @@ class TranslationSettings:
         transition = 'in_scale'
         scale_origin = None
         cancel_is_selected = False
-        cfg = ba.app.config
+        cfg = babase.app.config
         bg_color = cfg.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
 
         LANGUAGES = {
@@ -643,17 +648,17 @@ class TranslationSettings:
             'yo': 'yoruba',
             'zu': 'zulu'}
 
-        self.root_widget = ba.containerwidget(
+        self.root_widget = bui.containerwidget(
             size=(width, height),
             color=bg_color,
             transition=transition,
             toolbar_visibility='menu_minimal_no_back',
-            parent=_ba.get_special_widget('overlay_stack'),
+            parent=bui.get_special_widget('overlay_stack'),
             on_outside_click_call=self._cancel,
-            scale=(2.1 if uiscale is ba.UIScale.SMALL else
-                   1.5 if uiscale is ba.UIScale.MEDIUM else 1.0),
+            scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                   1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=scale_origin)
-        ba.textwidget(parent=self.root_widget,
+        bui.textwidget(parent=self.root_widget,
                       position=(width * 0.5, height - 45),
                       size=(20, 20),
                       h_align='center',
@@ -661,15 +666,15 @@ class TranslationSettings:
                       text="Text Translation",
                       scale=0.9,
                       color=(5, 5, 5))
-        cbtn = btn = ba.buttonwidget(parent=self.root_widget,
+        cbtn = btn = bui.buttonwidget(parent=self.root_widget,
                                      autoselect=True,
                                      position=(30, height - 60),
                                      size=(30, 30),
-                                     label=ba.charstr(ba.SpecialChar.BACK),
+                                     label=babase.charstr(babase.SpecialChar.BACK),
                                      button_type='backSmall',
                                      on_activate_call=self._cancel)
 
-        source_lang_text = ba.textwidget(parent=self.root_widget,
+        source_lang_text = bui.textwidget(parent=self.root_widget,
                                          position=(40, height - 110),
                                          size=(20, 20),
                                          h_align='left',
@@ -680,17 +685,17 @@ class TranslationSettings:
 
         source_lang_menu = PopupMenu(
             parent=self.root_widget,
-            position=(330 if uiscale is ba.UIScale.SMALL else 400, height - 115),
+            position=(330 if uiscale is babase.UIScale.SMALL else 400, height - 115),
             width=200,
-            scale=(2.8 if uiscale is ba.UIScale.SMALL else
-                   1.8 if uiscale is ba.UIScale.MEDIUM else 1.2),
+            scale=(2.8 if uiscale is babase.UIScale.SMALL else
+                   1.8 if uiscale is babase.UIScale.MEDIUM else 1.2),
             current_choice=cfg['Translate Source Language'],
             choices=LANGUAGES.keys(),
-            choices_display=(ba.Lstr(value=i) for i in LANGUAGES.values()),
+            choices_display=(babase.Lstr(value=i) for i in LANGUAGES.values()),
             button_size=(130, 35),
             on_value_change_call=self._change_source)
 
-        destination_lang_text = ba.textwidget(parent=self.root_widget,
+        destination_lang_text = bui.textwidget(parent=self.root_widget,
                                               position=(40, height - 165),
                                               size=(20, 20),
                                               h_align='left',
@@ -701,19 +706,19 @@ class TranslationSettings:
 
         destination_lang_menu = PopupMenu(
             parent=self.root_widget,
-            position=(330 if uiscale is ba.UIScale.SMALL else 400, height - 170),
+            position=(330 if uiscale is babase.UIScale.SMALL else 400, height - 170),
             width=200,
-            scale=(2.8 if uiscale is ba.UIScale.SMALL else
-                   1.8 if uiscale is ba.UIScale.MEDIUM else 1.2),
+            scale=(2.8 if uiscale is babase.UIScale.SMALL else
+                   1.8 if uiscale is babase.UIScale.MEDIUM else 1.2),
             current_choice=cfg['Translate Destination Language'],
             choices=list(LANGUAGES.keys())[1:],
-            choices_display=list(ba.Lstr(value=i) for i in LANGUAGES.values())[1:],
+            choices_display=list(babase.Lstr(value=i) for i in LANGUAGES.values())[1:],
             button_size=(130, 35),
             on_value_change_call=self._change_destination)
 
         try:
 
-            translation_mode_text = ba.textwidget(parent=self.root_widget,
+            translation_mode_text = bui.textwidget(parent=self.root_widget,
                                                   position=(40, height - 215),
                                                   size=(20, 20),
                                                   h_align='left',
@@ -721,7 +726,7 @@ class TranslationSettings:
                                                   text="Translate Mode",
                                                   scale=0.9,
                                                   color=(1, 1, 1))
-            decoration = ba.textwidget(parent=self.root_widget,
+            decoration = bui.textwidget(parent=self.root_widget,
                                        position=(40, height - 225),
                                        size=(20, 20),
                                        h_align='left',
@@ -730,7 +735,7 @@ class TranslationSettings:
                                        scale=0.9,
                                        color=(1, 1, 1))
 
-            language_char_text = ba.textwidget(parent=self.root_widget,
+            language_char_text = bui.textwidget(parent=self.root_widget,
                                                position=(85, height - 273),
                                                size=(20, 20),
                                                h_align='left',
@@ -739,7 +744,7 @@ class TranslationSettings:
                                                scale=0.6,
                                                color=(1, 1, 1))
 
-            pronunciation_text = ba.textwidget(parent=self.root_widget,
+            pronunciation_text = bui.textwidget(parent=self.root_widget,
                                                position=(295, height - 273),
                                                size=(20, 20),
                                                h_align='left',
@@ -748,9 +753,9 @@ class TranslationSettings:
                                                scale=0.6,
                                                color=(1, 1, 1))
 
-            from bastd.ui.radiogroup import make_radio_group
-            cur_val = ba.app.config.get('Pronunciation', True)
-            cb1 = ba.checkboxwidget(
+            from bauiv1lib.radiogroup import make_radio_group
+            cur_val = babase.app.config.get('Pronunciation', True)
+            cb1 = bui.checkboxwidget(
                 parent=self.root_widget,
                 position=(250, height - 275),
                 size=(20, 20),
@@ -758,7 +763,7 @@ class TranslationSettings:
                 scale=1,
                 autoselect=True,
                 text="")
-            cb2 = ba.checkboxwidget(
+            cb2 = bui.checkboxwidget(
                 parent=self.root_widget,
                 position=(40, height - 275),
                 size=(20, 20),
@@ -772,40 +777,40 @@ class TranslationSettings:
             print(e)
             pass
 
-        ba.containerwidget(edit=self.root_widget, cancel_button=btn)
+        bui.containerwidget(edit=self.root_widget, cancel_button=btn)
 
     def _change_source(self, choice):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Translate Source Language'] = choice
         cfg.apply_and_commit()
 
     def _change_destination(self, choice):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Translate Destination Language'] = choice
         cfg.apply_and_commit()
 
     def _actions_changed(self, v: str) -> None:
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Pronunciation'] = v
         cfg.apply_and_commit()
 
     def _cancel(self) -> None:
-        ba.containerwidget(edit=self.root_widget, transition='out_scale')
+        bui.containerwidget(edit=self.root_widget, transition='out_scale')
         SettingsWindow()
 
 
 class SettingsWindow:
 
     def __init__(self):
-        uiscale = ba.app.ui.uiscale
-        height = (300 if uiscale is ba.UIScale.SMALL else
-                  350 if uiscale is ba.UIScale.MEDIUM else 400)
-        width = (500 if uiscale is ba.UIScale.SMALL else
-                 600 if uiscale is ba.UIScale.MEDIUM else 650)
-        scroll_h = (200 if uiscale is ba.UIScale.SMALL else
-                    250 if uiscale is ba.UIScale.MEDIUM else 270)
-        scroll_w = (450 if uiscale is ba.UIScale.SMALL else
-                    550 if uiscale is ba.UIScale.MEDIUM else 600)
+        uiscale = bui.app.ui_v1.uiscale
+        height = (300 if uiscale is babase.UIScale.SMALL else
+                  350 if uiscale is babase.UIScale.MEDIUM else 400)
+        width = (500 if uiscale is babase.UIScale.SMALL else
+                 600 if uiscale is babase.UIScale.MEDIUM else 650)
+        scroll_h = (200 if uiscale is babase.UIScale.SMALL else
+                    250 if uiscale is babase.UIScale.MEDIUM else 270)
+        scroll_w = (450 if uiscale is babase.UIScale.SMALL else
+                    550 if uiscale is babase.UIScale.MEDIUM else 600)
         self._transition_out: Optional[str]
         scale_origin: Optional[Tuple[float, float]]
         self._transition_out = 'out_scale'
@@ -813,20 +818,20 @@ class SettingsWindow:
         transition = 'in_scale'
         scale_origin = None
         cancel_is_selected = False
-        cfg = ba.app.config
+        cfg = babase.app.config
         bg_color = cfg.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
 
-        self.root_widget = ba.containerwidget(
+        self.root_widget = bui.containerwidget(
             size=(width, height),
             color=bg_color,
             transition=transition,
             toolbar_visibility='menu_minimal_no_back',
-            parent=_ba.get_special_widget('overlay_stack'),
+            parent=bui.get_special_widget('overlay_stack'),
             on_outside_click_call=self._cancel,
-            scale=(2.1 if uiscale is ba.UIScale.SMALL else
-                   1.5 if uiscale is ba.UIScale.MEDIUM else 1.0),
+            scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                   1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=scale_origin)
-        ba.textwidget(parent=self.root_widget,
+        bui.textwidget(parent=self.root_widget,
                       position=(width * 0.5, height - 45),
                       size=(20, 20),
                       h_align='center',
@@ -834,25 +839,25 @@ class SettingsWindow:
                       text="Custom Settings",
                       scale=0.9,
                       color=(5, 5, 5))
-        cbtn = btn = ba.buttonwidget(parent=self.root_widget,
+        cbtn = btn = bui.buttonwidget(parent=self.root_widget,
                                      autoselect=True,
                                      position=(30, height - 60),
                                      size=(30, 30),
-                                     label=ba.charstr(ba.SpecialChar.BACK),
+                                     label=babase.charstr(babase.SpecialChar.BACK),
                                      button_type='backSmall',
                                      on_activate_call=self._cancel)
-        scroll_position = (30 if uiscale is ba.UIScale.SMALL else
-                           40 if uiscale is ba.UIScale.MEDIUM else 50)
-        self._scrollwidget = ba.scrollwidget(parent=self.root_widget,
+        scroll_position = (30 if uiscale is babase.UIScale.SMALL else
+                           40 if uiscale is babase.UIScale.MEDIUM else 50)
+        self._scrollwidget = bui.scrollwidget(parent=self.root_widget,
                                              position=(30, scroll_position),
                                              simple_culling_v=20.0,
                                              highlight=False,
                                              size=(scroll_w, scroll_h),
                                              selection_loops_to_parent=True)
-        ba.widget(edit=self._scrollwidget, right_widget=self._scrollwidget)
-        self._subcontainer = ba.columnwidget(parent=self._scrollwidget,
+        bui.widget(edit=self._scrollwidget, right_widget=self._scrollwidget)
+        self._subcontainer = bui.columnwidget(parent=self._scrollwidget,
                                              selection_loops_to_parent=True)
-        ip_button = ba.checkboxwidget(
+        ip_button = bui.checkboxwidget(
             parent=self._subcontainer,
             size=(300, 30),
             maxwidth=300,
@@ -862,7 +867,7 @@ class SettingsWindow:
             autoselect=True,
             text="IP Button",
             on_value_change_call=self.ip_button)
-        ping_button = ba.checkboxwidget(
+        ping_button = bui.checkboxwidget(
             parent=self._subcontainer,
             size=(300, 30),
             maxwidth=300,
@@ -872,7 +877,7 @@ class SettingsWindow:
             autoselect=True,
             text="Ping Button",
             on_value_change_call=self.ping_button)
-        copy_button = ba.checkboxwidget(
+        copy_button = bui.checkboxwidget(
             parent=self._subcontainer,
             size=(300, 30),
             maxwidth=300,
@@ -882,7 +887,7 @@ class SettingsWindow:
             autoselect=True,
             text="Copy Text Button",
             on_value_change_call=self.copy_button)
-        direct_send = ba.checkboxwidget(
+        direct_send = bui.checkboxwidget(
             parent=self._subcontainer,
             size=(300, 30),
             maxwidth=300,
@@ -892,7 +897,7 @@ class SettingsWindow:
             autoselect=True,
             text="Directly Send Custom Commands",
             on_value_change_call=self.direct_send)
-        colorfulchat = ba.checkboxwidget(
+        colorfulchat = bui.checkboxwidget(
             parent=self._subcontainer,
             size=(300, 30),
             maxwidth=300,
@@ -902,7 +907,7 @@ class SettingsWindow:
             autoselect=True,
             text="Colorful Chat",
             on_value_change_call=self.colorful_chat)
-        msg_notification_text = ba.textwidget(parent=self._subcontainer,
+        msg_notification_text = bui.textwidget(parent=self._subcontainer,
                                               scale=0.8,
                                               color=(1, 1, 1),
                                               text='Message Notifcation:',
@@ -913,13 +918,13 @@ class SettingsWindow:
             parent=self._subcontainer,
             position=(100, height - 1200),
             width=200,
-            scale=(2.8 if uiscale is ba.UIScale.SMALL else
-                   1.8 if uiscale is ba.UIScale.MEDIUM else 1.2),
+            scale=(2.8 if uiscale is babase.UIScale.SMALL else
+                   1.8 if uiscale is babase.UIScale.MEDIUM else 1.2),
             choices=['top', 'bottom'],
-            current_choice=ba.app.config['Message Notification'],
+            current_choice=babase.app.config['Message Notification'],
             button_size=(80, 25),
             on_value_change_call=self._change_notification)
-        self_status_text = ba.textwidget(parent=self._subcontainer,
+        self_status_text = bui.textwidget(parent=self._subcontainer,
                                          scale=0.8,
                                          color=(1, 1, 1),
                                          text='Self Status:',
@@ -930,19 +935,19 @@ class SettingsWindow:
             parent=self._subcontainer,
             position=(50, height - 1000),
             width=200,
-            scale=(2.8 if uiscale is ba.UIScale.SMALL else
-                   1.8 if uiscale is ba.UIScale.MEDIUM else 1.2),
+            scale=(2.8 if uiscale is babase.UIScale.SMALL else
+                   1.8 if uiscale is babase.UIScale.MEDIUM else 1.2),
             choices=['online', 'offline'],
-            current_choice=ba.app.config['Self Status'],
+            current_choice=babase.app.config['Self Status'],
             button_size=(80, 25),
             on_value_change_call=self._change_status)
-        ba.containerwidget(edit=self.root_widget, cancel_button=btn)
-        ba.containerwidget(edit=self.root_widget,
+        bui.containerwidget(edit=self.root_widget, cancel_button=btn)
+        bui.containerwidget(edit=self.root_widget,
                            selected_child=(cbtn if cbtn is not None
                                            and cancel_is_selected else None),
                            start_button=None)
 
-        self._translation_btn = ba.buttonwidget(parent=self._subcontainer,
+        self._translation_btn = bui.buttonwidget(parent=self._subcontainer,
                                                 scale=1.2,
                                                 position=(100, 1200),
                                                 size=(150, 50),
@@ -951,99 +956,99 @@ class SettingsWindow:
                                                 autoselect=True)
 
     def ip_button(self, value: bool):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['IP button'] = value
         cfg.apply_and_commit()
         if cfg['IP button']:
-            ba.screenmessage("IP Button is now enabled", color=(0, 1, 0))
+            bui.screenmessage("IP Button is now enabled", color=(0, 1, 0))
         else:
-            ba.screenmessage("IP Button is now disabled", color=(1, 0.7, 0))
+            bui.screenmessage("IP Button is now disabled", color=(1, 0.7, 0))
 
     def ping_button(self, value: bool):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['ping button'] = value
         cfg.apply_and_commit()
         if cfg['ping button']:
-            ba.screenmessage("Ping Button is now enabled", color=(0, 1, 0))
+            bui.screenmessage("Ping Button is now enabled", color=(0, 1, 0))
         else:
-            ba.screenmessage("Ping Button is now disabled", color=(1, 0.7, 0))
+            bui.screenmessage("Ping Button is now disabled", color=(1, 0.7, 0))
 
     def copy_button(self, value: bool):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['copy button'] = value
         cfg.apply_and_commit()
         if cfg['copy button']:
-            ba.screenmessage("Copy Text Button is now enabled", color=(0, 1, 0))
+            bui.screenmessage("Copy Text Button is now enabled", color=(0, 1, 0))
         else:
-            ba.screenmessage("Copy Text Button is now disabled", color=(1, 0.7, 0))
+            bui.screenmessage("Copy Text Button is now disabled", color=(1, 0.7, 0))
 
     def direct_send(self, value: bool):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Direct Send'] = value
         cfg.apply_and_commit()
 
     def colorful_chat(self, value: bool):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Colorful Chat'] = value
         cfg.apply_and_commit()
 
     def _change_notification(self, choice):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Message Notification'] = choice
         cfg.apply_and_commit()
 
     def _change_status(self, choice):
-        cfg = ba.app.config
+        cfg = babase.app.config
         cfg['Self Status'] = choice
         cfg.apply_and_commit()
 
     def _translaton_btn(self):
         try:
-            ba.containerwidget(edit=self.root_widget, transition='out_scale')
+            bui.containerwidget(edit=self.root_widget, transition='out_scale')
             TranslationSettings()
         except Exception as e:
             print(e)
             pass
 
     def _cancel(self) -> None:
-        ba.containerwidget(edit=self.root_widget, transition='out_scale')
+        bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
 
-class PartyWindow(ba.Window):
+class PartyWindow(bui.Window):
     """Party list/chat window."""
 
     def __del__(self) -> None:
-        _ba.set_party_window_open(False)
+        bui.set_party_window_open(False)
 
     def __init__(self, origin: Sequence[float] = (0, 0)):
         self._private_chat = False
         self._firstcall = True
         self.ping_server()
-        _ba.set_party_window_open(True)
+        bui.set_party_window_open(True)
         self._r = 'partyWindow'
         self._popup_type: Optional[str] = None
         self._popup_party_member_client_id: Optional[int] = None
         self._popup_party_member_is_host: Optional[bool] = None
         self._width = 500
-        uiscale = ba.app.ui.uiscale
-        self._height = (365 if uiscale is ba.UIScale.SMALL else
-                        480 if uiscale is ba.UIScale.MEDIUM else 600)
-        self.bg_color = ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
-        self.ping_timer = ba.Timer(5, ba.WeakCall(self.ping_server), repeat=True)
+        uiscale = bui.app.ui_v1.uiscale
+        self._height = (365 if uiscale is babase.UIScale.SMALL else
+                        480 if uiscale is babase.UIScale.MEDIUM else 600)
+        self.bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
+        self.ping_timer = bs.apptimer(5, bs.WeakCall(self.ping_server))
 
-        ba.Window.__init__(self, root_widget=ba.containerwidget(
+        bui.Window.__init__(self, root_widget=bui.containerwidget(
             size=(self._width, self._height),
             transition='in_scale',
             color=self.bg_color,
-            parent=_ba.get_special_widget('overlay_stack'),
+            parent=bui.get_special_widget('overlay_stack'),
             on_outside_click_call=self.close_with_sound,
             scale_origin_stack_offset=origin,
-            scale=(2.0 if uiscale is ba.UIScale.SMALL else
-                   1.35 if uiscale is ba.UIScale.MEDIUM else 1.0),
-            stack_offset=(0, -10) if uiscale is ba.UIScale.SMALL else (
-                240, 0) if uiscale is ba.UIScale.MEDIUM else (330, 20)))
+            scale=(2.0 if uiscale is babase.UIScale.SMALL else
+                   1.35 if uiscale is babase.UIScale.MEDIUM else 1.0),
+            stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+                240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20)))
 
-        self._cancel_button = ba.buttonwidget(parent=self._root_widget,
+        self._cancel_button = bui.buttonwidget(parent=self._root_widget,
                                               scale=0.7,
                                               position=(30, self._height - 47),
                                               size=(50, 50),
@@ -1051,12 +1056,12 @@ class PartyWindow(ba.Window):
                                               on_activate_call=self.close,
                                               autoselect=True,
                                               color=self.bg_color,
-                                              icon=ba.gettexture('crossOut'),
+                                              icon=bui.gettexture('crossOut'),
                                               iconscale=1.2)
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            cancel_button=self._cancel_button)
 
-        self._menu_button = ba.buttonwidget(
+        self._menu_button = bui.buttonwidget(
             parent=self._root_widget,
             scale=0.7,
             position=(self._width - 80, self._height - 47),
@@ -1064,17 +1069,17 @@ class PartyWindow(ba.Window):
             label='...',
             autoselect=True,
             button_type='square',
-            on_activate_call=ba.WeakCall(self._on_menu_button_press),
+            on_activate_call=bs.WeakCall(self._on_menu_button_press),
             color=self.bg_color,
             iconscale=1.2)
-
-        info = _ba.get_connection_to_host_info()
-        if info.get('name', '') != '':
-            self.title = ba.Lstr(value=info['name'])
-        else:
-            self.title = ba.Lstr(resource=self._r + '.titleText')
-
-        self._title_text = ba.textwidget(parent=self._root_widget,
+        try:
+            info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+            if info != '':
+                self.title = babase.Lstr(value=info['name']) if build_number < 21697 else babase.Lstr(value=info)
+        except AttributeError:
+            self.title = babase.Lstr(resource=self._r + '.titleText')
+        
+        self._title_text = bui.textwidget(parent=self._root_widget,
                                          scale=0.9,
                                          color=(0.5, 0.7, 0.5),
                                          text=self.title,
@@ -1084,7 +1089,7 @@ class PartyWindow(ba.Window):
                                          maxwidth=self._width * 0.6,
                                          h_align='center',
                                          v_align='center')
-        self._empty_str = ba.textwidget(parent=self._root_widget,
+        self._empty_str = bui.textwidget(parent=self._root_widget,
                                         scale=0.75,
                                         size=(0, 0),
                                         position=(self._width * 0.5,
@@ -1094,25 +1099,25 @@ class PartyWindow(ba.Window):
                                         v_align='center')
 
         self._scroll_width = self._width - 50
-        self._scrollwidget = ba.scrollwidget(parent=self._root_widget,
+        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
                                              size=(self._scroll_width,
                                                    self._height - 200),
                                              position=(30, 80),
                                              color=self.bg_color)
-        self._columnwidget = ba.columnwidget(parent=self._scrollwidget,
+        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
                                              border=2,
                                              margin=0)
-        ba.widget(edit=self._menu_button, down_widget=self._columnwidget)
+        bui.widget(edit=self._menu_button, down_widget=self._columnwidget)
 
-        self._muted_text = ba.textwidget(
+        self._muted_text = bui.textwidget(
             parent=self._root_widget,
             position=(self._width * 0.5, self._height * 0.5),
             size=(0, 0),
             h_align='center',
             v_align='center',
-            text=ba.Lstr(resource='chatMutedText'))
+            text=babase.Lstr(resource='chatMutedText'))
 
-        self._text_field = txt = ba.textwidget(
+        self._text_field = txt = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(500, 40),
@@ -1121,49 +1126,49 @@ class PartyWindow(ba.Window):
             maxwidth=494,
             shadow=0.3,
             flatness=1.0,
-            description=ba.Lstr(resource=self._r + '.chatMessageText'),
+            description=babase.Lstr(resource=self._r + '.chatMessageText'),
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
 
-        ba.widget(edit=self._scrollwidget,
+        bui.widget(edit=self._scrollwidget,
                   autoselect=True,
                   left_widget=self._cancel_button,
                   up_widget=self._cancel_button,
                   down_widget=self._text_field)
-        ba.widget(edit=self._columnwidget,
+        bui.widget(edit=self._columnwidget,
                   autoselect=True,
                   up_widget=self._cancel_button,
                   down_widget=self._text_field)
-        ba.containerwidget(edit=self._root_widget, selected_child=txt)
-        self._send_button = btn = ba.buttonwidget(parent=self._root_widget,
+        bui.containerwidget(edit=self._root_widget, selected_child=txt)
+        self._send_button = btn = bui.buttonwidget(parent=self._root_widget,
                                                   size=(50, 35),
-                                                  label=ba.Lstr(resource=self._r + '.sendText'),
+                                                  label=babase.Lstr(resource=self._r + '.sendText'),
                                                   button_type='square',
                                                   autoselect=True,
                                                   color=self.bg_color,
                                                   position=(self._width - 90, 35),
                                                   on_activate_call=self._send_chat_message)
-        ba.textwidget(edit=txt, on_return_press_call=btn.activate)
-        self._previous_button = ba.buttonwidget(parent=self._root_widget,
+        bui.textwidget(edit=txt, on_return_press_call=btn.activate)
+        self._previous_button = bui.buttonwidget(parent=self._root_widget,
                                                 size=(30, 30),
-                                                label=ba.charstr(ba.SpecialChar.UP_ARROW),
+                                                label=babase.charstr(babase.SpecialChar.UP_ARROW),
                                                 button_type='square',
                                                 autoselect=True,
                                                 position=(15, 57),
                                                 color=self.bg_color,
                                                 scale=0.75,
                                                 on_activate_call=self._previous_message)
-        self._next_button = ba.buttonwidget(parent=self._root_widget,
+        self._next_button = bui.buttonwidget(parent=self._root_widget,
                                             size=(30, 30),
-                                            label=ba.charstr(ba.SpecialChar.DOWN_ARROW),
+                                            label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
                                             button_type='square',
                                             autoselect=True,
                                             color=self.bg_color,
                                             scale=0.75,
                                             position=(15, 28),
                                             on_activate_call=self._next_message)
-        self._translate_button = ba.buttonwidget(parent=self._root_widget,
+        self._translate_button = bui.buttonwidget(parent=self._root_widget,
                                                  size=(55, 47),
                                                  label="Trans",
                                                  button_type='square',
@@ -1172,8 +1177,8 @@ class PartyWindow(ba.Window):
                                                  scale=0.75,
                                                  position=(self._width - 28, 35),
                                                  on_activate_call=self._translate)
-        if ba.app.config['copy button']:
-            self._copy_button = ba.buttonwidget(parent=self._root_widget,
+        if babase.app.config['copy button']:
+            self._copy_button = bui.buttonwidget(parent=self._root_widget,
                                                 size=(15, 15),
                                                 label='©',
                                                 button_type='backSmall',
@@ -1182,31 +1187,35 @@ class PartyWindow(ba.Window):
                                                 position=(self._width - 40, 80),
                                                 on_activate_call=self._copy_to_clipboard)
         self._ping_button = None
-        if info.get('name', '') != '':
-            if ba.app.config['ping button']:
-                self._ping_button = ba.buttonwidget(
-                    parent=self._root_widget,
-                    scale=0.7,
-                    position=(self._width - 538, self._height - 57),
-                    size=(75, 75),
-                    autoselect=True,
-                    button_type='square',
-                    label=f'{_ping}',
-                    on_activate_call=self._send_ping,
-                    color=self.bg_color,
-                    text_scale=2.3,
-                    iconscale=1.2)
-            if ba.app.config['IP button']:
-                self._ip_port_button = ba.buttonwidget(parent=self._root_widget,
-                                                       size=(30, 30),
-                                                       label='IP',
-                                                       button_type='square',
-                                                       autoselect=True,
-                                                       color=self.bg_color,
-                                                       position=(self._width - 530,
-                                                                 self._height - 100),
-                                                       on_activate_call=self._ip_port_msg)
-        self._settings_button = ba.buttonwidget(parent=self._root_widget,
+        try:
+            info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+            if info != '':
+                if babase.app.config['ping button']:
+                    self._ping_button = bui.buttonwidget(
+                        parent=self._root_widget,
+                        scale=0.7,
+                        position=(self._width - 538, self._height - 57),
+                        size=(75, 75),
+                        autoselect=True,
+                        button_type='square',
+                        label=f'{_ping}',
+                        on_activate_call=self._send_ping,
+                        color=self.bg_color,
+                        text_scale=2.3,
+                        iconscale=1.2)
+                if babase.app.config['IP button']:
+                    self._ip_port_button = bui.buttonwidget(parent=self._root_widget,
+                                                        size=(30, 30),
+                                                        label='IP',
+                                                        button_type='square',
+                                                        autoselect=True,
+                                                        color=self.bg_color,
+                                                        position=(self._width - 530,
+                                                                    self._height - 100),
+                                                        on_activate_call=self._ip_port_msg)
+        except AttributeError:
+            pass
+        self._settings_button = bui.buttonwidget(parent=self._root_widget,
                                                 size=(50, 50),
                                                 scale=0.5,
                                                 button_type='square',
@@ -1214,9 +1223,9 @@ class PartyWindow(ba.Window):
                                                 color=self.bg_color,
                                                 position=(self._width - 40, self._height - 47),
                                                 on_activate_call=self._on_setting_button_press,
-                                                icon=ba.gettexture('settingsIcon'),
+                                                icon=bui.gettexture('settingsIcon'),
                                                 iconscale=1.2)
-        self._privatechat_button = ba.buttonwidget(parent=self._root_widget,
+        self._privatechat_button = bui.buttonwidget(parent=self._root_widget,
                                                    size=(50, 50),
                                                    scale=0.5,
                                                    button_type='square',
@@ -1224,19 +1233,17 @@ class PartyWindow(ba.Window):
                                                    color=self.bg_color,
                                                    position=(self._width - 40, self._height - 80),
                                                    on_activate_call=self._on_privatechat_button_press,
-                                                   icon=ba.gettexture('ouyaOButton'),
+                                                   icon=bui.gettexture('ouyaOButton'),
                                                    iconscale=1.2)
-        self._name_widgets: List[ba.Widget] = []
+        self._name_widgets: List[bui.Widget] = []
         self._roster: Optional[List[Dict[str, Any]]] = None
-        self._update_timer = ba.Timer(1.0,
-                                      ba.WeakCall(self._update),
-                                      repeat=True,
-                                      timetype=ba.TimeType.REAL)
+        self._update_timer = bs.apptimer(1.0,
+                                      bs.WeakCall(self._update))
         self._update()
 
     def on_chat_message(self, msg: str, sent=None) -> None:
         """Called when a new chat message comes through."""
-        if ba.app.config['Party Chat Muted'] and not _ba.app.ui.party_window()._private_chat:
+        if babase.app.config['Party Chat Muted'] and not bui.app.ui_v1.party_window()._private_chat:
             return
         if sent:
             self._add_msg(msg, sent)
@@ -1244,13 +1251,13 @@ class PartyWindow(ba.Window):
             self._add_msg(msg)
 
     def _add_msg(self, msg: str, sent=None) -> None:
-        if ba.app.config['Colorful Chat']:
+        if babase.app.config['Colorful Chat']:
             sender = msg.split(': ')[0]
             color = color_tracker._get_sender_color(sender) if sender else (1, 1, 1)
         else:
             color = (1, 1, 1)
         maxwidth = self._scroll_width * 0.94
-        txt = ba.textwidget(parent=self._columnwidget,
+        txt = bui.textwidget(parent=self._columnwidget,
                             text=msg,
                             h_align='left',
                             v_align='center',
@@ -1261,33 +1268,33 @@ class PartyWindow(ba.Window):
                             shadow=0.3,
                             flatness=1.0)
         if sent:
-            ba.textwidget(edit=txt, size=(100, 15),
+            bui.textwidget(edit=txt, size=(100, 15),
                           selectable=True,
                           click_activate=True,
-                          on_activate_call=ba.Call(ba.screenmessage, f'Message sent: {_get_local_time(sent)}'))
+                          on_activate_call=babase.Call(bui.screenmessage, f'Message sent: {_get_local_time(sent)}'))
         self._chat_texts.append(txt)
         if len(self._chat_texts) > 40:
             first = self._chat_texts.pop(0)
             first.delete()
-        ba.containerwidget(edit=self._columnwidget, visible_child=txt)
+        bui.containerwidget(edit=self._columnwidget, visible_child=txt)
 
     def _on_menu_button_press(self) -> None:
-        is_muted = ba.app.config['Party Chat Muted']
-        uiscale = ba.app.ui.uiscale
+        is_muted = babase.app.config['Party Chat Muted']
+        uiscale = bui.app.ui_v1.uiscale
 
         choices = ['muteOption', 'modifyColor', 'addQuickReply', 'removeQuickReply', 'credits']
         choices_display = ['Mute Option', 'Modify Main Color',
                            'Add as Quick Reply', 'Remove a Quick Reply', 'Credits']
 
-        if hasattr(_ba.get_foreground_host_activity(), '_map'):
+        if hasattr(bs.get_foreground_host_activity(), '_map'):
             choices.append('manualCamera')
             choices_display.append('Manual Camera')
 
         PopupMenuWindow(
             position=self._menu_button.get_screen_space_center(),
             color=self.bg_color,
-            scale=(2.3 if uiscale is ba.UIScale.SMALL else
-                   1.65 if uiscale is ba.UIScale.MEDIUM else 1.23),
+            scale=(2.3 if uiscale is babase.UIScale.SMALL else
+                   1.65 if uiscale is babase.UIScale.MEDIUM else 1.23),
             choices=choices,
             choices_display=self._create_baLstr_list(choices_display),
             current_choice='muteOption',
@@ -1296,35 +1303,35 @@ class PartyWindow(ba.Window):
 
     def _update(self) -> None:
         if not self._private_chat:
-            _ba.set_party_window_open(True)
-            ba.textwidget(edit=self._title_text, text=self.title)
+            bui.set_party_window_open(True)
+            bui.textwidget(edit=self._title_text, text=self.title)
             if self._firstcall:
                 if hasattr(self, '_status_text'):
                     self._status_text.delete()
                 self._roster = []
                 self._firstcall = False
-                self._chat_texts: List[ba.Widget] = []
-                if not ba.app.config['Party Chat Muted']:
-                    msgs = _ba.get_chat_messages()
+                self._chat_texts: List[bui.Widget] = []
+                if not babase.app.config['Party Chat Muted']:
+                    msgs = bs.get_chat_messages()
                     for msg in msgs:
                         self._add_msg(msg)
             # update muted state
-            if ba.app.config['Party Chat Muted']:
-                ba.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.3))
+            if babase.app.config['Party Chat Muted']:
+                bui.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.3))
                 # clear any chat texts we're showing
                 if self._chat_texts:
                     while self._chat_texts:
                         first = self._chat_texts.pop()
                         first.delete()
             else:
-                ba.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.0))
+                bui.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.0))
             if self._ping_button:
-                ba.buttonwidget(edit=self._ping_button,
+                bui.buttonwidget(edit=self._ping_button,
                                 label=f'{_ping}',
                                 textcolor=self._get_ping_color())
 
             # update roster section
-            roster = _ba.get_game_roster()
+            roster = bs.get_game_roster()
             if roster != self._roster or self._firstcall:
 
                 self._roster = roster
@@ -1335,9 +1342,9 @@ class PartyWindow(ba.Window):
                 self._name_widgets = []
                 if not self._roster:
                     top_section_height = 60
-                    ba.textwidget(edit=self._empty_str,
-                                  text=ba.Lstr(resource=self._r + '.emptyText'))
-                    ba.scrollwidget(edit=self._scrollwidget,
+                    bui.textwidget(edit=self._empty_str,
+                                  text=babase.Lstr(resource=self._r + '.emptyText'))
+                    bui.scrollwidget(edit=self._scrollwidget,
                                     size=(self._width - 50,
                                           self._height - top_section_height - 110),
                                     position=(30, 80))
@@ -1380,10 +1387,10 @@ class PartyWindow(ba.Window):
                                         p_str = self._roster[index][
                                             'display_string']
                                 except Exception:
-                                    ba.print_exception(
+                                    babase.print_exception(
                                         'Error calcing client name str.')
                                     p_str = '???'
-                                widget = ba.textwidget(parent=self._root_widget,
+                                widget = bui.textwidget(parent=self._root_widget,
                                                        position=(pos[0], pos[1]),
                                                        scale=t_scale,
                                                        size=(c_width * 0.85, 30),
@@ -1394,7 +1401,7 @@ class PartyWindow(ba.Window):
                                                        selectable=True,
                                                        autoselect=True,
                                                        click_activate=True,
-                                                       text=ba.Lstr(value=p_str),
+                                                       text=babase.Lstr(value=p_str),
                                                        h_align='left',
                                                        v_align='center')
                                 self._name_widgets.append(widget)
@@ -1412,8 +1419,8 @@ class PartyWindow(ba.Window):
                                 # FIXME: Should pass client_id to these sort of
                                 #  calls; not spec-string (perhaps should wait till
                                 #  client_id is more readily available though).
-                                ba.textwidget(edit=widget,
-                                              on_activate_call=ba.Call(
+                                bui.textwidget(edit=widget,
+                                              on_activate_call=babase.Call(
                                                   self._on_party_member_press,
                                                   self._roster[index]['client_id'],
                                                   is_host, widget))
@@ -1427,11 +1434,11 @@ class PartyWindow(ba.Window):
                                 if is_host:
                                     twd = min(
                                         c_width * 0.85,
-                                        _ba.get_string_width(
+                                        _babase.get_string_width(
                                             p_str, suppress_warning=True) *
                                         t_scale)
                                     self._name_widgets.append(
-                                        ba.textwidget(
+                                        bui.textwidget(
                                             parent=self._root_widget,
                                             position=(pos[0] + twd + 1,
                                                       pos[1] - 0.5),
@@ -1440,24 +1447,24 @@ class PartyWindow(ba.Window):
                                             v_align='center',
                                             maxwidth=c_width * 0.96 - twd,
                                             color=(0.1, 1, 0.1, 0.5),
-                                            text=ba.Lstr(resource=self._r +
+                                            text=babase.Lstr(resource=self._r +
                                                          '.hostText'),
                                             scale=0.4,
                                             shadow=0.1,
                                             flatness=1.0))
-                    ba.textwidget(edit=self._empty_str, text='')
-                    ba.scrollwidget(edit=self._scrollwidget,
+                    bui.textwidget(edit=self._empty_str, text='')
+                    bui.scrollwidget(edit=self._scrollwidget,
                                     size=(self._width - 50,
                                           max(100, self._height - 139 -
                                               c_height_total)),
                                     position=(30, 80))
         else:
-            _ba.set_party_window_open(False)
+            bui.set_party_window_open(False)
             for widget in self._name_widgets:
                 widget.delete()
             self._name_widgets = []
-            ba.textwidget(edit=self._title_text, text='Private Chat')
-            ba.textwidget(edit=self._empty_str, text='')
+            bui.textwidget(edit=self._title_text, text='Private Chat')
+            bui.textwidget(edit=self._empty_str, text='')
             if self._firstcall:
                 self._firstcall = False
                 if hasattr(self, '_status_text'):
@@ -1470,15 +1477,15 @@ class PartyWindow(ba.Window):
                     while self._chat_texts:
                         first = self._chat_texts.pop()
                         first.delete()
-                uiscale = ba.app.ui.uiscale
-                scroll_height = (165 if uiscale is ba.UIScale.SMALL else
-                                 280 if uiscale is ba.UIScale.MEDIUM else 400)
-                ba.scrollwidget(edit=self._scrollwidget,
+                uiscale = bui.app.ui_v1.uiscale
+                scroll_height = (165 if uiscale is babase.UIScale.SMALL else
+                                 280 if uiscale is babase.UIScale.MEDIUM else 400)
+                bui.scrollwidget(edit=self._scrollwidget,
                                 size=(self._width - 50, scroll_height))
                 for msg in msgs:
                     message = messenger._format_message(msg)
                     self._add_msg(message, msg['sent'])
-                self._filter_text = ba.textwidget(parent=self._root_widget,
+                self._filter_text = bui.textwidget(parent=self._root_widget,
                                                   scale=0.6,
                                                   color=(0.9, 1.0, 0.9),
                                                   text='Filter: ',
@@ -1488,17 +1495,17 @@ class PartyWindow(ba.Window):
                                                   h_align='center',
                                                   v_align='center')
                 choices = [i for i in messenger.saved_ids]
-                choices_display = [ba.Lstr(value=messenger.saved_ids[i])
+                choices_display = [babase.Lstr(value=messenger.saved_ids[i])
                                    for i in messenger.saved_ids]
                 choices.append('add')
-                choices_display.append(ba.Lstr(value='***Add New***'))
+                choices_display.append(babase.Lstr(value='***Add New***'))
                 filter_widget = PopupMenu(
                     parent=self._root_widget,
                     position=(self._width * 0.4,
                               self._height - 80),
                     width=200,
-                    scale=(2.8 if uiscale is ba.UIScale.SMALL else
-                           1.8 if uiscale is ba.UIScale.MEDIUM else 1.2),
+                    scale=(2.8 if uiscale is babase.UIScale.SMALL else
+                           1.8 if uiscale is babase.UIScale.MEDIUM else 1.2),
                     choices=choices,
                     choices_display=choices_display,
                     current_choice=messenger.filter,
@@ -1513,7 +1520,7 @@ class PartyWindow(ba.Window):
                         color = (0, 1, 0)
                     else:
                         color = (0.9, 1.0, 0.9)
-                    self._status_text = ba.textwidget(parent=self._root_widget,
+                    self._status_text = bui.textwidget(parent=self._root_widget,
                                                       scale=0.5,
                                                       color=color,
                                                       text=f'Status:\t{user_status}',
@@ -1525,8 +1532,8 @@ class PartyWindow(ba.Window):
                                                       autoselect=True,
                                                       selectable=True,
                                                       click_activate=True)
-                    ba.textwidget(edit=self._status_text,
-                                  on_activate_call=ba.Call(messenger._get_status, messenger.filter, 'last_seen'))
+                    bui.textwidget(edit=self._status_text,
+                                  on_activate_call=babase.Call(messenger._get_status, messenger.filter, 'last_seen'))
 
     def _change_filter(self, choice):
         if choice == 'add':
@@ -1596,17 +1603,17 @@ class PartyWindow(ba.Window):
                     name = playerinfo['players'][0]['name_full']
                 except:
                     name = account
-                for i in ba.app.config.get('Custom Commands'):
+                for i in babase.app.config.get('Custom Commands'):
                     i = i.replace('$c', str(self._popup_party_member_client_id))
                     i = i.replace('$a', str(account))
                     i = i.replace('$n', str(name))
-                    if ba.app.config['Direct Send']:
-                        choices.append(f'_ba.chatmessage("{i}")')
+                    if babase.app.config['Direct Send']:
+                        choices.append(f'bs.chatmessage("{i}")')
                     else:
                         choices.append(f'self._edit_text_msg_box("{i}")')
-                    choices_display.append(ba.Lstr(value=i))
+                    choices_display.append(babase.Lstr(value=i))
                 choices.append('AddNewChoiceWindow()')
-                choices_display.append(ba.Lstr(value='***Add New***'))
+                choices_display.append(babase.Lstr(value='***Add New***'))
                 PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
                                 color=self.bg_color,
                                 scale=self._get_popup_window_scale(),
@@ -1640,14 +1647,14 @@ class PartyWindow(ba.Window):
                                  delegate=self, tag='')
             elif choice == 'addQuickReply':
                 try:
-                    newReply = ba.textwidget(query=self._text_field)
+                    newReply = bui.textwidget(query=self._text_field)
                     oldReplies = self._get_quick_responds()
                     oldReplies.append(newReply)
                     self._write_quick_responds(oldReplies)
-                    ba.screenmessage(f'"{newReply}" is added.', (0, 1, 0))
-                    ba.playsound(ba.getsound('dingSmallHigh'))
+                    bui.screenmessage(f'"{newReply}" is added.', (0, 1, 0))
+                    bui.getsound('dingSmallHigh').play()
                 except:
-                    ba.print_exception()
+                    babase.print_exception()
             elif choice == 'removeQuickReply':
                 quick_reply = self._get_quick_responds()
                 PopupMenuWindow(position=self._send_button.get_screen_space_center(),
@@ -1669,7 +1676,7 @@ class PartyWindow(ba.Window):
                     ok_text="Join Discord",
                     origin_widget=self.get_root_widget())
             elif choice == 'manualCamera':
-                ba.containerwidget(edit=self._root_widget, transition='out_scale')
+                bui.containerwidget(edit=self._root_widget, transition='out_scale')
                 Manual_camera_window()
 
         elif self._popup_type == 'muteType':
@@ -1688,8 +1695,8 @@ class PartyWindow(ba.Window):
             data = self._get_quick_responds()
             data.remove(choice)
             self._write_quick_responds(data)
-            ba.screenmessage(f'"{choice}" is removed.', (1, 0, 0))
-            ba.playsound(ba.getsound('shieldDown'))
+            bui.screenmessage(f'"{choice}" is removed.', (1, 0, 0))
+            bui.getsound('shieldDown').play()
 
         else:
             print(f'unhandled popup type: {self._popup_type}')
@@ -1697,34 +1704,34 @@ class PartyWindow(ba.Window):
 
     def _vote_kick_player(self):
         if self._popup_party_member_is_host:
-            ba.playsound(ba.getsound('error'))
-            ba.screenmessage(
-                ba.Lstr(resource='internal.cantKickHostError'),
+            bui.getsound('error').play()
+            bui.screenmessage(
+                babase.Lstr(resource='internal.cantKickHostError'),
                 color=(1, 0, 0))
         else:
             assert self._popup_party_member_client_id is not None
 
             # Ban for 5 minutes.
-            result = _ba.disconnect_client(
+            result = bs.disconnect_client(
                 self._popup_party_member_client_id, ban_time=5 * 60)
             if not result:
-                ba.playsound(ba.getsound('error'))
-                ba.screenmessage(
-                    ba.Lstr(resource='getTicketsWindow.unavailableText'),
+                bui.getsound('error').play()
+                bui.screenmessage(
+                    babase.Lstr(resource='getTicketsWindow.unavailableText'),
                     color=(1, 0, 0))
 
     def _send_admin_kick_command(self):
-        _ba.chatmessage('/kick ' + str(self._popup_party_member_client_id))
+        bs.chatmessage('/kick ' + str(self._popup_party_member_client_id))
 
     def _translate(self):
         def _apply_translation(translated):
             if self._text_field.exists():
-                ba.textwidget(edit=self._text_field, text=translated)
-        msg = ba.textwidget(query=self._text_field)
-        cfg = ba.app.config
+                bui.textwidget(edit=self._text_field, text=translated)
+        msg = bui.textwidget(query=self._text_field)
+        cfg = babase.app.config
         if msg == '':
-            ba.screenmessage('Nothing to translate.', (1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('Nothing to translate.', (1, 0, 0))
+            bui.getsound('error').play()
         else:
             data = dict(message=msg)
             if cfg['Translate Source Language']:
@@ -1736,17 +1743,17 @@ class PartyWindow(ba.Window):
             Translate(data, _apply_translation).start()
 
     def _copy_to_clipboard(self):
-        msg = ba.textwidget(query=self._text_field)
+        msg = bui.textwidget(query=self._text_field)
         if msg == '':
-            ba.screenmessage('Nothing to copy.', (1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('Nothing to copy.', (1, 0, 0))
+            bui.getsound('error').play()
         else:
-            ba.clipboard_set_text(msg)
-            ba.screenmessage(f'"{msg}" is copied to clipboard.', (0, 1, 0))
-            ba.playsound(ba.getsound('dingSmallHigh'))
+            babase.clipboard_set_text(msg)
+            bui.screenmessage(f'"{msg}" is copied to clipboard.', (0, 1, 0))
+            bui.getsound('dingSmallHigh').play()
 
     def _get_current_mute_type(self):
-        cfg = ba.app.config
+        cfg = babase.app.config
         if cfg['Chat Muted'] == True:
             if cfg['Party Chat Muted'] == True:
                 return 'muteAll'
@@ -1759,7 +1766,7 @@ class PartyWindow(ba.Window):
                 return 'unmuteAll'
 
     def _change_mute_type(self, choice):
-        cfg = ba.app.config
+        cfg = babase.app.config
         if choice == 'muteInGameOnly':
             cfg['Chat Muted'] = True
             cfg['Party Chat Muted'] = False
@@ -1779,27 +1786,26 @@ class PartyWindow(ba.Window):
         """Called when the popup is closing."""
 
     def _on_party_member_press(self, client_id: int, is_host: bool,
-                               widget: ba.Widget) -> None:
+                               widget: bui.Widget) -> None:
         # if we're the host, pop up 'kick' options for all non-host members
-        if _ba.get_foreground_host_session() is not None:
-            kick_str = ba.Lstr(resource='kickText')
+        if bs.get_foreground_host_session() is not None:
+            kick_str = babase.Lstr(resource='kickText')
         else:
             # kick-votes appeared in build 14248
-            if (_ba.get_connection_to_host_info().get('build_number', 0) <
-                    14248):
+            if build_number <14248:
                 return
-            kick_str = ba.Lstr(resource='kickVoteText')
-        uiscale = ba.app.ui.uiscale
+            kick_str = babase.Lstr(resource='kickVoteText')
+        uiscale = bui.app.ui_v1.uiscale
         choices = ['kick', 'mention', 'adminkick']
         choices_display = [kick_str] + \
             list(self._create_baLstr_list(['Mention this guy', f'Kick ID: {client_id}']))
         choices.append('customCommands')
-        choices_display.append(ba.Lstr(value='Custom Commands'))
+        choices_display.append(babase.Lstr(value='Custom Commands'))
         PopupMenuWindow(
             position=widget.get_screen_space_center(),
             color=self.bg_color,
-            scale=(2.3 if uiscale is ba.UIScale.SMALL else
-                   1.65 if uiscale is ba.UIScale.MEDIUM else 1.23),
+            scale=(2.3 if uiscale is babase.UIScale.SMALL else
+                   1.65 if uiscale is babase.UIScale.MEDIUM else 1.23),
             choices=choices,
             choices_display=choices_display,
             current_choice='mention',
@@ -1809,8 +1815,8 @@ class PartyWindow(ba.Window):
         self._popup_party_member_is_host = is_host
 
     def _send_chat_message(self) -> None:
-        msg = ba.textwidget(query=self._text_field)
-        ba.textwidget(edit=self._text_field, text='')
+        msg = bui.textwidget(query=self._text_field)
+        bui.textwidget(edit=self._text_field, text='')
         if '\\' in msg:
             msg = msg.replace('\\d', ('\ue048'))
             msg = msg.replace('\\c', ('\ue043'))
@@ -1842,35 +1848,38 @@ class PartyWindow(ba.Window):
         elif msg.startswith('/info '):
             account = msg.replace('/info ', '')
             if account:
-                from bastd.ui.account import viewer
+                from bauiv1lib.account import viewer
                 viewer.AccountViewerWindow(
                     account_id=account)
-                ba.textwidget(edit=self._text_field, text='')
+                bui.textwidget(edit=self._text_field, text='')
                 return
         if not self._private_chat:
             if msg == '/id':
-                myid = ba.internal.get_v1_account_misc_read_val_2('resolvedAccountID', '')
-                _ba.chatmessage(f"My Unique ID : {myid}")
+                myid = bui.app.plus.get_v1_account_misc_read_val_2('resolvedAccountID', '')
+                bs.chatmessage(f"My Unique ID : {myid}")
             elif msg == '/save':
-                info = _ba.get_connection_to_host_info()
-                config = ba.app.config
-                if info.get('name', '') != '':
-                    title = info['name']
-                    if not isinstance(config.get('Saved Servers'), dict):
-                        config['Saved Servers'] = {}
-                    config['Saved Servers'][f'{_ip}@{_port}'] = {
-                        'addr': _ip,
-                        'port': _port,
-                        'name': title
-                    }
-                    config.commit()
-                    ba.screenmessage("Server Added To Manual", color=(0, 1, 0), transient=True)
-                    ba.playsound(ba.getsound('gunCocking'))
+                try:
+                    info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+                    config = babase.app.config 
+                    if info != '':
+                        title = info['name']
+                        if not isinstance(config.get('Saved Servers'), dict):
+                            config['Saved Servers'] = {}
+                        config['Saved Servers'][f'{_ip}@{_port}'] = {
+                            'addr': _ip,
+                            'port': _port,
+                            'name': title
+                        }
+                        config.commit()
+                        bui.screenmessage("Server Added To Manual", color=(0, 1, 0), transient=True)
+                        bui.getsound('gunCocking').play()
+                except AttributeError:
+                    pass
             elif msg != '':
-                _ba.chatmessage(cast(str, msg))
+                bs.chatmessage(cast(str, msg))
         else:
             receiver = messenger.filter
-            name = ba.internal.get_v1_account_display_string()
+            name = bui.app.plus.get_v1_account_display_string()
             if not receiver:
                 display_error('Choose a valid receiver id')
                 return
@@ -1886,22 +1895,22 @@ class PartyWindow(ba.Window):
                     self._change_filter('all')
                 else:
                     display_error('Cant delete this')
-                ba.textwidget(edit=self._text_field, text='')
+                bui.textwidget(edit=self._text_field, text='')
                 return
-            ba.Call(messenger._send_request, url, data)
-            ba.Call(check_new_message)
+            babase.Call(messenger._send_request, url, data)
+            babase.Call(check_new_message)
             Thread(target=messenger._send_request, args=(url, data)).start()
             Thread(target=check_new_message).start()
-            ba.textwidget(edit=self._text_field, text='')
+            bui.textwidget(edit=self._text_field, text='')
 
     def _write_quick_responds(self, data):
         try:
             with open(quick_msg_file, 'w') as f:
                 f.write('\n'.join(data))
         except:
-            ba.print_exception()
-            ba.screenmessage('Error!', (1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            babase.print_exception()
+            bui.screenmessage('Error!', (1, 0, 0))
+            bui.getsound('error').play()
 
     def _get_quick_responds(self):
         if os.path.exists(quick_msg_file):
@@ -1913,13 +1922,13 @@ class PartyWindow(ba.Window):
             return default_replies
 
     def color_picker_selected_color(self, picker, color) -> None:
-        ba.containerwidget(edit=self._root_widget, color=color)
+        bui.containerwidget(edit=self._root_widget, color=color)
         color = tuple(round(i, 2) for i in color)
         self.bg_color = color
-        ba.app.config['PartyWindow Main Color'] = color
+        babase.app.config['PartyWindow Main Color'] = color
 
     def color_picker_closing(self, picker) -> None:
-        ba.app.config.apply_and_commit()
+        babase.app.config.apply_and_commit()
 
     def _remove_sender_from_message(self, msg=''):
         msg_start = msg.find(": ") + 2
@@ -1936,7 +1945,7 @@ class PartyWindow(ba.Window):
                 del self.msg_index
         try:
             msg_widget = msgs[self.msg_index]
-            msg = ba.textwidget(query=msg_widget)
+            msg = bui.textwidget(query=msg_widget)
             msg = self._remove_sender_from_message(msg)
             if msg in ('', '   '):
                 self._previous_message()
@@ -1956,7 +1965,7 @@ class PartyWindow(ba.Window):
                 del self.msg_index
         try:
             msg_widget = msgs[self.msg_index]
-            msg = ba.textwidget(query=msg_widget)
+            msg = bui.textwidget(query=msg_widget)
             msg = self._remove_sender_from_message(msg)
             if msg in ('', '   '):
                 self._next_message()
@@ -1973,10 +1982,13 @@ class PartyWindow(ba.Window):
         self._edit_text_msg_box(msg, 'replace')
 
     def ping_server(self):
-        info = _ba.get_connection_to_host_info()
-        if info.get('name', '') != '':
-            self.pingThread = PingThread(_ip, _port)
-            self.pingThread.start()
+        try:
+            info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+            if info != '':
+                self.pingThread = PingThread(_ip, _port)
+                self.pingThread.start()
+        except AttributeError:
+            pass
 
     def _get_ping_color(self):
         try:
@@ -1991,28 +2003,28 @@ class PartyWindow(ba.Window):
 
     def _send_ping(self):
         if isinstance(_ping, int):
-            _ba.chatmessage(f'My ping = {_ping}ms')
+            bs.chatmessage(f'My ping = {_ping}ms')
 
     def close(self) -> None:
         """Close the window."""
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def close_with_sound(self) -> None:
         """Close the window and make a lovely sound."""
-        ba.playsound(ba.getsound('swish'))
+        bui.getsound('swish').play()
         self.close()
 
     def _get_popup_window_scale(self) -> float:
-        uiscale = ba.app.ui.uiscale
-        return (2.4 if uiscale is ba.UIScale.SMALL else
-                1.5 if uiscale is ba.UIScale.MEDIUM else 1.0)
+        uiscale = bui.app.ui_v1.uiscale
+        return (2.4 if uiscale is babase.UIScale.SMALL else
+                1.5 if uiscale is babase.UIScale.MEDIUM else 1.0)
 
     def _create_baLstr_list(self, list1):
-        return (ba.Lstr(value=i) for i in list1)
+        return (babase.Lstr(value=i) for i in list1)
 
     def _get_player_info(self, clientID):
         info = {}
-        for i in _ba.get_game_roster():
+        for i in bs.get_game_roster():
             if i['client_id'] == clientID:
                 info['ds'] = i['display_string']
                 info['players'] = i['players']
@@ -2023,16 +2035,16 @@ class PartyWindow(ba.Window):
     def _edit_text_msg_box(self, text, action='add'):
         if isinstance(text, str):
             if action == 'add':
-                ba.textwidget(edit=self._text_field, text=ba.textwidget(
+                bui.textwidget(edit=self._text_field, text=bui.textwidget(
                     query=self._text_field) + text)
             elif action == 'replace':
-                ba.textwidget(edit=self._text_field, text=text)
+                bui.textwidget(edit=self._text_field, text=text)
 
     def _on_setting_button_press(self):
         try:
             SettingsWindow()
         except Exception as e:
-            ba.print_exception()
+            babase.print_exception()
             pass
 
     def _on_privatechat_button_press(self):
@@ -2060,11 +2072,11 @@ class PartyWindow(ba.Window):
                 else:
                     display_error(messenger.error)
         except Exception as e:
-            ba.print_exception()
+            babase.print_exception()
             pass
 
     def join_discord(self):
-        ba.open_url("https://discord.gg/KvYgpEg2JR")
+        bui.open_url("https://discord.gg/KvYgpEg2JR")
 
 
 class LoginWindow:
@@ -2076,19 +2088,19 @@ class LoginWindow:
         else:
             title = 'Login Window'
             label = 'Log In'
-        uiscale = ba.app.ui.uiscale
-        bg_color = ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
-        self._root_widget = ba.containerwidget(size=(500, 250),
+        uiscale = bui.app.ui_v1.uiscale
+        bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
+        self._root_widget = bui.containerwidget(size=(500, 250),
                                                transition='in_scale',
                                                color=bg_color,
                                                toolbar_visibility='menu_minimal_no_back',
-                                               parent=_ba.get_special_widget('overlay_stack'),
+                                               parent=bui.get_special_widget('overlay_stack'),
                                                on_outside_click_call=self._close,
-                                               scale=(2.1 if uiscale is ba.UIScale.SMALL else
-                                                      1.5 if uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               stack_offset=(0, -10) if uiscale is ba.UIScale.SMALL else (
-                                                   240, 0) if uiscale is ba.UIScale.MEDIUM else (330, 20))
-        self._title_text = ba.textwidget(parent=self._root_widget,
+                                               scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                                                      1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
+                                               stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+                                                   240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20))
+        self._title_text = bui.textwidget(parent=self._root_widget,
                                          scale=0.8,
                                          color=(1, 1, 1),
                                          text=title,
@@ -2096,17 +2108,17 @@ class LoginWindow:
                                          position=(250, 200),
                                          h_align='center',
                                          v_align='center')
-        self._id = ba.textwidget(parent=self._root_widget,
+        self._id = bui.textwidget(parent=self._root_widget,
                                  scale=0.5,
                                  color=(1, 1, 1),
                                  text=f'Account: ' +
-                                 ba.internal.get_v1_account_misc_read_val_2(
+                                 bui.app.plus.get_v1_account_misc_read_val_2(
                                      'resolvedAccountID', ''),
                                  size=(0, 0),
                                  position=(220, 170),
                                  h_align='center',
                                  v_align='center')
-        self._registrationkey_text = ba.textwidget(parent=self._root_widget,
+        self._registrationkey_text = bui.textwidget(parent=self._root_widget,
                                                    scale=0.5,
                                                    color=(1, 1, 1),
                                                    text=f'Registration Key:',
@@ -2114,7 +2126,7 @@ class LoginWindow:
                                                    position=(100, 140),
                                                    h_align='center',
                                                    v_align='center')
-        self._text_field = ba.textwidget(
+        self._text_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(200, 40),
@@ -2125,7 +2137,7 @@ class LoginWindow:
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
-        self._connect_button = ba.buttonwidget(parent=self._root_widget,
+        self._connect_button = bui.buttonwidget(parent=self._root_widget,
                                                size=(150, 30),
                                                color=(0, 1, 0),
                                                label='Get Registration Key',
@@ -2133,17 +2145,17 @@ class LoginWindow:
                                                autoselect=True,
                                                position=(150, 80),
                                                on_activate_call=self._connect)
-        self._confirm_button = ba.buttonwidget(parent=self._root_widget,
+        self._confirm_button = bui.buttonwidget(parent=self._root_widget,
                                                size=(50, 30),
                                                label=label,
                                                button_type='square',
                                                autoselect=True,
                                                position=(200, 40),
                                                on_activate_call=self._confirmcall)
-        ba.textwidget(edit=self._text_field, on_return_press_call=self._confirm_button.activate)
+        bui.textwidget(edit=self._text_field, on_return_press_call=self._confirm_button.activate)
 
     def _close(self):
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            transition=('out_scale'))
 
     def _connect(self):
@@ -2151,35 +2163,35 @@ class LoginWindow:
             host = url.split('http://')[1].split(':')[0]
             import socket
             address = socket.gethostbyname(host)
-            _ba.disconnect_from_host()
-            _ba.connect_to_party(address, port=11111)
+            bs.disconnect_from_host()
+            bs.connect_to_party(address, port=11111)
         except Exception:
             display_error('Cant get ip from hostname')
 
     def _confirmcall(self):
         if self.wtype == 'signup':
-            key = ba.textwidget(query=self._text_field)
+            key = bui.textwidget(query=self._text_field)
             answer = messenger._signup(registration_key=key) if key else None
             if answer:
                 self._close()
         else:
-            if messenger._login(registration_key=ba.textwidget(query=self._text_field)):
+            if messenger._login(registration_key=bui.textwidget(query=self._text_field)):
                 self._close()
 
 
 class AddNewIdWindow:
     def __init__(self):
-        uiscale = ba.app.ui.uiscale
-        bg_color = ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
-        self._root_widget = ba.containerwidget(size=(500, 250),
+        uiscale = bui.app.ui_v1.uiscale
+        bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
+        self._root_widget = bui.containerwidget(size=(500, 250),
                                                transition='in_scale',
                                                color=bg_color,
                                                toolbar_visibility='menu_minimal_no_back',
-                                               parent=_ba.get_special_widget('overlay_stack'),
+                                               parent=bui.get_special_widget('overlay_stack'),
                                                on_outside_click_call=self._close,
-                                               scale=(2.1 if uiscale is ba.UIScale.SMALL else
-                                                      1.5 if uiscale is ba.UIScale.MEDIUM else 1.0))
-        self._title_text = ba.textwidget(parent=self._root_widget,
+                                               scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                                                      1.5 if uiscale is babase.UIScale.MEDIUM else 1.0))
+        self._title_text = bui.textwidget(parent=self._root_widget,
                                          scale=0.8,
                                          color=(1, 1, 1),
                                          text='Add New ID',
@@ -2187,7 +2199,7 @@ class AddNewIdWindow:
                                          position=(250, 200),
                                          h_align='center',
                                          v_align='center')
-        self._accountid_text = ba.textwidget(parent=self._root_widget,
+        self._accountid_text = bui.textwidget(parent=self._root_widget,
                                              scale=0.6,
                                              color=(1, 1, 1),
                                              text='pb-id: ',
@@ -2195,7 +2207,7 @@ class AddNewIdWindow:
                                              position=(50, 155),
                                              h_align='center',
                                              v_align='center')
-        self._accountid_field = ba.textwidget(
+        self._accountid_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(250, 40),
@@ -2206,7 +2218,7 @@ class AddNewIdWindow:
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
-        self._nickname_text = ba.textwidget(parent=self._root_widget,
+        self._nickname_text = bui.textwidget(parent=self._root_widget,
                                             scale=0.5,
                                             color=(1, 1, 1),
                                             text='Nickname: ',
@@ -2214,7 +2226,7 @@ class AddNewIdWindow:
                                             position=(50, 115),
                                             h_align='center',
                                             v_align='center')
-        self._nickname_field = ba.textwidget(
+        self._nickname_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(250, 40),
@@ -2225,7 +2237,7 @@ class AddNewIdWindow:
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
-        self._help_text = ba.textwidget(parent=self._root_widget,
+        self._help_text = bui.textwidget(parent=self._root_widget,
                                         scale=0.4,
                                         color=(0.1, 0.9, 0.9),
                                         text='Help:\nEnter pb-id of account you\n    want to chat to\nEnter nickname of id to\n    recognize id easily\nLeave nickname <default>\n    to use their default name',
@@ -2233,27 +2245,27 @@ class AddNewIdWindow:
                                         position=(325, 120),
                                         h_align='left',
                                         v_align='center')
-        self._add = ba.buttonwidget(parent=self._root_widget,
+        self._add = bui.buttonwidget(parent=self._root_widget,
                                     size=(50, 30),
                                     label='Add',
                                     button_type='square',
                                     autoselect=True,
                                     position=(100, 50),
-                                    on_activate_call=ba.Call(self._relay_function))
-        ba.textwidget(edit=self._accountid_field, on_return_press_call=self._add.activate)
-        self._remove = ba.buttonwidget(parent=self._root_widget,
+                                    on_activate_call=babase.Call(self._relay_function))
+        bui.textwidget(edit=self._accountid_field, on_return_press_call=self._add.activate)
+        self._remove = bui.buttonwidget(parent=self._root_widget,
                                        size=(75, 30),
                                        label='Remove',
                                        button_type='square',
                                        autoselect=True,
                                        position=(170, 50),
                                        on_activate_call=self._remove_id)
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._close)
 
     def _relay_function(self):
-        account_id = ba.textwidget(query=self._accountid_field)
-        nickname = ba.textwidget(query=self._nickname_field)
+        account_id = bui.textwidget(query=self._accountid_field)
+        nickname = bui.textwidget(query=self._nickname_field)
         try:
             if messenger._save_id(account_id, nickname):
                 self._close()
@@ -2261,15 +2273,15 @@ class AddNewIdWindow:
             display_error('Enter valid pb-id')
 
     def _remove_id(self):
-        uiscale = ba.app.ui.uiscale
+        uiscale = bui.app.ui_v1.uiscale
         if len(messenger.saved_ids) > 1:
             choices = [i for i in messenger.saved_ids]
             choices.remove('all')
-            choices_display = [ba.Lstr(value=messenger.saved_ids[i]) for i in choices]
+            choices_display = [babase.Lstr(value=messenger.saved_ids[i]) for i in choices]
             PopupMenuWindow(position=self._remove.get_screen_space_center(),
-                            color=ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5)),
-                            scale=(2.4 if uiscale is ba.UIScale.SMALL else
-                                   1.5 if uiscale is ba.UIScale.MEDIUM else 1.0),
+                            color=babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5)),
+                            scale=(2.4 if uiscale is babase.UIScale.SMALL else
+                                   1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
                             choices=choices,
                             choices_display=choices_display,
                             current_choice=choices[0],
@@ -2287,25 +2299,25 @@ class AddNewIdWindow:
         """Called when the popup is closing."""
 
     def _close(self):
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            transition=('out_scale'))
 
 
 class AddNewChoiceWindow:
     def __init__(self):
-        uiscale = ba.app.ui.uiscale
-        bg_color = ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
-        self._root_widget = ba.containerwidget(size=(500, 250),
+        uiscale = bui.app.ui_v1.uiscale
+        bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
+        self._root_widget = bui.containerwidget(size=(500, 250),
                                                transition='in_scale',
                                                color=bg_color,
                                                toolbar_visibility='menu_minimal_no_back',
-                                               parent=_ba.get_special_widget('overlay_stack'),
+                                               parent=bui.get_special_widget('overlay_stack'),
                                                on_outside_click_call=self._close,
-                                               scale=(2.1 if uiscale is ba.UIScale.SMALL else
-                                                      1.5 if uiscale is ba.UIScale.MEDIUM else 1.0),
-                                               stack_offset=(0, -10) if uiscale is ba.UIScale.SMALL else (
-                                                   240, 0) if uiscale is ba.UIScale.MEDIUM else (330, 20))
-        self._title_text = ba.textwidget(parent=self._root_widget,
+                                               scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                                                      1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
+                                               stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+                                                   240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20))
+        self._title_text = bui.textwidget(parent=self._root_widget,
                                          scale=0.8,
                                          color=(1, 1, 1),
                                          text='Add Custom Command',
@@ -2313,7 +2325,7 @@ class AddNewChoiceWindow:
                                          position=(250, 200),
                                          h_align='center',
                                          v_align='center')
-        self._text_field = ba.textwidget(
+        self._text_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(500, 40),
@@ -2324,7 +2336,7 @@ class AddNewChoiceWindow:
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
-        self._help_text = ba.textwidget(parent=self._root_widget,
+        self._help_text = bui.textwidget(parent=self._root_widget,
                                         scale=0.4,
                                         color=(0.2, 0.2, 0.2),
                                         text='Use\n$c = client id\n$a = account id\n$n = name',
@@ -2332,44 +2344,44 @@ class AddNewChoiceWindow:
                                         position=(70, 75),
                                         h_align='left',
                                         v_align='center')
-        self._add = ba.buttonwidget(parent=self._root_widget,
+        self._add = bui.buttonwidget(parent=self._root_widget,
                                     size=(50, 30),
                                     label='Add',
                                     button_type='square',
                                     autoselect=True,
                                     position=(150, 50),
                                     on_activate_call=self._add_choice)
-        ba.textwidget(edit=self._text_field, on_return_press_call=self._add.activate)
-        self._remove = ba.buttonwidget(parent=self._root_widget,
+        bui.textwidget(edit=self._text_field, on_return_press_call=self._add.activate)
+        self._remove = bui.buttonwidget(parent=self._root_widget,
                                        size=(50, 30),
                                        label='Remove',
                                        button_type='square',
                                        autoselect=True,
                                        position=(350, 50),
                                        on_activate_call=self._remove_custom_command)
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            on_cancel_call=self._close)
 
     def _add_choice(self):
-        newCommand = ba.textwidget(query=self._text_field)
-        cfg = ba.app.config
+        newCommand = bui.textwidget(query=self._text_field)
+        cfg = babase.app.config
         if any(i in newCommand for i in ('$c', '$a', '$n')):
             cfg['Custom Commands'].append(newCommand)
             cfg.apply_and_commit()
-            ba.screenmessage('Added successfully', (0, 1, 0))
-            ba.playsound(ba.getsound('dingSmallHigh'))
+            bui.screenmessage('Added successfully', (0, 1, 0))
+            bui.getsound('dingSmallHigh').play()
             self._close()
         else:
-            ba.screenmessage('Use at least of these ($c, $a, $n)', (1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('Use at least of these ($c, $a, $n)', (1, 0, 0))
+            bui.getsound('error').play()
 
     def _remove_custom_command(self):
-        uiscale = ba.app.ui.uiscale
-        commands = ba.app.config['Custom Commands']
+        uiscale = bui.app.ui_v1.uiscale
+        commands = babase.app.config['Custom Commands']
         PopupMenuWindow(position=self._remove.get_screen_space_center(),
-                        color=ba.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5)),
-                        scale=(2.4 if uiscale is ba.UIScale.SMALL else
-                               1.5 if uiscale is ba.UIScale.MEDIUM else 1.0),
+                        color=babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5)),
+                        scale=(2.4 if uiscale is babase.UIScale.SMALL else
+                               1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
                         choices=commands,
                         current_choice=commands[0],
                         delegate=self)
@@ -2379,27 +2391,27 @@ class AddNewChoiceWindow:
                                    choice: str) -> None:
         """Called when a choice is selected in the popup."""
         if self._popup_type == 'removeCustomCommandSelect':
-            config = ba.app.config
+            config = babase.app.config
             config['Custom Commands'].remove(choice)
             config.apply_and_commit()
-            ba.screenmessage('Removed successfully', (0, 1, 0))
-            ba.playsound(ba.getsound('shieldDown'))
+            bui.screenmessage('Removed successfully', (0, 1, 0))
+            bui.getsound('shieldDown').play()
 
     def popup_menu_closing(self, popup_window: PopupWindow) -> None:
         """Called when the popup is closing."""
 
     def _close(self):
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            transition=('out_scale'))
 
 
 class Manual_camera_window:
     def __init__(self):
-        self._root_widget = ba.containerwidget(
+        self._root_widget = bui.containerwidget(
             on_outside_click_call=None,
             size=(0, 0))
         button_size = (30, 30)
-        self._title_text = ba.textwidget(parent=self._root_widget,
+        self._title_text = bui.textwidget(parent=self._root_widget,
                                          scale=0.9,
                                          color=(1, 1, 1),
                                          text='Manual Camera Setup',
@@ -2407,49 +2419,49 @@ class Manual_camera_window:
                                          position=(130, 153),
                                          h_align='center',
                                          v_align='center')
-        self._xminus = ba.buttonwidget(parent=self._root_widget,
+        self._xminus = bui.buttonwidget(parent=self._root_widget,
                                        size=button_size,
-                                       label=ba.charstr(ba.SpecialChar.LEFT_ARROW),
+                                       label=babase.charstr(babase.SpecialChar.LEFT_ARROW),
                                        button_type='square',
                                        autoselect=True,
                                        position=(1, 60),
-                                       on_activate_call=ba.Call(self._change_camera_position, 'x-'))
-        self._xplus = ba.buttonwidget(parent=self._root_widget,
+                                       on_activate_call=babase.Call(self._change_camera_position, 'x-'))
+        self._xplus = bui.buttonwidget(parent=self._root_widget,
                                       size=button_size,
-                                      label=ba.charstr(ba.SpecialChar.RIGHT_ARROW),
+                                      label=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
                                       button_type='square',
                                       autoselect=True,
                                       position=(60, 60),
-                                      on_activate_call=ba.Call(self._change_camera_position, 'x'))
-        self._yplus = ba.buttonwidget(parent=self._root_widget,
+                                      on_activate_call=babase.Call(self._change_camera_position, 'x'))
+        self._yplus = bui.buttonwidget(parent=self._root_widget,
                                       size=button_size,
-                                      label=ba.charstr(ba.SpecialChar.UP_ARROW),
+                                      label=babase.charstr(babase.SpecialChar.UP_ARROW),
                                       button_type='square',
                                       autoselect=True,
                                       position=(30, 100),
-                                      on_activate_call=ba.Call(self._change_camera_position, 'y'))
-        self._yminus = ba.buttonwidget(parent=self._root_widget,
+                                      on_activate_call=babase.Call(self._change_camera_position, 'y'))
+        self._yminus = bui.buttonwidget(parent=self._root_widget,
                                        size=button_size,
-                                       label=ba.charstr(ba.SpecialChar.DOWN_ARROW),
+                                       label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
                                        button_type='square',
                                        autoselect=True,
                                        position=(30, 20),
-                                       on_activate_call=ba.Call(self._change_camera_position, 'y-'))
-        self.inwards = ba.buttonwidget(parent=self._root_widget,
+                                       on_activate_call=babase.Call(self._change_camera_position, 'y-'))
+        self.inwards = bui.buttonwidget(parent=self._root_widget,
                                        size=(100, 30),
                                        label='INWARDS',
                                        button_type='square',
                                        autoselect=True,
                                        position=(120, 90),
-                                       on_activate_call=ba.Call(self._change_camera_position, 'z-'))
-        self._outwards = ba.buttonwidget(parent=self._root_widget,
+                                       on_activate_call=babase.Call(self._change_camera_position, 'z-'))
+        self._outwards = bui.buttonwidget(parent=self._root_widget,
                                          size=(100, 30),
                                          label='OUTWARDS',
                                          button_type='square',
                                          autoselect=True,
                                          position=(120, 50),
-                                         on_activate_call=ba.Call(self._change_camera_position, 'z'))
-        self._step_text = ba.textwidget(parent=self._root_widget,
+                                         on_activate_call=babase.Call(self._change_camera_position, 'z'))
+        self._step_text = bui.textwidget(parent=self._root_widget,
                                         scale=0.5,
                                         color=(1, 1, 1),
                                         text='Step:',
@@ -2457,7 +2469,7 @@ class Manual_camera_window:
                                         position=(1, -20),
                                         h_align='center',
                                         v_align='center')
-        self._text_field = ba.textwidget(
+        self._text_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
             size=(100, 40),
@@ -2468,29 +2480,29 @@ class Manual_camera_window:
             autoselect=True,
             v_align='center',
             corner_scale=0.7)
-        self._reset = ba.buttonwidget(parent=self._root_widget,
+        self._reset = bui.buttonwidget(parent=self._root_widget,
                                       size=(50, 30),
                                       label='Reset',
                                       button_type='square',
                                       autoselect=True,
                                       position=(120, -35),
-                                      on_activate_call=ba.Call(self._change_camera_position, 'reset'))
-        self._done = ba.buttonwidget(parent=self._root_widget,
+                                      on_activate_call=babase.Call(self._change_camera_position, 'reset'))
+        self._done = bui.buttonwidget(parent=self._root_widget,
                                      size=(50, 30),
                                      label='Done',
                                      button_type='square',
                                      autoselect=True,
                                      position=(180, -35),
                                      on_activate_call=self._close)
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            cancel_button=self._done)
 
     def _close(self):
-        ba.containerwidget(edit=self._root_widget,
+        bui.containerwidget(edit=self._root_widget,
                            transition=('out_scale'))
 
     def _change_camera_position(self, direction):
-        activity = _ba.get_foreground_host_activity()
+        activity = bs.get_foreground_host_activity()
         node = activity.globalsnode
         aoi = list(node.area_of_interest_bounds)
         center = [(aoi[0] + aoi[3]) / 2,
@@ -2501,9 +2513,9 @@ class Manual_camera_window:
                 aoi[5] - aoi[2])
 
         try:
-            increment = float(ba.textwidget(query=self._text_field))
+            increment = float(bui.textwidget(query=self._text_field))
         except:
-            # ba.print_exception()
+            # babase.print_exception()
             increment = 1
 
         if direction == 'x':
@@ -2542,7 +2554,7 @@ def __popup_menu_window_init__(self,
                                scale: float = 1.0,
                                color: Tuple[float, float, float] = (0.35, 0.55, 0.15),
                                choices_disabled: Sequence[str] = None,
-                               choices_display: Sequence[ba.Lstr] = None):
+                               choices_display: Sequence[babase.Lstr] = None):
     # FIXME: Clean up a bit.
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
@@ -2591,14 +2603,14 @@ def __popup_menu_window_init__(self,
                 self._width,
                 min(
                     maxwidth,
-                    _ba.get_string_width(choice_display_name,
+                    _babase.get_string_width(choice_display_name,
                                          suppress_warning=True)) + 75)
         else:
             self._width = max(
                 self._width,
                 min(
                     maxwidth,
-                    _ba.get_string_width(choice_display_name,
+                    _babase.get_string_width(choice_display_name,
                                          suppress_warning=True)) + 60)
 
     # init parent class - this will rescale and reposition things as
@@ -2610,22 +2622,22 @@ def __popup_menu_window_init__(self,
                          scale=self._scale)
 
     if self._use_scroll:
-        self._scrollwidget = ba.scrollwidget(parent=self.root_widget,
+        self._scrollwidget = bui.scrollwidget(parent=self.root_widget,
                                              position=(20, 20),
                                              highlight=False,
                                              color=(0.35, 0.55, 0.15),
                                              size=(self._width - 40,
                                                    self._height - 40))
-        self._columnwidget = ba.columnwidget(parent=self._scrollwidget,
+        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
                                              border=2,
                                              margin=0)
     else:
-        self._offset_widget = ba.containerwidget(parent=self.root_widget,
+        self._offset_widget = bui.containerwidget(parent=self.root_widget,
                                                  position=(30, 15),
                                                  size=(self._width - 40,
                                                        self._height),
                                                  background=False)
-        self._columnwidget = ba.columnwidget(parent=self._offset_widget,
+        self._columnwidget = bui.columnwidget(parent=self._offset_widget,
                                              border=2,
                                              margin=0)
     for index, choice in enumerate(choices):
@@ -2634,9 +2646,9 @@ def __popup_menu_window_init__(self,
         else:
             choice_display_name = choice
         inactive = (choice in self._choices_disabled)
-        wdg = ba.textwidget(parent=self._columnwidget,
+        wdg = bui.textwidget(parent=self._columnwidget,
                             size=(self._width - 40, 28),
-                            on_select_call=ba.Call(self._select, index),
+                            on_select_call=babase.Call(self._select, index),
                             click_activate=True,
                             color=(0.5, 0.5, 0.5, 0.5) if inactive else
                             ((0.5, 1, 0.5,
@@ -2649,7 +2661,7 @@ def __popup_menu_window_init__(self,
                             v_align='center',
                             selectable=(not inactive))
         if choice == self._current_choice:
-            ba.containerwidget(edit=self._columnwidget,
+            bui.containerwidget(edit=self._columnwidget,
                                selected_child=wdg,
                                visible_child=wdg)
 
@@ -2658,8 +2670,8 @@ def __popup_menu_window_init__(self,
     self._done_building = True
 
 
-original_connect_to_party = _ba.connect_to_party
-original_sign_in = ba.internal.sign_in_v1
+original_connect_to_party = bs.connect_to_party
+original_sign_in = babase.app.plus.sign_in_v1
 
 
 def modify_connect_to_party(address: str, port: int = 43210, print_progress: bool = True) -> None:
@@ -2677,7 +2689,7 @@ def modify_sign_in(account_type: str) -> None:
     if messenger.server_online:
         messenger.logged_in = False
         global temptimer
-        temptimer = ba.Timer(2, messenger._cookie_login)
+        temptimer = bs.Timer(2, messenger._cookie_login)
 
 
 class PingThread(Thread):
@@ -2692,7 +2704,7 @@ class PingThread(Thread):
         sock: Optional[socket.socket] = None
         try:
             import socket
-            from ba.internal import get_ip_address_type
+            from babase._net import get_ip_address_type
             socket_type = get_ip_address_type(self._address)
             sock = socket.socket(socket_type, socket.SOCK_DGRAM)
             sock.connect((self._address, self._port))
@@ -2718,38 +2730,43 @@ class PingThread(Thread):
             global _ping
             _ping = int((time.time() - starttime) * 1000.0)
         except Exception:
-            ba.print_exception('Error on gather ping', once=True)
+            babase.print_exception('Error on gather ping', once=True)
         finally:
             try:
                 if sock is not None:
                     sock.close()
             except Exception:
-                ba.print_exception('Error on gather ping cleanup', once=True)
+                babase.print_exception('Error on gather ping cleanup', once=True)
 
 
 def _get_store_char_tex(self) -> str:
-    _ba.set_party_icon_always_visible(True)
-    return ('storeCharacterXmas' if ba.internal.get_v1_account_misc_read_val(
+    return ('storeCharacterXmas' if bui.app.plus.get_v1_account_misc_read_val(
         'xmas', False) else
-        'storeCharacterEaster' if ba.internal.get_v1_account_misc_read_val(
+        'storeCharacterEaster' if bui.app.plus.get_v1_account_misc_read_val(
         'easter', False) else 'storeCharacter')
 
+class NewMainMenuWindow(mainmenu.MainMenuWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Display chat icon, but if user open/close gather it may disappear
+        bui.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
-class InitalRun(ba.Plugin):
+class InitalRun(babase.Plugin):
     def __init__(self):
-        if _ba.env().get("build_number", 0) >= 20124:
+        if build_number >= 21140:
             global messenger, listener, displayer, color_tracker
             initialize()
             messenger = PrivateChatHandler()
             listener = Thread(target=messenger_thread)
             listener.start()
-            displayer = ba.Timer(0.4, msg_displayer, True)
+            displayer = bs.AppTimer(0.4, msg_displayer, repeat=True)
             color_tracker = ColorTracker()
-            bastd.ui.party.PartyWindow = PartyWindow
+            bauiv1lib.party.PartyWindow = PartyWindow
+            mainmenu.MainMenuWindow = NewMainMenuWindow
             PopupMenuWindow.__init__ = __popup_menu_window_init__
-            _ba.connect_to_party = modify_connect_to_party
-            ba.internal.sign_in_v1 = modify_sign_in
+            bs.connect_to_party = modify_connect_to_party
+            babase.app.plus.sign_in_v1 = modify_sign_in
             MainMenuWindow._get_store_char_tex = _get_store_char_tex
         else:
-            display_error("This Party Window only runs with BombSquad version higer than 1.6.0.")
+            display_error("This Party Window only runs with BombSquad version higer than 1.7.19.")

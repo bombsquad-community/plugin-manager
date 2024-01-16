@@ -1,12 +1,14 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.actor.spaz import Spaz
+import babase
+import bascenev1 as bs
+from bascenev1lib.actor.spaz import Spaz
 
 if TYPE_CHECKING:
     from typing import Any
@@ -16,19 +18,19 @@ Spaz.oldhandlemessage = Spaz.handlemessage
 
 
 def handlemessage(self, msg: Any) -> Any:
-    if isinstance(msg, ba.DieMessage):
+    if isinstance(msg, bs.DieMessage):
         if self.node:
-            self.node.color_texture = ba.gettexture('bonesColor')
-            self.node.color_mask_texture = ba.gettexture('bonesColorMask')
-            self.node.head_model = ba.getmodel('bonesHead')
-            self.node.torso_model = ba.getmodel('bonesTorso')
-            self.node.pelvis_model = ba.getmodel('bonesPelvis')
-            self.node.upper_arm_model = ba.getmodel('bonesUpperArm')
-            self.node.forearm_model = ba.getmodel('bonesForeArm')
-            self.node.hand_model = ba.getmodel('bonesHand')
-            self.node.upper_leg_model = ba.getmodel('bonesUpperLeg')
-            self.node.lower_leg_model = ba.getmodel('bonesLowerLeg')
-            self.node.toes_model = ba.getmodel('bonesToes')
+            self.node.color_texture = bs.gettexture('bonesColor')
+            self.node.color_mask_texture = bs.gettexture('bonesColorMask')
+            self.node.head_mesh = bs.getmesh('bonesHead')
+            self.node.torso_mesh = bs.getmesh('bonesTorso')
+            self.node.pelvis_mesh = bs.getmesh('bonesPelvis')
+            self.node.upper_arm_mesh = bs.getmesh('bonesUpperArm')
+            self.node.forearm_mesh = bs.getmesh('bonesForeArm')
+            self.node.hand_mesh = bs.getmesh('bonesHand')
+            self.node.upper_leg_mesh = bs.getmesh('bonesUpperLeg')
+            self.node.lower_leg_mesh = bs.getmesh('bonesLowerLeg')
+            self.node.toes_mesh = bs.getmesh('bonesToes')
             self.node.style = 'bones'
         self.oldhandlemessage(msg)
     else:
@@ -36,5 +38,5 @@ def handlemessage(self, msg: Any) -> Any:
 
 
 # ba_meta export plugin
-class CustomDeath(ba.Plugin):
+class CustomDeath(babase.Plugin):
     Spaz.handlemessage = handlemessage

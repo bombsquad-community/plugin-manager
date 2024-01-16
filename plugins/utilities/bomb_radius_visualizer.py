@@ -1,4 +1,5 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 
 """
     Bomb Radius Visualizer by TheMikirog
@@ -16,9 +17,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # Let's import everything we need and nothing more.
-import ba
-import bastd
-from bastd.actor.bomb import Bomb
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import bascenev1lib
+from bascenev1lib.actor.bomb import Bomb
 
 if TYPE_CHECKING:
     pass
@@ -26,7 +29,7 @@ if TYPE_CHECKING:
 # ba_meta export plugin
 
 
-class BombRadiusVisualizer(ba.Plugin):
+class BombRadiusVisualizer(babase.Plugin):
 
     # We use a decorator to add extra code to existing code, increasing mod compatibility.
     # Here I'm defining a new bomb init function that'll be replaced.
@@ -44,7 +47,7 @@ class BombRadiusVisualizer(ba.Plugin):
             # Let's make a new node that's just a circle. It's the some one used in the Target Practice minigame.
             # This is going to make a slightly opaque red circle, signifying damaging area.
             # We aren't defining the size, because we're gonna animate it shortly after.
-            args[0].radius_visualizer = ba.newnode('locator',
+            args[0].radius_visualizer = bs.newnode('locator',
                                                    # Remove itself when the bomb node dies.
                                                    owner=args[0].node,
                                                    attrs={
@@ -59,14 +62,14 @@ class BombRadiusVisualizer(ba.Plugin):
 
             # Let's do a fancy animation of that red circle growing into shape like a cartoon.
             # We're gonna read our bomb's blast radius and use it to decide the size of our circle.
-            ba.animate_array(args[0].radius_visualizer, 'size', 1, {
+            bs.animate_array(args[0].radius_visualizer, 'size', 1, {
                 0.0: [0.0],
                 0.2: [args[0].blast_radius * 2.2],
                 0.25: [args[0].blast_radius * 2.0]
             })
 
             # Let's do a second circle, this time just the outline to where the damaging area ends.
-            args[0].radius_visualizer_circle = ba.newnode('locator',
+            args[0].radius_visualizer_circle = bs.newnode('locator',
                                                           # Remove itself when the bomb node dies.
                                                           owner=args[0].node,
                                                           attrs={
@@ -81,7 +84,7 @@ class BombRadiusVisualizer(ba.Plugin):
             args[0].node.connectattr('position', args[0].radius_visualizer_circle, 'position')
 
             # Let's animate that circle too, but this time let's do the opacity.
-            ba.animate(
+            bs.animate(
                 args[0].radius_visualizer_circle, 'opacity', {
                     0: 0.0,
                     0.4: 0.1
@@ -90,4 +93,4 @@ class BombRadiusVisualizer(ba.Plugin):
 
     # Finally we """travel through the game files""" to replace the function we want with our own version.
     # We transplant the old function's arguments into our version.
-    bastd.actor.bomb.Bomb.__init__ = new_bomb_init(bastd.actor.bomb.Bomb.__init__)
+    bascenev1lib.actor.bomb.Bomb.__init__ = new_bomb_init(bascenev1lib.actor.bomb.Bomb.__init__)

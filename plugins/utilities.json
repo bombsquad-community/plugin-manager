@@ -19,6 +19,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2454845",
@@ -106,6 +107,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -125,6 +127,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -163,6 +166,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "fed7c24",
@@ -187,6 +191,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -206,6 +211,7 @@
         }
       ],
       "versions": {
+        "1.2.3": null,
         "1.2.2": {
           "api_version": 7,
           "commit_sha": "7753b87",
@@ -239,7 +245,7 @@
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         },
         {
           "name": "Vishal",
@@ -299,7 +305,7 @@
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         }
       ],
       "versions": {
@@ -470,6 +476,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "6acdea8",
@@ -669,6 +676,7 @@
         }
       ],
       "versions": {
+        "4.0.1": null,
         "4.0.0": {
           "api_version": 7,
           "commit_sha": "a23e8cd",
@@ -684,10 +692,11 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "3.0.1": null,
         "3.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -703,10 +712,11 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -722,10 +732,11 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -741,10 +752,11 @@
         {
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "discord": "crossjoy"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "800125c",
@@ -760,7 +772,7 @@
         {
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "discord": "crossjoy"
         }
       ],
       "versions": {
@@ -809,10 +821,11 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "cb2d952",
@@ -828,10 +841,11 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "05ffa9f",
@@ -847,10 +861,11 @@
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "3221b3a",

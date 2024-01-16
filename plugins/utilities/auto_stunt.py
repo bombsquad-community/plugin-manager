@@ -1,22 +1,25 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 # AutoStunt mod by - Mr.Smoothy x Rikko
 # https://discord.gg/ucyaesh
-# https://bombsquad.ga
+# https://bombsquad-community.web.app/home
 # Dont modify redistribute this plugin , if want to use features of this plugin in your mod write logic in seprate file
 # and import this as module.
 # If want to contribute in this original module, raise PR on github https://github.com/bombsquad-community/plugin-manager
 
-import ba
-import _ba
-import bastd
-from bastd.actor.text import Text
-from bastd.actor.image import Image
-from bastd.actor import spaz
-from bastd.actor import playerspaz
-from bastd.gameutils import SharedObjects
-from bastd.actor.powerupbox import PowerupBoxFactory
-from bastd.actor.spazfactory import SpazFactory
-from bastd.game.elimination import EliminationGame
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import _babase
+import bascenev1lib
+from bascenev1lib.actor.text import Text
+from bascenev1lib.actor.image import Image
+from bascenev1lib.actor import spaz
+from bascenev1lib.actor import playerspaz
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.actor.powerupbox import PowerupBoxFactory
+from bascenev1lib.actor.spazfactory import SpazFactory
+from bascenev1lib.game.elimination import EliminationGame
 import math
 import json
 import os
@@ -26,12 +29,12 @@ from typing import Optional
 CONTROLS_CENTER = (0, 0)
 CONTROLS_SCALE = 1
 
-BASE_STUNTS_DIRECTORY = os.path.join(_ba.env()["python_directory_user"], "CustomStunts")
+BASE_STUNTS_DIRECTORY = os.path.join(_babase.env()["python_directory_user"], "CustomStunts")
 PLAYERS_STUNT_INFO = {}
 
 STUNT_CACHE = {}
-original_on_begin = ba._activity.Activity.on_begin
-original_chatmessage = _ba.chatmessage
+original_on_begin = bs._activity.Activity.on_begin
+original_chatmessage = bs.chatmessage
 
 
 class ControlsUI:
@@ -105,7 +108,7 @@ CONTROLS_UI_MAP = {
 }
 
 
-class NewSpaz(bastd.actor.spaz.Spaz):
+class NewSpaz(bascenev1lib.actor.spaz.Spaz):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.move_map = {
@@ -125,7 +128,7 @@ class NewSpaz(bastd.actor.spaz.Spaz):
         }
 
 
-class NewPlayerSpaz(bastd.actor.playerspaz.PlayerSpaz):
+class NewPlayerSpaz(bascenev1lib.actor.playerspaz.PlayerSpaz):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.move_map = {
@@ -150,7 +153,7 @@ class NewPlayerSpaz(bastd.actor.playerspaz.PlayerSpaz):
     def _handle_action(self, action, value: Optional[float] = None) -> None:
         if self.source_player.sessionplayer in PLAYERS_STUNT_INFO:
             PLAYERS_STUNT_INFO[self.source_player.sessionplayer].append({
-                "time": ba.time() - self.source_player.recording_start_time,
+                "time": bs.time() - self.source_player.recording_start_time,
                 "move": {
                     "action": action,
                     "value": value,
@@ -230,11 +233,11 @@ def handle_player_replay_end(player):
 
 
 def get_player_from_client_id(client_id, activity=None):
-    activity = activity or _ba.get_foreground_host_activity()
+    activity = activity or bs.get_foreground_host_activity()
     for player in activity.players:
         if player.sessionplayer.inputdevice.client_id == client_id:
             return player
-    raise ba.SessionPlayerNotFound()
+    raise bs.SessionPlayerNotFound()
 
 
 def mirror(clieid):
@@ -243,8 +246,8 @@ def mirror(clieid):
 
 
 def capture(player):
-    with ba.Context(player.actor._activity()):
-        player.recording_start_time = ba.time()
+    with babase.ContextRef(player.actor._activity()):
+        player.recording_start_time = bs.time()
     PLAYERS_STUNT_INFO[player.sessionplayer] = []
 
 
@@ -266,33 +269,33 @@ def replay(player, stunt_name):
                 stunt = json.load(fin)
                 STUNT_CACHE[stunt_name] = stunt
         except:
-            ba.screenmessage(f"{stunt_name} doesn't exists")
+            bui.screenmessage(f"{stunt_name} doesn't exists")
             return
     player.in_replay = True
-    with ba.Context(player.actor._activity()):
+    with babase.ContextRef(player.actor._activity()):
         ControlsUI.display(player.actor._activity())
         for move in stunt:
             value = move["move"]["value"]
             if value is None:
-                ba.timer(
+                bs.timer(
                     move["time"],
-                    ba.Call(player.actor.move_map[move["move"]["action"]])
+                    babase.Call(player.actor.move_map[move["move"]["action"]])
                 )
             else:
-                ba.timer(
+                bs.timer(
                     move["time"],
-                    ba.Call(player.actor.move_map[move["move"]["action"]], move["move"]["value"])
+                    babase.Call(player.actor.move_map[move["move"]["action"]], move["move"]["value"])
                 )
         last_move_time = move["time"]
         time_to_hide_controls = last_move_time + 1
-        ba.timer(time_to_hide_controls, ba.Call(handle_player_replay_end, player))
+        bs.timer(time_to_hide_controls, babase.Call(handle_player_replay_end, player))
 
 
 def spawn_mirror_spaz(player):
     player.mirror_mode = True
-    with ba.Context(player.actor._activity()):
+    with babase.ContextRef(player.actor._activity()):
         bot = spaz.Spaz(player.color, player.highlight, character=player.character).autoretain()
-        bot.handlemessage(ba.StandMessage(
+        bot.handlemessage(bs.StandMessage(
             (player.actor.node.position[0], player.actor.node.position[1], player.actor.node.position[2]+1), 93))
         bot.node.name = player.actor.node.name
         bot.node.name_color = player.actor.node.name_color
@@ -309,51 +312,51 @@ def ghost(player, stunt_name):
                 stunt = json.load(fin)
                 STUNT_CACHE[stunt_name] = stunt
         except:
-            ba.screenmessage(f"{stunt_name} doesn't exists")
+            bui.screenmessage(f"{stunt_name} doesn't exists")
             return
     player.in_replay = True
 
-    with ba.Context(player.actor._activity()):
+    with babase.ContextRef(player.actor._activity()):
         bot = spaz.Spaz((1, 0, 0), character="Spaz").autoretain()
-        bot.handlemessage(ba.StandMessage(player.actor.node.position, 93))
+        bot.handlemessage(bs.StandMessage(player.actor.node.position, 93))
         give_ghost_power(bot)
         ControlsUI.display(player.actor._activity())
         for move in stunt:
             value = move["move"]["value"]
             if value is None:
-                ba.timer(
+                bs.timer(
                     move["time"],
-                    ba.Call(bot.move_map[move["move"]["action"]])
+                    babase.Call(bot.move_map[move["move"]["action"]])
                 )
                 ui_activation = CONTROLS_UI_MAP.get(move["move"]["action"])
                 if ui_activation:
-                    ba.timer(
+                    bs.timer(
                         move["time"],
-                        ba.Call(ui_activation, player.actor._activity())
+                        babase.Call(ui_activation, player.actor._activity())
                     )
             else:
-                ba.timer(
+                bs.timer(
                     move["time"],
-                    ba.Call(bot.move_map[move["move"]["action"]], move["move"]["value"])
+                    babase.Call(bot.move_map[move["move"]["action"]], move["move"]["value"])
                 )
                 ui_activation = CONTROLS_UI_MAP.get(move["move"]["action"])
 
                 if ui_activation:
-                    ba.timer(
+                    bs.timer(
                         move["time"],
-                        ba.Call(ui_activation, player.actor._activity(), move["move"]["value"])
+                        babase.Call(ui_activation, player.actor._activity(), move["move"]["value"])
                     )
         last_move_time = move["time"]
         time_to_hide_controls = last_move_time + 1
-        ba.timer(time_to_hide_controls, ba.Call(handle_player_replay_end, player))
-        ba.timer(time_to_hide_controls, ba.Call(bot.node.delete))
+        bs.timer(time_to_hide_controls, babase.Call(handle_player_replay_end, player))
+        bs.timer(time_to_hide_controls, babase.Call(bot.node.delete))
 
 
 def give_ghost_power(spaz):
     spaz.node.invincible = True
     shared = SharedObjects.get()
     factory = SpazFactory.get()
-    ghost = ba.Material()
+    ghost = bs.Material()
     # smoothy hecks
     ghost.add_actions(
         conditions=(('they_have_material', factory.spaz_material), 'or',
@@ -397,7 +400,7 @@ def new_chatmessage(msg):
 
     if command == "start":
         capture(player)
-        _ba.chatmessage("Recording started for {}.".format(
+        bs.chatmessage("Recording started for {}.".format(
             player.getname(),
         ))
         return original_chatmessage(msg)
@@ -406,28 +409,28 @@ def new_chatmessage(msg):
 
     if command == "save":
         if len(msg_splits) < 2:
-            ba.screenmessage("Enter name of stunt eg : *save bombjump")
+            bui.screenmessage("Enter name of stunt eg : *save bombjump")
             return original_chatmessage(msg)
         save(player, stunt_name)
-        _ba.chatmessage('Recording "{}" by {} saved.'.format(
+        bs.chatmessage('Recording "{}" by {} saved.'.format(
             stunt_name,
             player.getname(),
         ))
     elif command == "stunt":
         if len(msg_splits) < 2:
-            ba.screenmessage("Enter name of stunt eg : *stunt bombjump")
+            bui.screenmessage("Enter name of stunt eg : *stunt bombjump")
             return original_chatmessage(msg)
         replay(player, stunt_name)
-        _ba.chatmessage('Replaying "{}" on {}.'.format(
+        bs.chatmessage('Replaying "{}" on {}.'.format(
             stunt_name,
             player.getname(),
         ))
     elif command == "learn":
         if len(msg_splits) < 2:
-            ba.screenmessage("Enter name of stunt eg : *learn bombjump")
+            bui.screenmessage("Enter name of stunt eg : *learn bombjump")
             return original_chatmessage(msg)
         ghost(player, stunt_name)
-        _ba.chatmessage('Replaying "{}" on {}.'.format(
+        bs.chatmessage('Replaying "{}" on {}.'.format(
             stunt_name,
             player.getname(),
         ))
@@ -473,25 +476,25 @@ def set_stick_image_position(self, x: float, y: float) -> None:
 
 def on_begin(self, *args, **kwargs) -> None:
     self._jump_image = Image(
-        ba.gettexture('buttonJump'),
+        bui.gettexture('buttonJump'),
         position=(385, 160),
         scale=(50, 50),
         color=[0.1, 0.45, 0.1, 0]
     )
     self._pickup_image = Image(
-        ba.gettexture('buttonPickUp'),
+        bui.gettexture('buttonPickUp'),
         position=(385, 240),
         scale=(50, 50),
         color=[0, 0.35, 0, 0]
     )
     self._punch_image = Image(
-        ba.gettexture('buttonPunch'),
+        bui.gettexture('buttonPunch'),
         position=(345, 200),
         scale=(50, 50),
         color=[0.45, 0.45, 0, 0]
     )
     self._bomb_image = Image(
-        ba.gettexture('buttonBomb'),
+        bui.gettexture('buttonBomb'),
         position=(425, 200),
         scale=(50, 50),
         color=[0.45, 0.1, 0.1, 0]
@@ -499,10 +502,10 @@ def on_begin(self, *args, **kwargs) -> None:
     self.stick_image_position_x = self.stick_image_position_y = 0.0
     self._stick_base_position = p = (-328, 200)
     self._stick_base_image_color = c2 = (0.25, 0.25, 0.25, 1.0)
-    self._stick_base_image = ba.newnode(
+    self._stick_base_image = bs.newnode(
         'image',
         attrs={
-            'texture': ba.gettexture('nub'),
+            'texture': bui.gettexture('nub'),
             'absolute_scale': True,
             'vr_depth': -40,
             'position': p,
@@ -511,9 +514,9 @@ def on_begin(self, *args, **kwargs) -> None:
         })
     self._stick_nub_position = p = (-328, 200)
     self._stick_nub_image_color = c3 = (0.4, 0.4, 0.4, 1.0)
-    self._stick_nub_image = ba.newnode('image',
+    self._stick_nub_image = bs.newnode('image',
                                        attrs={
-                                           'texture': ba.gettexture('nub'),
+                                           'texture': bui.gettexture('nub'),
                                            'absolute_scale': True,
                                            'position': p,
                                            'scale': (110*0.6, 110*0.66),
@@ -526,22 +529,22 @@ def on_begin(self, *args, **kwargs) -> None:
 
 
 # ba_meta export plugin
-class byHeySmoothy(ba.Plugin):
+class byHeySmoothy(babase.Plugin):
     def on_app_running(self):
-        _ba.set_party_icon_always_visible(True)
-        ba._activity.Activity.on_begin = on_begin
-        _ba.chatmessage = new_chatmessage
-        bastd.actor.playerspaz.PlayerSpaz = NewPlayerSpaz
-        bastd.actor.spaz.Spaz = NewSpaz
+        bui.set_party_icon_always_visible(True)
+        bs._activity.Activity.on_begin = on_begin
+        bs.chatmessage = new_chatmessage
+        bascenev1lib.actor.playerspaz.PlayerSpaz = NewPlayerSpaz
+        bascenev1lib.actor.spaz.Spaz = NewSpaz
 
 
 #  lets define a sample elimination game that can use super power of this plugin
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 class BroEliminaition(EliminationGame):
     name = 'BroElimination'
     description = 'Elimination Game with dual character control'
 
-    def spawn_player(self, player) -> ba.Actor:
+    def spawn_player(self, player) -> bs.Actor:
         super().spawn_player(player)
         spawn_mirror_spaz(player)
