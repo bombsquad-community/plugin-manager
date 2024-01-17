@@ -27,7 +27,7 @@ import _babase
 import bascenev1 as bs
 import bascenev1lib
 import bauiv1 as bui
-from baenv import TARGET_BALLISTICA_BUILD
+from baenv import TARGET_BALLISTICA_BUILD as build_number
 
 from typing import TYPE_CHECKING
 
@@ -37,8 +37,8 @@ if TYPE_CHECKING:
 
 ANDROID = babase.app.classic.platform == "android"
 DIRPATH = Path(
-    f"{_babase.app.python_directory_user if TARGET_BALLISTICA_BUILD < 21282 else _babase.app.env.python_directory_user}/image_id.json")
-APP_VERSION = _babase.app.version if TARGET_BALLISTICA_BUILD < 21282 else _babase.app.env.version
+    f"{_babase.app.python_directory_user if build_number < 21282 else _babase.app.env.python_directory_user}/image_id.json")
+APP_VERSION = _babase.app.version if build_number < 21282 else _babase.app.env.version
 
 if ANDROID:  # !can add ios in future
 

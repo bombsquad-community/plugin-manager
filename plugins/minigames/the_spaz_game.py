@@ -1,5 +1,6 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 
-# ba_meta require api 7
+# ba_meta require api 8
 """
 TheSpazGame - Mini game where all characters looks identical , identify enemies and kill them.
 Author:  Mr.Smoothy
@@ -12,9 +13,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.game.elimination import EliminationGame, Player
-from bastd.actor.spazfactory import SpazFactory
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1lib.game.elimination import EliminationGame, Player
+from bascenev1lib.actor.spazfactory import SpazFactory
 import random
 
 if TYPE_CHECKING:
@@ -23,14 +26,14 @@ if TYPE_CHECKING:
 
 CHARACTER = 'Spaz'
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 
 
 class TheSpazGame(EliminationGame):
     name = 'TheSpazGame'
     description = 'Enemy Spaz AmongUs. Kill them all'
-    scoreconfig = ba.ScoreConfig(
-        label='Survived', scoretype=ba.ScoreType.SECONDS, none_is_winner=True
+    scoreconfig = bs.ScoreConfig(
+        label='Survived', scoretype=bs.ScoreType.SECONDS, none_is_winner=True
     )
 
     announce_player_deaths = False
@@ -39,17 +42,17 @@ class TheSpazGame(EliminationGame):
 
     @classmethod
     def get_available_settings(
-        cls, sessiontype: type[ba.Session]
-    ) -> list[ba.Setting]:
+        cls, sessiontype: type[bs.Session]
+    ) -> list[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Lives Per Player',
                 default=1,
                 min_value=1,
                 max_value=10,
                 increment=1,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -61,31 +64,31 @@ class TheSpazGame(EliminationGame):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.15)
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
-        if issubclass(sessiontype, ba.DualTeamSession):
-            settings.append(ba.BoolSetting('Solo Mode', default=False))
+        if issubclass(sessiontype, bs.DualTeamSession):
+            settings.append(bs.BoolSetting('Solo Mode', default=False))
             settings.append(
-                ba.BoolSetting('Balance Total Lives', default=False)
+                bs.BoolSetting('Balance Total Lives', default=False)
             )
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.DualTeamSession) or issubclass(
-            sessiontype, ba.FreeForAllSession
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.DualTeamSession) or issubclass(
+            sessiontype, bs.FreeForAllSession
         )
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
-        return ba.getmaps('melee')
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
+        return bs.app.classic.getmaps('melee')
 
     def get_instance_description(self) -> str | Sequence:
         return (
@@ -101,7 +104,7 @@ class TheSpazGame(EliminationGame):
         super().__init__(settings)
         self._solo_mode = False
 
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         p = [-6, -4.3, -2.6, -0.9, 0.8, 2.5, 4.2, 5.9]
         q = [-4, -2.3, -0.6, 1.1, 2.8, 4.5]
 

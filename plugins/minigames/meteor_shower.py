@@ -1,4 +1,5 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -6,15 +7,17 @@ from __future__ import annotations
 import random
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.actor.bomb import Bomb
-from bastd.actor.onscreentimer import OnScreenTimer
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1lib.actor.bomb import Bomb
+from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
 
 
-lang = ba.app.lang.language
+lang = bs.app.lang.language
 
 if lang == 'Spanish':
     name = 'Lluvia de Meteoritos v2'
@@ -48,7 +51,7 @@ else:
     random_rain = 'Random Rain'
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
@@ -56,18 +59,18 @@ class Player(ba.Player['Team']):
         self.death_time: float | None = None
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
 
-# ba_meta export game
-class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class MeteorShowerv2Game(bs.TeamGameActivity[Player, Team]):
     """Minigame involving dodging falling bombs."""
 
     name = name
     description = 'Dodge the falling bombs.'
-    scoreconfig = ba.ScoreConfig(
-        label='Survived', scoretype=ba.ScoreType.MILLISECONDS, version='B'
+    scoreconfig = bs.ScoreConfig(
+        label='Survived', scoretype=bs.ScoreType.MILLISECONDS, version='B'
     )
 
     # Print messages when players die (since its meaningful in this game).
@@ -79,10 +82,10 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[ba.Session]
-    ) -> list[ba.Setting]:
+            cls, sessiontype: type[bs.Session]
+    ) -> list[babase.Setting]:
         settings = [
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 bomb_type,
                 choices=[
                     ('normal', 0),
@@ -95,22 +98,22 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
         return settings
 
     # We're currently hard-coded for one map.
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return ['Rampage']
 
     # We support teams, free-for-all, and co-op sessions.
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
         return (
-            issubclass(sessiontype, ba.DualTeamSession)
-            or issubclass(sessiontype, ba.FreeForAllSession)
-            or issubclass(sessiontype, ba.CoopSession)
+            issubclass(sessiontype, bs.DualTeamSession)
+            or issubclass(sessiontype, bs.FreeForAllSession)
+            or issubclass(sessiontype, bs.CoopSession)
         )
 
     def __init__(self, settings: dict):
@@ -138,7 +141,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
 
         # Some base class overrides:
         self.default_music = (
-            ba.MusicType.EPIC if self._epic_mode else ba.MusicType.SURVIVAL
+            bs.MusicType.EPIC if self._epic_mode else bs.MusicType.SURVIVAL
         )
         if self._epic_mode:
             self.slow_motion = True
@@ -152,19 +155,19 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
         delay = 5.0 if len(self.players) > 2 else 2.5
         if self._epic_mode:
             delay *= 0.25
-        ba.timer(delay, self._decrement_meteor_time, repeat=True)
+        bs.timer(delay, self._decrement_meteor_time, repeat=True)
 
         # Kick off the first wave in a few seconds.
         delay = 3.0
         if self._epic_mode:
             delay *= 0.25
-        ba.timer(delay, self._set_meteor_timer)
+        bs.timer(delay, self._set_meteor_timer)
 
         self._timer = OnScreenTimer()
         self._timer.start()
 
         # Check for immediate end (if we've only got 1 player, etc).
-        ba.timer(5.0, self._check_end_game)
+        bs.timer(5.0, self._check_end_game)
 
     def on_player_leave(self, player: Player) -> None:
         # Augment default behavior.
@@ -174,7 +177,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
         self._check_end_game()
 
     # overriding the default character spawning..
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         spaz = self.spawn_player_spaz(player)
 
         # Let's reconnect this player's controls to this
@@ -189,12 +192,12 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
 
     # Various high-level game events come through this method.
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
 
             # Augment standard behavior.
             super().handlemessage(msg)
 
-            curtime = ba.time()
+            curtime = bs.time()
 
             # Record the player's moment of death.
             # assert isinstance(msg.spaz.player
@@ -204,15 +207,15 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
             # (more accurate looking).
             # In teams/ffa, allow a one-second fudge-factor so we can
             # get more draws if players die basically at the same time.
-            if isinstance(self.session, ba.CoopSession):
+            if isinstance(self.session, bs.CoopSession):
                 # Teams will still show up if we check now.. check in
                 # the next cycle.
-                ba.pushcall(self._check_end_game)
+                babase.pushcall(self._check_end_game)
 
                 # Also record this for a final setting of the clock.
                 self._last_player_death_time = curtime
             else:
-                ba.timer(1.0, self._check_end_game)
+                bs.timer(1.0, self._check_end_game)
 
         else:
             # Default handler:
@@ -229,7 +232,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
 
         # In co-op, we go till everyone is dead.. otherwise we go
         # until one team remains.
-        if isinstance(self.session, ba.CoopSession):
+        if isinstance(self.session, bs.CoopSession):
             if living_team_count <= 0:
                 self.end_game()
         else:
@@ -237,7 +240,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
                 self.end_game()
 
     def _set_meteor_timer(self) -> None:
-        ba.timer(
+        bs.timer(
                 (1.0 + 0.2 * random.random()) * self._meteor_time,
             self._drop_bomb_cluster,
         )
@@ -248,10 +251,10 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
         # and debug things.
         loc_test = False
         if loc_test:
-            ba.newnode('locator', attrs={'position': (8, 6, -5.5)})
-            ba.newnode('locator', attrs={'position': (8, 6, -2.3)})
-            ba.newnode('locator', attrs={'position': (-7.3, 6, -5.5)})
-            ba.newnode('locator', attrs={'position': (-7.3, 6, -2.3)})
+            bs.newnode('locator', attrs={'position': (8, 6, -5.5)})
+            bs.newnode('locator', attrs={'position': (8, 6, -2.3)})
+            bs.newnode('locator', attrs={'position': (-7.3, 6, -5.5)})
+            bs.newnode('locator', attrs={'position': (-7.3, 6, -2.3)})
 
         # Drop several bombs in series.
         delay = 0.0
@@ -269,7 +272,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
                 random.uniform(-3.066, -4.12),
                 0,
             )
-            ba.timer(delay, ba.Call(self._drop_bomb, pos, vel))
+            bs.timer(delay, babase.Call(self._drop_bomb, pos, vel))
             delay += 0.1
         self._set_meteor_timer()
 
@@ -294,7 +297,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
         self._meteor_time = max(0.01, self._meteor_time * 0.9)
 
     def end_game(self) -> None:
-        cur_time = ba.time()
+        cur_time = bs.time()
         assert self._timer is not None
         start_time = self._timer.getstarttime()
 
@@ -325,7 +328,7 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
 
         # Ok now calc game results: set a score for each team and then tell
         # the game to end.
-        results = ba.GameResults()
+        results = bs.GameResults()
 
         # Remember that 'free-for-all' mode is simply a special form
         # of 'teams' mode where each player gets their own team, so we can
@@ -346,58 +349,58 @@ class MeteorShowerv2Game(ba.TeamGameActivity[Player, Team]):
 
 
 # ba_meta export plugin
-class MeteorShowerv2Coop(ba.Plugin):
+class MeteorShowerv2Coop(babase.Plugin):
     def on_app_running(self) -> None:
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 normal_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 0},
                 preview_texture_name='rampagePreview',
             )
         )
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 frozen_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 1},
                 preview_texture_name='rampagePreview',
             )
         )
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 sticky_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 2},
                 preview_texture_name='rampagePreview',
             )
         )
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 impact_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 3},
                 preview_texture_name='rampagePreview',
             )
         )
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 mine_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 4},
                 preview_texture_name='rampagePreview',
             )
         )
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 tnt_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 5},
                 preview_texture_name='rampagePreview',
             )
         )
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 random_rain,
                 gametype=MeteorShowerv2Game,
                 settings={bomb_type: 6},

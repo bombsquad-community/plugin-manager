@@ -1,19 +1,22 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # snake
 # Released under the MIT License. See LICENSE for details.
 #
 """Snake game by SEBASTIAN2059"""
 
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.actor import bomb as stdbomb
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.actor import bomb as stdbomb
 
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
@@ -29,7 +32,7 @@ class ScoreMessage:
         return self.player
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
@@ -38,14 +41,14 @@ class Player(ba.Player['Team']):
         self.actived = None
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
         self.score = 0
 
 
-lang = ba.app.lang.language
+lang = bs.app.lang.language
 if lang == 'Spanish':
     description = 'Sobrevive a un número determinado de minas para ganar.'
     join_description = 'Corre y no te dejes matar.'
@@ -65,15 +68,15 @@ class Custom_Mine(stdbomb.Bomb):
                               source_player=source_player)
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.HitMessage):
+        if isinstance(msg, bs.HitMessage):
             return
         else:
             super().handlemessage(msg)
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 
 
-class SnakeGame(ba.TeamGameActivity[Player, Team]):
+class SnakeGame(bs.TeamGameActivity[Player, Team]):
     """A game type based on acquiring kills."""
 
     name = 'Snake'
@@ -84,15 +87,15 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[ba.Session]) -> List[ba.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Score to Win',
                 min_value=40,
                 default=80,
                 increment=5,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -104,7 +107,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -115,27 +118,27 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.DualTeamSession)
-                or issubclass(sessiontype, ba.FreeForAllSession))
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return (issubclass(sessiontype, bs.DualTeamSession)
+                or issubclass(sessiontype, bs.FreeForAllSession))
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
-        return ba.getmaps('melee')
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
+        return bs.app.classic.getmaps('melee')
 
     def __init__(self, settings: dict):
         super().__init__(settings)
         self._scoreboard = Scoreboard()
         self._score_to_win: Optional[int] = None
-        self._dingsound = ba.getsound('dingSmall')
+        self._dingsound = bs.getsound('dingSmall')
 
-        self._beep_1_sound = ba.getsound('raceBeep1')
-        self._beep_2_sound = ba.getsound('raceBeep2')
+        self._beep_1_sound = bs.getsound('raceBeep1')
+        self._beep_2_sound = bs.getsound('raceBeep2')
 
         self._epic_mode = bool(settings['Epic Mode'])
         self._kills_to_win_per_player = int(
@@ -146,8 +149,8 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
 
         # Base class overrides.
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC if self._epic_mode else
-                              ba.MusicType.TO_THE_DEATH)
+        self.default_music = (bs.MusicType.EPIC if self._epic_mode else
+                              bs.MusicType.TO_THE_DEATH)
 
     def get_instance_description(self) -> Union[str, Sequence]:
         return join_description
@@ -178,30 +181,30 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
         lstart = 7.1 * t_scale
         inc = 1.25 * t_scale
 
-        ba.timer(lstart, self._do_light_1)
-        ba.timer(lstart + inc, self._do_light_2)
-        ba.timer(lstart + 2 * inc, self._do_light_3)
-        ba.timer(lstart + 3 * inc, self._start_race)
+        bs.timer(lstart, self._do_light_1)
+        bs.timer(lstart + inc, self._do_light_2)
+        bs.timer(lstart + 2 * inc, self._do_light_3)
+        bs.timer(lstart + 3 * inc, self._start_race)
 
         self._start_lights = []
         for i in range(4):
-            lnub = ba.newnode('image',
+            lnub = bs.newnode('image',
                               attrs={
-                                  'texture': ba.gettexture('nub'),
+                                  'texture': bs.gettexture('nub'),
                                   'opacity': 1.0,
                                   'absolute_scale': True,
                                   'position': (-75 + i * 50, light_y),
                                   'scale': (50, 50),
                                   'attach': 'center'
                               })
-            ba.animate(
+            bs.animate(
                 lnub, 'opacity', {
                     4.0 * t_scale: 0,
                     5.0 * t_scale: 1.0,
                     12.0 * t_scale: 1.0,
                     12.5 * t_scale: 0.0
                 })
-            ba.timer(13.0 * t_scale, lnub.delete)
+            bs.timer(13.0 * t_scale, lnub.delete)
             self._start_lights.append(lnub)
 
         self._start_lights[0].color = (0.2, 0, 0)
@@ -212,22 +215,22 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
     def _do_light_1(self) -> None:
         assert self._start_lights is not None
         self._start_lights[0].color = (1.0, 0, 0)
-        ba.playsound(self._beep_1_sound)
+        self._beep_1_sound.play()
 
     def _do_light_2(self) -> None:
         assert self._start_lights is not None
         self._start_lights[1].color = (1.0, 0, 0)
-        ba.playsound(self._beep_1_sound)
+        self._beep_1_sound.play()
 
     def _do_light_3(self) -> None:
         assert self._start_lights is not None
         self._start_lights[2].color = (1.0, 0.3, 0)
-        ba.playsound(self._beep_1_sound)
+        self._beep_1_sound.play()
 
     def _start_race(self) -> None:
         assert self._start_lights is not None
         self._start_lights[3].color = (0.0, 1.0, 0)
-        ba.playsound(self._beep_2_sound)
+        self._beep_2_sound.play()
 
         self._started = True
 
@@ -235,7 +238,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
             self.generate_mines(player)
 
     # overriding the default character spawning..
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         spaz = self.spawn_player_spaz(player)
 
         # Let's reconnect this player's controls to this
@@ -252,7 +255,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
 
     def generate_mines(self, player: Player):
         try:
-            player.actived = ba.Timer(0.5, ba.Call(self.spawn_mine, player), repeat=True)
+            player.actived = bs.Timer(0.5, babase.Call(self.spawn_mine, player), repeat=True)
         except Exception as e:
             print('Exception -> ' + str(e))
 
@@ -271,7 +274,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
 
         def arm():
             mine.arm()
-        ba.timer(0.5, arm)
+        bs.timer(0.5, arm)
 
         player.mines.append(mine)
         if len(player.mines) > 15:
@@ -286,7 +289,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
         self.handlemessage(ScoreMessage(player))
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
 
             # Augment standard behavior.
             super().handlemessage(msg)
@@ -304,7 +307,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
 
             assert self._score_to_win is not None
             if any(team.score >= self._score_to_win for team in self.teams):
-                self.end_game()  # ba.timer(0.5, self.end_game)
+                self.end_game()  # bs.timer(0.5, self.end_game)
         else:
             return super().handlemessage(msg)
         return None
@@ -315,7 +318,7 @@ class SnakeGame(ba.TeamGameActivity[Player, Team]):
                                             self._score_to_win)
 
     def end_game(self) -> None:
-        results = ba.GameResults()
+        results = bs.GameResults()
         for team in self.teams:
             results.set_team_score(team, team.score)
         self.end(results=results)

@@ -68,10 +68,10 @@ class ForestMap(bs.Map):
     def on_preload(cls) -> any:
         data: dict[str, any] = {
             'mesh': bs.getmesh('natureBackground'),
-            'tex': bui.gettexture('natureBackgroundColor'),
+            'tex': bs.gettexture('natureBackgroundColor'),
             'collision_mesh': bs.getcollisionmesh('natureBackgroundCollide'),
             'bgmesh': bs.getmesh('thePadBG'),
-            'bgtex': bui.gettexture('menuBG')
+            'bgtex': bs.gettexture('menuBG')
         }
         return data
 
@@ -85,7 +85,7 @@ class ForestMap(bs.Map):
             attrs={
                 'mesh': self.preloaddata['mesh'],
                 'color_texture': self.preloaddata['tex'],
-                'collide_mesh': self.preloaddata['collide_mesh'],
+                'collision_mesh': self.preloaddata['collision_mesh'],
                 'materials': [shared.footing_material]
             }
         )

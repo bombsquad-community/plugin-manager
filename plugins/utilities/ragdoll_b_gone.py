@@ -98,7 +98,7 @@ class RagdollBGone(babase.Plugin):
                                 # Pick a random death noise
                                 sound = death_sounds[random.randrange(len(death_sounds))]
                                 # Play the sound where our Spaz is
-                                sound.play(position=args[0].node.position)
+                                bs.Sound.play(sound, position=args[0].node.position)
                         # Delete our Spaz node immediately.
                         # Removing stuff is weird and prone to errors, so we're gonna delay it.
                         bs.timer(0.001, args[0].node.delete)
