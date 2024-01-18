@@ -119,4 +119,5 @@ class RagdollBGone(babase.Plugin):
 
     # Finally we """travel through the game files""" to replace the function we want with our own version.
     # We transplant the old function's arguments into our version.
-    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(bascenev1lib.actor.spaz.Spaz.handlemessage)
+    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(
+        bascenev1lib.actor.spaz.Spaz.handlemessage)

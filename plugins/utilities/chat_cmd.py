@@ -40,7 +40,6 @@ class _cmds:
         except:
             pass
 
-    
     def _handle():
         messages = get_chat_messages()
         if len(messages) > 1:
@@ -544,13 +543,16 @@ class _cmds:
                     cmsg(u'\U0001F95A Nazz are past/present/future \U0001F95A')
                     cmsg(u'\U0001F95A everything is Nazz \U0001F95A')
 
+
 class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
         bui.set_party_icon_always_visible(True)
-        
+
 # bs.timer(0.05, _update, repeat=True)
+
+
 def same():
     # bs.timer(0.5, _cmds._process_cmd, True)
     _cmds._process_cmd()
@@ -558,10 +560,7 @@ def same():
 
 
 class _enableee(babase.Plugin):
-    timer = bs.AppTimer(0.5, same,repeat=True)
-    
+    timer = bs.AppTimer(0.5, same, repeat=True)
+
     def on_app_running(self):
         mainmenu.MainMenuWindow = NewMainMenuWindow
-
-        
-        

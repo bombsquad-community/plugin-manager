@@ -302,7 +302,8 @@ def _get_local_time(utctime):
 def update_status():
     if messenger.logged_in:
         if babase.app.config['Self Status'] == 'online':
-            host = bs.get_connection_to_host_info().get('name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().get('name', '')
+            host = bs.get_connection_to_host_info().get(
+                'name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().get('name', '')
             if host:
                 my_status = f'Playing in {host}'
             else:
@@ -424,35 +425,35 @@ class SortQuickMessages:
                    1.3 if uiscale is babase.UIScale.MEDIUM else 1.0),
             stack_offset=(0, -16) if uiscale is babase.UIScale.SMALL else (0, 0))
         bui.textwidget(parent=self._root_widget,
-                      position=(-10, self._height - 50),
-                      size=(self._width, 25),
-                      text='Sort Quick Messages',
-                      color=bui.app.ui_v1.title_color,
-                      scale=1.05,
-                      h_align='center',
-                      v_align='center',
-                      maxwidth=270)
+                       position=(-10, self._height - 50),
+                       size=(self._width, 25),
+                       text='Sort Quick Messages',
+                       color=bui.app.ui_v1.title_color,
+                       scale=1.05,
+                       h_align='center',
+                       v_align='center',
+                       maxwidth=270)
         b_textcolor = (0.4, 0.75, 0.5)
         up_button = bui.buttonwidget(parent=self._root_widget,
-                                    position=(10, 170),
-                                    size=(75, 75),
-                                    on_activate_call=self._move_up,
-                                    label=babase.charstr(babase.SpecialChar.UP_ARROW),
-                                    button_type='square',
-                                    color=bg_color,
-                                    textcolor=b_textcolor,
-                                    autoselect=True,
-                                    repeat=True)
+                                     position=(10, 170),
+                                     size=(75, 75),
+                                     on_activate_call=self._move_up,
+                                     label=babase.charstr(babase.SpecialChar.UP_ARROW),
+                                     button_type='square',
+                                     color=bg_color,
+                                     textcolor=b_textcolor,
+                                     autoselect=True,
+                                     repeat=True)
         down_button = bui.buttonwidget(parent=self._root_widget,
-                                      position=(10, 75),
-                                      size=(75, 75),
-                                      on_activate_call=self._move_down,
-                                      label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
-                                      button_type='square',
-                                      color=bg_color,
-                                      textcolor=b_textcolor,
-                                      autoselect=True,
-                                      repeat=True)
+                                       position=(10, 75),
+                                       size=(75, 75),
+                                       on_activate_call=self._move_down,
+                                       label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
+                                       button_type='square',
+                                       color=bg_color,
+                                       textcolor=b_textcolor,
+                                       autoselect=True,
+                                       repeat=True)
         self._scroll_width = self._width - 150
         self._scroll_height = self._height - 110
         self._scrollwidget = bui.scrollwidget(
@@ -469,7 +470,7 @@ class SortQuickMessages:
         self._msg_selected = None
         self._refresh()
         bui.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._save)
+                            on_cancel_call=self._save)
 
     def _refresh(self):
         for child in self._columnwidget.get_children():
@@ -487,8 +488,8 @@ class SortQuickMessages:
                 maxwidth=self._scroll_width)
             if msg == self._msg_selected:
                 bui.columnwidget(edit=self._columnwidget,
-                                selected_child=txt,
-                                visible_child=txt)
+                                 selected_child=txt,
+                                 visible_child=txt)
 
     def _on_msg_select(self, msg):
         self._msg_selected = msg
@@ -659,29 +660,29 @@ class TranslationSettings:
                    1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=scale_origin)
         bui.textwidget(parent=self.root_widget,
-                      position=(width * 0.5, height - 45),
-                      size=(20, 20),
-                      h_align='center',
-                      v_align='center',
-                      text="Text Translation",
-                      scale=0.9,
-                      color=(5, 5, 5))
+                       position=(width * 0.5, height - 45),
+                       size=(20, 20),
+                       h_align='center',
+                       v_align='center',
+                       text="Text Translation",
+                       scale=0.9,
+                       color=(5, 5, 5))
         cbtn = btn = bui.buttonwidget(parent=self.root_widget,
-                                     autoselect=True,
-                                     position=(30, height - 60),
-                                     size=(30, 30),
-                                     label=babase.charstr(babase.SpecialChar.BACK),
-                                     button_type='backSmall',
-                                     on_activate_call=self._cancel)
+                                      autoselect=True,
+                                      position=(30, height - 60),
+                                      size=(30, 30),
+                                      label=babase.charstr(babase.SpecialChar.BACK),
+                                      button_type='backSmall',
+                                      on_activate_call=self._cancel)
 
         source_lang_text = bui.textwidget(parent=self.root_widget,
-                                         position=(40, height - 110),
-                                         size=(20, 20),
-                                         h_align='left',
-                                         v_align='center',
-                                         text="Source Language : ",
-                                         scale=0.9,
-                                         color=(1, 1, 1))
+                                          position=(40, height - 110),
+                                          size=(20, 20),
+                                          h_align='left',
+                                          v_align='center',
+                                          text="Source Language : ",
+                                          scale=0.9,
+                                          color=(1, 1, 1))
 
         source_lang_menu = PopupMenu(
             parent=self.root_widget,
@@ -696,13 +697,13 @@ class TranslationSettings:
             on_value_change_call=self._change_source)
 
         destination_lang_text = bui.textwidget(parent=self.root_widget,
-                                              position=(40, height - 165),
-                                              size=(20, 20),
-                                              h_align='left',
-                                              v_align='center',
-                                              text="Destination Language : ",
-                                              scale=0.9,
-                                              color=(1, 1, 1))
+                                               position=(40, height - 165),
+                                               size=(20, 20),
+                                               h_align='left',
+                                               v_align='center',
+                                               text="Destination Language : ",
+                                               scale=0.9,
+                                               color=(1, 1, 1))
 
         destination_lang_menu = PopupMenu(
             parent=self.root_widget,
@@ -719,39 +720,39 @@ class TranslationSettings:
         try:
 
             translation_mode_text = bui.textwidget(parent=self.root_widget,
-                                                  position=(40, height - 215),
-                                                  size=(20, 20),
-                                                  h_align='left',
-                                                  v_align='center',
-                                                  text="Translate Mode",
-                                                  scale=0.9,
-                                                  color=(1, 1, 1))
+                                                   position=(40, height - 215),
+                                                   size=(20, 20),
+                                                   h_align='left',
+                                                   v_align='center',
+                                                   text="Translate Mode",
+                                                   scale=0.9,
+                                                   color=(1, 1, 1))
             decoration = bui.textwidget(parent=self.root_widget,
-                                       position=(40, height - 225),
-                                       size=(20, 20),
-                                       h_align='left',
-                                       v_align='center',
-                                       text="________________",
-                                       scale=0.9,
-                                       color=(1, 1, 1))
+                                        position=(40, height - 225),
+                                        size=(20, 20),
+                                        h_align='left',
+                                        v_align='center',
+                                        text="________________",
+                                        scale=0.9,
+                                        color=(1, 1, 1))
 
             language_char_text = bui.textwidget(parent=self.root_widget,
-                                               position=(85, height - 273),
-                                               size=(20, 20),
-                                               h_align='left',
-                                               v_align='center',
-                                               text='Normal Translation',
-                                               scale=0.6,
-                                               color=(1, 1, 1))
+                                                position=(85, height - 273),
+                                                size=(20, 20),
+                                                h_align='left',
+                                                v_align='center',
+                                                text='Normal Translation',
+                                                scale=0.6,
+                                                color=(1, 1, 1))
 
             pronunciation_text = bui.textwidget(parent=self.root_widget,
-                                               position=(295, height - 273),
-                                               size=(20, 20),
-                                               h_align='left',
-                                               v_align='center',
-                                               text="Show Prononciation",
-                                               scale=0.6,
-                                               color=(1, 1, 1))
+                                                position=(295, height - 273),
+                                                size=(20, 20),
+                                                h_align='left',
+                                                v_align='center',
+                                                text="Show Prononciation",
+                                                scale=0.6,
+                                                color=(1, 1, 1))
 
             from bauiv1lib.radiogroup import make_radio_group
             cur_val = babase.app.config.get('Pronunciation', True)
@@ -832,31 +833,31 @@ class SettingsWindow:
                    1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=scale_origin)
         bui.textwidget(parent=self.root_widget,
-                      position=(width * 0.5, height - 45),
-                      size=(20, 20),
-                      h_align='center',
-                      v_align='center',
-                      text="Custom Settings",
-                      scale=0.9,
-                      color=(5, 5, 5))
+                       position=(width * 0.5, height - 45),
+                       size=(20, 20),
+                       h_align='center',
+                       v_align='center',
+                       text="Custom Settings",
+                       scale=0.9,
+                       color=(5, 5, 5))
         cbtn = btn = bui.buttonwidget(parent=self.root_widget,
-                                     autoselect=True,
-                                     position=(30, height - 60),
-                                     size=(30, 30),
-                                     label=babase.charstr(babase.SpecialChar.BACK),
-                                     button_type='backSmall',
-                                     on_activate_call=self._cancel)
+                                      autoselect=True,
+                                      position=(30, height - 60),
+                                      size=(30, 30),
+                                      label=babase.charstr(babase.SpecialChar.BACK),
+                                      button_type='backSmall',
+                                      on_activate_call=self._cancel)
         scroll_position = (30 if uiscale is babase.UIScale.SMALL else
                            40 if uiscale is babase.UIScale.MEDIUM else 50)
         self._scrollwidget = bui.scrollwidget(parent=self.root_widget,
-                                             position=(30, scroll_position),
-                                             simple_culling_v=20.0,
-                                             highlight=False,
-                                             size=(scroll_w, scroll_h),
-                                             selection_loops_to_parent=True)
+                                              position=(30, scroll_position),
+                                              simple_culling_v=20.0,
+                                              highlight=False,
+                                              size=(scroll_w, scroll_h),
+                                              selection_loops_to_parent=True)
         bui.widget(edit=self._scrollwidget, right_widget=self._scrollwidget)
         self._subcontainer = bui.columnwidget(parent=self._scrollwidget,
-                                             selection_loops_to_parent=True)
+                                              selection_loops_to_parent=True)
         ip_button = bui.checkboxwidget(
             parent=self._subcontainer,
             size=(300, 30),
@@ -908,12 +909,12 @@ class SettingsWindow:
             text="Colorful Chat",
             on_value_change_call=self.colorful_chat)
         msg_notification_text = bui.textwidget(parent=self._subcontainer,
-                                              scale=0.8,
-                                              color=(1, 1, 1),
-                                              text='Message Notifcation:',
-                                              size=(100, 30),
-                                              h_align='left',
-                                              v_align='center')
+                                               scale=0.8,
+                                               color=(1, 1, 1),
+                                               text='Message Notifcation:',
+                                               size=(100, 30),
+                                               h_align='left',
+                                               v_align='center')
         msg_notification_widget = PopupMenu(
             parent=self._subcontainer,
             position=(100, height - 1200),
@@ -925,12 +926,12 @@ class SettingsWindow:
             button_size=(80, 25),
             on_value_change_call=self._change_notification)
         self_status_text = bui.textwidget(parent=self._subcontainer,
-                                         scale=0.8,
-                                         color=(1, 1, 1),
-                                         text='Self Status:',
-                                         size=(100, 30),
-                                         h_align='left',
-                                         v_align='center')
+                                          scale=0.8,
+                                          color=(1, 1, 1),
+                                          text='Self Status:',
+                                          size=(100, 30),
+                                          h_align='left',
+                                          v_align='center')
         self_status_widget = PopupMenu(
             parent=self._subcontainer,
             position=(50, height - 1000),
@@ -943,17 +944,17 @@ class SettingsWindow:
             on_value_change_call=self._change_status)
         bui.containerwidget(edit=self.root_widget, cancel_button=btn)
         bui.containerwidget(edit=self.root_widget,
-                           selected_child=(cbtn if cbtn is not None
-                                           and cancel_is_selected else None),
-                           start_button=None)
+                            selected_child=(cbtn if cbtn is not None
+                                            and cancel_is_selected else None),
+                            start_button=None)
 
         self._translation_btn = bui.buttonwidget(parent=self._subcontainer,
-                                                scale=1.2,
-                                                position=(100, 1200),
-                                                size=(150, 50),
-                                                label='Translate Settings',
-                                                on_activate_call=self._translaton_btn,
-                                                autoselect=True)
+                                                 scale=1.2,
+                                                 position=(100, 1200),
+                                                 size=(150, 50),
+                                                 label='Translate Settings',
+                                                 on_activate_call=self._translaton_btn,
+                                                 autoselect=True)
 
     def ip_button(self, value: bool):
         cfg = babase.app.config
@@ -1049,17 +1050,17 @@ class PartyWindow(bui.Window):
                 240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20)))
 
         self._cancel_button = bui.buttonwidget(parent=self._root_widget,
-                                              scale=0.7,
-                                              position=(30, self._height - 47),
-                                              size=(50, 50),
-                                              label='',
-                                              on_activate_call=self.close,
-                                              autoselect=True,
-                                              color=self.bg_color,
-                                              icon=bui.gettexture('crossOut'),
-                                              iconscale=1.2)
+                                               scale=0.7,
+                                               position=(30, self._height - 47),
+                                               size=(50, 50),
+                                               label='',
+                                               on_activate_call=self.close,
+                                               autoselect=True,
+                                               color=self.bg_color,
+                                               icon=bui.gettexture('crossOut'),
+                                               iconscale=1.2)
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=self._cancel_button)
+                            cancel_button=self._cancel_button)
 
         self._menu_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -1073,40 +1074,42 @@ class PartyWindow(bui.Window):
             color=self.bg_color,
             iconscale=1.2)
         try:
-            info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+            info = bs.get_connection_to_host_info().get(
+                'name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().name
             if info != '':
-                self.title = babase.Lstr(value=info['name']) if build_number < 21697 else babase.Lstr(value=info)
+                self.title = babase.Lstr(
+                    value=info['name']) if build_number < 21697 else babase.Lstr(value=info)
         except AttributeError:
             self.title = babase.Lstr(resource=self._r + '.titleText')
-        
+
         self._title_text = bui.textwidget(parent=self._root_widget,
-                                         scale=0.9,
-                                         color=(0.5, 0.7, 0.5),
-                                         text=self.title,
+                                          scale=0.9,
+                                          color=(0.5, 0.7, 0.5),
+                                          text=self.title,
+                                          size=(0, 0),
+                                          position=(self._width * 0.47,
+                                                    self._height - 29),
+                                          maxwidth=self._width * 0.6,
+                                          h_align='center',
+                                          v_align='center')
+        self._empty_str = bui.textwidget(parent=self._root_widget,
+                                         scale=0.75,
                                          size=(0, 0),
-                                         position=(self._width * 0.47,
-                                                   self._height - 29),
-                                         maxwidth=self._width * 0.6,
+                                         position=(self._width * 0.5,
+                                                   self._height - 65),
+                                         maxwidth=self._width * 0.85,
                                          h_align='center',
                                          v_align='center')
-        self._empty_str = bui.textwidget(parent=self._root_widget,
-                                        scale=0.75,
-                                        size=(0, 0),
-                                        position=(self._width * 0.5,
-                                                  self._height - 65),
-                                        maxwidth=self._width * 0.85,
-                                        h_align='center',
-                                        v_align='center')
 
         self._scroll_width = self._width - 50
         self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
-                                             size=(self._scroll_width,
-                                                   self._height - 200),
-                                             position=(30, 80),
-                                             color=self.bg_color)
+                                              size=(self._scroll_width,
+                                                    self._height - 200),
+                                              position=(30, 80),
+                                              color=self.bg_color)
         self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
-                                             border=2,
-                                             margin=0)
+                                              border=2,
+                                              margin=0)
         bui.widget(edit=self._menu_button, down_widget=self._columnwidget)
 
         self._muted_text = bui.textwidget(
@@ -1132,63 +1135,65 @@ class PartyWindow(bui.Window):
             corner_scale=0.7)
 
         bui.widget(edit=self._scrollwidget,
-                  autoselect=True,
-                  left_widget=self._cancel_button,
-                  up_widget=self._cancel_button,
-                  down_widget=self._text_field)
+                   autoselect=True,
+                   left_widget=self._cancel_button,
+                   up_widget=self._cancel_button,
+                   down_widget=self._text_field)
         bui.widget(edit=self._columnwidget,
-                  autoselect=True,
-                  up_widget=self._cancel_button,
-                  down_widget=self._text_field)
+                   autoselect=True,
+                   up_widget=self._cancel_button,
+                   down_widget=self._text_field)
         bui.containerwidget(edit=self._root_widget, selected_child=txt)
         self._send_button = btn = bui.buttonwidget(parent=self._root_widget,
-                                                  size=(50, 35),
-                                                  label=babase.Lstr(resource=self._r + '.sendText'),
+                                                   size=(50, 35),
+                                                   label=babase.Lstr(
+                                                       resource=self._r + '.sendText'),
+                                                   button_type='square',
+                                                   autoselect=True,
+                                                   color=self.bg_color,
+                                                   position=(self._width - 90, 35),
+                                                   on_activate_call=self._send_chat_message)
+        bui.textwidget(edit=txt, on_return_press_call=btn.activate)
+        self._previous_button = bui.buttonwidget(parent=self._root_widget,
+                                                 size=(30, 30),
+                                                 label=babase.charstr(babase.SpecialChar.UP_ARROW),
+                                                 button_type='square',
+                                                 autoselect=True,
+                                                 position=(15, 57),
+                                                 color=self.bg_color,
+                                                 scale=0.75,
+                                                 on_activate_call=self._previous_message)
+        self._next_button = bui.buttonwidget(parent=self._root_widget,
+                                             size=(30, 30),
+                                             label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
+                                             button_type='square',
+                                             autoselect=True,
+                                             color=self.bg_color,
+                                             scale=0.75,
+                                             position=(15, 28),
+                                             on_activate_call=self._next_message)
+        self._translate_button = bui.buttonwidget(parent=self._root_widget,
+                                                  size=(55, 47),
+                                                  label="Trans",
                                                   button_type='square',
                                                   autoselect=True,
                                                   color=self.bg_color,
-                                                  position=(self._width - 90, 35),
-                                                  on_activate_call=self._send_chat_message)
-        bui.textwidget(edit=txt, on_return_press_call=btn.activate)
-        self._previous_button = bui.buttonwidget(parent=self._root_widget,
-                                                size=(30, 30),
-                                                label=babase.charstr(babase.SpecialChar.UP_ARROW),
-                                                button_type='square',
-                                                autoselect=True,
-                                                position=(15, 57),
-                                                color=self.bg_color,
-                                                scale=0.75,
-                                                on_activate_call=self._previous_message)
-        self._next_button = bui.buttonwidget(parent=self._root_widget,
-                                            size=(30, 30),
-                                            label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
-                                            button_type='square',
-                                            autoselect=True,
-                                            color=self.bg_color,
-                                            scale=0.75,
-                                            position=(15, 28),
-                                            on_activate_call=self._next_message)
-        self._translate_button = bui.buttonwidget(parent=self._root_widget,
-                                                 size=(55, 47),
-                                                 label="Trans",
-                                                 button_type='square',
-                                                 autoselect=True,
-                                                 color=self.bg_color,
-                                                 scale=0.75,
-                                                 position=(self._width - 28, 35),
-                                                 on_activate_call=self._translate)
+                                                  scale=0.75,
+                                                  position=(self._width - 28, 35),
+                                                  on_activate_call=self._translate)
         if babase.app.config['copy button']:
             self._copy_button = bui.buttonwidget(parent=self._root_widget,
-                                                size=(15, 15),
-                                                label='©',
-                                                button_type='backSmall',
-                                                autoselect=True,
-                                                color=self.bg_color,
-                                                position=(self._width - 40, 80),
-                                                on_activate_call=self._copy_to_clipboard)
+                                                 size=(15, 15),
+                                                 label='©',
+                                                 button_type='backSmall',
+                                                 autoselect=True,
+                                                 color=self.bg_color,
+                                                 position=(self._width - 40, 80),
+                                                 on_activate_call=self._copy_to_clipboard)
         self._ping_button = None
         try:
-            info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+            info = bs.get_connection_to_host_info().get(
+                'name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().name
             if info != '':
                 if babase.app.config['ping button']:
                     self._ping_button = bui.buttonwidget(
@@ -1205,40 +1210,40 @@ class PartyWindow(bui.Window):
                         iconscale=1.2)
                 if babase.app.config['IP button']:
                     self._ip_port_button = bui.buttonwidget(parent=self._root_widget,
-                                                        size=(30, 30),
-                                                        label='IP',
-                                                        button_type='square',
-                                                        autoselect=True,
-                                                        color=self.bg_color,
-                                                        position=(self._width - 530,
-                                                                    self._height - 100),
-                                                        on_activate_call=self._ip_port_msg)
+                                                            size=(30, 30),
+                                                            label='IP',
+                                                            button_type='square',
+                                                            autoselect=True,
+                                                            color=self.bg_color,
+                                                            position=(self._width - 530,
+                                                                      self._height - 100),
+                                                            on_activate_call=self._ip_port_msg)
         except AttributeError:
             pass
         self._settings_button = bui.buttonwidget(parent=self._root_widget,
-                                                size=(50, 50),
-                                                scale=0.5,
-                                                button_type='square',
-                                                autoselect=True,
-                                                color=self.bg_color,
-                                                position=(self._width - 40, self._height - 47),
-                                                on_activate_call=self._on_setting_button_press,
-                                                icon=bui.gettexture('settingsIcon'),
-                                                iconscale=1.2)
+                                                 size=(50, 50),
+                                                 scale=0.5,
+                                                 button_type='square',
+                                                 autoselect=True,
+                                                 color=self.bg_color,
+                                                 position=(self._width - 40, self._height - 47),
+                                                 on_activate_call=self._on_setting_button_press,
+                                                 icon=bui.gettexture('settingsIcon'),
+                                                 iconscale=1.2)
         self._privatechat_button = bui.buttonwidget(parent=self._root_widget,
-                                                   size=(50, 50),
-                                                   scale=0.5,
-                                                   button_type='square',
-                                                   autoselect=True,
-                                                   color=self.bg_color,
-                                                   position=(self._width - 40, self._height - 80),
-                                                   on_activate_call=self._on_privatechat_button_press,
-                                                   icon=bui.gettexture('ouyaOButton'),
-                                                   iconscale=1.2)
+                                                    size=(50, 50),
+                                                    scale=0.5,
+                                                    button_type='square',
+                                                    autoselect=True,
+                                                    color=self.bg_color,
+                                                    position=(self._width - 40, self._height - 80),
+                                                    on_activate_call=self._on_privatechat_button_press,
+                                                    icon=bui.gettexture('ouyaOButton'),
+                                                    iconscale=1.2)
         self._name_widgets: List[bui.Widget] = []
         self._roster: Optional[List[Dict[str, Any]]] = None
         self._update_timer = bs.apptimer(1.0,
-                                      bs.WeakCall(self._update))
+                                         bs.WeakCall(self._update))
         self._update()
 
     def on_chat_message(self, msg: str, sent=None) -> None:
@@ -1258,20 +1263,20 @@ class PartyWindow(bui.Window):
             color = (1, 1, 1)
         maxwidth = self._scroll_width * 0.94
         txt = bui.textwidget(parent=self._columnwidget,
-                            text=msg,
-                            h_align='left',
-                            v_align='center',
-                            size=(0, 13),
-                            scale=0.55,
-                            color=color,
-                            maxwidth=maxwidth,
-                            shadow=0.3,
-                            flatness=1.0)
+                             text=msg,
+                             h_align='left',
+                             v_align='center',
+                             size=(0, 13),
+                             scale=0.55,
+                             color=color,
+                             maxwidth=maxwidth,
+                             shadow=0.3,
+                             flatness=1.0)
         if sent:
             bui.textwidget(edit=txt, size=(100, 15),
-                          selectable=True,
-                          click_activate=True,
-                          on_activate_call=babase.Call(bui.screenmessage, f'Message sent: {_get_local_time(sent)}'))
+                           selectable=True,
+                           click_activate=True,
+                           on_activate_call=babase.Call(bui.screenmessage, f'Message sent: {_get_local_time(sent)}'))
         self._chat_texts.append(txt)
         if len(self._chat_texts) > 40:
             first = self._chat_texts.pop(0)
@@ -1327,8 +1332,8 @@ class PartyWindow(bui.Window):
                 bui.textwidget(edit=self._muted_text, color=(1, 1, 1, 0.0))
             if self._ping_button:
                 bui.buttonwidget(edit=self._ping_button,
-                                label=f'{_ping}',
-                                textcolor=self._get_ping_color())
+                                 label=f'{_ping}',
+                                 textcolor=self._get_ping_color())
 
             # update roster section
             roster = bs.get_game_roster()
@@ -1343,11 +1348,11 @@ class PartyWindow(bui.Window):
                 if not self._roster:
                     top_section_height = 60
                     bui.textwidget(edit=self._empty_str,
-                                  text=babase.Lstr(resource=self._r + '.emptyText'))
+                                   text=babase.Lstr(resource=self._r + '.emptyText'))
                     bui.scrollwidget(edit=self._scrollwidget,
-                                    size=(self._width - 50,
-                                          self._height - top_section_height - 110),
-                                    position=(30, 80))
+                                     size=(self._width - 50,
+                                           self._height - top_section_height - 110),
+                                     position=(30, 80))
                 else:
                     columns = 1 if len(
                         self._roster) == 1 else 2 if len(self._roster) == 2 else 3
@@ -1391,19 +1396,19 @@ class PartyWindow(bui.Window):
                                         'Error calcing client name str.')
                                     p_str = '???'
                                 widget = bui.textwidget(parent=self._root_widget,
-                                                       position=(pos[0], pos[1]),
-                                                       scale=t_scale,
-                                                       size=(c_width * 0.85, 30),
-                                                       maxwidth=c_width * 0.85,
-                                                       color=(1, 1,
-                                                              1) if index == 0 else
-                                                       (1, 1, 1),
-                                                       selectable=True,
-                                                       autoselect=True,
-                                                       click_activate=True,
-                                                       text=babase.Lstr(value=p_str),
-                                                       h_align='left',
-                                                       v_align='center')
+                                                        position=(pos[0], pos[1]),
+                                                        scale=t_scale,
+                                                        size=(c_width * 0.85, 30),
+                                                        maxwidth=c_width * 0.85,
+                                                        color=(1, 1,
+                                                               1) if index == 0 else
+                                                        (1, 1, 1),
+                                                        selectable=True,
+                                                        autoselect=True,
+                                                        click_activate=True,
+                                                        text=babase.Lstr(value=p_str),
+                                                        h_align='left',
+                                                        v_align='center')
                                 self._name_widgets.append(widget)
 
                                 # in newer versions client_id will be present and
@@ -1420,10 +1425,10 @@ class PartyWindow(bui.Window):
                                 #  calls; not spec-string (perhaps should wait till
                                 #  client_id is more readily available though).
                                 bui.textwidget(edit=widget,
-                                              on_activate_call=babase.Call(
-                                                  self._on_party_member_press,
-                                                  self._roster[index]['client_id'],
-                                                  is_host, widget))
+                                               on_activate_call=babase.Call(
+                                                   self._on_party_member_press,
+                                                   self._roster[index]['client_id'],
+                                                   is_host, widget))
                                 pos = (self._width * 0.53 - c_width_total * 0.5 +
                                        c_width * x,
                                        self._height - 65 - c_height * y)
@@ -1448,16 +1453,16 @@ class PartyWindow(bui.Window):
                                             maxwidth=c_width * 0.96 - twd,
                                             color=(0.1, 1, 0.1, 0.5),
                                             text=babase.Lstr(resource=self._r +
-                                                         '.hostText'),
+                                                             '.hostText'),
                                             scale=0.4,
                                             shadow=0.1,
                                             flatness=1.0))
                     bui.textwidget(edit=self._empty_str, text='')
                     bui.scrollwidget(edit=self._scrollwidget,
-                                    size=(self._width - 50,
-                                          max(100, self._height - 139 -
-                                              c_height_total)),
-                                    position=(30, 80))
+                                     size=(self._width - 50,
+                                           max(100, self._height - 139 -
+                                               c_height_total)),
+                                     position=(30, 80))
         else:
             bui.set_party_window_open(False)
             for widget in self._name_widgets:
@@ -1481,19 +1486,19 @@ class PartyWindow(bui.Window):
                 scroll_height = (165 if uiscale is babase.UIScale.SMALL else
                                  280 if uiscale is babase.UIScale.MEDIUM else 400)
                 bui.scrollwidget(edit=self._scrollwidget,
-                                size=(self._width - 50, scroll_height))
+                                 size=(self._width - 50, scroll_height))
                 for msg in msgs:
                     message = messenger._format_message(msg)
                     self._add_msg(message, msg['sent'])
                 self._filter_text = bui.textwidget(parent=self._root_widget,
-                                                  scale=0.6,
-                                                  color=(0.9, 1.0, 0.9),
-                                                  text='Filter: ',
-                                                  size=(0, 0),
-                                                  position=(self._width * 0.3,
-                                                            self._height - 70),
-                                                  h_align='center',
-                                                  v_align='center')
+                                                   scale=0.6,
+                                                   color=(0.9, 1.0, 0.9),
+                                                   text='Filter: ',
+                                                   size=(0, 0),
+                                                   position=(self._width * 0.3,
+                                                             self._height - 70),
+                                                   h_align='center',
+                                                   v_align='center')
                 choices = [i for i in messenger.saved_ids]
                 choices_display = [babase.Lstr(value=messenger.saved_ids[i])
                                    for i in messenger.saved_ids]
@@ -1521,19 +1526,19 @@ class PartyWindow(bui.Window):
                     else:
                         color = (0.9, 1.0, 0.9)
                     self._status_text = bui.textwidget(parent=self._root_widget,
-                                                      scale=0.5,
-                                                      color=color,
-                                                      text=f'Status:\t{user_status}',
-                                                      size=(200, 30),
-                                                      position=(self._width * 0.3,
-                                                                self._height - 110),
-                                                      h_align='center',
-                                                      v_align='center',
-                                                      autoselect=True,
-                                                      selectable=True,
-                                                      click_activate=True)
+                                                       scale=0.5,
+                                                       color=color,
+                                                       text=f'Status:\t{user_status}',
+                                                       size=(200, 30),
+                                                       position=(self._width * 0.3,
+                                                                 self._height - 110),
+                                                       h_align='center',
+                                                       v_align='center',
+                                                       autoselect=True,
+                                                       selectable=True,
+                                                       click_activate=True)
                     bui.textwidget(edit=self._status_text,
-                                  on_activate_call=babase.Call(messenger._get_status, messenger.filter, 'last_seen'))
+                                   on_activate_call=babase.Call(messenger._get_status, messenger.filter, 'last_seen'))
 
     def _change_filter(self, choice):
         if choice == 'add':
@@ -1792,7 +1797,7 @@ class PartyWindow(bui.Window):
             kick_str = babase.Lstr(resource='kickText')
         else:
             # kick-votes appeared in build 14248
-            if build_number <14248:
+            if build_number < 14248:
                 return
             kick_str = babase.Lstr(resource='kickVoteText')
         uiscale = bui.app.ui_v1.uiscale
@@ -1859,8 +1864,9 @@ class PartyWindow(bui.Window):
                 bs.chatmessage(f"My Unique ID : {myid}")
             elif msg == '/save':
                 try:
-                    info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
-                    config = babase.app.config 
+                    info = bs.get_connection_to_host_info().get(
+                        'name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().name
+                    config = babase.app.config
                     if info != '':
                         title = info['name']
                         if not isinstance(config.get('Saved Servers'), dict):
@@ -1983,7 +1989,8 @@ class PartyWindow(bui.Window):
 
     def ping_server(self):
         try:
-            info = bs.get_connection_to_host_info().get('name', '')  if build_number < 21697 else bs.get_connection_to_host_info_2().name
+            info = bs.get_connection_to_host_info().get(
+                'name', '') if build_number < 21697 else bs.get_connection_to_host_info_2().name
             if info != '':
                 self.pingThread = PingThread(_ip, _port)
                 self.pingThread.start()
@@ -2091,41 +2098,41 @@ class LoginWindow:
         uiscale = bui.app.ui_v1.uiscale
         bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
         self._root_widget = bui.containerwidget(size=(500, 250),
-                                               transition='in_scale',
-                                               color=bg_color,
-                                               toolbar_visibility='menu_minimal_no_back',
-                                               parent=bui.get_special_widget('overlay_stack'),
-                                               on_outside_click_call=self._close,
-                                               scale=(2.1 if uiscale is babase.UIScale.SMALL else
-                                                      1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
-                                               stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
-                                                   240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20))
+                                                transition='in_scale',
+                                                color=bg_color,
+                                                toolbar_visibility='menu_minimal_no_back',
+                                                parent=bui.get_special_widget('overlay_stack'),
+                                                on_outside_click_call=self._close,
+                                                scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                                                       1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
+                                                stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+            240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20))
         self._title_text = bui.textwidget(parent=self._root_widget,
-                                         scale=0.8,
-                                         color=(1, 1, 1),
-                                         text=title,
-                                         size=(0, 0),
-                                         position=(250, 200),
-                                         h_align='center',
-                                         v_align='center')
+                                          scale=0.8,
+                                          color=(1, 1, 1),
+                                          text=title,
+                                          size=(0, 0),
+                                          position=(250, 200),
+                                          h_align='center',
+                                          v_align='center')
         self._id = bui.textwidget(parent=self._root_widget,
-                                 scale=0.5,
-                                 color=(1, 1, 1),
-                                 text=f'Account: ' +
-                                 bui.app.plus.get_v1_account_misc_read_val_2(
-                                     'resolvedAccountID', ''),
-                                 size=(0, 0),
-                                 position=(220, 170),
-                                 h_align='center',
-                                 v_align='center')
+                                  scale=0.5,
+                                  color=(1, 1, 1),
+                                  text=f'Account: ' +
+                                  bui.app.plus.get_v1_account_misc_read_val_2(
+                                      'resolvedAccountID', ''),
+                                  size=(0, 0),
+                                  position=(220, 170),
+                                  h_align='center',
+                                  v_align='center')
         self._registrationkey_text = bui.textwidget(parent=self._root_widget,
-                                                   scale=0.5,
-                                                   color=(1, 1, 1),
-                                                   text=f'Registration Key:',
-                                                   size=(0, 0),
-                                                   position=(100, 140),
-                                                   h_align='center',
-                                                   v_align='center')
+                                                    scale=0.5,
+                                                    color=(1, 1, 1),
+                                                    text=f'Registration Key:',
+                                                    size=(0, 0),
+                                                    position=(100, 140),
+                                                    h_align='center',
+                                                    v_align='center')
         self._text_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
@@ -2138,25 +2145,25 @@ class LoginWindow:
             v_align='center',
             corner_scale=0.7)
         self._connect_button = bui.buttonwidget(parent=self._root_widget,
-                                               size=(150, 30),
-                                               color=(0, 1, 0),
-                                               label='Get Registration Key',
-                                               button_type='square',
-                                               autoselect=True,
-                                               position=(150, 80),
-                                               on_activate_call=self._connect)
+                                                size=(150, 30),
+                                                color=(0, 1, 0),
+                                                label='Get Registration Key',
+                                                button_type='square',
+                                                autoselect=True,
+                                                position=(150, 80),
+                                                on_activate_call=self._connect)
         self._confirm_button = bui.buttonwidget(parent=self._root_widget,
-                                               size=(50, 30),
-                                               label=label,
-                                               button_type='square',
-                                               autoselect=True,
-                                               position=(200, 40),
-                                               on_activate_call=self._confirmcall)
+                                                size=(50, 30),
+                                                label=label,
+                                                button_type='square',
+                                                autoselect=True,
+                                                position=(200, 40),
+                                                on_activate_call=self._confirmcall)
         bui.textwidget(edit=self._text_field, on_return_press_call=self._confirm_button.activate)
 
     def _close(self):
         bui.containerwidget(edit=self._root_widget,
-                           transition=('out_scale'))
+                            transition=('out_scale'))
 
     def _connect(self):
         try:
@@ -2184,29 +2191,29 @@ class AddNewIdWindow:
         uiscale = bui.app.ui_v1.uiscale
         bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
         self._root_widget = bui.containerwidget(size=(500, 250),
-                                               transition='in_scale',
-                                               color=bg_color,
-                                               toolbar_visibility='menu_minimal_no_back',
-                                               parent=bui.get_special_widget('overlay_stack'),
-                                               on_outside_click_call=self._close,
-                                               scale=(2.1 if uiscale is babase.UIScale.SMALL else
-                                                      1.5 if uiscale is babase.UIScale.MEDIUM else 1.0))
+                                                transition='in_scale',
+                                                color=bg_color,
+                                                toolbar_visibility='menu_minimal_no_back',
+                                                parent=bui.get_special_widget('overlay_stack'),
+                                                on_outside_click_call=self._close,
+                                                scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                                                       1.5 if uiscale is babase.UIScale.MEDIUM else 1.0))
         self._title_text = bui.textwidget(parent=self._root_widget,
-                                         scale=0.8,
-                                         color=(1, 1, 1),
-                                         text='Add New ID',
-                                         size=(0, 0),
-                                         position=(250, 200),
-                                         h_align='center',
-                                         v_align='center')
+                                          scale=0.8,
+                                          color=(1, 1, 1),
+                                          text='Add New ID',
+                                          size=(0, 0),
+                                          position=(250, 200),
+                                          h_align='center',
+                                          v_align='center')
         self._accountid_text = bui.textwidget(parent=self._root_widget,
-                                             scale=0.6,
-                                             color=(1, 1, 1),
-                                             text='pb-id: ',
-                                             size=(0, 0),
-                                             position=(50, 155),
-                                             h_align='center',
-                                             v_align='center')
+                                              scale=0.6,
+                                              color=(1, 1, 1),
+                                              text='pb-id: ',
+                                              size=(0, 0),
+                                              position=(50, 155),
+                                              h_align='center',
+                                              v_align='center')
         self._accountid_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
@@ -2219,13 +2226,13 @@ class AddNewIdWindow:
             v_align='center',
             corner_scale=0.7)
         self._nickname_text = bui.textwidget(parent=self._root_widget,
-                                            scale=0.5,
-                                            color=(1, 1, 1),
-                                            text='Nickname: ',
-                                            size=(0, 0),
-                                            position=(50, 115),
-                                            h_align='center',
-                                            v_align='center')
+                                             scale=0.5,
+                                             color=(1, 1, 1),
+                                             text='Nickname: ',
+                                             size=(0, 0),
+                                             position=(50, 115),
+                                             h_align='center',
+                                             v_align='center')
         self._nickname_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
@@ -2238,30 +2245,30 @@ class AddNewIdWindow:
             v_align='center',
             corner_scale=0.7)
         self._help_text = bui.textwidget(parent=self._root_widget,
-                                        scale=0.4,
-                                        color=(0.1, 0.9, 0.9),
-                                        text='Help:\nEnter pb-id of account you\n    want to chat to\nEnter nickname of id to\n    recognize id easily\nLeave nickname <default>\n    to use their default name',
-                                        size=(0, 0),
-                                        position=(325, 120),
-                                        h_align='left',
-                                        v_align='center')
+                                         scale=0.4,
+                                         color=(0.1, 0.9, 0.9),
+                                         text='Help:\nEnter pb-id of account you\n    want to chat to\nEnter nickname of id to\n    recognize id easily\nLeave nickname <default>\n    to use their default name',
+                                         size=(0, 0),
+                                         position=(325, 120),
+                                         h_align='left',
+                                         v_align='center')
         self._add = bui.buttonwidget(parent=self._root_widget,
-                                    size=(50, 30),
-                                    label='Add',
-                                    button_type='square',
-                                    autoselect=True,
-                                    position=(100, 50),
-                                    on_activate_call=babase.Call(self._relay_function))
+                                     size=(50, 30),
+                                     label='Add',
+                                     button_type='square',
+                                     autoselect=True,
+                                     position=(100, 50),
+                                     on_activate_call=babase.Call(self._relay_function))
         bui.textwidget(edit=self._accountid_field, on_return_press_call=self._add.activate)
         self._remove = bui.buttonwidget(parent=self._root_widget,
-                                       size=(75, 30),
-                                       label='Remove',
-                                       button_type='square',
-                                       autoselect=True,
-                                       position=(170, 50),
-                                       on_activate_call=self._remove_id)
+                                        size=(75, 30),
+                                        label='Remove',
+                                        button_type='square',
+                                        autoselect=True,
+                                        position=(170, 50),
+                                        on_activate_call=self._remove_id)
         bui.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._close)
+                            on_cancel_call=self._close)
 
     def _relay_function(self):
         account_id = bui.textwidget(query=self._accountid_field)
@@ -2300,7 +2307,7 @@ class AddNewIdWindow:
 
     def _close(self):
         bui.containerwidget(edit=self._root_widget,
-                           transition=('out_scale'))
+                            transition=('out_scale'))
 
 
 class AddNewChoiceWindow:
@@ -2308,23 +2315,23 @@ class AddNewChoiceWindow:
         uiscale = bui.app.ui_v1.uiscale
         bg_color = babase.app.config.get('PartyWindow Main Color', (0.5, 0.5, 0.5))
         self._root_widget = bui.containerwidget(size=(500, 250),
-                                               transition='in_scale',
-                                               color=bg_color,
-                                               toolbar_visibility='menu_minimal_no_back',
-                                               parent=bui.get_special_widget('overlay_stack'),
-                                               on_outside_click_call=self._close,
-                                               scale=(2.1 if uiscale is babase.UIScale.SMALL else
-                                                      1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
-                                               stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
-                                                   240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20))
+                                                transition='in_scale',
+                                                color=bg_color,
+                                                toolbar_visibility='menu_minimal_no_back',
+                                                parent=bui.get_special_widget('overlay_stack'),
+                                                on_outside_click_call=self._close,
+                                                scale=(2.1 if uiscale is babase.UIScale.SMALL else
+                                                       1.5 if uiscale is babase.UIScale.MEDIUM else 1.0),
+                                                stack_offset=(0, -10) if uiscale is babase.UIScale.SMALL else (
+            240, 0) if uiscale is babase.UIScale.MEDIUM else (330, 20))
         self._title_text = bui.textwidget(parent=self._root_widget,
-                                         scale=0.8,
-                                         color=(1, 1, 1),
-                                         text='Add Custom Command',
-                                         size=(0, 0),
-                                         position=(250, 200),
-                                         h_align='center',
-                                         v_align='center')
+                                          scale=0.8,
+                                          color=(1, 1, 1),
+                                          text='Add Custom Command',
+                                          size=(0, 0),
+                                          position=(250, 200),
+                                          h_align='center',
+                                          v_align='center')
         self._text_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
@@ -2337,30 +2344,30 @@ class AddNewChoiceWindow:
             v_align='center',
             corner_scale=0.7)
         self._help_text = bui.textwidget(parent=self._root_widget,
-                                        scale=0.4,
-                                        color=(0.2, 0.2, 0.2),
-                                        text='Use\n$c = client id\n$a = account id\n$n = name',
-                                        size=(0, 0),
-                                        position=(70, 75),
-                                        h_align='left',
-                                        v_align='center')
+                                         scale=0.4,
+                                         color=(0.2, 0.2, 0.2),
+                                         text='Use\n$c = client id\n$a = account id\n$n = name',
+                                         size=(0, 0),
+                                         position=(70, 75),
+                                         h_align='left',
+                                         v_align='center')
         self._add = bui.buttonwidget(parent=self._root_widget,
-                                    size=(50, 30),
-                                    label='Add',
-                                    button_type='square',
-                                    autoselect=True,
-                                    position=(150, 50),
-                                    on_activate_call=self._add_choice)
+                                     size=(50, 30),
+                                     label='Add',
+                                     button_type='square',
+                                     autoselect=True,
+                                     position=(150, 50),
+                                     on_activate_call=self._add_choice)
         bui.textwidget(edit=self._text_field, on_return_press_call=self._add.activate)
         self._remove = bui.buttonwidget(parent=self._root_widget,
-                                       size=(50, 30),
-                                       label='Remove',
-                                       button_type='square',
-                                       autoselect=True,
-                                       position=(350, 50),
-                                       on_activate_call=self._remove_custom_command)
+                                        size=(50, 30),
+                                        label='Remove',
+                                        button_type='square',
+                                        autoselect=True,
+                                        position=(350, 50),
+                                        on_activate_call=self._remove_custom_command)
         bui.containerwidget(edit=self._root_widget,
-                           on_cancel_call=self._close)
+                            on_cancel_call=self._close)
 
     def _add_choice(self):
         newCommand = bui.textwidget(query=self._text_field)
@@ -2402,7 +2409,7 @@ class AddNewChoiceWindow:
 
     def _close(self):
         bui.containerwidget(edit=self._root_widget,
-                           transition=('out_scale'))
+                            transition=('out_scale'))
 
 
 class Manual_camera_window:
@@ -2412,63 +2419,63 @@ class Manual_camera_window:
             size=(0, 0))
         button_size = (30, 30)
         self._title_text = bui.textwidget(parent=self._root_widget,
-                                         scale=0.9,
+                                          scale=0.9,
+                                          color=(1, 1, 1),
+                                          text='Manual Camera Setup',
+                                          size=(0, 0),
+                                          position=(130, 153),
+                                          h_align='center',
+                                          v_align='center')
+        self._xminus = bui.buttonwidget(parent=self._root_widget,
+                                        size=button_size,
+                                        label=babase.charstr(babase.SpecialChar.LEFT_ARROW),
+                                        button_type='square',
+                                        autoselect=True,
+                                        position=(1, 60),
+                                        on_activate_call=babase.Call(self._change_camera_position, 'x-'))
+        self._xplus = bui.buttonwidget(parent=self._root_widget,
+                                       size=button_size,
+                                       label=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
+                                       button_type='square',
+                                       autoselect=True,
+                                       position=(60, 60),
+                                       on_activate_call=babase.Call(self._change_camera_position, 'x'))
+        self._yplus = bui.buttonwidget(parent=self._root_widget,
+                                       size=button_size,
+                                       label=babase.charstr(babase.SpecialChar.UP_ARROW),
+                                       button_type='square',
+                                       autoselect=True,
+                                       position=(30, 100),
+                                       on_activate_call=babase.Call(self._change_camera_position, 'y'))
+        self._yminus = bui.buttonwidget(parent=self._root_widget,
+                                        size=button_size,
+                                        label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
+                                        button_type='square',
+                                        autoselect=True,
+                                        position=(30, 20),
+                                        on_activate_call=babase.Call(self._change_camera_position, 'y-'))
+        self.inwards = bui.buttonwidget(parent=self._root_widget,
+                                        size=(100, 30),
+                                        label='INWARDS',
+                                        button_type='square',
+                                        autoselect=True,
+                                        position=(120, 90),
+                                        on_activate_call=babase.Call(self._change_camera_position, 'z-'))
+        self._outwards = bui.buttonwidget(parent=self._root_widget,
+                                          size=(100, 30),
+                                          label='OUTWARDS',
+                                          button_type='square',
+                                          autoselect=True,
+                                          position=(120, 50),
+                                          on_activate_call=babase.Call(self._change_camera_position, 'z'))
+        self._step_text = bui.textwidget(parent=self._root_widget,
+                                         scale=0.5,
                                          color=(1, 1, 1),
-                                         text='Manual Camera Setup',
+                                         text='Step:',
                                          size=(0, 0),
-                                         position=(130, 153),
+                                         position=(1, -20),
                                          h_align='center',
                                          v_align='center')
-        self._xminus = bui.buttonwidget(parent=self._root_widget,
-                                       size=button_size,
-                                       label=babase.charstr(babase.SpecialChar.LEFT_ARROW),
-                                       button_type='square',
-                                       autoselect=True,
-                                       position=(1, 60),
-                                       on_activate_call=babase.Call(self._change_camera_position, 'x-'))
-        self._xplus = bui.buttonwidget(parent=self._root_widget,
-                                      size=button_size,
-                                      label=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
-                                      button_type='square',
-                                      autoselect=True,
-                                      position=(60, 60),
-                                      on_activate_call=babase.Call(self._change_camera_position, 'x'))
-        self._yplus = bui.buttonwidget(parent=self._root_widget,
-                                      size=button_size,
-                                      label=babase.charstr(babase.SpecialChar.UP_ARROW),
-                                      button_type='square',
-                                      autoselect=True,
-                                      position=(30, 100),
-                                      on_activate_call=babase.Call(self._change_camera_position, 'y'))
-        self._yminus = bui.buttonwidget(parent=self._root_widget,
-                                       size=button_size,
-                                       label=babase.charstr(babase.SpecialChar.DOWN_ARROW),
-                                       button_type='square',
-                                       autoselect=True,
-                                       position=(30, 20),
-                                       on_activate_call=babase.Call(self._change_camera_position, 'y-'))
-        self.inwards = bui.buttonwidget(parent=self._root_widget,
-                                       size=(100, 30),
-                                       label='INWARDS',
-                                       button_type='square',
-                                       autoselect=True,
-                                       position=(120, 90),
-                                       on_activate_call=babase.Call(self._change_camera_position, 'z-'))
-        self._outwards = bui.buttonwidget(parent=self._root_widget,
-                                         size=(100, 30),
-                                         label='OUTWARDS',
-                                         button_type='square',
-                                         autoselect=True,
-                                         position=(120, 50),
-                                         on_activate_call=babase.Call(self._change_camera_position, 'z'))
-        self._step_text = bui.textwidget(parent=self._root_widget,
-                                        scale=0.5,
-                                        color=(1, 1, 1),
-                                        text='Step:',
-                                        size=(0, 0),
-                                        position=(1, -20),
-                                        h_align='center',
-                                        v_align='center')
         self._text_field = bui.textwidget(
             parent=self._root_widget,
             editable=True,
@@ -2481,25 +2488,25 @@ class Manual_camera_window:
             v_align='center',
             corner_scale=0.7)
         self._reset = bui.buttonwidget(parent=self._root_widget,
+                                       size=(50, 30),
+                                       label='Reset',
+                                       button_type='square',
+                                       autoselect=True,
+                                       position=(120, -35),
+                                       on_activate_call=babase.Call(self._change_camera_position, 'reset'))
+        self._done = bui.buttonwidget(parent=self._root_widget,
                                       size=(50, 30),
-                                      label='Reset',
+                                      label='Done',
                                       button_type='square',
                                       autoselect=True,
-                                      position=(120, -35),
-                                      on_activate_call=babase.Call(self._change_camera_position, 'reset'))
-        self._done = bui.buttonwidget(parent=self._root_widget,
-                                     size=(50, 30),
-                                     label='Done',
-                                     button_type='square',
-                                     autoselect=True,
-                                     position=(180, -35),
-                                     on_activate_call=self._close)
+                                      position=(180, -35),
+                                      on_activate_call=self._close)
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=self._done)
+                            cancel_button=self._done)
 
     def _close(self):
         bui.containerwidget(edit=self._root_widget,
-                           transition=('out_scale'))
+                            transition=('out_scale'))
 
     def _change_camera_position(self, direction):
         activity = bs.get_foreground_host_activity()
@@ -2604,14 +2611,14 @@ def __popup_menu_window_init__(self,
                 min(
                     maxwidth,
                     _babase.get_string_width(choice_display_name,
-                                         suppress_warning=True)) + 75)
+                                             suppress_warning=True)) + 75)
         else:
             self._width = max(
                 self._width,
                 min(
                     maxwidth,
                     _babase.get_string_width(choice_display_name,
-                                         suppress_warning=True)) + 60)
+                                             suppress_warning=True)) + 60)
 
     # init parent class - this will rescale and reposition things as
     # needed and create our root widget
@@ -2623,23 +2630,23 @@ def __popup_menu_window_init__(self,
 
     if self._use_scroll:
         self._scrollwidget = bui.scrollwidget(parent=self.root_widget,
-                                             position=(20, 20),
-                                             highlight=False,
-                                             color=(0.35, 0.55, 0.15),
-                                             size=(self._width - 40,
-                                                   self._height - 40))
+                                              position=(20, 20),
+                                              highlight=False,
+                                              color=(0.35, 0.55, 0.15),
+                                              size=(self._width - 40,
+                                                    self._height - 40))
         self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
-                                             border=2,
-                                             margin=0)
+                                              border=2,
+                                              margin=0)
     else:
         self._offset_widget = bui.containerwidget(parent=self.root_widget,
-                                                 position=(30, 15),
-                                                 size=(self._width - 40,
-                                                       self._height),
-                                                 background=False)
+                                                  position=(30, 15),
+                                                  size=(self._width - 40,
+                                                        self._height),
+                                                  background=False)
         self._columnwidget = bui.columnwidget(parent=self._offset_widget,
-                                             border=2,
-                                             margin=0)
+                                              border=2,
+                                              margin=0)
     for index, choice in enumerate(choices):
         if len(choices_display_fin) == len(choices):
             choice_display_name = choices_display_fin[index]
@@ -2647,23 +2654,23 @@ def __popup_menu_window_init__(self,
             choice_display_name = choice
         inactive = (choice in self._choices_disabled)
         wdg = bui.textwidget(parent=self._columnwidget,
-                            size=(self._width - 40, 28),
-                            on_select_call=babase.Call(self._select, index),
-                            click_activate=True,
-                            color=(0.5, 0.5, 0.5, 0.5) if inactive else
-                            ((0.5, 1, 0.5,
+                             size=(self._width - 40, 28),
+                             on_select_call=babase.Call(self._select, index),
+                             click_activate=True,
+                             color=(0.5, 0.5, 0.5, 0.5) if inactive else
+                             ((0.5, 1, 0.5,
                               1) if choice == self._current_choice else
-                             (0.8, 0.8, 0.8, 1.0)),
-                            padding=0,
-                            maxwidth=maxwidth,
-                            text=choice_display_name,
-                            on_activate_call=self._activate,
-                            v_align='center',
-                            selectable=(not inactive))
+                              (0.8, 0.8, 0.8, 1.0)),
+                             padding=0,
+                             maxwidth=maxwidth,
+                             text=choice_display_name,
+                             on_activate_call=self._activate,
+                             v_align='center',
+                             selectable=(not inactive))
         if choice == self._current_choice:
             bui.containerwidget(edit=self._columnwidget,
-                               selected_child=wdg,
-                               visible_child=wdg)
+                                selected_child=wdg,
+                                visible_child=wdg)
 
     # ok from now on our delegate can be called
     self._delegate = weakref.ref(delegate)
@@ -2745,6 +2752,7 @@ def _get_store_char_tex(self) -> str:
         'storeCharacterEaster' if bui.app.plus.get_v1_account_misc_read_val(
         'easter', False) else 'storeCharacter')
 
+
 class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2752,6 +2760,8 @@ class NewMainMenuWindow(mainmenu.MainMenuWindow):
         bui.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
+
+
 class InitalRun(babase.Plugin):
     def __init__(self):
         if build_number >= 21140:

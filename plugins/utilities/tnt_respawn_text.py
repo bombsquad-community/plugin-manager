@@ -129,7 +129,8 @@ class TNTRespawnText(babase.Plugin):
             args[0]._tnt.node.add_death_action(tnt_callback)
         return wrapper
     # Let's replace the original init function with our modified version.
-    bascenev1lib.actor.bomb.TNTSpawner.__init__ = new_init(bascenev1lib.actor.bomb.TNTSpawner.__init__)
+    bascenev1lib.actor.bomb.TNTSpawner.__init__ = new_init(
+        bascenev1lib.actor.bomb.TNTSpawner.__init__)
 
     # Our modified update function.
     # This gets called every 1.1s. Check the TNTSpawner class in the game's code for details.
@@ -215,4 +216,5 @@ class TNTRespawnText(babase.Plugin):
         return wrapper
 
     # Let's replace the original update function with our modified version.
-    bascenev1lib.actor.bomb.TNTSpawner._update = new_update(bascenev1lib.actor.bomb.TNTSpawner._update)
+    bascenev1lib.actor.bomb.TNTSpawner._update = new_update(
+        bascenev1lib.actor.bomb.TNTSpawner._update)

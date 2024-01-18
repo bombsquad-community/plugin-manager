@@ -43,11 +43,11 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 from bascenev1lib.actor.scoreboard import Scoreboard
 from bascenev1lib.actor.spazfactory import SpazFactory
 from bascenev1lib.actor.spazbot import (SpazBot, SpazBotSet, BomberBot,
-                                 BomberBotPro, BomberBotProShielded,
-                                 BrawlerBot, BrawlerBotPro,
-                                 BrawlerBotProShielded, TriggerBot,
-                                 TriggerBotPro, TriggerBotProShielded,
-                                 ChargerBot, StickyBot, ExplodeyBot)
+                                        BomberBotPro, BomberBotProShielded,
+                                        BrawlerBot, BrawlerBotPro,
+                                        BrawlerBotProShielded, TriggerBot,
+                                        TriggerBotPro, TriggerBotProShielded,
+                                        ChargerBot, StickyBot, ExplodeyBot)
 
 if TYPE_CHECKING:
     from typing import Any, Sequence

@@ -284,7 +284,8 @@ def replay(player, stunt_name):
             else:
                 bs.timer(
                     move["time"],
-                    babase.Call(player.actor.move_map[move["move"]["action"]], move["move"]["value"])
+                    babase.Call(player.actor.move_map[move["move"]
+                                ["action"]], move["move"]["value"])
                 )
         last_move_time = move["time"]
         time_to_hide_controls = last_move_time + 1

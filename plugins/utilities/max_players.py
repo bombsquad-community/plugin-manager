@@ -136,7 +136,7 @@ class SettingsMaxPlayers(PopupWindow):
             icon=bui.gettexture('crossOut'),
             iconscale=1.2)
         bui.containerwidget(edit=self.root_widget,
-                           cancel_button=self._cancel_button)
+                            cancel_button=self._cancel_button)
 
         bui.textwidget(
             parent=self.root_widget,

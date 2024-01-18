@@ -61,7 +61,7 @@ class SettingWindow(bui.Window):
         try:
             if Udefault >= 29 and self.selected == "upper":
                 bui.textwidget(edit=self.warn_text,
-                              text="Careful!You risk get blind beyond this point")
+                               text="Careful!You risk get blind beyond this point")
             elif self.selected == "lower" and Ldefault >= -20 or self.selected == "upper" and Udefault <= 30:
                 bui.textwidget(edit=self.warn_text, text="")
             if self.selected == "lower":
@@ -78,7 +78,7 @@ class SettingWindow(bui.Window):
         try:
             if Ldefault <= -19 and self.selected == "lower":
                 bui.textwidget(edit=self.warn_text,
-                              text="DON'T BE AFRAID OF DARK,IT'S A PLACE WHERE YOU CAN HIDE")
+                               text="DON'T BE AFRAID OF DARK,IT'S A PLACE WHERE YOU CAN HIDE")
             elif (self.selected == "upper" and Udefault <= 30) or (self.selected == "lower" and Ldefault >= -20):
                 bui.textwidget(edit=self.warn_text, text="")
             if self.selected == "lower":
@@ -218,23 +218,25 @@ class SettingWindow(bui.Window):
 
 # ++++++++++++++++for keyboard navigation++++++++++++++++
         bui.widget(edit=self.enable_button, up_widget=decrease_button,
-                  down_widget=self.lower_text, left_widget=save_button, right_widget=save_button)
+                   down_widget=self.lower_text, left_widget=save_button, right_widget=save_button)
         bui.widget(edit=save_button, up_widget=self.close_button, down_widget=self.upper_text,
-                  left_widget=self.enable_button, right_widget=self.enable_button)
+                   left_widget=self.enable_button, right_widget=self.enable_button)
         bui.widget(edit=self.close_button, up_widget=increase_button, down_widget=save_button,
-                  left_widget=self.enable_button, right_widget=save_button)
+                   left_widget=self.enable_button, right_widget=save_button)
         bui.widget(edit=self.lower_text, up_widget=self.enable_button, down_widget=decrease_button,
-                  left_widget=self.upper_text, right_widget=self.upper_text)
+                   left_widget=self.upper_text, right_widget=self.upper_text)
         bui.widget(edit=self.upper_text, up_widget=save_button, down_widget=increase_button,
-                  left_widget=self.lower_text, right_widget=self.lower_text)
+                   left_widget=self.lower_text, right_widget=self.lower_text)
         bui.widget(edit=decrease_button, up_widget=self.lower_text, down_widget=self.enable_button,
-                  left_widget=increase_button, right_widget=increase_button)
+                   left_widget=increase_button, right_widget=increase_button)
         bui.widget(edit=increase_button, up_widget=self.upper_text, down_widget=self.close_button,
-                  left_widget=decrease_button, right_widget=decrease_button)
+                   left_widget=decrease_button, right_widget=decrease_button)
 # --------------------------------------------------------------------------------------------------
 
-        bui.textwidget(edit=self.upper_text, on_activate_call=babase.Call(self.on_text_click, "upper"))
-        bui.textwidget(edit=self.lower_text, on_activate_call=babase.Call(self.on_text_click, "lower"))
+        bui.textwidget(edit=self.upper_text, on_activate_call=babase.Call(
+            self.on_text_click, "upper"))
+        bui.textwidget(edit=self.lower_text, on_activate_call=babase.Call(
+            self.on_text_click, "lower"))
 
     def on_enableButton_press(self):
         global loop
@@ -275,12 +277,14 @@ def new_chat_message(msg: Union[str, babase.Lstr], clients: Sequence[int] = None
         except Exception as err:
             Print(err, "-from new_chat_message")
 
+
 class NewMainMenuWindow(MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
         bui.set_party_icon_always_visible(True)
-        
+
+
 old_fcm = bs.chatmessage
 bs.chatmessage = new_chat_message
 Map._old_init = Map.__init__

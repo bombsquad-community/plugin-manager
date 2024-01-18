@@ -60,7 +60,7 @@ class NewPublicGatherTab(PublicGatherTab, PingThread):
             on_activate_call=bs.WeakCall(self._join_random_server),
         )
         bui.widget(edit=self._random_join_button, up_widget=self._host_text,
-                  left_widget=self._filter_text)
+                   left_widget=self._filter_text)
 
         # We could place it somewhere under plugin settings which is kind of
         # official way to customise plugins. Although it's too deep:
@@ -100,7 +100,7 @@ class NewPublicGatherTab(PublicGatherTab, PingThread):
 
         if not parties:
             bui.screenmessage('No suitable servers found; wait',
-                             color=(1, 0, 0))
+                              color=(1, 0, 0))
             bui.getsound('error').play()
             return
 
@@ -228,7 +228,7 @@ class RandomJoinSettingsPopup(bui.Window):
                 bui.textwidget(query=self._minimum_players_edit))
         except ValueError:
             bui.screenmessage('"Minimum players" should be integer',
-                             color=(1, 0, 0))
+                              color=(1, 0, 0))
             bui.getsound('error').play()
             errored = True
         try:
@@ -236,7 +236,7 @@ class RandomJoinSettingsPopup(bui.Window):
                 bui.textwidget(query=self._maximum_ping_edit))
         except ValueError:
             bui.screenmessage('"Maximum ping" should be integer',
-                             color=(1, 0, 0))
+                              color=(1, 0, 0))
             bui.getsound('error').play()
             errored = True
         if errored:
@@ -247,16 +247,16 @@ class RandomJoinSettingsPopup(bui.Window):
 
         if minimum_players < 0:
             bui.screenmessage('"Minimum players" should be at least 0',
-                             color=(1, 0, 0))
+                              color=(1, 0, 0))
             bui.getsound('error').play()
             errored = True
 
         if maximum_ping <= 0:
             bui.screenmessage('"Maximum ping" should be greater than 0',
-                             color=(1, 0, 0))
+                              color=(1, 0, 0))
             bui.getsound('error').play()
             bui.screenmessage('(use 9999 as dont-care value)',
-                             color=(1, 0, 0))
+                              color=(1, 0, 0))
             errored = True
 
         if errored:
@@ -294,7 +294,7 @@ class RandomJoin:
             self.minimum_players = cfg['minimum_players']
         except KeyError:
             bui.screenmessage('Error: RandomJoin config is broken, resetting..',
-                             color=(1, 0, 0), log=True)
+                              color=(1, 0, 0), log=True)
             bui.getsound('error').play()
             self.commit_config()
 

@@ -132,7 +132,8 @@ class Quickturn(babase.Plugin):
 
             func(*args, **kwargs)
         return wrapper
-    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(bascenev1lib.actor.spaz.Spaz.handlemessage)
+    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(
+        bascenev1lib.actor.spaz.Spaz.handlemessage)
 
     def new_on_run(func):
         def wrapper(*args, **kwargs):

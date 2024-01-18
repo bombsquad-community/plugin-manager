@@ -282,7 +282,8 @@ class RocketLauncher:
             direction = [x, 0, z]
             direction[1] = 0.0
 
-            mag = 10.0 / 1 if babase.Vec3(*direction).length() == 0 else babase.Vec3(*direction).length()
+            mag = 10.0 / \
+                1 if babase.Vec3(*direction).length() == 0 else babase.Vec3(*direction).length()
             vel = [v * mag for v in direction]
             Rocket(position=position,
                    velocity=vel,

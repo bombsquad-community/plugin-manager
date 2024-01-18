@@ -55,7 +55,8 @@ def is_game_version_lower_than(version):
     version is lower than the passed version. Useful for addressing
     any breaking changes within game versions.
     """
-    game_version = tuple(map(int, babase.app.version if build_number < 21282 else babase.app.env.split(".")))
+    game_version = tuple(map(int, babase.app.version if build_number <
+                         21282 else babase.app.env.split(".")))
     version = tuple(map(int, version.split(".")))
     return game_version < version
 
@@ -103,23 +104,23 @@ def partyLight(switch=True):
         b = random.choice([0.5, 1])
         light = NodeActor(
             bs.newnode('light',
-                        attrs={
-                            'position': (positions[i][0], 0, positions[i][1]),
-                            'radius': 1.0,
-                            'lights_volumes': False,
-                            'height_attenuated': False,
-                            'color': (r, g, b)
-                        }))
+                       attrs={
+                           'position': (positions[i][0], 0, positions[i][1]),
+                           'radius': 1.0,
+                           'lights_volumes': False,
+                           'height_attenuated': False,
+                           'color': (r, g, b)
+                       }))
         sval = 1.87
         iscale = 1.3
         tcombine = bs.newnode('combine',
-                               owner=light.node,
-                               attrs={
-                                   'size': 3,
-                                   'input0': positions[i][0],
-                                   'input1': 0,
-                                   'input2': positions[i][1]
-                               })
+                              owner=light.node,
+                              attrs={
+                                  'size': 3,
+                                  'input0': positions[i][0],
+                                  'input1': 0,
+                                  'input2': positions[i][1]
+                              })
         assert light.node
         tcombine.connectattr('output', light.node, 'position')
         xval = positions[i][0]
@@ -154,7 +155,7 @@ def partyLight(switch=True):
                 offset=times[i])
         if not switch:
             bs.timer(0.1,
-                      light.node.delete)
+                     light.node.delete)
         activity.camera_flash_data.append(light)  # type: ignore
 
 
@@ -163,12 +164,12 @@ def rainbow(self) -> None:
     """Create RGB tint."""
     c_existing = self.globalsnode.tint
     cnode = bs.newnode('combine',
-                        attrs={
-                            'input0': c_existing[0],
-                            'input1': c_existing[1],
-                            'input2': c_existing[2],
-                            'size': 3
-                        })
+                       attrs={
+                           'input0': c_existing[0],
+                           'input1': c_existing[1],
+                           'input2': c_existing[2],
+                           'size': 3
+                       })
 
     _gameutils.animate(cnode, 'input0',
                        {0.0: 1.0, 1.0: 1.0, 2.0: 1.0, 3.0: 1.0,
@@ -199,12 +200,12 @@ def stop_rainbow(self):
         tint = (1, 1, 1)
 
     cnode = bs.newnode('combine',
-                        attrs={
-                            'input0': c_existing[0],
-                            'input1': c_existing[1],
-                            'input2': c_existing[2],
-                            'size': 3
-                        })
+                       attrs={
+                           'input0': c_existing[0],
+                           'input1': c_existing[1],
+                           'input2': c_existing[2],
+                           'size': 3
+                       })
 
     _gameutils.animate(cnode, 'input0', {0: c_existing[0], 1.0: tint[0]})
     _gameutils.animate(cnode, 'input1', {0: c_existing[1], 1.0: tint[1]})
@@ -268,12 +269,14 @@ def new_chat_message(msg: Union[str, babase.Lstr], clients: Sequence[int] = None
     if msg == '/disco off':
         stop()
 
+
 class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
         bui.set_party_icon_always_visible(True)
-        
+
+
 # Replace new chat func to the original game codes.
 bs.chatmessage = new_chat_message
 
@@ -282,4 +285,3 @@ bs.chatmessage = new_chat_message
 class ByCrossJoy(babase.Plugin):
     def on_app_running(self):
         mainmenu.MainMenuWindow = NewMainMenuWindow
-        

@@ -122,7 +122,7 @@ class zBotSet(SpazBotSet):
         except Exception:
             bot_list = []
             babase.print_exception('Error updating bot list: ' +
-                               str(self._bot_lists[self._bot_update_list]))
+                                   str(self._bot_lists[self._bot_update_list]))
         self._bot_update_list = (self._bot_update_list +
                                  1) % self._bot_list_count
 
@@ -286,7 +286,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
             player.icons = []
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return

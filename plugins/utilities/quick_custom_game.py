@@ -135,15 +135,15 @@ class SelectGameWindow(PlaylistAddGameWindow):
             stack_offset=(0, 1) if uiscale is babase.UIScale.SMALL else (0, 0))
 
         self._back_button = bui.buttonwidget(parent=self._root_widget,
-                                            position=(58 + x_inset,
-                                                      self._height - 53),
-                                            size=(165, 70),
-                                            scale=0.75,
-                                            text_scale=1.2,
-                                            label=babase.Lstr(resource='backText'),
-                                            autoselect=True,
-                                            button_type='back',
-                                            on_activate_call=self._back)
+                                             position=(58 + x_inset,
+                                                       self._height - 53),
+                                             size=(165, 70),
+                                             scale=0.75,
+                                             text_scale=1.2,
+                                             label=babase.Lstr(resource='backText'),
+                                             autoselect=True,
+                                             button_type='back',
+                                             on_activate_call=self._back)
         self._select_button = select_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(self._width - (172 + x_inset), self._height - 50),
@@ -156,17 +156,17 @@ class SelectGameWindow(PlaylistAddGameWindow):
 
         if bui.app.ui_v1.use_toolbars:
             bui.widget(edit=select_button,
-                      right_widget=bui.get_special_widget('party_button'))
+                       right_widget=bui.get_special_widget('party_button'))
 
         bui.textwidget(parent=self._root_widget,
-                      position=(self._width * 0.5, self._height - 28),
-                      size=(0, 0),
-                      scale=1.0,
-                      text=babase.Lstr(resource=self._r + '.titleText'),
-                      h_align='center',
-                      color=bui.app.ui_v1.title_color,
-                      maxwidth=250,
-                      v_align='center')
+                       position=(self._width * 0.5, self._height - 28),
+                       size=(0, 0),
+                       scale=1.0,
+                       text=babase.Lstr(resource=self._r + '.titleText'),
+                       h_align='center',
+                       color=bui.app.ui_v1.title_color,
+                       maxwidth=250,
+                       v_align='center')
         v = self._height - 64
 
         self._selected_title_text = bui.textwidget(
@@ -194,32 +194,32 @@ class SelectGameWindow(PlaylistAddGameWindow):
         v = self._height - 60
 
         self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
-                                             position=(x_inset + 61,
-                                                       v - scroll_height),
-                                             size=(self._scroll_width,
-                                                   scroll_height),
-                                             highlight=False)
+                                              position=(x_inset + 61,
+                                                        v - scroll_height),
+                                              size=(self._scroll_width,
+                                                    scroll_height),
+                                              highlight=False)
         bui.widget(edit=self._scrollwidget,
-                  up_widget=self._back_button,
-                  left_widget=self._back_button,
-                  right_widget=select_button)
+                   up_widget=self._back_button,
+                   left_widget=self._back_button,
+                   right_widget=select_button)
         self._column: Optional[bui.Widget] = None
 
         v -= 35
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=self._back_button,
-                           start_button=select_button)
+                            cancel_button=self._back_button,
+                            start_button=select_button)
         self._selected_game_type: Optional[Type[bs.GameActivity]] = None
 
         bui.containerwidget(edit=self._root_widget,
-                           selected_child=self._scrollwidget)
+                            selected_child=self._scrollwidget)
 
         self._game_types: list[type[bs.GameActivity]] = []
 
         # Get actual games loading in the bg.
         babase.app.meta.load_exported_classes(bs.GameActivity,
-                                          self._on_game_types_loaded,
-                                          completion_cb_in_bg_thread=True)
+                                              self._on_game_types_loaded,
+                                              completion_cb_in_bg_thread=True)
 
         # Refresh with our initial empty list. We'll refresh again once
         # game loading is complete.
@@ -240,29 +240,29 @@ class SelectGameWindow(PlaylistAddGameWindow):
             self._column.delete()
 
         self._column = bui.columnwidget(parent=self._scrollwidget,
-                                       border=2,
-                                       margin=0)
+                                        border=2,
+                                        margin=0)
 
         for i, gametype in enumerate(self._game_types):
 
             def _doit() -> None:
                 if self._select_button:
                     bs.apptimer(0.1,
-                             self._select_button.activate)
+                                self._select_button.activate)
 
             txt = bui.textwidget(parent=self._column,
-                                position=(0, 0),
-                                size=(self._width - 88, 24),
-                                text=gametype.get_display_string(),
-                                h_align='left',
-                                v_align='center',
-                                color=(0.8, 0.8, 0.8, 1.0),
-                                maxwidth=self._scroll_width * 0.8,
-                                on_select_call=babase.Call(
-                                    self._set_selected_game_type, gametype),
-                                always_highlight=True,
-                                selectable=True,
-                                on_activate_call=_doit)
+                                 position=(0, 0),
+                                 size=(self._width - 88, 24),
+                                 text=gametype.get_display_string(),
+                                 h_align='left',
+                                 v_align='center',
+                                 color=(0.8, 0.8, 0.8, 1.0),
+                                 maxwidth=self._scroll_width * 0.8,
+                                 on_select_call=babase.Call(
+                                     self._set_selected_game_type, gametype),
+                                 always_highlight=True,
+                                 selectable=True,
+                                 on_activate_call=_doit)
             if i == 0:
                 bui.widget(edit=txt, up_widget=self._back_button)
 
@@ -276,8 +276,8 @@ class SelectGameWindow(PlaylistAddGameWindow):
             size=(178, 50))
         if select_get_more_games_button:
             bui.containerwidget(edit=self._column,
-                               selected_child=self._get_more_games_button,
-                               visible_child=self._get_more_games_button)
+                                selected_child=self._get_more_games_button,
+                                visible_child=self._get_more_games_button)
 
     def _add(self) -> None:
         _babase.lock_all_input()  # Make sure no more commands happen.
@@ -364,7 +364,7 @@ def _restore_state(self) -> None:
         return  # ensure that our monkey patched init ran
     if self.__class__.__name__ not in bui.app.ui_v1.window_states:
         bui.containerwidget(edit=self._root_widget,
-                           selected_child=self._coop_button)
+                            selected_child=self._coop_button)
         return
     sel = states(self).get(
         bui.app.ui_v1.window_states[self.__class__.__name__], None)
@@ -372,7 +372,7 @@ def _restore_state(self) -> None:
         bui.containerwidget(edit=self._root_widget, selected_child=sel)
     else:
         bui.containerwidget(edit=self._root_widget,
-                           selected_child=self._coop_button)
+                            selected_child=self._coop_button)
         babase.print_exception(f'Error restoring state for {self}.')
 
 

@@ -253,8 +253,8 @@ class UFO(bs.Actor):
                 1.0 + i,
                 lambda: self._bots.spawn_bot(
                     RoboBot, pos=(self.node.position[0],
-                                     self.node.position[1] - 1,
-                                     self.node.position[2]), spawn_time=0.0
+                                  self.node.position[1] - 1,
+                                  self.node.position[2]), spawn_time=0.0
                 ),
             )
 
@@ -297,7 +297,6 @@ class UFO(bs.Actor):
                                            node.position[2], 0, 5, 0, 3, 10, 0,
                                            0, 0, 5, 0)
 
-
                     except:
                         pass
 
@@ -321,7 +320,7 @@ class UFO(bs.Actor):
             self.handlemessage(bs.DieMessage())
 
     def _get_target_player_pt(self) -> tuple[
-        bs.Vec3 | None, bs.Vec3 | None]:
+            bs.Vec3 | None, bs.Vec3 | None]:
         """Returns the position and velocity of our target.
 
         Both values will be None in the case of no target.
@@ -514,7 +513,6 @@ class UFO(bs.Actor):
                              {0: self.shield_deco.color, 0.2: (5, 0.2, 0.2)})
             self.bot_count = 6
 
-
     def update_ai(self) -> None:
         """Should be called periodically to update the spaz' AI."""
         # pylint: disable=too-many-branches
@@ -706,8 +704,8 @@ class UFOSet:
                 + str(self._ufo_bot_lists[self._ufo_bot_update_list])
             )
         self._bot_update_list = (
-                                    self._ufo_bot_update_list + 1
-                                ) % self._ufo_bot_list_count
+            self._ufo_bot_update_list + 1
+        ) % self._ufo_bot_list_count
 
         # Update our list of player points for the bots to use.
         player_pts = []
@@ -780,7 +778,7 @@ class UFOSet:
         """Add a bs.SpazBot instance to the set."""
         self._ufo_bot_lists[self._ufo_bot_add_list].append(bot)
         self._ufo_bot_add_list = (
-                                     self._ufo_bot_add_list + 1) % self._ufo_bot_list_count
+            self._ufo_bot_add_list + 1) % self._ufo_bot_list_count
 
     def have_living_bots(self) -> bool:
         """Return whether any bots in the set are alive or spawning."""
@@ -855,18 +853,16 @@ class UFOightGame(bs.TeamGameActivity[Player, Team]):
         self._bots = UFOSet()
         self._preset = str(settings['preset'])
         self._credit = bs.newnode('text',
-                               attrs={
-                                   'v_attach': 'bottom',
-                                   'h_align': 'center',
-                                   'color': (0.4, 0.4, 0.4),
-                                   'flatness': 0.5,
-                                   'shadow': 0.5,
-                                   'position': (0, 20),
-                                   'scale': 0.7,
-                                   'text': 'By Cross Joy'
-                               })
-
-
+                                  attrs={
+                                      'v_attach': 'bottom',
+                                      'h_align': 'center',
+                                      'color': (0.4, 0.4, 0.4),
+                                      'flatness': 0.5,
+                                      'shadow': 0.5,
+                                      'position': (0, 20),
+                                      'scale': 0.7,
+                                      'text': 'By Cross Joy'
+                                  })
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
@@ -877,8 +873,6 @@ class UFOightGame(bs.TeamGameActivity[Player, Team]):
     def on_begin(self) -> None:
         super().on_begin()
         self.setup_standard_powerup_drops()
-
-
 
         # In pro mode there's no powerups.
 
@@ -987,4 +981,3 @@ class MyUFOFightLevel(babase.Plugin):
                 preview_texture_name='footballStadiumPreview',
             )
         )
-

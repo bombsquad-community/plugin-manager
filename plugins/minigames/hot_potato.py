@@ -791,7 +791,8 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
             self._end_game_timer = bs.Timer(1.25, babase.Call(self.end_game))
         else:
             # There's still players remaining, so let's wait a while before marking a new player.
-            self.new_mark_timer = bs.Timer(2.0 if self.slow_motion else 4.0, babase.Call(self.new_mark))
+            self.new_mark_timer = bs.Timer(
+                2.0 if self.slow_motion else 4.0, babase.Call(self.new_mark))
 
     # Another extensively used function that returns all alive players.
     def get_alive_players(self) -> Sequence[bs.Player]:
@@ -852,7 +853,8 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
             self._round_end_timer = bs.Timer(0.5, self.end_game)
         else:
             # Pick random player(s) to get marked
-            self.new_mark_timer = bs.Timer(2.0 if self.slow_motion else 5.2, babase.Call(self.new_mark))
+            self.new_mark_timer = bs.Timer(
+                2.0 if self.slow_motion else 5.2, babase.Call(self.new_mark))
 
         self._update_icons()  # Create player state icons
 

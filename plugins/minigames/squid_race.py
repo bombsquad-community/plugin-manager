@@ -349,10 +349,10 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
                             player.actor.node.connectattr(
                                 'torso_position', mathnode, 'input2')
                             tstr = babase.Lstr(resource='lapNumberText',
-                                           subs=[('${CURRENT}',
-                                                  str(player.lap + 1)),
-                                                 ('${TOTAL}', str(self._laps))
-                                                 ])
+                                               subs=[('${CURRENT}',
+                                                      str(player.lap + 1)),
+                                                     ('${TOTAL}', str(self._laps))
+                                                     ])
                             txtnode = bs.newnode('text',
                                                  owner=mathnode,
                                                  attrs={
@@ -382,7 +382,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
         if self.has_begun():
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return

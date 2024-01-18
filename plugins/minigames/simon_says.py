@@ -206,7 +206,7 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
         if self.has_begun():
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),)
             return
         else:
@@ -232,7 +232,7 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
         if len(self.players) == 1:
             bs.timer(4000/1000, lambda: self.check_end())
         else:
-            bs.timer(6000/1000, self.call_round) 
+            bs.timer(6000/1000, self.call_round)
 
     def spawn_player(self, player: PlayerT) -> bs.Actor:
         assert player
@@ -310,7 +310,7 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
                 if ((self.simon and safe == False) or ((not self.simon) and safe == True)):
                     player.team.score = self.round_num
                     player.actor.handlemessage(bs.DieMessage())
-        bs.timer(1633/1000, self.call_round) 
+        bs.timer(1633/1000, self.call_round)
 
     def in_circle(self, pos) -> None:
         circles = []
