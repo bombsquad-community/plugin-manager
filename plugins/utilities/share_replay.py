@@ -145,7 +145,7 @@ class Help(PopupWindow):
 
         bui.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
         bui.textwidget(parent=self.root_widget, position=(0, self.height * 0.7), corner_scale=1.2, color=green,
-                      text=f"»Replays are exported to\n     {external_dir}\n»Copy replays to the above folder to be able to import them into the game\n»I would love to hear from you,meet me on discord\n                                -LoupGarou(author)")
+                       text=f"»Replays are exported to\n     {external_dir}\n»Copy replays to the above folder to be able to import them into the game\n»I would love to hear from you,meet me on discord\n                                -LoupGarou(author)")
 
     def close(self):
         bui.getsound('swish').play()
@@ -268,7 +268,7 @@ class ShareTabUi(WatchWindow):
         )
 
         self.scroll2 = bui.columnwidget(parent=scroll,
-                                       size=(sub_scroll_width, sub_scroll_height))
+                                        size=(sub_scroll_width, sub_scroll_height))
 
         tabdefs = [(MyTabId.INTERNAL, 'INTERNAL'), (MyTabId.EXTERNAL, "EXTERNAL")]
         self.tab_row = TabRow(self.root, tabdefs, pos=(stab_h, sub_scroll_height),
