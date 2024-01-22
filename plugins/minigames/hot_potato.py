@@ -92,7 +92,7 @@ class Icon(bs.Actor):
         self._player = player
         self._name_scale = name_scale
 
-        self._outline_tex = bui.gettexture('characterIconMask')
+        self._outline_tex = bs.gettexture('characterIconMask')
 
         # Character portrait
         icon = player.get_icon()
@@ -640,16 +640,16 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
         self.settings = settings
 
         # Let's define all of the sounds we need.
-        self._tick_sound = bui.getsound('tick')
-        self._player_eliminated_sound = bui.getsound('playerDeath')
+        self._tick_sound = bs.getsound('tick')
+        self._player_eliminated_sound = bs.getsound('playerDeath')
         # These next sounds are arrays instead of single sounds.
         # We'll use that fact later.
-        self._danger_tick_sounds = [bui.getsound('orchestraHit'),
-                                    bui.getsound('orchestraHit2'),
-                                    bui.getsound('orchestraHit3')]
-        self._marked_sounds = [bui.getsound('powerdown01'),
-                               bui.getsound('activateBeep'),
-                               bui.getsound('hiss')]
+        self._danger_tick_sounds = [bs.getsound('orchestraHit'),
+                                    bs.getsound('orchestraHit2'),
+                                    bs.getsound('orchestraHit3')]
+        self._marked_sounds = [bs.getsound('powerdown01'),
+                               bs.getsound('activateBeep'),
+                               bs.getsound('hiss')]
 
         # Normally play KOTH music, but switch to Epic music if we're in slow motion.
         self._epic_mode = bool(settings['Epic Mode'])
@@ -837,7 +837,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
             # To make a nice marked sound effect, I play multiple sounds at once
             # All of them are contained in the array.
             for sound in self._marked_sounds:
-                sound.play(1.0, new_victim.actor.node.position)
+                bs.Sound.play(sound, 1.0, new_victim.actor.node.position)
             self.mark(new_victim)
 
     # This function is called when the gamemode first loads.

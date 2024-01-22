@@ -20,6 +20,7 @@ from bascenev1lib.gameutils import SharedObjects
 from bascenev1lib.actor.powerupbox import PowerupBoxFactory
 from bascenev1lib.actor.spazfactory import SpazFactory
 from bascenev1lib.game.elimination import EliminationGame
+from bauiv1lib import mainmenu
 import math
 import json
 import os
@@ -246,7 +247,7 @@ def mirror(clieid):
 
 
 def capture(player):
-    with babase.ContextRef(player.actor._activity()):
+    with player.actor._activity().context:
         player.recording_start_time = bs.time()
     PLAYERS_STUNT_INFO[player.sessionplayer] = []
 
@@ -272,7 +273,7 @@ def replay(player, stunt_name):
             bui.screenmessage(f"{stunt_name} doesn't exists")
             return
     player.in_replay = True
-    with babase.ContextRef(player.actor._activity()):
+    with player.actor._activity().context:
         ControlsUI.display(player.actor._activity())
         for move in stunt:
             value = move["move"]["value"]
@@ -294,7 +295,7 @@ def replay(player, stunt_name):
 
 def spawn_mirror_spaz(player):
     player.mirror_mode = True
-    with babase.ContextRef(player.actor._activity()):
+    with player.actor._activity().context:
         bot = spaz.Spaz(player.color, player.highlight, character=player.character).autoretain()
         bot.handlemessage(bs.StandMessage(
             (player.actor.node.position[0], player.actor.node.position[1], player.actor.node.position[2]+1), 93))
@@ -317,7 +318,7 @@ def ghost(player, stunt_name):
             return
     player.in_replay = True
 
-    with babase.ContextRef(player.actor._activity()):
+    with player.actor._activity().context:
         bot = spaz.Spaz((1, 0, 0), character="Spaz").autoretain()
         bot.handlemessage(bs.StandMessage(player.actor.node.position, 93))
         give_ghost_power(bot)
@@ -389,6 +390,7 @@ def give_ghost_power(spaz):
 
 
 def new_chatmessage(msg):
+    #! Fix here to make it work with other mods modifying chat message
     if not msg.startswith("*"):
         return original_chatmessage(msg)
 
@@ -397,7 +399,11 @@ def new_chatmessage(msg):
     command = msg_splits[0]
 
     client_id = -1
-    player = get_player_from_client_id(client_id)
+    try:
+        player = get_player_from_client_id(client_id)
+    except AttributeError:
+        bui.screenmessage("Start a game to use", color=(0, 1, 0))
+        return
 
     if command == "start":
         capture(player)
@@ -477,25 +483,25 @@ def set_stick_image_position(self, x: float, y: float) -> None:
 
 def on_begin(self, *args, **kwargs) -> None:
     self._jump_image = Image(
-        bui.gettexture('buttonJump'),
+        bs.gettexture('buttonJump'),
         position=(385, 160),
         scale=(50, 50),
         color=[0.1, 0.45, 0.1, 0]
     )
     self._pickup_image = Image(
-        bui.gettexture('buttonPickUp'),
+        bs.gettexture('buttonPickUp'),
         position=(385, 240),
         scale=(50, 50),
         color=[0, 0.35, 0, 0]
     )
     self._punch_image = Image(
-        bui.gettexture('buttonPunch'),
+        bs.gettexture('buttonPunch'),
         position=(345, 200),
         scale=(50, 50),
         color=[0.45, 0.45, 0, 0]
     )
     self._bomb_image = Image(
-        bui.gettexture('buttonBomb'),
+        bs.gettexture('buttonBomb'),
         position=(425, 200),
         scale=(50, 50),
         color=[0.45, 0.1, 0.1, 0]
@@ -506,7 +512,7 @@ def on_begin(self, *args, **kwargs) -> None:
     self._stick_base_image = bs.newnode(
         'image',
         attrs={
-            'texture': bui.gettexture('nub'),
+            'texture': bs.gettexture('nub'),
             'absolute_scale': True,
             'vr_depth': -40,
             'position': p,
@@ -517,7 +523,7 @@ def on_begin(self, *args, **kwargs) -> None:
     self._stick_nub_image_color = c3 = (0.4, 0.4, 0.4, 1.0)
     self._stick_nub_image = bs.newnode('image',
                                        attrs={
-                                           'texture': bui.gettexture('nub'),
+                                           'texture': bs.gettexture('nub'),
                                            'absolute_scale': True,
                                            'position': p,
                                            'scale': (110*0.6, 110*0.66),
@@ -528,11 +534,16 @@ def on_begin(self, *args, **kwargs) -> None:
     self.set_stick_image_position = set_stick_image_position
     return original_on_begin(self, *args, **kwargs)
 
-
+class NewMainMenuWindow(mainmenu.MainMenuWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Display chat icon, but if user open/close gather it may disappear
+        bui.set_party_icon_always_visible(True)
+        
 # ba_meta export plugin
 class byHeySmoothy(babase.Plugin):
     def on_app_running(self):
-        bui.set_party_icon_always_visible(True)
+        mainmenu.MainMenuWindow = NewMainMenuWindow
         bs._activity.Activity.on_begin = on_begin
         bs.chatmessage = new_chatmessage
         bascenev1lib.actor.playerspaz.PlayerSpaz = NewPlayerSpaz

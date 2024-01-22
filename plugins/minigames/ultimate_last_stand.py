@@ -362,7 +362,7 @@ class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
-        bs.timer(1.3, babase.Call(babase.playsound, self._new_wave_sound))
+        bs.timer(1.3, self._new_wave_sound.play)
 
     def on_player_join(self, player: Player) -> None:
         player.lives = self._lives_per_player
