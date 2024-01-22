@@ -534,13 +534,16 @@ def on_begin(self, *args, **kwargs) -> None:
     self.set_stick_image_position = set_stick_image_position
     return original_on_begin(self, *args, **kwargs)
 
+
 class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
         bui.set_party_icon_always_visible(True)
-        
+
 # ba_meta export plugin
+
+
 class byHeySmoothy(babase.Plugin):
     def on_app_running(self):
         mainmenu.MainMenuWindow = NewMainMenuWindow
