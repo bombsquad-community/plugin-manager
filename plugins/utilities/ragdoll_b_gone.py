@@ -1,4 +1,5 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 
 """
     Ragdoll-B-Gone by TheMikirog
@@ -18,11 +19,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # Let's import everything we need and nothing more.
-import ba
-import bastd
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import bascenev1lib
 import random
-from bastd.actor.spaz import Spaz
-from bastd.actor.spazfactory import SpazFactory
+from bascenev1lib.actor.spaz import Spaz
+from bascenev1lib.actor.spazfactory import SpazFactory
 
 if TYPE_CHECKING:
     pass
@@ -30,7 +33,7 @@ if TYPE_CHECKING:
 # ba_meta export plugin
 
 
-class RagdollBGone(ba.Plugin):
+class RagdollBGone(babase.Plugin):
 
     # We use a decorator to add extra code to existing code, increasing mod compatibility.
     # Any gameplay altering mod should master the decorator!
@@ -42,16 +45,16 @@ class RagdollBGone(ba.Plugin):
         # We're working kind of blindly here, so it's good to have the original function
         # open in a second window for argument reference.
         def wrapper(*args, **kwargs):
-            if isinstance(args[1], ba.DieMessage):  # Replace Spaz death behavior
+            if isinstance(args[1], bs.DieMessage):  # Replace Spaz death behavior
 
                 # Here we play the gamey death noise in Co-op.
                 if not args[1].immediate:
                     if args[0].play_big_death_sound and not args[0]._dead:
-                        ba.playsound(SpazFactory.get().single_player_death_sound)
+                        SpazFactory.get().single_player_death_sound.play()
 
                 # If our Spaz dies by falling out of the map, we want to keep the ragdoll.
                 # Ragdolls don't impact gameplay if Spaz dies this way, so it's fine if we leave the behavior as is.
-                if args[1].how == ba.DeathType.FALL:
+                if args[1].how == bs.DeathType.FALL:
                     # The next two properties are all built-in, so their behavior can't be edited directly without touching the C++ layer.
                     # We can change their values though!
                     # "hurt" property is basically the health bar above the player and the blinking when low on health.
@@ -61,7 +64,7 @@ class RagdollBGone(ba.Plugin):
                     # Again, this behavior is built in. We can only trigger it by setting "dead" to True.
                     args[0].node.dead = True
                     # After the death animation ends (which is around 2 seconds) let's remove the Spaz our of existence.
-                    ba.timer(2.0, args[0].node.delete)
+                    bs.timer(2.0, args[0].node.delete)
                 else:
                     # Here's our new behavior!
                     # The idea is to remove the Spaz node and make some sparks for extra flair.
@@ -80,7 +83,7 @@ class RagdollBGone(ba.Plugin):
                                        args[0].node.position[2])
                                # This function allows us to spawn particles like sparks and bomb shrapnel.
                                # We're gonna use sparks here.
-                                ba.emitfx(position=pos,  # Here we place our edited position.
+                                bs.emitfx(position=pos,  # Here we place our edited position.
                                           velocity=args[0].node.velocity,
                                           # Random amount of sparks between 2 and 5
                                           count=random.randrange(2, 5),
@@ -95,10 +98,10 @@ class RagdollBGone(ba.Plugin):
                                 # Pick a random death noise
                                 sound = death_sounds[random.randrange(len(death_sounds))]
                                 # Play the sound where our Spaz is
-                                ba.playsound(sound, position=args[0].node.position)
+                                bs.Sound.play(sound, position=args[0].node.position)
                         # Delete our Spaz node immediately.
                         # Removing stuff is weird and prone to errors, so we're gonna delay it.
-                        ba.timer(0.001, args[0].node.delete)
+                        bs.timer(0.001, args[0].node.delete)
 
                 # Let's mark our Spaz as dead, so he can't die again.
                 # Notice how we're targeting the Spaz and not it's node.
@@ -116,4 +119,5 @@ class RagdollBGone(ba.Plugin):
 
     # Finally we """travel through the game files""" to replace the function we want with our own version.
     # We transplant the old function's arguments into our version.
-    bastd.actor.spaz.Spaz.handlemessage = new_handlemessage(bastd.actor.spaz.Spaz.handlemessage)
+    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(
+        bascenev1lib.actor.spaz.Spaz.handlemessage)

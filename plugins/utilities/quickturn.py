@@ -1,3 +1,4 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """
     Quickturn by TheMikirog
     
@@ -9,16 +10,18 @@
     No Rights Reserved
 """
 
-# ba_meta require api 7
+# ba_meta require api 8
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
 import math
-import bastd
-from bastd.actor.spaz import Spaz
+import bascenev1lib
+from bascenev1lib.actor.spaz import Spaz
 
 if TYPE_CHECKING:
     pass
@@ -26,7 +29,7 @@ if TYPE_CHECKING:
 # ba_meta export plugin
 
 
-class Quickturn(ba.Plugin):
+class Quickturn(babase.Plugin):
 
     class FootConnectMessage:
         """Spaz started touching the ground"""
@@ -46,7 +49,7 @@ class Quickturn(ba.Plugin):
         if self.node.knockout > 0.0 or self.frozen or self.node.hold_node:
             return
 
-        t_ms = ba.time(timeformat=ba.TimeFormat.MILLISECONDS)
+        t_ms = bs.time() * 1000
         assert isinstance(t_ms, int)
 
         if t_ms - self.last_wavedash_time_ms >= self._wavedash_cooldown:
@@ -77,7 +80,7 @@ class Quickturn(ba.Plugin):
             self.last_wavedash_time_ms = t_ms
 
             # FX
-            ba.emitfx(position=self.node.position,
+            bs.emitfx(position=self.node.position,
                       velocity=(vel[0]*0.5, -1, vel[1]*0.5),
                       chunk_type='spark',
                       count=5,
@@ -104,7 +107,7 @@ class Quickturn(ba.Plugin):
             args[0].grounded = 0
 
         return wrapper
-    bastd.actor.spaz.Spaz.__init__ = new_spaz_init(bastd.actor.spaz.Spaz.__init__)
+    bascenev1lib.actor.spaz.Spaz.__init__ = new_spaz_init(bascenev1lib.actor.spaz.Spaz.__init__)
 
     def new_factory(func):
         def wrapper(*args, **kwargs):
@@ -112,12 +115,12 @@ class Quickturn(ba.Plugin):
 
             args[0].roller_material.add_actions(
                 conditions=('they_have_material',
-                            bastd.gameutils.SharedObjects.get().footing_material),
+                            bascenev1lib.gameutils.SharedObjects.get().footing_material),
                 actions=(('message', 'our_node', 'at_connect', Quickturn.FootConnectMessage),
                          ('message', 'our_node', 'at_disconnect', Quickturn.FootDisconnectMessage)))
         return wrapper
-    bastd.actor.spazfactory.SpazFactory.__init__ = new_factory(
-        bastd.actor.spazfactory.SpazFactory.__init__)
+    bascenev1lib.actor.spazfactory.SpazFactory.__init__ = new_factory(
+        bascenev1lib.actor.spazfactory.SpazFactory.__init__)
 
     def new_handlemessage(func):
         def wrapper(*args, **kwargs):
@@ -129,7 +132,8 @@ class Quickturn(ba.Plugin):
 
             func(*args, **kwargs)
         return wrapper
-    bastd.actor.spaz.Spaz.handlemessage = new_handlemessage(bastd.actor.spaz.Spaz.handlemessage)
+    bascenev1lib.actor.spaz.Spaz.handlemessage = new_handlemessage(
+        bascenev1lib.actor.spaz.Spaz.handlemessage)
 
     def new_on_run(func):
         def wrapper(*args, **kwargs):
@@ -137,4 +141,4 @@ class Quickturn(ba.Plugin):
                 Quickturn.wavedash(args[0])
             func(*args, **kwargs)
         return wrapper
-    bastd.actor.spaz.Spaz.on_run = new_on_run(bastd.actor.spaz.Spaz.on_run)
+    bascenev1lib.actor.spaz.Spaz.on_run = new_on_run(bascenev1lib.actor.spaz.Spaz.on_run)

@@ -1,23 +1,26 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-import _ba
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import _babase
 import copy
 import random
-from ba import _math
-from ba._coopsession import CoopSession
-from ba._messages import PlayerDiedMessage, StandMessage
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.game.elimination import Icon, Player
-from bastd.actor.spaz import PickupMessage
-from bastd.actor.spazbot import SpazBotSet, BrawlerBot, SpazBotDiedMessage
-from bastd.actor.spazfactory import SpazFactory
+from babase import _math
+from bascenev1._coopsession import CoopSession
+from bascenev1._messages import PlayerDiedMessage, StandMessage
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.game.elimination import Icon, Player
+from bascenev1lib.actor.spaz import PickupMessage
+from bascenev1lib.actor.spazbot import SpazBotSet, BrawlerBot, SpazBotDiedMessage
+from bascenev1lib.actor.spazfactory import SpazFactory
 
 
 if TYPE_CHECKING:
@@ -26,7 +29,7 @@ if TYPE_CHECKING:
 
 class PlayerSpaz_Zom(PlayerSpaz):
     def handlemessage(self, m: Any) -> Any:
-        if isinstance(m, ba.HitMessage):
+        if isinstance(m, bs.HitMessage):
             if not self.node:
                 return
             if not m._source_player is None:
@@ -40,7 +43,7 @@ class PlayerSpaz_Zom(PlayerSpaz):
             else:
                 super().handlemessage(m)
 
-        elif isinstance(m, ba.FreezeMessage):
+        elif isinstance(m, bs.FreezeMessage):
             pass
 
         elif isinstance(m, PickupMessage):
@@ -48,10 +51,10 @@ class PlayerSpaz_Zom(PlayerSpaz):
                 return None
 
             try:
-                collision = ba.getcollision()
+                collision = bs.getcollision()
                 opposingnode = collision.opposingnode
                 opposingbody = collision.opposingbody
-            except ba.NotFoundError:
+            except bs.NotFoundError:
                 return True
 
             try:
@@ -85,7 +88,7 @@ class PlayerSpaz_Zom(PlayerSpaz):
 
 class PlayerZombie(PlayerSpaz):
     def handlemessage(self, m: Any) -> Any:
-        if isinstance(m, ba.HitMessage):
+        if isinstance(m, bs.HitMessage):
             if not self.node:
                 return None
             if not m._source_player is None:
@@ -106,8 +109,8 @@ class PlayerZombie(PlayerSpaz):
 class zBotSet(SpazBotSet):
     def start_moving(self) -> None:
         """Start processing bot AI updates so they start doing their thing."""
-        self._bot_update_timer = ba.Timer(0.05,
-                                          ba.WeakCall(self.zUpdate),
+        self._bot_update_timer = bs.Timer(0.05,
+                                          bs.WeakCall(self.zUpdate),
                                           repeat=True)
 
     def zUpdate(self) -> None:
@@ -118,31 +121,31 @@ class zBotSet(SpazBotSet):
             ])
         except Exception:
             bot_list = []
-            ba.print_exception('Error updating bot list: ' +
-                               str(self._bot_lists[self._bot_update_list]))
+            babase.print_exception('Error updating bot list: ' +
+                                   str(self._bot_lists[self._bot_update_list]))
         self._bot_update_list = (self._bot_update_list +
                                  1) % self._bot_list_count
 
         player_pts = []
-        for player in ba.getactivity().players:
-            assert isinstance(player, ba.Player)
+        for player in bs.getactivity().players:
+            assert isinstance(player, bs.Player)
             try:
                 if player.is_alive():
                     assert isinstance(player.actor, Spaz)
                     assert player.actor.node
                     if player.lives > 0:
                         player_pts.append(
-                            (ba.Vec3(player.actor.node.position),
-                             ba.Vec3(player.actor.node.velocity)))
+                            (babase.Vec3(player.actor.node.position),
+                             babase.Vec3(player.actor.node.velocity)))
             except Exception:
-                ba.print_exception('Error on bot-set _update.')
+                babase.print_exception('Error on bot-set _update.')
 
         for bot in bot_list:
             bot.set_player_points(player_pts)
             bot.update_ai()
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
@@ -150,13 +153,13 @@ class Team(ba.Team[Player]):
         self.spawn_order: list[Player] = []
 
 
-# ba_meta export game
-class ZombieHorde(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class ZombieHorde(bs.TeamGameActivity[Player, Team]):
 
     name = 'Zombie Horde'
     description = 'Kill walkers for points!'
-    scoreconfig = ba.ScoreConfig(label='Score',
-                                 scoretype=ba.ScoreType.POINTS,
+    scoreconfig = bs.ScoreConfig(label='Score',
+                                 scoretype=bs.ScoreType.POINTS,
                                  none_is_winner=False,
                                  lower_is_better=False)
     # Show messages when players die since it's meaningful here.
@@ -164,23 +167,23 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[ba.Session]) -> list[ba.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Lives Per Player',
                 default=1,
                 min_value=1,
                 max_value=10,
                 increment=1,
             ),
-            ba.IntSetting(
+            bs.IntSetting(
                 'Max Zombies',
                 default=10,
                 min_value=5,
                 max_value=50,
                 increment=5,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Time Limit',
                 choices=[
                     ('None', 0),
@@ -192,7 +195,7 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=0,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -203,29 +206,29 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
-        if issubclass(sessiontype, ba.DualTeamSession):
-            settings.append(ba.BoolSetting('Solo Mode', default=False))
+        if issubclass(sessiontype, bs.DualTeamSession):
+            settings.append(bs.BoolSetting('Solo Mode', default=False))
             settings.append(
-                ba.BoolSetting('Balance Total Lives', default=False))
+                bs.BoolSetting('Balance Total Lives', default=False))
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.DualTeamSession)
-                or issubclass(sessiontype, ba.FreeForAllSession))
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return (issubclass(sessiontype, bs.DualTeamSession)
+                or issubclass(sessiontype, bs.FreeForAllSession))
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
-        return ba.getmaps('melee')
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
+        return bs.app.classic.getmaps('melee')
 
     def __init__(self, settings: dict):
         super().__init__(settings)
         self._scoreboard = Scoreboard()
         self._start_time: float | None = None
-        self._vs_text: ba.Actor | None = None
-        self._round_end_timer: ba.Timer | None = None
+        self._vs_text: bs.Actor | None = None
+        self._round_end_timer: bs.Timer | None = None
         self._epic_mode = bool(settings['Epic Mode'])
         self._lives_per_player = int(settings['Lives Per Player'])
         self._max_zombies = int(settings['Max Zombies'])
@@ -236,54 +239,54 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
         # Base class overrides:
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC
-                              if self._epic_mode else ba.MusicType.SURVIVAL)
+        self.default_music = (bs.MusicType.EPIC
+                              if self._epic_mode else bs.MusicType.SURVIVAL)
 
         self.spazList = []
         self.zombieQ = 0
 
-        activity = ba.getactivity()
+        activity = bs.getactivity()
         my_factory = SpazFactory.get()
 
         appears = ['Kronk', 'Zoe', 'Pixel', 'Agent Johnson',
                    'Bones', 'Frosty', 'Kronk2']
-        myAppear = copy.copy(ba.app.spaz_appearances['Kronk'])
+        myAppear = copy.copy(babase.app.classic.spaz_appearances['Kronk'])
         myAppear.name = 'Kronk2'
-        ba.app.spaz_appearances['Kronk2'] = myAppear
+        babase.app.classic.spaz_appearances['Kronk2'] = myAppear
         for appear in appears:
             my_factory.get_media(appear)
         med = my_factory.spaz_media
-        med['Kronk2']['head_model'] = med['Zoe']['head_model']
+        med['Kronk2']['head_mesh'] = med['Zoe']['head_mesh']
         med['Kronk2']['color_texture'] = med['Agent Johnson']['color_texture']
         med['Kronk2']['color_mask_texture'] = med['Pixel']['color_mask_texture']
-        med['Kronk2']['torso_model'] = med['Bones']['torso_model']
-        med['Kronk2']['pelvis_model'] = med['Pixel']['pelvis_model']
-        med['Kronk2']['upper_arm_model'] = med['Frosty']['upper_arm_model']
-        med['Kronk2']['forearm_model'] = med['Frosty']['forearm_model']
-        med['Kronk2']['hand_model'] = med['Bones']['hand_model']
-        med['Kronk2']['upper_leg_model'] = med['Bones']['upper_leg_model']
-        med['Kronk2']['lower_leg_model'] = med['Pixel']['lower_leg_model']
-        med['Kronk2']['toes_model'] = med['Bones']['toes_model']
+        med['Kronk2']['torso_mesh'] = med['Bones']['torso_mesh']
+        med['Kronk2']['pelvis_mesh'] = med['Pixel']['pelvis_mesh']
+        med['Kronk2']['upper_arm_mesh'] = med['Frosty']['upper_arm_mesh']
+        med['Kronk2']['forearm_mesh'] = med['Frosty']['forearm_mesh']
+        med['Kronk2']['hand_mesh'] = med['Bones']['hand_mesh']
+        med['Kronk2']['upper_leg_mesh'] = med['Bones']['upper_leg_mesh']
+        med['Kronk2']['lower_leg_mesh'] = med['Pixel']['lower_leg_mesh']
+        med['Kronk2']['toes_mesh'] = med['Bones']['toes_mesh']
 
     def get_instance_description(self) -> str | Sequence:
         return ('Kill walkers for points! ',
                 'Dead player walker: 2 points!') if isinstance(
-            self.session, ba.DualTeamSession) else (
+            self.session, bs.DualTeamSession) else (
                 'Kill walkers for points! Dead player walker: 2 points!')
 
     def get_instance_description_short(self) -> str | Sequence:
         return ('Kill walkers for points! ',
                 'Dead player walker: 2 points!') if isinstance(
-            self.session, ba.DualTeamSession) else (
+            self.session, bs.DualTeamSession) else (
                 'Kill walkers for points! Dead player walker: 2 points!')
 
     def on_player_join(self, player: Player) -> None:
         if self.has_begun():
             player.lives = 0
             player.icons = []
-            ba.screenmessage(
-                ba.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+            bs.broadcastmessage(
+                babase.Lstr(resource='playerDelayedJoinText',
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return
@@ -314,13 +317,13 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
     def on_begin(self) -> None:
         super().on_begin()
-        self._start_time = ba.time()
+        self._start_time = bs.time()
         self.setup_standard_time_limit(self._time_limit)
         self.setup_standard_powerup_drops()
         self.zombieQ = 1
         if self._solo_mode:
-            self._vs_text = ba.NodeActor(
-                ba.newnode('text',
+            self._vs_text = bs.NodeActor(
+                bs.newnode('text',
                            attrs={
                                'position': (0, 105),
                                'h_attach': 'center',
@@ -331,12 +334,12 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                                'scale': 0.6,
                                'v_attach': 'bottom',
                                'color': (0.8, 0.8, 0.3, 1.0),
-                               'text': ba.Lstr(resource='vsText')
+                               'text': babase.Lstr(resource='vsText')
                            }))
 
         # If balance-team-lives is on, add lives to the smaller team until
         # total lives match.
-        if (isinstance(self.session, ba.DualTeamSession)
+        if (isinstance(self.session, bs.DualTeamSession)
                 and self._balance_total_lives and self.teams[0].players
                 and self.teams[1].players):
             if self._get_total_team_lives(
@@ -365,13 +368,13 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
         # We could check game-over conditions at explicit trigger points,
         # but lets just do the simple thing and poll it.
-        ba.timer(1.0, self._update, repeat=True)
+        bs.timer(1.0, self._update, repeat=True)
 
     def _update_icons(self) -> None:
         # pylint: disable=too-many-branches
 
         # In free-for-all mode, everyone is just lined up along the bottom.
-        if isinstance(self.session, ba.FreeForAllSession):
+        if isinstance(self.session, bs.FreeForAllSession):
             count = len(self.teams)
             x_offs = 85
             xval = x_offs * (count - 1) * -0.5
@@ -437,7 +440,7 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                             icon.update_for_lives()
                         xval += x_offs
 
-    def _get_spawn_point(self, player: Player) -> ba.Vec3 | None:
+    def _get_spawn_point(self, player: Player) -> babase.Vec3 | None:
         del player  # Unused.
 
         # In solo-mode, if there's an existing live player on the map, spawn at
@@ -455,10 +458,10 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                         break
             if living_player:
                 assert living_player_pos is not None
-                player_pos = ba.Vec3(living_player_pos)
-                points: list[tuple[float, ba.Vec3]] = []
+                player_pos = babase.Vec3(living_player_pos)
+                points: list[tuple[float, babase.Vec3]] = []
                 for team in self.teams:
-                    start_pos = ba.Vec3(self.map.get_start_position(team.id))
+                    start_pos = babase.Vec3(self.map.get_start_position(team.id))
                     points.append(
                         ((start_pos - player_pos).length(), start_pos))
                 # Hmm.. we need to sorting vectors too?
@@ -466,13 +469,13 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                 return points[-1][1]
         return None
 
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         position = self.map.get_ffa_start_position(self.players)
         angle = 20
         name = player.getname()
 
         light_color = _math.normalized_color(player.color)
-        display_color = _ba.safecolor(player.color, target_intensity=0.75)
+        display_color = _babase.safecolor(player.color, target_intensity=0.75)
         spaz = PlayerSpaz_Zom(color=player.color,
                               highlight=player.highlight,
                               character=player.character,
@@ -500,14 +503,14 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
             StandMessage(
                 position,
                 angle if angle is not None else random.uniform(0, 360)))
-        _ba.playsound(self._spawn_sound, 1, position=spaz.node.position)
-        light = _ba.newnode('light', attrs={'color': light_color})
+        bs.Sound.play(self._spawn_sound, 1, position=spaz.node.position)
+        light = bs.newnode('light', attrs={'color': light_color})
         spaz.node.connectattr('position', light, 'position')
-        ba.animate(light, 'intensity', {0: 0, 0.25: 1, 0.5: 0})
-        _ba.timer(0.5, light.delete)
+        bs.animate(light, 'intensity', {0: 0, 0.25: 1, 0.5: 0})
+        bs.timer(0.5, light.delete)
 
         if not self._solo_mode:
-            ba.timer(0.3, ba.Call(self._print_lives, player))
+            bs.timer(0.3, babase.Call(self._print_lives, player))
 
         for icon in player.icons:
             icon.handle_player_spawned()
@@ -539,30 +542,30 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
         respawn_time = round(max(1.0, respawn_time), 0)
 
         if player.actor and not self.has_ended():
-            from bastd.actor.respawnicon import RespawnIcon
-            player.customdata['respawn_timer'] = _ba.Timer(
-                respawn_time, ba.WeakCall(
+            from bascenev1lib.actor.respawnicon import RespawnIcon
+            player.customdata['respawn_timer'] = bs.Timer(
+                respawn_time, bs.WeakCall(
                     self.spawn_player_if_exists_as_zombie, player))
             player.customdata['respawn_icon'] = RespawnIcon(
                 player, respawn_time)
 
-    def spawn_player_if_exists_as_zombie(self, player: PlayerType) -> None:
+    def spawn_player_if_exists_as_zombie(self, player: PlayerT) -> None:
         """
         A utility method which calls self.spawn_player() *only* if the
-        ba.Player provided still exists; handy for use in timers and whatnot.
+        bs.Player provided still exists; handy for use in timers and whatnot.
 
         There is no need to override this; just override spawn_player().
         """
         if player:
             self.spawn_player_zombie(player)
 
-    def spawn_player_zombie(self, player: PlayerType) -> ba.Actor:
+    def spawn_player_zombie(self, player: PlayerT) -> bs.Actor:
         position = self.map.get_ffa_start_position(self.players)
         angle = 20
         name = player.getname()
 
         light_color = _math.normalized_color(player.color)
-        display_color = _ba.safecolor(player.color, target_intensity=0.75)
+        display_color = _babase.safecolor(player.color, target_intensity=0.75)
         spaz = PlayerSpaz_Zom(color=player.color,
                               highlight=player.highlight,
                               character='Kronk2',
@@ -591,21 +594,21 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
             StandMessage(
                 position,
                 angle if angle is not None else random.uniform(0, 360)))
-        _ba.playsound(self._spawn_sound, 1, position=spaz.node.position)
-        light = _ba.newnode('light', attrs={'color': light_color})
+        bs.Sound.play(self._spawn_sound, 1, position=spaz.node.position)
+        light = bs.newnode('light', attrs={'color': light_color})
         spaz.node.connectattr('position', light, 'position')
-        ba.animate(light, 'intensity', {0: 0, 0.25: 1, 0.5: 0})
-        _ba.timer(0.5, light.delete)
+        bs.animate(light, 'intensity', {0: 0, 0.25: 1, 0.5: 0})
+        bs.timer(0.5, light.delete)
 
         if not self._solo_mode:
-            ba.timer(0.3, ba.Call(self._print_lives, player))
+            bs.timer(0.3, babase.Call(self._print_lives, player))
 
         for icon in player.icons:
             icon.handle_player_spawned()
         return spaz
 
     def _print_lives(self, player: Player) -> None:
-        from bastd.actor import popuptext
+        from bascenev1lib.actor import popuptext
 
         # We get called in a timer so it's possible our player has left/etc.
         if not player or not player.is_alive() or not player.node:
@@ -642,13 +645,13 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
 
         # Update icons in a moment since our team will be gone from the
         # list then.
-        ba.timer(0, self._update_icons)
+        bs.timer(0, self._update_icons)
 
     def _get_total_team_lives(self, team: Team) -> int:
         return sum(player.lives for player in team.players)
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
 
             # Augment standard behavior.
             super().handlemessage(msg)
@@ -665,7 +668,7 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
             if msg._player in self.spazList:
                 self.spazList.remove(msg._player)
             if player.lives < 0:
-                ba.print_error(
+                babase.print_error(
                     "Got lives < 0 in Elim; this shouldn't happen. solo:" +
                     str(self._solo_mode))
                 player.lives = 0
@@ -677,7 +680,7 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
             # Play big death sound on our last death
             # or for every one in solo mode.
             if self._solo_mode or player.lives == 0:
-                ba.playsound(SpazFactory.get().single_player_death_sound)
+                SpazFactory.get().single_player_death_sound.play()
 
             # If we hit zero lives, we're dead (and our team might be too).
             if player.lives == 0:
@@ -732,16 +735,16 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
                         theScores) and theScores.count(max(theScores)) > 1:
                     pass
                 else:
-                    self._round_end_timer = ba.Timer(0.5, self.end_game)
+                    self._round_end_timer = bs.Timer(0.5, self.end_game)
             else:
-                self._round_end_timer = ba.Timer(0.5, self.end_game)
+                self._round_end_timer = bs.Timer(0.5, self.end_game)
 
     def spawn_zombie(self) -> None:
         # We need a Z height...
         thePt = list(self.get_random_point_in_play())
         thePt2 = self.map.get_ffa_start_position(self.players)
         thePt[1] = thePt2[1]
-        ba.timer(0.1, ba.Call(
+        bs.timer(0.1, babase.Call(
             self._bots.spawn_bot, BrawlerBot, pos=thePt, spawn_time=1.0))
 
     def _onSpazBotDied(self, DeathMsg) -> None:
@@ -816,25 +819,25 @@ class ZombieHorde(ba.TeamGameActivity[Player, Team]):
         setattr(BrawlerBot, 'color', (0.6, 0.6, 0.6))
         setattr(BrawlerBot, 'highlight', (0.6, 0.6, 0.6))
         setattr(BrawlerBot, 'character', 'Kronk')
-        results = ba.GameResults()
+        results = bs.GameResults()
         self._vs_text = None  # Kill our 'vs' if its there.
         for team in self.teams:
             results.set_team_score(team, team.score)
         self.end(results=results)
 
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 class ZombieHordeCoop(ZombieHorde):
 
     name = 'Zombie Horde'
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return ['Football Stadium']
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.CoopSession))
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return (issubclass(sessiontype, bs.CoopSession))
 
     def _update(self) -> None:
         if self.zombieQ > 0:
@@ -855,12 +858,12 @@ class ZombieHordeCoop(ZombieHorde):
                         break
 
         if not any(player.is_alive() for player in self.teams[0].players):
-            self._round_end_timer = ba.Timer(0.5, self.end_game)
+            self._round_end_timer = bs.Timer(0.5, self.end_game)
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             # Augment standard behavior.
-            ba.TeamGameActivity.handlemessage(self, msg)
+            bs.TeamGameActivity.handlemessage(self, msg)
             player: Player = msg.getplayer(Player)
             # If we have any icons, update their state.
             for icon in player.icons:
@@ -870,10 +873,10 @@ class ZombieHordeCoop(ZombieHorde):
 
 
 # ba_meta export plugin
-class ZombieHordeLevel(ba.Plugin):
+class ZombieHordeLevel(babase.Plugin):
     def on_app_running(self) -> None:
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs._level.Level(
                 'Zombie Horde',
                 gametype=ZombieHordeCoop,
                 settings={},

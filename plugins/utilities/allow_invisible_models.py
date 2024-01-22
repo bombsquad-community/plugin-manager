@@ -1,15 +1,17 @@
-# ba_meta require api 7
-import ba
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
+import babase
+import bascenev1 as bs
 
-original_getmodel = ba.getmodel
+original_getmesh = bs.getmesh
 
 
-def get_model_gracefully(model):
-    if model is not None:
-        return original_getmodel(model)
+def get_mesh_gracefully(mesh):
+    if mesh is not None:
+        return original_getmesh(mesh)
 
 
 # ba_meta export plugin
-class Main(ba.Plugin):
+class Main(babase.Plugin):
     def on_app_running(self):
-        ba.getmodel = get_model_gracefully
+        bs.getmesh = get_mesh_gracefully

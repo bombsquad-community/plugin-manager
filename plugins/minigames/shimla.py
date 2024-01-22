@@ -1,43 +1,43 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
 """DeathMatch game and support classes."""
 
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-import _ba
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.gameutils import SharedObjects
-from bastd.game.deathmatch import DeathMatchGame, Player, Team
-from bastd.gameutils import SharedObjects
+import babase
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.game.deathmatch import DeathMatchGame, Player
+from bascenev1lib.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 
 
 class ShimlaGame(DeathMatchGame):
     name = 'Shimla'
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.DualTeamSession)
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.DualTeamSession)
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
         return ['Creative Thoughts']
 
     def __init__(self, settings: dict):
         super().__init__(settings)
         shared = SharedObjects.get()
         self.lifts = {}
-        self._real_wall_material = ba.Material()
+        self._real_wall_material = bs.Material()
         self._real_wall_material.add_actions(
 
             actions=(
@@ -53,7 +53,7 @@ class ShimlaGame(DeathMatchGame):
                 ('modify_part_collision', 'physical', True)
 
             ))
-        self._lift_material = ba.Material()
+        self._lift_material = bs.Material()
         self._lift_material.add_actions(
 
             actions=(
@@ -71,14 +71,14 @@ class ShimlaGame(DeathMatchGame):
         )
 
     def on_begin(self):
-        ba.getactivity().globalsnode.happy_thoughts_mode = False
+        bs.getactivity().globalsnode.happy_thoughts_mode = False
         super().on_begin()
 
         self.make_map()
-        ba.timer(2, self.disable_fly)
+        bs.timer(2, self.disable_fly)
 
     def disable_fly(self):
-        activity = _ba.get_foreground_host_activity()
+        activity = bs.get_foreground_host_activity()
 
         for players in activity.players:
             players.actor.node.fly = False
@@ -102,29 +102,29 @@ class ShimlaGame(DeathMatchGame):
 
     def make_map(self):
         shared = SharedObjects.get()
-        _ba.get_foreground_host_activity()._map.leftwall.materials = [
+        bs.get_foreground_host_activity()._map.leftwall.materials = [
             shared.footing_material, self._real_wall_material]
 
-        _ba.get_foreground_host_activity()._map.rightwall.materials = [
+        bs.get_foreground_host_activity()._map.rightwall.materials = [
             shared.footing_material, self._real_wall_material]
 
-        _ba.get_foreground_host_activity()._map.topwall.materials = [
+        bs.get_foreground_host_activity()._map.topwall.materials = [
             shared.footing_material, self._real_wall_material]
 
-        self.floorwall1 = ba.newnode('region', attrs={'position': (-10, 5, -5.52), 'scale':
+        self.floorwall1 = bs.newnode('region', attrs={'position': (-10, 5, -5.52), 'scale':
                                                       (15, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-        self.floorwall2 = ba.newnode('region', attrs={'position': (10, 5, -5.52), 'scale': (
+        self.floorwall2 = bs.newnode('region', attrs={'position': (10, 5, -5.52), 'scale': (
             15, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
 
-        self.wall1 = ba.newnode('region', attrs={'position': (0, 11, -6.90), 'scale': (
+        self.wall1 = bs.newnode('region', attrs={'position': (0, 11, -6.90), 'scale': (
             35.4, 20, 1), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-        self.wall2 = ba.newnode('region', attrs={'position': (0, 11, -4.14), 'scale': (
+        self.wall2 = bs.newnode('region', attrs={'position': (0, 11, -4.14), 'scale': (
             35.4, 20, 1), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
 
-        ba.newnode('locator', attrs={'shape': 'box', 'position': (-10, 5, -5.52), 'color': (
+        bs.newnode('locator', attrs={'shape': 'box', 'position': (-10, 5, -5.52), 'color': (
             0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (15, 0.2, 2)})
 
-        ba.newnode('locator', attrs={'shape': 'box', 'position': (10, 5, -5.52), 'color': (
+        bs.newnode('locator', attrs={'shape': 'box', 'position': (10, 5, -5.52), 'color': (
             0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (15, 0.2, 2)})
         self.create_lift(-16.65, 8)
 
@@ -151,32 +151,32 @@ class ShimlaGame(DeathMatchGame):
 
         shared = SharedObjects.get()
 
-        ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (5.5, 0.1, 6),
+        bs.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (5.5, 0.1, 6),
                    'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-        ba.newnode('locator', attrs={'shape': 'box', 'position': (x, y,  -5.52), 'color': (
+        bs.newnode('locator', attrs={'shape': 'box', 'position': (x, y,  -5.52), 'color': (
             1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (5.5, 0.1, 2)})
 
     def create_lift(self, x, y):
         shared = SharedObjects.get()
         color = (0.7, 0.6, 0.5)
 
-        floor = ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
+        floor = bs.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
             1.8, 0.1, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material, self._lift_material]})
 
-        cleaner = ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
+        cleaner = bs.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (
             2, 0.3, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
 
-        lift = ba.newnode('locator', attrs={'shape': 'box', 'position': (
+        lift = bs.newnode('locator', attrs={'shape': 'box', 'position': (
             x, y,  -5.52), 'color': color, 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (1.8, 3.7, 2)})
 
-        _tcombine = ba.newnode('combine',
+        _tcombine = bs.newnode('combine',
                                owner=floor,
                                attrs={
                                    'input0': x,
                                    'input2': -5.5,
                                    'size': 3
                                })
-        mnode = ba.newnode('math',
+        mnode = bs.newnode('math',
                            owner=lift,
                            attrs={
                                'input1': (0, 2, 0),
@@ -184,7 +184,7 @@ class ShimlaGame(DeathMatchGame):
                            })
         _tcombine.connectattr('output', mnode, 'input2')
 
-        _cleaner_combine = ba.newnode('combine',
+        _cleaner_combine = bs.newnode('combine',
                                       owner=cleaner,
                                       attrs={
                                           'input1': 5.6,
@@ -192,10 +192,10 @@ class ShimlaGame(DeathMatchGame):
                                           'size': 3
                                       })
         _cleaner_combine.connectattr('output', cleaner, 'position')
-        ba.animate(_tcombine, 'input1', {
+        bs.animate(_tcombine, 'input1', {
             0: 5.1,
         })
-        ba.animate(_cleaner_combine, 'input0', {
+        bs.animate(_cleaner_combine, 'input0', {
             0: -19 if x < 0 else 19,
         })
 
@@ -205,29 +205,29 @@ class ShimlaGame(DeathMatchGame):
                              "cleaner": _cleaner_combine, 'leftLift': x < 0}
 
     def _handle_lift(self):
-        region = ba.getcollision().sourcenode
+        region = bs.getcollision().sourcenode
         lift = self.lifts[region]
 
         def clean(lift):
-            ba.animate(lift["cleaner"], 'input0', {
+            bs.animate(lift["cleaner"], 'input0', {
                 0: -19 if lift["leftLift"] else 19,
                 2: -16 if lift["leftLift"] else 16,
                 4.3: -19 if lift["leftLift"] else 19
             })
         if lift["state"] == "origin":
             lift["state"] = "transition"
-            ba.animate(lift["lift"], 'input1', {
+            bs.animate(lift["lift"], 'input1', {
                 0: 5.1,
                 1.3: 5.1,
                 6: 5+12,
                 9: 5+12,
                 15: 5.1
             })
-            ba.timer(16, ba.Call(lambda lift: lift.update({'state': 'end'}), lift))
-            ba.timer(12, ba.Call(clean, lift))
+            bs.timer(16, babase.Call(lambda lift: lift.update({'state': 'end'}), lift))
+            bs.timer(12, babase.Call(clean, lift))
 
     def _handle_lift_disconnect(self):
-        region = ba.getcollision().sourcenode
+        region = bs.getcollision().sourcenode
         lift = self.lifts[region]
         if lift["state"] == 'end':
             lift["state"] = "origin"
@@ -236,9 +236,9 @@ class ShimlaGame(DeathMatchGame):
         shared = SharedObjects.get()
 
         for i in range(0, 21):
-            ba.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (0.2, 0.1, 6),
+            bs.newnode('region', attrs={'position': (x, y, -5.52), 'scale': (0.2, 0.1, 6),
                        'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-            ba.newnode('locator', attrs={'shape': 'box', 'position': (x, y,  -5.52), 'color': (
+            bs.newnode('locator', attrs={'shape': 'box', 'position': (x, y,  -5.52), 'color': (
                 1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.2, 0.1, 2)})
             if backslash:
                 x = x+0.1
@@ -292,7 +292,7 @@ class mapdefs:
         0.5245740665, 0.5245740665, 0.01941146064)
 
 
-class CreativeThoughts(ba.Map):
+class CreativeThoughts(bs.Map):
     """Freaking map by smoothy."""
 
     defs = mapdefs
@@ -313,26 +313,26 @@ class CreativeThoughts(ba.Map):
     @classmethod
     def on_preload(cls) -> Any:
         data: Dict[str, Any] = {
-            'model': ba.getmodel('alwaysLandLevel'),
-            'bottom_model': ba.getmodel('alwaysLandLevelBottom'),
-            'bgmodel': ba.getmodel('alwaysLandBG'),
-            'collide_model': ba.getcollidemodel('alwaysLandLevelCollide'),
-            'tex': ba.gettexture('alwaysLandLevelColor'),
-            'bgtex': ba.gettexture('alwaysLandBGColor'),
-            'vr_fill_mound_model': ba.getmodel('alwaysLandVRFillMound'),
-            'vr_fill_mound_tex': ba.gettexture('vrFillMound')
+            'mesh': bs.getmesh('alwaysLandLevel'),
+            'bottom_mesh': bs.getmesh('alwaysLandLevelBottom'),
+            'bgmesh': bs.getmesh('alwaysLandBG'),
+            'collision_mesh': bs.getcollisionmesh('alwaysLandLevelCollide'),
+            'tex': bs.gettexture('alwaysLandLevelColor'),
+            'bgtex': bs.gettexture('alwaysLandBGColor'),
+            'vr_fill_mound_mesh': bs.getmesh('alwaysLandVRFillMound'),
+            'vr_fill_mound_tex': bs.gettexture('vrFillMound')
         }
         return data
 
     @classmethod
-    def get_music_type(cls) -> ba.MusicType:
-        return ba.MusicType.FLYING
+    def get_music_type(cls) -> bs.MusicType:
+        return bs.MusicType.FLYING
 
     def __init__(self) -> None:
         super().__init__(vr_overlay_offset=(0, -3.7, 2.5))
         shared = SharedObjects.get()
-        self._fake_wall_material = ba.Material()
-        self._real_wall_material = ba.Material()
+        self._fake_wall_material = bs.Material()
+        self._real_wall_material = bs.Material()
         self._fake_wall_material.add_actions(
             conditions=(('they_are_younger_than', 9000), 'and',
                         ('they_have_material', shared.player_material)),
@@ -348,29 +348,29 @@ class CreativeThoughts(ba.Map):
                 ('modify_part_collision', 'physical', True)
 
             ))
-        self.background = ba.newnode(
+        self.background = bs.newnode(
             'terrain',
             attrs={
-                'model': self.preloaddata['bgmodel'],
+                'mesh': self.preloaddata['bgmesh'],
                 'lighting': False,
                 'background': True,
-                'color_texture': ba.gettexture("rampageBGColor")
+                'color_texture': bs.gettexture("rampageBGColor")
             })
 
-        self.leftwall = ba.newnode('region', attrs={'position': (-17.75152479, 13, -5.52), 'scale': (
+        self.leftwall = bs.newnode('region', attrs={'position': (-17.75152479, 13, -5.52), 'scale': (
             0.1, 15.5, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-        self.rightwall = ba.newnode('region', attrs={'position': (17.75, 13, -5.52), 'scale': (
+        self.rightwall = bs.newnode('region', attrs={'position': (17.75, 13, -5.52), 'scale': (
             0.1, 15.5, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-        self.topwall = ba.newnode('region', attrs={'position': (0, 21.0, -5.52), 'scale': (
+        self.topwall = bs.newnode('region', attrs={'position': (0, 21.0, -5.52), 'scale': (
             35.4, 0.2, 2), 'type': 'box', 'materials': [shared.footing_material, self._real_wall_material]})
-        ba.newnode('locator', attrs={'shape': 'box', 'position': (-17.75152479, 13, -5.52), 'color': (
+        bs.newnode('locator', attrs={'shape': 'box', 'position': (-17.75152479, 13, -5.52), 'color': (
             0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 15.5, 2)})
-        ba.newnode('locator', attrs={'shape': 'box', 'position': (17.75, 13, -5.52), 'color': (
+        bs.newnode('locator', attrs={'shape': 'box', 'position': (17.75, 13, -5.52), 'color': (
             0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (0.1, 15.5, 2)})
-        ba.newnode('locator', attrs={'shape': 'box', 'position': (0, 21.0, -5.52), 'color': (
+        bs.newnode('locator', attrs={'shape': 'box', 'position': (0, 21.0, -5.52), 'color': (
             0, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': (35.4, 0.2, 2)})
 
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.happy_thoughts_mode = True
         gnode.shadow_offset = (0.0, 8.0, 5.0)
         gnode.tint = (1.3, 1.23, 1.0)
@@ -381,9 +381,9 @@ class CreativeThoughts(ba.Map):
         self.is_flying = True
 
         # throw out some tips on flying
-        txt = ba.newnode('text',
+        txt = bs.newnode('text',
                          attrs={
-                             'text': ba.Lstr(resource='pressJumpToFlyText'),
+                             'text': babase.Lstr(resource='pressJumpToFlyText'),
                              'scale': 1.2,
                              'maxwidth': 800,
                              'position': (0, 200),
@@ -392,7 +392,7 @@ class CreativeThoughts(ba.Map):
                              'h_align': 'center',
                              'v_attach': 'bottom'
                          })
-        cmb = ba.newnode('combine',
+        cmb = bs.newnode('combine',
                          owner=txt,
                          attrs={
                              'size': 4,
@@ -400,12 +400,12 @@ class CreativeThoughts(ba.Map):
                              'input1': 0.9,
                              'input2': 0.0
                          })
-        ba.animate(cmb, 'input3', {3.0: 0, 4.0: 1, 9.0: 1, 10.0: 0})
+        bs.animate(cmb, 'input3', {3.0: 0, 4.0: 1, 9.0: 1, 10.0: 0})
         cmb.connectattr('output', txt, 'color')
-        ba.timer(10.0, txt.delete)
+        bs.timer(10.0, txt.delete)
 
 
 try:
-    ba._map.register_map(CreativeThoughts)
+    bs._map.register_map(CreativeThoughts)
 except:
     pass

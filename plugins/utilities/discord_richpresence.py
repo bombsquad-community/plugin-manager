@@ -27,7 +27,7 @@ import _babase
 import bascenev1 as bs
 import bascenev1lib
 import bauiv1 as bui
-from baenv import TARGET_BALLISTICA_BUILD
+from baenv import TARGET_BALLISTICA_BUILD as build_number
 
 from typing import TYPE_CHECKING
 
@@ -37,8 +37,8 @@ if TYPE_CHECKING:
 
 ANDROID = babase.app.classic.platform == "android"
 DIRPATH = Path(
-    f"{_babase.app.python_directory_user if TARGET_BALLISTICA_BUILD < 21282 else _babase.app.env.python_directory_user}/image_id.json")
-APP_VERSION = _babase.app.version if TARGET_BALLISTICA_BUILD < 21282 else _babase.app.env.version
+    f"{_babase.app.python_directory_user if build_number < 21282 else _babase.app.env.python_directory_user}/image_id.json")
+APP_VERSION = _babase.app.version if build_number < 21282 else _babase.app.env.version
 
 if ANDROID:  # !can add ios in future
 
@@ -188,7 +188,7 @@ if ANDROID:  # !can add ios in future
 
                     def identify():
                         """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
-                        with open(f"{getcwd()}/token.txt", 'r') as f:
+                        with open(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt", 'r') as f:
                             token = bytes.fromhex(f.read()).decode('utf-8')
                         identify_payload = {
                             "op": 2,
@@ -220,7 +220,7 @@ if ANDROID:  # !can add ios in future
             threading.Thread(target=heartbeats, daemon=True, name="heartbeat").start()
 
         def start(self):
-            if Path(f"{getcwd()}/token.txt").exists():
+            if Path(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt").exists():
                 threading.Thread(target=self.ws.run_forever, daemon=True, name="websocket").start()
 
         def close(self):
@@ -370,12 +370,13 @@ def get_event_loop(force_fresh=False):
 
         def _generate_join_secret(self):
             # resp = requests.get('https://legacy.ballistica.net/bsAccessCheck').text
-            connection_info = bs.get_connection_to_host_info()
-            if connection_info:
-                addr = _last_server_addr
-                port = _last_server_port
-            else:
-                try:
+            try:
+                connection_info = bs.get_connection_to_host_info(
+                ) if build_number < 21727 else bs.get_connection_to_host_info_2()
+                if connection_info:
+                    addr = _last_server_addr
+                    port = _last_server_port
+                else:
                     with urlopen(
                         "https://legacy.ballistica.net/bsAccessCheck"
                     ) as resp:
@@ -389,8 +390,8 @@ def get_event_loop(force_fresh=False):
                         "port": port,
                     }
                     self.join_secret = json.dumps(secret_dict)
-                except:
-                    pass
+            except:
+                pass
 
         def _update_secret(self):
             threading.Thread(target=self._generate_join_secret, daemon=True).start()
@@ -535,7 +536,7 @@ class Discordlogin(PopupWindow):
         s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.27 if _uiscale is babase.UIScale.MEDIUM else 1.3
         self._width = 380 * s
         self._height = 150 + 150 * s
-        self.path = Path(f"{getcwd()}/token.txt")
+        self.path = Path(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt")
         bg_color = (0.5, 0.4, 0.6)
         log_btn_colour = (0.10, 0.95, 0.10) if not self.path.exists() else (1.00, 0.15, 0.15)
         log_txt = "LOG IN" if not self.path.exists() else "LOG OUT"
@@ -794,6 +795,7 @@ class DiscordRP(babase.Plugin):
     def on_app_running(self) -> None:
         if not ANDROID:
             self.rpc_thread.start()
+
             self.update_timer = bs.AppTimer(
                 1, bs.WeakCall(self.update_status), repeat=True
             )
@@ -869,7 +871,8 @@ class DiscordRP(babase.Plugin):
 
     def update_status(self) -> None:
         roster = bs.get_game_roster()
-        connection_info = bs.get_connection_to_host_info()
+        connection_info = bs.get_connection_to_host_info(
+        ) if build_number < 21727 else bs.get_connection_to_host_info_2()
 
         self.rpc_thread.large_image_key = "bombsquadicon"
         self.rpc_thread.large_image_text = "BombSquad"
@@ -877,15 +880,14 @@ class DiscordRP(babase.Plugin):
         self.rpc_thread.small_image_text = (
             f"{_babase.app.classic.platform.capitalize()}({APP_VERSION})"
         )
-        connection_info = bs.get_connection_to_host_info()
         if not ANDROID:
             svinfo = str(connection_info)
             if self._last_server_info != svinfo:
                 self._last_server_info = svinfo
                 self.rpc_thread.party_id = str(uuid.uuid4())
                 self.rpc_thread._update_secret()
-        if connection_info != {}:
-            servername = connection_info["name"]
+        if connection_info:
+            servername = connection_info.name
             self.rpc_thread.details = "Online"
             self.rpc_thread.party_size = max(
                 1, sum(len(client["players"]) for client in roster)
@@ -910,7 +912,7 @@ class DiscordRP(babase.Plugin):
                 else:
                     self.rpc_thread.state = servername[slice(19)]
 
-        if connection_info == {}:
+        if not connection_info:
             self.rpc_thread.details = "Local"  # ! replace with something like ballistica github cause
             self.rpc_thread.state = self._get_current_activity_name()
             self.rpc_thread.party_size = max(1, len(roster))
@@ -963,7 +965,7 @@ class DiscordRP(babase.Plugin):
                     points = act._score
                     self.rpc_thread.details += f" ({points} points)"
                 elif isinstance(act, MeteorShowerGame):
-                    with bs.ContextRef(act):
+                    with act.context:
                         sec = bs.time() - act._timer.getstarttime()
                     secfmt = ""
                     if sec < 60:
@@ -995,5 +997,5 @@ class DiscordRP(babase.Plugin):
                 self.rpc_thread.large_image_key = (
                     "https://media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif"
                 )
-        if ANDROID and Path(f"{getcwd()}/token.txt").exists():
+        if ANDROID and Path(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt").exists():
             self.rpc_thread.presence()

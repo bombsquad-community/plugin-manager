@@ -77,6 +77,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "3b55e82dc1c1d4d84760c23098233e30"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -92,10 +98,16 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "74d61a487379d163c3f5713f001ec69d"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -111,10 +123,16 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "25f9018fdc70173212e436d4e7c41e97"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -130,10 +148,16 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "4630220820b08642e9c72f9f24675298"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -149,7 +173,7 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
@@ -178,6 +202,12 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "6c90c97151c31d240a760590c56d7dbf"
+        },
         "1.0.1": {
           "api_version": 7,
           "commit_sha": "d511c15",
@@ -199,10 +229,16 @@
         {
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "discord": "crossjoy"
         }
       ],
       "versions": {
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "c7d3cc971090ee5a4cb0f096dad9f118"
+        },
         "2.0.0": {
           "api_version": 7,
           "commit_sha": "8b257b3",
@@ -328,6 +364,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "3272ee5dd06d5ad603c6a1be189ad1d1"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -343,7 +385,7 @@
         {
           "name": "SEBASTIAN2059",
           "email": "",
-          "discord": "SEBASTIAN2059#5751"
+          "discord": "sebastian2059"
         },
         {
           "name": "zPanxo",
@@ -373,10 +415,16 @@
         {
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "3730cdc9f922ac5a8c86e2c7debd09fe"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "52094fc",
@@ -392,7 +440,7 @@
         {
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
@@ -417,10 +465,16 @@
         {
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "a1d2d75303aaeb0b078a4c836d65ebee"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2aa1e50",
@@ -436,10 +490,16 @@
         {
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "aa03952868be8e978d7b23891883b52a"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2aa1e50",
@@ -455,10 +515,16 @@
         {
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "3a99f089fda47e034b16e7fa086ee051"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2aa1e50",
@@ -474,10 +540,16 @@
         {
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "627390f50e18bd76d94abf35f538ec8f"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "52094fc",
@@ -534,7 +606,7 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
@@ -588,6 +660,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "7e741a7f4c1ace1124d8719a009f8948"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -603,10 +681,16 @@
         {
           "name": "ThePersonMan",
           "email": "",
-          "discord": "ThePersonMan#0276"
+          "discord": "the.personman"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "270961a492432e6199dec2d0915d8acf"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -622,10 +706,16 @@
         {
           "name": "Dliwk",
           "email": "",
-          "discord": "Dliwk#7961"
+          "discord": "dliwk"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "3fb424583f1e686854fe94bd22c5161c"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -645,6 +735,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "7e70fb037b49b183a9fb4eaa2babb90e"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -660,10 +756,16 @@
         {
           "name": "SEBASTIAN2059",
           "email": "",
-          "discord": "SEBASTIAN2059#5751"
+          "discord": "sebastian2059"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "febeeb370ac150f455ed27bc9d557d75"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",
@@ -698,10 +800,16 @@
         {
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "discord": "crossjoy"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "82ffbb28961c57731bd64d4c4add06cd"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "7219487",

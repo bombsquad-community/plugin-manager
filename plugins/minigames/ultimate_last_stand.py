@@ -1,3 +1,4 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """Ultimate Last Stand V2:
 Made by Cross Joy"""
 
@@ -25,7 +26,7 @@ Made by Cross Joy"""
 
 # ----------------------------------------------------------------------------
 
-# ba_meta require api 7
+# ba_meta require api 8
 
 from __future__ import annotations
 
@@ -33,22 +34,24 @@ import random
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-import ba
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.bomb import TNTSpawner
-from bastd.actor.onscreentimer import OnScreenTimer
-from bastd.actor.scoreboard import Scoreboard
-from bastd.actor.spazfactory import SpazFactory
-from bastd.actor.spazbot import (SpazBot, SpazBotSet, BomberBot,
-                                 BomberBotPro, BomberBotProShielded,
-                                 BrawlerBot, BrawlerBotPro,
-                                 BrawlerBotProShielded, TriggerBot,
-                                 TriggerBotPro, TriggerBotProShielded,
-                                 ChargerBot, StickyBot, ExplodeyBot)
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.bomb import TNTSpawner
+from bascenev1lib.actor.onscreentimer import OnScreenTimer
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.actor.spazfactory import SpazFactory
+from bascenev1lib.actor.spazbot import (SpazBot, SpazBotSet, BomberBot,
+                                        BomberBotPro, BomberBotProShielded,
+                                        BrawlerBot, BrawlerBotPro,
+                                        BrawlerBotProShielded, TriggerBot,
+                                        TriggerBotPro, TriggerBotProShielded,
+                                        ChargerBot, StickyBot, ExplodeyBot)
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
-    from bastd.actor.spazbot import SpazBot
+    from bascenev1lib.actor.spazbot import SpazBot
 
 
 class IceBot(SpazBot):
@@ -71,7 +74,7 @@ class IceBot(SpazBot):
     points_mult = 3
 
 
-class Icon(ba.Actor):
+class Icon(bs.Actor):
     """Creates in in-game icon on screen."""
 
     def __init__(self,
@@ -90,10 +93,10 @@ class Icon(ba.Actor):
         self._show_lives = show_lives
         self._show_death = show_death
         self._name_scale = name_scale
-        self._outline_tex = ba.gettexture('characterIconMask')
+        self._outline_tex = bs.gettexture('characterIconMask')
 
         icon = player.get_icon()
-        self.node = ba.newnode('image',
+        self.node = bs.newnode('image',
                                delegate=self,
                                attrs={
                                    'texture': icon['texture'],
@@ -106,12 +109,12 @@ class Icon(ba.Actor):
                                    'absolute_scale': True,
                                    'attach': 'bottomCenter'
                                })
-        self._name_text = ba.newnode(
+        self._name_text = bs.newnode(
             'text',
             owner=self.node,
             attrs={
-                'text': ba.Lstr(value=player.getname()),
-                'color': ba.safecolor(player.team.color),
+                'text': babase.Lstr(value=player.getname()),
+                'color': babase.safecolor(player.team.color),
                 'h_align': 'center',
                 'v_align': 'center',
                 'vr_depth': 410,
@@ -122,7 +125,7 @@ class Icon(ba.Actor):
                 'v_attach': 'bottom'
             })
         if self._show_lives:
-            self._lives_text = ba.newnode('text',
+            self._lives_text = bs.newnode('text',
                                           owner=self.node,
                                           attrs={
                                               'text': 'x0',
@@ -178,7 +181,7 @@ class Icon(ba.Actor):
         if not self.node:
             return
         if self._show_death:
-            ba.animate(
+            bs.animate(
                 self.node, 'opacity', {
                     0.00: 1.0,
                     0.05: 0.0,
@@ -195,10 +198,10 @@ class Icon(ba.Actor):
                 })
             lives = self._player.lives
             if lives == 0:
-                ba.timer(0.6, self.update_for_lives)
+                bs.timer(0.6, self.update_for_lives)
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.DieMessage):
+        if isinstance(msg, bs.DieMessage):
             self.node.delete()
             return None
         return super().handlemessage(msg)
@@ -212,7 +215,7 @@ class SpawnInfo:
     dincrease: float
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
@@ -222,7 +225,7 @@ class Player(ba.Player['Team']):
         self.icons: list[Icon] = []
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
@@ -230,14 +233,14 @@ class Team(ba.Team[Player]):
         self.spawn_order: list[Player] = []
 
 
-# ba_meta export game
-class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
     """Minigame involving dodging falling bombs."""
 
     name = 'Ultimate Last Stand'
     description = 'Only the strongest will stand at the end.'
-    scoreconfig = ba.ScoreConfig(label='Survived',
-                                 scoretype=ba.ScoreType.SECONDS,
+    scoreconfig = bs.ScoreConfig(label='Survived',
+                                 scoretype=bs.ScoreType.SECONDS,
                                  none_is_winner=True)
 
     # Print messages when players die (since its meaningful in this game).
@@ -250,16 +253,16 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
     @classmethod
     def get_available_settings(
             cls,
-            sessiontype: type[ba.Session]) -> list[ba.Setting]:
+            sessiontype: type[bs.Session]) -> list[babase.Setting]:
         settings = [
-            ba.IntSetting(
+            bs.IntSetting(
                 'Lives Per Player',
                 default=1,
                 min_value=1,
                 max_value=10,
                 increment=1,
             ),
-            ba.FloatChoiceSetting(
+            bs.FloatChoiceSetting(
                 'Respawn Times',
                 choices=[
                     ('Shorter', 0.25),
@@ -270,31 +273,31 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=False),
         ]
-        if issubclass(sessiontype, ba.DualTeamSession):
+        if issubclass(sessiontype, bs.DualTeamSession):
             settings.append(
-                ba.BoolSetting('Balance Total Lives', default=False))
+                bs.BoolSetting('Balance Total Lives', default=False))
         return settings
 
     # We're currently hard-coded for one map.
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return ['Rampage']
 
     # We support teams, free-for-all, and co-op sessions.
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return (issubclass(sessiontype, ba.DualTeamSession)
-                or issubclass(sessiontype, ba.FreeForAllSession))
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return (issubclass(sessiontype, bs.DualTeamSession)
+                or issubclass(sessiontype, bs.FreeForAllSession))
 
     def __init__(self, settings: dict):
         super().__init__(settings)
 
         self._scoreboard = Scoreboard()
         self._start_time: float | None = None
-        self._vs_text: ba.Actor | None = None
-        self._round_end_timer: ba.Timer | None = None
+        self._vs_text: bs.Actor | None = None
+        self._round_end_timer: bs.Timer | None = None
         self._lives_per_player = int(settings['Lives Per Player'])
         self._balance_total_lives = bool(
             settings.get('Balance Total Lives', False))
@@ -302,17 +305,17 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         self._last_player_death_time: float | None = None
         self._timer: OnScreenTimer | None = None
         self._tntspawner: TNTSpawner | None = None
-        self._new_wave_sound = ba.getsound('scoreHit01')
+        self._new_wave_sound = bs.getsound('scoreHit01')
         self._bots = SpazBotSet()
         self._tntspawnpos = (0, 5.5, -6)
         self.spazList = []
 
         # Base class overrides:
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC
-                              if self._epic_mode else ba.MusicType.SURVIVAL)
+        self.default_music = (bs.MusicType.EPIC
+                              if self._epic_mode else bs.MusicType.SURVIVAL)
 
-        self.node = ba.newnode('text',
+        self.node = bs.newnode('text',
                                attrs={
                                    'v_attach': 'bottom',
                                    'h_align': 'center',
@@ -342,24 +345,24 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         }  # yapf: disable
 
         # Some base class overrides:
-        self.default_music = (ba.MusicType.EPIC
-                              if self._epic_mode else ba.MusicType.SURVIVAL)
+        self.default_music = (bs.MusicType.EPIC
+                              if self._epic_mode else bs.MusicType.SURVIVAL)
         if self._epic_mode:
             self.slow_motion = True
 
     def get_instance_description(self) -> str | Sequence:
         return 'Only the strongest team will stand at the end.' if isinstance(
             self.session,
-            ba.DualTeamSession) else 'Only the strongest will stand at the end.'
+            bs.DualTeamSession) else 'Only the strongest will stand at the end.'
 
     def get_instance_description_short(self) -> str | Sequence:
         return 'Only the strongest team will stand at the end.' if isinstance(
             self.session,
-            ba.DualTeamSession) else 'Only the strongest will stand at the end.'
+            bs.DualTeamSession) else 'Only the strongest will stand at the end.'
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
-        ba.timer(1.3, ba.Call(ba.playsound, self._new_wave_sound))
+        bs.timer(1.3, self._new_wave_sound.play)
 
     def on_player_join(self, player: Player) -> None:
         player.lives = self._lives_per_player
@@ -374,13 +377,13 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
 
     def on_begin(self) -> None:
         super().on_begin()
-        ba.animate_array(node=self.node, attr='color', size=3, keys={
+        bs.animate_array(node=self.node, attr='color', size=3, keys={
             0.0: (0.5, 0.5, 0.5),
             0.8: (0.83, 0.69, 0.21),
             1.6: (0.5, 0.5, 0.5)
         }, loop=True)
 
-        ba.timer(0.001, ba.WeakCall(self._start_bot_updates))
+        bs.timer(0.001, bs.WeakCall(self._start_bot_updates))
         self._tntspawner = TNTSpawner(position=self._tntspawnpos,
                                       respawn_time=10.0)
 
@@ -389,11 +392,11 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         self.setup_standard_powerup_drops()
 
         # Check for immediate end (if we've only got 1 player, etc).
-        self._start_time = ba.time()
+        self._start_time = bs.time()
 
         # If balance-team-lives is on, add lives to the smaller team until
         # total lives match.
-        if (isinstance(self.session, ba.DualTeamSession)
+        if (isinstance(self.session, bs.DualTeamSession)
             and self._balance_total_lives and self.teams[0].players
                 and self.teams[1].players):
             if self._get_total_team_lives(
@@ -409,7 +412,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
                 lesser_team.players[add_index].lives += 1
                 add_index = (add_index + 1) % len(lesser_team.players)
 
-        ba.timer(1.0, self._update, repeat=True)
+        bs.timer(1.0, self._update, repeat=True)
         self._update_icons()
 
         # We could check game-over conditions at explicit trigger points,
@@ -419,7 +422,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         # pylint: disable=too-many-branches
 
         # In free-for-all mode, everyone is just lined up along the bottom.
-        if isinstance(self.session, ba.FreeForAllSession):
+        if isinstance(self.session, bs.FreeForAllSession):
             count = len(self.teams)
             x_offs = 85
             xval = x_offs * (count - 1) * -0.5
@@ -453,21 +456,21 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
 
         # Update icons in a moment since our team will be gone from the
         # list then.
-        ba.timer(0, self._update_icons)
+        bs.timer(0, self._update_icons)
 
         # If the player to leave was the last in spawn order and had
         # their final turn currently in-progress, mark the survival time
         # for their team.
         if self._get_total_team_lives(player.team) == 0:
             assert self._start_time is not None
-            player.team.survival_seconds = int(ba.time() - self._start_time)
+            player.team.survival_seconds = int(bs.time() - self._start_time)
 
         # A departing player may trigger game-over.
 
     # overriding the default character spawning..
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         actor = self.spawn_player_spaz(player)
-        ba.timer(0.3, ba.Call(self._print_lives, player))
+        bs.timer(0.3, babase.Call(self._print_lives, player))
 
         # If we have any icons, update their state.
         for icon in player.icons:
@@ -475,7 +478,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         return actor
 
     def _print_lives(self, player: Player) -> None:
-        from bastd.actor import popuptext
+        from bascenev1lib.actor import popuptext
 
         # We get called in a timer so it's possible our player has left/etc.
         if not player or not player.is_alive() or not player.node:
@@ -499,14 +502,14 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
             self._update_bots()
         if len(self.players) > 3:
             self._update_bots()
-        self._bot_update_timer = ba.Timer(self._bot_update_interval,
-                                          ba.WeakCall(self._update_bots))
+        self._bot_update_timer = bs.Timer(self._bot_update_interval,
+                                          bs.WeakCall(self._update_bots))
 
     def _update_bots(self) -> None:
         assert self._bot_update_interval is not None
         self._bot_update_interval = max(0.5, self._bot_update_interval * 0.98)
-        self._bot_update_timer = ba.Timer(self._bot_update_interval,
-                                          ba.WeakCall(self._update_bots))
+        self._bot_update_timer = bs.Timer(self._bot_update_interval,
+                                          bs.WeakCall(self._update_bots))
         botspawnpts: list[Sequence[float]] = [[-5.0, 5.5, -4.14],
                                               [0.0, 5.5, -4.14],
                                               [5.0, 5.5, -4.14]]
@@ -516,7 +519,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
                     assert isinstance(player.actor, PlayerSpaz)
                     assert player.actor.node
             except Exception:
-                ba.print_exception('Error updating bots.')
+                babase.print_exception('Error updating bots.')
 
         spawnpt = random.choice(
             [botspawnpts[0], botspawnpts[1], botspawnpts[2]])
@@ -550,12 +553,12 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
 
     # Various high-level game events come through this method.
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
 
             # Augment standard behavior.
             super().handlemessage(msg)
 
-            curtime = ba.time()
+            curtime = bs.time()
 
             # Record the player's moment of death.
             # assert isinstance(msg.spaz.player
@@ -574,14 +577,14 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
             # Play big death sound on our last death
             # or for every one in solo mode.
             if player.lives == 0:
-                ba.playsound(SpazFactory.get().single_player_death_sound)
+                SpazFactory.get().single_player_death_sound.play()
 
             # If we hit zero lives, we're dead (and our team might be too).
             if player.lives == 0:
                 # If the whole team is now dead, mark their survival time.
                 if self._get_total_team_lives(player.team) == 0:
                     assert self._start_time is not None
-                    player.team.survival_seconds = int(ba.time() -
+                    player.team.survival_seconds = int(bs.time() -
                                                        self._start_time)
             else:
                 # Otherwise, in regular mode, respawn.
@@ -599,7 +602,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
         # the game (allows the dust to settle and draws to occur if deaths
         # are close enough).
         if len(self._get_living_teams()) < 2:
-            self._round_end_timer = ba.Timer(0.5, self.end_game)
+            self._round_end_timer = bs.Timer(0.5, self.end_game)
 
     def end_game(self) -> None:
         # Stop updating our time text, and set the final time to match
@@ -608,7 +611,7 @@ class UltimateLastStand(ba.TeamGameActivity[Player, Team]):
 
         # Ok now calc game results: set a score for each team and then tell
         # the game to end.
-        results = ba.GameResults()
+        results = bs.GameResults()
 
         # Remember that 'free-for-all' mode is simply a special form
         # of 'teams' mode where each player gets their own team, so we can

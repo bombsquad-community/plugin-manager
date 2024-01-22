@@ -1,12 +1,15 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 
-# ba_meta require api 7
+# ba_meta require api 8
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-import ba
-from ba import _map
-from bastd.gameutils import SharedObjects
-from bastd.maps import *
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bascenev1 import _map
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.maps import *
 
 if TYPE_CHECKING:
     pass
@@ -48,7 +51,7 @@ class ForestMapData():
     points['spawn2'] = (5.0, -2.0, -2.0) + (0.5, 1.0, 3.2)
 
 
-class ForestMap(ba.Map):
+class ForestMap(bs.Map):
 
     defs = ForestMapData()
     name = 'Forest'
@@ -64,11 +67,11 @@ class ForestMap(ba.Map):
     @classmethod
     def on_preload(cls) -> any:
         data: dict[str, any] = {
-            'model': ba.getmodel('natureBackground'),
-            'tex': ba.gettexture('natureBackgroundColor'),
-            'collide_model': ba.getcollidemodel('natureBackgroundCollide'),
-            'bgmodel': ba.getmodel('thePadBG'),
-            'bgtex': ba.gettexture('menuBG')
+            'mesh': bs.getmesh('natureBackground'),
+            'tex': bs.gettexture('natureBackgroundColor'),
+            'collision_mesh': bs.getcollisionmesh('natureBackgroundCollide'),
+            'bgmesh': bs.getmesh('thePadBG'),
+            'bgtex': bs.gettexture('menuBG')
         }
         return data
 
@@ -76,27 +79,27 @@ class ForestMap(ba.Map):
         super().__init__()
         shared = SharedObjects.get()
 
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'terrain',
             delegate=self,
             attrs={
-                'model': self.preloaddata['model'],
+                'mesh': self.preloaddata['mesh'],
                 'color_texture': self.preloaddata['tex'],
-                'collide_model': self.preloaddata['collide_model'],
+                'collision_mesh': self.preloaddata['collision_mesh'],
                 'materials': [shared.footing_material]
             }
         )
-        self.background = ba.newnode(
+        self.background = bs.newnode(
             'terrain',
             attrs={
-                'model': self.preloaddata['bgmodel'],
+                'mesh': self.preloaddata['bgmesh'],
                 'lighting': False,
                 'shadow': True,
                 'color_texture': self.preloaddata['bgtex']
             }
         )
 
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.tint = (1.0, 1.10, 1.15)
         gnode.ambient_color = (0.9, 1.3, 1.1)
         gnode.shadow_ortho = False
@@ -104,7 +107,7 @@ class ForestMap(ba.Map):
         gnode.vignette_inner = (0.95, 0.95, 0.99)
 
     def is_point_near_edge(self,
-                           point: ba.Vec3,
+                           point: babase.Vec3,
                            running: bool = False) -> bool:
         xpos = point.x
         zpos = point.z
@@ -117,5 +120,5 @@ class ForestMap(ba.Map):
 
 
 # ba_meta export plugin
-class EnableMe(ba.Plugin):
+class EnableMe(babase.Plugin):
     _map.register_map(ForestMap)

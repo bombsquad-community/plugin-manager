@@ -1,3 +1,4 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 # y me (: itsre3
 # =>2<=
@@ -5,7 +6,7 @@
 #
 """Defines Race mini-game."""
 
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -14,17 +15,17 @@ import random
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 
-import ba
-import _ba
-from bastd.actor.bomb import Bomb
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.gameutils import SharedObjects
+import babase
+import bascenev1 as bs
+from bascenev1lib.actor.bomb import Bomb
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import (Any, Type, Tuple, List, Sequence, Optional, Dict,
                         Union)
-    from bastd.actor.onscreentimer import OnScreenTimer
+    from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 
 @dataclass
@@ -34,7 +35,7 @@ class RaceMine:
     mine: Optional[Bomb]
 
 
-class RaceRegion(ba.Actor):
+class RaceRegion(bs.Actor):
     """Region used to track progress during a race."""
 
     def __init__(self, pt: Sequence[float], index: int):
@@ -43,7 +44,7 @@ class RaceRegion(ba.Actor):
         assert isinstance(activity, RaceGame)
         self.pos = pt
         self.index = index
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'region',
             delegate=self,
             attrs={
@@ -54,11 +55,11 @@ class RaceRegion(ba.Actor):
             })
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
-        self.distance_txt: Optional[ba.Node] = None
+        self.distance_txt: Optional[bs.Node] = None
         self.last_region = 0
         self.lap = 0
         self.distance = 0.0
@@ -66,7 +67,7 @@ class Player(ba.Player['Team']):
         self.rank: Optional[int] = None
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
@@ -75,22 +76,22 @@ class Team(ba.Team[Player]):
         self.finished = False
 
 
-# ba_meta export game
-class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class SleepRaceGame(bs.TeamGameActivity[Player, Team]):
     """Game of racing around a track."""
 
     name = 'Sleep Race'
     description = 'Can you run while sleeping?'
-    scoreconfig = ba.ScoreConfig(label='Time',
+    scoreconfig = bs.ScoreConfig(label='Time',
                                  lower_is_better=True,
-                                 scoretype=ba.ScoreType.MILLISECONDS)
+                                 scoretype=bs.ScoreType.MILLISECONDS)
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[ba.Session]) -> List[ba.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
         settings = [
-            ba.IntSetting('Laps', min_value=1, default=2, increment=1),
-            ba.IntChoiceSetting(
+            bs.IntSetting('Laps', min_value=1, default=2, increment=1),
+            bs.IntChoiceSetting(
                 'Time Limit',
                 default=0,
                 choices=[
@@ -102,7 +103,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                     ('20 Minutes', 1200),
                 ],
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Mine Spawning',
                 default=4000,
                 choices=[
@@ -112,7 +113,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                     ('2 Seconds', 2000),
                 ],
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Bomb Spawning',
                 choices=[
                     ('None', 0),
@@ -123,7 +124,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=2000,
             ),
-            ba.IntChoiceSetting(
+            bs.IntChoiceSetting(
                 'Knockout Time',
                 choices=[
                     ('8 Seconds', 8000),
@@ -131,48 +132,48 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                 ],
                 default=5000,
             ),
-            ba.BoolSetting('Epic Mode', default=False),
-            ba.BoolSetting('Credits', default=True),
+            bs.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Credits', default=True),
         ]
 
         # We have some specific settings in teams mode.
-        if issubclass(sessiontype, ba.DualTeamSession):
+        if issubclass(sessiontype, bs.DualTeamSession):
             settings.append(
-                ba.BoolSetting('Entire Team Must Finish', default=False))
+                bs.BoolSetting('Entire Team Must Finish', default=False))
         return settings
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.MultiTeamSession)
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.MultiTeamSession)
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
-        return ba.getmaps('race')
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
+        return bs.app.classic.getmaps('race')
 
     def __init__(self, settings: dict):
         self._race_started = False
         super().__init__(settings)
         self._scoreboard = Scoreboard()
-        self._score_sound = ba.getsound('score')
-        self._swipsound = ba.getsound('swip')
+        self._score_sound = bs.getsound('score')
+        self._swipsound = bs.getsound('swip')
         self._last_team_time: Optional[float] = None
         self._front_race_region: Optional[int] = None
-        self._nub_tex = ba.gettexture('nub')
-        self._beep_1_sound = ba.getsound('raceBeep1')
-        self._beep_2_sound = ba.getsound('raceBeep2')
-        self.race_region_material: Optional[ba.Material] = None
+        self._nub_tex = bs.gettexture('nub')
+        self._beep_1_sound = bs.getsound('raceBeep1')
+        self._beep_2_sound = bs.getsound('raceBeep2')
+        self.race_region_material: Optional[bs.Material] = None
         self._regions: List[RaceRegion] = []
         self._team_finish_pts: Optional[int] = None
-        self._time_text: Optional[ba.Actor] = None
-        self._cd_text: Optional[ba.Actor] = None
+        self._time_text: Optional[bs.Actor] = None
+        self._cd_text: Optional[bs.Actor] = None
         self._timer: Optional[OnScreenTimer] = None
         self._race_mines: Optional[List[RaceMine]] = None
-        self._race_mine_timer: Optional[ba.Timer] = None
-        self._scoreboard_timer: Optional[ba.Timer] = None
-        self._player_order_update_timer: Optional[ba.Timer] = None
-        self._start_lights: Optional[List[ba.Node]] = None
-        self._bomb_spawn_timer: Optional[ba.Timer] = None
-        self._knockout_timer: Optional[ba.Timer] = None
+        self._race_mine_timer: Optional[bs.Timer] = None
+        self._scoreboard_timer: Optional[bs.Timer] = None
+        self._player_order_update_timer: Optional[bs.Timer] = None
+        self._start_lights: Optional[List[bs.Node]] = None
+        self._bomb_spawn_timer: Optional[bs.Timer] = None
+        self._knockout_timer: Optional[bs.Timer] = None
         self._laps = int(settings['Laps'])
         self._entire_team_must_finish = bool(
             settings.get('Entire Team Must Finish', False))
@@ -185,11 +186,11 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
 
         # Base class overrides.
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC_RACE
-                              if self._epic_mode else ba.MusicType.RACE)
+        self.default_music = (bs.MusicType.EPIC_RACE
+                              if self._epic_mode else bs.MusicType.RACE)
 
     def get_instance_description(self) -> Union[str, Sequence]:
-        if (isinstance(self.session, ba.DualTeamSession)
+        if (isinstance(self.session, bs.DualTeamSession)
                 and self._entire_team_must_finish):
             t_str = ' Your entire team has to finish.'
         else:
@@ -208,7 +209,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         super().on_transition_in()
         shared = SharedObjects.get()
         pts = self.map.get_def_points('race_point')
-        mat = self.race_region_material = ba.Material()
+        mat = self.race_region_material = bs.Material()
         mat.add_actions(conditions=('they_have_material',
                                     shared.player_material),
                         actions=(
@@ -224,28 +225,28 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         assert isinstance(player.actor, PlayerSpaz)
         assert player.actor.node
         pos = player.actor.node.position
-        light = ba.newnode('light',
+        light = bs.newnode('light',
                            attrs={
                                'position': pos,
                                'color': (1, 1, 0),
                                'height_attenuated': False,
                                'radius': 0.4
                            })
-        ba.timer(0.5, light.delete)
-        ba.animate(light, 'intensity', {0: 0, 0.1: 1.0 * scale, 0.5: 0})
+        bs.timer(0.5, light.delete)
+        bs.animate(light, 'intensity', {0: 0, 0.1: 1.0 * scale, 0.5: 0})
 
     def _handle_race_point_collide(self) -> None:
         # FIXME: Tidy this up.
         # pylint: disable=too-many-statements
         # pylint: disable=too-many-branches
         # pylint: disable=too-many-nested-blocks
-        collision = ba.getcollision()
+        collision = bs.getcollision()
         try:
             region = collision.sourcenode.getdelegate(RaceRegion, True)
             player = collision.opposingnode.getdelegate(PlayerSpaz,
                                                         True).getplayer(
                                                             Player, True)
-        except ba.NotFoundError:
+        except bs.NotFoundError:
             return
 
         last_region = player.last_region
@@ -259,8 +260,8 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
             if this_region > last_region + 2:
                 if player.is_alive():
                     assert player.actor
-                    player.actor.handlemessage(ba.DieMessage())
-                    ba.screenmessage(ba.Lstr(
+                    player.actor.handlemessage(bs.DieMessage())
+                    bs.broadcastmessage(babase.Lstr(
                         translate=('statements', 'Killing ${NAME} for'
                                    ' skipping part of the track!'),
                         subs=[('${NAME}', player.getname(full=True))]),
@@ -279,7 +280,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                     # In teams mode with all-must-finish on, the team lap
                     # value is the min of all team players.
                     # Otherwise its the max.
-                    if isinstance(self.session, ba.DualTeamSession
+                    if isinstance(self.session, bs.DualTeamSession
                                   ) and self._entire_team_must_finish:
                         team.lap = min([p.lap for p in team.players])
                     else:
@@ -290,7 +291,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
 
                         # In teams mode, hand out points based on the order
                         # players come in.
-                        if isinstance(self.session, ba.DualTeamSession):
+                        if isinstance(self.session, bs.DualTeamSession):
                             assert self._team_finish_pts is not None
                             if self._team_finish_pts > 0:
                                 self.stats.player_scored(player,
@@ -303,7 +304,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                         player.finished = True
                         assert player.actor
                         player.actor.handlemessage(
-                            ba.DieMessage(immediate=True))
+                            bs.DieMessage(immediate=True))
 
                         # Makes sure noone behind them passes them in rank
                         # while finishing.
@@ -311,26 +312,26 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
 
                         # If the whole team has finished the race.
                         if team.lap == self._laps:
-                            ba.playsound(self._score_sound)
+                            self._score_sound.play()
                             player.team.finished = True
                             assert self._timer is not None
-                            elapsed = ba.time() - self._timer.getstarttime()
+                            elapsed = bs.time() - self._timer.getstarttime()
                             self._last_team_time = player.team.time = elapsed
                             self._check_end_game()
 
                         # Team has yet to finish.
                         else:
-                            ba.playsound(self._swipsound)
+                            self._swipsound.play()
 
                     # They've just finished a lap but not the race.
                     else:
-                        ba.playsound(self._swipsound)
+                        self._swipsound.play()
                         self._flash_player(player, 0.3)
 
                         # Print their lap number over their head.
                         try:
                             assert isinstance(player.actor, PlayerSpaz)
-                            mathnode = ba.newnode('math',
+                            mathnode = bs.newnode('math',
                                                   owner=player.actor.node,
                                                   attrs={
                                                       'input1': (0, 1.9, 0),
@@ -338,12 +339,12 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                                                   })
                             player.actor.node.connectattr(
                                 'torso_position', mathnode, 'input2')
-                            tstr = ba.Lstr(resource='lapNumberText',
-                                           subs=[('${CURRENT}',
-                                                  str(player.lap + 1)),
-                                                 ('${TOTAL}', str(self._laps))
-                                                 ])
-                            txtnode = ba.newnode('text',
+                            tstr = babase.Lstr(resource='lapNumberText',
+                                               subs=[('${CURRENT}',
+                                                      str(player.lap + 1)),
+                                                     ('${TOTAL}', str(self._laps))
+                                                     ])
+                            txtnode = bs.newnode('text',
                                                  owner=mathnode,
                                                  attrs={
                                                      'text': tstr,
@@ -353,15 +354,15 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                                                      'h_align': 'center'
                                                  })
                             mathnode.connectattr('output', txtnode, 'position')
-                            ba.animate(txtnode, 'scale', {
+                            bs.animate(txtnode, 'scale', {
                                 0.0: 0,
                                 0.2: 0.019,
                                 2.0: 0.019,
                                 2.2: 0
                             })
-                            ba.timer(2.3, mathnode.delete)
+                            bs.timer(2.3, mathnode.delete)
                         except Exception:
-                            ba.print_exception('Error printing lap.')
+                            babase.print_exception('Error printing lap.')
 
     def on_team_join(self, team: Team) -> None:
         self._update_scoreboard()
@@ -372,9 +373,9 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         # A player leaving disqualifies the team if 'Entire Team Must Finish'
         # is on (otherwise in teams mode everyone could just leave except the
         # leading player to win).
-        if (isinstance(self.session, ba.DualTeamSession)
+        if (isinstance(self.session, bs.DualTeamSession)
                 and self._entire_team_must_finish):
-            ba.screenmessage(ba.Lstr(
+            bs.broadcastmessage(babase.Lstr(
                 translate=('statements',
                            '${TEAM} is disqualified because ${PLAYER} left'),
                 subs=[('${TEAM}', player.team.name),
@@ -383,18 +384,18 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
             player.team.finished = True
             player.team.time = None
             player.team.lap = 0
-            ba.playsound(ba.getsound('boo'))
+            bs.getsound('boo').play()
             for otherplayer in player.team.players:
                 otherplayer.lap = 0
                 otherplayer.finished = True
                 try:
                     if otherplayer.actor is not None:
-                        otherplayer.actor.handlemessage(ba.DieMessage())
+                        otherplayer.actor.handlemessage(bs.DieMessage())
                 except Exception:
-                    ba.print_exception('Error sending DieMessage.')
+                    babase.print_exception('Error sending DieMessage.')
 
         # Defer so team/player lists will be updated.
-        ba.pushcall(self._check_end_game)
+        babase.pushcall(self._check_end_game)
 
     def _update_scoreboard(self) -> None:
         for team in self.teams:
@@ -402,7 +403,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
             if not distances:
                 teams_dist = 0.0
             else:
-                if (isinstance(self.session, ba.DualTeamSession)
+                if (isinstance(self.session, bs.DualTeamSession)
                         and self._entire_team_must_finish):
                     teams_dist = min(distances)
                 else:
@@ -415,14 +416,14 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                 show_value=False)
 
     def on_begin(self) -> None:
-        from bastd.actor.onscreentimer import OnScreenTimer
+        from bascenev1lib.actor.onscreentimer import OnScreenTimer
         super().on_begin()
         self.setup_standard_time_limit(self._time_limit)
         self.setup_standard_powerup_drops()
         self._team_finish_pts = 100
         if self._credits:
-            self._cd_text = ba.NodeActor(
-                ba.newnode('text',
+            self._cd_text = bs.NodeActor(
+                bs.newnode('text',
                            attrs={
                                'position': (0, 0),
                                'h_attach': 'center',
@@ -437,8 +438,8 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                            }))
 
         # Throw a timer up on-screen.
-        self._time_text = ba.NodeActor(
-            ba.newnode('text',
+        self._time_text = bs.NodeActor(
+            bs.newnode('text',
                        attrs={
                            'v_attach': 'top',
                            'h_attach': 'center',
@@ -458,14 +459,14 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                 for p in self.map.get_def_points('race_mine')
             ]
             if self._race_mines:
-                self._race_mine_timer = ba.Timer(0.001 * self._mine_spawning,
+                self._race_mine_timer = bs.Timer(0.001 * self._mine_spawning,
                                                  self._update_race_mine,
                                                  repeat=True)
 
-        self._scoreboard_timer = ba.Timer(0.25,
+        self._scoreboard_timer = bs.Timer(0.25,
                                           self._update_scoreboard,
                                           repeat=True)
-        self._player_order_update_timer = ba.Timer(0.25,
+        self._player_order_update_timer = bs.Timer(0.25,
                                                    self._update_player_order,
                                                    repeat=True)
 
@@ -478,30 +479,30 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         lstart = 7.1 * t_scale
         inc = 1.25 * t_scale
 
-        ba.timer(lstart, self._do_light_1)
-        ba.timer(lstart + inc, self._do_light_2)
-        ba.timer(lstart + 2 * inc, self._do_light_3)
-        ba.timer(lstart + 3 * inc, self._start_race)
+        bs.timer(lstart, self._do_light_1)
+        bs.timer(lstart + inc, self._do_light_2)
+        bs.timer(lstart + 2 * inc, self._do_light_3)
+        bs.timer(lstart + 3 * inc, self._start_race)
 
         self._start_lights = []
         for i in range(4):
-            lnub = ba.newnode('image',
+            lnub = bs.newnode('image',
                               attrs={
-                                  'texture': ba.gettexture('nub'),
+                                  'texture': bs.gettexture('nub'),
                                   'opacity': 1.0,
                                   'absolute_scale': True,
                                   'position': (-75 + i * 50, light_y),
                                   'scale': (50, 50),
                                   'attach': 'center'
                               })
-            ba.animate(
+            bs.animate(
                 lnub, 'opacity', {
                     4.0 * t_scale: 0,
                     5.0 * t_scale: 1.0,
                     12.0 * t_scale: 1.0,
                     12.5 * t_scale: 0.0
                 })
-            ba.timer(13.0 * t_scale, lnub.delete)
+            bs.timer(13.0 * t_scale, lnub.delete)
             self._start_lights.append(lnub)
 
         self._start_lights[0].color = (0.2, 0, 0)
@@ -512,45 +513,45 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
     def _do_light_1(self) -> None:
         assert self._start_lights is not None
         self._start_lights[0].color = (1.0, 0, 0)
-        ba.playsound(self._beep_1_sound)
+        self._beep_1_sound.play()
 
     def _do_light_2(self) -> None:
         assert self._start_lights is not None
         self._start_lights[1].color = (1.0, 0, 0)
-        ba.playsound(self._beep_1_sound)
+        self._beep_1_sound.play()
 
     def _do_light_3(self) -> None:
         assert self._start_lights is not None
         self._start_lights[2].color = (1.0, 0.3, 0)
-        ba.playsound(self._beep_1_sound)
+        self._beep_1_sound.play()
 
     def _start_race(self) -> None:
         assert self._start_lights is not None
         self._start_lights[3].color = (0.0, 1.0, 0)
-        ba.playsound(self._beep_2_sound)
+        self._beep_2_sound.play()
         for player in self.players:
             if player.actor is not None:
                 try:
                     assert isinstance(player.actor, PlayerSpaz)
                     player.actor.connect_controls_to_player()
                 except Exception:
-                    ba.print_exception('Error in race player connects.')
+                    babase.print_exception('Error in race player connects.')
         assert self._timer is not None
         self._timer.start()
 
         if self._bomb_spawning != 0:
-            self._bomb_spawn_timer = ba.Timer(0.001 * self._bomb_spawning,
+            self._bomb_spawn_timer = bs.Timer(0.001 * self._bomb_spawning,
                                               self._spawn_bomb,
                                               repeat=True)
 
         def knock_players():
-            activity = _ba.get_foreground_host_activity()
-            gnode = ba.getactivity().globalsnode
+            activity = bs.get_foreground_host_activity()
+            gnode = bs.getactivity().globalsnode
             for players in activity.players:
                 gnode.tint = (0.5, 0.5, 0.5)
                 node = players.actor.node
                 node.handlemessage('knockout', 600.0)
-                self.text_offset = ba.newnode('math',
+                self.text_offset = bs.newnode('math',
                                               owner=node,
                                               attrs={'input1': (-0.5, 0.5, 0.25),
                                                      'operation': 'add'})
@@ -558,7 +559,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                     'torso_position',
                     self.text_offset,
                     'input2')
-                self.text = ba.newnode('text',
+                self.text = bs.newnode('text',
                                        owner=node,
                                        attrs={
                                            'h_align': 'right',
@@ -571,12 +572,12 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                     'output',
                     self.text,
                     'position')
-                ba.animate(self.text, 'scale', {0: 0.0, 1.0: 0.01})
-                ba.timer(2, self.text.delete)
+                bs.animate(self.text, 'scale', {0: 0.0, 1.0: 0.01})
+                bs.timer(2, self.text.delete)
 
         if self._knockout_time != 0:
             knock_time = 0.001 * self._knockout_time
-        self._knockout_timer = ba.Timer(knock_time,
+        self._knockout_timer = bs.Timer(knock_time,
                                         knock_players,
                                         repeat=True)
 
@@ -586,18 +587,18 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
 
         # Calc all player distances.
         for player in self.players:
-            pos: Optional[ba.Vec3]
+            pos: Optional[babase.Vec3]
             try:
                 pos = player.position
-            except ba.NotFoundError:
+            except bs.NotFoundError:
                 pos = None
             if pos is not None:
                 r_index = player.last_region
                 rg1 = self._regions[r_index]
-                r1pt = ba.Vec3(rg1.pos[:3])
+                r1pt = babase.Vec3(rg1.pos[:3])
                 rg2 = self._regions[0] if r_index == len(
                     self._regions) - 1 else self._regions[r_index + 1]
-                r2pt = ba.Vec3(rg2.pos[:3])
+                r2pt = babase.Vec3(rg2.pos[:3])
                 r2dist = (pos - r2pt).length()
                 amt = 1.0 - (r2dist / (r2pt - r1pt).length())
                 amt = player.lap + (r_index + amt) * (1.0 / len(self._regions))
@@ -628,8 +629,8 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                    (-region_scale * pos[5], region_scale * pos[5]))
         pos = (pos[0] + random.uniform(*x_range), pos[1] + 1.0,
                pos[2] + random.uniform(*z_range))
-        ba.timer(random.uniform(0.0, 2.0),
-                 ba.WeakCall(self._spawn_bomb_at_pos, pos))
+        bs.timer(random.uniform(0.0, 2.0),
+                 bs.WeakCall(self._spawn_bomb_at_pos, pos))
 
     def _spawn_bomb_at_pos(self, pos: Sequence[float]) -> None:
         if self.has_ended():
@@ -645,15 +646,15 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
     def _flash_mine(self, i: int) -> None:
         assert self._race_mines is not None
         rmine = self._race_mines[i]
-        light = ba.newnode('light',
+        light = bs.newnode('light',
                            attrs={
                                'position': rmine.point[:3],
                                'color': (1, 0.2, 0.2),
                                'radius': 0.1,
                                'height_attenuated': False
                            })
-        ba.animate(light, 'intensity', {0.0: 0, 0.1: 1.0, 0.2: 0}, loop=True)
-        ba.timer(1.0, light.delete)
+        bs.animate(light, 'intensity', {0.0: 0, 0.1: 1.0, 0.2: 0}, loop=True)
+        bs.timer(1.0, light.delete)
 
     def _update_race_mine(self) -> None:
         assert self._race_mines is not None
@@ -667,9 +668,9 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         assert rmine is not None
         if not rmine.mine:
             self._flash_mine(m_index)
-            ba.timer(0.95, ba.Call(self._make_mine, m_index))
+            bs.timer(0.95, babase.Call(self._make_mine, m_index))
 
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         if player.team.finished:
             # FIXME: This is not type-safe!
             #   This call is expected to always return an Actor!
@@ -692,7 +693,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         # Prevent controlling of characters before the start of the race.
         if not self._race_started:
             spaz.disconnect_controls_from_player()
-        mathnode = ba.newnode('math',
+        mathnode = bs.newnode('math',
                               owner=spaz.node,
                               attrs={
                                   'input1': (0, 1.4, 0),
@@ -700,7 +701,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                               })
         spaz.node.connectattr('torso_position', mathnode, 'input2')
 
-        distance_txt = ba.newnode('text',
+        distance_txt = bs.newnode('text',
                                   owner=spaz.node,
                                   attrs={
                                       'text': '',
@@ -730,14 +731,14 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
             # In teams mode its over as soon as any team finishes the race
 
             # FIXME: The get_ffa_point_awards code looks dangerous.
-            if isinstance(session, ba.DualTeamSession):
+            if isinstance(session, bs.DualTeamSession):
                 self.end_game()
             else:
                 # In ffa we keep the race going while there's still any points
                 # to be handed out. Find out how many points we have to award
                 # and how many teams have finished, and once that matches
                 # we're done.
-                assert isinstance(session, ba.FreeForAllSession)
+                assert isinstance(session, bs.FreeForAllSession)
                 points_to_award = len(session.get_ffa_point_awards())
                 if teams_completed >= points_to_award - teams_completed:
                     self.end_game()
@@ -754,7 +755,7 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
                 endtime=None if self._last_team_time is None else (
                     self._timer.getstarttime() + self._last_team_time))
 
-        results = ba.GameResults()
+        results = bs.GameResults()
 
         for team in self.teams:
             if team.time is not None:
@@ -768,10 +769,10 @@ class SleepRaceGame(ba.TeamGameActivity[Player, Team]):
         # odd to be announcing that now.
         self.end(results=results,
                  announce_winning_team=isinstance(self.session,
-                                                  ba.DualTeamSession))
+                                                  bs.DualTeamSession))
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             # Augment default behavior.
             super().handlemessage(msg)
             player = msg.getplayer(Player)

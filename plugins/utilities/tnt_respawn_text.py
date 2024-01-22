@@ -1,4 +1,5 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 
 """
     TNT Respawn Text by TheMikirog
@@ -16,11 +17,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 # Let's import everything we need and nothing more.
-import ba
-import bastd
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import bascenev1lib
 import math
 import random
-from bastd.actor.bomb import Bomb
+from bascenev1lib.actor.bomb import Bomb
 
 if TYPE_CHECKING:
     pass
@@ -40,7 +43,7 @@ if TYPE_CHECKING:
 
 
 # ba_meta export plugin
-class TNTRespawnText(ba.Plugin):
+class TNTRespawnText(babase.Plugin):
 
     # This clamping function will make sure a certain value can't go above or below a certain threshold.
     # We're gonna need this functionality in just a bit.
@@ -54,7 +57,7 @@ class TNTRespawnText(ba.Plugin):
     def on_tnt_exploded(self):
         self.tnt_has_callback = False
         self._respawn_text.color = (1.0, 1.0, 1.0)
-        ba.animate(
+        bs.animate(
             self._respawn_text,
             'opacity',
             {
@@ -92,7 +95,7 @@ class TNTRespawnText(ba.Plugin):
             respawn_text_position = (args[0]._position[0],
                                      args[0]._position[1] - 0.4,
                                      args[0]._position[2])
-            args[0]._respawn_text = ba.newnode(
+            args[0]._respawn_text = bs.newnode(
                 'text',
                 attrs={
                     'text': "",  # we'll set the text later
@@ -126,7 +129,8 @@ class TNTRespawnText(ba.Plugin):
             args[0]._tnt.node.add_death_action(tnt_callback)
         return wrapper
     # Let's replace the original init function with our modified version.
-    bastd.actor.bomb.TNTSpawner.__init__ = new_init(bastd.actor.bomb.TNTSpawner.__init__)
+    bascenev1lib.actor.bomb.TNTSpawner.__init__ = new_init(
+        bascenev1lib.actor.bomb.TNTSpawner.__init__)
 
     # Our modified update function.
     # This gets called every 1.1s. Check the TNTSpawner class in the game's code for details.
@@ -165,7 +169,7 @@ class TNTRespawnText(ba.Plugin):
                 # Code goes here if we don't have a TNT box and we reached 100%.
                 if args[0]._tnt is None or args[0]._wait_time >= args[0]._respawn_time and args[0]._respawn_text:
                     # Animate the text "bounce" to draw attention
-                    ba.animate(
+                    bs.animate(
                         args[0]._respawn_text,
                         'scale',
                         {
@@ -176,7 +180,7 @@ class TNTRespawnText(ba.Plugin):
                         },
                     )
                     # Fade the text away
-                    ba.animate(
+                    bs.animate(
                         args[0]._respawn_text,
                         'opacity',
                         {
@@ -191,7 +195,7 @@ class TNTRespawnText(ba.Plugin):
                     args[0]._respawn_text.color = (1.0, 0.75, 0.5)
 
                     # Make some sparks to draw the eye.
-                    ba.emitfx(
+                    bs.emitfx(
                         position=args[0]._position,
                         count=int(5.0 + random.random() * 10),
                         scale=0.8,
@@ -212,4 +216,5 @@ class TNTRespawnText(ba.Plugin):
         return wrapper
 
     # Let's replace the original update function with our modified version.
-    bastd.actor.bomb.TNTSpawner._update = new_update(bastd.actor.bomb.TNTSpawner._update)
+    bascenev1lib.actor.bomb.TNTSpawner._update = new_update(
+        bascenev1lib.actor.bomb.TNTSpawner._update)

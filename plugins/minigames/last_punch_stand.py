@@ -1,17 +1,20 @@
-# ba_meta require api 7
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
+# ba_meta require api 8
 from typing import Sequence
-import ba
-import _ba
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+import _babase
 import random
-from bastd.actor.spaz import Spaz
-from bastd.actor.scoreboard import Scoreboard
+from bascenev1lib.actor.spaz import Spaz
+from bascenev1lib.actor.scoreboard import Scoreboard
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
@@ -39,7 +42,7 @@ class ChooseingSpaz(Spaz):
         super().__init__(color, highlight, "Spaz", None, True, True, False, False)
         self.last_player_attacked_by = None
         self.stand(pos)
-        self.loc = ba.newnode(
+        self.loc = bs.newnode(
             'locator',
             attrs={
                 'shape': 'circleOutline',
@@ -51,37 +54,37 @@ class ChooseingSpaz(Spaz):
             },
         )
         self.node.connectattr("position", self.loc, "position")
-        ba.animate_array(self.loc, "size", 1, keys={0: [0.5,], 1: [2,], 1.5: [0.5]}, loop=True)
+        bs.animate_array(self.loc, "size", 1, keys={0: [0.5,], 1: [2,], 1.5: [0.5]}, loop=True)
 
     def handlemessage(self, msg):
-        if isinstance(msg, ba.FreezeMessage):
+        if isinstance(msg, bs.FreezeMessage):
             return
 
-        if isinstance(msg, ba.PowerupMessage):
+        if isinstance(msg, bs.PowerupMessage):
             if not (msg.poweruptype == "health"):
                 return
 
         super().handlemessage(msg)
 
-        if isinstance(msg, ba.HitMessage):
-            self.handlemessage(ba.PowerupMessage("health"))
+        if isinstance(msg, bs.HitMessage):
+            self.handlemessage(bs.PowerupMessage("health"))
 
             player = msg.get_source_player(Player)
             if self.is_alive():
                 self.activity.handlemessage(ChooseingSpazHitMessage(player))
             self.last_player_attacked_by = player
 
-        elif isinstance(msg, ba.DieMessage):
+        elif isinstance(msg, bs.DieMessage):
             player = self.last_player_attacked_by
 
-            if msg.how.value != ba.DeathType.GENERIC.value:
+            if msg.how.value != bs.DeathType.GENERIC.value:
                 self._dead = True
                 self.activity.handlemessage(ChooseingSpazDieMessage(player))
 
             self.loc.delete()
 
     def stand(self, pos=(0, 0, 0), angle=0):
-        self.handlemessage(ba.StandMessage(pos, angle))
+        self.handlemessage(bs.StandMessage(pos, angle))
 
     def recolor(self, color, highlight=(1, 1, 1)):
         self.node.color = color
@@ -89,14 +92,14 @@ class ChooseingSpaz(Spaz):
         self.loc.color = color
 
 
-class ChooseBilbord(ba.Actor):
+class ChooseBilbord(bs.Actor):
     def __init__(self, player: Player, delay=0.1) -> None:
         super().__init__()
 
         icon = player.get_icon()
         self.scale = 100
 
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'image',
             delegate=self,
             attrs={
@@ -111,13 +114,13 @@ class ChooseBilbord(ba.Actor):
             },
         )
 
-        self.name_node = ba.newnode(
+        self.name_node = bs.newnode(
             'text',
             owner=self.node,
             attrs={
                 'position': (60, -185),
-                'text': ba.Lstr(value=player.getname()),
-                'color': ba.safecolor(player.team.color),
+                'text': babase.Lstr(value=player.getname()),
+                'color': babase.safecolor(player.team.color),
                 'h_align': 'center',
                 'v_align': 'center',
                 'vr_depth': 410,
@@ -128,26 +131,26 @@ class ChooseBilbord(ba.Actor):
             },
         )
 
-        ba.animate_array(self.node, "scale", keys={
+        bs.animate_array(self.node, "scale", keys={
                          0 + delay: [0, 0], 0.05 + delay: [self.scale, self.scale]}, size=1)
-        ba.animate(self.name_node, "scale", {0 + delay: 0, 0.07 + delay: 1})
+        bs.animate(self.name_node, "scale", {0 + delay: 0, 0.07 + delay: 1})
 
     def handlemessage(self, msg):
         super().handlemessage(msg)
-        if isinstance(msg, ba.DieMessage):
-            ba.animate_array(self.node, "scale", keys={0: self.node.scale, 0.05: [0, 0]}, size=1)
-            ba.animate(self.name_node, "scale", {0: self.name_node.scale, 0.07: 0})
+        if isinstance(msg, bs.DieMessage):
+            bs.animate_array(self.node, "scale", keys={0: self.node.scale, 0.05: [0, 0]}, size=1)
+            bs.animate(self.name_node, "scale", {0: self.name_node.scale, 0.07: 0})
 
             def __delete():
                 self.node.delete()
                 self.name_node.delete()
 
-            ba.timer(0.2, __delete)
+            bs.timer(0.2, __delete)
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 
 
-class LastPunchStand(ba.TeamGameActivity[Player, Team]):
+class LastPunchStand(bs.TeamGameActivity[Player, Team]):
     name = "Last Punch Stand"
     description = "Last one punchs the choosing spaz wins"
     tips = [
@@ -156,11 +159,11 @@ class LastPunchStand(ba.TeamGameActivity[Player, Team]):
         "evry time you punch the choosing spaz, you will get one point",
     ]
 
-    default_music = ba.MusicType.TO_THE_DEATH
+    default_music = bs.MusicType.TO_THE_DEATH
 
     available_settings = [
-        ba.FloatSetting("min time limit (in seconds)", 50.0, min_value=30.0),
-        ba.FloatSetting("max time limit (in seconds)", 160.0, 60),
+        bs.FloatSetting("min time limit (in seconds)", 50.0, min_value=30.0),
+        bs.FloatSetting("max time limit (in seconds)", 160.0, 60),
 
     ]
 
@@ -203,12 +206,12 @@ class LastPunchStand(ba.TeamGameActivity[Player, Team]):
         super().on_begin()
         time_limit = random.randint(self._min_timelimit, self._max_timelimit)
         self.spaw_bot()
-        ba.timer(time_limit, self.times_up)
+        bs.timer(time_limit, self.times_up)
 
         self.setup_standard_powerup_drops(False)
 
     def end_game(self) -> None:
-        results = ba.GameResults()
+        results = bs.GameResults()
         for team in self.teams:
             if self.choosed_player and (team.id == self.choosed_player.team.id):
                 team.score += 100
@@ -261,7 +264,7 @@ class LastPunchStand(ba.TeamGameActivity[Player, Team]):
             self.spaw_bot()
             self.change_choosed_player(None)
 
-        elif isinstance(msg, ba.PlayerDiedMessage):
+        elif isinstance(msg, bs.PlayerDiedMessage):
             player = msg.getplayer(Player)
             if not (self.has_ended() or self.times_uped):
                 self.respawn_player(player, 0)

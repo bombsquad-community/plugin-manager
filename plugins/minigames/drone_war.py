@@ -1,3 +1,4 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
 """
@@ -8,22 +9,22 @@ Youtube: https://www.youtube.com/c/HeySmoothy
 Website: https://bombsquad-community.web.app
 Github:  https://github.com/bombsquad-community
 """
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
-import _ba
-from ba._generated.enums import InputType
-from bastd.actor.bomb import Blast
+import babase
+import bascenev1 as bs
+from babase._mgen.enums import InputType
+from bascenev1lib.actor.bomb import Blast
 
-from bastd.gameutils import SharedObjects
-from bastd.actor.playerspaz import PlayerSpaz, PlayerType
-from bastd.game.deathmatch import DeathMatchGame, Player
-from bastd.actor import spaz
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.actor.playerspaz import PlayerSpaz, PlayerT
+from bascenev1lib.game.deathmatch import DeathMatchGame, Player
+from bascenev1lib.actor import spaz
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
@@ -33,11 +34,11 @@ STORAGE_ATTR_NAME = f'_shared_{__name__}_factory'
 # use drone as long as you want , unlike floater which dies after being idle.
 
 
-class Drone(ba.Actor):
+class Drone(bs.Actor):
     def __init__(self, spaz):
         super().__init__()
         shared = SharedObjects.get()
-        self._drone_material = ba.Material()
+        self._drone_material = bs.Material()
         self.loop_ascend = None
         self.loop_descend = None
         self.loop_lr = None
@@ -59,45 +60,45 @@ class Drone(ba.Actor):
                         ('they_have_material',
                         self._drone_material)),
             actions=('modify_part_collision', 'physical', False))
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'prop',
             delegate=self,
             owner=None,
             attrs={
                 'position': spaz.node.position,
-                'model': ba.getmodel('landMine'),
-                'light_model': ba.getmodel('landMine'),
+                'mesh': bs.getmesh('landMine'),
+                'light_mesh': bs.getmesh('landMine'),
                 'body': 'landMine',
                 'body_scale': 1,
-                'model_scale': 1,
+                'mesh_scale': 1,
                 'shadow_size': 0.25,
                 'density': 999999,
                 'gravity_scale': 0.0,
-                'color_texture': ba.gettexture('achievementCrossHair'),
+                'color_texture': bs.gettexture('achievementCrossHair'),
                 'reflection': 'soft',
                 'reflection_scale': [0.25],
                 'materials': [shared.footing_material, self._drone_material]
             })
-        self.grab_node = ba.newnode(
+        self.grab_node = bs.newnode(
             'prop',
             owner=self.node,
             attrs={
                 'position': (0, 0, 0),
                 'body': 'sphere',
-                'model': None,
+                'mesh': None,
                 'color_texture': None,
                 'body_scale': 0.2,
                 'reflection': 'powerup',
                 'density': 999999,
                 'reflection_scale': [1.0],
-                'model_scale': 0.2,
+                'mesh_scale': 0.2,
                 'gravity_scale': 0,
                 'shadow_size': 0.1,
                 'is_area_of_interest': True,
                 'materials': [shared.object_material, self._drone_material]
             })
         self.node.connectattr('position', self.grab_node, 'position')
-        self._rcombine = ba.newnode('combine',
+        self._rcombine = bs.newnode('combine',
                                     owner=self.node,
                                     attrs={
                                         'input0': self.spaz.node.position[0],
@@ -119,12 +120,12 @@ class Drone(ba.Actor):
     def ascend(self):
         def loop():
             if self.node.exists():
-                ba.animate(self._rcombine, 'input1', {
+                bs.animate(self._rcombine, 'input1', {
                     0: self.node.position[1],
                     1: self.node.position[1] + 2
                 })
         loop()
-        self.loop_ascend = ba.Timer(1, loop, repeat=True)
+        self.loop_ascend = bs.Timer(1, loop, repeat=True)
 
     def pause_movement(self):
         self.loop_ascend = None
@@ -132,12 +133,12 @@ class Drone(ba.Actor):
     def decend(self):
         def loop():
             if self.node.exists():
-                ba.animate(self._rcombine, 'input1', {
+                bs.animate(self._rcombine, 'input1', {
                     0: self.node.position[1],
                     1: self.node.position[1] - 2
                 })
         loop()
-        self.loop_ascend = ba.Timer(1, loop, repeat=True)
+        self.loop_ascend = bs.Timer(1, loop, repeat=True)
 
     def pause_lr(self):
         self.loop_lr = None
@@ -148,7 +149,7 @@ class Drone(ba.Actor):
     def left_(self, value=-1):
         def loop():
             if self.node.exists():
-                ba.animate(self._rcombine, 'input0', {
+                bs.animate(self._rcombine, 'input0', {
                     0: self.node.position[0],
                     1: self.node.position[0] + 2 * value
                 })
@@ -158,12 +159,12 @@ class Drone(ba.Actor):
             self.x_direction = value
             self.z_direction = 0
             loop()
-            self.loop_lr = ba.Timer(1, loop, repeat=True)
+            self.loop_lr = bs.Timer(1, loop, repeat=True)
 
     def right_(self, value=1):
         def loop():
             if self.node.exists():
-                ba.animate(self._rcombine, 'input0', {
+                bs.animate(self._rcombine, 'input0', {
                     0: self.node.position[0],
                     1: self.node.position[0] + 2 * value
                 })
@@ -173,12 +174,12 @@ class Drone(ba.Actor):
             self.x_direction = value
             self.z_direction = 0
             loop()
-            self.loop_lr = ba.Timer(1, loop, repeat=True)
+            self.loop_lr = bs.Timer(1, loop, repeat=True)
 
     def up_(self, value=1):
         def loop():
             if self.node.exists():
-                ba.animate(self._rcombine, 'input2', {
+                bs.animate(self._rcombine, 'input2', {
                     0: self.node.position[2],
                     1: self.node.position[2] - 2 * value
                 })
@@ -188,12 +189,12 @@ class Drone(ba.Actor):
             self.x_direction = 0
             self.z_direction = - value
             loop()
-            self.loop_ud = ba.Timer(1, loop, repeat=True)
+            self.loop_ud = bs.Timer(1, loop, repeat=True)
 
     def down_(self, value=-1):
         def loop():
             if self.node.exists():
-                ba.animate(self._rcombine, 'input2', {
+                bs.animate(self._rcombine, 'input2', {
                     0: self.node.position[2],
                     1: self.node.position[2] - 2 * value
                 })
@@ -203,17 +204,17 @@ class Drone(ba.Actor):
             self.x_direction = 0
             self.z_direction = - value
             loop()
-            self.loop_ud = ba.Timer(1, loop, repeat=True)
+            self.loop_ud = bs.Timer(1, loop, repeat=True)
 
     def handlemessage(self, msg):
-        if isinstance(msg, ba.DieMessage):
+        if isinstance(msg, bs.DieMessage):
             self.node.delete()
             self.grab_node.delete()
             self.loop_ascend = None
             self.loop_ud = None
             self.loop_lr = None
-        elif isinstance(msg, ba.OutOfBoundsMessage):
-            self.handlemessage(ba.DieMessage())
+        elif isinstance(msg, bs.OutOfBoundsMessage):
+            self.handlemessage(bs.DieMessage())
         else:
             super().handlemessage(msg)
 
@@ -224,7 +225,7 @@ class RocketFactory:
     """Quake Rocket factory"""
 
     def __init__(self) -> None:
-        self.ball_material = ba.Material()
+        self.ball_material = bs.Material()
 
         self.ball_material.add_actions(
             conditions=((('we_are_younger_than', 5), 'or',
@@ -251,7 +252,7 @@ class RocketFactory:
     @classmethod
     def get(cls):
         """Get factory if exists else create new"""
-        activity = ba.getactivity()
+        activity = bs.getactivity()
         if hasattr(activity, STORAGE_ATTR_NAME):
             return getattr(activity, STORAGE_ATTR_NAME)
         factory = cls()
@@ -263,30 +264,31 @@ class RocketLauncher:
     """Very dangerous weapon"""
 
     def __init__(self):
-        self.last_shot = ba.time()
+        self.last_shot = bs.time()
 
     def give(self, spaz: spaz.Spaz) -> None:
         """Give spaz a rocket launcher"""
         spaz.punch_callback = self.shot
-        self.last_shot = ba.time()
+        self.last_shot = bs.time()
 
     # FIXME
     # noinspection PyUnresolvedReferences
     def shot(self, spaz, x, z, position) -> None:
         """Release a rocket"""
-        time = ba.time()
+        time = bs.time()
         if time - self.last_shot > 0.6:
             self.last_shot = time
 
             direction = [x, 0, z]
             direction[1] = 0.0
 
-            mag = 10.0 / 1 if ba.Vec3(*direction).length() == 0 else ba.Vec3(*direction).length()
+            mag = 10.0 / \
+                1 if babase.Vec3(*direction).length() == 0 else babase.Vec3(*direction).length()
             vel = [v * mag for v in direction]
             Rocket(position=position,
                    velocity=vel,
-                   owner=spaz.getplayer(ba.Player),
-                   source_player=spaz.getplayer(ba.Player),
+                   owner=spaz.getplayer(bs.Player),
+                   source_player=spaz.getplayer(bs.Player),
                    color=spaz.node.color).autoretain()
 
 
@@ -294,7 +296,7 @@ class ImpactMessage:
     """Rocket touched something"""
 
 
-class Rocket(ba.Actor):
+class Rocket(bs.Actor):
     """Epic rocket from rocket launcher"""
 
     def __init__(self,
@@ -309,16 +311,16 @@ class Rocket(ba.Actor):
         self._color = color
         factory = RocketFactory.get()
 
-        self.node = ba.newnode('prop',
+        self.node = bs.newnode('prop',
                                delegate=self,
                                attrs={
                                    'position': position,
                                    'velocity': velocity,
-                                   'model': ba.getmodel('impactBomb'),
+                                   'mesh': bs.getmesh('impactBomb'),
                                    'body': 'sphere',
-                                   'color_texture': ba.gettexture(
+                                   'color_texture': bs.gettexture(
                                        'bunnyColor'),
-                                   'model_scale': 0.2,
+                                   'mesh_scale': 0.2,
                                    'is_area_of_interest': True,
                                    'body_scale': 0.8,
                                    'materials': [
@@ -328,17 +330,17 @@ class Rocket(ba.Actor):
         self.node.extra_acceleration = (self.node.velocity[0] * 200, 0,
                                         self.node.velocity[2] * 200)
 
-        self._life_timer = ba.Timer(
-            5, ba.WeakCall(self.handlemessage, ba.DieMessage()))
+        self._life_timer = bs.Timer(
+            5, bs.WeakCall(self.handlemessage, bs.DieMessage()))
 
-        self._emit_timer = ba.Timer(0.001, ba.WeakCall(self.emit), repeat=True)
+        self._emit_timer = bs.Timer(0.001, bs.WeakCall(self.emit), repeat=True)
         self.base_pos_y = self.node.position[1]
 
-        ba.camerashake(5.0)
+        bs.camerashake(5.0)
 
     def emit(self) -> None:
         """Emit a trace after rocket"""
-        ba.emitfx(position=self.node.position,
+        bs.emitfx(position=self.node.position,
                   scale=0.4,
                   spread=0.01,
                   chunk_type='spark')
@@ -346,7 +348,7 @@ class Rocket(ba.Actor):
             return
         self.node.position = (self.node.position[0], self.base_pos_y,
                               self.node.position[2])  # ignore y
-        ba.newnode('explosion',
+        bs.newnode('explosion',
                    owner=self.node,
                    attrs={
                        'position': self.node.position,
@@ -358,9 +360,9 @@ class Rocket(ba.Actor):
         """Message handling for rocket"""
         super().handlemessage(msg)
         if isinstance(msg, ImpactMessage):
-            self.node.handlemessage(ba.DieMessage())
+            self.node.handlemessage(bs.DieMessage())
 
-        elif isinstance(msg, ba.DieMessage):
+        elif isinstance(msg, bs.DieMessage):
             if self.node:
                 Blast(position=self.node.position,
                       blast_radius=2,
@@ -369,25 +371,25 @@ class Rocket(ba.Actor):
                 self.node.delete()
                 self._emit_timer = None
 
-        elif isinstance(msg, ba.OutOfBoundsMessage):
-            self.handlemessage(ba.DieMessage())
+        elif isinstance(msg, bs.OutOfBoundsMessage):
+            self.handlemessage(bs.DieMessage())
 
 
-# ba_meta export game
+# ba_meta export bascenev1.GameActivity
 class ChooseQueen(DeathMatchGame):
     name = 'Drone War'
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.DualTeamSession)
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.DualTeamSession)
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
         return ['Football Stadium']
 
     def spawn_player_spaz(
         self,
-        player: PlayerType,
+        player: PlayerT,
         position: Sequence[float] | None = None,
         angle: float | None = None,
     ) -> PlayerSpaz:
@@ -398,29 +400,29 @@ class ChooseQueen(DeathMatchGame):
     def on_begin(self):
         super().on_begin()
         shared = SharedObjects.get()
-        self.ground_material = ba.Material()
+        self.ground_material = bs.Material()
         self.ground_material.add_actions(
             conditions=('they_have_material', shared.player_material),
             actions=(
                 ('modify_part_collision', 'collide', True),
-                ('call', 'at_connect', ba.Call(self._handle_player_collide)),
+                ('call', 'at_connect', babase.Call(self._handle_player_collide)),
             ),
         )
         pos = (0, 0.1, -5)
-        self.main_region = ba.newnode('region', attrs={'position': pos, 'scale': (
+        self.main_region = bs.newnode('region', attrs={'position': pos, 'scale': (
             30, 0.001, 23), 'type': 'box', 'materials': [shared.footing_material, self.ground_material]})
 
     def _handle_player_collide(self):
         try:
-            player = ba.getcollision().opposingnode.getdelegate(
+            player = bs.getcollision().opposingnode.getdelegate(
                 PlayerSpaz, True)
-        except ba.NotFoundError:
+        except bs.NotFoundError:
             return
         if player.is_alive():
             player.shatter(True)
 
     def spawn_drone(self, spaz):
-        with ba.Context(_ba.get_foreground_host_activity()):
+        with bs.get_foreground_host_activity().context:
 
             drone = Drone(spaz)
             r_launcher = RocketLauncher()

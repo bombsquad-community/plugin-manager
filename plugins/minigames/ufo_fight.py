@@ -1,4 +1,4 @@
-"""UFO Boss Fight v1.0:
+"""UFO Boss Fight v2.0:
 Made by Cross Joy"""
 
 # Anyone who wanna help me in giving suggestion/ fix bugs/ by creating PR,
@@ -8,21 +8,28 @@ Made by Cross Joy"""
 # My Discord Id: Cross Joy#0721
 # My BS Discord Server: https://discford.gg/JyBY6haARJ
 
-# ba_meta require api 7
+# ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
+
+# ---------------------------------------
+# Update v2.0
+
+# updated to api 8
+# ---------------------------------------
 
 from __future__ import annotations
 
 import random
 from typing import TYPE_CHECKING
-import ba
-import _ba
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.spaz import Spaz
-from bastd.actor.bomb import Blast, Bomb
-from bastd.actor.onscreentimer import OnScreenTimer
-from bastd.actor.spazbot import SpazBotSet, StickyBot
-from bastd.gameutils import SharedObjects
+
+import babase
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.spaz import Spaz
+from bascenev1lib.actor.bomb import Blast, Bomb
+from bascenev1lib.actor.onscreentimer import OnScreenTimer
+from bascenev1lib.actor.spazbot import SpazBotSet, StickyBot
+from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Union, Callable
@@ -32,17 +39,17 @@ class UFODiedMessage:
     ufo: UFO
     """The UFO that was killed."""
 
-    killerplayer: ba.Player | None
-    """The ba.Player that killed it (or None)."""
+    killerplayer: bs.Player | None
+    """The bs.Player that killed it (or None)."""
 
-    how: ba.DeathType
+    how: bs.DeathType
     """The particular type of death."""
 
     def __init__(
         self,
         ufo: UFO,
-        killerplayer: ba.Player | None,
-        how: ba.DeathType,
+        killerplayer: bs.Player | None,
+        how: bs.DeathType,
     ):
         """Instantiate with given values."""
         self.spazbot = ufo
@@ -57,7 +64,7 @@ class RoboBot(StickyBot):
     highlight = (3, 3, 3)
 
 
-class UFO(ba.Actor):
+class UFO(bs.Actor):
     """
     New AI for Boss
     """
@@ -65,7 +72,7 @@ class UFO(ba.Actor):
     # pylint: disable=too-many-public-methods
     # pylint: disable=too-many-locals
 
-    node: ba.Node
+    node: bs.Node
 
     def __init__(self, hitpoints: int = 5000):
 
@@ -74,32 +81,29 @@ class UFO(ba.Actor):
 
         self.update_callback: Callable[[UFO], Any] | None = None
         activity = self.activity
-        assert isinstance(activity, ba.GameActivity)
+        assert isinstance(activity, bs.GameActivity)
 
-        self.platform_material = ba.Material()
+        self.platform_material = bs.Material()
         self.platform_material.add_actions(
             conditions=('they_have_material', shared.footing_material),
             actions=(
                 'modify_part_collision', 'collide', True))
-        self.ice_material = ba.Material()
+        self.ice_material = bs.Material()
         self.ice_material.add_actions(
             actions=('modify_part_collision', 'friction', 0.0))
 
-        self._player_pts: list[tuple[ba.Vec3, ba.Vec3]] | None = None
-        self._ufo_update_timer: ba.Timer | None = None
-        self.last_player_attacked_by: ba.Player | None = None
+        self._player_pts: list[tuple[bs.Vec3, bs.Vec3]] | None = None
+        self._ufo_update_timer: bs.Timer | None = None
+        self.last_player_attacked_by: bs.Player | None = None
         self.last_attacked_time = 0.0
         self.last_attacked_type: tuple[str, str] | None = None
 
-        self.to_target: ba.Vec3 = ba.Vec3(0, 0, 0)
+        self.to_target: bs.Vec3 = bs.Vec3(0, 0, 0)
         self.dist = (0, 0, 0)
 
         self._bots = SpazBotSet()
         self.frozen = False
-        self.y_pos = 3
-        self.xz_pos = 1
         self.bot_count = 3
-        self.bot_dur_froze = False
 
         self.hitpoints = hitpoints
         self.hitpoints_max = hitpoints
@@ -108,18 +112,18 @@ class UFO(ba.Actor):
         self._height = 35
         self._bar_width = 240
         self._bar_height = 35
-        self._bar_tex = self._backing_tex = ba.gettexture('bar')
-        self._cover_tex = ba.gettexture('uiAtlas')
-        self._model = ba.getmodel('meterTransparent')
+        self._bar_tex = self._backing_tex = bs.gettexture('bar')
+        self._cover_tex = bs.gettexture('uiAtlas')
+        self._mesh = bs.getmesh('meterTransparent')
         self.bar_posx = -120
 
         self._last_hit_time: int | None = None
         self.impact_scale = 1.0
         self._num_times_hit = 0
 
-        self._sucker_mat = ba.Material()
+        self._sucker_mat = bs.Material()
 
-        self.ufo_material = ba.Material()
+        self.ufo_material = bs.Material()
         self.ufo_material.add_actions(
             conditions=('they_have_material',
                         shared.player_material),
@@ -135,31 +139,30 @@ class UFO(ba.Actor):
                          self.ufo_material)),
             actions=('modify_part_collision', 'physical', False))
 
-        activity = _ba.get_foreground_host_activity()
-        with ba.Context(activity):
-            point = activity.map.get_flag_position(None)
-            boss_spawn_pos = (point[0], point[1] + 1, point[2])
+        activity = bs.get_foreground_host_activity()
+        point = activity.map.get_flag_position(None)
+        boss_spawn_pos = (point[0], point[1] + 1, point[2])
 
-        self.node = ba.newnode('prop', delegate=self, attrs={
+        self.node = bs.newnode('prop', delegate=self, attrs={
             'position': boss_spawn_pos,
             'velocity': (2, 0, 0),
-            'color_texture': ba.gettexture('achievementFootballShutout'),
-            'model': ba.getmodel('landMine'),
-            # 'light_model': ba.getmodel('powerupSimple'),
-            'model_scale': 3.3,
+            'color_texture': bs.gettexture('achievementFootballShutout'),
+            'mesh': bs.getmesh('landMine'),
+            # 'light_mesh': bs.getmesh('powerupSimple'),
+            'mesh_scale': 3.3,
             'body': 'landMine',
             'body_scale': 3.3,
-            'gravity_scale': 0.05,
+            'gravity_scale': 0.2,
             'density': 1,
             'reflection': 'soft',
             'reflection_scale': [0.25],
             'shadow_size': 0.1,
             'max_speed': 1.5,
             'is_area_of_interest':
-                    True,
+                True,
             'materials': [shared.footing_material, shared.object_material]})
 
-        self.holder = ba.newnode('region', attrs={
+        self.holder = bs.newnode('region', attrs={
             'position': (
                 boss_spawn_pos[0], boss_spawn_pos[1] - 0.25,
                 boss_spawn_pos[2]),
@@ -168,7 +171,7 @@ class UFO(ba.Actor):
             'materials': (self.platform_material, self.ice_material,
                           shared.object_material)})
 
-        self.suck_anim = ba.newnode('locator',
+        self.suck_anim = bs.newnode('locator',
                                     owner=self.node,
                                     attrs={'shape': 'circleOutline',
                                            'position': (
@@ -181,7 +184,7 @@ class UFO(ba.Actor):
                                            'additive': True})
 
         def suck_anim():
-            ba.animate_array(self.suck_anim, 'position', 3,
+            bs.animate_array(self.suck_anim, 'position', 3,
                              {0: (
                                  self.node.position[0],
                                  self.node.position[1] - 5,
@@ -194,7 +197,7 @@ class UFO(ba.Actor):
                                      self.node.position[
                                          2] + self.to_target.z / 2)})
 
-        self.suck_timer = ba.Timer(0.5, suck_anim, repeat=True)
+        self.suck_timer = bs.Timer(0.5, suck_anim, repeat=True)
 
         self.blocks = []
 
@@ -209,14 +212,14 @@ class UFO(ba.Actor):
 
             ))
 
-        # self.sucker = ba.newnode('region', attrs={
+        # self.sucker = bs.newnode('region', attrs={
         #     'position': (
         #         boss_spawn_pos[0], boss_spawn_pos[1] - 2, boss_spawn_pos[2]),
         #     'scale': [2, 10, 2],
         #     'type': 'box',
         #     'materials': self._sucker_mat, })
 
-        self.suck = ba.newnode('region',
+        self.suck = bs.newnode('region',
                                attrs={'position': (
                                    boss_spawn_pos[0], boss_spawn_pos[1] - 2,
                                    boss_spawn_pos[2]),
@@ -227,69 +230,65 @@ class UFO(ba.Actor):
         self.node.connectattr('position', self.holder, 'position')
         self.node.connectattr('position', self.suck, 'position')
 
-        ba.animate(self.node, 'model_scale', {
+        bs.animate(self.node, 'mesh_scale', {
             0: 0,
-            0.2: self.node.model_scale * 1.1,
-            0.26: self.node.model_scale})
+            0.2: self.node.mesh_scale * 1.1,
+            0.26: self.node.mesh_scale})
 
-        self.shield_deco = ba.newnode('shield', owner=self.node,
+        self.shield_deco = bs.newnode('shield', owner=self.node,
                                       attrs={'color': (4, 4, 4),
                                              'radius': 1.2})
         self.node.connectattr('position', self.shield_deco, 'position')
         self._scoreboard()
         self._update()
-        self.drop_bomb_timer = ba.Timer(1.5, ba.Call(self._drop_bomb),
+        self.drop_bomb_timer = bs.Timer(1.5, bs.Call(self._drop_bomb),
                                         repeat=True)
 
-        self.drop_bots_timer = ba.Timer(15.0, ba.Call(self._drop_bots), repeat=True)
+        self.drop_bots_timer = bs.Timer(15.0, bs.Call(self._drop_bots), repeat=True)
 
     def _drop_bots(self) -> None:
         p = self.node.position
-        if not self.frozen:
-            for i in range(self.bot_count):
-                ba.timer(
-                    1.0 + i,
-                    lambda: self._bots.spawn_bot(
-                        RoboBot, pos=(self.node.position[0],
-                                      self.node.position[1] - 1,
-                                      self.node.position[2]), spawn_time=0.0
-                    ),
-                )
-        else:
-            self.bot_dur_froze = True
+        for i in range(self.bot_count):
+            bs.timer(
+                1.0 + i,
+                lambda: self._bots.spawn_bot(
+                    RoboBot, pos=(self.node.position[0],
+                                  self.node.position[1] - 1,
+                                  self.node.position[2]), spawn_time=0.0
+                ),
+            )
 
     def _drop_bomb(self) -> None:
         t = self.to_target
         p = self.node.position
-        if not self.frozen:
-            if abs(self.dist[0]) < 2 and abs(self.dist[2]) < 2:
-                Bomb(position=(p[0], p[1] - 0.5, p[2]),
-                     velocity=(t[0] * 5, 0, t[2] * 5),
-                     bomb_type='land_mine').autoretain().arm()
-            elif self.hitpoints > self.hitpoints_max * 3 / 4:
-                Bomb(position=(p[0], p[1] - 1.5, p[2]),
-                     velocity=(t[0] * 8, 2, t[2] * 8),
-                     bomb_type='normal').autoretain()
-            elif self.hitpoints > self.hitpoints_max * 1 / 2:
-                Bomb(position=(p[0], p[1] - 1.5, p[2]),
-                     velocity=(t[0] * 8, 2, t[2] * 8),
-                     bomb_type='ice').autoretain()
+        if abs(self.dist[0]) < 2 and abs(self.dist[2]) < 2:
+            Bomb(position=(p[0], p[1] - 0.5, p[2]),
+                 velocity=(t[0] * 5, 0, t[2] * 5),
+                 bomb_type='land_mine').autoretain().arm()
+        elif self.hitpoints > self.hitpoints_max * 3 / 4:
+            Bomb(position=(p[0], p[1] - 1.5, p[2]),
+                 velocity=(t[0] * 8, 2, t[2] * 8),
+                 bomb_type='normal').autoretain()
+        elif self.hitpoints > self.hitpoints_max * 1 / 2:
+            Bomb(position=(p[0], p[1] - 1.5, p[2]),
+                 velocity=(t[0] * 8, 2, t[2] * 8),
+                 bomb_type='ice').autoretain()
 
-            elif self.hitpoints > self.hitpoints_max * 1 / 4:
-                Bomb(position=(p[0], p[1] - 1.5, p[2]),
-                     velocity=(t[0] * 15, 2, t[2] * 15),
-                     bomb_type='sticky').autoretain()
-            else:
-                Bomb(position=(p[0], p[1] - 1.5, p[2]),
-                     velocity=(t[0] * 15, 2, t[2] * 15),
-                     bomb_type='impact').autoretain()
+        elif self.hitpoints > self.hitpoints_max * 1 / 4:
+            Bomb(position=(p[0], p[1] - 1.5, p[2]),
+                 velocity=(t[0] * 15, 2, t[2] * 15),
+                 bomb_type='sticky').autoretain()
+        else:
+            Bomb(position=(p[0], p[1] - 1.5, p[2]),
+                 velocity=(t[0] * 15, 2, t[2] * 15),
+                 bomb_type='impact').autoretain()
 
     def _levitate(self):
-        node = ba.getcollision().opposingnode
+        node = bs.getcollision().opposingnode
         if node.exists():
             p = node.getdelegate(Spaz, True)
 
-            def raise_player(player: ba.Player):
+            def raise_player(player: bs.Player):
                 if player.is_alive():
                     node = player.node
                     try:
@@ -303,7 +302,7 @@ class UFO(ba.Actor):
 
             if not self.frozen:
                 for i in range(7):
-                    ba.timer(0.05 + i / 20, ba.Call(raise_player, p))
+                    bs.timer(0.05 + i / 20, bs.Call(raise_player, p))
 
     def on_punched(self, damage: int) -> None:
         """Called when this spaz gets punched."""
@@ -315,24 +314,22 @@ class UFO(ba.Actor):
         damage = abs(msg.magnitude)
         if msg.hit_type == 'explosion':
             damage /= 20
-        else:
-            damage /= 5
 
         self.hitpoints -= int(damage)
         if self.hitpoints <= 0:
-            self.handlemessage(ba.DieMessage())
+            self.handlemessage(bs.DieMessage())
 
     def _get_target_player_pt(self) -> tuple[
-            ba.Vec3 | None, ba.Vec3 | None]:
+            bs.Vec3 | None, bs.Vec3 | None]:
         """Returns the position and velocity of our target.
 
         Both values will be None in the case of no target.
         """
         assert self.node
-        botpt = ba.Vec3(self.node.position)
+        botpt = bs.Vec3(self.node.position)
         closest_dist: float | None = None
-        closest_vel: ba.Vec3 | None = None
-        closest: ba.Vec3 | None = None
+        closest_vel: bs.Vec3 | None = None
+        closest: bs.Vec3 | None = None
         assert self._player_pts is not None
         for plpt, plvel in self._player_pts:
             dist = (plpt - botpt).length()
@@ -349,12 +346,12 @@ class UFO(ba.Actor):
             assert closest_vel is not None
             assert closest is not None
             return (
-                ba.Vec3(closest[0], closest[1], closest[2]),
-                ba.Vec3(closest_vel[0], closest_vel[1], closest_vel[2]),
+                bs.Vec3(closest[0], closest[1], closest[2]),
+                bs.Vec3(closest_vel[0], closest_vel[1], closest_vel[2]),
             )
         return None, None
 
-    def set_player_points(self, pts: list[tuple[ba.Vec3, ba.Vec3]]) -> None:
+    def set_player_points(self, pts: list[tuple[bs.Vec3, bs.Vec3]]) -> None:
         """Provide the spaz-bot with the locations of its enemies."""
         self._player_pts = pts
 
@@ -368,13 +365,13 @@ class UFO(ba.Actor):
         Category: Gameplay Functions
         """
         lifespan = 1.0
-        app = ba.app
+        app = bs.app
 
         # FIXME: Should never vary game elements based on local config.
         #  (connected clients may have differing configs so they won't
         #  get the intended results).
-        do_big = app.ui.uiscale is ba.UIScale.SMALL or app.vr_mode
-        txtnode = ba.newnode('text',
+        do_big = app.ui.uiscale is bs.UIScale.SMALL or app.vr_mode
+        txtnode = bs.newnode('text',
                              attrs={
                                  'text': damage,
                                  'in_world': True,
@@ -385,7 +382,7 @@ class UFO(ba.Actor):
                                  'scale': 0.035 if do_big else 0.03
                              })
         # Translate upward.
-        tcombine = ba.newnode('combine', owner=txtnode, attrs={'size': 3})
+        tcombine = bs.newnode('combine', owner=txtnode, attrs={'size': 3})
         tcombine.connectattr('output', txtnode, 'position')
         v_vals = []
         pval = 0.0
@@ -397,25 +394,25 @@ class UFO(ba.Actor):
             vval *= 0.5
         p_start = position[0]
         p_dir = direction[0]
-        ba.animate(tcombine, 'input0',
+        bs.animate(tcombine, 'input0',
                    {i[0] * lifespan: p_start + p_dir * i[1]
                     for i in v_vals})
         p_start = position[1]
         p_dir = direction[1]
-        ba.animate(tcombine, 'input1',
+        bs.animate(tcombine, 'input1',
                    {i[0] * lifespan: p_start + p_dir * i[1]
                     for i in v_vals})
         p_start = position[2]
         p_dir = direction[2]
-        ba.animate(tcombine, 'input2',
+        bs.animate(tcombine, 'input2',
                    {i[0] * lifespan: p_start + p_dir * i[1]
                     for i in v_vals})
-        ba.animate(txtnode, 'opacity', {0.7 * lifespan: 1.0, lifespan: 0.0})
-        ba.timer(lifespan, txtnode.delete)
+        bs.animate(txtnode, 'opacity', {0.7 * lifespan: 1.0, lifespan: 0.0})
+        bs.timer(lifespan, txtnode.delete)
 
     def _scoreboard(self) -> None:
-        self._backing = ba.NodeActor(
-            ba.newnode('image',
+        self._backing = bs.NodeActor(
+            bs.newnode('image',
                        attrs={
                            'position': (self.bar_posx + self._width / 2, -100),
                            'scale': (self._width, self._height),
@@ -427,15 +424,15 @@ class UFO(ba.Actor):
                            'attach': 'topCenter',
                            'texture': self._backing_tex
                        }))
-        self._bar = ba.NodeActor(
-            ba.newnode('image',
+        self._bar = bs.NodeActor(
+            bs.newnode('image',
                        attrs={
                            'opacity': 1.0,
                            'color': (0.5, 0.5, 0.5),
                            'attach': 'topCenter',
                            'texture': self._bar_tex
                        }))
-        self._bar_scale = ba.newnode('combine',
+        self._bar_scale = bs.newnode('combine',
                                      owner=self._bar.node,
                                      attrs={
                                          'size': 2,
@@ -443,7 +440,7 @@ class UFO(ba.Actor):
                                          'input1': self._bar_height
                                      })
         self._bar_scale.connectattr('output', self._bar.node, 'scale')
-        self._bar_position = ba.newnode(
+        self._bar_position = bs.newnode(
             'combine',
             owner=self._bar.node,
             attrs={
@@ -452,8 +449,8 @@ class UFO(ba.Actor):
                 'input1': -100
             })
         self._bar_position.connectattr('output', self._bar.node, 'position')
-        self._cover = ba.NodeActor(
-            ba.newnode('image',
+        self._cover = bs.NodeActor(
+            bs.newnode('image',
                        attrs={
                            'position': (self.bar_posx + 120, -100),
                            'scale':
@@ -465,10 +462,10 @@ class UFO(ba.Actor):
                            'vr_depth': 2,
                            'attach': 'topCenter',
                            'texture': self._cover_tex,
-                           'model_transparent': self._model
+                           'mesh_transparent': self._mesh
                        }))
-        self._score_text = ba.NodeActor(
-            ba.newnode('text',
+        self._score_text = bs.NodeActor(
+            bs.newnode('text',
                        attrs={
                            'position': (self.bar_posx + 120, -100),
                            'h_attach': 'center',
@@ -487,32 +484,32 @@ class UFO(ba.Actor):
         self._score_text.node.text = str(self.hitpoints)
         self._bar_width = self.hitpoints * self._width_max / self.hitpoints_max
         cur_width = self._bar_scale.input0
-        ba.animate(self._bar_scale, 'input0', {
+        bs.animate(self._bar_scale, 'input0', {
             0.0: cur_width,
             0.1: self._bar_width
         })
         cur_x = self._bar_position.input0
 
-        ba.animate(self._bar_position, 'input0', {
+        bs.animate(self._bar_position, 'input0', {
             0.0: cur_x,
             0.1: self.bar_posx + self._bar_width / 2
         })
 
         if self.hitpoints > self.hitpoints_max * 3 / 4:
-            ba.animate_array(self.shield_deco, 'color', 3,
+            bs.animate_array(self.shield_deco, 'color', 3,
                              {0: self.shield_deco.color, 0.2: (4, 4, 4)})
         elif self.hitpoints > self.hitpoints_max * 1 / 2:
-            ba.animate_array(self.shield_deco, 'color', 3,
+            bs.animate_array(self.shield_deco, 'color', 3,
                              {0: self.shield_deco.color, 0.2: (3, 3, 5)})
             self.bot_count = 4
 
         elif self.hitpoints > self.hitpoints_max * 1 / 4:
-            ba.animate_array(self.shield_deco, 'color', 3,
+            bs.animate_array(self.shield_deco, 'color', 3,
                              {0: self.shield_deco.color, 0.2: (1, 5, 1)})
             self.bot_count = 5
 
         else:
-            ba.animate_array(self.shield_deco, 'color', 3,
+            bs.animate_array(self.shield_deco, 'color', 3,
                              {0: self.shield_deco.color, 0.2: (5, 0.2, 0.2)})
             self.bot_count = 6
 
@@ -530,10 +527,10 @@ class UFO(ba.Actor):
             return
 
         pos = self.node.position
-        our_pos = ba.Vec3(pos[0], pos[1] - self.y_pos, pos[2])
+        our_pos = bs.Vec3(pos[0], pos[1] - 3, pos[2])
 
-        target_pt_raw: ba.Vec3 | None
-        target_vel: ba.Vec3 | None
+        target_pt_raw: bs.Vec3 | None
+        target_vel: bs.Vec3 | None
 
         target_pt_raw, target_vel = self._get_target_player_pt()
 
@@ -562,15 +559,12 @@ class UFO(ba.Actor):
             setattr(self.node, 'extra_acceleration',
                     (0, self.to_target.y * 80 + 70,
                      0))
-        else:
+        elif not self.frozen:
             setattr(self.node, 'velocity',
-                    (self.to_target.x * self.xz_pos,
-                     self.to_target.y,
-                     self.to_target.z * self.xz_pos))
+                    (self.to_target.x, self.to_target.y, self.to_target.z))
             setattr(self.node, 'extra_acceleration',
-                    (self.to_target.x * self.xz_pos,
-                     self.to_target.y * 80 + 70,
-                     self.to_target.z * self.xz_pos))
+                    (self.to_target.x, self.to_target.y * 80 + 70,
+                     self.to_target.z))
 
     def on_expire(self) -> None:
         super().on_expire()
@@ -579,14 +573,14 @@ class UFO(ba.Actor):
         # no chance of them keeping activities or other things alive.
         self.update_callback = None
 
-    def animate_model(self) -> None:
+    def animate_mesh(self) -> None:
         if not self.node:
             return None
-        # ba.animate(self.node, 'model_scale', {
-        #     0: self.node.model_scale,
-        #     0.08: self.node.model_scale * 0.9,
-        #     0.15: self.node.model_scale})
-        ba.emitfx(position=self.node.position,
+        # bs.animate(self.node, 'mesh_scale', {
+        #     0: self.node.mesh_scale,
+        #     0.08: self.node.mesh_scale * 0.9,
+        #     0.15: self.node.mesh_scale})
+        bs.emitfx(position=self.node.position,
                   velocity=self.node.velocity,
                   count=int(6 + random.random() * 10),
                   scale=0.5,
@@ -597,15 +591,15 @@ class UFO(ba.Actor):
         # pylint: disable=too-many-branches
         assert not self.expired
 
-        if isinstance(msg, ba.HitMessage):
+        if isinstance(msg, bs.HitMessage):
             # Don't die on punches (that's annoying).
-            self.animate_model()
+            self.animate_mesh()
             if self.hitpoints != 0:
                 self.do_damage(msg)
             # self.show_damage_msg(msg)
             self._update()
 
-        elif isinstance(msg, ba.DieMessage):
+        elif isinstance(msg, bs.DieMessage):
             if self.node:
                 self.hitpoints = 0
                 self.frozen = True
@@ -629,46 +623,52 @@ class UFO(ba.Actor):
                                 position=(p_x, p[1], p_z),
                                 blast_radius=2.0).autoretain()
 
-                    ba.timer(0 + i, ba.Call(ded_explode, i))
+                    bs.timer(0 + i, bs.Call(ded_explode, i))
 
-                ba.timer(5, self.node.delete)
-                ba.timer(0.1, self.suck.delete)
-                ba.timer(0.1, self.suck_anim.delete)
+                bs.timer(5, self.node.delete)
+                bs.timer(0.1, self.suck.delete)
+                bs.timer(0.1, self.suck_anim.delete)
 
-        elif isinstance(msg, ba.OutOfBoundsMessage):
-            activity = _ba.get_foreground_host_activity()
+        elif isinstance(msg, bs.OutOfBoundsMessage):
+            activity = bs.get_foreground_host_activity()
             try:
                 point = activity.map.get_flag_position(None)
                 boss_spawn_pos = (point[0], point[1] + 1.5, point[2])
                 assert self.node
                 self.node.position = boss_spawn_pos
             except:
-                self.handlemessage(ba.DieMessage())
+                self.handlemessage(bs.DieMessage())
 
-        elif isinstance(msg, ba.FreezeMessage):
+        elif isinstance(msg, bs.FreezeMessage):
             if not self.frozen:
                 self.frozen = True
-                self.y_pos = -1.5
-                self.xz_pos = 0.01
+                self.drop_bomb_timer = False
+                self.drop_bots_timer = False
+                setattr(self.node, 'velocity',
+                        (0,  self.to_target.y, 0))
+                setattr(self.node, 'extra_acceleration',
+                        (0,  0, 0))
                 self.node.reflection_scale = [2]
 
                 def unfrozen():
                     self.frozen = False
-                    if self.bot_dur_froze:
-                        ba.timer(0.1, ba.Call(self._drop_bots))
-                        self.bot_dur_froze = False
-                    self.y_pos = 3
-                    self.xz_pos = 1
+                    self.drop_bomb_timer = bs.Timer(1.5,
+                                                    bs.Call(self._drop_bomb),
+                                                    repeat=True)
+
+                    self.drop_bots_timer = bs.Timer(15.0,
+                                                    bs.Call(self._drop_bots),
+                                                    repeat=True)
                     self.node.reflection_scale = [0.25]
 
-                ba.timer(5.0, unfrozen)
+                bs.timer(3.0, unfrozen)
 
         else:
             super().handlemessage(msg)
 
 
 class UFOSet:
-    """A container/controller for one or more ba.SpazBots.
+    """A container/controller for one or more bs.SpazBots.
 
     category: Bot Classes
     """
@@ -684,9 +684,9 @@ class UFOSet:
         self._ufo_bot_lists: list[list[UFO]] = [
             [] for _ in range(self._ufo_bot_list_count)
         ]
-        self._ufo_spawn_sound = ba.getsound('spawn')
+        self._ufo_spawn_sound = bs.getsound('spawn')
         self._ufo_spawning_count = 0
-        self._ufo_bot_update_timer: ba.Timer | None = None
+        self._ufo_bot_update_timer: bs.Timer | None = None
         self.start_moving()
 
     def _update(self) -> None:
@@ -699,7 +699,7 @@ class UFOSet:
             ]
         except Exception:
             bot_list = []
-            ba.print_exception(
+            bs.print_exception(
                 'Error updating bot list: '
                 + str(self._ufo_bot_lists[self._ufo_bot_update_list])
             )
@@ -709,8 +709,8 @@ class UFOSet:
 
         # Update our list of player points for the bots to use.
         player_pts = []
-        for player in ba.getactivity().players:
-            assert isinstance(player, ba.Player)
+        for player in bs.getactivity().players:
+            assert isinstance(player, bs.Player)
             try:
                 # TODO: could use abstracted player.position here so we
                 # don't have to assume their actor type, but we have no
@@ -720,12 +720,12 @@ class UFOSet:
                     assert player.actor.node
                     player_pts.append(
                         (
-                            ba.Vec3(player.actor.node.position),
-                            ba.Vec3(player.actor.node.velocity),
+                            bs.Vec3(player.actor.node.position),
+                            bs.Vec3(player.actor.node.velocity),
                         )
                     )
             except Exception:
-                ba.print_exception('Error on bot-set _update.')
+                bs.print_exception('Error on bot-set _update.')
 
         for bot in bot_list:
             bot.set_player_points(player_pts)
@@ -733,8 +733,8 @@ class UFOSet:
 
     def start_moving(self) -> None:
         """Start processing bot AI updates so they start doing their thing."""
-        self._ufo_bot_update_timer = ba.Timer(
-            0.05, ba.WeakCall(self._update), repeat=True
+        self._ufo_bot_update_timer = bs.Timer(
+            0.05, bs.WeakCall(self._update), repeat=True
         )
 
     def spawn_bot(
@@ -745,13 +745,13 @@ class UFOSet:
         on_spawn_call: Callable[[UFO], Any] | None = None,
     ) -> None:
         """Spawn a bot from this set."""
-        from bastd.actor import spawner
+        from bascenev1lib.actor import spawner
 
         spawner.Spawner(
             pt=pos,
             spawn_time=spawn_time,
             send_spawn_message=False,
-            spawn_callback=ba.Call(
+            spawn_callback=bs.Call(
                 self._spawn_bot, bot_type, pos, on_spawn_call
             ),
         )
@@ -764,18 +764,18 @@ class UFOSet:
         on_spawn_call: Callable[[UFO], Any] | None,
     ) -> None:
         spaz = bot_type()
-        ba.playsound(self._ufo_spawn_sound, position=pos)
+        self._ufo_spawn_sound.play(position=pos)
         assert spaz.node
         spaz.node.handlemessage('flash')
         spaz.node.is_area_of_interest = False
-        spaz.handlemessage(ba.StandMessage(pos, random.uniform(0, 360)))
+        spaz.handlemessage(bs.StandMessage(pos, random.uniform(0, 360)))
         self.add_bot(spaz)
         self._ufo_spawning_count -= 1
         if on_spawn_call is not None:
             on_spawn_call(spaz)
 
     def add_bot(self, bot: UFO) -> None:
-        """Add a ba.SpazBot instance to the set."""
+        """Add a bs.SpazBot instance to the set."""
         self._ufo_bot_lists[self._ufo_bot_add_list].append(bot)
         self._ufo_bot_add_list = (
             self._ufo_bot_add_list + 1) % self._ufo_bot_list_count
@@ -799,26 +799,26 @@ class UFOSet:
         """Immediately clear out any bots in the set."""
 
         # Don't do this if the activity is shutting down or dead.
-        activity = ba.getactivity(doraise=False)
+        activity = bs.getactivity(doraise=False)
         if activity is None or activity.expired:
             return
 
         for i, bot_list in enumerate(self._ufo_bot_lists):
             for bot in bot_list:
-                bot.handlemessage(ba.DieMessage(immediate=True))
+                bot.handlemessage(bs.DieMessage(immediate=True))
             self._ufo_bot_lists[i] = []
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
 
-# ba_meta export game
-class UFOightGame(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class UFOightGame(bs.TeamGameActivity[Player, Team]):
     """
     A co-op game where you try to defeat UFO Boss
     as fast as possible
@@ -826,33 +826,33 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
 
     name = 'UFO Fight'
     description = 'REal Boss Fight?'
-    scoreconfig = ba.ScoreConfig(
-        label='Time', scoretype=ba.ScoreType.MILLISECONDS, lower_is_better=True
+    scoreconfig = bs.ScoreConfig(
+        label='Time', scoretype=bs.ScoreType.MILLISECONDS, lower_is_better=True
     )
-    default_music = ba.MusicType.TO_THE_DEATH
+    default_music = bs.MusicType.TO_THE_DEATH
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         # For now we're hard-coding spawn positions and whatnot
         # so we need to be sure to specify that we only support
         # a specific map.
         return ['Football Stadium']
 
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
         # We currently support Co-Op only.
-        return issubclass(sessiontype, ba.CoopSession)
+        return issubclass(sessiontype, bs.CoopSession)
 
     # In the constructor we should load any media we need/etc.
     # ...but not actually create anything yet.
     def __init__(self, settings: dict):
         super().__init__(settings)
-        self._winsound = ba.getsound('score')
+        self._winsound = bs.getsound('score')
         self._won = False
         self._timer: OnScreenTimer | None = None
         self._bots = UFOSet()
         self._preset = str(settings['preset'])
-        self._credit = ba.newnode('text',
+        self._credit = bs.newnode('text',
                                   attrs={
                                       'v_attach': 'bottom',
                                       'h_align': 'center',
@@ -866,7 +866,7 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.tint = (0.42, 0.55, 0.66)
 
     # Called when our game actually begins.
@@ -878,20 +878,20 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
 
         # Make our on-screen timer and start it roughly when our bots appear.
         self._timer = OnScreenTimer()
-        ba.timer(4.0, self._timer.start)
+        bs.timer(4.0, self._timer.start)
 
         def checker():
             if not self._won:
-                self.timer = ba.Timer(0.1, self._check_if_won, repeat=True)
+                self.timer = bs.Timer(0.1, self._check_if_won, repeat=True)
 
-        ba.timer(10, checker)
-        activity = _ba.get_foreground_host_activity()
+        bs.timer(10, checker)
+        activity = bs.get_foreground_host_activity()
 
         point = activity.map.get_flag_position(None)
         boss_spawn_pos = (point[0], point[1] + 1.5, point[2])
 
         # Spawn some baddies.
-        ba.timer(
+        bs.timer(
             1.0,
             lambda: self._bots.spawn_bot(
                 UFO, pos=boss_spawn_pos, spawn_time=3.0
@@ -915,10 +915,10 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
     def handlemessage(self, msg: Any) -> Any:
 
         # A player has died.
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             player = msg.getplayer(Player)
             self.stats.player_was_killed(player)
-            ba.timer(0.1, self._checkroundover)
+            bs.timer(0.1, self._checkroundover)
 
         # A spaz-bot has died.
         elif isinstance(msg, UFODiedMessage):
@@ -926,7 +926,7 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
             # bots if we ask here (the currently-dying bot isn't officially
             # marked dead yet) ..so lets push a call into the event loop to
             # check once this guy has finished dying.
-            ba.pushcall(self._check_if_won)
+            bs.pushcall(self._check_if_won)
 
         # Let the base class handle anything we don't.
         else:
@@ -948,20 +948,20 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
         assert self._timer is not None
         self._timer.stop()
 
-        results = ba.GameResults()
+        results = bs.GameResults()
 
         # If we won, set our score to the elapsed time in milliseconds.
         # (there should just be 1 team here since this is co-op).
         # ..if we didn't win, leave scores as default (None) which means
         # we lost.
         if self._won:
-            elapsed_time_ms = int((ba.time() - self._timer.starttime) * 1000.0)
-            ba.cameraflash()
-            ba.playsound(self._winsound)
+            elapsed_time_ms = int((bs.time() - self._timer.starttime) * 1000.0)
+            bs.cameraflash()
+            self._winsound.play()
             for team in self.teams:
                 for player in team.players:
                     if player.actor:
-                        player.actor.handlemessage(ba.CelebrateMessage())
+                        player.actor.handlemessage(bs.CelebrateMessage())
                 results.set_team_score(team, elapsed_time_ms)
 
         # Ends the activity.
@@ -969,11 +969,11 @@ class UFOightGame(ba.TeamGameActivity[Player, Team]):
 
 
 # ba_meta export plugin
-class MyUFOFightLevel(ba.Plugin):
+class MyUFOFightLevel(babase.Plugin):
 
     def on_app_running(self) -> None:
-        ba.app.add_coop_practice_level(
-            ba.Level(
+        babase.app.classic.add_coop_practice_level(
+            bs.Level(
                 name='The UFO Fight',
                 displayname='${GAME}',
                 gametype=UFOightGame,

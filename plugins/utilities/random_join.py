@@ -1,17 +1,19 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypeVar
 
-import _ba
-import ba
-import ba.internal
+import _babase
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
 import random
-from bastd.ui.gather.publictab import PublicGatherTab, PartyEntry, PingThread
+from bauiv1lib.gather.publictab import PublicGatherTab, PartyEntry, PingThread
 if TYPE_CHECKING:
     from typing import Callable
 
 ClassType = TypeVar('ClassType')
-MethodType = TypeVar('Methodtype')
+MethodType = TypeVar('MethodType')
 
 
 def override(cls: ClassType) -> Callable[[MethodType], MethodType]:
@@ -50,26 +52,26 @@ class NewPublicGatherTab(PublicGatherTab, PingThread):
         v = c_height - 35
         v -= 60
 
-        self._random_join_button = ba.buttonwidget(
+        self._random_join_button = bui.buttonwidget(
             parent=self._container,
             label='random',
             size=(90, 45),
             position=(710, v + 10),
-            on_activate_call=ba.WeakCall(self._join_random_server),
+            on_activate_call=bs.WeakCall(self._join_random_server),
         )
-        ba.widget(edit=self._random_join_button, up_widget=self._host_text,
-                  left_widget=self._filter_text)
+        bui.widget(edit=self._random_join_button, up_widget=self._host_text,
+                   left_widget=self._filter_text)
 
         # We could place it somewhere under plugin settings which is kind of
         # official way to customise plugins. Although it's too deep:
         # Gather Window -> Main Menu -> Settings -> Advanced -(scroll)->
         # Plugins -(scroll probably)-> RandomJoin Settings.
-        self._random_join_settings_button = ba.buttonwidget(
+        self._random_join_settings_button = bui.buttonwidget(
             parent=self._container,
-            icon=ba.gettexture('settingsIcon'),
+            icon=bui.gettexture('settingsIcon'),
             size=(40, 40),
             position=(820, v + 13),
-            on_activate_call=ba.WeakCall(self._show_random_join_settings),
+            on_activate_call=bs.WeakCall(self._show_random_join_settings),
         )
 
     @override(PublicGatherTab)
@@ -97,9 +99,9 @@ class NewPublicGatherTab(PublicGatherTab, PingThread):
                                                      and p.ping <= randomjoin.maximum_ping)))]
 
         if not parties:
-            ba.screenmessage('No suitable servers found; wait',
-                             color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('No suitable servers found; wait',
+                              color=(1, 0, 0))
+            bui.getsound('error').play()
             return
 
         for party in parties:
@@ -110,33 +112,33 @@ class NewPublicGatherTab(PublicGatherTab, PingThread):
         party = random.choice(
             [p for p in parties if p.name[:6] in name_prefixes])
 
-        ba.internal.connect_to_party(party.address, party.port)
+        bs.connect_to_party(party.address, party.port)
 
 
-class RandomJoinSettingsPopup(ba.Window):
-    def __init__(self, origin_widget: ba.Widget) -> None:
+class RandomJoinSettingsPopup(bui.Window):
+    def __init__(self, origin_widget: bui.Widget) -> None:
         c_width = 600
         c_height = 400
-        uiscale = ba.app.ui.uiscale
-        super().__init__(root_widget=ba.containerwidget(
+        uiscale = bui.app.ui_v1.uiscale
+        super().__init__(root_widget=bui.containerwidget(
             scale=(
                 1.8
-                if uiscale is ba.UIScale.SMALL
+                if uiscale is babase.UIScale.SMALL
                 else 1.55
-                if uiscale is ba.UIScale.MEDIUM
+                if uiscale is babase.UIScale.MEDIUM
                 else 1.0
             ),
             scale_origin_stack_offset=origin_widget.get_screen_space_center(),
             stack_offset=(0, -10)
-            if uiscale is ba.UIScale.SMALL
+            if uiscale is babase.UIScale.SMALL
             else (0, 15)
-            if uiscale is ba.UIScale.MEDIUM
+            if uiscale is babase.UIScale.MEDIUM
             else (0, 0),
             size=(c_width, c_height),
             transition='in_scale',
         ))
 
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             size=(0, 0),
             h_align='center',
@@ -149,7 +151,7 @@ class RandomJoinSettingsPopup(ba.Window):
         )
 
         v = c_height - 120
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             size=(0, 0),
             h_align='right',
@@ -158,7 +160,7 @@ class RandomJoinSettingsPopup(ba.Window):
             maxwidth=c_width * 0.3,
             position=(c_width * 0.4, v),
         )
-        self._maximum_ping_edit = ba.textwidget(
+        self._maximum_ping_edit = bui.textwidget(
             parent=self._root_widget,
             size=(c_width * 0.3, 40),
             h_align='left',
@@ -171,7 +173,7 @@ class RandomJoinSettingsPopup(ba.Window):
             max_chars=4,
         )
         v -= 60
-        ba.textwidget(
+        bui.textwidget(
             parent=self._root_widget,
             size=(0, 0),
             h_align='right',
@@ -180,7 +182,7 @@ class RandomJoinSettingsPopup(ba.Window):
             maxwidth=c_width * 0.3,
             position=(c_width * 0.4, v),
         )
-        self._minimum_players_edit = ba.textwidget(
+        self._minimum_players_edit = bui.textwidget(
             parent=self._root_widget,
             size=(c_width * 0.3, 40),
             h_align='left',
@@ -195,27 +197,27 @@ class RandomJoinSettingsPopup(ba.Window):
         v -= 60
 
         # Cancel button.
-        self.cancel_button = btn = ba.buttonwidget(
+        self.cancel_button = btn = bui.buttonwidget(
             parent=self._root_widget,
-            label=ba.Lstr(resource='cancelText'),
+            label=babase.Lstr(resource='cancelText'),
             size=(180, 60),
             color=(1.0, 0.2, 0.2),
             position=(40, 30),
             on_activate_call=self._cancel,
             autoselect=True,
         )
-        ba.containerwidget(edit=self._root_widget, cancel_button=btn)
+        bui.containerwidget(edit=self._root_widget, cancel_button=btn)
 
         # Save button.
-        self.savebtn = btn = ba.buttonwidget(
+        self.savebtn = btn = bui.buttonwidget(
             parent=self._root_widget,
-            label=ba.Lstr(resource='saveText'),
+            label=babase.Lstr(resource='saveText'),
             size=(180, 60),
             position=(c_width - 200, 30),
             on_activate_call=self._save,
             autoselect=True,
         )
-        ba.containerwidget(edit=self._root_widget, start_button=btn)
+        bui.containerwidget(edit=self._root_widget, start_button=btn)
 
     def _save(self) -> None:
         errored = False
@@ -223,19 +225,19 @@ class RandomJoinSettingsPopup(ba.Window):
         maximum_ping: int | None = None
         try:
             minimum_players = int(
-                ba.textwidget(query=self._minimum_players_edit))
+                bui.textwidget(query=self._minimum_players_edit))
         except ValueError:
-            ba.screenmessage('"Minimum players" should be integer',
-                             color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('"Minimum players" should be integer',
+                              color=(1, 0, 0))
+            bui.getsound('error').play()
             errored = True
         try:
             maximum_ping = int(
-                ba.textwidget(query=self._maximum_ping_edit))
+                bui.textwidget(query=self._maximum_ping_edit))
         except ValueError:
-            ba.screenmessage('"Maximum ping" should be integer',
-                             color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('"Maximum ping" should be integer',
+                              color=(1, 0, 0))
+            bui.getsound('error').play()
             errored = True
         if errored:
             return
@@ -244,17 +246,17 @@ class RandomJoinSettingsPopup(ba.Window):
         assert maximum_ping is not None
 
         if minimum_players < 0:
-            ba.screenmessage('"Minimum players" should be at least 0',
-                             color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('"Minimum players" should be at least 0',
+                              color=(1, 0, 0))
+            bui.getsound('error').play()
             errored = True
 
         if maximum_ping <= 0:
-            ba.screenmessage('"Maximum ping" should be greater than 0',
-                             color=(1, 0, 0))
-            ba.playsound(ba.getsound('error'))
-            ba.screenmessage('(use 9999 as dont-care value)',
-                             color=(1, 0, 0))
+            bui.screenmessage('"Maximum ping" should be greater than 0',
+                              color=(1, 0, 0))
+            bui.getsound('error').play()
+            bui.screenmessage('(use 9999 as dont-care value)',
+                              color=(1, 0, 0))
             errored = True
 
         if errored:
@@ -264,15 +266,15 @@ class RandomJoinSettingsPopup(ba.Window):
         randomjoin.minimum_players = minimum_players
 
         randomjoin.commit_config()
-        ba.playsound(ba.getsound('shieldUp'))
+        bui.getsound('shieldUp').play()
         self._transition_out()
 
     def _cancel(self) -> None:
-        ba.playsound(ba.getsound('shieldDown'))
+        bui.getsound('shieldDown').play()
         self._transition_out()
 
     def _transition_out(self) -> None:
-        ba.containerwidget(edit=self._root_widget, transition='out_scale')
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
 class RandomJoin:
@@ -283,7 +285,7 @@ class RandomJoin:
         self.load_config()
 
     def load_config(self) -> None:
-        cfg = ba.app.config.get('Random Join', {
+        cfg = babase.app.config.get('Random Join', {
             'maximum_ping': self.maximum_ping,
             'minimum_players': self.minimum_players,
         })
@@ -291,25 +293,25 @@ class RandomJoin:
             self.maximum_ping = cfg['maximum_ping']
             self.minimum_players = cfg['minimum_players']
         except KeyError:
-            ba.screenmessage('Error: RandomJoin config is broken, resetting..',
-                             color=(1, 0, 0), log=True)
-            ba.playsound(ba.getsound('error'))
+            bui.screenmessage('Error: RandomJoin config is broken, resetting..',
+                              color=(1, 0, 0), log=True)
+            bui.getsound('error').play()
             self.commit_config()
 
     def commit_config(self) -> None:
-        ba.app.config['Random Join'] = {
+        babase.app.config['Random Join'] = {
             'maximum_ping': self.maximum_ping,
             'minimum_players': self.minimum_players,
         }
-        ba.app.config.commit()
+        babase.app.config.commit()
 
 
 randomjoin = RandomJoin()
 
 
-# ba_meta require api 7
-# ba_meta export ba.Plugin
-class RandomJoinPlugin(ba.Plugin):
+# ba_meta require api 8
+# ba_meta export babase.Plugin
+class RandomJoinPlugin(babase.Plugin):
     def on_app_running(self) -> None:
         # I feel bad that all patching logic happens not here.
         pass

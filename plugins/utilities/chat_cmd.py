@@ -1,12 +1,22 @@
+# Ported by brostos to api 8
+# Tool used to make porting easier.(https://github.com/bombsquad-community/baport)
 """python 3.9 | chatcmd for a beutiful game  - BombSquad OwO"""
 # modded by IM_NOT_PRANAV#7874
 
 # biggggggg thankssssssssssssss to FireFighter1037 for helping everything
 
 # -*- coding: utf-8 -*-
-# ba_meta require api 7
-from _ba import env, get_foreground_host_activity, get_foreground_host_session, get_game_roster,              get_chat_messages, set_party_icon_always_visible, chatmessage as cmsg,          screenmessage as smsg
-import ba
+# Ported by brostos to api 8
+# ba_meta require api 8
+
+import threading
+import time
+from bascenev1 import get_foreground_host_activity, get_foreground_host_session, get_game_roster, get_chat_messages, chatmessage as cmsg
+from bauiv1 import set_party_icon_always_visible, screenmessage as smsg
+import babase
+import bauiv1 as bui
+import bascenev1 as bs
+from bauiv1lib import mainmenu
 
 # our prefix that what we starts cmds with
 px = '/'
@@ -17,16 +27,18 @@ px = '/'
 class _cmds:
 
     def _process_cmd():
-        set_party_icon_always_visible(True)
-        messages = get_chat_messages()
-        if len(messages) > 1:
-            lastmsg = messages[len(messages)-1]
+        try:
+            messages = get_chat_messages()
+            if len(messages) > 1:
+                lastmsg = messages[len(messages)-1]
 
-            m = lastmsg.split(' ')[1]
-            if m.startswith(px):
-                return _cmds._handle()
-            else:
-                pass
+                m = lastmsg.split(' ')[1]
+                if m.startswith(px):
+                    return _cmds._handle()
+                else:
+                    pass
+        except:
+            pass
 
     def _handle():
         messages = get_chat_messages()
@@ -137,17 +149,17 @@ class _cmds:
                         cmsg('could not found player')
 
             elif m in [px+'quit', px+'restart']:
-                ba.quit()
+                babase.quit()
 
             elif m in [px+'mute', px+'mutechat']:
-                cfg = ba.app.config
+                cfg = babase.app.config
                 cfg['Chat Muted'] = True
                 cfg.apply_and_commit()
                 cmsg('muted')
                 smsg(f'chat muted use {px}unmute and click on send to unmute')
 
             elif m in [px+'unmute', px+'unmutechat']:
-                cfg = ba.app.config
+                cfg = babase.app.config
                 cfg['Chat Muted'] = False
                 cfg.apply_and_commit()
                 cmsg('un_muted')
@@ -222,16 +234,16 @@ class _cmds:
                 elif n[0] == 'all':
                     for i in activity_players:
                         body = i.actor.node
-                        if not body.torso_model == None:
-                            body.head_model = None
-                            body.torso_model = None
-                            body.upper_arm_model = None
-                            body.forearm_model = None
-                            body.pelvis_model = None
-                            body.hand_model = None
-                            body.toes_model = None
-                            body.upper_leg_model = None
-                            body.lower_leg_model = None
+                        if not body.torso_mesh == None:
+                            body.head_mesh = None
+                            body.torso_mesh = None
+                            body.upper_arm_mesh = None
+                            body.forearm_mesh = None
+                            body.pelvis_mesh = None
+                            body.hand_mesh = None
+                            body.toes_mesh = None
+                            body.upper_leg_mesh = None
+                            body.lower_leg_mesh = None
                             body.style = 'cyborg'
                             cmsg('All invisible now Dont get cought')
                         else:
@@ -239,16 +251,16 @@ class _cmds:
                 else:
                     body = activity_players[int(n[0])].actor.node
                     is_name = session_players[int(n[0])].getname()
-                    if not body.torso_model == None:
-                        body.head_model = None
-                        body.torso_model = None
-                        body.upper_arm_model = None
-                        body.forearm_model = None
-                        body.pelvis_model = None
-                        body.hand_model = None
-                        body.toes_model = None
-                        body.upper_leg_model = None
-                        body.lower_leg_model = None
+                    if not body.torso_mesh == None:
+                        body.head_mesh = None
+                        body.torso_mesh = None
+                        body.upper_arm_mesh = None
+                        body.forearm_mesh = None
+                        body.pelvis_mesh = None
+                        body.hand_mesh = None
+                        body.toes_mesh = None
+                        body.upper_leg_mesh = None
+                        body.lower_leg_mesh = None
                         body.style = 'cyborg'
                         cmsg(is_name+' using invisiblelity ')
                     else:
@@ -260,8 +272,8 @@ class _cmds:
                 elif n[0] == 'all':
                     for i in activity_players:
                         body = i.actor.node
-                        if not body.head_model == None:
-                            body.head_model = None
+                        if not body.head_mesh == None:
+                            body.head_mesh = None
                             body.style = 'cyborg'
                             cmsg('headless ? xD')
                         else:
@@ -269,8 +281,8 @@ class _cmds:
                 else:
                     body = activity_players[int(n[0])].actor.node
                     is_name = session_players[int(n[0])].getname()
-                    if not body.head_model == None:
-                        body.head_model = None
+                    if not body.head_mesh == None:
+                        body.head_mesh = None
                         body.style = 'cyborg'
                         cmsg(is_name+'is headless now xD')
                     else:
@@ -282,16 +294,16 @@ class _cmds:
                 elif n[0] == 'all':
                     for i in activity_players:
                         body = i.actor.node
-                        body.head_model = None
-                        body.handlemessage(ba.PowerupMessage(poweruptype='punch'))
-                        body.handlemessage(ba.PowerupMessage(poweruptype='shield'))
+                        body.head_mesh = None
+                        body.handlemessage(bs.PowerupMessage(poweruptype='punch'))
+                        body.handlemessage(bs.PowerupMessage(poweruptype='shield'))
                         cmsg('dont creep out childs all will be scared')
                 else:
                     try:
                         body = activity_players[int(n[0])].actor.node
-                        body.head_model = None
-                        body.handlemessage(ba.PowerupMessage(poweruptype='punch'))
-                        body.handlemessage(ba.PowerupMessage(poweruptype='shield'))
+                        body.head_mesh = None
+                        body.handlemessage(bs.PowerupMessage(poweruptype='punch'))
+                        body.handlemessage(bs.PowerupMessage(poweruptype='shield'))
                         cmsg('dont creep out childs all will be scared')
                     except:
                         cmsg('could not found player to make')
@@ -301,11 +313,11 @@ class _cmds:
                     cmsg(f'Use : {px}kill all or {px}kill number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.DieMessage())
+                        i.actor.node.handlemessage(bs.DieMessage())
                         cmsg('Killed all')
                 else:
                     is_name = session_players[int(n[0])].getname()
-                    activity_players[int(n[0])].actor.node.handlemessage(ba.DieMessage())
+                    activity_players[int(n[0])].actor.node.handlemessage(bs.DieMessage())
                     cmsg('Killed '+is_name)
 
             elif m in [px+'heal', px+'heath']:
@@ -313,12 +325,12 @@ class _cmds:
                     cmsg(f'Use: {px}heal all or {px}heal number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.PowerupMessage(poweruptype='health'))
+                        i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='health'))
                         cmsg('Heald all')
                 else:
                     is_name = session_players[int(n[0])].getname()
                     activity_players[int(n[0])].actor.node.handlemessage(
-                        ba.PowerupMessage(poweruptype='health'))
+                        bs.PowerupMessage(poweruptype='health'))
                     cmsg('Heald '+is_name)
 
             elif m in [px+'curse', px+'cur']:
@@ -326,12 +338,12 @@ class _cmds:
                     cmsg(f'Use: {px}curse all or {px}curse number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.PowerupMessage(poweruptype='curse'))
+                        i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='curse'))
                         cmsg('Cursed all')
                 else:
                     is_name = session_players[int(n[0])].getname()
                     activity_players[int(n[0])].actor.node.handlemessage(
-                        ba.PowerupMessage(poweruptype='curse'))
+                        bs.PowerupMessage(poweruptype='curse'))
                     cmsg('Cursed '+is_name)
 
             elif m in [px+'sleep']:
@@ -378,12 +390,12 @@ class _cmds:
                     cmsg(f'Use: {px}gloves all or {px}gloves number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.PowerupMessage(poweruptype='punch'))
+                        i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='punch'))
                         cmsg('Free Gloves enjoy all')
                 else:
                     is_name = session_players[int(n[0])].getname()
                     activity_players[int(n[0])].actor.node.handlemessage(
-                        ba.PowerupMessage(poweruptype='punch'))
+                        bs.PowerupMessage(poweruptype='punch'))
                     cmsg(is_name+' using gloves')
 
             elif m in [px+'shield', px+'protect']:
@@ -391,12 +403,12 @@ class _cmds:
                     cmsg(f'Use: {px}shield all or {px}shield number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.PowerupMessage(poweruptype='shield'))
+                        i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='shield'))
                         cmsg('Everyone enjoy free shield :)')
                 else:
                     is_name = session_players[int(n[0])].getname()
                     activity_players[int(n[0])].actor.node.handlemessage(
-                        ba.PowerupMessage(poweruptype='shield'))
+                        bs.PowerupMessage(poweruptype='shield'))
                     cmsg(is_name+' using shield')
 
             elif m in [px+'freeze', px+'ice']:
@@ -404,11 +416,11 @@ class _cmds:
                     cmsg(f'Use: {px}freeze all or {px}freeze number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.FreezeMessage())
+                        i.actor.node.handlemessage(bs.FreezeMessage())
                         cmsg('Freezed all')
                 else:
                     is_name = session_players[int(n[0])].getname()
-                    activity_players[int(n[0])].actor.node.handlemessage(ba.FreezeMessage())
+                    activity_players[int(n[0])].actor.node.handlemessage(bs.FreezeMessage())
                     cmsg('Un freezed '+is_name)
 
             elif m in [px+'unfreeze', px+'thaw']:
@@ -416,11 +428,11 @@ class _cmds:
                     cmsg(f'Use: {px}unfreeze/thaw all or {px}unfreeze/thaw number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.ThawMessage())
+                        i.actor.node.handlemessage(bs.ThawMessage())
                         cmsg('Un freezed all ')
                 else:
                     is_name = session_players[int(n[0])].getname()
-                    activity_players[int(n[0])].actor.node.handlemessage(ba.ThawMessage())
+                    activity_players[int(n[0])].actor.node.handlemessage(bs.ThawMessage())
                     cmsg('Un freezed '+is_name)
 
             elif m in [px+'fall']:
@@ -428,11 +440,11 @@ class _cmds:
                     cmsg(f'Use: {px}fall all or {px}fall number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.StandMessage())
+                        i.actor.node.handlemessage(bs.StandMessage())
                         cmsg('Felt everyone')
                 else:
                     is_name = session_players[int(n[0])].getname()
-                    activity_players[int(n[0])].actor.node.handlemessage(ba.StandMessage())
+                    activity_players[int(n[0])].actor.node.handlemessage(bs.StandMessage())
                     cmsg(is_name+' got felt')
 
             elif m in [px+'celebrate', px+'celeb']:
@@ -440,11 +452,11 @@ class _cmds:
                     cmsg(f'Use: {px}celebrate all or {px}celebrate number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
-                        i.actor.node.handlemessage(ba.CelebrateMessage())
+                        i.actor.node.handlemessage(bs.CelebrateMessage())
                         cmsg('Celebrate all :)')
                 else:
                     is_name = session_players[int(n[0])].getname()
-                    activity_players[int(n[0])].actor.node.handlemessage(ba.CelebrateMessage())
+                    activity_players[int(n[0])].actor.node.handlemessage(bs.CelebrateMessage())
                     cmsg(is_name+' is celebrating bt why?')
 
             elif m in [px+'fly']:
@@ -532,12 +544,23 @@ class _cmds:
                     cmsg(u'\U0001F95A everything is Nazz \U0001F95A')
 
 
-# ba.timer(0.05, _update, repeat=True)
+class NewMainMenuWindow(mainmenu.MainMenuWindow):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Display chat icon, but if user open/close gather it may disappear
+        bui.set_party_icon_always_visible(True)
+
+# bs.timer(0.05, _update, repeat=True)
+
+
 def same():
-    ba.timer(0.5, _cmds._process_cmd, True)
+    # bs.timer(0.5, _cmds._process_cmd, True)
+    _cmds._process_cmd()
+# ba_meta export babase.Plugin
 
-# ba_meta export plugin
 
+class _enableee(babase.Plugin):
+    timer = bs.AppTimer(0.5, same, repeat=True)
 
-class _enableee(ba.Plugin):
-    same()
+    def on_app_running(self):
+        mainmenu.MainMenuWindow = NewMainMenuWindow
