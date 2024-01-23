@@ -930,13 +930,18 @@
         }
       ],
       "versions": {
+        "1.2.0": {
+          "api_version": 8,
+          "commit_sha": "b93463d",
+          "released_on": "23-01-2024",
+          "md5sum": "4860bfcbc59f4fbcd775ed92f5679f24"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ab26786",
           "released_on": "27-07-2023",
           "md5sum": "d0c9c0472d7b145eadf535957a462fdf"
-        },
-        "1.2.0": null
+        }
       }
     },
     "supersmash": {
