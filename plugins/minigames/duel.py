@@ -1,5 +1,5 @@
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-
+"""New Duel / Created by: byANG3L"""
 # ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
 
