@@ -50,9 +50,9 @@ class SuperSpaz(PlayerSpaz):
                     if not node.frozen:
                         node.frozen = True
                         node.handlemessage(bs.FreezeMessage())
-                        bui.getsound('freeze').play()
-                    bui.getsound('superPunch').play()
-                    bui.getsound('punchStrong02').play()
+                        bs.getsound('freeze').play()
+                    bs.getsound('superPunch').play()
+                    bs.getsound('punchStrong02').play()
                     Blast(position=node.position,
                           velocity=node.velocity,
                           blast_radius=0.0,
@@ -163,7 +163,7 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
         super().__init__(settings)
         self._scoreboard = Scoreboard()
         self._score_to_win: Optional[int] = None
-        self._dingsound = bui.getsound('dingSmall')
+        self._dingsound = bs.getsound('dingSmall')
         self._epic_mode = bool(settings['Epic Mode'])
         self._kills_to_win_per_player = int(
             settings['Kills to Win Per Player'])
@@ -181,10 +181,10 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
         self._players_vs_1: bool = False
         self._players_vs_2: bool = False
         self._first_countdown: bool = True
-        self._count_1 = bui.getsound('announceOne')
-        self._count_2 = bui.getsound('announceTwo')
-        self._count_3 = bui.getsound('announceThree')
-        self._boxing_bell = bui.getsound('boxingBell')
+        self._count_1 = bs.getsound('announceOne')
+        self._count_2 = bs.getsound('announceTwo')
+        self._count_3 = bs.getsound('announceThree')
+        self._boxing_bell = bs.getsound('boxingBell')
 
         # Base class overrides.
         self.slow_motion = self._epic_mode
@@ -352,8 +352,8 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
             bs.timer(0.1, sp_fx, repeat=True)
 
         if self._box_mode:
-            spaz.node.color_texture = bui.gettexture('tnt')
-            spaz.node.color_mask_texture = bui.gettexture('tnt')
+            spaz.node.color_texture = bs.gettexture('tnt')
+            spaz.node.color_mask_texture = bs.gettexture('tnt')
             spaz.node.color = (1, 1, 1)
             spaz.node.highlight = (1, 1, 1)
             spaz.node.head_mesh = None
