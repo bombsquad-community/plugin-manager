@@ -919,12 +919,12 @@
         }
       }
     },
-    "duel": {
+    "super_duel": {
       "description": "Crush your enemy in a 1v1",
       "external_url": "https://www.youtube.com/watch?v=hvRtiXR-oC0",
       "authors": [
         {
-          "name": "Unknown/JoseAng3l",
+          "name": "JoseAng3l",
           "email": "",
           "discord": "joseang3l"
         }
