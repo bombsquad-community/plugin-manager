@@ -113,7 +113,7 @@ class Player(bs.Player['Team']):
 class Team(bs.Team[Player]):
     """Our team type for this game."""
 
-    def on_app_running(self) -> None:
+    def __init__(self) -> None:
         self.score = 0
 
 
