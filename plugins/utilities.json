@@ -1091,7 +1091,7 @@
         }
       }
     },
-    "InfinityShield": {
+    "infinity_shield": {
       "description": "Gives you unbreakable shield",
       "external_url": "https://youtu.be/hp7vbB-hUPg?si=i7Th0NP5xDPLN2P_",
       "authors": [
@@ -1102,15 +1102,10 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "f744c41",
-          "released_on": "24-01-2024",
-          "md5sum": "eb917ca19d206dfd19667181dacc1df5"
-        }
+        "1.0.0": null
       }
     },
-    "OnlyNight": {
+    "0nly_night": {
       "description": "Night Mode",
       "external_url": "",
       "authors": [
@@ -1121,15 +1116,10 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "f744c41",
-          "released_on": "24-01-2024",
-          "md5sum": "255d3d6694008cc2f73d115182100b52"
-        }
+        "1.0.0": null
       }
     },
-    "Tag": {
+    "tag": {
       "description": "Get a tag",
       "external_url": "",
       "authors": [
@@ -1140,12 +1130,7 @@
         }
       ],
       "versions": {
-        "2.0.1": {
-          "api_version": 8,
-          "commit_sha": "f744c41",
-          "released_on": "24-01-2024",
-          "md5sum": "01cf9e10ab0e1bf51c07d80ff842c632"
-        }
+        "2.0.1": null
       }
     }
   }
