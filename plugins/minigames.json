@@ -877,6 +877,104 @@
           "md5sum": "1cbe5b3e85b5dfcee1eb322f33568fd4"
         }
       }
+    },
+    "Avalanche": {
+      "description": "Dodge the falling ice bombs",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "HYPER_RACE": {
+      "description": "Race and avoid the obsatacles",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "meteorshowerdeluxe": {
+      "description": "Meteor shower on all maps support",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "EraOSBeta",
+          "email": "",
+          "discord": "3ra0"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "ofuuuAttack": {
+      "description": "Dodge the falling bombs.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Riyukii",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "safe_zone": {
+      "description": "Stay in the safe zone",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "SEBASTIAN2059",
+          "email": "",
+          "discord": "sebastian2059"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "SnowBallFight": {
+      "description": "Throw snoballs and dominate",
+      "external_url": "https://youtu.be/uXyb_meBjGI?si=D_N_OXZT5BFh8R5C",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "EggGame": {
+      "description": "Throw Egg as far u can",
+      "external_url": "https://youtu.be/82vLp9ceCcw?si=OSC5Hu3Ns7PevlwP",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }

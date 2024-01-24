@@ -986,6 +986,62 @@
           "md5sum": "5fa8706f36d618f8302551dd2a0403a0"
         }
       }
-    }
+    },
+    "disable_friendly_fire": {
+      "description": "Disables friendly fire",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "EmperoR",
+          "email": "",
+          "discord": "EmperoR#4098"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "infinityShield": {
+      "description": "Gives you unbreakable shield",
+      "external_url": "https://youtu.be/hp7vbB-hUPg?si=i7Th0NP5xDPLN2P_",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "OnlyNight": {
+      "description": "Night Mode",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "Tag": {
+      "description": "Get a tag",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "pranav",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "2.0.1": null
+      }
+    }    
   }
 }
