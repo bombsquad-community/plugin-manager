@@ -176,6 +176,7 @@ class Team(bs.Team[Player]):
         self.survival_seconds: Optional[int] = None
         self.spawn_order: List[Player] = []
 
+
 lang = bs.app.lang.language
 if lang == 'Spanish':
     description = 'Mantente en la zona segura.'
@@ -187,6 +188,8 @@ else:
     kill_timer = 'Kill timer: '
 
 # ba_meta export bascenev1.GameActivity
+
+
 class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
     """Game type where last player(s) left alive win."""
 
@@ -244,7 +247,7 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
-        return ['Football Stadium','Hockey Stadium']
+        return ['Football Stadium', 'Hockey Stadium']
 
     def __init__(self, settings: dict):
         super().__init__(settings)
@@ -263,7 +266,7 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
         self.slow_motion = self._epic_mode
         self.default_music = (bs.MusicType.EPIC
                               if self._epic_mode else bs.MusicType.SURVIVAL)
-                              
+
         self._tick_sound = bs.getsound('tick')
 
     def get_instance_description(self) -> Union[str, Sequence]:
@@ -286,7 +289,7 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
                 player.team.survival_seconds = 0
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return
@@ -305,21 +308,21 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
         # Don't waste time doing this until begin.
         if self.has_begun():
             self._update_icons()
-           
+
     def on_begin(self) -> None:
         super().on_begin()
         self._start_time = bs.time()
         self.setup_standard_time_limit(self._time_limit)
-        #self.setup_standard_powerup_drops()
-        
-        bs.timer(5,self.spawn_zone)
+        # self.setup_standard_powerup_drops()
+
+        bs.timer(5, self.spawn_zone)
         self._bots = stdbot.SpazBotSet()
-        bs.timer(3,babase.Call(self.add_bot,'left'))
-        bs.timer(3,babase.Call(self.add_bot,'right'))
+        bs.timer(3, babase.Call(self.add_bot, 'left'))
+        bs.timer(3, babase.Call(self.add_bot, 'right'))
         if len(self.initialplayerinfos) > 4:
-            bs.timer(5,babase.Call(self.add_bot,'right'))
-            bs.timer(5,babase.Call(self.add_bot,'left'))
-        
+            bs.timer(5, babase.Call(self.add_bot, 'right'))
+            bs.timer(5, babase.Call(self.add_bot, 'left'))
+
         if self._solo_mode:
             self._vs_text = bs.NodeActor(
                 bs.newnode('text',
@@ -359,78 +362,88 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
         # We could check game-over conditions at explicit trigger points,
         # but lets just do the simple thing and poll it.
         bs.timer(1.0, self._update, repeat=True)
-        
+
     def spawn_zone(self):
-        self.zone_pos = (random.randrange(-10,10),0.05,random.randrange(-5,5))
-        self.zone = bs.newnode('locator',attrs={'shape':'circle','position':self.zone_pos,'color':(1, 1, 0),'opacity':0.8,'draw_beauty':True,'additive':False,'drawShadow':False})
-        self.zone_limit = bs.newnode('locator',attrs={'shape':'circleOutline','position':self.zone_pos,'color':(1, 0.2, 0.2),'opacity':0.8,'draw_beauty':True,'additive':False,'drawShadow':False})
-        bs.animate_array(self.zone, 'size', 1,{0:[0], 0.3:[self.get_players_count()*0.85], 0.35:[self.get_players_count()*0.8]})
-        bs.animate_array(self.zone_limit, 'size', 1,{0:[0], 0.3:[self.get_players_count()*1.2], 0.35:[self.get_players_count()*0.95]})
+        self.zone_pos = (random.randrange(-10, 10), 0.05, random.randrange(-5, 5))
+        self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': self.zone_pos, 'color': (
+            1, 1, 0), 'opacity': 0.8, 'draw_beauty': True, 'additive': False, 'drawShadow': False})
+        self.zone_limit = bs.newnode('locator', attrs={'shape': 'circleOutline', 'position': self.zone_pos, 'color': (
+            1, 0.2, 0.2), 'opacity': 0.8, 'draw_beauty': True, 'additive': False, 'drawShadow': False})
+        bs.animate_array(self.zone, 'size', 1, {0: [0], 0.3: [
+                         self.get_players_count()*0.85], 0.35: [self.get_players_count()*0.8]})
+        bs.animate_array(self.zone_limit, 'size', 1, {0: [0], 0.3: [
+                         self.get_players_count()*1.2], 0.35: [self.get_players_count()*0.95]})
         self.last_players_count = self.get_players_count()
         bs.getsound('laserReverse').play()
         self.start_timer()
         self.move_zone()
-    
+
     def delete_zone(self):
         self.zone.delete()
         self.zone = None
         self.zone_limit.delete()
         self.zone_limit = None
         bs.getsound('shieldDown').play()
-        bs.timer(1,self.spawn_zone)
-    
+        bs.timer(1, self.spawn_zone)
+
     def move_zone(self):
-        if self.zone_pos[0] > 0: x = random.randrange(0,10)
-        else: x = random.randrange(-10,0)
-		
-        if self.zone_pos[2] > 0: y = random.randrange(0,5)
-        else: y = random.randrange(-5,0)
-		
-        new_pos = (x,0.05,y)
-        bs.animate_array(self.zone, 'position', 3,{0:self.zone.position, 8:new_pos})
-        bs.animate_array(self.zone_limit, 'position', 3,{0:self.zone_limit.position,8:new_pos})
-    
+        if self.zone_pos[0] > 0:
+            x = random.randrange(0, 10)
+        else:
+            x = random.randrange(-10, 0)
+
+        if self.zone_pos[2] > 0:
+            y = random.randrange(0, 5)
+        else:
+            y = random.randrange(-5, 0)
+
+        new_pos = (x, 0.05, y)
+        bs.animate_array(self.zone, 'position', 3, {0: self.zone.position, 8: new_pos})
+        bs.animate_array(self.zone_limit, 'position', 3, {0: self.zone_limit.position, 8: new_pos})
+
     def start_timer(self):
         count = self.get_players_count()
-        self._time_remaining = 10 if count > 9 else count-1 if count > 6 else count if count > 2 else count*2 
-        self._timer_x = bs.Timer(1.0,bs.WeakCall(self.tick),repeat=True)
+        self._time_remaining = 10 if count > 9 else count-1 if count > 6 else count if count > 2 else count*2
+        self._timer_x = bs.Timer(1.0, bs.WeakCall(self.tick), repeat=True)
         # gnode = bs.getactivity().globalsnode
         # tint = gnode.tint
         # bs.animate_array(gnode,'tint',3,{0:tint,self._time_remaining*1.5:(1.0,0.5,0.5),self._time_remaining*1.55:tint})
-    
+
     def stop_timer(self):
         self._time = None
         self._timer_x = None
-        
+
     def tick(self):
         self.check_players()
         self._time = bs.NodeActor(bs.newnode('text',
-            attrs={'v_attach':'top','h_attach':'center',
-            'text':kill_timer+str(self._time_remaining)+'s',
-            'opacity':0.8,'maxwidth':100,'h_align':'center',
-            'v_align':'center','shadow':1.0,'flatness':1.0,
-            'color':(1,1,1),'scale':1.5,'position':(0,-50)}
-            )
-        )
+                                             attrs={'v_attach': 'top', 'h_attach': 'center',
+                                                    'text': kill_timer+str(self._time_remaining)+'s',
+                                                    'opacity': 0.8, 'maxwidth': 100, 'h_align': 'center',
+                                                    'v_align': 'center', 'shadow': 1.0, 'flatness': 1.0,
+                                                    'color': (1, 1, 1), 'scale': 1.5, 'position': (0, -50)}
+                                             )
+                                  )
         self._time_remaining -= 1
         self._tick_sound.play()
-       
+
     def check_players(self):
         if self._time_remaining <= 0:
             self.stop_timer()
-            bs.animate_array(self.zone, 'size', 1,{0:[self.last_players_count*0.8], 1.4:[self.last_players_count*0.8],1.5:[0]})
-            bs.animate_array(self.zone_limit, 'size', 1,{0:[self.last_players_count*0.95], 1.45:[self.last_players_count*0.95],1.5:[0]})
-            bs.timer(1.5,self.delete_zone)
+            bs.animate_array(self.zone, 'size', 1, {
+                             0: [self.last_players_count*0.8], 1.4: [self.last_players_count*0.8], 1.5: [0]})
+            bs.animate_array(self.zone_limit, 'size', 1, {
+                             0: [self.last_players_count*0.95], 1.45: [self.last_players_count*0.95], 1.5: [0]})
+            bs.timer(1.5, self.delete_zone)
             for player in self.players:
                 if not player.actor is None:
                     if player.actor.is_alive():
                         p1 = player.actor.node.position
                         p2 = self.zone.position
-                        diff = (babase.Vec3(p1[0]-p2[0],0.0,p1[2]-p2[2]))
+                        diff = (babase.Vec3(p1[0]-p2[0], 0.0, p1[2]-p2[2]))
                         dist = (diff.length())
                         if dist > (self.get_players_count()*0.7):
                             player.actor.handlemessage(bs.DieMessage())
-        
+
     def get_players_count(self):
         count = 0
         for player in self.players:
@@ -438,7 +451,7 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
                 if player.actor.is_alive():
                     count += 1
         return count
-        
+
     def _update_solo_mode(self) -> None:
         # For both teams, find the first player on the spawn order list with
         # lives remaining and spawn them if they're not alive.
@@ -558,9 +571,9 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
 
         # spaz but *without* the ability to attack or pick stuff up.
         actor.connect_controls_to_player(enable_punch=False,
-                                        enable_bomb=False,
-                                        enable_pickup=False)
-        
+                                         enable_bomb=False,
+                                         enable_pickup=False)
+
         # If we have any icons, update their state.
         for icon in player.icons:
             icon.handle_player_spawned()
@@ -642,38 +655,42 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
             if self._solo_mode:
                 player.team.spawn_order.remove(player)
                 player.team.spawn_order.append(player)
-        elif isinstance(msg,stdbot.SpazBotDiedMessage):
+        elif isinstance(msg, stdbot.SpazBotDiedMessage):
             self._on_spaz_bot_died(msg)
-    
-    def _on_spaz_bot_died(self,die_msg):
-        bs.timer(1,babase.Call(self.add_bot,die_msg.spazbot.node.position))
-		
-    def _on_bot_spawn(self,spaz):
+
+    def _on_spaz_bot_died(self, die_msg):
+        bs.timer(1, babase.Call(self.add_bot, die_msg.spazbot.node.position))
+
+    def _on_bot_spawn(self, spaz):
         spaz.update_callback = self.move_bot
         spaz_type = type(spaz)
         spaz._charge_speed = self._get_bot_speed(spaz_type)
 
-    def add_bot(self,pos=None):
-        if pos == 'left': position = (-11,0,random.randrange(-5,5))
-        elif pos == 'right': position = (11,0,random.randrange(-5,5))
-        else: position = pos
-        self._bots.spawn_bot(self.get_random_bot(),pos=position,spawn_time=1,on_spawn_call=babase.Call(self._on_bot_spawn))
+    def add_bot(self, pos=None):
+        if pos == 'left':
+            position = (-11, 0, random.randrange(-5, 5))
+        elif pos == 'right':
+            position = (11, 0, random.randrange(-5, 5))
+        else:
+            position = pos
+        self._bots.spawn_bot(self.get_random_bot(), pos=position, spawn_time=1,
+                             on_spawn_call=babase.Call(self._on_bot_spawn))
 
-    def move_bot(self,bot):
+    def move_bot(self, bot):
         p = bot.node.position
-        speed = -bot._charge_speed if(p[0]>=-11 and p[0]<0) else bot._charge_speed
-		
-        if (p[0]>=-11) and (p[0]<=11):
+        speed = -bot._charge_speed if (p[0] >= -11 and p[0] < 0) else bot._charge_speed
+
+        if (p[0] >= -11) and (p[0] <= 11):
             bot.node.move_left_right = speed
             bot.node.move_up_down = 0.0
             bot.node.run = 0.0
             return True
         return False
-		
+
     def get_random_bot(self):
         bots = [stdbot.BomberBotStatic, stdbot.TriggerBotStatic]
         return (random.choice(bots))
-		
+
     def _get_bot_speed(self, bot_type):
         if bot_type == stdbot.BomberBotStatic:
             return 0.48
@@ -681,7 +698,7 @@ class SafeZoneGame(bs.TeamGameActivity[Player, Team]):
             return 0.73
         else:
             raise Exception('Invalid bot type to _getBotSpeed(): '+str(bot_type))
-            
+
     def _update(self) -> None:
         if self._solo_mode:
             # For both teams, find the first player on the spawn order

@@ -4,8 +4,8 @@
 
 """Egg game and support classes."""
 #  The Egg Game - throw egg as far as you can
-#  created in BCS (Bombsquad Consultancy Service) - opensource bombsquad mods for all 
-#  discord.gg/ucyaesh    join now and give your contribution 
+#  created in BCS (Bombsquad Consultancy Service) - opensource bombsquad mods for all
+#  discord.gg/ucyaesh    join now and give your contribution
 #  The Egg game by mr.smoothy
 # ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
@@ -45,14 +45,14 @@ class Puck(bs.Actor):
 
         # Spawn just above the provided point.
         self._spawn_pos = (position[0], position[1] + 1.0, position[2])
-        self.last_players_to_touch =None
+        self.last_players_to_touch = None
         self.scored = False
         self.egg_mesh = bs.getmesh('egg')
         self.egg_tex_1 = bs.gettexture('eggTex1')
         self.egg_tex_2 = bs.gettexture('eggTex2')
         self.egg_tex_3 = bs.gettexture('eggTex3')
-        self.eggtx=[self.egg_tex_1,self.egg_tex_2,self.egg_tex_3]
-        regg=random.randrange(0,3)
+        self.eggtx = [self.egg_tex_1, self.egg_tex_2, self.egg_tex_3]
+        regg = random.randrange(0, 3)
         assert activity is not None
         assert isinstance(activity, EggGame)
         pmats = [shared.object_material, activity.puck_material]
@@ -65,7 +65,7 @@ class Puck(bs.Actor):
                                    'reflection': 'soft',
                                    'reflection_scale': [0.2],
                                    'shadow_size': 0.5,
-                                   'body_scale':0.7,
+                                   'body_scale': 0.7,
                                    'is_area_of_interest': True,
                                    'position': self._spawn_pos,
                                    'materials': pmats
@@ -180,14 +180,14 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
         self.puck_scored_tex = bs.gettexture('landMineLit')
         self._puck_sound = bui.getsound('metalHit')
         self.puck_material = bs.Material()
-        self._fake_wall_material=bs.Material()
-        self.HIGHEST=0
+        self._fake_wall_material = bs.Material()
+        self.HIGHEST = 0
         self._fake_wall_material.add_actions(
             conditions=('they_have_material', shared.player_material),
             actions=(
                 ('modify_part_collision', 'collide', True),
                 ('modify_part_collision', 'physical', True)
-                
+
             ))
         self.puck_material.add_actions(actions=(('modify_part_collision',
                                                  'friction', 0.5)))
@@ -232,8 +232,8 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
             actions=(('modify_part_collision', 'collide',
                       True), ('modify_part_collision', 'physical', False),
                      ('call', 'at_connect', self._handle_score)))
-        self.main_ground_material= bs.Material()
-        
+        self.main_ground_material = bs.Material()
+
         self.main_ground_material.add_actions(
             conditions=('they_have_material', self.puck_material),
             actions=(('modify_part_collision', 'collide',
@@ -243,7 +243,7 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
         self._puck_spawn_pos: Optional[Sequence[float]] = None
         self._score_regions: Optional[List[bs.NodeActor]] = None
         self._puck: Optional[Puck] = None
-        self._pucks=[]
+        self._pucks = []
         self._score_to_win = int(settings['Score to Win'])
         self._time_limit = float(settings['Time Limit'])
 
@@ -255,8 +255,8 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
 
     def on_begin(self) -> None:
         super().on_begin()
-        if self._time_limit==0.0:
-            self._time_limit=60
+        if self._time_limit == 0.0:
+            self._time_limit = 60
         self.setup_standard_time_limit(self._time_limit)
         # self.setup_standard_powerup_drops()
         self._puck_spawn_pos = self.map.get_flag_position(None)
@@ -269,10 +269,10 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
         # Set up the two score regions.
         defs = self.map.defs
         self._score_regions = []
-        pos=(11.88630542755127, 0.3009839951992035, 1.33331298828125)
+        pos = (11.88630542755127, 0.3009839951992035, 1.33331298828125)
         # mat=bs.Material()
         # mat.add_actions(
-            
+
         #     actions=( ('modify_part_collision','physical',True),
         #               ('modify_part_collision','collide',True))
         #     )
@@ -299,13 +299,14 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
             bs.NodeActor(
                 bs.newnode('region',
                            attrs={
-                               'position': (-9.21,defs.boxes['goal2'][0:3][1],defs.boxes['goal2'][0:3][2]),
+                               'position': (-9.21, defs.boxes['goal2'][0:3][1], defs.boxes['goal2'][0:3][2]),
                                'scale': defs.boxes['goal2'][6:9],
                                'type': 'box',
                                'materials': (self._fake_wall_material, )
                            })))
-        pos=(0,0.1,-5)
-        self.main_ground=bs.newnode('region',attrs={'position': pos,'scale': (25,0.001,22),'type': 'box','materials': [self.main_ground_material]})
+        pos = (0, 0.1, -5)
+        self.main_ground = bs.newnode('region', attrs={'position': pos, 'scale': (
+            25, 0.001, 22), 'type': 'box', 'materials': [self.main_ground_material]})
         self._update_scoreboard()
         self._chant_sound.play()
 
@@ -326,63 +327,63 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
 
     def _kill_puck(self) -> None:
         self._puck = None
+
     def _handle_egg_collision(self) -> None:
 
-        no=bs.getcollision().opposingnode
-        pos=no.position
-        egg=no.getdelegate(Puck)
-        source_player=egg.last_players_to_touch
-        if source_player==None or pos[0]< -8 or not source_player.node.exists() :
+        no = bs.getcollision().opposingnode
+        pos = no.position
+        egg = no.getdelegate(Puck)
+        source_player = egg.last_players_to_touch
+        if source_player == None or pos[0] < -8 or not source_player.node.exists():
             return
 
-
         try:
-            col=source_player.team.color
-            self.flagg=Flag(pos,touchable=False,color=col).autoretain()
-            self.flagg.is_area_of_interest=True
-            player_pos=source_player.node.position
-            
-            distance = math.sqrt( pow(player_pos[0]-pos[0],2) + pow(player_pos[2]-pos[2],2))
-            
-            
-            dis_mark=bs.newnode('text',
-                                    
-                                    attrs={
-                                        'text':str(round(distance,2))+"m",
-                                        'in_world':True,
-                                        'scale':0.02,
-                                        'h_align':'center',
-                                        'position':(pos[0],1.6,pos[2]),
-                                        'color':col
-                                    })
-            bs.animate(dis_mark,'scale',{
-                0.0:0, 0.5:0.01
+            col = source_player.team.color
+            self.flagg = Flag(pos, touchable=False, color=col).autoretain()
+            self.flagg.is_area_of_interest = True
+            player_pos = source_player.node.position
+
+            distance = math.sqrt(pow(player_pos[0]-pos[0], 2) + pow(player_pos[2]-pos[2], 2))
+
+            dis_mark = bs.newnode('text',
+
+                                  attrs={
+                                      'text': str(round(distance, 2))+"m",
+                                      'in_world': True,
+                                      'scale': 0.02,
+                                      'h_align': 'center',
+                                      'position': (pos[0], 1.6, pos[2]),
+                                      'color': col
+                                  })
+            bs.animate(dis_mark, 'scale', {
+                0.0: 0, 0.5: 0.01
             })
             if distance > self.HIGHEST:
-                self.HIGHEST=distance
+                self.HIGHEST = distance
                 self.stats.player_scored(
-                        source_player,
-                        10,
-                        big_message=False)
-            
+                    source_player,
+                    10,
+                    big_message=False)
+
             no.delete()
-            bs.timer(2,self._spawn_puck)
-            source_player.team.score=int(distance) 
-            
-        except():
+            bs.timer(2, self._spawn_puck)
+            source_player.team.score = int(distance)
+
+        except ():
             pass
+
     def spawn_player(self, player: Player) -> bs.Actor:
-        
-        
-        zoo=random.randrange(-4,5)
-        pos=(-11.204887390136719, 0.2998693287372589, zoo)
+
+        zoo = random.randrange(-4, 5)
+        pos = (-11.204887390136719, 0.2998693287372589, zoo)
         spaz = self.spawn_player_spaz(
-            player, position=pos, angle=90 )
+            player, position=pos, angle=90)
         assert spaz.node
 
         # Prevent controlling of characters before the start of the race.
-               
+
         return spaz
+
     def _handle_score(self) -> None:
         """A point has been scored."""
 
@@ -481,11 +482,12 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
         # bs.animate(light, 'intensity', {0.0: 0, 0.25: 1, 0.5: 0}, loop=True)
         # bs.timer(1.0, light.delete)
         pass
+
     def _spawn_puck(self) -> None:
         # self._swipsound.play()
         # self._whistle_sound.play()
         self._flash_puck_spawn()
         assert self._puck_spawn_pos is not None
-        zoo=random.randrange(-5,6)
-        pos=(-11.204887390136719, 0.2998693287372589, zoo)
-        self._pucks.append (Puck(position=pos))
+        zoo = random.randrange(-5, 6)
+        pos = (-11.204887390136719, 0.2998693287372589, zoo)
+        self._pucks.append(Puck(position=pos))

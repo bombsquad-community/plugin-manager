@@ -425,12 +425,12 @@ class NewBomb(Bomb):
         self._exploded = True
         if self.node:
             blast = NewBlast(position=self.node.position,
-                          velocity=self.node.velocity,
-                          blast_radius=self.blast_radius,
-                          blast_type=self.bomb_type,
-                          source_player=babase.existing(self._source_player),
-                          hit_type=self.hit_type,
-                          hit_subtype=self.hit_subtype).autoretain()
+                             velocity=self.node.velocity,
+                             blast_radius=self.blast_radius,
+                             blast_type=self.bomb_type,
+                             source_player=babase.existing(self._source_player),
+                             hit_type=self.hit_type,
+                             hit_subtype=self.hit_subtype).autoretain()
             for callback in self._explode_callbacks:
                 callback(self, blast)
 
@@ -458,7 +458,7 @@ class TNT(bs.Actor):
         self._collide_material.add_actions(
             actions=('modify_part_collision', 'collide', True),
         )
-        
+
         if teleport:
             collide = self._collide_material
         else:
@@ -649,7 +649,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                             ('modify_part_collision', 'physical', False),
                             ('call', 'at_connect',
                              self._handle_race_point_collide),
-                        ))
+        ))
         for rpt in pts:
             self._regions.append(RaceRegion(rpt, len(self._regions)))
 
@@ -685,18 +685,18 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
         collision = bs.getcollision()
         try:
             region = collision.sourcenode.getdelegate(RaceRegion, True)
-            spaz = collision.opposingnode.getdelegate(PlayerSpaz,True)
+            spaz = collision.opposingnode.getdelegate(PlayerSpaz, True)
         except bs.NotFoundError:
             return
-        
+
         if not spaz.is_alive():
             return
-        
+
         try:
             player = spaz.getplayer(Player, True)
         except bs.NotFoundError:
             return
-        
+
         last_region = player.last_region
         this_region = region.index
 
@@ -713,7 +713,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                         translate=('statements', 'Killing ${NAME} for'
                                    ' skipping part of the track!'),
                         subs=[('${NAME}', player.getname(full=True))]),
-                                     color=(1, 0, 0))
+                        color=(1, 0, 0))
             else:
                 # If this player is in first, note that this is the
                 # front-most race-point.
@@ -788,10 +788,10 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                             player.actor.node.connectattr(
                                 'torso_position', mathnode, 'input2')
                             tstr = babase.Lstr(resource='lapNumberText',
-                                           subs=[('${CURRENT}',
-                                                  str(player.lap + 1)),
-                                                 ('${TOTAL}', str(self._laps))
-                                                 ])
+                                               subs=[('${CURRENT}',
+                                                      str(player.lap + 1)),
+                                                     ('${TOTAL}', str(self._laps))
+                                                     ])
                             txtnode = bs.newnode('text',
                                                  owner=mathnode,
                                                  attrs={
@@ -828,7 +828,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                            '${TEAM} is disqualified because ${PLAYER} left'),
                 subs=[('${TEAM}', player.team.name),
                       ('${PLAYER}', player.getname(full=True))]),
-                             color=(1, 1, 0))
+                color=(1, 1, 0))
             player.team.finished = True
             player.team.time = None
             player.team.lap = 0
@@ -967,55 +967,54 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
         self._tnt((-6, 5, 1), (0, 0, 0), 1.3)
 
         bs.timer(0.1, bs.WeakCall(self._tnt, (-3.2, 5, 1),
-            (0, 0, 0), 1.0, (0, 20, 60)), repeat=True)
+                                  (0, 0, 0), 1.0, (0, 20, 60)), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6.8, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6.8, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (7.6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (7.6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6.8, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6.8, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (7.6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (7.6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6.8, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6.8, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (7.6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (7.6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (6.8, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (6.8, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (7.6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
+                                  (7.6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (-5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
+                                  (-5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-            (-1.5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
-
-
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-            (-1, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-            (-1, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-            (-1, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
+                                  (-1.5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-            (-4.6, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
+                                  (-1, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-            (-4.6, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
+                                  (-1, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
         bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-            (-4.6, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
+                                  (-1, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
+
+        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
+                                  (-4.6, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
+                                  (-4.6, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
+                                  (-4.6, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
 
         bs.timer(1.6, bs.WeakCall(
             self._powerup, (2, 5, -5), 'curse', (0, 20, -3)), repeat=True)
@@ -1029,7 +1028,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
              extra_acceleration: float = None) -> None:
         if extra_acceleration:
             TNT(position, velocity, tnt_scale, False).autoretain(
-                ).node.extra_acceleration = extra_acceleration
+            ).node.extra_acceleration = extra_acceleration
         else:
             TNT(position, velocity, tnt_scale).autoretain()
 
@@ -1044,7 +1043,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
             NewBomb(position=position,
                     velocity=velocity,
                     bomb_type=type).autoretain(
-                        ).node.extra_acceleration = extra_acceleration
+            ).node.extra_acceleration = extra_acceleration
         else:
             NewBomb(position=position,
                     velocity=velocity,
@@ -1057,7 +1056,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
         if extra_acceleration:
             PowerupBox(position=position,
                        poweruptype=poweruptype).autoretain(
-                            ).node.extra_acceleration = extra_acceleration
+            ).node.extra_acceleration = extra_acceleration
         else:
             PowerupBox(position=position, poweruptype=poweruptype).autoretain()
 

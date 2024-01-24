@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
 
 Spaz._old_init = Spaz.__init__
+
+
 def __init__(self,
              color: Sequence[float] = (1.0, 1.0, 1.0),
              highlight: Sequence[float] = (0.5, 0.5, 0.5),
@@ -27,10 +29,11 @@ def __init__(self,
              can_accept_powerups: bool = True,
              powerups_expire: bool = False,
              demo_mode: bool = False):
-    self._old_init(color,highlight,character,source_player,start_invincible,
-                   can_accept_powerups,powerups_expire,demo_mode)
+    self._old_init(color, highlight, character, source_player, start_invincible,
+                   can_accept_powerups, powerups_expire, demo_mode)
     if self.source_player:
         self.equip_shields()
+
         def animate_shield():
             if not self.shield:
                 return
@@ -40,6 +43,7 @@ def __init__(self,
             })
         bs.timer(0.2, animate_shield, repeat=True)
         self.impact_scale = 0
+
 
 def equip_shields(self, decay: bool = False) -> None:
     """
