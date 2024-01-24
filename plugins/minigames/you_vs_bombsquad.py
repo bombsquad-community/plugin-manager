@@ -36,110 +36,129 @@ else:
 # def ba_get_api_version():
 #     return 6
 
-def ba_get_levels():
-	return [babase._level.Level(
-            name_easy,
-			gametype=TUvsBombSquad,
-			settings={},
-			preview_texture_name='footballStadiumPreview'),
-            babase._level.Level(
-            name_easy_epic,
-            gametype=TUvsBombSquad,
-            settings={'Epic Mode': True},
-            preview_texture_name='footballStadiumPreview'),
 
-            babase._level.Level(
-            name_hard,
-            gametype=TUvsBombSquad,
-            settings={'Hard Mode': True},
-            preview_texture_name='footballStadiumPreview'),
-            babase._level.Level(
-            name_hard_epic,
-            gametype=TUvsBombSquad,
-            settings={'Hard Mode': True,
-                      'Epic Mode': True},
-            preview_texture_name='footballStadiumPreview')]
+def ba_get_levels():
+    return [babase._level.Level(
+        name_easy,
+        gametype=TUvsBombSquad,
+        settings={},
+        preview_texture_name='footballStadiumPreview'),
+        babase._level.Level(
+        name_easy_epic,
+        gametype=TUvsBombSquad,
+        settings={'Epic Mode': True},
+        preview_texture_name='footballStadiumPreview'),
+
+        babase._level.Level(
+        name_hard,
+        gametype=TUvsBombSquad,
+        settings={'Hard Mode': True},
+        preview_texture_name='footballStadiumPreview'),
+        babase._level.Level(
+        name_hard_epic,
+        gametype=TUvsBombSquad,
+        settings={'Hard Mode': True,
+                  'Epic Mode': True},
+        preview_texture_name='footballStadiumPreview')]
 
 #### BOTS ####
+
+
 class SpazBot(BrawlerBot):
     character = 'Spaz'
-    color=(0.1,0.35,0.1)
-    highlight=(1,0.15,0.15)
+    color = (0.1, 0.35, 0.1)
+    highlight = (1, 0.15, 0.15)
+
 
 class ZoeBot(BrawlerBot):
     character = 'Zoe'
-    color=(0.6,0.6,0.6)
-    highlight=(0,1,0)
+    color = (0.6, 0.6, 0.6)
+    highlight = (0, 1, 0)
+
 
 class SnakeBot(BrawlerBot):
     character = 'Snake Shadow'
-    color=(1,1,1)
-    highlight=(0.55,0.8,0.55)
+    color = (1, 1, 1)
+    highlight = (0.55, 0.8, 0.55)
+
 
 class MelBot(BrawlerBot):
     character = 'Mel'
-    color=(1,1,1)
-    highlight=(0.1,0.6,0.1)
+    color = (1, 1, 1)
+    highlight = (0.1, 0.6, 0.1)
+
 
 class JackBot(BrawlerBot):
     character = 'Jack Morgan'
-    color=(1,0.2,0.1)
-    highlight=(1,1,0)
+    color = (1, 0.2, 0.1)
+    highlight = (1, 1, 0)
+
 
 class SantaBot(BrawlerBot):
     character = 'Santa Claus'
-    color=(1,0,0)
-    highlight=(1,1,1)
+    color = (1, 0, 0)
+    highlight = (1, 1, 1)
+
 
 class FrostyBot(BrawlerBot):
     character = 'Frosty'
-    color=(0.5,0.5,1)
-    highlight=(1,0.5,0)
+    color = (0.5, 0.5, 1)
+    highlight = (1, 0.5, 0)
+
 
 class BonesBot(BrawlerBot):
     character = 'Bones'
-    color=(0.6,0.9,1)
-    highlight=(0.6,0.9,1)
+    color = (0.6, 0.9, 1)
+    highlight = (0.6, 0.9, 1)
+
 
 class BernardBot(BrawlerBot):
     character = 'Bernard'
-    color=(0.7,0.5,0.0)
-    highlight=(0.6,0.5,0.8)
+    color = (0.7, 0.5, 0.0)
+    highlight = (0.6, 0.5, 0.8)
+
 
 class PascalBot(BrawlerBot):
     character = 'Pascal'
-    color=(0.3,0.5,0.8)
-    highlight=(1,0,0)
+    color = (0.3, 0.5, 0.8)
+    highlight = (1, 0, 0)
+
 
 class TaobaoBot(BrawlerBot):
     character = 'Taobao Mascot'
-    color=(1,0.5,0)
-    highlight=(1,1,1)
+    color = (1, 0.5, 0)
+    highlight = (1, 1, 1)
+
 
 class BBot(BrawlerBot):
     character = 'B-9000'
-    color=(0.5,0.5,0.5)
-    highlight=(1,0,0)
+    color = (0.5, 0.5, 0.5)
+    highlight = (1, 0, 0)
+
 
 class AgentBot(BrawlerBot):
     character = 'Agent Johnson'
-    color=(0.3,0.3,0.33)
-    highlight=(1,0.5,0.3)
+    color = (0.3, 0.3, 0.33)
+    highlight = (1, 0.5, 0.3)
+
 
 class GrumbledorfBot(BrawlerBot):
     character = 'Grumbledorf'
-    color=(0.2,0.4,1.0)
-    highlight=(0.06,0.15,0.4)
+    color = (0.2, 0.4, 1.0)
+    highlight = (0.06, 0.15, 0.4)
+
 
 class PixelBot(BrawlerBot):
     character = 'Pixel'
-    color=(0,1,0.7)
-    highlight=(0.65,0.35,0.75)
+    color = (0, 1, 0.7)
+    highlight = (0.65, 0.35, 0.75)
+
 
 class BunnyBot(BrawlerBot):
     character = 'Easter Bunny'
-    color=(1,1,1)
-    highlight=(1,0.5,0.5)
+    color = (1, 1, 1)
+    highlight = (1, 0.5, 0.5)
+
 
 class Player(bs.Player['Team']):
     """Our player type for this game."""
@@ -299,108 +318,108 @@ class TUvsBombSquad(bs.TeamGameActivity[Player, Team]):
 
         for i in range(len(self._spaz_easy)):
             self._spawn_bots(4.0, SpazBot,
-                self._spaz_easy[i][0], self._spaz_easy[i][1])
+                             self._spaz_easy[i][0], self._spaz_easy[i][1])
         for i in range(len(self._zoe_easy)):
             self._spawn_bots(4.0, ZoeBot,
-                self._zoe_easy[i][0], self._zoe_easy[i][1])
+                             self._zoe_easy[i][0], self._zoe_easy[i][1])
         for i in range(len(self._snake_easy)):
             self._spawn_bots(4.0, SnakeBot,
-                self._snake_easy[i][0], self._snake_easy[i][1])
+                             self._snake_easy[i][0], self._snake_easy[i][1])
         for i in range(len(self._kronk_easy)):
             self._spawn_bots(4.0, BrawlerBot,
-                self._kronk_easy[i][0], self._kronk_easy[i][1])
+                             self._kronk_easy[i][0], self._kronk_easy[i][1])
         for i in range(len(self._mel_easy)):
             self._spawn_bots(4.0, MelBot,
-                self._mel_easy[i][0], self._mel_easy[i][1])
+                             self._mel_easy[i][0], self._mel_easy[i][1])
         for i in range(len(self._jack_easy)):
             self._spawn_bots(4.0, JackBot,
-                self._jack_easy[i][0], self._jack_easy[i][1])
+                             self._jack_easy[i][0], self._jack_easy[i][1])
         for i in range(len(self._santa_easy)):
             self._spawn_bots(4.0, SantaBot,
-                self._santa_easy[i][0], self._santa_easy[i][1])
+                             self._santa_easy[i][0], self._santa_easy[i][1])
         for i in range(len(self._frosty_easy)):
             self._spawn_bots(4.0, FrostyBot,
-                self._frosty_easy[i][0], self._frosty_easy[i][1])
+                             self._frosty_easy[i][0], self._frosty_easy[i][1])
         for i in range(len(self._bunny_easy)):
             self._spawn_bots(4.0, BunnyBot,
-                self._bunny_easy[i][0], self._bunny_easy[i][1])
+                             self._bunny_easy[i][0], self._bunny_easy[i][1])
         for i in range(len(self._bones_easy)):
             self._spawn_bots(4.0, BonesBot,
-                self._bones_easy[i][0], self._bones_easy[i][1])
+                             self._bones_easy[i][0], self._bones_easy[i][1])
         for i in range(len(self._bernard_easy)):
             self._spawn_bots(4.0, BernardBot,
-                self._bernard_easy[i][0], self._bernard_easy[i][1])
+                             self._bernard_easy[i][0], self._bernard_easy[i][1])
         for i in range(len(self._pascal_easy)):
             self._spawn_bots(4.0, PascalBot,
-                self._pascal_easy[i][0], self._pascal_easy[i][1])
+                             self._pascal_easy[i][0], self._pascal_easy[i][1])
         for i in range(len(self._taobao_easy)):
             self._spawn_bots(4.0, TaobaoBot,
-                self._taobao_easy[i][0], self._taobao_easy[i][1])
+                             self._taobao_easy[i][0], self._taobao_easy[i][1])
         for i in range(len(self._bbot_easy)):
             self._spawn_bots(4.0, BBot,
-                self._bbot_easy[i][0], self._bbot_easy[i][1])
+                             self._bbot_easy[i][0], self._bbot_easy[i][1])
         for i in range(len(self._agent_easy)):
             self._spawn_bots(4.0, AgentBot,
-                self._agent_easy[i][0], self._agent_easy[i][1])
+                             self._agent_easy[i][0], self._agent_easy[i][1])
         for i in range(len(self._wizard_easy)):
             self._spawn_bots(4.0, GrumbledorfBot,
-                self._wizard_easy[i][0], self._wizard_easy[i][1])
+                             self._wizard_easy[i][0], self._wizard_easy[i][1])
         for i in range(len(self._pixel_easy)):
             self._spawn_bots(4.0, PixelBot,
-                self._pixel_easy[i][0], self._pixel_easy[i][1])
+                             self._pixel_easy[i][0], self._pixel_easy[i][1])
 
         if self._hard_mode:
             for i in range(len(self._spaz_hard)):
                 self._spawn_bots(4.0, SpazBot,
-                    self._spaz_hard[i][0], self._spaz_hard[i][1])
+                                 self._spaz_hard[i][0], self._spaz_hard[i][1])
             for i in range(len(self._zoe_hard)):
                 self._spawn_bots(4.0, ZoeBot,
-                    self._zoe_hard[i][0], self._zoe_hard[i][1])
+                                 self._zoe_hard[i][0], self._zoe_hard[i][1])
             for i in range(len(self._snake_hard)):
                 self._spawn_bots(4.0, SnakeBot,
-                    self._snake_hard[i][0], self._snake_hard[i][1])
+                                 self._snake_hard[i][0], self._snake_hard[i][1])
             for i in range(len(self._kronk_hard)):
                 self._spawn_bots(4.0, BrawlerBot,
-                    self._kronk_hard[i][0], self._kronk_hard[i][1])
+                                 self._kronk_hard[i][0], self._kronk_hard[i][1])
             for i in range(len(self._mel_hard)):
                 self._spawn_bots(4.0, MelBot,
-                    self._mel_hard[i][0], self._mel_hard[i][1])
+                                 self._mel_hard[i][0], self._mel_hard[i][1])
             for i in range(len(self._jack_hard)):
                 self._spawn_bots(4.0, JackBot,
-                    self._jack_hard[i][0], self._jack_hard[i][1])
+                                 self._jack_hard[i][0], self._jack_hard[i][1])
             for i in range(len(self._santa_hard)):
                 self._spawn_bots(4.0, SantaBot,
-                    self._santa_hard[i][0], self._santa_hard[i][1])
+                                 self._santa_hard[i][0], self._santa_hard[i][1])
             for i in range(len(self._frosty_hard)):
                 self._spawn_bots(4.0, FrostyBot,
-                    self._frosty_hard[i][0], self._frosty_hard[i][1])
+                                 self._frosty_hard[i][0], self._frosty_hard[i][1])
             for i in range(len(self._bunny_hard)):
                 self._spawn_bots(4.0, BunnyBot,
-                    self._bunny_hard[i][0], self._bunny_hard[i][1])
+                                 self._bunny_hard[i][0], self._bunny_hard[i][1])
             for i in range(len(self._bones_hard)):
                 self._spawn_bots(4.0, BonesBot,
-                    self._bones_hard[i][0], self._bones_hard[i][1])
+                                 self._bones_hard[i][0], self._bones_hard[i][1])
             for i in range(len(self._bernard_hard)):
                 self._spawn_bots(4.0, BernardBot,
-                    self._bernard_hard[i][0], self._bernard_hard[i][1])
+                                 self._bernard_hard[i][0], self._bernard_hard[i][1])
             for i in range(len(self._pascal_hard)):
                 self._spawn_bots(4.0, PascalBot,
-                    self._pascal_hard[i][0], self._pascal_hard[i][1])
+                                 self._pascal_hard[i][0], self._pascal_hard[i][1])
             for i in range(len(self._taobao_hard)):
                 self._spawn_bots(4.0, TaobaoBot,
-                    self._taobao_hard[i][0], self._taobao_hard[i][1])
+                                 self._taobao_hard[i][0], self._taobao_hard[i][1])
             for i in range(len(self._bbot_hard)):
                 self._spawn_bots(4.0, BBot,
-                    self._bbot_hard[i][0], self._bbot_hard[i][1])
+                                 self._bbot_hard[i][0], self._bbot_hard[i][1])
             for i in range(len(self._agent_hard)):
                 self._spawn_bots(4.0, AgentBot,
-                    self._agent_hard[i][0], self._agent_hard[i][1])
+                                 self._agent_hard[i][0], self._agent_hard[i][1])
             for i in range(len(self._wizard_hard)):
                 self._spawn_bots(4.0, GrumbledorfBot,
-                    self._wizard_hard[i][0], self._wizard_hard[i][1])
+                                 self._wizard_hard[i][0], self._wizard_hard[i][1])
             for i in range(len(self._pixel_hard)):
                 self._spawn_bots(4.0, PixelBot,
-                    self._pixel_hard[i][0], self._pixel_hard[i][1])
+                                 self._pixel_hard[i][0], self._pixel_hard[i][1])
 
     def _spawn_bots(self, time: float, bot: Any,
                     pos: float, spawn_time: float) -> None:
@@ -411,7 +430,7 @@ class TUvsBombSquad(bs.TeamGameActivity[Player, Team]):
         if self.has_begun():
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return
