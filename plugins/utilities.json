@@ -1083,7 +1083,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "f744c41",
+          "released_on": "24-01-2024",
+          "md5sum": "203ecefa1c1eb9894cfb0d87e2d7fe09"
+        }
       }
     },
     "InfinityShield": {
@@ -1097,7 +1102,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "f744c41",
+          "released_on": "24-01-2024",
+          "md5sum": "eb917ca19d206dfd19667181dacc1df5"
+        }
       }
     },
     "OnlyNight": {
@@ -1111,7 +1121,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "f744c41",
+          "released_on": "24-01-2024",
+          "md5sum": "255d3d6694008cc2f73d115182100b52"
+        }
       }
     },
     "Tag": {
@@ -1125,8 +1140,13 @@
         }
       ],
       "versions": {
-        "2.0.1": null
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "f744c41",
+          "released_on": "24-01-2024",
+          "md5sum": "01cf9e10ab0e1bf51c07d80ff842c632"
+        }
       }
-    }    
+    }
   }
 }
