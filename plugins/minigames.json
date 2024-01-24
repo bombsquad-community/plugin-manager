@@ -979,7 +979,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "c1c96450fbdb6e5b2f0d26bb4e797236"
+        }
       }
     },
     "hyper_race": {
@@ -993,7 +998,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "8b423bdae256bd411489528b550b8bd9"
+        }
       }
     },
     "meteor_shower_deluxe": {
@@ -1007,7 +1017,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "7e86bbc8e3ebb26a66602068950adfbf"
+        }
       }
     },
     "ofuuu_attack": {
@@ -1021,7 +1036,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "982c72f2d2cb3d50280f50b022e7865f"
+        }
       }
     },
     "safe_zone": {
@@ -1035,7 +1055,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "862fab0c26947c70397542742fb82635"
+        }
       }
     },
     "snow_ball_fight": {
@@ -1049,7 +1074,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "ef6bd7cd0404674f65e8f8d4da3ab8c8"
+        }
       }
     },
     "egg_game": {
@@ -1063,7 +1093,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "e1d401ec8f2d06dec741d713d6602710"
+        }
       }
     },
     "you_vs_bombsquad": {
@@ -1077,7 +1112,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "451daeabbd628ec70fa31b80a0999f35"
+        }
       }
     }
   }
