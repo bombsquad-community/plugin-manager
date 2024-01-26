@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 def ba_get_levels():
     return [babase._level.Level(
-            'Bot Chase',gametype=BotChaseGame,
+            'Bot Chase', gametype=BotChaseGame,
             settings={},
-            preview_texture_name = 'footballStadiumPreview')]
+            preview_texture_name='footballStadiumPreview')]
 
 
 class Player(bs.Player['Team']):
@@ -70,7 +70,8 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
-        return (issubclass(sessiontype, bs.FreeForAllSession) or issubclass(sessiontype, bs.DualTeamSession) or issubclass(sessiontype, bs.CoopSession)) # Coop session unused
+        # Coop session unused
+        return (issubclass(sessiontype, bs.FreeForAllSession) or issubclass(sessiontype, bs.DualTeamSession) or issubclass(sessiontype, bs.CoopSession))
 
     def __init__(self, settings: dict):
         super().__init__(settings)
@@ -87,7 +88,7 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
         if self.has_begun():
             bs.broadcastmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             assert self._timer is not None
@@ -104,11 +105,11 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
         spaz.connect_controls_to_player(enable_punch=True,
                                         enable_bomb=True,
                                         enable_pickup=True)
-        
+
         spaz.bomb_count = 3
         spaz.bomb_type = 'normal'
 
-        #cerdo gordo
+        # cerdo gordo
         spaz.node.color_mask_texture = bs.gettexture('melColorMask')
         spaz.node.color_texture = bs.gettexture('melColor')
         spaz.node.head_mesh = bs.getmesh('melHead')
@@ -122,8 +123,8 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
         spaz.node.toes_mesh = bs.getmesh('melToes')
         spaz.node.style = 'mel'
         # Sounds cerdo gordo
-        mel_sounds = [bs.getsound('mel01'), bs.getsound('mel02'),bs.getsound('mel03'),bs.getsound('mel04'),bs.getsound('mel05'),
-                      bs.getsound('mel06'),bs.getsound('mel07'),bs.getsound('mel08'),bs.getsound('mel09'),bs.getsound('mel10')]
+        mel_sounds = [bs.getsound('mel01'), bs.getsound('mel02'), bs.getsound('mel03'), bs.getsound('mel04'), bs.getsound('mel05'),
+                      bs.getsound('mel06'), bs.getsound('mel07'), bs.getsound('mel08'), bs.getsound('mel09'), bs.getsound('mel10')]
         spaz.node.jump_sounds = mel_sounds
         spaz.node.attack_sounds = mel_sounds
         spaz.node.impact_sounds = mel_sounds
@@ -136,9 +137,11 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
 
     def on_begin(self) -> None:
         super().on_begin()
-        self._bots.spawn_bot(MrSpazBot, pos=(random.choice([1, -1, 2, -2]), 1.34, random.choice([1, -1, 2, -2])), spawn_time=2.0)
-        self._bots.spawn_bot(MrSpazBot, pos=(random.choice([1, -1, 2, -2]), 1.34, random.choice([1, -1, 2, -2])), spawn_time=2.0)
-    
+        self._bots.spawn_bot(MrSpazBot, pos=(random.choice(
+            [1, -1, 2, -2]), 1.34, random.choice([1, -1, 2, -2])), spawn_time=2.0)
+        self._bots.spawn_bot(MrSpazBot, pos=(random.choice(
+            [1, -1, 2, -2]), 1.34, random.choice([1, -1, 2, -2])), spawn_time=2.0)
+
         self._timer = OnScreenTimer()
         self._timer.start()
 
@@ -167,7 +170,8 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
         return None
 
     def _spawn_this_bot(self) -> None:
-        self._bots.spawn_bot(MrSpazBot, pos=(random.choice([1, -1, 2, -2]), 1.34, random.choice([1, -1, 2, -2])), spawn_time=2.0)
+        self._bots.spawn_bot(MrSpazBot, pos=(random.choice(
+            [1, -1, 2, -2]), 1.34, random.choice([1, -1, 2, -2])), spawn_time=2.0)
 
     def _check_end_game(self) -> None:
         living_team_count = 0
