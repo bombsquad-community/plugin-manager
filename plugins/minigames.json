@@ -1189,6 +1189,20 @@
       "versions": {
         "1.0.0": null
       }
+    },
+    "bot_chase": {
+      "description": "Try to survive from bots!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }

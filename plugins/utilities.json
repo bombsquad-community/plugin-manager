@@ -1147,6 +1147,20 @@
           "md5sum": "01cf9e10ab0e1bf51c07d80ff842c632"
         }
       }
+    },
+    "ba_colours": {
+      "description": "Try to survive from bots!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Froshlee",
+          "email": "",
+          "discord": "froshlee24"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
