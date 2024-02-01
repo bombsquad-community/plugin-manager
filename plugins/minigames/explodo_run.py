@@ -51,8 +51,15 @@ class ExplodoRunGame(bs.TeamGameActivity[Player, Team]):
     scoreconfig = bs.ScoreConfig(label='Time',
                                  scoretype=bs.ScoreType.MILLISECONDS,
                                  lower_is_better=False)
-    default_music = bs.MusicType.TO_THE_DEATH
 
+    @classmethod
+    def get_preview_texture_name(cls) -> str:
+        return 'rampagePreview'
+    
+    @classmethod
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
+        return ['Rampage']
+    
     def __init__(self, settings: dict):
         settings['map'] = "Rampage"
         self._epic_mode = settings.get('Epic Mode', False)
@@ -64,6 +71,7 @@ class ExplodoRunGame(bs.TeamGameActivity[Player, Team]):
         self._won = False
         self._bots = SpazBotSet()
         self.wave = 1
+        self.default_music = bs.MusicType.TO_THE_DEATH
 
     def on_begin(self) -> None:
         super().on_begin()

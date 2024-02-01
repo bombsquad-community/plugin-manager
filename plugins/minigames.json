@@ -1311,7 +1311,7 @@
       }
     },
     "explodo_run": {
-      "description": "Run For Your Life :))",
+      "description": "Cursed meteor shower of crazy Captain Jack trying take your soul",
       "external_url": "",
       "authors": [
         {
@@ -1321,12 +1321,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "af5022d1f78887e0ac2b0cfc37f4f04a"
-        }
+        "1.0.0": null
       }
     },
     "extinction": {
@@ -1349,7 +1344,7 @@
       }
     },
     "fat_pigs": {
-      "description": "Survive...",
+      "description": "Eliminate other Mels' while dodging falling stickies.",
       "external_url": "",
       "authors": [
         {
@@ -1359,16 +1354,11 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "fe0d82c322ce01d8956af3131e135ad2"
-        }
+        "1.0.0": null
       }
     },
     "flag_day": {
-      "description": "Pick up flags to receive a prize.\nBut beware...",
+      "description": "Pick up flags to receive a prize.But beware...",
       "external_url": "https://youtu.be/ANDzdBicjA4?si=h8S_TPUAxSaG7nls",
       "authors": [
         {
@@ -1378,12 +1368,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "e11fbf742e6556939ac8d986e2dd430b"
-        }
+        "1.0.0": null
       }
     }
   }
