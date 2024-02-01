@@ -49,7 +49,7 @@ Configs = {
     "SuperPunch": False,
     "ImpactOnly": False,
     "StickyOnly": False,
-    "IceOnly"   : False,
+    "IceOnly": False,
     "Infinite Bombs": False,
     "More Are Coming": False,
     "Credits": False,
@@ -82,7 +82,7 @@ class Plugin(babase.Plugin):
         if babase.app.build_number if build_number < 21282 else babase.app.env.build_number:
             setconfigs()
             self.overwrite()
-            
+
         else:
             babase.screenmessage(f'{__name__} only works on api 8')
 
@@ -115,7 +115,7 @@ def AllSettingsWindowInit(self, transition: str = 'in_right', origin_widget: bui
 # on cheat button press call Window
 def on_cheat_menu_btn_press(self):
     bui.containerwidget(edit=self._root_widget,
-                       transition='out_scale')
+                        transition='out_scale')
     bui.app.ui_v1.set_main_menu_window(
         CheatMenuWindow(
             transition='in_right').get_root_widget(), from_window=self._root_widget)
@@ -161,7 +161,7 @@ class CheatMenuWindow(bui.Window):
             button_type='backSmall',
             on_activate_call=self._back)
         bui.containerwidget(edit=self._root_widget,
-                           cancel_button=self._back_button)
+                            cancel_button=self._back_button)
 
         # window title, apears in top center of window
         self._title_text = bui.textwidget(
@@ -183,7 +183,7 @@ class CheatMenuWindow(bui.Window):
                   self._scroll_height),
             selection_loops_to_parent=True)
         bui.widget(edit=self._scrollwidget,
-                  right_widget=self._scrollwidget)
+                   right_widget=self._scrollwidget)
 
         # subcontainer represents scroll widget and used as parent
         self._subcontainer = bui.containerwidget(
@@ -222,20 +222,20 @@ class CheatMenuWindow(bui.Window):
         try:
             if change == True and config == "Fly":
                 bui.screenmessage("Some maps may not work good for flying",
-                                 color=(1, 0, 0))
+                                  color=(1, 0, 0))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
             bui.screenmessage("error", color=(1, 0, 0))
             bui.getsound('error').play()
-            
+
         try:
             if change == True and config == "SuperPunch":
                 bui.screenmessage("SuperPunch Activated",
-                                 color=(1, 0, 0))
+                                  color=(1, 0, 0))
             elif change == False and config == "SuperPunch":
-                    bui.screenmessage("Super Punch Deactivated",
-                                     color=(0.5,0,0))
+                bui.screenmessage("Super Punch Deactivated",
+                                  color=(0.5, 0, 0))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
@@ -245,10 +245,10 @@ class CheatMenuWindow(bui.Window):
         try:
             if change == True and config == "IceOnly":
                 bui.screenmessage("Ice Bombs Activated",
-                                 color=(0.1, 1, 1))
+                                  color=(0.1, 1, 1))
             elif change == False and config == "IceOnly":
                 bui.screenmessage("Ice Bombs Deactivated",
-                                 color=(1, 0, 0))
+                                  color=(1, 0, 0))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
@@ -257,23 +257,23 @@ class CheatMenuWindow(bui.Window):
         try:
             if change == True and config == "StickyOnly":
                 bui.screenmessage("Sticky Bombs Activated",
-                                 color=(0, 1, 0))
+                                  color=(0, 1, 0))
             elif change == False and config == "StickyOnly":
                 bui.screenmessage("Sticky Bombs Deactivated",
-                                 color=(1, 0, 0))
+                                  color=(1, 0, 0))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
             bui.screenmessage("error", color=(1, 0, 0))
             bui.getsound('spazOw').play()
-            
+
         try:
             if change == True and config == "ImpactOnly":
                 bui.screenmessage("Impact Bombs Activated",
-                                 color=(0.5, 0.5, 0.5))
+                                  color=(0.5, 0.5, 0.5))
             elif change == False and config == "ImpactOnly":
                 bui.screenmessage("Impact Bombs Deactivated",
-                                 color=(1, 0, 0))
+                                  color=(1, 0, 0))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
@@ -283,17 +283,17 @@ class CheatMenuWindow(bui.Window):
         try:
             if change == True and config == "More Are Coming":
                 bui.screenmessage("Check out https://discord.gg/2RKd9QQdQY For More Mods",
-                                 color=(4, 9, 2))
+                                  color=(4, 9, 2))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
             bui.screenmessage("error", color=(1, 0, 0))
             bui.getsound('cheer').play()
-            
+
         try:
             if change == True and config == "Credits":
                 bui.screenmessage("To Pranav Made The Mod and Emily For Ideas, Thx",
-                                 color=(4, 9, 2))
+                                  color=(4, 9, 2))
             update_config(config, change)
             bui.getsound('gunCocking').play()
         except Exception:
@@ -304,7 +304,7 @@ class CheatMenuWindow(bui.Window):
         """Kill the window and get back to previous one
         """
         bui.containerwidget(edit=self._root_widget,
-                           transition='out_scale')
+                            transition='out_scale')
         bui.app.ui_v1.set_main_menu_window(
             AllSettingsWindow(
                 transition='in_left').get_root_widget(), from_window=self._root_widget)
@@ -316,6 +316,7 @@ def ishost():
         for player in session.sessionplayers:
             if player.inputdevice.client_id == -1:
                 return True
+
 
 def activity_loop():
     if bs.get_foreground_host_activity() is not None:
@@ -337,19 +338,21 @@ def activity_loop():
                     player.actor._punch_power_scale = 1.2
 
                 if config["IceOnly"]:
-                       player.actor.bomb_type = 'ice'
+                    player.actor.bomb_type = 'ice'
                 elif not config["IceOnly"]:
-                   player.actor.bomb_type = 'normal'
-                   player.actor.bomb_count= 1              
-                   
+                    player.actor.bomb_type = 'normal'
+                    player.actor.bomb_count = 1
+
                 if config["ImpactOnly"]:
-                           player.actor.bomb_type = 'impact'
-                           player.actor.bomb_count = 1
-                           
+                    player.actor.bomb_type = 'impact'
+                    player.actor.bomb_count = 1
+
                 if config["StickyOnly"]:
-                           player.actor.bomb_type = 'sticky'
-                           player.actor.bomb_count = 1
+                    player.actor.bomb_type = 'sticky'
+                    player.actor.bomb_count = 1
 
                 if config["Infinite Bombs"]:
-                         player.actor.bomb_count = 100
-timer = babase.AppTimer(2, activity_loop,repeat=True)
+                    player.actor.bomb_count = 100
+
+
+timer = babase.AppTimer(2, activity_loop, repeat=True)

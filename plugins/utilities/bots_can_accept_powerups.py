@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 class BotsCanAcceptPowerupsPlugin(babase.Plugin):
     def on_app_running(self) -> None:
         SpazBot.oldinit = SpazBot.__init__
+
         def __init__(self) -> None:
             self.oldinit()
             pam = PowerupBoxFactory.get().powerup_accept_material
