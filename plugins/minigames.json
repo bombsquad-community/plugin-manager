@@ -1321,7 +1321,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ec6286e",
+          "released_on": "01-02-2024",
+          "md5sum": "e3cd927316b9c3bcac714b4dc8d0d73c"
+        }
       }
     },
     "extinction": {
@@ -1354,7 +1359,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ec6286e",
+          "released_on": "01-02-2024",
+          "md5sum": "fe0d82c322ce01d8956af3131e135ad2"
+        }
       }
     },
     "flag_day": {
@@ -1368,7 +1378,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ec6286e",
+          "released_on": "01-02-2024",
+          "md5sum": "e11fbf742e6556939ac8d986e2dd430b"
+        }
       }
     }
   }
