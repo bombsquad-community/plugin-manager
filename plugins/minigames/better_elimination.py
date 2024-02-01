@@ -1,8 +1,8 @@
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-#BetterElimination
-#Made by your friend: @[Just] Freak#4999
+# BetterElimination
+# Made by your friend: @[Just] Freak#4999
 
-#Huge Thx to Nippy for "Live Team Balance"
+# Huge Thx to Nippy for "Live Team Balance"
 
 
 """Defines a very-customisable Elimination mini-game"""
@@ -222,7 +222,7 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
             bs.BoolSetting('Epic Mode', default=False),
 
 
-## Add settings ##
+            ## Add settings ##
             bs.BoolSetting('Live Team Balance (by Nippy#2677)', True),
             bs.BoolSetting('Enable Gloves', False),
             bs.BoolSetting('Enable Powerups', True),
@@ -231,7 +231,7 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
             bs.BoolSetting('One Punch Kill', False),
             bs.BoolSetting('Spawn with Shield', False),
             bs.BoolSetting('Punching Only', False),
-## Add settings ##
+            ## Add settings ##
         ]
         if issubclass(sessiontype, bs.DualTeamSession):
             settings.append(bs.BoolSetting('Solo Mode', default=False))
@@ -299,7 +299,7 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
                 player.team.survival_seconds = 0
             bui.screenmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(0, 1, 0),
             )
             return
@@ -321,6 +321,8 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
 
 
 ## Run settings related: IcyFloor ##
+
+
     def on_transition_in(self) -> None:
         super().on_transition_in()
         activity = bs.getactivity()
@@ -329,8 +331,6 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
         else:
             return
 ## Run settings related: IcyFloor ##
-
-
 
     def on_begin(self) -> None:
         super().on_begin()
@@ -343,14 +343,13 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
             bs.getactivity().globalsnode.tint = (0.5, 0.7, 1)
         else:
             pass
-#-# Tried return here, pfft. Took me 30mins to figure out why pwps spawning only on NightMode
-#-# Now its fixed :)
+# -# Tried return here, pfft. Took me 30mins to figure out why pwps spawning only on NightMode
+# -# Now its fixed :)
         if self._enable_powerups:
             self.setup_standard_powerup_drops()
         else:
             pass
 ## Run settings related: NightMode,Powerups ##
-
 
         if self._solo_mode:
             self._vs_text = bs.NodeActor(
@@ -526,7 +525,6 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
         return actor
 ## Run settings related: Spaz ##
 
-
     def _print_lives(self, player: Player) -> None:
         from bascenev1lib.actor import popuptext
 
@@ -542,24 +540,25 @@ class BetterEliminationGame(bs.TeamGameActivity[Player, Team]):
                             position=player.node.position).autoretain()
 
     def on_player_leave(self, player: Player) -> None:
-        ########################################################Nippy#2677
-        team_count=1  #Just initiating
-        if player.lives>0 and self._live_team_balance:
-            team_mem=[]
+        # Nippy#2677
+        team_count = 1  # Just initiating
+        if player.lives > 0 and self._live_team_balance:
+            team_mem = []
             for teamer in player.team.players:
-                if player!=teamer:
-                    team_mem.append(teamer)  #Got Dead players Team
-            live=player.lives
-            team_count=len(team_mem)
-            for i in range(int((live if live%2==0 else live+1)/2)):  #Extending Player List for Sorted Players
+                if player != teamer:
+                    team_mem.append(teamer)  # Got Dead players Team
+            live = player.lives
+            team_count = len(team_mem)
+            # Extending Player List for Sorted Players
+            for i in range(int((live if live % 2 == 0 else live+1)/2)):
                 team_mem.extend(team_mem)
-            if team_count>0:
+            if team_count > 0:
                 for i in range(live):
-                    team_mem[i].lives+=1
+                    team_mem[i].lives += 1
 
-        if team_count<=0 :   #Draw if Player Leaves
+        if team_count <= 0:  # Draw if Player Leaves
             self.end_game()
-        ########################################################Nippy#2677
+        # Nippy#2677
         super().on_player_leave(player)
         player.icons = []
 

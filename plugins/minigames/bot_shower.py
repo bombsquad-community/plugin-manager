@@ -123,7 +123,7 @@ class BotShowerGame(bs.TeamGameActivity[Player, Team]):
         if self.has_begun():
             bui.screenmessage(
                 babase.Lstr(resource='playerDelayedJoinText',
-                        subs=[('${PLAYER}', player.getname(full=True))]),
+                            subs=[('${PLAYER}', player.getname(full=True))]),
                 color=(1, 1, 0),
             )
 
@@ -147,7 +147,8 @@ class BotShowerGame(bs.TeamGameActivity[Player, Team]):
 
     def _spawn_bot(self) -> None:
         assert self._bots is not None
-        self._bots.spawn_bot(random.choice(self._bot_type), pos=(random.uniform(-11, 11), (9.8 if self.map.getname() == 'Football Stadium' else 5.0), random.uniform(-5, 5)))
+        self._bots.spawn_bot(random.choice(self._bot_type), pos=(
+            random.uniform(-11, 11), (9.8 if self.map.getname() == 'Football Stadium' else 5.0), random.uniform(-5, 5)))
 
     def _check_end_game(self) -> None:
         living_team_count = 0

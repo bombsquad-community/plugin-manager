@@ -1,6 +1,6 @@
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-#BetterDeathMatch
-#Made by your friend: @[Just] Freak#4999
+# BetterDeathMatch
+# Made by your friend: @[Just] Freak#4999
 
 """Defines a very-customisable DeathMatch mini-game"""
 
@@ -77,7 +77,7 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
             bs.BoolSetting('Epic Mode', default=False),
 
 
-## Add settings ##
+            ## Add settings ##
             bs.BoolSetting('Enable Gloves', False),
             bs.BoolSetting('Enable Powerups', True),
             bs.BoolSetting('Night Mode', False),
@@ -85,9 +85,8 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
             bs.BoolSetting('One Punch Kill', False),
             bs.BoolSetting('Spawn with Shield', False),
             bs.BoolSetting('Punching Only', False),
-## Add settings ##
+            ## Add settings ##
         ]
-
 
         # In teams mode, a suicide gives a point to the other team, but in
         # free-for-all it subtracts from your own score. By default we clamp
@@ -126,7 +125,6 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
         self._only_punch = bool(settings['Punching Only'])
 ## Take applied settings ##
 
-
         self._epic_mode = bool(settings['Epic Mode'])
         self._kills_to_win_per_player = int(
             settings['Kills to Win Per Player'])
@@ -151,6 +149,8 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
 
 
 ## Run settings related: IcyFloor ##
+
+
     def on_transition_in(self) -> None:
         super().on_transition_in()
         activity = bs.getactivity()
@@ -159,8 +159,6 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
         else:
             return
 ## Run settings related: IcyFloor ##
-
-
 
     def on_begin(self) -> None:
         super().on_begin()
@@ -172,14 +170,13 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
             bs.getactivity().globalsnode.tint = (0.5, 0.7, 1)
         else:
             pass
-#-# Tried return here, pfft. Took me 30mins to figure out why pwps spawning only on NightMode
-#-# Now its fixed :)
+# -# Tried return here, pfft. Took me 30mins to figure out why pwps spawning only on NightMode
+# -# Now its fixed :)
         if self._enable_powerups:
             self.setup_standard_powerup_drops()
         else:
             pass
 ## Run settings related: NightMode,Powerups ##
-
 
         # Base kills needed to win on the size of the largest team.
         self._score_to_win = (self._kills_to_win_per_player *
@@ -244,6 +241,8 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
 
 
 ## Run settings related: Spaz ##
+
+
     def spawn_player(self, player: Player) -> bs.Actor:
         spaz = self.spawn_player_spaz(player)
         if self._boxing_gloves:
@@ -257,7 +256,6 @@ class BetterDeathMatchGame(bs.TeamGameActivity[Player, Team]):
 
         return spaz
 ## Run settings related: Spaz ##
-
 
     def _update_scoreboard(self) -> None:
         for team in self.teams:
