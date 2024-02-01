@@ -1175,6 +1175,34 @@
       "versions": {
         "1.0.0": null
       }
+    },
+    "bots_can_accept_powerups": {
+      "description": "Bots can steal your powerups",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "cheat_menu": {
+      "description": "Cheat menu on the settings window",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "pranav",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }

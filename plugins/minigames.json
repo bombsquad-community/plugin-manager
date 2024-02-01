@@ -1274,7 +1274,7 @@
         "1.0.0": null
       }
     },
-    "extinction_run": {
+    "extinction": {
       "description": "Survive the Extinction.",
       "external_url": "",
       "authors": [
@@ -1289,13 +1289,27 @@
       }
     },
     "fat_pigs": {
-      "description": "Survive the Extinction.",
-      "external_url": "Survive the pigs...",
+      "description": "Survive...",
+      "external_url": "",
       "authors": [
         {
           "name": "Zacker Tz",
           "email": "",
           "discord": "zacker_tz"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "flag_day": {
+      "description": "Pick up flags to receive a prize.\nBut beware...",
+      "external_url": "https://youtu.be/ANDzdBicjA4?si=h8S_TPUAxSaG7nls",
+      "authors": [
+        {
+          "name": "MattZ45986",
+          "email": "",
+          "discord": ""
         }
       ],
       "versions": {
