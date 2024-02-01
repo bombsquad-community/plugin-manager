@@ -55,11 +55,11 @@ class ExplodoRunGame(bs.TeamGameActivity[Player, Team]):
     @classmethod
     def get_preview_texture_name(cls) -> str:
         return 'rampagePreview'
-    
+
     @classmethod
     def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return ['Rampage']
-    
+
     def __init__(self, settings: dict):
         settings['map'] = "Rampage"
         self._epic_mode = settings.get('Epic Mode', False)
