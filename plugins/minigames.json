@@ -1203,6 +1203,104 @@
       "versions": {
         "1.0.0": null
       }
+    },
+    "down_into_the_abyss": {
+      "description": "Survive as long as you can but dont miss a step",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "better_deathmatch": {
+      "description": "A very-customisable DeathMatch mini-game",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "freakyyyy"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "better_elimination": {
+      "description": "A very-customisable Elimination mini-game",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "freakyyyy"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "bot_shower": {
+      "description": "Survive from the bots.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "explodo_run": {
+      "description": "Run For Your Life :))",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "extinction_run": {
+      "description": "Survive the Extinction.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "fat_pigs": {
+      "description": "Survive the Extinction.",
+      "external_url": "Survive the pigs...",
+      "authors": [
+        {
+          "name": "Zacker Tz",
+          "email": "",
+          "discord": "zacker_tz"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
