@@ -1159,7 +1159,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "4b5479f51356b0c9c80c4b9968fea910"
+        }
       }
     },
     "xyz_tool": {
@@ -1173,7 +1178,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "3f301456128f422b7277c667f6c5c47e"
+        }
       }
     },
     "bots_can_accept_powerups": {
@@ -1187,7 +1197,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "71eae7c5d0e05821809d348ea0c64837"
+        }
       }
     },
     "cheat_menu": {
@@ -1201,7 +1216,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "079e857197979aabf53f232b3cce56ba"
+        }
       }
     }
   }
