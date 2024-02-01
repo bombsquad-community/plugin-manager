@@ -1093,13 +1093,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "718039b",
-          "released_on": "24-01-2024",
-          "md5sum": "e1d401ec8f2d06dec741d713d6602710"
-        }
-      }
+        "1.0.0": null
     },
     "you_vs_bombsquad": {
       "description": "You against bombsquad solo or with friends",
