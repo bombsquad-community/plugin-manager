@@ -911,7 +911,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "4a9cdcd798454e5034a5ea9ce58fe586"
+        }
       }
     },
     "super_duel": {
@@ -974,7 +979,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "a07a171c29417056bb69ed1cf0f2864b"
+        }
       }
     },
     "hyper_race": {
@@ -988,7 +998,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "8b423bdae256bd411489528b550b8bd9"
+        }
       }
     },
     "meteor_shower_deluxe": {
@@ -1173,7 +1188,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "15e303e02e3da4636fd002c43a579180"
+        }
       }
     },
     "gravity_falls": {
@@ -1206,7 +1226,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "b0519f41146eb2f8b9c2d6c747376a9b"
+        }
       }
     },
     "down_into_the_abyss": {
@@ -1315,7 +1340,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "9fb61df79a50d010864964a7cb1de76e"
+        }
       }
     },
     "fat_pigs": {
