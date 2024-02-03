@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 def ba_get_api_version():
     return 8
 
+
 def ba_get_levels():
     return [bs._level.Level(
             'Bot Chase', gametype=BotChaseGame,
