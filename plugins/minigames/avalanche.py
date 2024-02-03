@@ -26,12 +26,12 @@ randomPic = ["lakeFrigidPreview", "hockeyStadiumPreview"]
 
 
 def ba_get_api_version():
-    return 6
+    return 8
 
 
 def ba_get_levels():
     return [
-        babase._level.Level(
+        bs._level.Level(
             "Icy Emits",
             gametype=IcyEmitsGame,
             settings={},

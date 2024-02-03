@@ -254,7 +254,7 @@
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         }
       ],
       "versions": {
@@ -360,7 +360,7 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
@@ -601,7 +601,7 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         },
         {
           "name": "JoseAng3l",
@@ -911,12 +911,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "47a1ca8",
-          "released_on": "22-08-2023",
-          "md5sum": "398cf911195c4904b281ed05767e25f4"
-        }
+        "1.0.0": null
       }
     },
     "super_duel": {
@@ -979,16 +974,11 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "718039b",
-          "released_on": "24-01-2024",
-          "md5sum": "c1c96450fbdb6e5b2f0d26bb4e797236"
-        }
+        "1.0.0": null
       }
     },
     "hyper_race": {
-      "description": "Race and avoid the obsatacles",
+      "description": "Race and avoid the obstacles",
       "external_url": "",
       "authors": [
         {
@@ -998,12 +988,7 @@
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "718039b",
-          "released_on": "24-01-2024",
-          "md5sum": "8b423bdae256bd411489528b550b8bd9"
-        }
+        "1.0.0": null
       }
     },
     "meteor_shower_deluxe": {
@@ -1144,7 +1129,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "IDK",
           "email": "",
           "discord": ""
         }
@@ -1163,9 +1148,9 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "Blitz",
           "email": "",
-          "discord": ""
+          "discord": "itsmeblitz"
         }
       ],
       "versions": {
@@ -1182,18 +1167,13 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "IDK",
           "email": "",
           "discord": ""
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "1b6e28bed97bf78430135c64a1fca2c2"
-        }
+        "1.0.0": null
       }
     },
     "gravity_falls": {
@@ -1201,7 +1181,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "IDK",
           "email": "",
           "discord": ""
         }
@@ -1220,18 +1200,13 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "! JETZ",
           "email": "",
-          "discord": ""
+          "discord": "! JETZ#5313"
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "c26e6aee6f545d911106431f3c2d8f0f"
-        }
+        "1.0.0": null
       }
     },
     "down_into_the_abyss": {
@@ -1239,7 +1214,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "IDK",
           "email": "",
           "discord": ""
         }
@@ -1296,9 +1271,9 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "! JETZ",
           "email": "",
-          "discord": ""
+          "discord": "! JETZ#5313"
         }
       ],
       "versions": {
@@ -1315,9 +1290,9 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "Blitz",
           "email": "",
-          "discord": ""
+          "discord": "itsmeblitz"
         }
       ],
       "versions": {
@@ -1329,18 +1304,13 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "IDK",
           "email": "",
           "discord": ""
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "daf6c3e3d8663fa6d99c9e3f75033f36"
-        }
+        "1.0.0": null
       }
     },
     "fat_pigs": {

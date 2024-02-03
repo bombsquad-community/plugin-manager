@@ -1115,7 +1115,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "IDK",
           "email": "",
           "discord": ""
         }
@@ -1172,18 +1172,13 @@
       "external_url": "",
       "authors": [
         {
-          "name": "",
+          "name": "Yann",
           "email": "",
-          "discord": ""
+          "discord": "riyukiiyan"
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "3f301456128f422b7277c667f6c5c47e"
-        }
+        "1.0.0": null
       }
     },
     "bots_can_accept_powerups": {

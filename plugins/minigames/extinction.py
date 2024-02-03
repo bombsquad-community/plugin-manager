@@ -23,12 +23,12 @@ def ba_get_api_version():
 
 
 def ba_get_levels():
-    return [babase._level.Level(
+    return [bs._level.Level(
             'Extinction',
             gametype=NewMeteorShowerGame,
             settings={'Epic Mode': False},
             preview_texture_name='footballStadiumPreview'),
-            babase._level.Level(
+            bs._level.Level(
             'Epic Extinction',
             gametype=NewMeteorShowerGame,
             settings={'Epic Mode': True},

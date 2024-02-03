@@ -22,15 +22,15 @@ if TYPE_CHECKING:
 
 
 def ba_get_api_version():
-    return 6
+    return 8
 
 
 def ba_get_levels():
-    return [babase._level.Level(
+    return [bs._level.Level(
             'Infinite Ninjas', gametype=InfiniteNinjasGame,
             settings={},
             preview_texture_name='footballStadiumPreview'),
-            babase._level.Level(
+            bs._level.Level(
             'Epic Infinite Ninjas', gametype=InfiniteNinjasGame,
             settings={'Epic Mode': True},
             preview_texture_name='footballStadiumPreview')]

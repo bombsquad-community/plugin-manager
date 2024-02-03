@@ -16,11 +16,11 @@ if TYPE_CHECKING:
     from typing import Any, List, Type, Optional
 
 
-# def ba_get_api_version():
-#     return 6
+def ba_get_api_version():
+    return 8
 
 def ba_get_levels():
-    return [babase._level.Level(
+    return [bs._level.Level(
             'Bot Chase', gametype=BotChaseGame,
             settings={},
             preview_texture_name='footballStadiumPreview')]
