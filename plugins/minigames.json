@@ -1044,25 +1044,6 @@
         }
       }
     },
-    "safe_zone": {
-      "description": "Stay in the safe zone",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "SEBASTIAN2059",
-          "email": "",
-          "discord": "sebastian2059"
-        }
-      ],
-      "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "718039b",
-          "released_on": "24-01-2024",
-          "md5sum": "862fab0c26947c70397542742fb82635"
-        }
-      }
-    },
     "snow_ball_fight": {
       "description": "Throw snoballs and dominate",
       "external_url": "https://youtu.be/uXyb_meBjGI?si=D_N_OXZT5BFh8R5C",
