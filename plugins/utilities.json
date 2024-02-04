@@ -1148,25 +1148,6 @@
         }
       }
     },
-    "ba_colours": {
-      "description": "Colourful bots and more",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "Froshlee",
-          "email": "",
-          "discord": "froshlee24"
-        }
-      ],
-      "versions": {
-        "1.0.0": {
-          "api_version": 8,
-          "commit_sha": "4941d0c",
-          "released_on": "01-02-2024",
-          "md5sum": "4b5479f51356b0c9c80c4b9968fea910"
-        }
-      }
-    },
     "xyz_tool": {
       "description": "Punch to save the co-ordinates",
       "external_url": "",
