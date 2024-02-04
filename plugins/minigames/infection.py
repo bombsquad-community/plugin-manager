@@ -55,11 +55,11 @@ else:
 
 
 def ba_get_api_version():
-    return 6
+    return 8
 
 
 def ba_get_levels():
-    return [babase._level.Level(
+    return [bs._level.Level(
         name,
         gametype=Infection,
         settings={},

@@ -254,7 +254,7 @@
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         }
       ],
       "versions": {
@@ -360,7 +360,7 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
@@ -601,7 +601,7 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         },
         {
           "name": "JoseAng3l",
@@ -913,9 +913,9 @@
       "versions": {
         "1.0.0": {
           "api_version": 8,
-          "commit_sha": "47a1ca8",
-          "released_on": "22-08-2023",
-          "md5sum": "398cf911195c4904b281ed05767e25f4"
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "4a9cdcd798454e5034a5ea9ce58fe586"
         }
       }
     },
@@ -965,6 +965,386 @@
           "commit_sha": "68e77f2",
           "released_on": "24-07-2023",
           "md5sum": "1cbe5b3e85b5dfcee1eb322f33568fd4"
+        }
+      }
+    },
+    "avalanche": {
+      "description": "Dodge the falling ice bombs",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "a07a171c29417056bb69ed1cf0f2864b"
+        }
+      }
+    },
+    "hyper_race": {
+      "description": "Race and avoid the obstacles",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "8b423bdae256bd411489528b550b8bd9"
+        }
+      }
+    },
+    "meteor_shower_deluxe": {
+      "description": "Meteor shower on all maps support",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "EraOSBeta",
+          "email": "",
+          "discord": "3ra0"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "7e86bbc8e3ebb26a66602068950adfbf"
+        }
+      }
+    },
+    "ofuuu_attack": {
+      "description": "Dodge the falling bombs.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Riyukii",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "982c72f2d2cb3d50280f50b022e7865f"
+        }
+      }
+    },
+    "snow_ball_fight": {
+      "description": "Throw snoballs and dominate",
+      "external_url": "https://youtu.be/uXyb_meBjGI?si=D_N_OXZT5BFh8R5C",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "ef6bd7cd0404674f65e8f8d4da3ab8c8"
+        }
+      }
+    },
+    "egg_game": {
+      "description": "Throw Egg as far u can",
+      "external_url": "https://youtu.be/82vLp9ceCcw?si=OSC5Hu3Ns7PevlwP",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "388e58a",
+          "released_on": "01-02-2024",
+          "md5sum": "8fc1f9c984f9e77b0125cbeaba5c13bf"
+        }
+      }
+    },
+    "you_vs_bombsquad": {
+      "description": "You against bombsquad solo or with friends",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "451daeabbd628ec70fa31b80a0999f35"
+        }
+      }
+    },
+    "onslaught_football": {
+      "description": "Onslaught but in football map",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "IDK",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "e6267fec4dc7f874b1f8065863aae1cb"
+        }
+      }
+    },
+    "lame_fight": {
+      "description": "Save World With Super Powers",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Blitz",
+          "email": "",
+          "discord": "itsmeblitz"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "eb0e5a8658e82b3aac6b04b68c1c0f60"
+        }
+      }
+    },
+    "infinite_ninjas": {
+      "description": "How long can you survive from Ninjas??",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "IDK",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "15e303e02e3da4636fd002c43a579180"
+        }
+      }
+    },
+    "gravity_falls": {
+      "description": "Trip to the moon",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "IDK",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "6d0b06b283ef702f41837f09e457d3b8"
+        }
+      }
+    },
+    "bot_chase": {
+      "description": "Try to survive from bots!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "! JETZ",
+          "email": "",
+          "discord": "! JETZ#5313"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "b0519f41146eb2f8b9c2d6c747376a9b"
+        }
+      }
+    },
+    "down_into_the_abyss": {
+      "description": "Survive as long as you can but dont miss a step",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "IDK",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "d3c488671dd35c488e22002ddeb80aef"
+        }
+      }
+    },
+    "better_deathmatch": {
+      "description": "A very-customisable DeathMatch mini-game",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "freakyyyy"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "0b607db2dbe3ab40aa05bd4bfd5b4afa"
+        }
+      }
+    },
+    "better_elimination": {
+      "description": "A very-customisable Elimination mini-game",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": "freakyyyy"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "18bbb7f6ddc4206c7039ad3b5f5facae"
+        }
+      }
+    },
+    "bot_shower": {
+      "description": "Survive from the bots.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "! JETZ",
+          "email": "",
+          "discord": "! JETZ#5313"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "1259e09ccd9b10ae82e4a6623572a4d2"
+        }
+      }
+    },
+    "explodo_run": {
+      "description": "Cursed meteor shower of crazy Captain Jack trying take your soul",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Blitz",
+          "email": "",
+          "discord": "itsmeblitz"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ec6286e",
+          "released_on": "01-02-2024",
+          "md5sum": "e3cd927316b9c3bcac714b4dc8d0d73c"
+        }
+      }
+    },
+    "extinction": {
+      "description": "Survive the Extinction.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "IDK",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "9fb61df79a50d010864964a7cb1de76e"
+        }
+      }
+    },
+    "fat_pigs": {
+      "description": "Eliminate other Mels' while dodging falling stickies.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Zacker Tz",
+          "email": "",
+          "discord": "zacker_tz"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ec6286e",
+          "released_on": "01-02-2024",
+          "md5sum": "fe0d82c322ce01d8956af3131e135ad2"
+        }
+      }
+    },
+    "flag_day": {
+      "description": "Pick up flags to receive a prize.But beware...",
+      "external_url": "https://youtu.be/ANDzdBicjA4?si=h8S_TPUAxSaG7nls",
+      "authors": [
+        {
+          "name": "MattZ45986",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "ec6286e",
+          "released_on": "01-02-2024",
+          "md5sum": "e11fbf742e6556939ac8d986e2dd430b"
         }
       }
     }
