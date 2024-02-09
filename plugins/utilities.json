@@ -4,7 +4,7 @@
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
     "translate": {
-      "description": "Translate yours/others chat. Just click on the message to translate them. Compatible with other PW mods (like advanced_party_window)",
+      "description": "Translate yours/others chat. Just click on the message to translate them. Open Plugin Settings/Double click 'Trans' button to open translation settings. Compatible with other PW mods (like advanced_party_window)",
       "external_url": "",
       "authors": [
         {
