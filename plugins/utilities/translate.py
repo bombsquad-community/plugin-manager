@@ -46,7 +46,8 @@ def translate(text, _callback, source='auto', target='en'):
     url = f'https://translate.google.com/m?tl={target}&sl={source}&q={text}'
     request = urllib.request.Request(url)
     data = urllib.request.urlopen(request).read().decode('utf-8')
-    result = data[(data.find('"result-container">'))+len('"result-container">'):data.find('</div><div class="links-container">')]
+    result = data[(data.find('"result-container">'))+len('"result-container">')
+                   :data.find('</div><div class="links-container">')]
     replace_list = [('&#39;', '\''), ('&quot;', '"'), ('&amp;', '&')]
     for i in replace_list:
         result = result.replace(i[0], i[1])
@@ -181,20 +182,20 @@ class TranslateWindow:
                                         maxwidth=59)
 
         self.other_chat_arrow = bui.textwidget(parent=self._root_widget,
-                                         color=(1, 1, 1),
-                                         h_align='center',
-                                         v_align='center',
-                                         text=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
-                                         position=(200, 140),
-                                         maxwidth=59)
+                                               color=(1, 1, 1),
+                                               h_align='center',
+                                               v_align='center',
+                                               text=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
+                                               position=(200, 140),
+                                               maxwidth=59)
 
         self.your_chat_arrow = bui.textwidget(parent=self._root_widget,
-                                         color=(1, 1, 1),
-                                         h_align='center',
-                                         v_align='center',
-                                         text=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
-                                         position=(200, 55),
-                                         maxwidth=59)
+                                              color=(1, 1, 1),
+                                              h_align='center',
+                                              v_align='center',
+                                              text=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
+                                              position=(200, 55),
+                                              maxwidth=59)
 
         self.other_source_button = PopupMenu(parent=self._root_widget,
                                              position=(54, 140),
