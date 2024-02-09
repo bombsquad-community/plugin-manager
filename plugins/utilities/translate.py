@@ -180,6 +180,22 @@ class TranslateWindow:
                                         position=(-10, 55),
                                         maxwidth=59)
 
+        self.other_chat_arrow = bui.textwidget(parent=self._root_widget,
+                                         color=(1, 1, 1),
+                                         h_align='center',
+                                         v_align='center',
+                                         text=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
+                                         position=(200, 140),
+                                         maxwidth=59)
+
+        self.your_chat_arrow = bui.textwidget(parent=self._root_widget,
+                                         color=(1, 1, 1),
+                                         h_align='center',
+                                         v_align='center',
+                                         text=babase.charstr(babase.SpecialChar.RIGHT_ARROW),
+                                         position=(200, 55),
+                                         maxwidth=59)
+
         self.other_source_button = PopupMenu(parent=self._root_widget,
                                              position=(54, 140),
                                              autoselect=False,
