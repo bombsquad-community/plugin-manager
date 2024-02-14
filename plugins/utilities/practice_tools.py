@@ -258,7 +258,7 @@ def new_bomb_init(func):
                 })
 
         if babase.app.config.get(
-            "bombCountdown") and bomb_type not in fuse_bomb:
+                "bombCountdown") and bomb_type not in fuse_bomb:
             color = (1.0, 1.0, 0.0)
             count_bomb(*args, count='3', color=color)
             color = (1.0, 0.5, 0.0)
@@ -425,7 +425,7 @@ def bot_handlemessage(func):
                                          {
                                              0.0: [2.0],
                                              0.2: [0.0],
-                                         })
+                        })
 
                     bs.animate_array(args[0].bot_radius, 'size', 1, {
                         0.0: [0],
@@ -440,7 +440,7 @@ def bot_handlemessage(func):
                                      1, {
                                          0.0: [0],
                                          0.25: [0]
-                                     })
+                    })
 
                     bs.animate(
                         args[0].radius_visualizer_circle, 'opacity', {
@@ -448,7 +448,7 @@ def bot_handlemessage(func):
                             0.25: 0.0
                         })
             if not (babase.app.config.get("powerupsExpire") and
-                args[0].powerups_expire):
+                    args[0].powerups_expire):
                 if args[1].poweruptype == 'triple_bombs':
                     tex = PowerupBoxFactory.get().tex_bomb
                     args[0]._flash_billboard(tex)
@@ -588,7 +588,7 @@ class NewBotSet(SpazBotSet):
             bot_list = []
             babase.print_exception('Error updating bot list: ' +
                                    str(self._bot_lists[
-                                           self._bot_update_list]))
+                                       self._bot_update_list]))
         self._bot_update_list = (self._bot_update_list +
                                  1) % self._bot_list_count
 
@@ -628,11 +628,11 @@ class NewBotSet(SpazBotSet):
             self._bot_lists[i] = []
 
     def spawn_bot(
-        self,
-        bot_type: type[SpazBot],
-        pos: Sequence[float],
-        spawn_time: float = 3.0,
-        on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
+            self,
+            bot_type: type[SpazBot],
+            pos: Sequence[float],
+            spawn_time: float = 3.0,
+            on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
         """Spawn a bot from this set."""
 
         spawner.Spawner(
@@ -673,7 +673,7 @@ class DummyBotSet(NewBotSet):
             except Exception:
                 babase.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
-                                               self._bot_update_list]))
+                                           self._bot_update_list]))
             self._bot_update_list = (self._bot_update_list +
                                      1) % self._bot_list_count
 
@@ -1175,7 +1175,7 @@ class BotsPracticeTab(PracticeTab):
             'Pro Bomber', 'Pro Brawler',
             'Pro Trigger', 'Pro Charger',
             'S.Pro Bomber', 'S.Pro Brawler',
-            'S.Pro Trigger', 'S.Pro Charger'):
+                'S.Pro Trigger', 'S.Pro Charger'):
             tint1 = (1.0, 0.2, 0.1)
             tint2 = (0.6, 0.1, 0.05)
         elif self.bot_array_name[self._icon_index] in 'Bouncy':
@@ -1191,7 +1191,7 @@ class BotsPracticeTab(PracticeTab):
 
         if self.bot_array_name[self._icon_index] in (
             'S.Pro Bomber', 'S.Pro Brawler',
-            'S.Pro Trigger', 'S.Pro Charger'):
+                'S.Pro Trigger', 'S.Pro Charger'):
             color = (1.3, 1.2, 3.0)
         else:
             color = (1.0, 1.0, 1.0)

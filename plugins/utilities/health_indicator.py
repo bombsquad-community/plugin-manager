@@ -61,8 +61,8 @@ def new_handlemessage_spaz_(func):
             if args[1].poweruptype == 'health':
                 update_hitpoint_text(args[0])
         if isinstance(
-            args[1], bs.HitMessage) or isinstance(
-            args[1], bs.ImpactDamageMessage):
+                args[1], bs.HitMessage) or isinstance(
+                args[1], bs.ImpactDamageMessage):
             update_hitpoint_text(args[0])
 
     return wrapper
