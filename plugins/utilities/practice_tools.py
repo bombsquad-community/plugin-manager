@@ -1,4 +1,4 @@
-"""Practice Tools Mod: V2.1
+"""Practice Tools Mod: V2.2
 Made by Cross Joy"""
 
 # If anyone who want to help me on giving suggestion/ fix bugs/ creating PR,
@@ -12,25 +12,12 @@ Made by Cross Joy"""
 # Support link: https://www.buymeacoffee.com/CrossJoy
 
 # ----------------------------------------------------------------------------
-# V2.1 update
-# - Fix bug where the ui stuck if opened on server side.
-# - Fix a bug to set party icon to always visible for newer bombsquad version.
 
-# V2.0 update
-# - Updated to API 8 (1.7.20+)
+# V2.2 update
+# - Enhance computability with other mods.
+# - Added setting for permanent powerups.
+# - Codes Optimization.
 
-# V1.2 update
-# - Added New Bot: Bomber Lite and Brawler Lite.
-# - Added New Setting: Epic Mode Toggle.
-# - Added immunity to curse if invincible.
-# - Fixed Power Up mini billboard will not removed after debuff.
-# - Fixed Power Up landmine count will not removed after debuff.
-# - Fixed the config (Bot Picker, Count, Radius and Power Up Picker) will set to default when exit the practice tab.
-
-# V1.1 update
-# - Fixed Charger Bot Pro bot spawn with shield.
-# - Fixed selecting Bruiser bot is not working.
-# - Added screen message when pressing spawn/clear/debuff button.
 # ----------------------------------------------------------------------------
 # Powerful and comprehensive tools for practice purpose.
 
@@ -72,7 +59,8 @@ import bascenev1lib
 import bauiv1 as bui
 from bauiv1lib import mainmenu
 from babase import app, Plugin
-from bascenev1lib.actor.powerupbox import PowerupBox
+from bascenev1lib.actor.powerupbox import PowerupBox, PowerupBoxFactory
+from bascenev1lib.actor.bomb import Bomb
 from bascenev1lib.actor.spaz import Spaz
 from bascenev1lib.actor import spawner
 from bascenev1lib.actor.spazbot import (SpazBotSet, SpazBot, BrawlerBot,
@@ -94,47 +82,35 @@ from bauiv1lib.tabs import TabRow
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, Optional
 
-version = '2.1'
+version = '2.2'
 
-try:
-    if babase.app.config.get("bombCountdown") is None:
-        babase.app.config["bombCountdown"] = False
-    else:
-        babase.app.config.get("bombCountdown")
-except:
-    babase.app.config["bombCountdown"] = False
 
-try:
-    if babase.app.config.get("bombRadiusVisual") is None:
-        babase.app.config["bombRadiusVisual"] = False
-    else:
-        babase.app.config.get("bombRadiusVisual")
-except:
-    babase.app.config["bombRadiusVisual"] = False
+class ConfigLoader:
+    def __init__(self):
+        self.config_data = {
+            "Practice Tab": False,
+            "bombCountdown": False,
+            "bombRadiusVisual": False,
+            "stopBots": False,
+            "immortalDummy": False,
+            "powerupsExpire": False,
+            "invincible": False
+        }
+        self.config_names = ["Practice Tab", "bombCountdown",
+                             "bombRadiusVisual", "stopBots",
+                             "immortalDummy", "powerupsExpire", "invincible"]
 
-try:
-    if babase.app.config.get("stopBots") is None:
-        babase.app.config["stopBots"] = False
-    else:
-        babase.app.config.get("stopBots")
-except:
-    babase.app.config["stopBots"] = False
-
-try:
-    if babase.app.config.get("immortalDummy") is None:
-        babase.app.config["immortalDummy"] = False
-    else:
-        babase.app.config.get("immortalDummy")
-except:
-    babase.app.config["immortalDummy"] = False
-
-try:
-    if babase.app.config.get("invincible") is None:
-        babase.app.config["invincible"] = False
-    else:
-        babase.app.config.get("invincible")
-except:
-    babase.app.config["invincible"] = False
+    def load_configs(self):
+        for config_name in self.config_names:
+            try:
+                existing_config = babase.app.config.get(config_name)
+                if existing_config is None:
+                    babase.app.config[config_name] = self.config_data[
+                        config_name]
+                else:
+                    babase.app.config.get(config_name)
+            except:
+                babase.app.config[config_name] = self.config_data[config_name]
 
 
 class PartyWindow(bui.Window):
@@ -174,7 +150,7 @@ def redefine_class(original_cls: object, cls: object) -> None:
 
 
 def main(plugin: Plugin) -> None:
-    print(f'Plugins Tools v{plugin.__version__}')
+    print(f'Practice Tools v{plugin.__version__}')
     app.practice_tool = plugin
     redefine_class(OriginalPartyWindow, PartyWindow)
 
@@ -185,10 +161,9 @@ class NewMainMenuWindow(mainmenu.MainMenuWindow):
         # Display chat icon, but if user open/close gather it may disappear
         bui.set_party_icon_always_visible(True)
 
+
 # ba_meta require api 8
 # ba_meta export plugin
-
-
 class Practice(Plugin):
     __version__ = version
 
@@ -202,334 +177,373 @@ class Practice(Plugin):
             raise RuntimeError(
                 'sad')
         mainmenu.MainMenuWindow = NewMainMenuWindow
+        config_loader = ConfigLoader()
+        config_loader.load_configs()
         return main(self)
 
-    def new_bomb_init(func):
-        def setting(*args, **kwargs):
-            func(*args, **kwargs)
 
-            bomb_type = args[0].bomb_type
-            fuse_bomb = ('land_mine', 'tnt', 'impact')
+def new_bomb_init(func):
+    def setting(*args, **kwargs):
+        func(*args, **kwargs)
 
-            if babase.app.config.get("bombRadiusVisual"):
-                args[0].radius_visualizer = bs.newnode('locator',
-                                                       owner=args[0].node,
-                                                       # Remove itself when the bomb node dies.
-                                                       attrs={
-                                                           'shape': 'circle',
-                                                           'color': (1, 0, 0),
-                                                           'opacity': 0.05,
-                                                           'draw_beauty': False,
-                                                           'additive': False
-                                                       })
-                args[0].node.connectattr('position', args[0].radius_visualizer,
-                                         'position')
+        bomb_type = args[0].bomb_type
+        fuse_bomb = ('land_mine', 'tnt', 'impact')
 
-                bs.animate_array(args[0].radius_visualizer, 'size', 1, {
-                    0.0: [0.0],
-                    0.2: [args[0].blast_radius * 2.2],
-                    0.25: [args[0].blast_radius * 2.0]
-                })
+        if babase.app.config.get("bombRadiusVisual"):
+            args[0].radius_visualizer = bs.newnode('locator',
+                                                   owner=args[0].node,
+                                                   # Remove itself when the bomb node dies.
+                                                   attrs={
+                                                       'shape': 'circle',
+                                                       'color': (1, 0, 0),
+                                                       'opacity': 0.05,
+                                                       'draw_beauty': False,
+                                                       'additive': False
+                                                   })
+            args[0].node.connectattr('position', args[0].radius_visualizer,
+                                     'position')
 
-                args[0].radius_visualizer_circle = bs.newnode(
-                    'locator',
-                    owner=args[
-                        0].node,
-                    # Remove itself when the bomb node dies.
-                    attrs={
-                        'shape': 'circleOutline',
-                        'size': [
-                            args[
-                                0].blast_radius * 2.0],
-                        # Here's that bomb's blast radius value again!
-                        'color': (
-                            1, 1, 0),
-                        'draw_beauty': False,
-                        'additive': True
-                    })
-                args[0].node.connectattr('position',
-                                         args[0].radius_visualizer_circle,
-                                         'position')
-
-                bs.animate(
-                    args[0].radius_visualizer_circle, 'opacity', {
-                        0: 0.0,
-                        0.4: 0.1
-                    })
-
-                if bomb_type == 'tnt':
-                    args[0].fatal = bs.newnode('locator',
-                                               owner=args[0].node,
-                                               # Remove itself when the bomb node dies.
-                                               attrs={
-                                                   'shape': 'circle',
-                                                   'color': (
-                                                       0.7, 0, 0),
-                                                   'opacity': 0.10,
-                                                   'draw_beauty': False,
-                                                   'additive': False
-                                               })
-                    args[0].node.connectattr('position',
-                                             args[0].fatal,
-                                             'position')
-
-                    bs.animate_array(args[0].fatal, 'size', 1, {
-                        0.0: [0.0],
-                        0.2: [args[0].blast_radius * 2.2 * 0.7],
-                        0.25: [args[0].blast_radius * 2.0 * 0.7]
-                    })
-
-            if babase.app.config.get(
-                    "bombCountdown") and bomb_type not in fuse_bomb:
-                color = (1.0, 1.0, 0.0)
-                count_bomb(*args, count='3', color=color)
-                color = (1.0, 0.5, 0.0)
-                bs.timer(1, bs.Call(count_bomb, *args, count='2', color=color))
-                color = (1.0, 0.15, 0.15)
-                bs.timer(2, bs.Call(count_bomb, *args, count='1', color=color))
-
-        return setting
-
-    bascenev1lib.actor.bomb.Bomb.__init__ = new_bomb_init(
-        bascenev1lib.actor.bomb.Bomb.__init__)
-
-
-Spaz._pm2_spz_old = Spaz.__init__
-
-
-def _init_spaz_(self, *args, **kwargs):
-    self._pm2_spz_old(*args, **kwargs)
-    self.bot_radius = bs.newnode('locator',
-                                 owner=self.node,
-                                 # Remove itself when the bomb node dies.
-                                 attrs={
-                                     'shape': 'circle',
-                                     'color': (0, 0, 1),
-                                     'opacity': 0.0,
-                                     'draw_beauty': False,
-                                     'additive': False
-                                 })
-    self.node.connectattr('position',
-                          self.bot_radius,
-                          'position')
-
-    self.radius_visualizer_circle = bs.newnode(
-        'locator',
-        owner=self.node,
-        # Remove itself when the bomb node dies.
-        attrs={
-            'shape': 'circleOutline',
-            'size': [(self.hitpoints_max - self.hitpoints) * 0.0048],
-            # Here's that bomb's blast radius value again!
-            'color': (0, 1, 1),
-            'draw_beauty': False,
-            'additive': True
-        })
-
-    self.node.connectattr('position', self.radius_visualizer_circle,
-                          'position')
-
-    self.curse_visualizer = bs.newnode('locator',
-                                       owner=self.node,
-                                       # Remove itself when the bomb node dies.
-                                       attrs={
-                                           'shape': 'circle',
-                                           'color': (1, 0, 0),
-                                           'size': (0.0, 0.0, 0.0),
-                                           'opacity': 0.05,
-                                           'draw_beauty': False,
-                                           'additive': False
-                                       })
-    self.node.connectattr('position', self.curse_visualizer,
-                          'position')
-
-    self.curse_visualizer_circle = bs.newnode(
-        'locator',
-        owner=self.node,
-        # Remove itself when the bomb node dies.
-        attrs={
-            'shape': 'circleOutline',
-            'size': [3 * 2.0],
-            # Here's that bomb's blast radius value again!
-            'color': (
-                1, 1, 0),
-            'opacity': 0.0,
-            'draw_beauty': False,
-            'additive': True
-        })
-    self.node.connectattr('position',
-                          self.curse_visualizer_circle,
-                          'position')
-
-    self.curse_visualizer_fatal = bs.newnode('locator',
-                                             owner=self.node,
-                                             # Remove itself when the bomb node dies.
-                                             attrs={
-                                                 'shape': 'circle',
-                                                 'color': (
-                                                     0.7, 0, 0),
-                                                 'size': (0.0, 0.0, 0.0),
-                                                 'opacity': 0.10,
-                                                 'draw_beauty': False,
-                                                 'additive': False
-                                             })
-    self.node.connectattr('position',
-                          self.curse_visualizer_fatal,
-                          'position')
-
-    def invincible() -> None:
-        for i in bs.get_foreground_host_activity().players:
-            try:
-                if i.node:
-                    if babase.app.config.get("invincible"):
-                        i.actor.node.invincible = True
-                    else:
-                        i.actor.node.invincible = False
-            except:
-                pass
-
-    bs.timer(1.001, bs.Call(invincible))
-
-
-Spaz.__init__ = _init_spaz_
-
-Spaz.super_curse = Spaz.curse
-
-
-def new_cursed(self):
-    if self.node.invincible:
-        return
-    self.super_curse()
-    if babase.app.config.get("bombRadiusVisual"):
-        bs.animate_array(self.curse_visualizer, 'size', 1, {
-            0.0: [0.0],
-            0.2: [3 * 2.2],
-            0.5: [3 * 2.0],
-            5.0: [3 * 2.0],
-            5.1: [0.0],
-        })
-
-        bs.animate(
-            self.curse_visualizer_circle, 'opacity', {
-                0: 0.0,
-                0.4: 0.1,
-                5.0: 0.1,
-                5.1: 0.0,
+            bs.animate_array(args[0].radius_visualizer, 'size', 1, {
+                0.0: [0.0],
+                0.2: [args[0].blast_radius * 2.2],
+                0.25: [args[0].blast_radius * 2.0]
             })
 
-        bs.animate_array(self.curse_visualizer_fatal, 'size', 1, {
-            0.0: [0.0],
-            0.2: [2.2],
-            0.5: [2.0],
-            5.0: [2.0],
-            5.1: [0.0],
-        })
+            args[0].radius_visualizer_circle = bs.newnode(
+                'locator',
+                owner=args[
+                    0].node,
+                # Remove itself when the bomb node dies.
+                attrs={
+                    'shape': 'circleOutline',
+                    'size': [
+                        args[
+                            0].blast_radius * 2.0],
+                    # Here's that bomb's blast radius value again!
+                    'color': (
+                        1, 1, 0),
+                    'draw_beauty': False,
+                    'additive': True
+                })
+            args[0].node.connectattr('position',
+                                     args[0].radius_visualizer_circle,
+                                     'position')
+
+            bs.animate(
+                args[0].radius_visualizer_circle, 'opacity', {
+                    0: 0.0,
+                    0.4: 0.1
+                })
+
+            if bomb_type == 'tnt':
+                args[0].fatal = bs.newnode('locator',
+                                           owner=args[0].node,
+                                           # Remove itself when the bomb node dies.
+                                           attrs={
+                                               'shape': 'circle',
+                                               'color': (
+                                                   0.7, 0, 0),
+                                               'opacity': 0.10,
+                                               'draw_beauty': False,
+                                               'additive': False
+                                           })
+                args[0].node.connectattr('position',
+                                         args[0].fatal,
+                                         'position')
+
+                bs.animate_array(args[0].fatal, 'size', 1, {
+                    0.0: [0.0],
+                    0.2: [args[0].blast_radius * 2.2 * 0.7],
+                    0.25: [args[0].blast_radius * 2.0 * 0.7]
+                })
+
+        if babase.app.config.get(
+            "bombCountdown") and bomb_type not in fuse_bomb:
+            color = (1.0, 1.0, 0.0)
+            count_bomb(*args, count='3', color=color)
+            color = (1.0, 0.5, 0.0)
+            bs.timer(1, bs.Call(count_bomb, *args, count='2', color=color))
+            color = (1.0, 0.15, 0.15)
+            bs.timer(2, bs.Call(count_bomb, *args, count='1', color=color))
+
+    return setting
 
 
-Spaz.curse = new_cursed
+bascenev1lib.actor.bomb.Bomb.__init__ = new_bomb_init(
+    bascenev1lib.actor.bomb.Bomb.__init__)
 
-Spaz.super_handlemessage = Spaz.handlemessage
+
+def _init_spaz_(func):
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        args[0].bot_radius = bs.newnode('locator',
+                                        owner=args[0].node,
+                                        attrs={
+                                            'shape': 'circle',
+                                            'color': (0, 0, 1),
+                                            'opacity': 0.0,
+                                            'draw_beauty': False,
+                                            'additive': False
+                                        })
+        args[0].node.connectattr('position',
+                                 args[0].bot_radius,
+                                 'position')
+
+        args[0].radius_visualizer_circle = bs.newnode(
+            'locator',
+            owner=args[0].node,
+            attrs={
+                'shape': 'circleOutline',
+                'size': [(args[0].hitpoints_max - args[0].hitpoints) * 0.0048],
+                'color': (0, 1, 1),
+                'draw_beauty': False,
+                'additive': True
+            })
+
+        args[0].node.connectattr('position', args[0].radius_visualizer_circle,
+                                 'position')
+
+        args[0].curse_visualizer = bs.newnode('locator',
+                                              owner=args[0].node,
+                                              attrs={
+                                                  'shape': 'circle',
+                                                  'color': (1, 0, 0),
+                                                  'size': (0.0, 0.0, 0.0),
+                                                  'opacity': 0.05,
+                                                  'draw_beauty': False,
+                                                  'additive': False
+                                              })
+        args[0].node.connectattr('position', args[0].curse_visualizer,
+                                 'position')
+
+        args[0].curse_visualizer_circle = bs.newnode(
+            'locator',
+            owner=args[0].node,
+            attrs={
+                'shape': 'circleOutline',
+                'size': [3 * 2.0],
+                'color': (
+                    1, 1, 0),
+                'opacity': 0.0,
+                'draw_beauty': False,
+                'additive': True
+            })
+        args[0].node.connectattr('position',
+                                 args[0].curse_visualizer_circle,
+                                 'position')
+
+        args[0].curse_visualizer_fatal = bs.newnode('locator',
+                                                    owner=args[0].node,
+                                                    attrs={
+                                                        'shape': 'circle',
+                                                        'color': (
+                                                            0.7, 0, 0),
+                                                        'size': (0.0, 0.0, 0.0),
+                                                        'opacity': 0.10,
+                                                        'draw_beauty': False,
+                                                        'additive': False
+                                                    })
+        args[0].node.connectattr('position',
+                                 args[0].curse_visualizer_fatal,
+                                 'position')
+
+        def invincible() -> None:
+            for i in bs.get_foreground_host_activity().players:
+                try:
+                    if i.node:
+                        if babase.app.config.get("invincible"):
+                            i.actor.node.invincible = True
+                        else:
+                            i.actor.node.invincible = False
+                except:
+                    pass
+
+        bs.timer(1.001, bs.Call(invincible))
+
+    return wrapper
 
 
-def bot_handlemessage(self, msg: Any):
-    if isinstance(msg, bs.PowerupMessage):
-        if msg.poweruptype == 'health':
-            if babase.app.config.get("bombRadiusVisual"):
-                if self._cursed:
-                    bs.animate_array(self.curse_visualizer, 'size', 1, {
-                        0.0: [3 * 2.0],
-                        0.2: [0.0],
-                    })
+Spaz.__init__ = _init_spaz_(Spaz.__init__)
 
-                    bs.animate(
-                        self.curse_visualizer_circle, 'opacity', {
-                            0.0: 0.1,
-                            0.2: 0.0,
+
+def new_cursed(func):
+    def wrapper(*args, **kwargs):
+        if args[0].node.invincible:
+            return
+        func(*args, **kwargs)
+        if babase.app.config.get("bombRadiusVisual"):
+            bs.animate_array(args[0].curse_visualizer, 'size', 1, {
+                0.0: [0.0],
+                0.2: [3 * 2.2],
+                0.5: [3 * 2.0],
+                5.0: [3 * 2.0],
+                5.1: [0.0],
+            })
+
+            bs.animate(
+                args[0].curse_visualizer_circle, 'opacity', {
+                    0: 0.0,
+                    0.4: 0.1,
+                    5.0: 0.1,
+                    5.1: 0.0,
+                })
+
+            bs.animate_array(args[0].curse_visualizer_fatal, 'size', 1, {
+                0.0: [0.0],
+                0.2: [2.2],
+                0.5: [2.0],
+                5.0: [2.0],
+                5.1: [0.0],
+            })
+
+    return wrapper
+
+
+Spaz.curse = new_cursed(Spaz.curse)
+
+
+def bot_handlemessage(func):
+    def wrapper(*args, **kwargs):
+
+        if isinstance(args[1], bs.PowerupMessage):
+            if args[1].poweruptype == 'health':
+                if babase.app.config.get("bombRadiusVisual"):
+                    if args[0]._cursed:
+                        bs.animate_array(args[0].curse_visualizer, 'size', 1, {
+                            0.0: [3 * 2.0],
+                            0.2: [0.0],
                         })
 
-                    bs.animate_array(self.curse_visualizer_fatal, 'size', 1, {
-                        0.0: [2.0],
-                        0.2: [0.0],
+                        bs.animate(
+                            args[0].curse_visualizer_circle, 'opacity', {
+                                0.0: 0.1,
+                                0.2: 0.0,
+                            })
+
+                        bs.animate_array(args[0].curse_visualizer_fatal, 'size',
+                                         1,
+                                         {
+                                             0.0: [2.0],
+                                             0.2: [0.0],
+                                         })
+
+                    bs.animate_array(args[0].bot_radius, 'size', 1, {
+                        0.0: [0],
+                        0.25: [0]
                     })
-
-                bs.animate_array(self.bot_radius, 'size', 1, {
-                    0.0: [0],
-                    0.25: [0]
-                })
-                bs.animate(self.bot_radius, 'opacity', {
-                    0.0: 0.00,
-                    0.25: 0.0
-                })
-
-                bs.animate_array(self.radius_visualizer_circle, 'size', 1, {
-                    0.0: [0],
-                    0.25: [0]
-                })
-
-                bs.animate(
-                    self.radius_visualizer_circle, 'opacity', {
+                    bs.animate(args[0].bot_radius, 'opacity', {
                         0.0: 0.00,
                         0.25: 0.0
                     })
 
-    self.super_handlemessage(msg)
+                    bs.animate_array(args[0].radius_visualizer_circle, 'size',
+                                     1, {
+                                         0.0: [0],
+                                         0.25: [0]
+                                     })
 
-    if isinstance(msg, bs.HitMessage):
-        if self.hitpoints <= 0:
-            bs.animate(self.bot_radius, 'opacity', {
-                0.0: 0.00
-            })
-            bs.animate(
-                self.radius_visualizer_circle, 'opacity', {
+                    bs.animate(
+                        args[0].radius_visualizer_circle, 'opacity', {
+                            0.0: 0.00,
+                            0.25: 0.0
+                        })
+            if not (babase.app.config.get("powerupsExpire") and
+                args[0].powerups_expire):
+                if args[1].poweruptype == 'triple_bombs':
+                    tex = PowerupBoxFactory.get().tex_bomb
+                    args[0]._flash_billboard(tex)
+                    args[0].set_bomb_count(3)
+
+                elif args[1].poweruptype == 'impact_bombs':
+                    args[0].bomb_type = 'impact'
+                    tex = args[0]._get_bomb_type_tex()
+                    args[0]._flash_billboard(tex)
+
+                elif args[1].poweruptype == 'sticky_bombs':
+                    args[0].bomb_type = 'sticky'
+                    tex = args[0]._get_bomb_type_tex()
+                    args[0]._flash_billboard(tex)
+
+                elif args[1].poweruptype == 'punch':
+                    tex = PowerupBoxFactory.get().tex_punch
+                    args[0]._flash_billboard(tex)
+                    args[0].equip_boxing_gloves()
+
+                elif args[1].poweruptype == 'ice_bombs':
+                    args[0].bomb_type = 'ice'
+                    tex = args[0]._get_bomb_type_tex()
+                    args[0]._flash_billboard(tex)
+
+                if args[1].poweruptype in ['triple_bombs', 'impact_bombs',
+                                           'sticky_bombs', 'punch',
+                                           'ice_bombs']:
+                    args[0].node.handlemessage('flash')
+                    if args[1].sourcenode:
+                        args[1].sourcenode.handlemessage(
+                            bs.PowerupAcceptMessage())
+                    return True
+
+        func(*args, **kwargs)
+
+        if isinstance(args[1], bs.HitMessage):
+            if args[0].hitpoints <= 0:
+                bs.animate(args[0].bot_radius, 'opacity', {
                     0.0: 0.00
                 })
-        elif babase.app.config.get('bombRadiusVisual'):
+                bs.animate(
+                    args[0].radius_visualizer_circle, 'opacity', {
+                        0.0: 0.00
+                    })
+            elif babase.app.config.get('bombRadiusVisual'):
 
-            bs.animate_array(self.bot_radius, 'size', 1, {
-                0.0: [(self.hitpoints_max - self.hitpoints) * 0.0045],
-                0.25: [(self.hitpoints_max - self.hitpoints) * 0.0045]
-            })
-            bs.animate(self.bot_radius, 'opacity', {
-                0.0: 0.00,
-                0.25: 0.05
-            })
-
-            bs.animate_array(self.radius_visualizer_circle, 'size', 1, {
-                0.0: [(self.hitpoints_max - self.hitpoints) * 0.0045],
-                0.25: [(self.hitpoints_max - self.hitpoints) * 0.0045]
-            })
-
-            bs.animate(
-                self.radius_visualizer_circle, 'opacity', {
+                bs.animate_array(args[0].bot_radius, 'size', 1, {
+                    0.0: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045],
+                    0.25: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045]
+                })
+                bs.animate(args[0].bot_radius, 'opacity', {
                     0.0: 0.00,
-                    0.25: 0.1
+                    0.25: 0.05
                 })
 
+                bs.animate_array(args[0].radius_visualizer_circle, 'size', 1, {
+                    0.0: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045],
+                    0.25: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045]
+                })
 
-Spaz.handlemessage = bot_handlemessage
+                bs.animate(
+                    args[0].radius_visualizer_circle, 'opacity', {
+                        0.0: 0.00,
+                        0.25: 0.1
+                    })
+
+    return wrapper
+
+
+Spaz.handlemessage = bot_handlemessage(Spaz.handlemessage)
 
 
 def count_bomb(*args, count, color):
-    text = bs.newnode('math', owner=args[0].node,
-                      attrs={'input1': (0, 0.7, 0),
-                             'operation': 'add'})
-    args[0].node.connectattr('position', text, 'input2')
-    args[0].spaztext = bs.newnode('text',
-                                  owner=args[0].node,
-                                  attrs={
-                                      'text': count,
-                                      'in_world': True,
-                                      'color': color,
-                                      'shadow': 1.0,
-                                      'flatness': 1.0,
-                                      'scale': 0.012,
-                                      'h_align': 'center',
-                                  })
+    if args[0].node.exists():
+        text = bs.newnode('math', owner=args[0].node,
+                          attrs={'input1': (0, 0.7, 0),
+                                 'operation': 'add'})
+        args[0].node.connectattr('position', text, 'input2')
+        args[0].spaztext = bs.newnode('text',
+                                      owner=args[0].node,
+                                      attrs={
+                                          'text': count,
+                                          'in_world': True,
+                                          'color': color,
+                                          'shadow': 1.0,
+                                          'flatness': 1.0,
+                                          'scale': 0.012,
+                                          'h_align': 'center',
+                                      })
 
-    args[0].node.connectattr('position', args[0].spaztext,
-                             'position')
-    bs.animate(args[0].spaztext, 'scale',
-               {0: 0, 0.3: 0.03, 0.5: 0.025, 0.8: 0.025, 1.0: 0.0})
+        args[0].node.connectattr('position', args[0].spaztext,
+                                 'position')
+        bs.animate(args[0].spaztext, 'scale',
+                   {0: 0, 0.3: 0.03, 0.5: 0.025, 0.8: 0.025, 1.0: 0.0})
 
 
 def doTestButton(self):
@@ -574,7 +588,7 @@ class NewBotSet(SpazBotSet):
             bot_list = []
             babase.print_exception('Error updating bot list: ' +
                                    str(self._bot_lists[
-                                       self._bot_update_list]))
+                                           self._bot_update_list]))
         self._bot_update_list = (self._bot_update_list +
                                  1) % self._bot_list_count
 
@@ -614,11 +628,11 @@ class NewBotSet(SpazBotSet):
             self._bot_lists[i] = []
 
     def spawn_bot(
-            self,
-            bot_type: type[SpazBot],
-            pos: Sequence[float],
-            spawn_time: float = 3.0,
-            on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
+        self,
+        bot_type: type[SpazBot],
+        pos: Sequence[float],
+        spawn_time: float = 3.0,
+        on_spawn_call: Callable[[SpazBot], Any] | None = None) -> None:
         """Spawn a bot from this set."""
 
         spawner.Spawner(
@@ -659,7 +673,7 @@ class DummyBotSet(NewBotSet):
             except Exception:
                 babase.print_exception('Error updating bot list: ' +
                                        str(self._bot_lists[
-                                           self._bot_update_list]))
+                                               self._bot_update_list]))
             self._bot_update_list = (self._bot_update_list +
                                      1) % self._bot_list_count
 
@@ -1161,7 +1175,7 @@ class BotsPracticeTab(PracticeTab):
             'Pro Bomber', 'Pro Brawler',
             'Pro Trigger', 'Pro Charger',
             'S.Pro Bomber', 'S.Pro Brawler',
-                'S.Pro Trigger', 'S.Pro Charger'):
+            'S.Pro Trigger', 'S.Pro Charger'):
             tint1 = (1.0, 0.2, 0.1)
             tint2 = (0.6, 0.1, 0.05)
         elif self.bot_array_name[self._icon_index] in 'Bouncy':
@@ -1177,7 +1191,7 @@ class BotsPracticeTab(PracticeTab):
 
         if self.bot_array_name[self._icon_index] in (
             'S.Pro Bomber', 'S.Pro Brawler',
-                'S.Pro Trigger', 'S.Pro Charger'):
+            'S.Pro Trigger', 'S.Pro Charger'):
             color = (1.3, 1.2, 3.0)
         else:
             color = (1.0, 1.0, 1.0)
@@ -1211,8 +1225,9 @@ class PowerUpPracticeTab(PracticeTab):
              'shield', 'sticky_bombs'])
         self._icon_index = self.load_settings()
 
-        self.setting_name = (['Bomb Countdown', 'Bomb Radius Visualizer'])
-        self.config = (['bombCountdown', 'bombRadiusVisual'])
+        self.setting_name = (
+            ['Bomb Countdown', 'Bomb Radius Visualizer', 'Powerups Expire'])
+        self.config = (['bombCountdown', 'bombRadiusVisual', 'powerupsExpire'])
 
     def on_activate(
         self,
@@ -1238,7 +1253,7 @@ class PowerUpPracticeTab(PracticeTab):
         self._sub_width = self._scroll_width
         self._sub_height = 200
 
-        self.container_h = 450
+        self.container_h = 550
         power_height = self.container_h - 50
 
         self._subcontainer = bui.containerwidget(
@@ -1426,6 +1441,11 @@ class PowerUpPracticeTab(PracticeTab):
                     babase.app.config["bombRadiusVisual"] = True
                 else:
                     babase.app.config["bombRadiusVisual"] = False
+            elif setting == 2:
+                if value:
+                    babase.app.config["powerupsExpire"] = True
+                else:
+                    babase.app.config["powerupsExpire"] = False
 
     def load_settings(self):
         try:
@@ -2204,9 +2224,9 @@ class InfoWindow(popup.PopupWindow):
         text = ('Practice Tools Mod\n'
                 'Made By Cross Joy\n'
                 'version v' + version + '\n'
-                '\n'
-                'Thx to\n'
-                'Mikirog for the Bomb radius visualizer mod.\n'
+                                        '\n'
+                                        'Thx to\n'
+                                        'Mikirog for the Bomb radius visualizer mod.\n'
                 )
 
         lines = text.splitlines()
