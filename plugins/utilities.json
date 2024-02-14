@@ -826,7 +826,7 @@
       }
     },
     "disco_light": {
-      "description": "Add disco light into the game.",
+      "description": "Add disco light into the game. Do '/disco' to turn on and '/disco off' to turn off",
       "external_url": "",
       "authors": [
         {
@@ -836,6 +836,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -851,7 +852,7 @@
       }
     },
     "practice_tools": {
-      "description": "Powerful and comprehensive tools for practice purpose. Practice tabs can be access through party window.",
+      "description": "Powerful and comprehensive tools for practice purposes. Practice tabs can be accessed through party window.",
       "external_url": "https://www.youtube.com/watch?v=7BeCcIYSXd0&t=113s&ab_channel=BOMBsquadlife",
       "authors": [
         {
@@ -861,6 +862,7 @@
         }
       ],
       "versions": {
+        "2.2.0": null,
         "2.1.1": {
           "api_version": 8,
           "commit_sha": "5422dd6",
@@ -903,6 +905,20 @@
           "released_on": "14-12-2022",
           "md5sum": "a04c30c11a43443fe192fe70ad528f22"
         }
+      }
+    },
+    "health_indicator": {
+      "description": "Add a simple health indicator on every player and bot.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "crossjoy"
+        }
+      ],
+      "versions": {
+        "1.2.0": null
       }
     },
     "autorun": {
