@@ -1,12 +1,11 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-"""Disco Light Mod: V1.0
+"""Disco Light Mod: V2.1
 Made by Cross Joy"""
 
 # If anyone who wanna help me on giving suggestion/ fix bugs/ creating PR,
 # Can visit my github https://github.com/CrossJoy/Bombsquad-Modding
 
 # You can contact me through discord:
-# My Discord Id: crossjoy
+# My Discord Id: Cross Joy#0721
 # My BS Discord Server: https://discord.gg/JyBY6haARJ
 
 
@@ -19,11 +18,16 @@ Made by Cross Joy"""
 
 
 # Coop and multiplayer compatible.
-# Work on any 1.7 ver.
+# Work on any 1.7.20+ ver.
 
 # Note:
 # The plugin commands only works on the host with the plugin activated.
 # Other clients/players can't use the commands.
+
+# v2.1
+# - Enhance compatibility with other mods
+# - Tint change when /disco off will be more dynamic.
+
 # ----------------------------------------------------------------------------
 
 # ba_meta require api 8
@@ -33,255 +37,196 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from baenv import TARGET_BALLISTICA_BUILD as build_number
-from bauiv1lib import mainmenu
+import bascenev1 as bs
 import babase
 import bauiv1 as bui
-import bascenev1 as bs
-import _babase
-from bascenev1 import _gameutils, animate
+from bascenev1 import _gameutils
 import random
 
+from bascenev1 import animate
 
 if TYPE_CHECKING:
     from typing import Sequence, Union
 
-# Check game ver.
 
+class DiscoLight:
 
-def is_game_version_lower_than(version):
-    """
-    Returns a boolean value indicating whether the current game
-    version is lower than the passed version. Useful for addressing
-    any breaking changes within game versions.
-    """
-    game_version = tuple(map(int, babase.app.version if build_number <
-                         21282 else babase.app.env.split(".")))
-    version = tuple(map(int, version.split(".")))
-    return game_version < version
+    def __init__(self):
+        activity = bs.get_foreground_host_activity()
+        self.globalnodes = activity.globalsnode.tint
 
+    # Activate disco light.
+    def start(self):
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            self.partyLight(True)
+            self.rainbow(activity)
 
-# if is_game_version_lower_than("1.7.7"):
-#     ba_internal = _ba
-# else:
-#     ba_internal = babase.internal
+    # Deactivate disco light.
+    def stop(self):
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            self.partyLight(False)
+            self.stop_rainbow(activity)
 
+    # Create and animate colorful spotlight.
+    def partyLight(self, switch=True):
+        from bascenev1._nodeactor import NodeActor
+        x_spread = 10
+        y_spread = 5
+        positions = [[-x_spread, -y_spread], [0, -y_spread], [0, y_spread],
+                     [x_spread, -y_spread], [x_spread, y_spread],
+                     [-x_spread, y_spread]]
+        times = [0, 2700, 1000, 1800, 500, 1400]
 
-# Activate disco light.
-def start():
-    activity = bs.get_foreground_host_activity()
+        # Store this on the current activity, so we only have one at a time.
+        activity = bs.getactivity()
+        activity.camera_flash_data = []  # type: ignore
+        for i in range(6):
+            r = random.choice([0.5, 1])
+            g = random.choice([0.5, 1])
+            b = random.choice([0.5, 1])
+            light = NodeActor(
+                bs.newnode('light',
+                           attrs={
+                               'position': (
+                                   positions[i][0], 0, positions[i][1]),
+                               'radius': 1.0,
+                               'lights_volumes': False,
+                               'height_attenuated': False,
+                               'color': (r, g, b)
+                           }))
+            sval = 1.87
+            iscale = 1.3
+            tcombine = bs.newnode('combine',
+                                  owner=light.node,
+                                  attrs={
+                                      'size': 3,
+                                      'input0': positions[i][0],
+                                      'input1': 0,
+                                      'input2': positions[i][1]
+                                  })
+            assert light.node
+            tcombine.connectattr('output', light.node, 'position')
+            xval = positions[i][0]
+            yval = positions[i][1]
+            spd = 1.0 + random.random()
+            spd2 = 1.0 + random.random()
+            animate(tcombine,
+                    'input0', {
+                        0.0: xval + 0,
+                        0.069 * spd: xval + 10.0,
+                        0.143 * spd: xval - 10.0,
+                        0.201 * spd: xval + 0
+                    },
+                    loop=True)
+            animate(tcombine,
+                    'input2', {
+                        0.0: yval + 0,
+                        0.15 * spd2: yval + 10.0,
+                        0.287 * spd2: yval - 10.0,
+                        0.398 * spd2: yval + 0
+                    },
+                    loop=True)
+            animate(light.node,
+                    'intensity', {
+                        0.0: 0,
+                        0.02 * sval: 0,
+                        0.05 * sval: 0.8 * iscale,
+                        0.08 * sval: 0,
+                        0.1 * sval: 0
+                    },
+                    loop=True,
+                    offset=times[i])
+            if not switch:
+                bs.timer(0.1,
+                         light.node.delete)
+            activity.camera_flash_data.append(light)  # type: ignore
 
-    with activity.context:
-        partyLight(True)
-        rainbow(activity)
+    # Create RGB tint.
+    def rainbow(self, activity) -> None:
+        """Create RGB tint."""
 
+        cnode = bs.newnode('combine',
+                           attrs={
+                               'input0': self.globalnodes[0],
+                               'input1': self.globalnodes[1],
+                               'input2': self.globalnodes[2],
+                               'size': 3
+                           })
 
-# Deactivate disco light.
-def stop():
-    activity = bs.get_foreground_host_activity()
+        _gameutils.animate(cnode, 'input0',
+                           {0.0: 1.0, 1.0: 1.0, 2.0: 1.0, 3.0: 1.0,
+                            4.0: 0.2, 5.0: 0.1, 6.0: 0.5,
+                            7.0: 1.0}, loop=True)
 
-    with activity.context:
-        partyLight(False)
-        stop_rainbow(activity)
+        _gameutils.animate(cnode, 'input1',
+                           {0.0: 0.2, 1.0: 0.2, 2.0: 0.5, 3.0: 1.0,
+                            4.0: 1.0, 5.0: 0.1, 6.0: 0.3,
+                            7.0: 0.2}, loop=True)
 
+        _gameutils.animate(cnode, 'input2',
+                           {0.0: 0.2, 1.0: 0.2, 2.0: 0.0, 3.0: 0.0,
+                            4.0: 0.2, 5.0: 1.0, 6.0: 1.0,
+                            7.0: 0.2}, loop=True)
 
-# Create and animate colorful spotlight.
-def partyLight(switch=True):
-    from bascenev1._nodeactor import NodeActor
-    x_spread = 10
-    y_spread = 5
-    positions = [[-x_spread, -y_spread], [0, -y_spread], [0, y_spread],
-                 [x_spread, -y_spread], [x_spread, y_spread],
-                 [-x_spread, y_spread]]
-    times = [0, 2700, 1000, 1800, 500, 1400]
+        cnode.connectattr('output', activity.globalsnode, 'tint')
 
-    # Store this on the current activity, so we only have one at a time.
-    activity = bs.getactivity()
-    activity.camera_flash_data = []  # type: ignore
-    for i in range(6):
-        r = random.choice([0.5, 1])
-        g = random.choice([0.5, 1])
-        b = random.choice([0.5, 1])
-        light = NodeActor(
-            bs.newnode('light',
-                       attrs={
-                           'position': (positions[i][0], 0, positions[i][1]),
-                           'radius': 1.0,
-                           'lights_volumes': False,
-                           'height_attenuated': False,
-                           'color': (r, g, b)
-                       }))
-        sval = 1.87
-        iscale = 1.3
-        tcombine = bs.newnode('combine',
-                              owner=light.node,
-                              attrs={
-                                  'size': 3,
-                                  'input0': positions[i][0],
-                                  'input1': 0,
-                                  'input2': positions[i][1]
-                              })
-        assert light.node
-        tcombine.connectattr('output', light.node, 'position')
-        xval = positions[i][0]
-        yval = positions[i][1]
-        spd = 1.0 + random.random()
-        spd2 = 1.0 + random.random()
-        animate(tcombine,
-                'input0', {
-                    0.0: xval + 0,
-                    0.069 * spd: xval + 10.0,
-                    0.143 * spd: xval - 10.0,
-                    0.201 * spd: xval + 0
-                },
-                loop=True)
-        animate(tcombine,
-                'input2', {
-                    0.0: yval + 0,
-                    0.15 * spd2: yval + 10.0,
-                    0.287 * spd2: yval - 10.0,
-                    0.398 * spd2: yval + 0
-                },
-                loop=True)
-        animate(light.node,
-                'intensity', {
-                    0.0: 0,
-                    0.02 * sval: 0,
-                    0.05 * sval: 0.8 * iscale,
-                    0.08 * sval: 0,
-                    0.1 * sval: 0
-                },
-                loop=True,
-                offset=times[i])
-        if not switch:
-            bs.timer(0.1,
-                     light.node.delete)
-        activity.camera_flash_data.append(light)  # type: ignore
+    # Revert to the original map tint.
+    def stop_rainbow(self, activity):
+        """Revert to the original map tint."""
+        c_existing = activity.globalsnode.tint
+        # map_name = activity.map.getname()
+        tint = self.globalnodes
 
+        cnode = bs.newnode('combine',
+                           attrs={
+                               'input0': c_existing[0],
+                               'input1': c_existing[1],
+                               'input2': c_existing[2],
+                               'size': 3
+                           })
 
-# Create RGB tint.
-def rainbow(self) -> None:
-    """Create RGB tint."""
-    c_existing = self.globalsnode.tint
-    cnode = bs.newnode('combine',
-                       attrs={
-                           'input0': c_existing[0],
-                           'input1': c_existing[1],
-                           'input2': c_existing[2],
-                           'size': 3
-                       })
+        _gameutils.animate(cnode, 'input0', {0: c_existing[0], 1.0: tint[0]})
+        _gameutils.animate(cnode, 'input1', {0: c_existing[1], 1.0: tint[1]})
+        _gameutils.animate(cnode, 'input2', {0: c_existing[2], 1.0: tint[2]})
 
-    _gameutils.animate(cnode, 'input0',
-                       {0.0: 1.0, 1.0: 1.0, 2.0: 1.0, 3.0: 1.0,
-                        4.0: 0.2, 5.0: 0.1, 6.0: 0.5,
-                        7.0: 1.0}, loop=True)
-
-    _gameutils.animate(cnode, 'input1',
-                       {0.0: 0.2, 1.0: 0.2, 2.0: 0.5, 3.0: 1.0,
-                        4.0: 1.0, 5.0: 0.1, 6.0: 0.3,
-                        7.0: 0.2}, loop=True)
-
-    _gameutils.animate(cnode, 'input2',
-                       {0.0: 0.2, 1.0: 0.2, 2.0: 0.0, 3.0: 0.0,
-                        4.0: 0.2, 5.0: 1.0, 6.0: 1.0,
-                        7.0: 0.2}, loop=True)
-
-    cnode.connectattr('output', self.globalsnode, 'tint')
-
-
-# Revert to the original map tint.
-def stop_rainbow(self):
-    """Revert to the original map tint."""
-    try:
-        c_existing = self.globalsnode.tint
-        map_name = self.map.getname()
-        tint = check_map_tint(map_name)
-    except:
-        tint = (1, 1, 1)
-
-    cnode = bs.newnode('combine',
-                       attrs={
-                           'input0': c_existing[0],
-                           'input1': c_existing[1],
-                           'input2': c_existing[2],
-                           'size': 3
-                       })
-
-    _gameutils.animate(cnode, 'input0', {0: c_existing[0], 1.0: tint[0]})
-    _gameutils.animate(cnode, 'input1', {0: c_existing[1], 1.0: tint[1]})
-    _gameutils.animate(cnode, 'input2', {0: c_existing[2], 1.0: tint[2]})
-
-    cnode.connectattr('output', self.globalsnode, 'tint')
-
-
-# Check map name
-def check_map_tint(map_name):
-    if map_name in 'Hockey Stadium':
-        tint = (1.2, 1.3, 1.33)
-    elif map_name in 'Football Stadium':
-        tint = (1.3, 1.2, 1.0)
-    elif map_name in 'Bridgit':
-        tint = (1.1, 1.2, 1.3)
-    elif map_name in 'Big G':
-        tint = (1.1, 1.2, 1.3)
-    elif map_name in 'Roundabout':
-        tint = (1.0, 1.05, 1.1)
-    elif map_name in 'Monkey Face':
-        tint = (1.1, 1.2, 1.2)
-    elif map_name in 'Zigzag':
-        tint = (1.0, 1.15, 1.15)
-    elif map_name in 'The Pad':
-        tint = (1.1, 1.1, 1.0)
-    elif map_name in 'Lake Frigid':
-        tint = (0.8, 0.9, 1.3)
-    elif map_name in 'Crag Castle':
-        tint = (1.15, 1.05, 0.75)
-    elif map_name in 'Tower D':
-        tint = (1.15, 1.11, 1.03)
-    elif map_name in 'Happy Thoughts':
-        tint = (1.3, 1.23, 1.0)
-    elif map_name in 'Step Right Up':
-        tint = (1.2, 1.1, 1.0)
-    elif map_name in 'Doom Shroom':
-        tint = (0.82, 1.10, 1.15)
-    elif map_name in 'Courtyard':
-        tint = (1.2, 1.17, 1.1)
-    elif map_name in 'Rampage':
-        tint = (1.2, 1.1, 0.97)
-    elif map_name in 'Tip Top':
-        tint = (0.8, 0.9, 1.3)
-    else:
-        tint = (1, 1, 1)
-
-    return tint
-
-
-# Get the original game codes.
-old_fcm = bs.chatmessage
+        cnode.connectattr('output', activity.globalsnode, 'tint')
 
 
 # New chat func to add some commands to activate/deactivate the disco light.
-def new_chat_message(msg: Union[str, babase.Lstr], clients: Sequence[int] = None,
-                     sender_override: str = None):
-    old_fcm(msg, clients, sender_override)
-    if msg == '/disco':
-        start()
-    if msg == '/disco off':
-        stop()
+def new_chat_message(func):
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
+        activity = bs.get_foreground_host_activity()
+        with activity.context:
+            try:
+                if not activity.disco_light:
+                    activity.disco_light = DiscoLight()
+            except:
+                activity.disco_light = DiscoLight()
+        if args[0] == '/disco':
+            activity.disco_light.start()
+        elif args[0] == '/disco off':
+            activity.disco_light.stop()
+
+    return wrapper
 
 
-class NewMainMenuWindow(mainmenu.MainMenuWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Display chat icon, but if user open/close gather it may disappear
+def new_begin(func):
+    """Runs when game is began."""
+
+    def wrapper(*args, **kwargs):
+        func(*args, **kwargs)
         bui.set_party_icon_always_visible(True)
 
-
-# Replace new chat func to the original game codes.
-bs.chatmessage = new_chat_message
+    return wrapper
 
 
 # ba_meta export plugin
 class ByCrossJoy(babase.Plugin):
-    def on_app_running(self):
-        mainmenu.MainMenuWindow = NewMainMenuWindow
+    def __init__(self):
+        # Replace new chat func to the original game codes.
+        bs.chatmessage = new_chat_message(bs.chatmessage)
+        bs._activity.Activity.on_begin = new_begin(
+            bs._activity.Activity.on_begin)
