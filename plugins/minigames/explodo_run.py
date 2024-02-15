@@ -133,11 +133,11 @@ class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##
         babase.app.classic.add_coop_practice_level(bs.Level(
-            name = 'Explodo Run',
-        gametype=ExplodoRunGame,
-        settings={},
-        preview_texture_name='rampagePreview'))
+            name='Explodo Run',
+            gametype=ExplodoRunGame,
+            settings={},
+            preview_texture_name='rampagePreview'))
         babase.app.classic.add_coop_practice_level(bs.Level('Epic Explodo Run',
-        gametype=ExplodoRunGame,
-        settings={'Epic Mode': True},
-        preview_texture_name='rampagePreview'))
+                                                            gametype=ExplodoRunGame,
+                                                            settings={'Epic Mode': True},
+                                                            preview_texture_name='rampagePreview'))

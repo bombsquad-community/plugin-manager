@@ -245,11 +245,11 @@ class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##
         babase.app.classic.add_coop_practice_level(bs.Level(
-            name = 'Extinction',
+            name='Extinction',
             gametype=NewMeteorShowerGame,
             settings={'Epic Mode': False},
             preview_texture_name='footballStadiumPreview'))
         babase.app.classic.add_coop_practice_level(bs.Level('Epic Extinction',
-            gametype=NewMeteorShowerGame,
-            settings={'Epic Mode': True},
-            preview_texture_name='footballStadiumPreview'))
+                                                            gametype=NewMeteorShowerGame,
+                                                            settings={'Epic Mode': True},
+                                                            preview_texture_name='footballStadiumPreview'))

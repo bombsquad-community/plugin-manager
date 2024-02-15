@@ -163,7 +163,7 @@ class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##
         babase.app.classic.add_coop_practice_level(bs.Level(
-            name = 'Lame Fight',
+            name='Lame Fight',
             gametype=LameFightGame,
             settings={},
             preview_texture_name='courtyardPreview'))

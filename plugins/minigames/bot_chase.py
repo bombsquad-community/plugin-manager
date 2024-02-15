@@ -217,6 +217,6 @@ class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##
         babase.app.classic.add_coop_practice_level(bs.Level(
-            name = 'Bot Chase', gametype=BotChaseGame,
+            name='Bot Chase', gametype=BotChaseGame,
             settings={},
             preview_texture_name='footballStadiumPreview'))
