@@ -33,33 +33,6 @@ else:
     name_hard = 'You vs BS Hard'
     name_hard_epic = 'You vs BS Hard Epic'
 
-# def ba_get_api_version():
-#     return 6
-
-
-def ba_get_levels():
-    return [babase._level.Level(
-        name_easy,
-        gametype=TUvsBombSquad,
-        settings={},
-        preview_texture_name='footballStadiumPreview'),
-        babase._level.Level(
-        name_easy_epic,
-        gametype=TUvsBombSquad,
-        settings={'Epic Mode': True},
-        preview_texture_name='footballStadiumPreview'),
-
-        babase._level.Level(
-        name_hard,
-        gametype=TUvsBombSquad,
-        settings={'Hard Mode': True},
-        preview_texture_name='footballStadiumPreview'),
-        babase._level.Level(
-        name_hard_epic,
-        gametype=TUvsBombSquad,
-        settings={'Hard Mode': True,
-                  'Epic Mode': True},
-        preview_texture_name='footballStadiumPreview')]
 
 #### BOTS ####
 
@@ -503,3 +476,30 @@ class TUvsBombSquad(bs.TeamGameActivity[Player, Team]):
 
         # Ends the activity.
         self.end(results)
+
+
+# ba_meta export plugin
+class plugin(babase.Plugin):
+    def __init__(self):
+        ## Campaign support ##
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name=name_easy,
+            gametype=TUvsBombSquad,
+            settings={},
+            preview_texture_name='footballStadiumPreview'))
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name_easy_epic,
+            gametype=TUvsBombSquad,
+            settings={'Epic Mode': True},
+            preview_texture_name='footballStadiumPreview'))
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name=name_hard,
+            gametype=TUvsBombSquad,
+            settings={'Hard Mode': True},
+            preview_texture_name='footballStadiumPreview'))
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name=name_hard_epic,
+            gametype=TUvsBombSquad,
+            settings={'Hard Mode': True,
+                      'Epic Mode': True},
+            preview_texture_name='footballStadiumPreview'))
