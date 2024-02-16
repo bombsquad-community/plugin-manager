@@ -67,7 +67,7 @@
       }
     },
     "simon_says": {
-      "description": "You better do what Simon says",
+      "description": "You better do what Simon says. Playable in co-op",
       "external_url": "",
       "authors": [
         {
@@ -77,6 +77,12 @@
         }
       ],
       "versions": {
+        "1.0.2": {
+          "api_version": 8,
+          "commit_sha": "593ae6f",
+          "released_on": "16-02-2024",
+          "md5sum": "57cd7a06f1f3169752cf77537affcf5b"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
