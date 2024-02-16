@@ -102,6 +102,7 @@ class Player(bs.Player['Team']):
 
     def __init__(self) -> None:
         self.score = 0
+        self.dead: bool = False
 
 
 class Team(bs.Team[Player]):
@@ -230,9 +231,8 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
             player.score = 0
         # check for immediate end if theres only 1 player
         if len(self.players) == 1:
-            bs.timer(4000/1000, lambda: self.check_end())
-        else:
-            bs.timer(6000/1000, self.call_round)
+            bs.timer(4000/1000, bs.Call(self.check_end))
+        bs.timer(6000/1000, self.call_round)
 
     def spawn_player(self, player: PlayerT) -> bs.Actor:
         assert player
@@ -352,6 +352,7 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
 
     def handlemessage(self, msg) -> None:
         if isinstance(msg, bs.PlayerDiedMessage):
+            msg.getplayer(Player).dead = True
             self.check_end()
         else:
             super().handlemessage(msg)
@@ -363,10 +364,25 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
             results.set_team_score(team, team.score)
         self.end(results=results)
 
-    def check_end(self) -> None:
+    def check_end(self):
         i = 0
         for player in self.players:
-            if player.is_alive():
+            if player.is_alive() and not player.dead:
                 i += 1
-        if i <= 2:
-            bs.timer(0.6, lambda: self.end_game())
+        if isinstance(self.session, bs.CoopSession):
+            if i <= 0:
+                bs.timer(0.6, bs.Call(self.end_game))
+        else:
+            if i <= 2:
+                bs.timer(0.6, bs.Call(self.end_game))
+
+
+# ba_meta export plugin
+class plugin(babase.Plugin):
+    def __init__(self):
+        ## Campaign support ##
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name = 'Simon Says',
+            gametype=SimonSays,
+            settings={},
+            preview_texture_name='courtyardPreview'))
