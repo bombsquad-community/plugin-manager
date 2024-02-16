@@ -14,7 +14,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "bda8f46",
+          "released_on": "16-02-2024",
+          "md5sum": "8c4b4d564d54db67281532f185d68ee6"
+        }
       }
     },
     "soccer": {
