@@ -3,6 +3,20 @@
   "description": "Minigames",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/minigames",
   "plugins": {
+    "dark_fields": {
+      "description": "Get to the other side.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Froshlee14",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "soccer": {
       "description": "Shoot the ball in left or right edge of the map to score",
       "external_url": "",
