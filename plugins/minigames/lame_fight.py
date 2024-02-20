@@ -18,18 +18,6 @@ if TYPE_CHECKING:
     from typing import Any, Type, Dict, List, Optional
 
 
-def ba_get_api_version():
-    return 6
-
-
-def ba_get_levels():
-    return [babase._level.Level(
-        'Lame Fight',
-        gametype=LameFightGame,
-        settings={},
-        preview_texture_name='courtyardPreview')]
-
-
 class Player(bs.Player['Team']):
     """Our player type for this game."""
 
@@ -168,3 +156,14 @@ class LameFightGame(bs.TeamGameActivity[Player, Team]):
 
         # Ends the activity.
         self.end(results)
+
+
+# ba_meta export plugin
+class plugin(babase.Plugin):
+    def __init__(self):
+        ## Campaign support ##
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name='Lame Fight',
+            gametype=LameFightGame,
+            settings={},
+            preview_texture_name='courtyardPreview'))

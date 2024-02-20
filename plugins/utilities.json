@@ -3,6 +3,25 @@
   "description": "Utilities",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "translate": {
+      "description": "Translate yours/others chat. Just click on the message to translate them. Open Plugin Settings/Double click 'Trans' button to open translation settings. Compatible with other PW mods (like advanced_party_window)",
+      "external_url": "https://github.com/bombsquad-community/plugin-manager/assets/92618708/5860e44d-0b70-4a3f-a651-208a4452ea38",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "fcda5f0",
+          "released_on": "09-02-2024",
+          "md5sum": "2efa68f899ff04bf345ed5e8c32886d7"
+        }
+      }
+    },
     "random_join": {
       "description": "Come visit the unknown servers around all the world! Plugin designed not to join servers with similar names more frequently than rare ones. Have fun!",
       "external_url": "",
@@ -692,7 +711,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Anonymous",
+          "name": "-",
           "email": "",
           "discord": ""
         }
@@ -807,7 +826,7 @@
       }
     },
     "disco_light": {
-      "description": "Add disco light into the game.",
+      "description": "Add disco light into the game. Do '/disco' to turn on and '/disco off' to turn off",
       "external_url": "",
       "authors": [
         {
@@ -817,6 +836,12 @@
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 8,
+          "commit_sha": "41046ae",
+          "released_on": "14-02-2024",
+          "md5sum": "bfffb346d61958c02015dde0b1520ca3"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -832,7 +857,7 @@
       }
     },
     "practice_tools": {
-      "description": "Powerful and comprehensive tools for practice purpose. Practice tabs can be access through party window.",
+      "description": "Powerful and comprehensive tools for practice purposes. Practice tabs can be accessed through party window.",
       "external_url": "https://www.youtube.com/watch?v=7BeCcIYSXd0&t=113s&ab_channel=BOMBsquadlife",
       "authors": [
         {
@@ -842,6 +867,12 @@
         }
       ],
       "versions": {
+        "2.2.0": {
+          "api_version": 8,
+          "commit_sha": "41046ae",
+          "released_on": "14-02-2024",
+          "md5sum": "b02de60a80039b092ef4d826b3d61cc1"
+        },
         "2.1.1": {
           "api_version": 8,
           "commit_sha": "5422dd6",
@@ -883,6 +914,25 @@
           "commit_sha": "800125c",
           "released_on": "14-12-2022",
           "md5sum": "a04c30c11a43443fe192fe70ad528f22"
+        }
+      }
+    },
+    "health_indicator": {
+      "description": "Add a simple health indicator on every player and bot.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "crossjoy"
+        }
+      ],
+      "versions": {
+        "1.2.0": {
+          "api_version": 8,
+          "commit_sha": "41046ae",
+          "released_on": "14-02-2024",
+          "md5sum": "e16123cf550f433c70e53b8ec41a4e46"
         }
       }
     },
@@ -1115,7 +1165,7 @@
       "external_url": "",
       "authors": [
         {
-          "name": "IDK",
+          "name": "-",
           "email": "",
           "discord": ""
         }
