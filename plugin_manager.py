@@ -1752,7 +1752,7 @@ class PluginManagerWindow(bui.Window):
             if self.selected_category is None:
                 continue
             try:
-                await self.draw_plugin_names(self.selected_category, search_term=filter_text)
+                await self.draw_plugin_names(self.selected_category, search_term=filter_text.lower())
             except CategoryDoesNotExist:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
