@@ -147,7 +147,4 @@
     "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps.json"
   ],
   "external_source_url": "https://github.com/{repository}/{content_type}/{tag}/category.json"
-}ger/{content_type}/{tag}/plugins/maps.json"
-  ],
-  "external_source_url": "https://github.com/{repository}/{content_type}/{tag}/category.json"
 }
