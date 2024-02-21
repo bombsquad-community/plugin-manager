@@ -1,8 +1,12 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.7 (22-02-2024)
+
+- Fix searching in plugin manager with capital letters.
+
 ### 1.0.6 (26-12-2023)
 
-- Fixed plugin manager throwing errors on older builds
+- Fixed plugin manager throwing errors on older builds.
 
 ### 1.0.5 (11-12-2023)
 
