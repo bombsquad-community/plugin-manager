@@ -32,7 +32,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.6"
+PLUGIN_MANAGER_VERSION = "1.0.7"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1752,7 +1752,7 @@ class PluginManagerWindow(bui.Window):
             if self.selected_category is None:
                 continue
             try:
-                await self.draw_plugin_names(self.selected_category, search_term=filter_text)
+                await self.draw_plugin_names(self.selected_category, search_term=filter_text.lower())
             except CategoryDoesNotExist:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
