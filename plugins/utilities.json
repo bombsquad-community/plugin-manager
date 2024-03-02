@@ -1254,6 +1254,20 @@
           "md5sum": "079e857197979aabf53f232b3cce56ba"
         }
       }
+    },
+    "natpmp_upnp": {
+      "description": "Automatic port forwarding if upnp is enabled",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "brostosjoined",
+          "email": "",
+          "discord": "brostos"
+        }
+      ],
+      "versions": {
+        "1.0.0": null,
+      }
     }
   }
 }
