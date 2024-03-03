@@ -2,7 +2,7 @@
 
 import babase
 import bauiv1 as bui
-import bascenev1
+import bascenev1 as bs
 
 import shutil
 import hashlib
@@ -21,6 +21,7 @@ WAN_SERVICE_NAMES = (
     "WANPPPConnection.1",  # CenturyLink C1100Z
     "WANPPPConn1",  # Huawei B528s-23a
 )
+BS_PORT = bs.get_game_port()
 
 
 def threaded(func):
@@ -92,34 +93,37 @@ def get_modules() -> None:
 # Plucked from https://github.com/tenable/upnp_info/blob/d20a1fda8ca4877d61b89fe7126077a3a5f0b322/upnp_info.py#L23
 def get_gateway_addr():
     """Returns the gateway ip of the router if upnp service is available"""
-    locations = set()
-    location_regex = re.compile("location:[ ]*(.+)"+ chr(13) + chr(10), re.IGNORECASE)
-    ssdpDiscover = (
-        "M-SEARCH * HTTP/1.1"+ chr(13) + chr(10)
-        + "HOST: 239.255.255.250:1900"+ chr(13) + chr(10)
-        + 'MAN: "ssdp:discover"'+ chr(13) + chr(10)
-        + "MX: 1"+ chr(13) + chr(10)
-        + "ST: ssdp:all"+ chr(13) + chr(10)
-        + chr(13) + chr(10)
-    )
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(ssdpDiscover.encode("ASCII"), ("239.255.255.250", 1900))
-    sock.settimeout(3)
     try:
-        while True:
-            data, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
-            location_result = location_regex.search(data.decode("ASCII"))
-            if location_result and (location_result.group(1) in locations) == False:
-                locations.add(location_result.group(1))
-    except socket.error:
-        sock.close()
-    if locations:
-        for location in locations:
-            parsed_url = urlparse(location)
-            if parsed_url.path.endswith("xml"):
-                gateway_ip_address = parsed_url.netloc.split(':')[0]
-                return gateway_ip_address
+        locations = set()
+        location_regex = re.compile("location:[ ]*(.+)"+ chr(13) + chr(10), re.IGNORECASE)
+        ssdpDiscover = (
+            "M-SEARCH * HTTP/1.1"+ chr(13) + chr(10)
+            + "HOST: 239.255.255.250:1900"+ chr(13) + chr(10)
+            + 'MAN: "ssdp:discover"'+ chr(13) + chr(10)
+            + "MX: 1"+ chr(13) + chr(10)
+            + "ST: ssdp:all"+ chr(13) + chr(10)
+            + chr(13) + chr(10)
+        )
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.sendto(ssdpDiscover.encode("ASCII"), ("239.255.255.250", 1900))
+        sock.settimeout(3)
+        try:
+            while True:
+                data, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
+                location_result = location_regex.search(data.decode("ASCII"))
+                if location_result and (location_result.group(1) in locations) == False:
+                    locations.add(location_result.group(1))
+        except socket.error:
+            sock.close()
+        if locations:
+            for location in locations:
+                parsed_url = urlparse(location)
+                if parsed_url.path.endswith("xml"):
+                    gateway_ip_address = parsed_url.netloc.split(':')[0]
+                    return gateway_ip_address
+    except:
+        pass
                  
 '''
 
@@ -130,7 +134,7 @@ def get_gateway_addr():
         with open(f"{nat_pmp_file_path}/__init__.py", "w") as f:
             f.writelines(lines)
 
-    add_port_mapping()
+        add_port_mapping()
 
 
 @threaded
@@ -163,9 +167,19 @@ def add_port_mapping():
             )
     except (NATPMPUnsupportedError, NATPMPNetworkError):
         import upnpy
+        from upnpy.exceptions import SOAPError
+        from urllib.error import HTTPError 
 
         upnp = upnpy.UPnP()
         devices = upnp.discover()
+        
+        if devices == []:
+            babase.screenmessage(
+                "Please enable upnp service on your router", (1.00, 0.15, 0.15)
+            )
+            # bui.getsound('shieldDown').play() -> RuntimeError : Sound creation failed
+            return
+        
 
         local_ip = (
             (
@@ -183,67 +197,67 @@ def add_port_mapping():
             )
             + ["no IP found"]
         )[0]
-        for upnp_dev in devices:
-            for service in upnp_dev.services:
-                if service in WAN_SERVICE_NAMES:
-                    service = upnp_dev[service]
-                    service.AddPortMapping(
-                        NewRemoteHost="",
-                        NewExternalPort=43210,
-                        NewProtocol="UDP",
-                        NewInternalPort=43210,
-                        NewInternalClient=str(local_ip),
-                        NewEnabled="1",
-                        NewPortMappingDescription="Bombsquad",
-                        NewLeaseDuration=0,
-                    )
-                    if confirm_port():
-                        babase.screenmessage(
-                            "You are now joinable from the internet", (0.2, 1, 0.2)
+        try:
+            for upnp_dev in devices:
+                for service in upnp_dev.services:
+                    if service in WAN_SERVICE_NAMES:
+                        service = upnp_dev[service]
+                        try:
+                            result = service.GetSpecificPortMappingEntry(
+                                NewRemoteHost="", NewExternalPort=BS_PORT, NewProtocol="UDP"
+                            )
+                            if result and not confirm_port():
+                                if babase.do_once():
+                                    babase.screenmessage(
+                                        "Oops seems like your network doesn't support upnp",
+                                        (1.0, 0.15, 0.15),
+                                    )
+                                    babase.pushcall(
+                                        bui.getsound("error").play(), from_other_thread=True
+                                    )
+                                return
+                        except SOAPError:
+                            if not confirm_port():
+                                return
+                        service.AddPortMapping(
+                            NewRemoteHost="",
+                            NewExternalPort=BS_PORT,
+                            NewProtocol="UDP",
+                            NewInternalPort=BS_PORT,
+                            NewInternalClient=str(local_ip),
+                            NewEnabled="1",
+                            NewPortMappingDescription="Bombsquad",
+                            NewLeaseDuration=0,
                         )
-                        bui.getsound("shieldUp").play()
+                        if confirm_port():
+                            babase.screenmessage(
+                                "You are now joinable from the internet", (0.2, 1, 0.2)
+                            )
+                            bui.getsound("shieldUp").play()
+        except (SOAPError, HTTPError):
+            babase.screenmessage('You will need to manualy add the port at the router :(')
+            
 
 
 @threaded
-def check_port():
+def delete_port_mapping():
     import upnpy
     from upnpy.exceptions import SOAPError
 
     upnp = upnpy.UPnP()
     devices = upnp.discover()
-
+    
     if devices == []:
-        babase.screenmessage(
-            "Please enable upnp service on your router", (1.00, 0.15, 0.15)
-        )
-        # bui.getsound('shieldDown').play() -> RuntimeError : Sound creation failed
         return
-
-    for upnp_dev in devices:
-        for service in upnp_dev.services:
-            if service in WAN_SERVICE_NAMES:
-                service = upnp_dev[service]
-                if service.GetSpecificPortMappingEntry:
-                    try:
-                        result = service.GetSpecificPortMappingEntry(
-                            NewRemoteHost="", NewExternalPort=43210, NewProtocol="UDP"
-                        )
-                        if result and confirm_port():
-                            return True
-                        elif result and not confirm_port():
-                            if babase.do_once():
-                                babase.screenmessage(
-                                    "Oops seems like your network doesn't support upnp",
-                                    (1.0, 0.15, 0.15),
-                                )
-                                babase.pushcall(
-                                    bui.getsound("error").play(), from_other_thread=True
-                                )
-                            return True
-                        elif not result and not confirm_port():
-                            return False
-                    except SOAPError:
-                        pass
+    
+    try:
+        for upnp_dev in devices:
+            for service in upnp_dev.services:
+                if service in WAN_SERVICE_NAMES:
+                    service = upnp_dev[service]
+                    service.DeletePortMapping(NewRemoteHost="", NewExternalPort=BS_PORT, NewProtocol="UDP")
+    except:
+        pass
 
 
 # ba_meta export babase.Plugin
@@ -252,5 +266,14 @@ class Joinable(babase.Plugin):
         get_modules()
         if confirm_port():
             return
-        elif not check_port():
+        else:
             add_port_mapping()
+            
+    def on_app_shutdown(self) -> None:
+        delete_port_mapping()
+
+    def on_app_pause(self) -> None:
+        delete_port_mapping()
+
+    def on_app_resume(self) -> None:
+        add_port_mapping()
