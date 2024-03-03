@@ -168,18 +168,17 @@ def add_port_mapping():
     except (NATPMPUnsupportedError, NATPMPNetworkError):
         import upnpy
         from upnpy.exceptions import SOAPError
-        from urllib.error import HTTPError 
+        from urllib.error import HTTPError
 
         upnp = upnpy.UPnP()
         devices = upnp.discover()
-        
+
         if devices == []:
             babase.screenmessage(
                 "Please enable upnp service on your router", (1.00, 0.15, 0.15)
             )
             # bui.getsound('shieldDown').play() -> RuntimeError : Sound creation failed
             return
-        
 
         local_ip = (
             (
@@ -236,7 +235,6 @@ def add_port_mapping():
                             bui.getsound("shieldUp").play()
         except (SOAPError, HTTPError, UnicodeDecodeError):
             babase.screenmessage('You will need to manualy add the port at the router :(')
-            
 
 
 @threaded
@@ -259,16 +257,17 @@ def delete_port_mapping():
 
         upnp = upnpy.UPnP()
         devices = upnp.discover()
-        
+
         if devices == []:
             return
-        
+
         try:
             for upnp_dev in devices:
                 for service in upnp_dev.services:
                     if service in WAN_SERVICE_NAMES:
                         service = upnp_dev[service]
-                        service.DeletePortMapping(NewRemoteHost="", NewExternalPort=BS_PORT, NewProtocol="UDP")
+                        service.DeletePortMapping(
+                            NewRemoteHost="", NewExternalPort=BS_PORT, NewProtocol="UDP")
         except:
             pass
 
@@ -281,7 +280,7 @@ class Joinable(babase.Plugin):
             return
         else:
             add_port_mapping()
-            
+
     def on_app_shutdown(self) -> None:
         delete_port_mapping()
 
