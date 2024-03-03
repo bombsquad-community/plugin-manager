@@ -232,7 +232,7 @@ def add_port_mapping():
                                 "You are now joinable from the internet", (0.2, 1, 0.2)
                             )
                             bui.getsound("shieldUp").play()
-        except (SOAPError, HTTPError):
+        except (SOAPError, HTTPError, UnicodeDecodeError):
             babase.screenmessage('You will need to manualy add the port on the router :(')
 
 
