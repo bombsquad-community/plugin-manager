@@ -216,8 +216,7 @@ def add_port_mapping():
                                     )
                                 return
                         except SOAPError:
-                            if not confirm_port():
-                                return
+                            pass
                         service.AddPortMapping(
                             NewRemoteHost="",
                             NewExternalPort=BS_PORT,
@@ -234,7 +233,7 @@ def add_port_mapping():
                             )
                             bui.getsound("shieldUp").play()
         except (SOAPError, HTTPError):
-            babase.screenmessage('You will need to manualy add the port at the router :(')
+            babase.screenmessage('You will need to manualy add the port on the router :(')
 
 
 @threaded
