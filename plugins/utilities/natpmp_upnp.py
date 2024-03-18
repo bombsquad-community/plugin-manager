@@ -18,7 +18,6 @@ from os import remove, getcwd
 from urllib.request import urlretrieve, urlopen
 
 
-
 # Plucked from https://github.com/ethereum/upnp-port-forward/blob/master/upnp_port_forward/
 WAN_SERVICE_NAMES = (
     "WANIPConn1",
@@ -143,8 +142,8 @@ def get_modules() -> None:
     for package, details in packages.items():
         parsed_url = urlparse(details["url"])
         path = unquote(parsed_url.path)
-        filename = os.path.basename(path) 
-        
+        filename = os.path.basename(path)
+
         if details["url"].endswith(".whl"):
             file_format = "whl"
             folder_name = '-'.join(filename.split('-')[:2])
@@ -154,7 +153,6 @@ def get_modules() -> None:
         package_path = os.path.join(install_path, f"{package}.{file_format}")
         package_path = Path(f"{install_path}/{package}.{file_format}")
         package_source_dir = Path(f"{install_path}/{details['folder']}")
-        
 
         if not Path(f"{package_source_dir}/__init__.py").exists():
             try:
@@ -178,7 +176,8 @@ def get_modules() -> None:
                         if subfolder.endswith(details["folder"]):
                             shutil.copytree(subfolder, f"{install_path}/{details['folder']}")
                 if details["folder"] == "six.py":
-                    shutil.copy(Path(f"{install_path}/{folder_name}/six.py"), f"{install_path}/six.py")
+                    shutil.copy(Path(f"{install_path}/{folder_name}/six.py"),
+                                f"{install_path}/six.py")
                 shutil.rmtree(Path(f"{install_path}/{folder_name}"))
             except shutil.ReadError as e:
                 with zipfile.ZipFile(package_filename, 'r') as zip_ref:
@@ -187,7 +186,7 @@ def get_modules() -> None:
             remove(package_path)
         else:
             return
-    
+
     # Patch to natpmp to work without netifaces
     with open(Path(f"{install_path}\\natpmp\\__init__.py"), "r") as f:
         lines = f.readlines()
@@ -282,12 +281,12 @@ def add_port_mapping():
             babase.screenmessage(
                 "Please enable upnp service on your router", (1.00, 0.15, 0.15)
             )
-            bui.getsound('shieldDown').play() # -> RuntimeError : Sound creation failed
+            bui.getsound('shieldDown').play()  # -> RuntimeError : Sound creation failed
             return
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             # connect() for UDP doesn't send packets
-            s.connect(('10.0.0.0', 0))  
+            s.connect(('10.0.0.0', 0))
             local_ip = s.getsockname()[0]
             s.close()
         except:
@@ -322,7 +321,6 @@ def add_port_mapping():
                         )
         except (SOAPError, HTTPError, UnicodeDecodeError):
             babase.screenmessage("You will need to manualy port forward at the router :(")
-
 
 
 # ba_meta export babase.Plugin
