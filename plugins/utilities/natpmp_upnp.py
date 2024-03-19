@@ -96,37 +96,37 @@ def get_modules() -> None:
             "md5": "a9486faba8dd3c4caa8c20a0f699958b",
             "folder": "lxml",
         }
-    elif "Darwin" and "arm64" in system:
+    elif "Darwin" in system and "arm64" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/bc/7e/4c66526e9b4f9c46afd7b2fef4482857d38752f2ee7cbb218816c5468251/lxml-5.1.0-cp311-cp311-macosx_11_0_arm64.whl",
             "md5": "4bed29fe8026c333c2d5030ecc8d85d9",
             "folder": "lxml",
         }
-    elif "Darwin" and "x86_64" in system:
+    elif "Darwin" in system and "x86_64" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/f9/dc/9819d678570f5f348de134b54b93fcf52584d7afff875cd7122117932f53/lxml-5.1.0-cp311-cp311-macosx_10_9_x86_64.whl",
             "md5": "d9ac00081b68951622009c900caaf715",
             "folder": "lxml",
         }
-    elif "glibc" and "x86_64" in system:
+    elif "glibc" in system and "x86_64" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/1f/09/df0101e6d7be06fca545c0f7417d03d69679ff280d892a406469086780a4/lxml-5.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
             "md5": "2c4dfc402f879dafc020ef7a79dc36d3",
             "folder": "lxml",
         }
-    elif "glibc" and "aarch64" in system:
+    elif "glibc" in system and "aarch64" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/f9/cf/d56019b06cde5ea5cbc7b984ccb7da1620bc132287b7ada6e86fed6f89a0/lxml-5.1.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
             "md5": "e21b6ac73e89d9c9a34c7dd4e79351cc",
             "folder": "lxml",
         }
-    elif not "glibc" and "x86_64" in system:
+    elif not "glibc" in system and "x86_64" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/14/60/8a188be2c9acf3d4c4168a16e3500cf1f1fe3cbd490895127251cb542b0b/lxml-5.1.0-cp311-cp311-musllinux_1_1_x86_64.whl",
             "md5": "48cd2be61449641adc10e61d0130cbef",
             "folder": "lxml",
         }
-    elif not "glibc" and "aarch64" in system:
+    elif not "glibc" in system and "aarch64" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/ce/fa/fa0366c08a061592d4dde52c7952a8b122135f0ac29762163e898b6f2dc1/lxml-5.1.0-cp311-cp311-musllinux_1_1_aarch64.whl",
             "md5": "b087cb7cb571cda85bb895e1d9f4b004",
