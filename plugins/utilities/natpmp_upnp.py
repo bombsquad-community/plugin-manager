@@ -188,7 +188,7 @@ def get_modules() -> None:
             return
 
     # Patch to natpmp to work without netifaces
-    with open(Path(f"{install_path}\\natpmp\\__init__.py"), "r") as f:
+    with open(Path(f"{install_path}/natpmp/__init__.py"), "r") as f:
         lines = f.readlines()
         # Define the new function as a string
         new_function = '''
@@ -234,7 +234,7 @@ def get_gateway_addr():
         lines[224:229] = new_function
         lines[21] = "import socket\nimport re\nfrom urllib.parse import urlparse"
 
-    with open(Path(f"{install_path}\\natpmp\\__init__.py"), "w") as f:
+    with open(Path(f"{install_path}/natpmp/__init__.py"), "w") as f:
         f.writelines(lines)
 
     add_port_mapping()
@@ -254,86 +254,88 @@ def add_port_mapping():
     if confirm_port():
         return
     # Try to add UDP port using NAT-PMP
-    import socket
-    import natpmp
-    from natpmp import NATPMPUnsupportedError, NATPMPNetworkError
-
     try:
-        natpmp.map_port(
-            natpmp.NATPMP_PROTOCOL_UDP,
-            BS_PORT,
-            BS_PORT,
-            14400,
-            gateway_ip=natpmp.get_gateway_addr(),
-        )
-        if confirm_port():
-            babase.screenmessage(
-                "You are now joinable from the internet", (0.2, 1, 0.2)
-            )
-    except (NATPMPUnsupportedError, NATPMPNetworkError):
-        import upnpclient
-        from upnpclient.soap import SOAPError
-        from urllib.error import HTTPError
-
-        devices = upnpclient.discover()
-
-        if devices == []:
-            babase.screenmessage(
-                "Please enable upnp service on your router", (1.00, 0.15, 0.15)
-            )
-            bui.getsound('shieldDown').play()  # -> RuntimeError : Sound creation failed
-            return
+        import socket
+        import natpmp
+        from natpmp import NATPMPUnsupportedError, NATPMPNetworkError
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            # connect() for UDP doesn't send packets
-            s.connect(('10.0.0.0', 0))
-            local_ip = s.getsockname()[0]
-            s.close()
-        except:
-            pass
-        try:
-            for upnp_dev in devices:
-                for service in upnp_dev.services:
-                    if service.name in WAN_SERVICE_NAMES:
-                        try:
-                            result = service.GetSpecificPortMappingEntry(
-                                NewRemoteHost="", NewExternalPort=BS_PORT, NewProtocol="UDP"
+            natpmp.map_port(
+                natpmp.NATPMP_PROTOCOL_UDP,
+                BS_PORT,
+                BS_PORT,
+                14400,
+                gateway_ip=natpmp.get_gateway_addr(),
+            )
+            if confirm_port():
+                babase.screenmessage(
+                    "You are now joinable from the internet", (0.2, 1, 0.2)
+                )
+        except (NATPMPUnsupportedError, NATPMPNetworkError):
+            import upnpclient
+            from upnpclient.soap import SOAPError
+            from urllib.error import HTTPError
+
+            devices = upnpclient.discover()
+
+            if devices == []:
+                babase.screenmessage(
+                    "Please enable upnp service on your router", (1.00, 0.15, 0.15)
+                )
+                bui.getsound('shieldDown').play()  # -> RuntimeError : Sound creation failed
+                return
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                # connect() for UDP doesn't send packets
+                s.connect(('10.0.0.0', 0))
+                local_ip = s.getsockname()[0]
+                s.close()
+            except:
+                pass
+            try:
+                for upnp_dev in devices:
+                    for service in upnp_dev.services:
+                        if service.name in WAN_SERVICE_NAMES:
+                            try:
+                                result = service.GetSpecificPortMappingEntry(
+                                    NewRemoteHost="", NewExternalPort=BS_PORT, NewProtocol="UDP"
+                                )
+                                if result and not confirm_port():
+                                    if babase.do_once():
+                                        babase.screenmessage(
+                                            "Oops seems like your network doesn't support upnp",
+                                            (1.0, 0.15, 0.15),
+                                        )
+                                    return
+                            except (SOAPError):
+                                if confirm_port():
+                                    return
+                            service.AddPortMapping(
+                                NewRemoteHost="0.0.0.0",
+                                NewExternalPort=BS_PORT,
+                                NewProtocol="UDP",
+                                NewInternalPort=BS_PORT,
+                                NewInternalClient=local_ip,
+                                NewEnabled="1",
+                                NewPortMappingDescription="Bombsquad",
+                                NewLeaseDuration=14400,
                             )
-                            if result and not confirm_port():
-                                if babase.do_once():
-                                    babase.screenmessage(
-                                        "Oops seems like your network doesn't support upnp",
-                                        (1.0, 0.15, 0.15),
-                                    )
-                                return
-                        except (SOAPError):
-                            if confirm_port():
-                                return
-                        service.AddPortMapping(
-                            NewRemoteHost="0.0.0.0",
-                            NewExternalPort=BS_PORT,
-                            NewProtocol="UDP",
-                            NewInternalPort=BS_PORT,
-                            NewInternalClient=local_ip,
-                            NewEnabled="1",
-                            NewPortMappingDescription="Bombsquad",
-                            NewLeaseDuration=14400,
-                        )
-        except (SOAPError, HTTPError, UnicodeDecodeError):
-            babase.screenmessage("You will need to manualy port forward at the router :(")
+            except (SOAPError, HTTPError, UnicodeDecodeError):
+                babase.screenmessage("You will need to manualy port forward at the router :(")
+    except ModuleNotFoundError:
+        pass
 
 
 # ba_meta export babase.Plugin
 class Joinable(babase.Plugin):
     def on_app_running(self) -> None:
-        try:
-            get_modules()
-            if confirm_port():
-                return
-            else:
-                add_port_mapping()
-        except:
-            pass
+    # try:
+        get_modules()
+        if confirm_port():
+            return
+        else:
+            add_port_mapping()
+    # except:
+    #     pass
 
     def on_app_resume(self) -> None:
         add_port_mapping()
