@@ -328,7 +328,7 @@ def add_port_mapping():
 # ba_meta export babase.Plugin
 class Joinable(babase.Plugin):
     def on_app_running(self) -> None:
-    # try:
+        # try:
         get_modules()
         if confirm_port():
             return
