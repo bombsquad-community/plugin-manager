@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.8 (11-04-2024)
+
+- Avoid making app-mode related calls while `SceneAppMode` isn't set.
+
 ### 1.0.7 (22-02-2024)
 
 - Fix searching in plugin manager with capital letters.

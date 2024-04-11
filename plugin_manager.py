@@ -4,8 +4,8 @@ from baenv import TARGET_BALLISTICA_BUILD
 import babase
 import _babase
 import bauiv1 as bui
-import _bauiv1 as _bui
-import _bascenev1 as _bs
+import _bauiv1
+import _bascenev1
 from bauiv1lib import popup, confirm
 
 import urllib.request
@@ -32,7 +32,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.7"
+PLUGIN_MANAGER_VERSION = "1.0.8"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -64,11 +64,8 @@ if TARGET_BALLISTICA_BUILD < 21282:
     babase.app.env.arcade = babase.app.arcade_mode
     babase.app.env.headless = babase.app.arcade_mode
     babase.app.env.demo = babase.app.demo_mode
-    protocol_version = babase.app.protocol_version
-    toolbar_test = babase.app.toolbar_test
-else:
-    protocol_version = _bs.protocol_version()
-    toolbar_test = _bui.toolbar_test()
+    _bascenev1.protocol_version = lambda: babase.app.protocol_version
+    _bauiv1.toolbar_test = lambda: babase.app.toolbar_test
 
 
 _env = _babase.env()
