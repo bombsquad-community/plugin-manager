@@ -16,6 +16,10 @@ jobs:
           uses: actions/setup-python@v5
           with:
             python-version: '3.11'
+        - run: |
+            output = $(python3 test/get_changes.py "${{ github.ref }}")
+            echo "::set-output name=changelog::$output"
+          id: set_changelog
         - name: Create Release
           id: create_release
           uses: actions/create-release@v1
@@ -25,7 +29,7 @@ jobs:
             tag_name: ${{ github.ref }}
             release_name: ${{ github.ref }}
             body: |
-              $(python3 test/get_changes.py "${{ github.ref }}")
+              ${{ steps.set_changelog.outputs.changelog }}
             draft: false
             prerelease: false\
         - name: Upload Release Asset
