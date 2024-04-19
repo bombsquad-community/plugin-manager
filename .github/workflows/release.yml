@@ -1,7 +1,6 @@
 name: Create Release
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - v1.*
