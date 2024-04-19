@@ -1,6 +1,7 @@
 import re
 import sys
 
+
 def get_version_changelog(version):
     with open('CHANGELOG.md', 'r') as file:
         content = file.read()
@@ -10,6 +11,7 @@ def get_version_changelog(version):
             return matches[0].strip()
         else:
             return f"Changelog entry for version {version} not found."
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
