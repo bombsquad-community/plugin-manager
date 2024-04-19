@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.9 (20-04-2024)
+
+- Making the Plugin Manager look a little cleaner.
+
 ### 1.0.8 (11-04-2024)
 
 - Avoid making app-mode related calls while `SceneAppMode` isn't set.
