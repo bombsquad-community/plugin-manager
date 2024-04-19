@@ -16,7 +16,7 @@ which makes further modding of your game more convenient by providing easier acc
 
 [DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
 [DownloadLinkJSdelivr]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
-[DownloadLink]:https://github.com/Loup-Garou911XD/plugin-manager/releases/latest/download/plugin_manager.py
+[DownloadLink]:https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py
 
 ![Plugin Manager GIF](https://user-images.githubusercontent.com/106954762/190505304-519c4b91-2461-42b1-be57-655a3fb0cbe8.gif)
 
