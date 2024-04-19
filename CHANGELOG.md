@@ -1,6 +1,10 @@
 ## Plugin Manager (dd-mm-yyyy)
 
-### 1.0.9 (20-04-2024)
+### 1.0.10 (20-04-2024)
+
+- Fixing up the bug in Refreshing Plugins button.
+
+### 1.0.9 (19-04-2024)
 
 - Making the Plugin Manager look a little cleaner.
 
