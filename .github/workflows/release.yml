@@ -25,7 +25,7 @@ jobs:
             tag_name: ${{ github.ref }}
             release_name: ${{ github.ref }}
             body: |
-              $(python3 test/get_changes.py `github.ref`)
+              $(python3 test/get_changes.py "${{ github.ref }}")
             draft: false
             prerelease: false\
         - name: Upload Release Asset
