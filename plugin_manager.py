@@ -1897,7 +1897,7 @@ class PluginManagerWindow(bui.Window):
                                          always_highlight=True,
                                          color=color,
                                          # on_select_call=lambda: None,
-                                         text=plugin.name,
+                                         text=plugin.name.replace('_', ' ').title(),
                                          click_activate=True,
                                          on_activate_call=lambda: self.show_plugin_window(plugin),
                                          h_align='left',
