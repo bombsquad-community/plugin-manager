@@ -32,7 +32,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.9"
+PLUGIN_MANAGER_VERSION = "1.0.10"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1831,11 +1831,11 @@ class PluginManagerWindow(bui.Window):
     #     await asyncio.gather(*plugin_names_to_draw)
 
     # XXX: Not sure if this is the best way to handle search filters.
-    async def draw_plugin_names(self, category, search_term=""):
+    async def draw_plugin_names(self, category, search_term="", refresh=False):
         # Re-draw plugin list UI if either search term or category was switched.
         to_draw_plugin_names = (search_term, category) != (self._last_filter_text,
                                                            self.selected_category)
-        if not to_draw_plugin_names:
+        if not (to_draw_plugin_names or refresh):
             return
 
         try:
@@ -1921,7 +1921,7 @@ class PluginManagerWindow(bui.Window):
     async def select_category(self, category):
         self.plugins_in_current_view.clear()
         self.draw_category_selection_button(post_label=category)
-        await self.draw_plugin_names(category, search_term=self._last_filter_text)
+        await self.draw_plugin_names(category, search_term=self._last_filter_text, refresh=True)
         self.selected_category = category
 
     def cleanup(self):
