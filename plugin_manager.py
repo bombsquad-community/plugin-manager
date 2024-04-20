@@ -375,18 +375,19 @@ class StartupTasks:
                 reverse=True,
             )
             new_supported_plugins = new_supported_plugins[:new_plugin_count]
-            new_supported_plugins = [plug.replace('_', ' ').title() for plug in new_supported_plugins]
+            new_supported_plugins = [plug.replace('_', ' ').title()
+                                     for plug in new_supported_plugins]
             new_supported_plugins_count = len(new_supported_plugins)
             if new_supported_plugins_count > 0:
-                new_supported_plugins = ", ".join(map(str, (new_supported_plugins 
+                new_supported_plugins = ", ".join(map(str, (new_supported_plugins
                                                             if new_supported_plugins_count < 4 else
                                                             new_supported_plugins[0:3])
                                                       ))
                 if new_supported_plugins_count == 1:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
                 else:
-                    notification_text = (f"{new_supported_plugins_count} new plugins " + 
-                        f"({new_supported_plugins + (', etc' if new_supported_plugins_count > 3 else '')}) are available!")
+                    notification_text = (f"{new_supported_plugins_count} new plugins " +
+                                         f"({new_supported_plugins + (', etc' if new_supported_plugins_count > 3 else '')}) are available!")
                 bui.screenmessage(notification_text, color=(0, 1, 0))
 
         if existing_num_of_plugins != new_num_of_plugins:
