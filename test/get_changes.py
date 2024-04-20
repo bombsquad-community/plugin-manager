@@ -3,6 +3,7 @@ import sys
 
 
 def get_version_changelog(version: str):
+    """Get changelog entry from CHANGELOG.md for given version"""
     with open('CHANGELOG.md', 'r') as file:
         content = file.read()
         pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"

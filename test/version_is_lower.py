@@ -3,6 +3,8 @@ from get_latest import get_latest
 
 
 def semantic_to_str(semantic_version: str):
+    """Convert version in the form of v1.2.3 to 001002003
+    for comparing 2 version in semantic versioning format"""
     out = ""
     for i in (semantic_version.split(".")):
         if len(i) == 1:
@@ -13,6 +15,7 @@ def semantic_to_str(semantic_version: str):
 
 
 def version_is_lower(version: str):
+    """Check if given version is lower than the latest entry in index.json"""
     latest = semantic_to_str(get_latest())
     version = semantic_to_str(version)
     if latest > version:
