@@ -32,7 +32,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.10"
+PLUGIN_MANAGER_VERSION = "1.0.11"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1004,7 +1004,11 @@ class PluginWindow(popup.PopupWindow):
 
         if to_draw_button1:
             bui.buttonwidget(parent=self._root_widget,
-                             position=(width * 0.1, pos),
+                             position=(
+                                 width * (
+                                     0.1 if self.plugin.is_installed and has_update else
+                                     0.25 if self.plugin.is_installed else
+                                     0.4), pos),
                              size=button_size,
                              on_activate_call=button1_action,
                              color=b1_color,
@@ -1015,7 +1019,7 @@ class PluginWindow(popup.PopupWindow):
 
         if self.plugin.is_installed:
             bui.buttonwidget(parent=self._root_widget,
-                             position=(width * 0.4, pos),
+                             position=(width * (0.4 if has_update else 0.55), pos),
                              size=button_size,
                              on_activate_call=button2_action,
                              color=b2_color,
@@ -1025,7 +1029,6 @@ class PluginWindow(popup.PopupWindow):
                              label=button2_label)
 
             if has_update:
-                # button3 =
                 bui.buttonwidget(parent=self._root_widget,
                                  position=(width * 0.7, pos),
                                  size=button_size,
