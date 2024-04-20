@@ -32,7 +32,7 @@ from threading import Thread
 import logging
 
 
-PLUGIN_MANAGER_VERSION = "1.0.11"
+PLUGIN_MANAGER_VERSION = "1.0.12"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -375,13 +375,19 @@ class StartupTasks:
                 reverse=True,
             )
             new_supported_plugins = new_supported_plugins[:new_plugin_count]
+            new_supported_plugins = [plug.replace('_', ' ').title()
+                                     for plug in new_supported_plugins]
             new_supported_plugins_count = len(new_supported_plugins)
             if new_supported_plugins_count > 0:
-                new_supported_plugins = ", ".join(map(str, new_supported_plugins))
+                new_supported_plugins = ", ".join(map(str, (new_supported_plugins
+                                                            if new_supported_plugins_count < 4 else
+                                                            new_supported_plugins[0:3])
+                                                      ))
                 if new_supported_plugins_count == 1:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
                 else:
-                    notification_text = f"{new_supported_plugins_count} new plugins ({new_supported_plugins}) are available!"
+                    notification_text = (f"{new_supported_plugins_count} new plugins " +
+                                         f"({new_supported_plugins + (', etc' if new_supported_plugins_count > 3 else '')}) are available!")
                 bui.screenmessage(notification_text, color=(0, 1, 0))
 
         if existing_num_of_plugins != new_num_of_plugins:
@@ -940,7 +946,8 @@ class PluginWindow(popup.PopupWindow):
                                                 scale_origin_stack_offset=self.scale_origin)
 
         pos = height * 0.8
-        plugin_title = f"{self.plugin.name} (v{self.plugin.latest_compatible_version.number})"
+        plug_name = self.plugin.name.replace('_', ' ').title()
+        plugin_title = f"{plug_name} (v{self.plugin.latest_compatible_version.number})"
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49, pos), size=(0, 0),
                        h_align='center', v_align='center', text=plugin_title,
