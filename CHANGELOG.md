@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.13 (20-04-2024)
+
+- Improvements to the new plugins notification
+
 ### 1.0.12 (20-04-2024)
 
 - Limited the "x new plugins are available" screen message to only show maximum 3 plugins.

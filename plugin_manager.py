@@ -31,8 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-
-PLUGIN_MANAGER_VERSION = "1.0.12"
+PLUGIN_MANAGER_VERSION = "1.0.13"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -356,7 +355,7 @@ class StartupTasks:
     async def notify_new_plugins(self):
         if not babase.app.config["Community Plugin Manager"]["Settings"]["Notify New Plugins"]:
             return
-
+        show_max_names = 2
         await self.plugin_manager.setup_index()
         new_num_of_plugins = len(await self.plugin_manager.categories["All"].get_plugins())
         try:
@@ -380,14 +379,15 @@ class StartupTasks:
             new_supported_plugins_count = len(new_supported_plugins)
             if new_supported_plugins_count > 0:
                 new_supported_plugins = ", ".join(map(str, (new_supported_plugins
-                                                            if new_supported_plugins_count < 4 else
-                                                            new_supported_plugins[0:3])
+                                                            if new_supported_plugins_count <= show_max_names else
+                                                            new_supported_plugins[0:show_max_names])
                                                       ))
                 if new_supported_plugins_count == 1:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
                 else:
-                    notification_text = (f"{new_supported_plugins_count} new plugins " +
-                                         f"({new_supported_plugins + (', etc' if new_supported_plugins_count > 3 else '')}) are available!")
+                    notification_text = new_supported_plugins + \
+                        ('' if new_supported_plugins_count <= show_max_names else ' and +' +
+                         str(new_supported_plugins_count-show_max_names)) + " new plugins are available"
                 bui.screenmessage(notification_text, color=(0, 1, 0))
 
         if existing_num_of_plugins != new_num_of_plugins:
