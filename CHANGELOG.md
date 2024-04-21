@@ -1,12 +1,16 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.14 (21-04-2024)
+
+- Displaying All Author Names and their Info for plugins.
+
 ### 1.0.13 (20-04-2024)
 
-- Improvements to the new plugins notification
+- Improvements to the new plugins notification.
 
 ### 1.0.12 (20-04-2024)
 
-- Limited the "x new plugins are available" screen message to only show maximum 3 plugins.
+- Limited the "x new plugins are available" screen message to only show maximum 2 plugins.
 
 ### 1.0.11 (20-04-2024)
 
