@@ -3,9 +3,9 @@
   "versions": {
     "1.0.14": {
       "api_version": 8,
-      "commit_sha": "0090a02",
+      "commit_sha": "fc5a7f1",
       "released_on": "21-04-2024",
-      "md5sum": "c152f1e515c1a43445038694599de2f3"
+      "md5sum": "d25f8b80387d532d1d8aa3b84b35b696"
     },
     "1.0.13": {
       "api_version": 8,
