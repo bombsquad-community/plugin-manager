@@ -39,7 +39,23 @@ which makes further modding of your game more convenient by providing easier acc
 
 There are two different ways the plugin manager can be installed:
 
-1. [Download plugin_manager.py][DownloadLink] to your mods directory (check it out by going into your game's
+
+1. From dev console
+
+   - Enable "Show Dev Console Button" from advance bombsquad settings
+   - Paste the following code in dev console
+     ```py
+     import urllib.request;import _babase;import os;url="https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py";plugin_path=os.path.join(_babase.env()["python_directory_user"],"plugin_manager.py");file=urllib.request.urlretrieve(url)[0];fl = open(file,'r');f=open(plugin_path, 'w+');f.write(fl.read());fl.close();f.close();print("SUCCESS")
+      ```
+   - "SUCCESS" will be shown in the console 
+
+2. Another way is to add
+   [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
+   to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
+   will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
+   manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
+
+3. [Download plugin_manager.py][DownloadLink] to your mods directory (check it out by going into your game's
    Settings -> Advanced -> Show Mods Folder). This is the recommended way (read next method to know why).
    If you're on a newer version of Android (11 or above) and not rooted, it probably won't be possible to copy
    mods to game's mods folder. In this case, you can connect your Android phone to a computer and push `plugin_manager.py`
@@ -47,13 +63,6 @@ There are two different ways the plugin manager can be installed:
    ```bash
    $ adb push plugin_manager.py /sdcard/Android/data/net.froemling.bombsquad/files/mods/plugin_manager.py
    ```
-
-3. Another way is to add
-   [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
-   to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
-   will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
-   manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
-
 
 ## Usage
 
