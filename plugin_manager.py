@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.13"
+PLUGIN_MANAGER_VERSION = "1.0.14"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -954,15 +954,17 @@ class PluginWindow(popup.PopupWindow):
                        scale=text_scale * 1.25, color=color,
                        maxwidth=width * 0.9)
         pos -= 25
-        # author =
+        # Author
+        text = 'by ' + ', '.join([author["name"] for author in self.plugin.info["authors"]])
         bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos),
-                       size=(0, 0),
+                       position=(width * 0.49 - (len(text)*14/2), pos - 10),
+                       size=(len(text)*14, 20),
                        h_align='center',
                        v_align='center',
-                       text='by ' + self.plugin.info["authors"][0]["name"],
+                       text=text,
                        scale=text_scale * 0.8,
-                       color=color, maxwidth=width * 0.9)
+                       color=color,
+                       maxwidth=width * 0.9)
         pos -= 35
         # status = bui.textwidget(parent=self._root_widget,
         #                        position=(width * 0.49, pos), size=(0, 0),
