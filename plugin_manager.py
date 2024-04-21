@@ -920,7 +920,7 @@ class AuthorsWindow(popup.PopupWindow):
                        h_align='center', v_align='center', text='Authors',
                        scale=text_scale * 1.25, color=color,
                        maxwidth=width * 0.9)
-        
+
         back_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(width * 0.1, height * 0.87),
@@ -953,7 +953,7 @@ class AuthorsWindow(popup.PopupWindow):
                                scale=(
                                    (1.0 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
                                    (1.2 if key == 'name' else 1.0)
-                                   ),
+                               ),
                                text=text,
                                h_align='left',
                                v_align='center',
