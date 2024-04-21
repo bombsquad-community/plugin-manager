@@ -952,7 +952,7 @@ class AuthorsWindow(popup.PopupWindow):
                                scale=(
                                    (1.1 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
                                    (1.2 if key == 'name' else 1.0)
-                                   ),
+                               ),
                                text=text,
                                h_align='center',
                                v_align='center',
