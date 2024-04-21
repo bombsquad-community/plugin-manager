@@ -938,33 +938,30 @@ class AuthorsWindow(popup.PopupWindow):
                                               position=(width * 0.1, height * 0.1))
         self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
                                               border=1,
-                                              left_border=-20 if _uiscale is babase.UIScale.SMALL else 0,
+                                              left_border=-15,
                                               margin=0)
 
         for author in self.authors_info:
             for key, value in author.items():
                 text = f"{key.title()}: {value if value != '' else 'Not Provided'}"
                 if key == 'name':
-                    text = ('   ' if _uiscale is babase.UIScale.SMALL else '      ') + value
+                    text = value
                 bui.textwidget(parent=self._columnwidget,
                                size=(width * 0.8, 35 if key == 'name' else 30),
-                               always_highlight=True,
-                               color=color,
+                               color=color if key == 'name' else (0.75, 0.7, 0.8),
                                scale=(
-                                   (1.0 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
+                                   (1.1 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
                                    (1.2 if key == 'name' else 1.0)
-                               ),
+                                   ),
                                text=text,
-                               h_align='left',
+                               h_align='center',
                                v_align='center',
                                maxwidth=420)
             bui.textwidget(parent=self._columnwidget,
                            size=(width * 0.8, 30),
                            always_highlight=True,
-                           color=color,
-                           h_align='left',
-                           v_align='center',
-                           maxwidth=420)
+                           h_align='center',
+                           v_align='center')
 
     def _back(self) -> None:
         bui.getsound('swish').play()
