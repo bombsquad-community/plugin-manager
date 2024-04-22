@@ -1773,7 +1773,7 @@ class PluginManagerWindow(bui.Window):
 
         if self.alphabet_order_selection_button is None:
             self.alphabet_order_selection_button = bui.buttonwidget(parent=self._root_widget,
-                                                                    size=(40,30),
+                                                                    size=(40, 30),
                                                                     position=(
                                                                         category_pos_x - 47,
                                                                         category_pos_y),
@@ -1787,8 +1787,8 @@ class PluginManagerWindow(bui.Window):
                                                                     text_scale=0.6)
         else:
             bui.buttonwidget(edit=self.alphabet_order_selection_button,
-                             label = ('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
-            )
+                             label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
+                             )
 
         label = f"Category: {post_label}"
 
@@ -1812,8 +1812,8 @@ class PluginManagerWindow(bui.Window):
     async def _on_order_button_press(self) -> None:
         self.selected_alphabet_order = ('a_z' if self.selected_alphabet_order == 'z_a' else 'z_a')
         bui.buttonwidget(edit=self.alphabet_order_selection_button,
-                         label = ('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
-        )
+                         label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
+                         )
         filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
         await self.draw_plugin_names(
             self.selected_category, refresh=True, order=self.selected_alphabet_order
@@ -1979,8 +1979,8 @@ class PluginManagerWindow(bui.Window):
         else:
             plugins = category_plugins
 
-        def return_name(val): 
-            return val.name 
+        def return_name(val):
+            return val.name
         plugins.sort(key=return_name, reverse=(True if order == 'z_a' else False))
 
         if plugins == self._last_filter_plugins and not refresh:
