@@ -1,5 +1,13 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.17 (22-04-2024)
+
+- Added function for getting changelog
+
+### 1.0.16 (22-04-2024)
+
+- Fix for error caused when disable button was missing
+
 ### 1.0.15 (22-04-2024)
 
 - Plugins can now be viewed in A-Z and Z-A order.
