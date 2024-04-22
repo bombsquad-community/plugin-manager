@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.14"
+PLUGIN_MANAGER_VERSION = "1.0.15"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1589,7 +1589,7 @@ class PluginSourcesWindow(popup.PopupWindow):
 
 class PluginCategoryWindow(popup.PopupMenuWindow):
     def __init__(self, choices, current_choice, origin_widget, asyncio_callback):
-        choices = (*choices, "Custom Sources")
+        choices = (*choices, "Installed", "Custom Sources")
         self._asyncio_callback = asyncio_callback
         self.scale_origin = origin_widget.get_screen_space_center()
         super().__init__(
@@ -1967,7 +1967,7 @@ class PluginManagerWindow(bui.Window):
             return
 
         try:
-            category_plugins = await self.plugin_manager.categories[category].get_plugins()
+            category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
         except (KeyError, AttributeError):
             raise CategoryDoesNotExist(f"{category} does not exist.")
 
@@ -1990,7 +1990,10 @@ class PluginManagerWindow(bui.Window):
         self._last_filter_text = search_term
         self._last_filter_plugins = plugins
 
-        plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
+        if category == 'Installed':
+            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins if plugin.is_installed)
+        else:
+            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
 
         for plugin in self._columnwidget.get_children():
             plugin.delete()
