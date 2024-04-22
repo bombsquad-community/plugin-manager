@@ -1104,7 +1104,7 @@ class PluginWindow(popup.PopupWindow):
                                                    size=(len(text)*14, 20),
                                                    label='',
                                                    texture=bui.gettexture("empty"),
-                                                   on_activate_call=lambda: 
+                                                   on_activate_call=lambda:
                                                        AuthorsWindow(self.plugin.info["authors"], self._root_widget))
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49 - (len(text)*14/2), pos - 10),
