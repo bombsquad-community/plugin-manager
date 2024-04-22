@@ -1320,15 +1320,15 @@ class PluginManager:
         if not self._changelog:
             request = urllib.request.Request(CHANGELOG_META.format(
                 repository_url=REPOSITORY_URL,
-                        content_type="raw",
-                        tag=CURRENT_TAG
-                ),
+                content_type="raw",
+                tag=CURRENT_TAG
+            ),
                 headers=self.request_headers)
             response = await async_send_network_request(request)
             self._changelog = response.read().decode()
         return self._changelog
-    
-    async def setup_changelog(self, version = None) -> None:
+
+    async def setup_changelog(self, version=None) -> None:
         if version is None:
             version = PLUGIN_MANAGER_VERSION
         while self._changelog_setup_in_progress:
@@ -1346,7 +1346,6 @@ class PluginManager:
         self.set_changelog_global_cache(changelog)
         print(changelog)
         self._changelog_setup_in_progress = False
-    
 
     async def setup_plugin_categories(self, plugin_index):
         # A hack to have the "All" category show at the top.
@@ -1395,7 +1394,7 @@ class PluginManager:
     def set_index_global_cache(self, index):
         _CACHE["index"] = index
 
-    def set_changelog_global_cache(self,changelog):
+    def set_changelog_global_cache(self, changelog):
         _CACHE["changelog"] = changelog
 
     def unset_index_global_cache(self):
