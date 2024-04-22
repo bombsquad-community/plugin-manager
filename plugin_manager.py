@@ -2408,7 +2408,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
     async def update(self, to_version=None, commit_sha=None):
         try:
             await self._plugin_manager.update(to_version, commit_sha)
-            PluginManager.setup_changelog()
+            await self._plugin_manager.setup_changelog()
         except MD5CheckSumFailed:
             bui.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
             bui.getsound('error').play()
