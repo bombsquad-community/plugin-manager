@@ -26,10 +26,13 @@ jobs:
       - name: set_variables
         run: |
           output1=$(python3 test/get_latest.py)
-          output2=$(python3 test/get_changes.py "$output1")
+          {
+            echo "changelog<<EOF"
+            python3 test/get_changes.py "$(python3 test/get_latest.py)"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
           output3=$(python3 test/version_is_lower.py ${{ steps.previoustag.outputs.tag }})
           echo "latestVersion=$output1" >> $GITHUB_OUTPUT
-          echo "changelog=$output2" >> $GITHUB_OUTPUT
           echo "shouldRun=$output3" >> $GITHUB_OUTPUT
         id: set_variables
       
