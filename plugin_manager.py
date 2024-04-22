@@ -8,7 +8,6 @@ import _bauiv1
 import _bascenev1
 from bauiv1lib import popup, confirm
 
-
 import urllib.request
 import http.client
 import socket
@@ -896,6 +895,73 @@ class Plugin:
             bui.getsound('error').play()
 
 
+class ChangelogWindow(popup.PopupWindow):
+    def __init__(self, origin_widget):
+        self.scale_origin = origin_widget.get_screen_space_center()
+        bui.getsound('swish').play()
+        s = 1.65 if _uiscale is babase.UIScale.SMALL else 1.39 if _uiscale is babase.UIScale.MEDIUM else 1.67
+        width = 400 * s
+        height = width * 0.5
+        color = (1, 1, 1)
+        text_scale = 0.7 * s
+        self._transition_out = 'out_scale'
+        transition = 'in_scale'
+
+        self._root_widget = bui.containerwidget(size=(width, height),
+                                                on_outside_click_call=self._back,
+                                                transition=transition,
+                                                scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
+                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
+                                                scale_origin_stack_offset=self.scale_origin)
+
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, height * 0.87), size=(0, 0),
+                       h_align='center', v_align='center', text='ChangeLog',
+                       scale=text_scale * 1.25, color=bui.app.ui_v1.title_color,
+                       maxwidth=width * 0.9)
+
+        back_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(width * 0.1, height * 0.8),
+            size=(60, 60),
+            scale=0.8,
+            label=babase.charstr(babase.SpecialChar.BACK),
+            # autoselect=True,
+            button_type='backSmall',
+            on_activate_call=self._back)
+
+        bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
+
+        bui.textwidget(parent=self._root_widget,
+                       position=(width * 0.49, height * 0.72), size=(0, 0),
+                       h_align='center', v_align='center', text=PLUGIN_MANAGER_VERSION,
+                       scale=text_scale * 1.1, color=color,
+                       maxwidth=width * 0.9)
+
+        bui.buttonwidget(
+            parent=self._root_widget,
+            position=(width * 0.7, height * 0.72 - 20),
+            size=(140, 60),
+            scale=0.8,
+            label='Full ChangeLog',
+            button_type='square',
+            on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md'))
+
+        logs = _CACHE['changelog'].split('\n')
+        loop_height = height * 0.62
+        for log in logs:
+            bui.textwidget(parent=self._root_widget,
+                           position=(width * 0.05, loop_height), size=(0, 0),
+                           h_align='left', v_align='top', text=log,
+                           scale=text_scale, color=color,
+                           maxwidth=width * 0.9)
+            loop_height -= 35
+
+    def _back(self) -> None:
+        bui.getsound('swish').play()
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
+
+
 class AuthorsWindow(popup.PopupWindow):
     def __init__(self, authors_info, origin_widget):
         self.authors_info = authors_info
@@ -1038,7 +1104,8 @@ class PluginWindow(popup.PopupWindow):
                                                    size=(len(text)*14, 20),
                                                    label='',
                                                    texture=bui.gettexture("empty"),
-                                                   on_activate_call=lambda: AuthorsWindow(self.plugin.info["authors"], self._root_widget))
+                                                   on_activate_call=lambda: 
+                                                       AuthorsWindow(self.plugin.info["authors"], self._root_widget))
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49 - (len(text)*14/2), pos - 10),
                        size=(len(text)*14, 20),
@@ -1345,7 +1412,6 @@ class PluginManager:
         else:
             changelog = f"Changelog entry for version {version} not found."
         self.set_changelog_global_cache(changelog)
-        print(changelog)
         self._changelog_setup_in_progress = False
 
     async def setup_plugin_categories(self, plugin_index):
@@ -1779,6 +1845,7 @@ class PluginManagerWindow(bui.Window):
         self.draw_category_selection_button(post_label="All")
         self.draw_refresh_icon()
         self.draw_settings_icon()
+        await self.plugin_manager.setup_changelog()
         with self.exception_handler():
             await self.plugin_manager.setup_index()
             bui.textwidget(edit=self._plugin_manager_status_text,
@@ -2171,6 +2238,25 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        maxwidth=width * 0.9)
 
         pos -= 20
+        self._changelog_button = bui.buttonwidget(parent=self._root_widget,
+                                                  position=((width * 0.2) - button_size[0] / 2 - 5,
+                                                            pos),
+                                                  size=(80, 30),
+                                                  on_activate_call=lambda:
+                                                      ChangelogWindow(self._root_widget),
+                                                  textcolor=b_text_color,
+                                                  button_type='square',
+                                                  label='')
+        bui.textwidget(parent=self._root_widget,
+                       position=((width * 0.2) - button_size[0] / 2, pos),
+                       size=(70, 30),
+                       scale=0.6,
+                       h_align='center',
+                       v_align='center',
+                       text='ChangeLog',
+                       color=b_text_color,
+                       draw_controller=self._changelog_button,
+                       )
         self._save_button = bui.buttonwidget(parent=self._root_widget,
                                              position=((width * 0.82) - button_size[0] / 2, pos),
                                              size=(73, 35),
