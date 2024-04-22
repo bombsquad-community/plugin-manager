@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.16"
+PLUGIN_MANAGER_VERSION = "1.0.17"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -71,6 +71,7 @@ _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
 
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
+CHANGELOG_META = "{repository_url}/{content_type}/{tag}/CHANGELOG.md"
 HEADERS = {
     "User-Agent": _env["legacy_user_agent_string"],
 }
@@ -1283,9 +1284,11 @@ class PluginManager:
     def __init__(self):
         self.request_headers = HEADERS
         self._index = _CACHE.get("index", {})
+        self._changelog = _CACHE.get("changelog", {})
         self.categories = {}
         self.module_path = sys.modules[__name__].__file__
         self._index_setup_in_progress = False
+        self._changelog_setup_in_progress = False
 
     async def get_index(self):
         if not self._index:
@@ -1312,6 +1315,38 @@ class PluginManager:
         index = await self.get_index()
         await self.setup_plugin_categories(index)
         self._index_setup_in_progress = False
+
+    async def get_changelog(self) -> str:
+        if not self._changelog:
+            request = urllib.request.Request(CHANGELOG_META.format(
+                repository_url=REPOSITORY_URL,
+                        content_type="raw",
+                        tag=CURRENT_TAG
+                ),
+                headers=self.request_headers)
+            response = await async_send_network_request(request)
+            self._changelog = response.read().decode()
+        return self._changelog
+    
+    async def setup_changelog(self, version = None) -> None:
+        if version is None:
+            version = PLUGIN_MANAGER_VERSION
+        while self._changelog_setup_in_progress:
+            # Avoid making multiple network calls to the same resource in parallel.
+            # Rather wait for the previous network call to complete.
+            await asyncio.sleep(0.1)
+        self._changelog_setup_in_progress = not bool(self._changelog)
+        full_changelog = await self.get_changelog()
+        pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
+        matches = re.findall(pattern, full_changelog, re.DOTALL)
+        if matches:
+            changelog = matches[0].strip()
+        else:
+            changelog = f"Changelog entry for version {version} not found."
+        self.set_changelog_global_cache(changelog)
+        print(changelog)
+        self._changelog_setup_in_progress = False
+    
 
     async def setup_plugin_categories(self, plugin_index):
         # A hack to have the "All" category show at the top.
@@ -1355,9 +1390,13 @@ class PluginManager:
     async def refresh(self):
         self.cleanup()
         await self.setup_index()
+        await self.setup_changelog()
 
     def set_index_global_cache(self, index):
         _CACHE["index"] = index
+
+    def set_changelog_global_cache(self,changelog):
+        _CACHE["changelog"] = changelog
 
     def unset_index_global_cache(self):
         try:
@@ -2283,6 +2322,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
     async def update(self, to_version=None, commit_sha=None):
         try:
             await self._plugin_manager.update(to_version, commit_sha)
+            PluginManager.setup_changelog()
         except MD5CheckSumFailed:
             bui.screenmessage("MD5 checksum failed during plugin manager update", color=(1, 0, 0))
             bui.getsound('error').play()
