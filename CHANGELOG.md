@@ -1,5 +1,10 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.15 (22-04-2024)
+
+- Plugins can now be viewed in A-Z and Z-A order.
+- Added 'Installed' category to show Installed plugins.
+
 ### 1.0.14 (21-04-2024)
 
 - Displaying All Author Names and their Info for plugins.
