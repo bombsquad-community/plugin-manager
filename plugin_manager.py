@@ -1991,7 +1991,8 @@ class PluginManagerWindow(bui.Window):
         self._last_filter_plugins = plugins
 
         if category == 'Installed':
-            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins if plugin.is_installed)
+            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin)
+                                         for plugin in plugins if plugin.is_installed)
         else:
             plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
 
