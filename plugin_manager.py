@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.14"
+PLUGIN_MANAGER_VERSION = "1.0.15"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1589,7 +1589,7 @@ class PluginSourcesWindow(popup.PopupWindow):
 
 class PluginCategoryWindow(popup.PopupMenuWindow):
     def __init__(self, choices, current_choice, origin_widget, asyncio_callback):
-        choices = (*choices, "Custom Sources")
+        choices = (*choices, "Installed", "Custom Sources")
         self._asyncio_callback = asyncio_callback
         self.scale_origin = origin_widget.get_screen_space_center()
         super().__init__(
@@ -1628,6 +1628,8 @@ class PluginManagerWindow(bui.Window):
         self.category_selection_button = None
         self.selected_category = None
         self.plugins_in_current_view = {}
+        self.selected_alphabet_order = 'a_z'
+        self.alphabet_order_selection_button = None
 
         loop.create_task(self.draw_index())
 
@@ -1761,13 +1763,32 @@ class PluginManagerWindow(bui.Window):
 
     def draw_category_selection_button(self, post_label):
         category_pos_x = (440 if _uiscale is babase.UIScale.SMALL else
-                          340 if _uiscale is babase.UIScale.MEDIUM else 350)
+                          340 if _uiscale is babase.UIScale.MEDIUM else 370)
         category_pos_y = self._height - (141 if _uiscale is babase.UIScale.SMALL else
                                          110 if _uiscale is babase.UIScale.MEDIUM else 110)
         b_size = (140, 30)
         # b_textcolor = (0.75, 0.7, 0.8)
         b_textcolor = (0.8, 0.8, 0.85)
         # b_color = (0.6, 0.53, 0.63)
+
+        if self.alphabet_order_selection_button is None:
+            self.alphabet_order_selection_button = bui.buttonwidget(parent=self._root_widget,
+                                                                    size=(40, 30),
+                                                                    position=(
+                                                                        category_pos_x - 47,
+                                                                        category_pos_y),
+                                                                    label=(
+                                                                        'Z - A' if self.selected_alphabet_order == 'z_a'
+                                                                        else 'A - Z'),
+                                                                    on_activate_call=(
+                                                                        lambda: loop.create_task(self._on_order_button_press())),
+                                                                    button_type="square",
+                                                                    textcolor=b_textcolor,
+                                                                    text_scale=0.6)
+        else:
+            bui.buttonwidget(edit=self.alphabet_order_selection_button,
+                             label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
+                             )
 
         label = f"Category: {post_label}"
 
@@ -1788,9 +1809,19 @@ class PluginManagerWindow(bui.Window):
             self.category_selection_button = bui.buttonwidget(edit=self.category_selection_button,
                                                               label=label)
 
+    async def _on_order_button_press(self) -> None:
+        self.selected_alphabet_order = ('a_z' if self.selected_alphabet_order == 'z_a' else 'z_a')
+        bui.buttonwidget(edit=self.alphabet_order_selection_button,
+                         label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
+                         )
+        filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
+        await self.draw_plugin_names(
+            self.selected_category, refresh=True, order=self.selected_alphabet_order
+        )
+
     def draw_search_bar(self):
         search_bar_pos_x = (85 if _uiscale is babase.UIScale.SMALL else
-                            68 if _uiscale is babase.UIScale.MEDIUM else 90)
+                            68 if _uiscale is babase.UIScale.MEDIUM else 75)
         search_bar_pos_y = self._height - (
             145 if _uiscale is babase.UIScale.SMALL else
             110 if _uiscale is babase.UIScale.MEDIUM else 116)
@@ -1802,7 +1833,7 @@ class PluginManagerWindow(bui.Window):
             35 if _uiscale is babase.UIScale.MEDIUM else 45)
 
         filter_txt_pos_x = (60 if _uiscale is babase.UIScale.SMALL else
-                            40 if _uiscale is babase.UIScale.MEDIUM else 60)
+                            40 if _uiscale is babase.UIScale.MEDIUM else 50)
         filter_txt_pos_y = search_bar_pos_y + (3 if _uiscale is babase.UIScale.SMALL else
                                                4 if _uiscale is babase.UIScale.MEDIUM else 8)
 
@@ -1845,7 +1876,8 @@ class PluginManagerWindow(bui.Window):
             if self.selected_category is None:
                 continue
             try:
-                await self.draw_plugin_names(self.selected_category, search_term=filter_text.lower())
+                await self.draw_plugin_names(
+                    self.selected_category, search_term=filter_text.lower(), order=self.selected_alphabet_order)
             except CategoryDoesNotExist:
                 pass
             # XXX: This may be more efficient, but we need a way to get a plugin's textwidget
@@ -1927,7 +1959,7 @@ class PluginManagerWindow(bui.Window):
     #     await asyncio.gather(*plugin_names_to_draw)
 
     # XXX: Not sure if this is the best way to handle search filters.
-    async def draw_plugin_names(self, category, search_term="", refresh=False):
+    async def draw_plugin_names(self, category, search_term="", refresh=False, order='a_z'):
         # Re-draw plugin list UI if either search term or category was switched.
         to_draw_plugin_names = (search_term, category) != (self._last_filter_text,
                                                            self.selected_category)
@@ -1935,26 +1967,34 @@ class PluginManagerWindow(bui.Window):
             return
 
         try:
-            category_plugins = await self.plugin_manager.categories[category].get_plugins()
+            category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
         except (KeyError, AttributeError):
             raise CategoryDoesNotExist(f"{category} does not exist.")
 
         if search_term:
-            plugins = filter(
+            plugins = list(filter(
                 lambda plugin: self.search_term_filterer(plugin, search_term),
                 category_plugins,
-            )
+            ))
         else:
             plugins = category_plugins
 
-        if plugins == self._last_filter_plugins:
+        def return_name(val):
+            return val.name
+        plugins.sort(key=return_name, reverse=(True if order == 'z_a' else False))
+
+        if plugins == self._last_filter_plugins and not refresh:
             # Plugins names to draw on UI are already drawn.
             return
 
         self._last_filter_text = search_term
         self._last_filter_plugins = plugins
 
-        plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
+        if category == 'Installed':
+            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin)
+                                         for plugin in plugins if plugin.is_installed)
+        else:
+            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
 
         for plugin in self._columnwidget.get_children():
             plugin.delete()
@@ -2017,7 +2057,8 @@ class PluginManagerWindow(bui.Window):
     async def select_category(self, category):
         self.plugins_in_current_view.clear()
         self.draw_category_selection_button(post_label=category)
-        await self.draw_plugin_names(category, search_term=self._last_filter_text, refresh=True)
+        await self.draw_plugin_names(
+            category, search_term=self._last_filter_text, refresh=True, order=self.selected_alphabet_order)
         self.selected_category = category
 
     def cleanup(self):
