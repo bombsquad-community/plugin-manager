@@ -1180,7 +1180,7 @@ class PluginWindow(popup.PopupWindow):
 
         if self.plugin.is_installed:
             selected_btn = bui.buttonwidget(parent=self._root_widget,
-                                            position=(width * (0.4 if has_update else 0.55), pos),
+                                            position=(width * (0.4 if has_update or not to_draw_button1 else 0.55), pos),
                                             size=button_size,
                                             on_activate_call=button2_action,
                                             color=b2_color,
