@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.18 (25-04-2024)
+
+- Fix error caused when cant get changelog
+
 ### 1.0.17 (22-04-2024)
 
 - Added ChangeLog Window to view latest changes.
