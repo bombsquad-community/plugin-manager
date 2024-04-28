@@ -1407,8 +1407,8 @@ class PluginManager:
         self._changelog_setup_in_progress = not bool(self._changelog)
         try:
             full_changelog = await self.get_changelog()
-        except Exception:
-            full_changelog = 'Could not get ChangeLog'
+        except urllib.error.URLError:
+            full_changelog = 'Could not get ChangeLog due to Internet Issues'
         pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
         matches = re.findall(pattern, full_changelog, re.DOTALL)
         if matches:
