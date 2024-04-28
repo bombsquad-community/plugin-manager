@@ -2,7 +2,7 @@
 
 ### 1.0.18 (25-04-2024)
 
-- Fix error caused when cant get changelog
+- Fixed errors which were caused due to no internet connection.
 
 ### 1.0.17 (22-04-2024)
 
