@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.18 (28-04-2024)
+
+- Fixed errors which were caused due to no internet connection.
+
 ### 1.0.17 (22-04-2024)
 
 - Added ChangeLog Window to view latest changes.

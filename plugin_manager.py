@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.17"
+PLUGIN_MANAGER_VERSION = "1.0.18"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1180,7 +1180,8 @@ class PluginWindow(popup.PopupWindow):
 
         if self.plugin.is_installed:
             selected_btn = bui.buttonwidget(parent=self._root_widget,
-                                            position=(width * (0.4 if has_update else 0.55), pos),
+                                            position=(
+                                                width * (0.4 if has_update or not to_draw_button1 else 0.55), pos),
                                             size=button_size,
                                             on_activate_call=button2_action,
                                             color=b2_color,
@@ -1404,13 +1405,16 @@ class PluginManager:
             # Rather wait for the previous network call to complete.
             await asyncio.sleep(0.1)
         self._changelog_setup_in_progress = not bool(self._changelog)
-        full_changelog = await self.get_changelog()
-        pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
-        matches = re.findall(pattern, full_changelog, re.DOTALL)
-        if matches:
-            changelog = matches[0].strip()
-        else:
-            changelog = f"Changelog entry for version {version} not found."
+        try:
+            full_changelog = await self.get_changelog()
+            pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
+            matches = re.findall(pattern, full_changelog, re.DOTALL)
+            if matches:
+                changelog = matches[0].strip()
+            else:
+                changelog = f"Changelog entry for version {version} not found."
+        except urllib.error.URLError:
+            changelog = 'Could not get ChangeLog due to Internet Issues.'
         self.set_changelog_global_cache(changelog)
         self._changelog_setup_in_progress = False
 
@@ -1456,7 +1460,6 @@ class PluginManager:
     async def refresh(self):
         self.cleanup()
         await self.setup_index()
-        await self.setup_changelog()
 
     def set_index_global_cache(self, index):
         _CACHE["index"] = index
@@ -1732,7 +1735,7 @@ class PluginManagerWindow(bui.Window):
     def __init__(self, transition: str = "in_right", origin_widget: bui.Widget = None):
         self.plugin_manager = PluginManager()
         self.category_selection_button = None
-        self.selected_category = None
+        self.selected_category = 'All'
         self.plugins_in_current_view = {}
         self.selected_alphabet_order = 'a_z'
         self.alphabet_order_selection_button = None
@@ -1831,6 +1834,7 @@ class PluginManagerWindow(bui.Window):
         except urllib.error.URLError:
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="Make sure you are connected\n to the Internet and try again.")
+            self.plugin_manager._index_setup_in_progress = False
         except RuntimeError:
             # User probably went back before a bui.Window could finish loading.
             pass
@@ -1923,7 +1927,7 @@ class PluginManagerWindow(bui.Window):
                          )
         filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
         await self.draw_plugin_names(
-            self.selected_category, refresh=True, order=self.selected_alphabet_order
+            self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
         )
 
     def draw_search_bar(self):
@@ -2076,7 +2080,11 @@ class PluginManagerWindow(bui.Window):
         try:
             category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
         except (KeyError, AttributeError):
-            raise CategoryDoesNotExist(f"{category} does not exist.")
+            no_internet_text = "Make sure you are connected\n to the Internet and try again."
+            if bui.textwidget(query=self._plugin_manager_status_text) != no_internet_text:
+                raise CategoryDoesNotExist(f"{category} does not exist.")
+            else:
+                return
 
         if search_term:
             plugins = list(filter(
@@ -2183,6 +2191,7 @@ class PluginManagerWindow(bui.Window):
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
+            await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="")
