@@ -1927,7 +1927,7 @@ class PluginManagerWindow(bui.Window):
                          )
         filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
         await self.draw_plugin_names(
-            self.selected_category, refresh=True, order=self.selected_alphabet_order
+            self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
         )
 
     def draw_search_bar(self):
