@@ -104,7 +104,7 @@ REGEXP = {
 DISCORD_URL = "https://ballistica.net/discord"
 
 
-_CACHE = {"changelog": "None"}
+_CACHE = {}
 
 
 class MD5CheckSumFailed(Exception):
@@ -1405,7 +1405,10 @@ class PluginManager:
             # Rather wait for the previous network call to complete.
             await asyncio.sleep(0.1)
         self._changelog_setup_in_progress = not bool(self._changelog)
-        full_changelog = await self.get_changelog()
+        try:
+            full_changelog = await self.get_changelog()
+        except Exception:
+            full_changelog = 'Could not get ChangeLog'
         pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
         matches = re.findall(pattern, full_changelog, re.DOTALL)
         if matches:
@@ -1457,7 +1460,6 @@ class PluginManager:
     async def refresh(self):
         self.cleanup()
         await self.setup_index()
-        await self.setup_changelog()
 
     def set_index_global_cache(self, index):
         _CACHE["index"] = index
@@ -1733,7 +1735,7 @@ class PluginManagerWindow(bui.Window):
     def __init__(self, transition: str = "in_right", origin_widget: bui.Widget = None):
         self.plugin_manager = PluginManager()
         self.category_selection_button = None
-        self.selected_category = None
+        self.selected_category = 'All'
         self.plugins_in_current_view = {}
         self.selected_alphabet_order = 'a_z'
         self.alphabet_order_selection_button = None
@@ -1832,6 +1834,7 @@ class PluginManagerWindow(bui.Window):
         except urllib.error.URLError:
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="Make sure you are connected\n to the Internet and try again.")
+            self.plugin_manager._index_setup_in_progress = False
         except RuntimeError:
             # User probably went back before a bui.Window could finish loading.
             pass
@@ -2077,7 +2080,11 @@ class PluginManagerWindow(bui.Window):
         try:
             category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
         except (KeyError, AttributeError):
-            raise CategoryDoesNotExist(f"{category} does not exist.")
+            no_internet_text = "Make sure you are connected\n to the Internet and try again."
+            if bui.textwidget(query=self._plugin_manager_status_text) != no_internet_text:
+                raise CategoryDoesNotExist(f"{category} does not exist.")
+            else:
+                return
 
         if search_term:
             plugins = list(filter(
@@ -2184,6 +2191,7 @@ class PluginManagerWindow(bui.Window):
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
+            await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="")
