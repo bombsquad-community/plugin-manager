@@ -2080,7 +2080,7 @@ class PluginManagerWindow(bui.Window):
             return
 
         try:
-             if self.plugin_manager.categories != {}:
+            if self.plugin_manager.categories != {}:
                 if self.plugin_manager.categories['All'] is not None:
                     category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
                 else: return
