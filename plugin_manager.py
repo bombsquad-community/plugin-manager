@@ -1926,9 +1926,11 @@ class PluginManagerWindow(bui.Window):
                          label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
                          )
         filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
-        await self.draw_plugin_names(
-            self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
-        )
+        if self.plugin_manager.categories != {}:
+            if self.plugin_manager.categories['All'] is not None:
+                await self.draw_plugin_names(
+                    self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
+                )
 
     def draw_search_bar(self):
         search_bar_pos_x = (85 if _uiscale is babase.UIScale.SMALL else
