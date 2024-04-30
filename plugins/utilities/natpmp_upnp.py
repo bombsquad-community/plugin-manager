@@ -41,7 +41,7 @@ def threaded(func):
 @threaded
 def get_modules() -> None:
     if babase.app.classic.platform == 'mac':
-        install_path =bs.app.env.python_directory_app
+        install_path = bs.app.env.python_directory_app
     else:
         install_path = Path(f"{getcwd()}/ba_data/python")  # For the guys like me on windows
     packages = {
