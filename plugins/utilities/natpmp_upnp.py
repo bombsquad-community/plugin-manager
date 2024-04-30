@@ -242,9 +242,11 @@ def get_gateway_addr():
 
     add_port_mapping()
 
+
 def play_sound(sound):
     with bs.get_foreground_host_activity().context:
         bs.getsound(sound).play()
+
 
 @threaded
 def confirm_port():
@@ -313,7 +315,8 @@ def add_port_mapping():
                                             "Oops seems like your network doesn't support upnp",
                                             (1.0, 0.15, 0.15),
                                         )
-                                        babase.pushcall(babase.Call(play_sound, 'error'), from_other_thread=True)
+                                        babase.pushcall(babase.Call(
+                                            play_sound, 'error'), from_other_thread=True)
                                     return
                             except (SOAPError):
                                 if confirm_port():
