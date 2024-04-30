@@ -333,7 +333,11 @@ class Joinable(babase.Plugin):
         if confirm_port():
             return
         else:
-            add_port_mapping()
+            try:
+                import upnpclient
+                add_port_mapping()
+            except ImportError:
+                passg()
     # except:
     #     pass
 
