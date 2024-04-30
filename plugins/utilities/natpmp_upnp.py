@@ -40,7 +40,10 @@ def threaded(func):
 
 @threaded
 def get_modules() -> None:
-    install_path = Path(f"{getcwd()}/ba_data/python")  # For the guys like me on windows
+    if babase.app.classic.platform == 'mac':
+        install_path =bs.app.env.python_directory_app
+    else:
+        install_path = Path(f"{getcwd()}/ba_data/python")  # For the guys like me on windows
     packages = {
         "upnp-client": {
             "url": "https://files.pythonhosted.org/packages/dd/69/4d38d9fa757c328df93e7037eb8c1da8ca48e62828c23ba3c421e9335e30/upnpclient-1.0.3.tar.gz",
