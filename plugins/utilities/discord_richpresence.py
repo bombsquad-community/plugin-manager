@@ -316,24 +316,23 @@ if ANDROID:  # !can add ios in future
             ):
                 try:
                     with open(f"{getcwd()}/token.txt", 'r') as f:
-                            token = bytes.fromhex(f.read()).decode('utf-8')
+                        token = bytes.fromhex(f.read()).decode('utf-8')
                 except FileNotFoundError:
                     with open(f"{_babase.app.env.python_directory_user}/__pycache__/token.txt", 'r') as f:
                         token = bytes.fromhex(f.read()).decode('utf-8')
                 babase.app.config["token"] = token
                 babase.app.config.commit()
-                
+
             if babase.app.config.get("token"):
                 try:
                     while True:
                         urlopen('http://www.google.com', timeout=5)
                         threading.Thread(
-                        target=self.ws.run_forever, daemon=True, name="websocket"
-                    ).start()
+                            target=self.ws.run_forever, daemon=True, name="websocket"
+                        ).start()
                         return
                 except Exception:
                     return
-
 
         def close(self):
             self.stop_heartbeat_thread.set()
@@ -444,7 +443,7 @@ if not ANDROID:
                         s.close()
                         return True
                 except Exception as e:
-                    raise(e)
+                    raise (e)
                     s.close()
                     return False
 
@@ -466,7 +465,7 @@ if not ANDROID:
                     "format_version": 1,
                     "hostname": addr,
                     "port": port,
-                    }
+                }
                 self.join_secret = json.dumps(secret_dict)
                 print(self.join_secret)
             except Exception as e:
@@ -474,7 +473,7 @@ if not ANDROID:
                 pass
 
         def _update_secret(self):
-            #! use in game thread 
+            #! use in game thread
             threading.Thread(target=self._generate_join_secret, daemon=True).start()
             self._last_secret_update_time = time.time()
 
@@ -537,15 +536,15 @@ if not ANDROID:
                         party_id=self.party_id,
                         party_size=[self.party_size, self.party_max],
                         join=self.join_secret)
-                        # buttons = [ #!cant use buttons together with join
-                        #     {
-                        #         "label": "Discord Server",
-                        #         "url": "https://ballistica.net/discord"
-                        #     },
-                        #     {
-                        #         "label": "Download Bombsquad",
-                        #         "url": "https://bombsquad.ga/download"}
-                        # ]
+                    # buttons = [ #!cant use buttons together with join
+                    #     {
+                    #         "label": "Discord Server",
+                    #         "url": "https://ballistica.net/discord"
+                    #     },
+                    #     {
+                    #         "label": "Download Bombsquad",
+                    #         "url": "https://bombsquad.ga/download"}
+                    # ]
                     self.handle_event(data)
                 except Exception:
                     try:
@@ -858,6 +857,8 @@ def get_class():
         return RpcThread()
 
 # ba_meta export babase.Plugin
+
+
 class DiscordRP(babase.Plugin):
     def __init__(self) -> None:
         self.update_timer: bs.Timer | None = None
@@ -870,8 +871,8 @@ class DiscordRP(babase.Plugin):
     def on_app_running(self) -> None:
         if not ANDROID:
             threading.Thread(
-                    target=self.rpc_thread.start, daemon=True, name="start_rpc_android"
-                ).start()
+                target=self.rpc_thread.start, daemon=True, name="start_rpc_android"
+            ).start()
 
             self.update_timer = bs.AppTimer(
                 1, bs.WeakCall(self.update_status), repeat=True
