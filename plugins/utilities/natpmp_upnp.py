@@ -242,6 +242,9 @@ def get_gateway_addr():
 
     add_port_mapping()
 
+def play_sound(sound):
+    with bs.get_foreground_host_activity().context:
+        bs.getsound(sound).play()
 
 @threaded
 def confirm_port():
@@ -273,6 +276,7 @@ def add_port_mapping():
                 babase.screenmessage(
                     "You are now joinable from the internet", (0.2, 1, 0.2)
                 )
+                babase.pushcall(babase.Call(play_sound, 'shieldUp'), from_other_thread=True)
         except (NATPMPUnsupportedError, NATPMPNetworkError):
             import upnpclient
             from upnpclient.soap import SOAPError
@@ -284,7 +288,8 @@ def add_port_mapping():
                 babase.screenmessage(
                     "Please enable upnp service on your router", (1.00, 0.15, 0.15)
                 )
-                bui.getsound('shieldDown').play()  # -> RuntimeError : Sound creation failed
+                # bui.getsound('shieldDown').play()  # -> RuntimeError : Sound creation failed
+                babase.pushcall(babase.Call(play_sound, 'shieldDown'), from_other_thread=True)
                 return
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -308,6 +313,7 @@ def add_port_mapping():
                                             "Oops seems like your network doesn't support upnp",
                                             (1.0, 0.15, 0.15),
                                         )
+                                        babase.pushcall(babase.Call(play_sound, 'error'), from_other_thread=True)
                                     return
                             except (SOAPError):
                                 if confirm_port():
