@@ -2083,8 +2083,10 @@ class PluginManagerWindow(bui.Window):
             if self.plugin_manager.categories != {}:
                 if self.plugin_manager.categories['All'] is not None:
                     category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
-                else: return
-            else: return
+                else:
+                    return
+            else:
+                return
         except (KeyError, AttributeError):
             no_internet_text = "Make sure you are connected\n to the Internet and try again."
             if bui.textwidget(query=self._plugin_manager_status_text) != no_internet_text:
