@@ -340,7 +340,7 @@ class Joinable(babase.Plugin):
                 import upnpclient
                 add_port_mapping()
             except ImportError:
-                passg()
+                pass
     # except:
     #     pass
 
