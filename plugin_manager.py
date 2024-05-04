@@ -1386,6 +1386,7 @@ class PluginManager:
         self._index_setup_in_progress = False
 
     async def get_changelog(self) -> str:
+        requested = False
         if not self._changelog:
             request = urllib.request.Request(CHANGELOG_META.format(
                 repository_url=REPOSITORY_URL,
@@ -1395,7 +1396,8 @@ class PluginManager:
                 headers=self.request_headers)
             response = await async_send_network_request(request)
             self._changelog = response.read().decode()
-        return self._changelog
+            requested = True
+        return [self._changelog, requested]
 
     async def setup_changelog(self, version=None) -> None:
         if version is None:
@@ -1407,12 +1409,15 @@ class PluginManager:
         self._changelog_setup_in_progress = not bool(self._changelog)
         try:
             full_changelog = await self.get_changelog()
-            pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
-            matches = re.findall(pattern, full_changelog, re.DOTALL)
-            if matches:
-                changelog = matches[0].strip()
+            if full_changelog[1]:
+                pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
+                matches = re.findall(pattern, full_changelog[0], re.DOTALL)
+                if matches:
+                    changelog = matches[0].strip()
+                else:
+                    changelog = f"Changelog entry for version {version} not found."
             else:
-                changelog = f"Changelog entry for version {version} not found."
+                changelog = full_changelog[0]
         except urllib.error.URLError:
             changelog = 'Could not get ChangeLog due to Internet Issues.'
         self.set_changelog_global_cache(changelog)
