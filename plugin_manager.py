@@ -1475,6 +1475,7 @@ class PluginManager:
     def unset_index_global_cache(self):
         try:
             del _CACHE["index"]
+            del _CACHE["changelog"]
         except KeyError:
             pass
 
