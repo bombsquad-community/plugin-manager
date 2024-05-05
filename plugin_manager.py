@@ -1113,7 +1113,7 @@ class PluginWindow(popup.PopupWindow):
                        v_align='center',
                        text=text,
                        scale=text_scale * 0.8,
-                       color=(0.45, 0.36, 0.46),
+                       color=(0.75, 0.7, 0.8),
                        maxwidth=width * 0.9,
                        draw_controller=author_text_control_btn,
                        )
