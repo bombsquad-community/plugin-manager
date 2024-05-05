@@ -2,7 +2,8 @@
 
 ### 1.0.19 (05-05-2024)
 
-- Fixed an issue where changelog were not found
+- Fixed an issue where changelogs were not displayed.
+- Changed the Authors text color to be seen more easily.
 
 ### 1.0.18 (28-04-2024)
 
