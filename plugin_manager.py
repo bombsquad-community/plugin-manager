@@ -39,8 +39,11 @@ CURRENT_TAG = "main"
 
 
 if TARGET_BALLISTICA_BUILD < 21852:
-    babase.app.env.engine_build_number = babase.app.env.build_number
-    babase.app.env.engine_version = babase.app.env.version
+    class Dummy(babase.app.env):
+        engine_build_number = babase.app.env.build_number
+        engine_version = babase.app.env.version
+
+    babase.app.env = Dummy
     
 if TARGET_BALLISTICA_BUILD < 21282:
     # These attributes have been deprecated as of 1.7.27. For more info see:
