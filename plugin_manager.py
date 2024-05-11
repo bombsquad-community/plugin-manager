@@ -37,7 +37,7 @@ REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
 
-    
+
 if TARGET_BALLISTICA_BUILD < 21282:
     # These attributes have been deprecated as of 1.7.27. For more info see:
     # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
