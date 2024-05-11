@@ -38,6 +38,10 @@ REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 
 
+if TARGET_BALLISTICA_BUILD < 21852:
+    babase.app.env.engine_build_number = babase.app.env.build_number
+    babase.app.env.engine_version = babase.app.env.version
+    
 if TARGET_BALLISTICA_BUILD < 21282:
     # These attributes have been deprecated as of 1.7.27. For more info see:
     # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
@@ -47,10 +51,10 @@ if TARGET_BALLISTICA_BUILD < 21282:
 
     babase.app.env = Dummy()
 
-    babase.app.env.build_number = babase.app.build_number
+    babase.app.env.engine_build_number = babase.app.build_number
     babase.app.env.device_name = babase.app.device_name
     babase.app.env.config_file_path = babase.app.config_file_path
-    babase.app.env.version = babase.app.version
+    babase.app.env.engine_version = babase.app.version
     babase.app.env.debug = babase.app.debug_build
     babase.app.env.test = babase.app.test_build
     babase.app.env.data_directory = babase.app.data_directory
