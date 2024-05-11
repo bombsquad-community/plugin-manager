@@ -37,13 +37,6 @@ REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
 
-
-if TARGET_BALLISTICA_BUILD < 21852:
-    class Dummy(babase.app.env):
-        engine_build_number = babase.app.env.build_number
-        engine_version = babase.app.env.version
-
-    babase.app.env = Dummy
     
 if TARGET_BALLISTICA_BUILD < 21282:
     # These attributes have been deprecated as of 1.7.27. For more info see:
@@ -73,6 +66,12 @@ if TARGET_BALLISTICA_BUILD < 21282:
     _bascenev1.protocol_version = lambda: babase.app.protocol_version
     _bauiv1.toolbar_test = lambda: babase.app.toolbar_test
 
+if TARGET_BALLISTICA_BUILD < 21852:
+    class Dummy(babase.app.env):
+        engine_build_number = babase.app.env.build_number
+        engine_version = babase.app.env.version
+
+    babase.app.env = Dummy
 
 _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
