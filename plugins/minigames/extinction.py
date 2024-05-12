@@ -18,23 +18,6 @@ if TYPE_CHECKING:
     from typing import Any, Sequence, Optional, Type
 
 
-def ba_get_api_version():
-    return 8
-
-
-def ba_get_levels():
-    return [bs._level.Level(
-            'Extinction',
-            gametype=NewMeteorShowerGame,
-            settings={'Epic Mode': False},
-            preview_texture_name='footballStadiumPreview'),
-            bs._level.Level(
-            'Epic Extinction',
-            gametype=NewMeteorShowerGame,
-            settings={'Epic Mode': True},
-            preview_texture_name='footballStadiumPreview')]
-
-
 class Meteor(bs.Actor):
     """A giant meteor instead of bombs."""
 
@@ -255,3 +238,18 @@ class NewMeteorShowerGame(bs.TeamGameActivity[Player, Team]):
             results.set_team_score(team, int(1000.0 * longest_life))
 
         self.end(results=results)
+
+
+# ba_meta export plugin
+class plugin(babase.Plugin):
+    def __init__(self):
+        ## Campaign support ##
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name='Extinction',
+            gametype=NewMeteorShowerGame,
+            settings={'Epic Mode': False},
+            preview_texture_name='footballStadiumPreview'))
+        babase.app.classic.add_coop_practice_level(bs.Level('Epic Extinction',
+                                                            gametype=NewMeteorShowerGame,
+                                                            settings={'Epic Mode': True},
+                                                            preview_texture_name='footballStadiumPreview'))

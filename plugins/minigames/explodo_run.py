@@ -18,22 +18,6 @@ if TYPE_CHECKING:
     from typing import Any, Type, Dict, List, Optional
 
 
-def ba_get_api_version():
-    return 8
-
-
-def ba_get_levels():
-    return [bs._level.Level(
-        'Explodo Run',
-        gametype=ExplodoRunGame,
-        settings={},
-        preview_texture_name='rampagePreview'), bs._level.Level(
-        'Epic Explodo Run',
-        gametype=ExplodoRunGame,
-        settings={'Epic Mode': True},
-        preview_texture_name='rampagePreview')]
-
-
 class Player(bs.Player['Team']):
     """Our player type for this game."""
 
@@ -142,3 +126,18 @@ class ExplodoRunGame(bs.TeamGameActivity[Player, Team]):
 
         # Ends the activity.
         self.end(results)
+
+
+# ba_meta export plugin
+class plugin(babase.Plugin):
+    def __init__(self):
+        ## Campaign support ##
+        babase.app.classic.add_coop_practice_level(bs.Level(
+            name='Explodo Run',
+            gametype=ExplodoRunGame,
+            settings={},
+            preview_texture_name='rampagePreview'))
+        babase.app.classic.add_coop_practice_level(bs.Level('Epic Explodo Run',
+                                                            gametype=ExplodoRunGame,
+                                                            settings={'Epic Mode': True},
+                                                            preview_texture_name='rampagePreview'))
