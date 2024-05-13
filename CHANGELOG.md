@@ -4,6 +4,7 @@
 
 - Now compatible with BS version 1.7.35+.
 - Updated build_number and version attributes to latest.
+- FIX: Changelog for all version was shown after refreshing
 
 ### 1.0.19 (05-05-2024)
 
