@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.19"
+PLUGIN_MANAGER_VERSION = "1.0.20"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -47,10 +47,10 @@ if TARGET_BALLISTICA_BUILD < 21282:
 
     babase.app.env = Dummy()
 
-    babase.app.env.build_number = babase.app.build_number
+    babase.app.env.engine_build_number = babase.app.build_number
     babase.app.env.device_name = babase.app.device_name
     babase.app.env.config_file_path = babase.app.config_file_path
-    babase.app.env.version = babase.app.version
+    babase.app.env.engine_version = babase.app.version
     babase.app.env.debug = babase.app.debug_build
     babase.app.env.test = babase.app.test_build
     babase.app.env.data_directory = babase.app.data_directory
@@ -66,6 +66,12 @@ if TARGET_BALLISTICA_BUILD < 21282:
     _bascenev1.protocol_version = lambda: babase.app.protocol_version
     _bauiv1.toolbar_test = lambda: babase.app.toolbar_test
 
+if TARGET_BALLISTICA_BUILD < 21852:
+    class Dummy(babase.app.env):
+        engine_build_number = babase.app.env.build_number
+        engine_version = babase.app.env.version
+
+    babase.app.env = Dummy
 
 _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
@@ -1460,6 +1466,7 @@ class PluginManager:
                 category.cleanup()
         self.categories.clear()
         self._index.clear()
+        self._changelog = None
         self.unset_index_global_cache()
 
     async def refresh(self):
