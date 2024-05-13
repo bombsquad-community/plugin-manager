@@ -2,8 +2,8 @@
 
 ### 1.0.20 (13-05-2024)
 
-- Update for bs version 1.7.35
-- Updated build_number and version attributes
+- Now compatible with BS version 1.7.35+.
+- Updated build_number and version attributes to latest.
 
 ### 1.0.19 (05-05-2024)
 
