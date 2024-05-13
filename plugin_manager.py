@@ -1466,6 +1466,7 @@ class PluginManager:
                 category.cleanup()
         self.categories.clear()
         self._index.clear()
+        self._changelog = None
         self.unset_index_global_cache()
 
     async def refresh(self):
