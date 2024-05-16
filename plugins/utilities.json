@@ -14,7 +14,7 @@
         }
       ],
       "versions": {
-        "1.2.0": null,
+        "1.2.0": null
       }
     },
     "updown": {
@@ -28,7 +28,7 @@
         }
       ],
       "versions": {
-        "1.0.0": null,
+        "1.0.0": null
       }
     },
     "rejoin": {
@@ -42,7 +42,7 @@
         }
       ],
       "versions": {
-        "2.0.0": null,
+        "2.0.0": null
       }
     },
     "topmsg": {
@@ -56,7 +56,7 @@
         }
       ],
       "versions": {
-        "1.0.0": null,
+        "1.0.0": null
       }
     },
     "sorry": {
@@ -70,7 +70,7 @@
         }
       ],
       "versions": {
-        "2.0.0": null,
+        "2.0.0": null
       }
     },
     "translate": {
