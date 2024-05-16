@@ -3,6 +3,101 @@
   "description": "Utilities",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "sandbox": {
+      "description": "The most advanced bombsquad mod ever imo, which can basically do almost everything in the game, literally.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.2": {
+          "api_version": 8,
+          "commit_sha": "0fa3cfe",
+          "released_on": "16-05-2024",
+          "md5sum": "930f4f0997ab1a08761f822ceab1e603"
+        }
+      }
+    },
+    "updown": {
+      "description": "Adds UP and DOWN buttons in party window to recall messages in chat, just like linux terminal lol",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1": {
+          "api_version": 8,
+          "commit_sha": "0fa3cfe",
+          "released_on": "16-05-2024",
+          "md5sum": "4aabde88ad00aba302209ca092fe744c"
+        }
+      }
+    },
+    "rejoin": {
+      "description": "Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then cope coz party is full.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "2": {
+          "api_version": 8,
+          "commit_sha": "0fa3cfe",
+          "released_on": "16-05-2024",
+          "md5sum": "d879a88ecca777d4d39a0db46372620f"
+        }
+      }
+    },
+    "topmsg": {
+      "description": "When chat is muted, see new chat messages on top right! (like kill logs)",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1": {
+          "api_version": 8,
+          "commit_sha": "0fa3cfe",
+          "released_on": "16-05-2024",
+          "md5sum": "62a6212e9cd735b8828285f0292373a4"
+        }
+      }
+    },
+    "sorry": {
+      "description": "Send a random sorry to chat, in case u killed your teammate by mistake or something",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "2": {
+          "api_version": 8,
+          "commit_sha": "0fa3cfe",
+          "released_on": "16-05-2024",
+          "md5sum": "3d6b712888680744e023d600ec1c320b"
+        }
+      }
+    },
     "translate": {
       "description": "Translate yours/others chat. Just click on the message to translate them. Open Plugin Settings/Double click 'Trans' button to open translation settings. Compatible with other PW mods (like advanced_party_window)",
       "external_url": "https://github.com/bombsquad-community/plugin-manager/assets/92618708/5860e44d-0b70-4a3f-a651-208a4452ea38",
