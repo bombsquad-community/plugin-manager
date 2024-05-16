@@ -14,12 +14,7 @@
         }
       ],
       "versions": {
-        "1.2": {
-          "api_version": 8,
-          "commit_sha": "0fa3cfe",
-          "released_on": "16-05-2024",
-          "md5sum": "930f4f0997ab1a08761f822ceab1e603"
-        }
+        "1.2.0": null,
       }
     },
     "updown": {
@@ -33,12 +28,7 @@
         }
       ],
       "versions": {
-        "1": {
-          "api_version": 8,
-          "commit_sha": "0fa3cfe",
-          "released_on": "16-05-2024",
-          "md5sum": "4aabde88ad00aba302209ca092fe744c"
-        }
+        "1.0.0": null,
       }
     },
     "rejoin": {
@@ -52,12 +42,7 @@
         }
       ],
       "versions": {
-        "2": {
-          "api_version": 8,
-          "commit_sha": "0fa3cfe",
-          "released_on": "16-05-2024",
-          "md5sum": "d879a88ecca777d4d39a0db46372620f"
-        }
+        "2.0.0": null,
       }
     },
     "topmsg": {
@@ -71,12 +56,7 @@
         }
       ],
       "versions": {
-        "1": {
-          "api_version": 8,
-          "commit_sha": "0fa3cfe",
-          "released_on": "16-05-2024",
-          "md5sum": "62a6212e9cd735b8828285f0292373a4"
-        }
+        "1.0.0": null,
       }
     },
     "sorry": {
@@ -90,12 +70,7 @@
         }
       ],
       "versions": {
-        "2": {
-          "api_version": 8,
-          "commit_sha": "0fa3cfe",
-          "released_on": "16-05-2024",
-          "md5sum": "3d6b712888680744e023d600ec1c320b"
-        }
+        "2.0.0": null,
       }
     },
     "translate": {
