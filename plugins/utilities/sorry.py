@@ -26,14 +26,15 @@ lmao = [
     "%, $ entirely"
 ]
 
+
 class SorryPW(bauiv1lib.party.PartyWindow):
     def __init__(s, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        s._delay = s._a = 50 # 5 seconds
+        s._delay = s._a = 50  # 5 seconds
         s._btn = bui.buttonwidget(
             parent=s._root_widget,
             size=(50, 35),
-            scale = 0.7,
+            scale=0.7,
             label='Sorry',
             button_type='square',
             position=(s._width - 60, s._height - 83),
@@ -41,16 +42,27 @@ class SorryPW(bauiv1lib.party.PartyWindow):
         )
 
     def _ok(s, a):
-        if s._btn.exists(): bui.buttonwidget(edit=s._btn, label=str((s._delay - a) / 10) if a != s._delay else 'Sorry'); s._a = a
-        else: return
-    def _apologize(s):
-        if s._a != s._delay: push("Too fast!"); return
+        if s._btn.exists():
+            bui.buttonwidget(edit=s._btn, label=str((s._delay - a) / 10)
+                             if a != s._delay else 'Sorry')
+            s._a = a
         else:
-            bs.chatmessage(random.choice(lmao).replace('%', random.choice(sory)).replace('$', random.choice(cash)))
-            for i in range(10,s._delay+1): bs.apptimer((i-10)/10, bs.Call(s._ok,i))
+            return
+
+    def _apologize(s):
+        if s._a != s._delay:
+            push("Too fast!")
+            return
+        else:
+            bs.chatmessage(random.choice(lmao).replace(
+                '%', random.choice(sory)).replace('$', random.choice(cash)))
+            for i in range(10, s._delay+1):
+                bs.apptimer((i-10)/10, bs.Call(s._ok, i))
 
 # ba_meta require api 8
 # ba_meta export plugin
+
+
 class byBordd(babase.Plugin):
     def __init__(s):
         bauiv1lib.party.PartyWindow = SorryPW
