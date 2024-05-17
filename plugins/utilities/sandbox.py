@@ -5344,8 +5344,10 @@ class TexturePicker(popup.PopupWindow):
     def ok(s, index):
         global THE_TB
         bui.containerwidget(edit=s.root_widget, transition=anim_out)
-        try: bui.textwidget(edit=THE_TB, text=all_texture[index])
-        except TypeError: pass # NoneType
+        try:
+            bui.textwidget(edit=THE_TB, text=all_texture[index])
+        except TypeError:
+            pass  # NoneType
 
     def on_popup_cancel(s) -> None:
         bui.getsound('swish').play()
