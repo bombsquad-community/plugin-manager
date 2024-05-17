@@ -20,6 +20,7 @@ from bascenev1lib.actor.powerupbox import PowerupBox
 from bascenev1lib.actor.bomb import TNTSpawner
 from os import listdir as ls
 
+
 def error(real):  # not fake
     bui.getsound('error').play()
     with ga().context:
@@ -5928,6 +5929,7 @@ class CustomBotSet(SpazBotSet):
 class byBordd(ba.Plugin):
     def __init__(s):
         mm.MainMenuWindow._refresh_in_game = Nice.Button(mm.MainMenuWindow._refresh_in_game)
+
 
 # All Textures (generated)
 all_texture = [i[:-4] for i in ls("ba_data/textures")]
