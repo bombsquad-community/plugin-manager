@@ -2133,7 +2133,7 @@ class Nice(mm.MainMenuWindow):
                 if i == 11:  # Lit Mine
                     n = Bomb(position=p, bomb_type='land_mine', bomb_scale=bss,
                              blast_radius=br).autoretain()
-                    n.arm() # returns None
+                    n.arm()  # returns None
                     n = n.node
                 if i > 11 and i < 17:  # Eggs
                     from bascenev1lib.gameutils import SharedObjects
