@@ -4,7 +4,7 @@
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
     "sandbox": {
-      "description": "Spawn and control bots, change music, add teams, spawn objects, apply player effects, change game values in real time, and much more!",
+      "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
       "external_url": "",
       "authors": [
         {
@@ -42,7 +42,7 @@
       }
     },
     "rejoin": {
-      "description": "Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then cope coz party is full.",
+      "description": "Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then party is full. Skill issue.",
       "external_url": "",
       "authors": [
         {
@@ -80,7 +80,7 @@
       }
     },
     "sorry": {
-      "description": "Send a random sorry to chat, in case u killed your teammate by mistake or something",
+      "description": "Send a random sorry to chat, preventing revenge attempts from teammates you kill by mistake.",
       "external_url": "",
       "authors": [
         {
