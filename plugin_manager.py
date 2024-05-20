@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.20"
+PLUGIN_MANAGER_VERSION = "1.0.21"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -372,6 +372,9 @@ class StartupTasks:
             babase.app.config.commit()
             return
 
+        def title_it(plug):
+            plug = str(plug).replace('_', ' ').title()
+            return plug
         if existing_num_of_plugins < new_num_of_plugins:
             new_plugin_count = new_num_of_plugins - existing_num_of_plugins
             all_plugins = await self.plugin_manager.categories["All"].get_plugins()
@@ -381,13 +384,11 @@ class StartupTasks:
                 reverse=True,
             )
             new_supported_plugins = new_supported_plugins[:new_plugin_count]
-            new_supported_plugins = [plug.replace('_', ' ').title()
-                                     for plug in new_supported_plugins]
             new_supported_plugins_count = len(new_supported_plugins)
             if new_supported_plugins_count > 0:
-                new_supported_plugins = ", ".join(map(str, (new_supported_plugins
-                                                            if new_supported_plugins_count <= show_max_names else
-                                                            new_supported_plugins[0:show_max_names])
+                new_supported_plugins = ", ".join(map(title_it, (new_supported_plugins
+                                                                 if new_supported_plugins_count <= show_max_names else
+                                                                 new_supported_plugins[0:show_max_names])
                                                       ))
                 if new_supported_plugins_count == 1:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
