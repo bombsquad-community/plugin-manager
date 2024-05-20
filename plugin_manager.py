@@ -387,8 +387,8 @@ class StartupTasks:
             new_supported_plugins_count = len(new_supported_plugins)
             if new_supported_plugins_count > 0:
                 new_supported_plugins = ", ".join(map(title_it, (new_supported_plugins
-                                                            if new_supported_plugins_count <= show_max_names else
-                                                            new_supported_plugins[0:show_max_names])
+                                                                 if new_supported_plugins_count <= show_max_names else
+                                                                 new_supported_plugins[0:show_max_names])
                                                       ))
                 if new_supported_plugins_count == 1:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
