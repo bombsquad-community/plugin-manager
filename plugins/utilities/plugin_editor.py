@@ -93,9 +93,8 @@ class EditModWindow(bui.Window):
         self._shown = False
         self._plug_path = ba.env()['python_directory_user']
         self._same_plug = __file__ in (self._plug_path + '\\' + self._plugin + '.py',
-                     self._plug_path + '/' + self._plugin + '.py')
+                                       self._plug_path + '/' + self._plugin + '.py')
         self._plug_exists = os.path.exists(self._plug_path + os.sep + self._plugin + '.py')
-        
 
         if self._theme == 'dark':
             self._tint = bs.get_foreground_host_activity().globalsnode.tint
@@ -126,7 +125,7 @@ class EditModWindow(bui.Window):
             self._line_num = bui.textwidget(
                 parent=self._root_widget,
                 position=(
-                    self._width * (0.25 if bui.app.ui_v1.uiscale is bui.UIScale.SMALL 
+                    self._width * (0.25 if bui.app.ui_v1.uiscale is bui.UIScale.SMALL
                                    else 0.175),
                     self._height - 60),
                 size=(120, 30),
@@ -190,7 +189,7 @@ class EditModWindow(bui.Window):
                     position=(self._width * 0.5, self._height * 0.6),
                     size=(0, 0),
                     text=bui.Lstr(value='Either this is a Workspace Plugin or I can\'t find this.'),
-                    color=(0.7,0.8,0.7),
+                    color=(0.7, 0.8, 0.7),
                     h_align='center',
                     v_align='center',
                 )
@@ -256,12 +255,12 @@ class EditModWindow(bui.Window):
                 size=(sub_width, sub_height),
                 background=False,
             )
-            
+
             bui.widget(
                 edit=self._back_button,
                 right_widget=self._line_num,
                 down_widget=(
-                    self._subcontainer if self._selected_line_widget is None else 
+                    self._subcontainer if self._selected_line_widget is None else
                     self._selected_line_widget
                 )
             )
@@ -269,7 +268,7 @@ class EditModWindow(bui.Window):
                 edit=self._line_num,
                 up_widget=self._line_num,
                 down_widget=(
-                    self._subcontainer if self._selected_line_widget is None else 
+                    self._subcontainer if self._selected_line_widget is None else
                     self._selected_line_widget
                 )
             )
@@ -278,7 +277,7 @@ class EditModWindow(bui.Window):
                     edit=self._add_line_button,
                     up_widget=self._add_line_button,
                     down_widget=(
-                        self._subcontainer if self._selected_line_widget is None else 
+                        self._subcontainer if self._selected_line_widget is None else
                         self._selected_line_widget
                     )
                 )
@@ -286,7 +285,7 @@ class EditModWindow(bui.Window):
                     edit=self._remove_line_button,
                     up_widget=self._remove_line_button,
                     down_widget=(
-                        self._subcontainer if self._selected_line_widget is None else 
+                        self._subcontainer if self._selected_line_widget is None else
                         self._selected_line_widget
                     )
                 )
@@ -342,17 +341,17 @@ class EditModWindow(bui.Window):
                 self._selected_line_widget = obj
                 try:
                     bui.textwidget(edit=self._line_num,
-                        text=str(self._widgets.index(obj)+1)
-                    )
+                                   text=str(self._widgets.index(obj)+1)
+                                   )
                 except:
                     pass
 
             bui.textwidget(edit=abc,
-                        on_select_call=bui.Call(edit_them, abc),
-                        on_activate_call=bui.Call(edit_them, abc))
+                           on_select_call=bui.Call(edit_them, abc),
+                           on_activate_call=bui.Call(edit_them, abc))
             y_num -= 18
             self._widgets.append(abc)
-    
+
     def _un_editable_all(self) -> None:
         for line in self._widgets:
             bui.textwidget(edit=line, editable=False)
@@ -602,12 +601,12 @@ class Plugin_Window(PluginWindow):
             )
 
     def _show_menu(self, button, func, plugin, classpath) -> None:
-        choices =['view', 'edit','settings'
-                  ] if plugin is not None and plugin.has_settings_ui() else ['view', 'edit']
-        choices_display=[
-                bui.Lstr(value='View Code'),
-                bui.Lstr(value='Edit Code'),
-                bui.Lstr(value='Settings'),
+        choices = ['view', 'edit', 'settings'
+                   ] if plugin is not None and plugin.has_settings_ui() else ['view', 'edit']
+        choices_display = [
+            bui.Lstr(value='View Code'),
+            bui.Lstr(value='Edit Code'),
+            bui.Lstr(value='Settings'),
         ] if plugin is not None and plugin.has_settings_ui() else [
             bui.Lstr(value='View Code'),
             bui.Lstr(value='Edit Code')
@@ -711,7 +710,7 @@ class PluginEditorSettingsWindow(popup.PopupWindow):
                        text='Theme :',
                        scale=text_scale * 1.15,
                        color=bui.app.ui_v1.title_color
-        )
+                       )
 
         popup.PopupMenu(
             parent=self._root_widget,
