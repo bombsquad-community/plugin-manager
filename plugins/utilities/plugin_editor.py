@@ -4,7 +4,7 @@
 # Made for everyone who uses it.
 # Let's you edit Plugins which are in your device.
 # Doesn't work for workspaces.
-# Safefy Point: Don't mess with the code
+# Safety Point: Don't mess with the code
 # or you might lose all your plugins.
 
 from __future__ import annotations
