@@ -3,6 +3,25 @@
   "description": "Utilities",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "plugin_editor": {
+      "description": "An Editor which let's you view and edit plugins inside the game!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Vishuuu",
+          "email": "vishal.u338@gmail.com",
+          "discord": "vishal3308"
+        }
+      ],
+      "versions": {
+        "1.1.1": {
+          "api_version": 8,
+          "commit_sha": "bb6734a",
+          "released_on": "24-05-2024",
+          "md5sum": "9d5f8f71a4a91d4b47c9ca15a54f3a9e"
+        }
+      }
+    },
     "sandbox": {
       "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
       "external_url": "",
