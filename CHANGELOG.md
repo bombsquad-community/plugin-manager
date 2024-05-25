@@ -1,5 +1,20 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.21 (20-05-2024)
+
+- Fixed an error related with notification of new plugins.
+
+### 1.0.20 (13-05-2024)
+
+- Now compatible with BS version 1.7.35+.
+- Updated build_number and version attributes to latest.
+- FIX: Changelog for all version was shown after refreshing.
+
+### 1.0.19 (05-05-2024)
+
+- Fixed an issue where changelogs were not displayed.
+- Changed the Authors text color to be seen more easily.
+
 ### 1.0.18 (28-04-2024)
 
 - Fixed errors which were caused due to no internet connection.

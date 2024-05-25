@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.18"
+PLUGIN_MANAGER_VERSION = "1.0.21"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -47,10 +47,10 @@ if TARGET_BALLISTICA_BUILD < 21282:
 
     babase.app.env = Dummy()
 
-    babase.app.env.build_number = babase.app.build_number
+    babase.app.env.engine_build_number = babase.app.build_number
     babase.app.env.device_name = babase.app.device_name
     babase.app.env.config_file_path = babase.app.config_file_path
-    babase.app.env.version = babase.app.version
+    babase.app.env.engine_version = babase.app.version
     babase.app.env.debug = babase.app.debug_build
     babase.app.env.test = babase.app.test_build
     babase.app.env.data_directory = babase.app.data_directory
@@ -66,6 +66,12 @@ if TARGET_BALLISTICA_BUILD < 21282:
     _bascenev1.protocol_version = lambda: babase.app.protocol_version
     _bauiv1.toolbar_test = lambda: babase.app.toolbar_test
 
+if TARGET_BALLISTICA_BUILD < 21852:
+    class Dummy(babase.app.env):
+        engine_build_number = babase.app.env.build_number
+        engine_version = babase.app.env.version
+
+    babase.app.env = Dummy
 
 _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
@@ -366,6 +372,9 @@ class StartupTasks:
             babase.app.config.commit()
             return
 
+        def title_it(plug):
+            plug = str(plug).replace('_', ' ').title()
+            return plug
         if existing_num_of_plugins < new_num_of_plugins:
             new_plugin_count = new_num_of_plugins - existing_num_of_plugins
             all_plugins = await self.plugin_manager.categories["All"].get_plugins()
@@ -375,13 +384,11 @@ class StartupTasks:
                 reverse=True,
             )
             new_supported_plugins = new_supported_plugins[:new_plugin_count]
-            new_supported_plugins = [plug.replace('_', ' ').title()
-                                     for plug in new_supported_plugins]
             new_supported_plugins_count = len(new_supported_plugins)
             if new_supported_plugins_count > 0:
-                new_supported_plugins = ", ".join(map(str, (new_supported_plugins
-                                                            if new_supported_plugins_count <= show_max_names else
-                                                            new_supported_plugins[0:show_max_names])
+                new_supported_plugins = ", ".join(map(title_it, (new_supported_plugins
+                                                                 if new_supported_plugins_count <= show_max_names else
+                                                                 new_supported_plugins[0:show_max_names])
                                                       ))
                 if new_supported_plugins_count == 1:
                     notification_text = f"{new_supported_plugins_count} new plugin ({new_supported_plugins}) is available!"
@@ -1113,7 +1120,7 @@ class PluginWindow(popup.PopupWindow):
                        v_align='center',
                        text=text,
                        scale=text_scale * 0.8,
-                       color=(0.45, 0.36, 0.46),
+                       color=(0.75, 0.7, 0.8),
                        maxwidth=width * 0.9,
                        draw_controller=author_text_control_btn,
                        )
@@ -1386,6 +1393,7 @@ class PluginManager:
         self._index_setup_in_progress = False
 
     async def get_changelog(self) -> str:
+        requested = False
         if not self._changelog:
             request = urllib.request.Request(CHANGELOG_META.format(
                 repository_url=REPOSITORY_URL,
@@ -1395,7 +1403,8 @@ class PluginManager:
                 headers=self.request_headers)
             response = await async_send_network_request(request)
             self._changelog = response.read().decode()
-        return self._changelog
+            requested = True
+        return [self._changelog, requested]
 
     async def setup_changelog(self, version=None) -> None:
         if version is None:
@@ -1407,12 +1416,15 @@ class PluginManager:
         self._changelog_setup_in_progress = not bool(self._changelog)
         try:
             full_changelog = await self.get_changelog()
-            pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
-            matches = re.findall(pattern, full_changelog, re.DOTALL)
-            if matches:
-                changelog = matches[0].strip()
+            if full_changelog[1]:
+                pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
+                matches = re.findall(pattern, full_changelog[0], re.DOTALL)
+                if matches:
+                    changelog = matches[0].strip()
+                else:
+                    changelog = f"Changelog entry for version {version} not found."
             else:
-                changelog = f"Changelog entry for version {version} not found."
+                changelog = full_changelog[0]
         except urllib.error.URLError:
             changelog = 'Could not get ChangeLog due to Internet Issues.'
         self.set_changelog_global_cache(changelog)
@@ -1455,6 +1467,7 @@ class PluginManager:
                 category.cleanup()
         self.categories.clear()
         self._index.clear()
+        self._changelog = None
         self.unset_index_global_cache()
 
     async def refresh(self):
@@ -1470,6 +1483,7 @@ class PluginManager:
     def unset_index_global_cache(self):
         try:
             del _CACHE["index"]
+            del _CACHE["changelog"]
         except KeyError:
             pass
 
@@ -1926,9 +1940,11 @@ class PluginManagerWindow(bui.Window):
                          label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
                          )
         filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
-        await self.draw_plugin_names(
-            self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
-        )
+        if self.plugin_manager.categories != {}:
+            if self.plugin_manager.categories['All'] is not None:
+                await self.draw_plugin_names(
+                    self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
+                )
 
     def draw_search_bar(self):
         search_bar_pos_x = (85 if _uiscale is babase.UIScale.SMALL else
@@ -2078,7 +2094,13 @@ class PluginManagerWindow(bui.Window):
             return
 
         try:
-            category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
+            if self.plugin_manager.categories != {}:
+                if self.plugin_manager.categories['All'] is not None:
+                    category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
+                else:
+                    return
+            else:
+                return
         except (KeyError, AttributeError):
             no_internet_text = "Make sure you are connected\n to the Internet and try again."
             if bui.textwidget(query=self._plugin_manager_status_text) != no_internet_text:
