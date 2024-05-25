@@ -8,6 +8,7 @@ import babase
 # Tell the app about our Plugin.
 # ba_meta export plugin
 
+
 class MyPlugin(babase.Plugin):
     """My awesome plugin."""
 
