@@ -564,6 +564,34 @@
         }
       }
     },
+    "canon_fight": {
+      "description": "Blow up your enemy with powerfull cannon",
+      "external_url": "https://www.youtube.com/watch?v=7cv3ZSZeTns",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "laser_tracer": {
+      "description": "Dont touch dangerous laser light",
+      "external_url": "https://youtu.be/wTgwZKiykQw?si=Cr0ybDYAcKCUNFN4",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "arms_race": {
       "description": "Upgrade your weapons by eliminating enemies. Win by being first one to kill while cursed",
       "external_url": "",

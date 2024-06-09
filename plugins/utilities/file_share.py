@@ -1,6 +1,6 @@
 # ba_meta require api 8
 '''
-File Share Mod for BombSquad 1.7.23 and above.
+File Share Mod for BombSquad 1.7.30 and above.
 https://youtu.be/qtGsFU4cgic
 https://discord.gg/ucyaesh
 by : Mr.Smoothy
@@ -19,7 +19,7 @@ import _baplus
 import _babase
 import babase
 from bauiv1lib.fileselector import FileSelectorWindow
-from bauiv1lib.promocode import PromoCodeWindow
+from bauiv1lib.sendinfo import SendInfoWindow
 from bauiv1lib.confirm import ConfirmWindow
 import bauiv1 as bui
 import os
@@ -55,14 +55,16 @@ class UploadConfirmation(ConfirmWindow):
         origin_widget: bui.Widget | None = None,
 
     ):
-        super().__init__(text=text, action=action, origin_widget=origin_widget, ok_text=ok_text)
+        super().__init__(text=text, action=action,
+                         origin_widget=origin_widget, ok_text=ok_text)
         self.status = status
         self.file_path = file_path
 
     def _ok(self) -> None:
         if self.status == "init":
             self._cancel()
-            UploadConfirmation("", "uploading", text="Uploading file wait !", ok_text="Wait")
+            UploadConfirmation(
+                "", "uploading", text="Uploading file wait !", ok_text="Wait")
             self._upload_file()
 
         elif self.status == "uploading":
@@ -83,10 +85,10 @@ class UploadConfirmation(ConfirmWindow):
         ShowURLWindow(url)
 
 
-class InputWindow(PromoCodeWindow):
+class InputWindow(SendInfoWindow):
     def __init__(
             self, modal: bool = True, origin_widget: bui.Widget | None = None, path=None):
-        super().__init__(modal=modal, origin_widget=origin_widget)
+        super().__init__(modal=modal, legacy_code_mode=True, origin_widget=origin_widget)
         bui.textwidget(edit=self._text_field, max_chars=300)
         self._path = path
         self.message_widget = bui.textwidget(
@@ -101,12 +103,15 @@ class InputWindow(PromoCodeWindow):
     def _do_enter(self):
         url = bui.textwidget(query=self._text_field)
         if self._path and self._path != "/bombsquad":
-            bui.textwidget(edit=self.message_widget, text="downloading.... wait...")
+            bui.textwidget(edit=self.message_widget,
+                           text="downloading.... wait...")
             bui.screenmessage("Downloading started")
-            thread = Thread(target=handle_download, args=(url, self._path, self.on_download,))
+            thread = Thread(target=handle_download, args=(
+                url, self._path, self.on_download,))
             thread.start()
         else:
-            bui.textwidget(edit=self.message_widget, text="First select folder were to save file.")
+            bui.textwidget(edit=self.message_widget,
+                           text="First select folder were to save file.")
         self.close()
 
     def on_download(self, output_path):
@@ -306,7 +311,8 @@ def handle_upload(file, callback, root_widget):
                 _babase.pushcall(Call(callback, json.loads(response.read().decode(
                     'utf-8'))["link"], root_widget), from_other_thread=True)
             else:
-                bui.screenmessage(f"Failed to Upload file. Status code: {response.getcode()}")
+                bui.screenmessage(
+                    f"Failed to Upload file. Status code: {response.getcode()}")
     except urllib.error.URLError as e:
         bui.screenmessage(f"Error occurred: {e}")
 
@@ -318,22 +324,26 @@ def handle_download(url, path, callback):
             if response.getcode() == 200:
                 # Read the filename from the Content-Disposition header
                 filename = None
-                content_disposition = response.headers.get('Content-Disposition', '')
+                content_disposition = response.headers.get(
+                    'Content-Disposition', '')
 
                 match = re.search(r'filename\*?=(.+)', content_disposition)
 
                 if match:
-                    filename = urllib.parse.unquote(match.group(1), encoding='utf-8')
+                    filename = urllib.parse.unquote(
+                        match.group(1), encoding='utf-8')
                     filename = filename.replace("UTF-8''", '')
 
                 output_path = os.path.join(path, filename)
 
                 with open(output_path, 'wb') as file:
                     file.write(response.read())
-                _babase.pushcall(Call(callback, output_path), from_other_thread=True)
+                _babase.pushcall(Call(callback, output_path),
+                                 from_other_thread=True)
                 print(f"File downloaded and saved to: {output_path}")
             else:
-                print(f"Failed to download file. Status code: {response.getcode()}")
+                print(
+                    f"Failed to download file. Status code: {response.getcode()}")
     except urllib.error.URLError as e:
         # bui.screenmessage(f'Error occured {e}')
         print(f"Error occurred: {e}")
