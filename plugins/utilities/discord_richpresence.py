@@ -113,8 +113,8 @@ MAPNAME_ID = {
     "android": "1097728392280932453",
 }
 ANDROID = babase.app.classic.platform == "android"
-APP_VERSION = _babase.app.version if build_number < 21282 else (_babase.app.env.engine_version if build_number > 21823  else _babase.app.env.version)
-
+APP_VERSION = _babase.app.version if build_number < 21282 else (
+    _babase.app.env.engine_version if build_number > 21823 else _babase.app.env.version)
 
 
 if ANDROID:  # !can add ios in future

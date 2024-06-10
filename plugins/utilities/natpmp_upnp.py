@@ -93,7 +93,7 @@ def get_modules() -> None:
     }
 
     system = platform.platform()
-    #! system variable doesnt work on android shit 
+    #! system variable doesnt work on android shit
     #! we can only get architecture using platform.machine()
     if "Windows" in system:
         packages["lxml"] = {
