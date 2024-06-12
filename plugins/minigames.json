@@ -564,6 +564,44 @@
         }
       }
     },
+    "canon_fight": {
+      "description": "Blow up your enemy with powerfull cannon",
+      "external_url": "https://www.youtube.com/watch?v=7cv3ZSZeTns",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "505c948",
+          "released_on": "09-06-2024",
+          "md5sum": "44adbe3bd6ec4988d65ff4ee79b48d95"
+        }
+      }
+    },
+    "laser_tracer": {
+      "description": "Dont touch dangerous laser light",
+      "external_url": "https://youtu.be/wTgwZKiykQw?si=Cr0ybDYAcKCUNFN4",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "505c948",
+          "released_on": "09-06-2024",
+          "md5sum": "08a6457ebd271a7f7860a506b731d272"
+        }
+      }
+    },
     "arms_race": {
       "description": "Upgrade your weapons by eliminating enemies. Win by being first one to kill while cursed",
       "external_url": "",
