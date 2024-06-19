@@ -941,8 +941,9 @@ class ChangelogWindow(popup.PopupWindow):
 
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49, height * 0.72), size=(0, 0),
-                       h_align='center', v_align='center', text=PLUGIN_MANAGER_VERSION,
-                       scale=text_scale * 1.1, color=color,
+                       h_align='center', v_align='center',
+                       text=PLUGIN_MANAGER_VERSION  + _CACHE['changelog']['released_on'],
+                       scale=text_scale * 0.9, color=color,
                        maxwidth=width * 0.9)
 
         bui.buttonwidget(
@@ -954,7 +955,7 @@ class ChangelogWindow(popup.PopupWindow):
             button_type='square',
             on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md'))
 
-        logs = _CACHE['changelog'].split('\n')
+        logs = _CACHE['changelog']['info'].split('\n')
         loop_height = height * 0.62
         for log in logs:
             bui.textwidget(parent=self._root_widget,
@@ -1418,15 +1419,20 @@ class PluginManager:
             full_changelog = await self.get_changelog()
             if full_changelog[1]:
                 pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
+                released_on = full_changelog[0].split(version)[1].split('\n')[0]
                 matches = re.findall(pattern, full_changelog[0], re.DOTALL)
                 if matches:
-                    changelog = matches[0].strip()
+                    changelog = {
+                        'released_on': released_on,
+                        'info': matches[0].strip()
+                    }
                 else:
                     changelog = f"Changelog entry for version {version} not found."
             else:
                 changelog = full_changelog[0]
         except urllib.error.URLError:
-            changelog = 'Could not get ChangeLog due to Internet Issues.'
+            changelog = {'released_on': '(Not Provided)',
+                         'info': 'Could not get ChangeLog due to Internet Issues.'}
         self.set_changelog_global_cache(changelog)
         self._changelog_setup_in_progress = False
 
