@@ -1431,7 +1431,7 @@ class PluginManager:
             else:
                 changelog = full_changelog[0]
         except urllib.error.URLError:
-            changelog = {'released_on': '(Not Provided)',
+            changelog = {'released_on': ' (Not Provided)',
                          'info': 'Could not get ChangeLog due to Internet Issues.'}
         self.set_changelog_global_cache(changelog)
         self._changelog_setup_in_progress = False
