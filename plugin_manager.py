@@ -24,7 +24,7 @@ import hashlib
 import copy
 import traceback
 
-from typing import Union, Optional
+from typing import Union, Optional, cast
 from datetime import datetime
 
 # Modules used for overriding AllSettingsWindow
@@ -1427,7 +1427,8 @@ class PluginManager:
                         'info': matches[0].strip()
                     }
                 else:
-                    changelog = f"Changelog entry for version {version} not found."
+                    changelog = {'released_on': ' (Not Provided)',
+                                 'info': f"Changelog entry for version {version} not found."}
             else:
                 changelog = full_changelog[0]
         except urllib.error.URLError:
@@ -1880,8 +1881,8 @@ class PluginManagerWindow(bui.Window):
         self.draw_category_selection_button(post_label="All")
         self.draw_refresh_icon()
         self.draw_settings_icon()
-        await self.plugin_manager.setup_changelog()
         with self.exception_handler():
+            await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
             self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
