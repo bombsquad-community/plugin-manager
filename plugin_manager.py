@@ -1823,13 +1823,14 @@ class PluginManagerWindow(bui.Window):
             parent=self._root_widget,
             position=(-5, loading_pos_y),
             size=(self._width, 25),
-            text="Loading...",
+            text="Loading",
             color=bui.app.ui_v1.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
             maxwidth=400,
         )
+        self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
     def _back(self) -> None:
         from bauiv1lib.settings.allsettings import AllSettingsWindow
@@ -1852,6 +1853,7 @@ class PluginManagerWindow(bui.Window):
         try:
             yield
         except urllib.error.URLError:
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="Make sure you are connected\n to the Internet and try again.")
             self.plugin_manager._index_setup_in_progress = False
@@ -1859,9 +1861,18 @@ class PluginManagerWindow(bui.Window):
             # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text=str(e))
             raise
+
+    def _update_dots(self):
+        text = cast(str, bui.textwidget(query=self._plugin_manager_status_text))
+        if text.endswith('....'):
+            text = text[0:len(text)-4]
+        text = text + '.'
+        bui.textwidget(edit=self._plugin_manager_status_text,
+                       text=text)
 
     async def draw_index(self):
         self.draw_search_bar()
@@ -1872,6 +1883,7 @@ class PluginManagerWindow(bui.Window):
         await self.plugin_manager.setup_changelog()
         with self.exception_handler():
             await self.plugin_manager.setup_index()
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="")
             await self.select_category("All")
@@ -2215,12 +2227,15 @@ class PluginManagerWindow(bui.Window):
     async def refresh(self):
         self.cleanup()
         bui.textwidget(edit=self._plugin_manager_status_text,
-                       text="Refreshing...")
+                       text="Refreshing")
+        if self._dot_timer is None:
+            self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="")
             await self.select_category(self.selected_category)
