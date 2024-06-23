@@ -24,7 +24,6 @@ import bauiv1 as bui
 import bascenev1 as bs
 import bascenev1lib
 import math
-from babase._mgen.enums import TimeType
 from bascenev1lib.actor.spaz import Spaz
 
 if TYPE_CHECKING:
