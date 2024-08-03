@@ -1269,8 +1269,8 @@ class MainMenuTheme(MainMenuActivity):
                     text = bs.Lstr(
                         value='${V} (${B})',
                         subs=[
-                            ('${V}', env.version),
-                            ('${B}', str(env.build_number)),
+                            ('${V}', env.engine_version),
+                            ('${B}', str(env.engine_build_number)),
                         ],
                     )
             else:
