@@ -953,7 +953,7 @@ class ChangelogWindow(popup.PopupWindow):
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49, height * 0.72), size=(0, 0),
                        h_align='center', v_align='center',
-                       text=PLUGIN_MANAGER_VERSION  + released_on,
+                       text=PLUGIN_MANAGER_VERSION + released_on,
                        scale=text_scale * 0.9, color=color,
                        maxwidth=width * 0.9)
 
