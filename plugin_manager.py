@@ -966,7 +966,6 @@ class ChangelogWindow(popup.PopupWindow):
             button_type='square',
             on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md'))
 
-        logs = _CACHE['changelog']['info'].split('\n')
         loop_height = height * 0.62
         for log in logs:
             bui.textwidget(parent=self._root_widget,
