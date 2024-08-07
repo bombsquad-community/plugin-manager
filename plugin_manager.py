@@ -2164,6 +2164,8 @@ class PluginManagerWindow(bui.Window):
 
         for plugin in self._columnwidget.get_children():
             plugin.delete()
+        text_widget = bui.textwidget(parent=self._columnwidget)
+        text_widget.delete()
 
         await asyncio.gather(*plugin_names_to_draw)
 
