@@ -939,10 +939,21 @@ class ChangelogWindow(popup.PopupWindow):
 
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
+        try:
+            released_on = _CACHE['changelog']['released_on']
+            logs = _CACHE['changelog']['info'].split('\n')
+            h_align = 'left'
+            extra = 0.1
+        except KeyError:
+            released_on = ''
+            logs = ["Could not load ChangeLog"]
+            h_align = 'center'
+            extra = 1
+
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49, height * 0.72), size=(0, 0),
                        h_align='center', v_align='center',
-                       text=PLUGIN_MANAGER_VERSION  + _CACHE['changelog']['released_on'],
+                       text=PLUGIN_MANAGER_VERSION  + released_on,
                        scale=text_scale * 0.9, color=color,
                        maxwidth=width * 0.9)
 
@@ -959,8 +970,8 @@ class ChangelogWindow(popup.PopupWindow):
         loop_height = height * 0.62
         for log in logs:
             bui.textwidget(parent=self._root_widget,
-                           position=(width * 0.05, loop_height), size=(0, 0),
-                           h_align='left', v_align='top', text=log,
+                           position=(width * 0.5 * extra, loop_height), size=(0, 0),
+                           h_align=h_align, v_align='top', text=log,
                            scale=text_scale, color=color,
                            maxwidth=width * 0.9)
             loop_height -= 35
@@ -2346,8 +2357,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        maxwidth=width * 0.95)
 
         pos -= 75
+        try:
+            plugin_manager_update_available = await self._plugin_manager.get_update_details()
+        except urllib.error.URLError:
+            plugin_manager_update_available = False
+        discord_width = (width * 0.20) if plugin_manager_update_available else (width * 0.31)
         self.discord_button = bui.buttonwidget(parent=self._root_widget,
-                                               position=((width * 0.20) - button_size[0] / 2, pos),
+                                               position=(discord_width - button_size[0] / 2, pos),
                                                size=button_size,
                                                on_activate_call=lambda: bui.open_url(DISCORD_URL),
                                                textcolor=b_text_color,
@@ -2357,14 +2373,15 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                                                label="")
 
         bui.imagewidget(parent=self._root_widget,
-                        position=((width * 0.20)+0.5 - button_size[0] / 2, pos),
+                        position=(discord_width+0.5 - button_size[0] / 2, pos),
                         size=button_size,
                         texture=bui.gettexture("discordLogo"),
                         color=discord_fg_color,
                         draw_controller=self.discord_button)
 
+        github_width = (width * 0.49) if plugin_manager_update_available else (width * 0.65)
         self.github_button = bui.buttonwidget(parent=self._root_widget,
-                                              position=((width * 0.49) - button_size[0] / 2, pos),
+                                              position=(github_width - button_size[0] / 2, pos),
                                               size=button_size,
                                               on_activate_call=lambda: bui.open_url(REPOSITORY_URL),
                                               textcolor=b_text_color,
@@ -2374,7 +2391,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                                               label='')
 
         bui.imagewidget(parent=self._root_widget,
-                        position=((width * 0.49) + 0.5 - button_size[0] / 2, pos),
+                        position=(github_width + 0.5 - button_size[0] / 2, pos),
                         size=button_size,
                         texture=bui.gettexture("githubLogo"),
                         color=(1, 1, 1),
