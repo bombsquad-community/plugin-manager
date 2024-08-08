@@ -24,14 +24,14 @@ import hashlib
 import copy
 import traceback
 
-from typing import Union, Optional
+from typing import Union, Optional, cast
 from datetime import datetime
 
 # Modules used for overriding AllSettingsWindow
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.21"
+PLUGIN_MANAGER_VERSION = "1.0.22"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -939,10 +939,22 @@ class ChangelogWindow(popup.PopupWindow):
 
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
+        try:
+            released_on = _CACHE['changelog']['released_on']
+            logs = _CACHE['changelog']['info'].split('\n')
+            h_align = 'left'
+            extra = 0.1
+        except KeyError:
+            released_on = ''
+            logs = ["Could not load ChangeLog"]
+            h_align = 'center'
+            extra = 1
+
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49, height * 0.72), size=(0, 0),
-                       h_align='center', v_align='center', text=PLUGIN_MANAGER_VERSION,
-                       scale=text_scale * 1.1, color=color,
+                       h_align='center', v_align='center',
+                       text=PLUGIN_MANAGER_VERSION + released_on,
+                       scale=text_scale * 0.9, color=color,
                        maxwidth=width * 0.9)
 
         bui.buttonwidget(
@@ -954,12 +966,11 @@ class ChangelogWindow(popup.PopupWindow):
             button_type='square',
             on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md'))
 
-        logs = _CACHE['changelog'].split('\n')
         loop_height = height * 0.62
         for log in logs:
             bui.textwidget(parent=self._root_widget,
-                           position=(width * 0.05, loop_height), size=(0, 0),
-                           h_align='left', v_align='top', text=log,
+                           position=(width * 0.5 * extra, loop_height), size=(0, 0),
+                           h_align=h_align, v_align='top', text=log,
                            scale=text_scale, color=color,
                            maxwidth=width * 0.9)
             loop_height -= 35
@@ -1418,15 +1429,21 @@ class PluginManager:
             full_changelog = await self.get_changelog()
             if full_changelog[1]:
                 pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
+                released_on = full_changelog[0].split(version)[1].split('\n')[0]
                 matches = re.findall(pattern, full_changelog[0], re.DOTALL)
                 if matches:
-                    changelog = matches[0].strip()
+                    changelog = {
+                        'released_on': released_on,
+                        'info': matches[0].strip()
+                    }
                 else:
-                    changelog = f"Changelog entry for version {version} not found."
+                    changelog = {'released_on': ' (Not Provided)',
+                                 'info': f"Changelog entry for version {version} not found."}
             else:
                 changelog = full_changelog[0]
         except urllib.error.URLError:
-            changelog = 'Could not get ChangeLog due to Internet Issues.'
+            changelog = {'released_on': ' (Not Provided)',
+                         'info': 'Could not get ChangeLog due to Internet Issues.'}
         self.set_changelog_global_cache(changelog)
         self._changelog_setup_in_progress = False
 
@@ -1817,13 +1834,14 @@ class PluginManagerWindow(bui.Window):
             parent=self._root_widget,
             position=(-5, loading_pos_y),
             size=(self._width, 25),
-            text="Loading...",
+            text="Loading",
             color=bui.app.ui_v1.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
             maxwidth=400,
         )
+        self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
     def _back(self) -> None:
         from bauiv1lib.settings.allsettings import AllSettingsWindow
@@ -1846,6 +1864,7 @@ class PluginManagerWindow(bui.Window):
         try:
             yield
         except urllib.error.URLError:
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="Make sure you are connected\n to the Internet and try again.")
             self.plugin_manager._index_setup_in_progress = False
@@ -1853,9 +1872,18 @@ class PluginManagerWindow(bui.Window):
             # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text=str(e))
             raise
+
+    def _update_dots(self):
+        text = cast(str, bui.textwidget(query=self._plugin_manager_status_text))
+        if text.endswith('....'):
+            text = text[0:len(text)-4]
+        text = text + '.'
+        bui.textwidget(edit=self._plugin_manager_status_text,
+                       text=text)
 
     async def draw_index(self):
         self.draw_search_bar()
@@ -1863,9 +1891,10 @@ class PluginManagerWindow(bui.Window):
         self.draw_category_selection_button(post_label="All")
         self.draw_refresh_icon()
         self.draw_settings_icon()
-        await self.plugin_manager.setup_changelog()
         with self.exception_handler():
+            await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="")
             await self.select_category("All")
@@ -2135,6 +2164,8 @@ class PluginManagerWindow(bui.Window):
 
         for plugin in self._columnwidget.get_children():
             plugin.delete()
+        text_widget = bui.textwidget(parent=self._columnwidget)
+        text_widget.delete()
 
         await asyncio.gather(*plugin_names_to_draw)
 
@@ -2209,12 +2240,15 @@ class PluginManagerWindow(bui.Window):
     async def refresh(self):
         self.cleanup()
         bui.textwidget(edit=self._plugin_manager_status_text,
-                       text="Refreshing...")
+                       text="Refreshing")
+        if self._dot_timer is None:
+            self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
+            self._dot_timer = None
             bui.textwidget(edit=self._plugin_manager_status_text,
                            text="")
             await self.select_category(self.selected_category)
@@ -2324,8 +2358,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        maxwidth=width * 0.95)
 
         pos -= 75
+        try:
+            plugin_manager_update_available = await self._plugin_manager.get_update_details()
+        except urllib.error.URLError:
+            plugin_manager_update_available = False
+        discord_width = (width * 0.20) if plugin_manager_update_available else (width * 0.31)
         self.discord_button = bui.buttonwidget(parent=self._root_widget,
-                                               position=((width * 0.20) - button_size[0] / 2, pos),
+                                               position=(discord_width - button_size[0] / 2, pos),
                                                size=button_size,
                                                on_activate_call=lambda: bui.open_url(DISCORD_URL),
                                                textcolor=b_text_color,
@@ -2335,14 +2374,15 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                                                label="")
 
         bui.imagewidget(parent=self._root_widget,
-                        position=((width * 0.20)+0.5 - button_size[0] / 2, pos),
+                        position=(discord_width+0.5 - button_size[0] / 2, pos),
                         size=button_size,
                         texture=bui.gettexture("discordLogo"),
                         color=discord_fg_color,
                         draw_controller=self.discord_button)
 
+        github_width = (width * 0.49) if plugin_manager_update_available else (width * 0.65)
         self.github_button = bui.buttonwidget(parent=self._root_widget,
-                                              position=((width * 0.49) - button_size[0] / 2, pos),
+                                              position=(github_width - button_size[0] / 2, pos),
                                               size=button_size,
                                               on_activate_call=lambda: bui.open_url(REPOSITORY_URL),
                                               textcolor=b_text_color,
@@ -2352,7 +2392,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                                               label='')
 
         bui.imagewidget(parent=self._root_widget,
-                        position=((width * 0.49) + 0.5 - button_size[0] / 2, pos),
+                        position=(github_width + 0.5 - button_size[0] / 2, pos),
                         size=button_size,
                         texture=bui.gettexture("githubLogo"),
                         color=(1, 1, 1),
