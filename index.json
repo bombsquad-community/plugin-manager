@@ -1,6 +1,96 @@
 {
   "plugin_manager_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugin_manager.py",
   "versions": {
+    "1.0.22": {
+      "api_version": 8,
+      "commit_sha": "719c104",
+      "released_on": "07-08-2024",
+      "md5sum": "9c431e0eff32a16070afb7f59a5f0046"
+    },
+    "1.0.21": {
+      "api_version": 8,
+      "commit_sha": "b1a3aaa",
+      "released_on": "20-05-2024",
+      "md5sum": "e00d6ce92ce4651eceb5ae389ca5c4fb"
+    },
+    "1.0.20": {
+      "api_version": 8,
+      "commit_sha": "5ce10ce",
+      "released_on": "13-05-2024",
+      "md5sum": "eb49f952e59effaf4529017f4bed4f72"
+    },
+    "1.0.19": {
+      "api_version": 8,
+      "commit_sha": "b439c4b",
+      "released_on": "05-05-2024",
+      "md5sum": "5cc29a6d7eaafe883e63cd6f0e9153f4"
+    },
+    "1.0.18": {
+      "api_version": 8,
+      "commit_sha": "5af504e",
+      "released_on": "28-04-2024",
+      "md5sum": "2c231693e686971a7cc4f12d1ffa3fdd"
+    },
+    "1.0.17": {
+      "api_version": 8,
+      "commit_sha": "02530f0",
+      "released_on": "22-04-2024",
+      "md5sum": "b5f3902046731ae4cc5bc88586203238"
+    },
+    "1.0.16": {
+      "api_version": 8,
+      "commit_sha": "0839999",
+      "released_on": "22-04-2024",
+      "md5sum": "f9f3f7d3ff9fcbeee7ae01c8dc1a4ab8"
+    },
+    "1.0.15": {
+      "api_version": 8,
+      "commit_sha": "fd170eb",
+      "released_on": "22-04-2024",
+      "md5sum": "3666dbb82805bdc4885ebf6b105ebf3b"
+    },
+    "1.0.14": {
+      "api_version": 8,
+      "commit_sha": "fc5a7f1",
+      "released_on": "21-04-2024",
+      "md5sum": "d25f8b80387d532d1d8aa3b84b35b696"
+    },
+    "1.0.13": {
+      "api_version": 8,
+      "commit_sha": "2a4cb47",
+      "released_on": "21-04-2024",
+      "md5sum": "0d04386a75f692bd80875c6f97b262c5"
+    },
+    "1.0.12": {
+      "api_version": 8,
+      "commit_sha": "34bbcba",
+      "released_on": "20-04-2024",
+      "md5sum": "6d14d091d02582270c5c93b54d65efd5"
+    },
+    "1.0.11": {
+      "api_version": 8,
+      "commit_sha": "4228b3e",
+      "released_on": "20-04-2024",
+      "md5sum": "c22d4d2270e17971b6559edac845d0ff"
+    },
+    "1.0.10": {
+      "api_version": 8,
+      "commit_sha": "6dd86ef",
+      "released_on": "19-04-2024",
+      "md5sum": "06a39b09fc5c0be30a7bf2d65c350310"
+    },
+    "1.0.9": {
+      "api_version": 8,
+      "commit_sha": "88834bd",
+      "released_on": "19-04-2024",
+      "md5sum": "57157cb438d793370586e1ccc957ad30"
+    },
+    "1.0.8": {
+      "api_version": 8,
+      "commit_sha": "85b5727",
+      "released_on": "11-04-2024",
+      "md5sum": "74fbf98aa908fc2830f5973101e38b3a"
+    },
     "1.0.7": {
       "api_version": 8,
       "commit_sha": "cf55d26",

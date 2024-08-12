@@ -267,7 +267,7 @@ class RailBullet(bs.Actor):
                        })
             pos = (pos[0] + vel[0], pos[1] + vel[1], pos[2] + vel[2])
 
-        for node in _babase.getnodes():
+        for node in bs.getnodes():
             if node and node.getnodetype() == 'spaz':
                 # pylint: disable=invalid-name
                 m3 = babase.Vec3(position)

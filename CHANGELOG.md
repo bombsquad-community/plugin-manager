@@ -1,5 +1,69 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.22 (07-08-2024)
+
+- Fixed a few Errors and UI Bugs.
+
+### 1.0.21 (20-05-2024)
+
+- Fixed an error related with notification of new plugins.
+
+### 1.0.20 (13-05-2024)
+
+- Now compatible with BS version 1.7.35+.
+- Updated build_number and version attributes to latest.
+- FIX: Changelog for all version was shown after refreshing.
+
+### 1.0.19 (05-05-2024)
+
+- Fixed an issue where changelogs were not displayed.
+- Changed the Authors text color to be seen more easily.
+
+### 1.0.18 (28-04-2024)
+
+- Fixed errors which were caused due to no internet connection.
+
+### 1.0.17 (22-04-2024)
+
+- Added ChangeLog Window to view latest changes.
+
+### 1.0.16 (22-04-2024)
+
+- Fix for error caused when disable button was missing
+
+### 1.0.15 (22-04-2024)
+
+- Plugins can now be viewed in A-Z and Z-A order.
+- Added 'Installed' category to show Installed plugins.
+
+### 1.0.14 (21-04-2024)
+
+- Displaying All Author Names and their Info for plugins.
+
+### 1.0.13 (20-04-2024)
+
+- Improvements to the new plugins notification.
+
+### 1.0.12 (20-04-2024)
+
+- Limited the "x new plugins are available" screen message to only show maximum 2 plugins.
+
+### 1.0.11 (20-04-2024)
+
+- Fixed positions of a few buttons.
+
+### 1.0.10 (19-04-2024)
+
+- Fixed up a bug in Refreshing Plugins button.
+
+### 1.0.9 (19-04-2024)
+
+- Made the Plugin names look a little cleaner.
+
+### 1.0.8 (11-04-2024)
+
+- Avoid making app-mode related calls while `SceneAppMode` isn't set.
+
 ### 1.0.7 (22-02-2024)
 
 - Fix searching in plugin manager with capital letters.

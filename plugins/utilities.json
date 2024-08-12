@@ -3,6 +3,120 @@
   "description": "Utilities",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "plugin_editor": {
+      "description": "An Editor which let's you view and edit plugins inside the game!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Vishuuu",
+          "email": "vishal.u338@gmail.com",
+          "discord": "vishal3308"
+        }
+      ],
+      "versions": {
+        "1.1.1": {
+          "api_version": 8,
+          "commit_sha": "bb6734a",
+          "released_on": "24-05-2024",
+          "md5sum": "9d5f8f71a4a91d4b47c9ca15a54f3a9e"
+        }
+      }
+    },
+    "sandbox": {
+      "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.2.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "ce6e2acb7dca2d41df1d5b5dcb0064a1"
+        }
+      }
+    },
+    "updown": {
+      "description": "Adds UP and DOWN buttons in party window to recall messages in chat.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "7c597ef8cf7966a056eb5b34c01678eb"
+        }
+      }
+    },
+    "rejoin": {
+      "description": "Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then party is full.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "a34da341e7f2055a1f57f5262fa07c79"
+        }
+      }
+    },
+    "topmsg": {
+      "description": "When chat is muted, see new chat messages on top right! (like kill logs)",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "74a592e8204e81872752a4a6eff6701e"
+        }
+      }
+    },
+    "sorry": {
+      "description": "Send a random sorry to chat, preventing revenge attempts from teammates you kill by mistake.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "58fd9fbfc6fbff9f617b5a1763fc6aab"
+        }
+      }
+    },
     "translate": {
       "description": "Translate yours/others chat. Just click on the message to translate them. Open Plugin Settings/Double click 'Trans' button to open translation settings. Compatible with other PW mods (like advanced_party_window)",
       "external_url": "https://github.com/bombsquad-community/plugin-manager/assets/92618708/5860e44d-0b70-4a3f-a651-208a4452ea38",
@@ -562,6 +676,12 @@
         }
       ],
       "versions": {
+        "1.0.2": {
+          "api_version": 8,
+          "commit_sha": "505c948",
+          "released_on": "09-06-2024",
+          "md5sum": "ae32962255c357b29bd9c46c0551a19c"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "b089293",
@@ -947,6 +1067,12 @@
         }
       ],
       "versions": {
+        "1.0.2": {
+          "api_version": 8,
+          "commit_sha": "95076d1",
+          "released_on": "23-06-2024",
+          "md5sum": "3a072f0bb33bfa784670827d1b32b4d9"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -1078,6 +1204,12 @@
         }
       ],
       "versions": {
+        "1.4.3": {
+          "api_version": 8,
+          "commit_sha": "f50a546",
+          "released_on": "12-08-2024",
+          "md5sum": "44e294a7b04a3e03b96ad430afb40d20"
+        },
         "1.4.2": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
