@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
 from bauiv1lib.popup import PopupWindow
-from babase._mgen.enums import TimeType
+
 
 import asyncio
 import http.client
@@ -38,7 +38,8 @@ if TYPE_CHECKING:
 ANDROID = babase.app.classic.platform == "android"
 DIRPATH = Path(
     f"{_babase.app.python_directory_user if build_number < 21282 else _babase.app.env.python_directory_user}/image_id.json")
-APP_VERSION = _babase.app.version if build_number < 21282 else _babase.app.env.version
+APP_VERSION = _babase.app.version if build_number < 21282 else (
+    _babase.app.env.engine_version if build_number > 21823 else _babase.app.env.version)
 
 if ANDROID:  # !can add ios in future
 
