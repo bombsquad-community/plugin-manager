@@ -113,6 +113,10 @@ MAPNAME_ID = {
     "whereeaglesdare": "1097700904972587109",
     "android": "1097728392280932453",
 }
+
+APP_VERSION = _babase.app.version if build_number < 21282 else (
+    _babase.app.env.engine_version if build_number > 21823 else _babase.app.env.version)
+
 ANDROID = babase.app.classic.platform == "android"
 
 if ANDROID:  # !can add ios in future
