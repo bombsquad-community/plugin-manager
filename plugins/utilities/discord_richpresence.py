@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
 from bauiv1lib.popup import PopupWindow
-from babase._mgen.enums import TimeType
+
 
 import asyncio
 import http.client
