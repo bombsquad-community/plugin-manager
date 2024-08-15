@@ -173,7 +173,7 @@ def get_modules() -> None:
                 content = f.read()
                 assert hashlib.md5(content).hexdigest() == details["md5"]
             try:
-                shutil.unpack_archive(package_filename, install_path)
+                shutil.unpack_archive(package_filename, install_path, format="tar")
                 extracted_package_files = Path(f"{install_path}/{folder_name}")
                 for root, dirs, files in os.walk(extracted_package_files):
                     for dir in dirs:
