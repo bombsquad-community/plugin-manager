@@ -144,7 +144,7 @@ if ANDROID:  # !can add ios in future
                         hashlib.md5(content).hexdigest()
                         == "86bc69b61947943627afc1b351c0b5db"
                     )
-                shutil.unpack_archive(filename, install_path)
+                shutil.unpack_archive(filename, install_path, formart='tar')
                 remove(path)
                 shutil.copytree(source_dir, file_path)
                 shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
@@ -363,7 +363,7 @@ if not ANDROID:
                         hashlib.md5(content).hexdigest()
                         == "f7c163cdd001af2456c09e241b90bad7"
                     )
-                shutil.unpack_archive(filename, install_path)
+                shutil.unpack_archive(filename, install_path, format='tar')
                 shutil.copytree(source_dir, file_path)
                 shutil.rmtree(Path(f"{install_path}/pypresence-4.3.0"))
                 remove(path)
