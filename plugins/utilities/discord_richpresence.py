@@ -408,7 +408,7 @@ if not ANDROID:
             global _last_server_port
             old_connect(*args, **kwargs)
             _last_server_addr = kwargs.get("address") or args[0]
-            _last_server_port = kwargs.get("port") or args[1]
+            _last_server_port = kwargs.get("port") or args[1] if len(args) > 1 else 43210 #! Joining a game on same device as host NB check what happens if host is port forwarded you join it and check joining a server port forwarded or not
 
         bs.connect_to_party = new_connect
 
