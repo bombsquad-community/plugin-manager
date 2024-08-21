@@ -918,16 +918,13 @@ class DiscordRP(babase.Plugin):
             )
 
     def has_settings_ui(self):
-        return True
+        if ANDROID:
+            return True
+        else:
+            return False
 
     def show_settings_ui(self, button):
-        if not ANDROID:
-            bui.screenmessage(
-                "Nothing here achievement.Only for mobile users!!!", (0.26, 0.65, 0.94)
-            )
-            bui.getsound("achievement").play()
-        if ANDROID:
-            Discordlogin()
+        Discordlogin()
 
     def on_app_shutdown(self) -> None:
         if not ANDROID and self.rpc_thread.is_discord_running():
