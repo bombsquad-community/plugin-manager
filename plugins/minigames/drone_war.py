@@ -434,7 +434,7 @@ class ChooseQueen(DeathMatchGame):
             player.assigninput(InputType.PICK_UP_PRESS, drone.ascend)
             player.assigninput(InputType.PICK_UP_RELEASE, drone.pause_movement)
             player.assigninput(InputType.JUMP_PRESS, drone.decend)
-            player.assigninput(babase.InputType.JUMP_RELEASE, self.pause_movement)
+            player.assigninput(InputType.JUMP_RELEASE, self.pause_movement)
             player.assigninput(InputType.PUNCH_PRESS, drone.fire)
             player.assigninput(InputType.LEFT_PRESS, drone.left_)
             player.assigninput(InputType.RIGHT_PRESS, drone.right_)
