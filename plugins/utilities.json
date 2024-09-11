@@ -851,6 +851,20 @@
         }
       }
     },
+    "achievements_unlocker": {
+      "description": "Anlock All Achievements",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yelllow",
+          "email": "im.yellow.dev@gmail.com",
+          "discord": "y.lw"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
     "ultra_party_window": {
       "description": "Ultra your party window with lots of features",
       "external_url": "",
