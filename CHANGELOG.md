@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.0.22 (07-08-2024)
+
+- Fixed a few Errors and UI Bugs.
+
 ### 1.0.21 (20-05-2024)
 
 - Fixed an error related with notification of new plugins.
