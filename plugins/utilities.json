@@ -22,6 +22,20 @@
         }
       }
     },
+    "party_filter": {
+      "description": "Add filters to 'gather- public' window , ex: hide empty, full parties",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yelllow",
+          "email": "im.yellow.dev@gmail.com",
+          "discord": "y.lw"
+        },
+      ],
+      "versions": {
+        "1.0.0": {}
+      }
+    },
     "sandbox": {
       "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
       "external_url": "",
