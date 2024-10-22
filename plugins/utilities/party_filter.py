@@ -10,7 +10,7 @@ import bascenev1 as bs
 
 # Global state
 is_refreshing = True
-hide_full = False  
+hide_full = False
 hide_empty = False
 only_empty = False
 buttons_or_checkboxes = 2
@@ -30,6 +30,8 @@ def override(cls: ClassType) -> Callable[[MethodType], MethodType]:
     return decorator
 
 # Enhanced Gather Tab
+
+
 class EnhancedPublicGatherTab(PublicGatherTab):
     @override(PublicGatherTab)
     def _build_join_tab(self, width: float, height: float) -> None:
@@ -52,19 +54,19 @@ class EnhancedPublicGatherTab(PublicGatherTab):
         v_ = 65 if buttons_or_checkboxes == 1 else 50
 
         bui.textwidget(parent=self.window_root, size=(0, 0), h_align='center', v_align='center',
-            text='Partiy Filter Menu', scale=1.5, color=(1, 1, 0.7),
-            maxwidth=c_width * 0.8, position=(c_width * 0.5, c_height - 60))
+                       text='Partiy Filter Menu', scale=1.5, color=(1, 1, 0.7),
+                       maxwidth=c_width * 0.8, position=(c_width * 0.5, c_height - 60))
         bui.textwidget(parent=self.window_root, size=(0, 0), h_align='center', v_align='center',
-            text='BY Yelllow', scale=0.8, color=(1, 1, 0),
-            maxwidth=c_width * 0.8, position=(c_width * 0.5, c_height - 100))
+                       text='BY Yelllow', scale=0.8, color=(1, 1, 0),
+                       maxwidth=c_width * 0.8, position=(c_width * 0.5, c_height - 100))
 
         bui.buttonwidget(parent=self.window_root, position=(c_width * 0.1, c_height * 0.8),
-            size=(60, 60), scale=0.8, color=(1, 0.3, 0.3), label=babase.charstr(babase.SpecialChar.BACK),
-            button_type='backSmall', on_activate_call=self._close_window)
+                         size=(60, 60), scale=0.8, color=(1, 0.3, 0.3), label=babase.charstr(babase.SpecialChar.BACK),
+                         button_type='backSmall', on_activate_call=self._close_window)
 
         self._change_ui_button = bui.buttonwidget(parent=self.window_root, position=(c_width * 0.85, c_height * 0.8),
-            size=(60, 60), scale=0.8, color=(1, 1, 0) if buttons_or_checkboxes == 1 else (0, 0, 1),
-            label='C' if buttons_or_checkboxes == 1 else 'B', on_activate_call=self._change_ui)
+                                                  size=(60, 60), scale=0.8, color=(1, 1, 0) if buttons_or_checkboxes == 1 else (0, 0, 1),
+                                                  label='C' if buttons_or_checkboxes == 1 else 'B', on_activate_call=self._change_ui)
 
         v = c_height - 175
         if buttons_or_checkboxes == 1:
@@ -75,8 +77,8 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             )
         else:
             bui.checkboxwidget(parent=self.window_root, text='Stop Refresh', position=(c_height // 2, v),
-                size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=not is_refreshing,
-                on_value_change_call=bs.WeakCall(self._toggle_refresh))
+                               size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=not is_refreshing,
+                               on_value_change_call=bs.WeakCall(self._toggle_refresh))
 
         v -= v_
         if buttons_or_checkboxes == 1:
@@ -87,8 +89,8 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             )
         else:
             bui.checkboxwidget(parent=self.window_root, text='Hide Full Parties', position=(c_height // 2, v),
-                size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=hide_full,
-                on_value_change_call=bs.WeakCall(self._toggle_full))
+                               size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=hide_full,
+                               on_value_change_call=bs.WeakCall(self._toggle_full))
 
         v -= v_
         if buttons_or_checkboxes == 1:
@@ -99,9 +101,9 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             )
         else:
             self._empty_checkbox = bui.checkboxwidget(parent=self.window_root, text='Hide Empty Parties', position=(c_height // 2, v),
-                size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=hide_empty,
-                on_value_change_call=bs.WeakCall(self._toggle_empty))
-        
+                                                      size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=hide_empty,
+                                                      on_value_change_call=bs.WeakCall(self._toggle_empty))
+
         v -= v_
         if buttons_or_checkboxes == 1:
             self._only_empty_button = bui.buttonwidget(
@@ -111,8 +113,8 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             )
         else:
             self._only_empty_checkbox = bui.checkboxwidget(parent=self.window_root, text='Empty Parties', position=(c_height // 2, v),
-                size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=only_empty,
-                on_value_change_call=bs.WeakCall(self._toggle_only_empty))
+                                                           size=(200, 30), autoselect=True, textcolor=(0.8, 0.8, 0.8), value=only_empty,
+                                                           on_value_change_call=bs.WeakCall(self._toggle_only_empty))
 
     @override(PublicGatherTab)
     def _close_window(self) -> None:
@@ -128,8 +130,8 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             color=(0, 0, 1) if buttons_or_checkboxes == 1 else (1, 1, 0)
         )
         bui.buttonwidget(edit=self._change_ui_button,
-                        color=(1, 1, 0) if buttons_or_checkboxes == 1 else (0, 0, 1),
-                        label='C' if buttons_or_checkboxes == 1 else 'B')
+                         color=(1, 1, 0) if buttons_or_checkboxes == 1 else (0, 0, 1),
+                         label='C' if buttons_or_checkboxes == 1 else 'B')
         self._close_window()
         self._open_window()
 
@@ -138,22 +140,22 @@ class EnhancedPublicGatherTab(PublicGatherTab):
         global is_refreshing
         is_refreshing = not is_refreshing
         bui.screenmessage(f"Refreshing {'Enabled' if is_refreshing else 'Disabled'}",
-                            color=(0, 1, 0) if is_refreshing else (1, 0, 0))
+                          color=(0, 1, 0) if is_refreshing else (1, 0, 0))
         if buttons_or_checkboxes == 1:
             bui.buttonwidget(edit=self._refresh_button,
-                            color=(1, 0, 0) if is_refreshing else (0, 1, 0),
-                            label='Stop Refresh' if is_refreshing else 'Start Refresh')
+                             color=(1, 0, 0) if is_refreshing else (0, 1, 0),
+                             label='Stop Refresh' if is_refreshing else 'Start Refresh')
 
     @override(PublicGatherTab)
     def _toggle_full(self, _=None) -> None:
         global hide_full
         hide_full = not hide_full
         bui.screenmessage(f"{'Hiding' if hide_full else 'Showing'} Full Parties",
-                            color=(0, 1, 0) if hide_full else (1, 0, 0))
+                          color=(0, 1, 0) if hide_full else (1, 0, 0))
         if buttons_or_checkboxes == 1:
             bui.buttonwidget(edit=self._full_button,
-                            color=(1, 0, 0) if not hide_full else (0, 1, 0),
-                            label='Hide Full Parties' if not hide_full else 'Show Full Parties')
+                             color=(1, 0, 0) if not hide_full else (0, 1, 0),
+                             label='Hide Full Parties' if not hide_full else 'Show Full Parties')
         self._update_party_rows()
 
     @override(PublicGatherTab)
@@ -163,15 +165,15 @@ class EnhancedPublicGatherTab(PublicGatherTab):
         if hide_empty:
             only_empty = False
         bui.screenmessage(f"{'Hiding' if hide_empty else 'Showing'} Empty Parties",
-                            color=(0, 1, 0) if hide_empty else (1, 0, 0))
+                          color=(0, 1, 0) if hide_empty else (1, 0, 0))
         if buttons_or_checkboxes == 1:
             bui.buttonwidget(edit=self._empty_button,
-                            color=(1, 0, 0) if not hide_empty else (0, 1, 0),
-                            label='Hide Empty Parties' if not hide_empty else 'Show Empty Parties')
+                             color=(1, 0, 0) if not hide_empty else (0, 1, 0),
+                             label='Hide Empty Parties' if not hide_empty else 'Show Empty Parties')
             if hide_empty:
-                bui.buttonwidget(edit=self._only_empty_button, 
-                                color=(1, 0, 0) if not only_empty else (0, 1, 0),
-                                label='Empty Parties' if not only_empty else 'All Parties')
+                bui.buttonwidget(edit=self._only_empty_button,
+                                 color=(1, 0, 0) if not only_empty else (0, 1, 0),
+                                 label='Empty Parties' if not only_empty else 'All Parties')
         else:
             if hide_empty:
                 bui.checkboxwidget(edit=self._only_empty_checkbox, value=only_empty)
@@ -184,15 +186,15 @@ class EnhancedPublicGatherTab(PublicGatherTab):
         if only_empty:
             hide_empty = False
         bui.screenmessage(f"{'Only' if only_empty else 'All'} Empty Parties",
-                            color=(0, 1, 0) if only_empty else (1, 0, 0))
+                          color=(0, 1, 0) if only_empty else (1, 0, 0))
         if buttons_or_checkboxes == 1:
             bui.buttonwidget(edit=self._only_empty_button,
-                            color=(1, 0, 0) if not only_empty else (0, 1, 0),
-                            label='Empty Parties' if not only_empty else 'All Parties')
+                             color=(1, 0, 0) if not only_empty else (0, 1, 0),
+                             label='Empty Parties' if not only_empty else 'All Parties')
             if only_empty:
                 bui.buttonwidget(edit=self._empty_button,
-                            color=(1, 0, 0) if not hide_empty else (0, 1, 0),
-                            label='Hide Empty Parties' if not hide_empty else 'Show Empty Parties')
+                                 color=(1, 0, 0) if not hide_empty else (0, 1, 0),
+                                 label='Hide Empty Parties' if not hide_empty else 'Show Empty Parties')
         else:
             if only_empty:
                 bui.checkboxwidget(edit=self._empty_checkbox, value=hide_empty)
@@ -204,7 +206,8 @@ class EnhancedPublicGatherTab(PublicGatherTab):
         if is_refreshing:
             self._original__update_party_rows()
             if hide_full:
-                self._parties_sorted = [p for p in self._parties_sorted if p[1].size < p[1].size_max]
+                self._parties_sorted = [
+                    p for p in self._parties_sorted if p[1].size < p[1].size_max]
             if hide_empty:
                 self._parties_sorted = [p for p in self._parties_sorted if p[1].size > 0]
             if only_empty:
@@ -215,4 +218,4 @@ class EnhancedPublicGatherTab(PublicGatherTab):
 # ba_meta export babase.Plugin
 class ByYelllow(babase.Plugin):
     def on_app_running(self) -> None:
-        pass # Bruh 
+        pass  # Bruh
