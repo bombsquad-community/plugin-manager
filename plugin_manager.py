@@ -1,6 +1,5 @@
-# ba_meta require api 8
+# ba_meta require api 9
 from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
-from baenv import TARGET_BALLISTICA_BUILD
 import babase
 import _babase
 import bauiv1 as bui
@@ -22,13 +21,11 @@ import pathlib
 import contextlib
 import hashlib
 import copy
-import traceback
 
-from typing import Union, Optional, cast
+from typing import cast, override
 from datetime import datetime
 
 # Modules used for overriding AllSettingsWindow
-from threading import Thread
 import logging
 
 PLUGIN_MANAGER_VERSION = "1.0.23"
@@ -36,41 +33,6 @@ REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
-
-
-if TARGET_BALLISTICA_BUILD < 21282:
-    # These attributes have been deprecated as of 1.7.27. For more info see:
-    # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
-    # Adding a compatibility layer here so older builds still work fine.
-    class Dummy:
-        build_number = babase.app.build_number
-        device_name = babase.app.device_name
-        config_file_path = babase.app.config_file_path
-        version = babase.app.version
-        debug = babase.app.debug_build
-        test = babase.app.test_build
-        data_directory = babase.app.data_directory
-        python_directory_user = babase.app.python_directory_user
-        python_directory_app = babase.app.python_directory_app
-        python_directory_app_site = babase.app.python_directory_app_site
-        api_version = babase.app.api_version
-        tv = babase.app.on_tv
-        vr = babase.app.vr_mode
-        arcade = babase.app.arcade_mode
-        headless = babase.app.arcade_mode
-        demo = babase.app.demo_mode
-
-    _bascenev1.protocol_version = lambda: babase.app.protocol_version
-    _bauiv1.toolbar_test = lambda: babase.app.toolbar_test
-
-    babase.app.env = Dummy
-
-if TARGET_BALLISTICA_BUILD < 21852:
-    class Dummy(babase.app.env):
-        engine_build_number = babase.app.env.build_number
-        engine_version = babase.app.env.version
-
-    babase.app.env = Dummy
 
 _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
@@ -1761,7 +1723,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
 
-class PluginManagerWindow(bui.Window):
+class PluginManagerWindow(bui.MainWindow):
     def __init__(self, transition: str = "in_right", origin_widget: bui.Widget = None):
         self.plugin_manager = PluginManager()
         self.category_selection_button = None
@@ -1785,32 +1747,41 @@ class PluginManagerWindow(bui.Window):
             self._scale_origin = origin_widget.get_screen_space_center()
             transition = "in_scale"
 
-        super().__init__(root_widget=bui.containerwidget(
-            size=(self._width, self._height + top_extra),
+        super().__init__(
+            root_widget=bui.containerwidget(
+                size=(self._width, self._height + top_extra),
+                toolbar_visibility="menu_minimal",
+                scale=(1.9 if _uiscale is babase.UIScale.SMALL
+                    else 1.5 if _uiscale is babase.UIScale.MEDIUM
+                    else 1.0),
+                stack_offset=(0, -25) if _uiscale is babase.UIScale.SMALL else (0, 0)
+            ),
             transition=transition,
-            toolbar_visibility="menu_minimal",
-            scale_origin_stack_offset=self._scale_origin,
-            scale=(1.9 if _uiscale is babase.UIScale.SMALL
-                   else 1.5 if _uiscale is babase.UIScale.MEDIUM
-                   else 1.0),
-            stack_offset=(0, -25) if _uiscale is babase.UIScale.SMALL else (0, 0)
-        ))
+            origin_widget=origin_widget,
+        )
 
         back_pos_x = 5 + (37 if _uiscale is babase.UIScale.SMALL else
                           27 if _uiscale is babase.UIScale.MEDIUM else 68)
         back_pos_y = self._height - (95 if _uiscale is babase.UIScale.SMALL else
                                      65 if _uiscale is babase.UIScale.MEDIUM else 50)
-        self._back_button = back_button = bui.buttonwidget(
-            parent=self._root_widget,
-            position=(back_pos_x, back_pos_y),
-            size=(60, 60),
-            scale=0.8,
-            label=babase.charstr(babase.SpecialChar.BACK),
-            # autoselect=True,
-            button_type='backSmall',
-            on_activate_call=self._back)
+        
+        if _uiscale is bui.UIScale.SMALL:
+            self._back_button = None
+            bui.containerwidget(
+                edit=self._root_widget, on_cancel_call=self.main_window_back
+            )
+        else:
+            self._back_button = back_button = bui.buttonwidget(
+                parent=self._root_widget,
+                position=(back_pos_x, back_pos_y),
+                size=(60, 60),
+                scale=0.8,
+                label=babase.charstr(babase.SpecialChar.BACK),
+                # autoselect=True,
+                button_type='backSmall',
+                on_activate_call=self.main_window_back)
 
-        bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
+            bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
         title_pos = self._height - (83 if _uiscale is babase.UIScale.SMALL else
                                     50 if _uiscale is babase.UIScale.MEDIUM else 50)
@@ -1842,47 +1813,37 @@ class PluginManagerWindow(bui.Window):
         )
         self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
-    def _back(self) -> None:
-        from bauiv1lib.settings.allsettings import AllSettingsWindow
-        del self._last_filter_plugins
-        bui.containerwidget(edit=self._root_widget,
-                            transition=self._transition_out)
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                AllSettingsWindow(transition='in_left').get_root_widget())
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                AllSettingsWindow(transition='in_left').get_root_widget(),
-                from_window=self._root_widget,)
-
     @contextlib.contextmanager
     def exception_handler(self):
         try:
             yield
         except urllib.error.URLError:
             self._dot_timer = None
-            bui.textwidget(edit=self._plugin_manager_status_text,
-                           text="Make sure you are connected\n to the Internet and try again.")
+            try:
+                bui.textwidget(
+                    edit=self._plugin_manager_status_text,
+                    text="Make sure you are connected\n to the Internet and try again."
+                )
+            except: pass
             self.plugin_manager._index_setup_in_progress = False
         except RuntimeError:
             # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
             self._dot_timer = None
-            bui.textwidget(edit=self._plugin_manager_status_text,
-                           text=str(e))
+            try:
+                bui.textwidget(edit=self._plugin_manager_status_text, text=str(e))
+            except: pass
             raise
 
     def _update_dots(self):
-        text = cast(str, bui.textwidget(query=self._plugin_manager_status_text))
-        if text.endswith('....'):
-            text = text[0:len(text)-4]
-        text = text + '.'
-        bui.textwidget(edit=self._plugin_manager_status_text,
-                       text=text)
+        try:
+            text = cast(str, bui.textwidget(query=self._plugin_manager_status_text))
+            if text.endswith('....'):
+                text = text[0:len(text)-4]
+            bui.textwidget(edit=self._plugin_manager_status_text, text=(text + '.'))
+        except:
+            pass
 
     async def draw_index(self):
         self.draw_search_bar()
@@ -1894,8 +1855,9 @@ class PluginManagerWindow(bui.Window):
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
             self._dot_timer = None
-            bui.textwidget(edit=self._plugin_manager_status_text,
-                           text="")
+            try:
+                bui.textwidget(edit=self._plugin_manager_status_text, text="")
+            except: pass
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
@@ -2238,8 +2200,9 @@ class PluginManagerWindow(bui.Window):
 
     async def refresh(self):
         self.cleanup()
-        bui.textwidget(edit=self._plugin_manager_status_text,
-                       text="Refreshing")
+        try:
+            bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
+        except: pass
         if self._dot_timer is None:
             self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
@@ -2248,8 +2211,9 @@ class PluginManagerWindow(bui.Window):
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
             self._dot_timer = None
-            bui.textwidget(edit=self._plugin_manager_status_text,
-                           text="")
+            try:
+                bui.textwidget(edit=self._plugin_manager_status_text, text="")
+            except: pass
             await self.select_category(self.selected_category)
 
     def soft_refresh(self):
@@ -2494,12 +2458,12 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
-class NewAllSettingsWindow(bui.Window):
+class NewAllSettingsWindow(bui.MainWindow):
     """Window for selecting a settings category."""
 
     def __init__(
         self,
-        transition: str = 'in_right',
+        transition: str | None = 'in_right',
         origin_widget: bui.Widget | None = None,
     ):
         # pylint: disable=too-many-statements
@@ -2507,67 +2471,63 @@ class NewAllSettingsWindow(bui.Window):
 
         # Preload some modules we use in a background thread so we won't
         # have a visual hitch when the user taps them.
-        Thread(target=self._preload_modules).start()
+        bui.app.threadpool.submit_no_wait(self._preload_modules)
 
         bui.set_analytics_screen('Settings Window')
-        scale_origin: tuple[float, float] | None
-        if origin_widget is not None:
-            self._transition_out = 'out_scale'
-            scale_origin = origin_widget.get_screen_space_center()
-            transition = 'in_scale'
-        else:
-            self._transition_out = 'out_right'
-            scale_origin = None
         assert bui.app.classic is not None
-        width = 900 if _uiscale is bui.UIScale.SMALL else 670
-        x_inset = 75 if _uiscale is bui.UIScale.SMALL else 0
-        height = 435
+        uiscale = bui.app.ui_v1.uiscale
+        width = 1000 if uiscale is bui.UIScale.SMALL else 800
+        x_inset = 125 if uiscale is bui.UIScale.SMALL else 105
+        height = 490
         self._r = 'settingsWindow'
-        top_extra = 20 if _uiscale is bui.UIScale.SMALL else 0
+        top_extra = 20 if uiscale is bui.UIScale.SMALL else 0
 
+        uiscale = bui.app.ui_v1.uiscale
         super().__init__(
             root_widget=bui.containerwidget(
                 size=(width, height + top_extra),
-                transition=transition,
-                toolbar_visibility='menu_minimal',
-                scale_origin_stack_offset=scale_origin,
-                scale=(
-                    1.75
-                    if _uiscale is bui.UIScale.SMALL
-                    else 1.35
-                    if _uiscale is bui.UIScale.MEDIUM
-                    else 1.0
+                toolbar_visibility=(
+                    'menu_minimal'
+                    if uiscale is bui.UIScale.SMALL
+                    else 'menu_full'
                 ),
-                stack_offset=(0, -8)
-                if _uiscale is bui.UIScale.SMALL
-                else (0, 0),
-            )
+                scale=(
+                    1.5
+                    if uiscale is bui.UIScale.SMALL
+                    else 1.25 if uiscale is bui.UIScale.MEDIUM else 1.0
+                ),
+                stack_offset=(
+                    (0, 0) if uiscale is bui.UIScale.SMALL else (0, 0)
+                ),
+            ),
+            transition=transition,
+            origin_widget=origin_widget,
         )
 
-        if bui.app.ui_v1.use_toolbars and _uiscale is bui.UIScale.SMALL:
+        if uiscale is bui.UIScale.SMALL:
             self._back_button = None
             bui.containerwidget(
-                edit=self._root_widget, on_cancel_call=self._do_back
+                edit=self._root_widget, on_cancel_call=self.main_window_back
             )
         else:
             self._back_button = btn = bui.buttonwidget(
                 parent=self._root_widget,
                 autoselect=True,
-                position=(40 + x_inset, height - 55),
+                position=(x_inset - 20, height - 85),
                 size=(130, 60),
                 scale=0.8,
                 text_scale=1.2,
                 label=bui.Lstr(resource='backText'),
                 button_type='back',
-                on_activate_call=self._do_back,
+                on_activate_call=self.main_window_back,
             )
             bui.containerwidget(edit=self._root_widget, cancel_button=btn)
 
         bui.textwidget(
             parent=self._root_widget,
-            position=(0, height - 44),
+            position=(0, height - 80),
             size=(width, 25),
-            text=bui.Lstr(resource=self._r + '.titleText'),
+            text=bui.Lstr(resource=f'{self._r}.titleText'),
             color=bui.app.ui_v1.title_color,
             h_align='center',
             v_align='center',
@@ -2582,19 +2542,23 @@ class NewAllSettingsWindow(bui.Window):
                 label=bui.charstr(bui.SpecialChar.BACK),
             )
 
-        v = height - 80
+        v = height - 120
         v -= 145
 
-        basew = 200
-        baseh = 160
+        basew = 280 if uiscale is bui.UIScale.SMALL else 230
+        baseh = 170
         x_offs = (
-            x_inset + (105 if _uiscale is bui.UIScale.SMALL else 72) - basew
+            x_inset + (105 if uiscale is bui.UIScale.SMALL else 72) - basew
         )  # now unused
+        x_dif = (basew - 7) / 2
         x_offs2 = x_offs + basew - 7
         x_offs3 = x_offs + 2 * (basew - 7)
         x_offs4 = x_offs + 3 * (basew - 7)
-        x_offs5 = x_offs2 + 0.5 * (basew - 7)
-        x_offs6 = x_offs5 + (basew - 7)
+        x_offs5 = x_offs2
+        x_offs6 = x_offs3
+        x_offs2 -= x_dif
+        x_offs3 -= x_dif
+        x_offs4 -= x_dif
 
         def _b_title(
             x: float, y: float, button: bui.Widget, text: str | bui.Lstr
@@ -2620,11 +2584,11 @@ class NewAllSettingsWindow(bui.Window):
             label='',
             on_activate_call=self._do_controllers,
         )
-        if bui.app.ui_v1.use_toolbars and self._back_button is None:
+        if self._back_button is None:
             bbtn = bui.get_special_widget('back_button')
             bui.widget(edit=ctb, left_widget=bbtn)
         _b_title(
-            x_offs2, v, ctb, bui.Lstr(resource=self._r + '.controllersText')
+            x_offs2, v, ctb, bui.Lstr(resource=f'{self._r}.controllersText')
         )
         imgw = imgh = 130
         bui.imagewidget(
@@ -2644,10 +2608,9 @@ class NewAllSettingsWindow(bui.Window):
             label='',
             on_activate_call=self._do_graphics,
         )
-        if bui.app.ui_v1.use_toolbars:
-            pbtn = bui.get_special_widget('party_button')
-            bui.widget(edit=gfxb, up_widget=pbtn, right_widget=pbtn)
-        _b_title(x_offs3, v, gfxb, bui.Lstr(resource=self._r + '.graphicsText'))
+        pbtn = bui.get_special_widget('squad_button')
+        bui.widget(edit=gfxb, up_widget=pbtn, right_widget=pbtn)
+        _b_title(x_offs3, v, gfxb, bui.Lstr(resource=f'{self._r}.graphicsText'))
         imgw = imgh = 110
         bui.imagewidget(
             parent=self._root_widget,
@@ -2666,7 +2629,7 @@ class NewAllSettingsWindow(bui.Window):
             label='',
             on_activate_call=self._do_audio,
         )
-        _b_title(x_offs4, v, abtn, bui.Lstr(resource=self._r + '.audioText'))
+        _b_title(x_offs4, v, abtn, bui.Lstr(resource=f'{self._r}.audioText'))
         imgw = imgh = 120
         bui.imagewidget(
             parent=self._root_widget,
@@ -2688,7 +2651,7 @@ class NewAllSettingsWindow(bui.Window):
             label='',
             on_activate_call=self._do_advanced,
         )
-        _b_title(x_offs5, v, avb, bui.Lstr(resource=self._r + '.advancedText'))
+        _b_title(x_offs5, v, avb, bui.Lstr(resource=f'{self._r}.advancedText'))
         imgw = imgh = 120
         bui.imagewidget(
             parent=self._root_widget,
@@ -2699,160 +2662,106 @@ class NewAllSettingsWindow(bui.Window):
             draw_controller=avb,
         )
 
-        mmb = self._modmgr_button = bui.buttonwidget(parent=self._root_widget,
-                                                     autoselect=True,
-                                                     position=(x_offs6, v),
-                                                     size=(basew, baseh),
-                                                     button_type="square",
-                                                     label="",
-                                                     on_activate_call=self._do_modmanager)
-        _b_title(x_offs6, v, mmb, bui.Lstr(value="Plugin Manager"))
-        imgw = imgh = 112
-        bui.imagewidget(parent=self._root_widget,
-                        position=(x_offs6 + basew * 0.49 - imgw * 0.5 + 5,
-                                  v + 35),
-                        size=(imgw, imgh),
-                        color=(0.8, 0.95, 1),
-                        texture=bui.gettexture("storeIcon"),
-                        draw_controller=mmb)
-
+        pmb = self._plugman_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(x_offs6, v),
+            size=(basew, baseh),
+            button_type='square',
+            label='',
+            on_activate_call=self._do_plugman,
+        )
+        _b_title(x_offs6, v, pmb, bui.Lstr(value="Plugin Manager"))
+        imgw = imgh = 120
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(x_offs6 + basew * 0.49 - imgw * 0.5 + 5, v + 35),
+            size=(imgw, imgh),
+            color=(0.8, 0.95, 1),
+            texture=bui.gettexture('storeIcon'),
+            draw_controller=pmb,
+        )
         self._restore_state()
 
-    # noinspection PyUnresolvedReferences
+    @override
+    def get_main_window_state(self) -> bui.MainWindowState:
+        # Support recreating our window for back/refresh purposes.
+        cls = type(self)
+        return bui.BasicMainWindowState(
+            create_call=lambda transition, origin_widget: cls(
+                transition=transition, origin_widget=origin_widget
+            )
+        )
+
+    @override
+    def on_main_window_close(self) -> None:
+        self._save_state()
+
     @staticmethod
     def _preload_modules() -> None:
-        """Preload modules we use (called in bg thread)."""
+        """Preload modules we use; avoids hitches (called in bg thread)."""
         import bauiv1lib.mainmenu as _unused1
         import bauiv1lib.settings.controls as _unused2
         import bauiv1lib.settings.graphics as _unused3
         import bauiv1lib.settings.audio as _unused4
         import bauiv1lib.settings.advanced as _unused5
 
-    def _do_back(self) -> None:
-        # pylint: disable=cyclic-import
-        from bauiv1lib.mainmenu import MainMenuWindow
-
-        self._save_state()
-        bui.containerwidget(
-            edit=self._root_widget, transition=self._transition_out
-        )
-        assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                MainMenuWindow(transition='in_left').get_root_widget(),)
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                MainMenuWindow(transition='in_left').get_root_widget(),
-                from_window=self._root_widget,)
-
     def _do_controllers(self) -> None:
         # pylint: disable=cyclic-import
         from bauiv1lib.settings.controls import ControlsSettingsWindow
 
-        self._save_state()
-        bui.containerwidget(edit=self._root_widget, transition='out_left')
-        assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                ControlsSettingsWindow(
-                    origin_widget=self._controllers_button
-                ).get_root_widget(),)
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                ControlsSettingsWindow(
-                    origin_widget=self._controllers_button
-                ).get_root_widget(),
-                from_window=self._root_widget,)
+        # no-op if we're not in control.
+        if not self.main_window_has_control():
+            return
+
+        self.main_window_replace(
+            ControlsSettingsWindow(origin_widget=self._controllers_button)
+        )
 
     def _do_graphics(self) -> None:
         # pylint: disable=cyclic-import
         from bauiv1lib.settings.graphics import GraphicsSettingsWindow
 
-        self._save_state()
-        bui.containerwidget(edit=self._root_widget, transition='out_left')
-        assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                GraphicsSettingsWindow(
-                    origin_widget=self._graphics_button
-                ).get_root_widget(),)
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                GraphicsSettingsWindow(
-                    origin_widget=self._graphics_button
-                ).get_root_widget(),
-                from_window=self._root_widget,)
+        # no-op if we're not in control.
+        if not self.main_window_has_control():
+            return
+
+        self.main_window_replace(
+            GraphicsSettingsWindow(origin_widget=self._graphics_button)
+        )
 
     def _do_audio(self) -> None:
         # pylint: disable=cyclic-import
         from bauiv1lib.settings.audio import AudioSettingsWindow
 
-        self._save_state()
-        bui.containerwidget(edit=self._root_widget, transition='out_left')
-        assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                AudioSettingsWindow(
-                    origin_widget=self._audio_button
-                ).get_root_widget(),)
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                AudioSettingsWindow(
-                    origin_widget=self._audio_button
-                ).get_root_widget(),
-                from_window=self._root_widget,)
+        # no-op if we're not in control.
+        if not self.main_window_has_control():
+            return
+
+        self.main_window_replace(
+            AudioSettingsWindow(origin_widget=self._audio_button)
+        )
 
     def _do_advanced(self) -> None:
         # pylint: disable=cyclic-import
         from bauiv1lib.settings.advanced import AdvancedSettingsWindow
 
-        self._save_state()
-        bui.containerwidget(edit=self._root_widget, transition='out_left')
-        assert bui.app.classic is not None
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                AdvancedSettingsWindow(
-                    origin_widget=self._advanced_button
-                ).get_root_widget())
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                AdvancedSettingsWindow(
-                    origin_widget=self._advanced_button
-                ).get_root_widget(),
-                from_window=self._root_widget,)
+        # no-op if we're not in control.
+        if not self.main_window_has_control():
+            return
 
-    def _do_modmanager(self) -> None:
-        self._save_state()
-        bui.containerwidget(edit=self._root_widget, transition="out_left")
-        if TARGET_BALLISTICA_BUILD < 21697:
-            # from_window parameter was added in 1.7.30, see changelogs below
-            # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1730-build-21697-api-8-2023-12-08
-            # Adding a check here so older builds still work fine.
-            bui.app.ui_v1.set_main_menu_window(
-                PluginManagerWindow(
-                    origin_widget=self._modmgr_button
-                ).get_root_widget(),)
-        else:
-            bui.app.ui_v1.set_main_menu_window(
-                PluginManagerWindow(
-                    origin_widget=self._modmgr_button
-                ).get_root_widget(),
-                from_window=self._root_widget,)
+        self.main_window_replace(
+            AdvancedSettingsWindow(origin_widget=self._advanced_button)
+        )
+
+    def _do_plugman(self) -> None:
+        # no-op if we're not in control.
+        if not self.main_window_has_control():
+            return
+
+        self.main_window_replace(
+            PluginManagerWindow(origin_widget=self._plugman_button)
+        )
 
     def _save_state(self) -> None:
         try:
@@ -2865,16 +2774,14 @@ class NewAllSettingsWindow(bui.Window):
                 sel_name = 'Audio'
             elif sel == self._advanced_button:
                 sel_name = 'Advanced'
-            elif sel == self._modmgr_button:
-                sel_name = 'Mod Manager'
+            elif sel == self._plugman_button:
+                sel_name = 'PlugMan'
             elif sel == self._back_button:
                 sel_name = 'Back'
             else:
                 raise ValueError(f'unrecognized selection \'{sel}\'')
             assert bui.app.classic is not None
-            bui.app.ui_v1.window_states[type(self)] = {
-                'sel_name': sel_name
-            }
+            bui.app.ui_v1.window_states[type(self)] = {'sel_name': sel_name}
         except Exception:
             logging.exception('Error saving state for %s.', self)
 
@@ -2893,8 +2800,8 @@ class NewAllSettingsWindow(bui.Window):
                 sel = self._audio_button
             elif sel_name == 'Advanced':
                 sel = self._advanced_button
-            elif sel_name == "Mod Manager":
-                sel = self._modmgr_button
+            elif sel_name == "PlugMan":
+                sel = self._plugman_button
             elif sel_name == 'Back':
                 sel = self._back_button
             else:
