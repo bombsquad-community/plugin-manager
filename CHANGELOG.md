@@ -1,6 +1,6 @@
 ## Plugin Manager (dd-mm-yyyy)
 
-### 1.0.23 (12-09-2024)
+### 1.0.23 (13-01-2025)
 
 - Fixed a bug which wasn't letting older versions run Plugin Manager.
   
