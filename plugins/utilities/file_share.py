@@ -1,4 +1,4 @@
-# ba_meta require api 8
+# ba_meta require api 9
 '''
 File Share Mod for BombSquad 1.7.30 and above.
 https://youtu.be/qtGsFU4cgic

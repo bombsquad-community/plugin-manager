@@ -59,7 +59,7 @@ class SorryPW(bauiv1lib.party.PartyWindow):
             for i in range(10, s._delay+1):
                 bs.apptimer((i-10)/10, bs.Call(s._ok, i))
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export plugin
 
 

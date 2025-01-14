@@ -214,7 +214,7 @@ class EnhancedPublicGatherTab(PublicGatherTab):
                 self._parties_sorted = [p for p in self._parties_sorted if p[1].size == 0]
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export babase.Plugin
 class ByYelllow(babase.Plugin):
     def on_app_running(self) -> None:

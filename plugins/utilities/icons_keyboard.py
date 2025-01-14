@@ -7,7 +7,7 @@
 # Tap bottom-left bomb button to cycle through different icons
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 import bauiv1
 import babase

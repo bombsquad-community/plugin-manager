@@ -309,7 +309,7 @@ class RandomJoin:
 randomjoin = RandomJoin()
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export babase.Plugin
 class RandomJoinPlugin(babase.Plugin):
     def on_app_running(self) -> None:

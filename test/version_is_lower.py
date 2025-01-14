@@ -1,5 +1,5 @@
 import sys
-from get_latest import get_latest
+from get_latest import get_latest_version
 
 
 def semantic_to_str(semantic_version: str):
@@ -16,7 +16,7 @@ def semantic_to_str(semantic_version: str):
 
 def version_is_lower(version: str):
     """Check if given version is lower than the latest entry in index.json"""
-    latest = semantic_to_str(get_latest())
+    latest = semantic_to_str(get_latest_version())
     version = semantic_to_str(version)
     if latest > version:
         return True
