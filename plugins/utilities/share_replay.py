@@ -13,7 +13,7 @@ Message me in discord if you find some bug
 Use this code for your experiments or plugin but please dont rename this plugin and distribute with your name,don't do that,its bad'
 """
 
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 if TYPE_CHECKING:
