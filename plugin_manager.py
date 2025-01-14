@@ -1694,8 +1694,8 @@ class PluginManagerWindow(bui.MainWindow):
                 size=(self._width, self._height + top_extra),
                 toolbar_visibility="menu_minimal",
                 scale=(1.9 if _uiscale is babase.UIScale.SMALL
-                    else 1.5 if _uiscale is babase.UIScale.MEDIUM
-                    else 1.0),
+                       else 1.5 if _uiscale is babase.UIScale.MEDIUM
+                       else 1.0),
                 stack_offset=(0, -25) if _uiscale is babase.UIScale.SMALL else (0, 0)
             ),
             transition=transition,
@@ -1706,7 +1706,7 @@ class PluginManagerWindow(bui.MainWindow):
                           27 if _uiscale is babase.UIScale.MEDIUM else 68)
         back_pos_y = self._height - (95 if _uiscale is babase.UIScale.SMALL else
                                      65 if _uiscale is babase.UIScale.MEDIUM else 50)
-        
+
         if _uiscale is bui.UIScale.SMALL:
             self._back_button = None
             bui.containerwidget(
@@ -1765,7 +1765,8 @@ class PluginManagerWindow(bui.MainWindow):
                     edit=self._plugin_manager_status_text,
                     text="Make sure you are connected\n to the Internet and try again."
                 )
-            except: pass
+            except:
+                pass
             self.plugin_manager._index_setup_in_progress = False
         except RuntimeError:
             # User probably went back before a bui.Window could finish loading.
@@ -1774,7 +1775,8 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text=str(e))
-            except: pass
+            except:
+                pass
             raise
 
     def _update_dots(self):
@@ -1798,7 +1800,8 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except: pass
+            except:
+                pass
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
@@ -2113,7 +2116,8 @@ class PluginManagerWindow(bui.MainWindow):
         self.cleanup()
         try:
             bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
-        except: pass
+        except:
+            pass
         if self._dot_timer is None:
             self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
@@ -2124,7 +2128,8 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except: pass
+            except:
+                pass
             await self.select_category(self.selected_category)
 
     def soft_refresh(self):
@@ -2383,7 +2388,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
 
         for child in self._root_widget.get_children():
             child.delete()
-        
+
         bui.containerwidget(
             edit=self._root_widget, size=(width, height + top_extra)
         )
