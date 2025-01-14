@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: 'Get Previous tag'
         uses: oprypin/find-latest-tag@v1.1.2
@@ -27,14 +27,16 @@ jobs:
 
       - name: set_variables
         run: |
-          output1=$(python3 test/get_latest.py)
+          output1=$(python3 test/get_latest.py get_latest_version)
           {
             echo "changelog<<EOF"
-            python3 test/get_changes.py "$(python3 test/get_latest.py)"
+            python3 test/get_changes.py "$(python3 test/get_latest.py get_latest_version)"
             echo EOF
           } >> "$GITHUB_OUTPUT"
+          output2=$(python3 test/get_latest.py get_latest_api)
           output3=$(python3 test/version_is_lower.py ${{ steps.previoustag.outputs.tag }})
           echo "latestVersion=$output1" >> $GITHUB_OUTPUT
+          echo "latestAPI=$output2" >> $GITHUB_OUTPUT
           echo "shouldRun=$output3" >> $GITHUB_OUTPUT
         id: set_variables
       
@@ -54,7 +56,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          name: ${{ steps.tag_version.outputs.new_tag }} (api ${{ steps.set_variables.outputs.latestAPI }})
           artifacts: "plugin_manager.py"
           body: |
             ## Changelog

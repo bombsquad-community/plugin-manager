@@ -2,7 +2,7 @@
 
 ### 1.1.0 (15-01-2025)
 
-- Updating to bombsquad api 9. 
+- Updated to bombsquad api 9. 
   
 ### 1.0.23 (13-01-2025)
 
