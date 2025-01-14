@@ -1,10 +1,8 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
-**Important:** Please check out the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch if you're
-using the game version (1.7.0 <= your game version <= 1.7.19) which uses API 7 plugins.
-If you're on game version (1.7.20 or a later version) where it uses API 8 plugins, then proceed with the rest of the
-README here.
-
+**Important:** For bombsquad version < 1.7.37
+- for version 1.7.0 to 1.7.19 checkout the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch
+- for version 1.7.20 to 1.7.36 checkout the [api8](https://github.com/bombsquad-community/plugin-manager/tree/api8) branch
 -------------------------------
 
 # Plugin-Manager
