@@ -47,12 +47,12 @@ There are two different ways the plugin manager can be installed:
    - Enable "Show Dev Console Button" from advance bombsquad settings
    - Paste the following code in dev console
      ```py
-     import urllib.request;import _babase;import os;url="https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py";plugin_path=os.path.join(_babase.env()["python_directory_user"],"plugin_manager.py");file=urllib.request.urlretrieve(url)[0];fl = open(file,'r');f=open(plugin_path, 'w+');f.write(fl.read());fl.close();f.close();print("SUCCESS")
+     import urllib.request;import _babase;import os;url="https://github.com/bombsquad-community/plugin-manager/releases/download/v1.0.23/plugin_manager.py";plugin_path=os.path.join(_babase.env()["python_directory_user"],"plugin_manager.py");file=urllib.request.urlretrieve(url)[0];fl = open(file,'r');f=open(plugin_path, 'w+');f.write(fl.read());fl.close();f.close();print("SUCCESS")
       ```
    - "SUCCESS" will be shown in the console 
 
 2. Another way is to add
-   [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
+   [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/api8/plugin_manager.py)
    to your workspace. However, plugin manager self-updates will fail when installed using this way since the game
    will overrwrite the updated plugin manager, with the older version from workspace on the next sync. However, you can
    manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
