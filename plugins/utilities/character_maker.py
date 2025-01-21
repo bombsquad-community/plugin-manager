@@ -1,6 +1,6 @@
 # Released under the MIT License. See LICENSE for details.
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 
 '''
@@ -748,27 +748,11 @@ def get_player(msg, activity):
             return player
 
 
-old_piv = bui.set_party_icon_always_visible
-
-
-def new_piv(*args, **kwargs):
-    old_piv(True)
-
-
-bui.set_party_icon_always_visible = new_piv
-
-
-class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        bui.set_party_icon_always_visible(True)
-
 # ba_meta export plugin
 
 
 class bySmoothy(babase.Plugin):
     def __init__(self):
-        bauiv1lib.mainmenu.MainMenuWindow = NewMainMenuWindow
         _babase.import_character = import_character
         _babase.export_character = export_character
         _babase.spaz_to_json = spaz_to_json
