@@ -10,7 +10,7 @@ k = bs.connect_to_party
 
 def j(address, port=43210, print_progress=False):
     try:
-       if bs.get_connection_to_host_info() is not None:
+        if bs.get_connection_to_host_info() is not None:
             bs.disconnect_from_host()
             m.i = address
             m.p = port
