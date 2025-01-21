@@ -1,13 +1,10 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 import random
 from bascenev1lib.actor import bomb
@@ -19,6 +16,7 @@ if TYPE_CHECKING:
 class NewBlast(bomb.Blast):
     def __init__(
         self,
+        *,
         position: Sequence[float] = (0.0, 1.0, 0.0),
         velocity: Sequence[float] = (0.0, 0.0, 0.0),
         blast_radius: float = 2.0,
@@ -27,9 +25,16 @@ class NewBlast(bomb.Blast):
         hit_type: str = 'explosion',
         hit_subtype: str = 'normal',
     ):
-        super().__init__(position, velocity, blast_radius, blast_type,
-                         source_player, hit_type, hit_subtype)
-        scorch_radius = light_radius = self.radius
+        super().__init__(
+            position=position,
+            velocity=velocity,
+            blast_radius=blast_radius,
+            blast_type=blast_type,
+            source_player=source_player,
+            hit_type=hit_type,
+            hit_subtype=hit_subtype
+        )
+        scorch_radius = self.radius
         if self.blast_type == 'tnt':
             scorch_radius *= 1.15
         scorch = bs.newnode(
