@@ -18,7 +18,7 @@ Made by Cross Joy"""
 
 
 # Coop and multiplayer compatible.
-# Work on any 1.7.20+ ver.
+# Work on any 1.7.37+ ver.
 
 # Note:
 # The plugin commands only works on the host with the plugin activated.
@@ -30,23 +30,17 @@ Made by Cross Joy"""
 
 # ----------------------------------------------------------------------------
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import bascenev1 as bs
 import babase
-import bauiv1 as bui
 from bascenev1 import _gameutils
 import random
 
 from bascenev1 import animate
-
-if TYPE_CHECKING:
-    from typing import Sequence, Union
 
 
 class DiscoLight:
@@ -213,20 +207,8 @@ def new_chat_message(func):
     return wrapper
 
 
-def new_begin(func):
-    """Runs when game is began."""
-
-    def wrapper(*args, **kwargs):
-        func(*args, **kwargs)
-        bui.set_party_icon_always_visible(True)
-
-    return wrapper
-
-
 # ba_meta export plugin
 class ByCrossJoy(babase.Plugin):
     def __init__(self):
         # Replace new chat func to the original game codes.
         bs.chatmessage = new_chat_message(bs.chatmessage)
-        bs._activity.Activity.on_begin = new_begin(
-            bs._activity.Activity.on_begin)
