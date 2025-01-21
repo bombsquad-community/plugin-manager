@@ -19,6 +19,8 @@ class BombPickupMessage:
 freeze: bool = True
 
 # ba_meta export plugin
+
+
 class Plugin(babase.Plugin):
 
     # there are two ways to ignore our team player hits
