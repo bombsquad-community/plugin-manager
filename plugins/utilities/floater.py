@@ -256,6 +256,7 @@ def assignFloInputs(clientID: int):
 
 old_fcm = bs.chatmessage
 
+
 def new_chat_message(*args, **kwargs):
     old_fcm(*args, **kwargs)
     if args[0] == '/floater':
@@ -264,8 +265,11 @@ def new_chat_message(*args, **kwargs):
         except:
             pass
 
+
 bs.chatmessage = new_chat_message
 
 # ba_meta export plugin
+
+
 class byFreaku(babase.Plugin):
     def on_app_running(self): pass
