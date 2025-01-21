@@ -1766,7 +1766,8 @@ class PluginManagerWindow(bui.MainWindow):
                     edit=self._plugin_manager_status_text,
                     text="Make sure you are connected\n to the Internet and try again."
                 )
-            except: pass
+            except:
+                pass
             self.plugin_manager._index_setup_in_progress = False
         except RuntimeError:
             # User probably went back before a bui.Window could finish loading.
@@ -1775,7 +1776,8 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text=str(e))
-            except: pass
+            except:
+                pass
             raise
 
     def _update_dots(self):
@@ -1784,7 +1786,8 @@ class PluginManagerWindow(bui.MainWindow):
             if text.endswith('....'):
                 text = text[0:len(text)-4]
             bui.textwidget(edit=self._plugin_manager_status_text, text=(text + '.'))
-        except: pass
+        except:
+            pass
 
     async def draw_index(self):
         self.draw_search_bar()
@@ -1798,7 +1801,8 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except: pass
+            except:
+                pass
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
@@ -2113,7 +2117,8 @@ class PluginManagerWindow(bui.MainWindow):
         self.cleanup()
         try:
             bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
-        except: pass
+        except:
+            pass
         if self._dot_timer is None:
             self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
@@ -2124,7 +2129,8 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except: pass
+            except:
+                pass
             await self.select_category(self.selected_category)
 
     def soft_refresh(self):
