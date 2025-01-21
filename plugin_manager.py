@@ -23,13 +23,13 @@ import pathlib
 import hashlib
 import contextlib
 
+from typing import cast
 from datetime import datetime
-from typing import cast, override
 
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.0"
+PLUGIN_MANAGER_VERSION = "1.0.23"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -37,6 +37,7 @@ CURRENT_TAG = "main"
 
 _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
+_app_api_version = babase.app.env.api_version
 
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 CHANGELOG_META = "{repository_url}/{content_type}/{tag}/CHANGELOG.md"
@@ -786,7 +787,7 @@ class Plugin:
     def latest_compatible_version(self):
         if self._latest_compatible_version is None:
             for number, info in self.info["versions"].items():
-                if info["api_version"] == babase.app.env.api_version:
+                if info["api_version"] == _app_api_version:
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
@@ -795,7 +796,7 @@ class Plugin:
                     break
         if self._latest_compatible_version is None:
             raise NoCompatibleVersion(
-                f"{self.name} has no version compatible with API {babase.app.env.api_version}."
+                f"{self.name} has no version compatible with API {_app_api_version}."
             )
         return self._latest_compatible_version
 
@@ -1427,7 +1428,7 @@ class PluginManager:
     async def get_update_details(self):
         index = await self.get_index()
         for version, info in index["versions"].items():
-            if info["api_version"] != babase.app.env.api_version:
+            if info["api_version"] != _app_api_version:
                 # No point checking a version of the API game doesn't support.
                 continue
             if version == PLUGIN_MANAGER_VERSION:
@@ -1765,8 +1766,7 @@ class PluginManagerWindow(bui.MainWindow):
                     edit=self._plugin_manager_status_text,
                     text="Make sure you are connected\n to the Internet and try again."
                 )
-            except:
-                pass
+            except: pass
             self.plugin_manager._index_setup_in_progress = False
         except RuntimeError:
             # User probably went back before a bui.Window could finish loading.
@@ -1775,8 +1775,7 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text=str(e))
-            except:
-                pass
+            except: pass
             raise
 
     def _update_dots(self):
@@ -1785,8 +1784,7 @@ class PluginManagerWindow(bui.MainWindow):
             if text.endswith('....'):
                 text = text[0:len(text)-4]
             bui.textwidget(edit=self._plugin_manager_status_text, text=(text + '.'))
-        except:
-            pass
+        except: pass
 
     async def draw_index(self):
         self.draw_search_bar()
@@ -1800,8 +1798,7 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except:
-                pass
+            except: pass
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
@@ -2116,8 +2113,7 @@ class PluginManagerWindow(bui.MainWindow):
         self.cleanup()
         try:
             bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
-        except:
-            pass
+        except: pass
         if self._dot_timer is None:
             self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
 
@@ -2128,8 +2124,7 @@ class PluginManagerWindow(bui.MainWindow):
             self._dot_timer = None
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except:
-                pass
+            except: pass
             await self.select_category(self.selected_category)
 
     def soft_refresh(self):
@@ -2327,7 +2322,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        size=(0, 0),
                        h_align='center',
                        v_align='center',
-                       text=f'API Version: {babase.app.env.api_version}',
+                       text=f'API Version: {_app_api_version}',
                        scale=text_scale * 0.7,
                        color=(0.4, 0.8, 1),
                        maxwidth=width * 0.95)
