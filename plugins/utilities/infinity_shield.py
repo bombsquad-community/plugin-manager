@@ -1,17 +1,17 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 import random
 from bascenev1lib.actor.spaz import Spaz
 from bascenev1lib.actor.spazfactory import SpazFactory
+
+if TYPE_CHECKING:
+    from typing import Sequence
 
 if TYPE_CHECKING:
     pass
@@ -21,6 +21,7 @@ Spaz._old_init = Spaz.__init__
 
 
 def __init__(self,
+             *,
              color: Sequence[float] = (1.0, 1.0, 1.0),
              highlight: Sequence[float] = (0.5, 0.5, 0.5),
              character: str = 'Spaz',
@@ -29,8 +30,16 @@ def __init__(self,
              can_accept_powerups: bool = True,
              powerups_expire: bool = False,
              demo_mode: bool = False):
-    self._old_init(color, highlight, character, source_player, start_invincible,
-                   can_accept_powerups, powerups_expire, demo_mode)
+    self._old_init(
+        color=color,
+        highlight=highlight,
+        character=character,
+        source_player=source_player,
+        start_invincible=start_invincible,
+        can_accept_powerups=can_accept_powerups,
+        powerups_expire=powerups_expire,
+        demo_mode=demo_mode
+    )
     if self.source_player:
         self.equip_shields()
 
