@@ -31,7 +31,7 @@ from datetime import datetime
 from threading import Thread
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.0.22"
+PLUGIN_MANAGER_VERSION = "1.0.23"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -43,28 +43,27 @@ if TARGET_BALLISTICA_BUILD < 21282:
     # https://github.com/efroemling/ballistica/blob/master/CHANGELOG.md#1727-build-21282-api-8-2023-08-30
     # Adding a compatibility layer here so older builds still work fine.
     class Dummy:
-        pass
+        build_number = babase.app.build_number
+        device_name = babase.app.device_name
+        config_file_path = babase.app.config_file_path
+        version = babase.app.version
+        debug = babase.app.debug_build
+        test = babase.app.test_build
+        data_directory = babase.app.data_directory
+        python_directory_user = babase.app.python_directory_user
+        python_directory_app = babase.app.python_directory_app
+        python_directory_app_site = babase.app.python_directory_app_site
+        api_version = babase.app.api_version
+        tv = babase.app.on_tv
+        vr = babase.app.vr_mode
+        arcade = babase.app.arcade_mode
+        headless = babase.app.arcade_mode
+        demo = babase.app.demo_mode
 
-    babase.app.env = Dummy()
-
-    babase.app.env.engine_build_number = babase.app.build_number
-    babase.app.env.device_name = babase.app.device_name
-    babase.app.env.config_file_path = babase.app.config_file_path
-    babase.app.env.engine_version = babase.app.version
-    babase.app.env.debug = babase.app.debug_build
-    babase.app.env.test = babase.app.test_build
-    babase.app.env.data_directory = babase.app.data_directory
-    babase.app.env.python_directory_user = babase.app.python_directory_user
-    babase.app.env.python_directory_app = babase.app.python_directory_app
-    babase.app.env.python_directory_app_site = babase.app.python_directory_app_site
-    babase.app.env.api_version = babase.app.api_version
-    babase.app.env.tv = babase.app.on_tv
-    babase.app.env.vr = babase.app.vr_mode
-    babase.app.env.arcade = babase.app.arcade_mode
-    babase.app.env.headless = babase.app.arcade_mode
-    babase.app.env.demo = babase.app.demo_mode
     _bascenev1.protocol_version = lambda: babase.app.protocol_version
     _bauiv1.toolbar_test = lambda: babase.app.toolbar_test
+
+    babase.app.env = Dummy
 
 if TARGET_BALLISTICA_BUILD < 21852:
     class Dummy(babase.app.env):

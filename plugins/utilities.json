@@ -22,6 +22,25 @@
         }
       }
     },
+    "party_filter": {
+      "description": "Adds Filters in the gather->public window.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yelllow",
+          "email": "im.yellow.dev@gmail.com",
+          "discord": "y.lw"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "667397e",
+          "released_on": "04-01-2025",
+          "md5sum": "b624ef90abf20588f21eb55291f9747d"
+        }
+      }
+    },
     "sandbox": {
       "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
       "external_url": "",
