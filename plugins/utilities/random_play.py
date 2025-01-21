@@ -1,4 +1,4 @@
-# ba_meta require api 8
+# ba_meta require api 9
 from random import choice, randint
 from typing import Any, Union
 
@@ -15,6 +15,7 @@ from bascenev1 import (
 )
 
 from bauiv1 import Widget, UIScale, buttonwidget
+from bauiv1lib.play import PlaylistSelectContext
 from bauiv1lib.playlist.browser import PlaylistBrowserWindow
 from bascenev1lib.activity.multiteamjoin import MultiTeamJoinActivity
 
@@ -127,14 +128,15 @@ def patched__init__(
     sessiontype: type[Session],
     transition: str | None = "in_right",
     origin_widget: Widget | None = None,
+    playlist_select_context: PlaylistSelectContext | None = None,
 ):
     width = 800
     height = 650
 
     ui_scale = babase.app.ui_v1.uiscale
 
-    y_offset = -100 if ui_scale is UIScale.SMALL else 0
-    x_offset = 50 if ui_scale is UIScale.SMALL else 0
+    y_offset = -95 if ui_scale is UIScale.SMALL else -35 if ui_scale is UIScale.MEDIUM else 115
+    x_offset = 140 if ui_scale is UIScale.SMALL else 80 if ui_scale is UIScale.MEDIUM else 240
 
     self.old__init__(sessiontype, transition, origin_widget)
     # pylint: disable=protected-access
@@ -142,8 +144,8 @@ def patched__init__(
         parent=self._root_widget,
         position=(width - 120 * 2 + x_offset, height - 132 + y_offset),
         autoselect=True,
-        size=(80, 60),
-        scale=1.1,
+        size=(80, 50),
+        scale=0.6 if ui_scale is UIScale.SMALL else 1.15,
         text_scale=1.2,
         label="Random",
         on_activate_call=game_starter_factory(sessiontype),
