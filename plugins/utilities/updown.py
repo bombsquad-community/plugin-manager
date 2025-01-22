@@ -1,7 +1,6 @@
 import babase as ba
 import bauiv1 as bui
 import bauiv1lib.party
-from bauiv1lib.popup import PopupWindow
 from bascenev1 import get_chat_messages as gcm, screenmessage as push
 
 
@@ -11,6 +10,7 @@ class VeryPW(bauiv1lib.party.PartyWindow):
         s._n = 0
         s._o = ""
         s._f = True
+        s._chat_texts_haxx = []
         for i in range(2):
             bui.buttonwidget(
                 parent=s._root_widget,
@@ -41,6 +41,8 @@ class VeryPW(bauiv1lib.party.PartyWindow):
             s._n = -1
             s._c(s._o)
 
+        for msg in s._chat_texts:
+            msg.delete()
         for msg in s._chat_texts_haxx:
             msg.delete()
         for z in range(len(s._w1)):
@@ -61,12 +63,12 @@ class VeryPW(bauiv1lib.party.PartyWindow):
                                  flatness=1.0)
             bui.textwidget(edit=txt,
                            on_activate_call=ba.Call(
-                               s._on_chat_press,
-                               s._w1[z], txt))
+                               s._copy_msg,
+                               s._w1[z]))
             s._chat_texts_haxx.append(txt)
             bui.containerwidget(edit=s._columnwidget, visible_child=txt)
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export plugin
 
 
