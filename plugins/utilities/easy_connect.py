@@ -242,22 +242,22 @@ def newbuild_favorites_tab(self, region_width: float, region_height: float) -> N
                                           margin=0,
                                           claims_left_right=True)
     self._no_parties_added_text = bui.textwidget(
-            parent=self._container,
-            size=(0, 0),
-            h_align='center',
-            v_align='center',
-            text='',
-            color=(0.6, 0.6, 0.6),
-            scale=1.2,
-            position=(
-                (
-                    (240 if uiscale is bui.UIScale.SMALL else 225)
-                    + sub_scroll_width * 0.5
-                ),
-                v + sub_scroll_height * 0.5,
+        parent=self._container,
+        size=(0, 0),
+        h_align='center',
+        v_align='center',
+        text='',
+        color=(0.6, 0.6, 0.6),
+        scale=1.2,
+        position=(
+            (
+                (240 if uiscale is bui.UIScale.SMALL else 225)
+                + sub_scroll_width * 0.5
             ),
-            glow_type='uniform',
-        )
+            v + sub_scroll_height * 0.5,
+        ),
+        glow_type='uniform',
+    )
 
     self._favorite_selected = None
     self._refresh_favorites()
