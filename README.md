@@ -91,7 +91,7 @@ There are two different ways the plugin manager can be installed:
 
 Let's say you wanna submit this new utility-type plugin named as `sample_plugin.py`:
 ```python
-# ba_meta require api 8
+# ba_meta require api 9
 import babase
 
 # ba_meta export babase.Plugin
