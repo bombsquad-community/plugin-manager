@@ -224,7 +224,7 @@ def my_refresh_in_game(self, *args, **kwargs):
         button_type='square',
         label='Manual\nCamera',
         text_scale=1.5)
-    
+
     bui.buttonwidget(edit=camera_button,
                      on_activate_call=bui.Call(self._manual_camera, camera_button)
     return value
@@ -241,5 +241,5 @@ def _manual_camera(self, widget):
 
 class ByDroopy(babase.Plugin):
     def __init__(self):
-        InGameMenuWindow._refresh_in_game = my_refresh_in_game
-        InGameMenuWindow._manual_camera = _manual_camera
+        InGameMenuWindow._refresh_in_game=my_refresh_in_game
+        InGameMenuWindow._manual_camera=_manual_camera
