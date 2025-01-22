@@ -77,7 +77,12 @@
         }
       ],
       "versions": {
-        "1.1.0": null,
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "90cbaf7",
+          "released_on": "22-01-2025",
+          "md5sum": "b287c940c143bf9c4831477742dbd913"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "333416f",
