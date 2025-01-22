@@ -177,6 +177,7 @@ def NewEditProfileWindowInit(self,
         text_scale=1.2,
         on_activate_call=babase.Call(_on_tagwinbtn_press, self))
 
+
 def _on_tagwinbtn_press(self):
     """
     Calls tag config window passes all paramisters 
@@ -195,6 +196,8 @@ def _on_tagwinbtn_press(self):
 
 # ba_meta require api 9
 # ba_meta export plugin
+
+
 class Tag(babase.Plugin):
     def __init__(self) -> None:
         """
@@ -458,6 +461,7 @@ class TagWindow(bui.MainWindow):
             bui.getsound('error').play()
 
         self.main_window_back()
+
 
 class CustomConfigNumberEdit:
     """A set of controls for editing a numeric config value.
