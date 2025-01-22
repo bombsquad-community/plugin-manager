@@ -243,5 +243,5 @@ create something similar, with a hope we as a community can continue to keep it 
   information.
 - Any plugins you submit here are automatically assumed to be licensed under the MIT license, i.e. unless you explicitly
   specify a different license in your plugin's source code. See
-  [this plugin](https://github.com/rikkolovescats/plugin-manager/blob/f29008acdbf54988f3622ae4baa8735d83338bb5/plugins/utilities/store_event_specials.py#L1-L22)
+  [this plugin](https://github.com/bombsquad-community/plugin-manager/blob/main/plugins/utilities/store_event_specials.py#L1-L22)
   for an example.
