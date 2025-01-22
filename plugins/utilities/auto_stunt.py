@@ -1,5 +1,4 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # AutoStunt mod by - Mr.Smoothy x Rikko
 # https://discord.gg/ucyaesh
 # https://bombsquad-community.web.app/home
@@ -12,15 +11,12 @@ import bauiv1 as bui
 import bascenev1 as bs
 import _babase
 import bascenev1lib
-from bascenev1lib.actor.text import Text
 from bascenev1lib.actor.image import Image
 from bascenev1lib.actor import spaz
-from bascenev1lib.actor import playerspaz
 from bascenev1lib.gameutils import SharedObjects
 from bascenev1lib.actor.powerupbox import PowerupBoxFactory
 from bascenev1lib.actor.spazfactory import SpazFactory
 from bascenev1lib.game.elimination import EliminationGame
-from bauiv1lib import mainmenu
 import math
 import json
 import os
@@ -73,10 +69,10 @@ class ControlsUI:
             channel * 0.5 for channel in activity._bomb_image.node.color[:3]) + [1]
 
     def on_move_ud(activity, value):
-        activity.set_stick_image_position(activity, x=activity.stick_image_position_x, y=value)
+        activity.set_stick_image_position(activity.stick_image_position_x, value)
 
     def on_move_lr(activity, value):
-        activity.set_stick_image_position(activity, x=value, y=activity.stick_image_position_y)
+        activity.set_stick_image_position(value, activity.stick_image_position_y)
 
     def display(activity):
         activity._jump_image.node.color = list(activity._jump_image.node.color[:3]) + [1]
@@ -296,7 +292,11 @@ def replay(player, stunt_name):
 def spawn_mirror_spaz(player):
     player.mirror_mode = True
     with player.actor._activity().context:
-        bot = spaz.Spaz(player.color, player.highlight, character=player.character).autoretain()
+        bot = spaz.Spaz(
+            color=player.color,
+            highlight=player.highlight,
+            character=player.character
+        ).autoretain()
         bot.handlemessage(bs.StandMessage(
             (player.actor.node.position[0], player.actor.node.position[1], player.actor.node.position[2]+1), 93))
         bot.node.name = player.actor.node.name
@@ -319,10 +319,10 @@ def ghost(player, stunt_name):
     player.in_replay = True
 
     with player.actor._activity().context:
-        bot = spaz.Spaz((1, 0, 0), character="Spaz").autoretain()
+        bot = spaz.Spaz(color=(1, 0, 0), character="Spaz").autoretain()
         bot.handlemessage(bs.StandMessage(player.actor.node.position, 93))
         give_ghost_power(bot)
-        ControlsUI.display(player.actor._activity())
+        ControlsUI.display(bot._activity())
         for move in stunt:
             value = move["move"]["value"]
             if value is None:
@@ -427,20 +427,26 @@ def new_chatmessage(msg):
         if len(msg_splits) < 2:
             bui.screenmessage("Enter name of stunt eg : *stunt bombjump")
             return original_chatmessage(msg)
-        replay(player, stunt_name)
-        bs.chatmessage('Replaying "{}" on {}.'.format(
-            stunt_name,
-            player.getname(),
-        ))
+        if player is not None and player.actor is not None:
+            replay(player, stunt_name)
+            bs.chatmessage('Replaying "{}" on {}.'.format(
+                stunt_name,
+                player.getname(),
+            ))
+        else:
+            bui.screenmessage("Player not found")
     elif command == "learn":
         if len(msg_splits) < 2:
             bui.screenmessage("Enter name of stunt eg : *learn bombjump")
             return original_chatmessage(msg)
-        ghost(player, stunt_name)
-        bs.chatmessage('Replaying "{}" on {}.'.format(
-            stunt_name,
-            player.getname(),
-        ))
+        if player is not None and player.actor is not None:
+            ghost(player, stunt_name)
+            bs.chatmessage('Replaying "{}" on {}.'.format(
+                stunt_name,
+                player.getname(),
+            ))
+        else:
+            bui.screenmessage("Player not found")
     elif command == "mirror":
         spawn_mirror_spaz(player)
     return original_chatmessage(msg)
@@ -531,23 +537,15 @@ def on_begin(self, *args, **kwargs) -> None:
                                        })
     self._stick_base_image.opacity = 0.0
     self._stick_nub_image.opacity = 0.0
-    self.set_stick_image_position = set_stick_image_position
     return original_on_begin(self, *args, **kwargs)
-
-
-class NewMainMenuWindow(mainmenu.MainMenuWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Display chat icon, but if user open/close gather it may disappear
-        bui.set_party_icon_always_visible(True)
 
 # ba_meta export plugin
 
 
 class byHeySmoothy(babase.Plugin):
     def on_app_running(self):
-        mainmenu.MainMenuWindow = NewMainMenuWindow
         bs._activity.Activity.on_begin = on_begin
+        bs._activity.Activity.set_stick_image_position = set_stick_image_position
         bs.chatmessage = new_chatmessage
         bascenev1lib.actor.playerspaz.PlayerSpaz = NewPlayerSpaz
         bascenev1lib.actor.spaz.Spaz = NewSpaz
