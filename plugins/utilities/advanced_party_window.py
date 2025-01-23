@@ -168,7 +168,7 @@ class PingThread(threading.Thread):
             else:
                 babase.print_exception(
                     f'Error on gather ping '
-                    f'(errno={exc.errno})', once=True)
+                    f'(errno={exc.errno})', once = True)
         except Exception:
             babase.print_exception('Error on gather ping', once=True)
         finally:
@@ -1697,7 +1697,8 @@ def fetchAccountInfo(account, loading_widget):
             fdata = json.load(f)
         if account in fdata:
             servers = fdata[account]
-        url = f'https://{BCSSERVER}/player?key={base64.b64encode(account.encode("utf-8")).decode("utf-8")}&base64=true'
+        url = f'https: //{BCSSERVER}/player?key={base64.b64encode(
+            account.encode("utf-8")).decode("utf-8")}&base64=true'
         req = urllib.request.Request(url, headers={
                                      "User-Agent": f'BS{_babase.env().get("build_number", 0)}', "Accept-Language": "en-US,en;q=0.9", })
         data = urllib.request.urlopen(req)

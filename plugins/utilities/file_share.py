@@ -300,7 +300,7 @@ def handle_upload(file, callback, root_widget):
     # for the data to be posted.
     data = bytes(form)
     file_name = urllib.parse.quote(file_name)
-    r = urllib.request.Request(f'https://file.io?title={file_name}', data=data)
+    r = urllib.request.Request(f'https: //file.io?title={file_name}', data=data)
     r.add_header('Content-type', form.get_content_type())
     r.add_header('Content-length', len(data))
 
