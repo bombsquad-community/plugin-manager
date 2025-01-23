@@ -1559,7 +1559,8 @@ class Nice(mm.MainMenuWindow):
             tn.append(i)
             try:
                 attr = getattr(blex, i) if i not in [
-                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)  # gay
+                    # gay
+                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)
             except:
                 attr = None
             typez.append(str(type(attr).__name__))
