@@ -99,7 +99,8 @@ class CategoryVersionMetadata:
         for plugin_name, plugin_metadata in self.category_metadata["plugins"].items():
             for version_name, version_metadata in plugin_metadata["versions"].items():
                 if version_metadata is None:
-                    plugin_path = f"{os.path.join(self.category_metadata_base, f'{plugin_name}.py')}"
+                    plugin_path = f"{os.path.join(
+                        self.category_metadata_base, f'{plugin_name}.py')}"
                     yield PluginVersionMetadata(
                         plugin_name,
                         version_name,

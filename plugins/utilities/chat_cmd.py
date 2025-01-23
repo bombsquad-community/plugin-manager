@@ -74,16 +74,16 @@ class _cmds:
                         if n[2] == '1':
                             cmsg('============== Help 1, Page 1 ==============')
                             cmsg(f' your command prefix is or all commands starts with - {px}')
-                            cmsg(f' {px}list or {px}l --   to see ids of players and execute commands')
-                            cmsg(f' {px}uniqeid or {px}id --   to see accountid/uniqeid of player')
-                            cmsg(f' {px}quit or {px}restart  --  to restart the game')
-                            cmsg(f' {px}mute/unmute  --  to mute chat for everyone in your game')
+                            cmsg(f' {px}list or {px}l -- to see ids of players and execute commands')
+                            cmsg(f' {px}uniqeid or {px}id -- to see accountid/uniqeid of player')
+                            cmsg(f' {px}quit or {px}restart -- to restart the game')
+                            cmsg(f' {px}mute/unmute -- to mute chat for everyone in your game')
                         elif n[2] == '2':
                             cmsg('============== Help 1, Page 2 ==============')
-                            cmsg(f' {px}pause  --  to pause everyone in your game')
-                            cmsg(f' {px}nv or {px}night  --  to make night in your game')
-                            cmsg(f' {px}dv or {px}day  --  to make night in your game')
-                            cmsg(f' {px}camera_mode  --  to rotate camera ,repat to off')
+                            cmsg(f' {px}pause -- to pause everyone in your game')
+                            cmsg(f' {px}nv or {px}night -- to make night in your game')
+                            cmsg(f' {px}dv or {px}day -- to make night in your game')
+                            cmsg(f' {px}camera_mode -- to rotate camera, repat to off')
                             cmsg('===========================================')
                 elif n[0] == '2':
                     cmsg('============================')
@@ -99,11 +99,13 @@ class _cmds:
                             cmsg(f' {px}freeze all or {px}freeze number of list | freeze the player')
                             cmsg(
                                 f' {px}unfreeze/thaw all or {px}unfreeze/thaw number of list | unfreeze the player')
-                            cmsg(f' {px}gloves all or {px}gloves number of list | give gloves to player')
+                            cmsg(f' {px}gloves all or {
+                                 px}gloves number of list | give gloves to player')
                             cmsg('============================')
                         elif n[2] == '2':
                             cmsg('============== Help 2 Page 2 ==============')
-                            cmsg(f' {px}shield all or {px}shield number of list | give shield the player')
+                            cmsg(f' {px}shield all or {
+                                 px}shield number of list | give shield the player')
                             cmsg(
                                 f' {px}fall all or {px}fall number of list | teleport in down and fall up the player')
                             cmsg(f' {px}curse all or {px}curse number of list | curse the player')
@@ -115,7 +117,8 @@ class _cmds:
                             cmsg('============================')
                         elif n[2] == '3':
                             cmsg('============== Help 2 Page 3 ==============')
-                            cmsg(f' {px}gm all or {px}gm number of list | give bs gods like powers to player')
+                            cmsg(f' {px}gm all or {
+                                 px}gm number of list | give bs gods like powers to player')
                             cmsg(
                                 f' {px}sp all or {px}sp number of list | give superrrrrrr damages when punch to player')
                             cmsg(f' {px}sleep all or {px}sleep number of list | sleep up the player')
@@ -125,7 +128,8 @@ class _cmds:
 
                 elif n[0] == '3':
                     cmsg('============================')
-                    cmsg(f" {px}d_bomb bombType | changes default bomb | do {px}d_bomb help for bomb names ")
+                    cmsg(f" {px}d_bomb bombType | changes default bomb | do {
+                         px}d_bomb help for bomb names ")
                     cmsg(f' {px}dbc (number of bombs) | changes default count of player')
                     cmsg('============================')
 
@@ -140,7 +144,7 @@ class _cmds:
 
             elif m in [px+'uniqeid', px+'id', px+'pb-id', px+'pb', px+'accountid']:
                 if n == []:
-                    cmsg(f'use : {px}uniqeid number of list')
+                    cmsg(f'use: {px}uniqeid number of list')
                 else:
                     try:
                         id = session_players[int(n[0])]
@@ -175,14 +179,14 @@ class _cmds:
 
             elif m in [px+'dv', px+'day']:
                 if activity.globalsnode.tint == (1.0, 1.0, 1.0):
-                    cmsg(f'alwardy {px}dv is on ,do {px}nv for night')
+                    cmsg(f'alwardy {px}dv is on, do {px}nv for night')
                 else:
                     activity.globalsnode.tint = (1.0, 1.0, 1.0)
                     cmsg('day mode on!')
 
             elif m in [px+'nv', px+'night']:
                 if activity.globalsnode.tint == (0.5, 0.7, 1.0):
-                    cmsg(f'alwardy {px}nv is on ,do {px}dv for day')
+                    cmsg(f'alwardy {px}nv is on, do {px}dv for day')
                 else:
                     activity.globalsnode.tint = (0.5, 0.7, 1.0)
                     cmsg('night mode on!')
@@ -230,7 +234,7 @@ class _cmds:
                         cmsg('could not found player')
             elif m in [px+'inv', px+'invisible']:
                 if n == []:
-                    cmsg(f'help : {px}inv all or {px}inv number of list')
+                    cmsg(f'help: {px}inv all or {px}inv number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
                         body = i.actor.node
@@ -268,7 +272,7 @@ class _cmds:
 
             elif m in [px+'hl', px+'headless']:
                 if n == []:
-                    cmsg(f'help : {px}spaz all or {px}spaz number of list')
+                    cmsg(f'help: {px}spaz all or {px}spaz number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
                         body = i.actor.node
@@ -310,7 +314,7 @@ class _cmds:
 
             elif m in [px+'kill', px+'die']:
                 if n == []:
-                    cmsg(f'Use : {px}kill all or {px}kill number of list')
+                    cmsg(f'Use: {px}kill all or {px}kill number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
                         i.actor.node.handlemessage(bs.DieMessage())
@@ -360,7 +364,7 @@ class _cmds:
 
             elif m in [px+'sp', px+'superpunch']:
                 if n == []:
-                    cmsg(f'Use : {px}sp/superpunch all or {px}sp/superpunch number of list')
+                    cmsg(f'Use: {px}sp/superpunch all or {px}sp/superpunch number of list')
                 elif n[0] == 'all':
                     for i in activity_players:
                         if not i.actor._punch_power_scale == 15:
@@ -516,7 +520,7 @@ class _cmds:
             elif m in [px+'d_bomb', px+'default_bomb']:
                 if n == []:
                     cmsg(
-                        f'Use: {px}d_bomb/default_bomb all or {px}d_bomb number of list ,type {px}d_bomb help for help')
+                        f'Use: {px}d_bomb/default_bomb all or {px}d_bomb number of list, type {px}d_bomb help for help')
                 elif n[0] == 'help':
                     cmsg("bombtypes - ['ice', 'impact', 'land_mine', 'normal', 'sticky','tnt']")
                 elif n[0] in ['ice', 'impact',  'land_mine', 'normal', 'sticky', 'tnt']:

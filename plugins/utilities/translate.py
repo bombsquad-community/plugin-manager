@@ -43,11 +43,10 @@ available_translate_languages.insert(0, 'Auto Detect')
 
 def translate(text, _callback, source='auto', target='en'):
     text = urllib.parse.quote(text)
-    url = f'https://translate.google.com/m?tl={target}&sl={source}&q={text}'
+    url = f'https: //translate.google.com/m?tl={target}&sl={source}&q={text}'
     request = urllib.request.Request(url)
     data = urllib.request.urlopen(request).read().decode('utf-8')
-    result = data[(data.find('"result-container">'))+len('"result-container">')
-                   :data.find('</div><div class="links-container">')]
+    result = data[(data.find('"result-container">'))+len('"result-container">')                  :data.find('</div><div class="links-container">')]
     replace_list = [('&#39;', '\''), ('&quot;', '"'), ('&amp;', '&')]
     for i in replace_list:
         result = result.replace(i[0], i[1])

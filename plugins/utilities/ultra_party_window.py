@@ -1516,7 +1516,7 @@ class PartyWindow(ba.Window):
                     self._status_text = ba.textwidget(parent=self._root_widget,
                                                       scale=0.5,
                                                       color=color,
-                                                      text=f'Status:\t{user_status}',
+                                                      text=f'Status: \t{user_status}',
                                                       size=(200, 30),
                                                       position=(self._width * 0.3,
                                                                 self._height - 110),
@@ -1850,7 +1850,7 @@ class PartyWindow(ba.Window):
         if not self._private_chat:
             if msg == '/id':
                 myid = ba.internal.get_v1_account_misc_read_val_2('resolvedAccountID', '')
-                _ba.chatmessage(f"My Unique ID : {myid}")
+                _ba.chatmessage(f"My Unique ID: {myid}")
             elif msg == '/save':
                 info = _ba.get_connection_to_host_info()
                 config = ba.app.config
@@ -1967,7 +1967,7 @@ class PartyWindow(ba.Window):
 
     def _ip_port_msg(self):
         try:
-            msg = f'IP : {_ip}     PORT : {_port}'
+            msg = f'IP: {_ip}     PORT: {_port}'
         except:
             msg = ''
         self._edit_text_msg_box(msg, 'replace')
@@ -2109,7 +2109,7 @@ class LoginWindow:
         self._registrationkey_text = ba.textwidget(parent=self._root_widget,
                                                    scale=0.5,
                                                    color=(1, 1, 1),
-                                                   text=f'Registration Key:',
+                                                   text=f'Registration Key: ',
                                                    size=(0, 0),
                                                    position=(100, 140),
                                                    h_align='center',

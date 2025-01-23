@@ -413,7 +413,7 @@ def get_event_loop(force_fresh=False):
             self.rpc.send_data(
                 1,
                 {
-                    "nonce": f"{time.time():.20f}",
+                    "nonce": f"{time.time(): .20f}",
                     "cmd": "SUBSCRIBE",
                     "evt": event,
                     "args": args,
@@ -970,9 +970,9 @@ class DiscordRP(babase.Plugin):
                         sec = bs.time() - act._timer.getstarttime()
                     secfmt = ""
                     if sec < 60:
-                        secfmt = f"{sec:.2f}"
+                        secfmt = f"{sec: .2f}"
                     else:
-                        secfmt = f"{int(sec) // 60:02}:{sec:.2f}"
+                        secfmt = f"{int(sec) // 60: 02}: {sec: .2f}"
                     self.rpc_thread.details += f" ({secfmt})"
 
                 # if isinstance(session, ba.DualTeamSession):

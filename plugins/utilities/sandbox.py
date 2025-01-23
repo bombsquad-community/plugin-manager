@@ -1559,7 +1559,8 @@ class Nice(mm.MainMenuWindow):
             tn.append(i)
             try:
                 attr = getattr(blex, i) if i not in [
-                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)  # gay
+                    # gay
+                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)
             except:
                 attr = None
             typez.append(str(type(attr).__name__))
@@ -1757,7 +1758,7 @@ class Nice(mm.MainMenuWindow):
             v = value  # string anything u like
         elif typ == "Texture":
             if value not in all_texture:
-                error(f"Unknown texture '{value}',\nuse 'white', 'black' or 'null' for empty ones")
+                error(f"Unknown texture '{value}', \nuse 'white', 'black' or 'null' for empty ones")
                 return
             with ga().context:
                 v = bs.gettexture(value)
@@ -1766,7 +1767,7 @@ class Nice(mm.MainMenuWindow):
             with ga().context:
                 setattr(node[1 if s.tweakz_is_node else 2], name, v)
         except Exception as e:
-            error(str(e) if str(e).strip() else f"No error info, repr(e):\n{repr(e)}")
+            error(str(e) if str(e).strip() else f"No error info, repr(e): \n{repr(e)}")
         else:
             ding(f"Tweaked!")
         s.kill(True, s.TTW)
@@ -1854,9 +1855,9 @@ class Nice(mm.MainMenuWindow):
                 f"Success! calling '{name}' (dumped to terminal)\nwith arguments {args}\noutputted: {out}")
             s.kill(True, s.CTW)
         except Exception as e:
-            error(str(e) if str(e).strip() else f"No error info, repr(e):\n{repr(e)}")
+            error(str(e) if str(e).strip() else f"No error info, repr(e): \n{repr(e)}")
         else:
-            print(f"SandBox.ByBordd: calling '{name}' outputted:\n{out}")
+            print(f"SandBox.ByBordd: calling '{name}' outputted: \n{out}")
 
     def drop_window(s):
         if ga() is None:
@@ -2685,7 +2686,8 @@ class Nice(mm.MainMenuWindow):
             elif isinstance(a, tuple) or i == 6 or i == 11 or i == 28:
                 k = Nice.val_attrs[i]
                 l = bui.buttonwidget(parent=attr_sub,
-                                     label=f"{str(a[0]+0.01)[:3]} {str(a[1]+0.01)[:3]}, {str(a[2]+0.01)[:3]}",
+                                     label=f"{str(a[0]+0.01)[:3]} {str(a[1]+0.01)
+                                                                   [:3]}, {str(a[2]+0.01)[:3]}",
                                      scale=s.scale,
                                      size=(30, 12),
                                      color=k,
@@ -3662,7 +3664,8 @@ class Nice(mm.MainMenuWindow):
             elif isinstance(a, tuple) or i == 6 or i == 11 or i == 28:
                 k = val_attrs2[i]
                 l = bui.buttonwidget(parent=mud_sub,
-                                     label=f"{str(a[0]+0.01)[:3]} {str(a[1]+0.01)[:3]}, {str(a[2]+0.01)[:3]}",
+                                     label=f"{str(a[0]+0.01)[:3]} {str(a[1]+0.01)
+                                                                   [:3]}, {str(a[2]+0.01)[:3]}",
                                      scale=s.scale,
                                      size=(30, 12),
                                      color=k,

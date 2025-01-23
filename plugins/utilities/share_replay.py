@@ -123,7 +123,7 @@ class CommonUtilities:
                 remove(external_dir+selected_replay)
             cls_inst.on_tab_select(tab_id)  # updating the tab
             Print(selected_replay[0:-4]+" was deleted", color=red)
-        ConfirmWindow(text=f"Delete \"{selected_replay.split('.')[0]}\" \nfrom {'internal directory' if tab_id==MyTabId.INTERNAL else 'external directory'}?",
+        ConfirmWindow(text=f"Delete \"{selected_replay.split('.')[0]}\" \nfrom {'internal directory' if tab_id == MyTabId.INTERNAL else 'external directory'}?",
                       action=do_it, cancel_is_selected=True)
 
 
@@ -145,7 +145,7 @@ class Help(PopupWindow):
 
         bui.containerwidget(edit=self.root_widget, on_outside_click_call=self.close)
         bui.textwidget(parent=self.root_widget, position=(0, self.height * 0.7), corner_scale=1.2, color=green,
-                       text=f"»Replays are exported to\n     {external_dir}\n»Copy replays to the above folder to be able to import them into the game\n»I would love to hear from you,meet me on discord\n                                -LoupGarou(author)")
+                       text=f"»Replays are exported to\n     {external_dir}\n»Copy replays to the above folder to be able to import them into the game\n»I would love to hear from you, meet me on discord\n -LoupGarou(author)")
 
     def close(self):
         bui.getsound('swish').play()

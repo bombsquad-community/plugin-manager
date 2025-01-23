@@ -287,7 +287,7 @@ def _save_state(self) -> None:
             sel_name = 'Max Players'
         elif selected_tab_ids:
             assert len(selected_tab_ids) == 1
-            sel_name = f'Tab:{selected_tab_ids[0].value}'
+            sel_name = f'Tab: {selected_tab_ids[0].value}'
         elif sel == self._tab_container:
             sel_name = 'TabContainer'
         else:

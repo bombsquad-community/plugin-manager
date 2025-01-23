@@ -560,8 +560,8 @@ class CustomConfigNumberEdit:
         if self._callback:
             self._callback(self._value)
         babase.app.config[self._configkey[0]][self._configkey[1]
-                                              ][self._configkey[2]] = float(str(f'{self._value:.1f}'))
+                                              ][self._configkey[2]] = float(str(f'{self._value: .1f}'))
         babase.app.config.apply_and_commit()
 
     def _update_display(self) -> None:
-        bui.textwidget(edit=self.valuetext, text=f'{self._value:.1f}')
+        bui.textwidget(edit=self.valuetext, text=f'{self._value: .1f}')

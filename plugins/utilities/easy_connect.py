@@ -596,7 +596,7 @@ def _update_party_lists(self) -> None:
     if DEBUG_PROCESSING:
         print(
             f'Sorted {len(self._parties_sorted)} parties in'
-            f' {time.time()-starttime:.5f}s.'
+            f' {time.time()-starttime: .5f}s.'
         )
 
 
