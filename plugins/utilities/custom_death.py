@@ -1,5 +1,5 @@
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations

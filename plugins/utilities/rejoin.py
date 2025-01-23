@@ -1,8 +1,8 @@
-# ba_meta require api 8
+# ba_meta require api 9
 import bascenev1 as bs
 from babase import Plugin as v
 from bauiv1 import buttonwidget as z, gettexture as x
-from bauiv1lib.mainmenu import MainMenuWindow as m
+from bauiv1lib.ingamemenu import InGameMenuWindow as m
 
 m.i = m.p = 0
 k = bs.connect_to_party
@@ -10,12 +10,13 @@ k = bs.connect_to_party
 
 def j(address, port=43210, print_progress=False):
     try:
-        bs.disconnect_from_host()
+        if bs.get_connection_to_host_info() is not None:
+            bs.disconnect_from_host()
+            m.i = address
+            m.p = port
+            k(m.i, m.p, print_progress)
     except:
         pass
-    m.i = address
-    m.p = port
-    k(m.i, m.p, print_progress)
 
 
 def R(s):

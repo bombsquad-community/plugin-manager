@@ -8,10 +8,8 @@
 # https://github.com/Freaku17/BombSquad-Mods-byFreaku
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
-from typing import TYPE_CHECKING
-import _babase
 import babase
 import random
 import math
@@ -20,10 +18,6 @@ import bascenev1 as bs
 from bascenev1lib.gameutils import SharedObjects
 from bascenev1lib.actor.bomb import Bomb
 from bascenev1lib.actor.popuptext import PopupText
-from bauiv1lib.party import PartyWindow
-import bauiv1lib.mainmenu
-if TYPE_CHECKING:
-    from typing import Optional
 
 
 class Floater(bs.Actor):
@@ -253,21 +247,11 @@ def assignFloInputs(clientID: int):
                 i.assigninput(babase.InputType.PICK_UP_PRESS, floater.up)
                 i.assigninput(babase.InputType.PICK_UP_RELEASE, floater.upR)
                 i.assigninput(babase.InputType.JUMP_PRESS, floater.down)
+                i.assigninput(babase.InputType.JUMP_RELEASE, floater.downR)
                 i.assigninput(babase.InputType.BOMB_PRESS, floater.drop)
                 i.assigninput(babase.InputType.PUNCH_PRESS, babase.Call(dis, i, floater))
                 i.assigninput(babase.InputType.UP_DOWN, floater.updown)
                 i.assigninput(babase.InputType.LEFT_RIGHT, floater.leftright)
-
-
-old_piv = bui.set_party_icon_always_visible
-
-
-def new_piv(*args, **kwargs):
-    # Do not let chat icon go away
-    old_piv(True)
-
-
-bui.set_party_icon_always_visible = new_piv
 
 
 old_fcm = bs.chatmessage
@@ -284,15 +268,8 @@ def new_chat_message(*args, **kwargs):
 
 bs.chatmessage = new_chat_message
 
-
-class NewMainMenuWindow(bauiv1lib.mainmenu.MainMenuWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Display chat icon, but if user open/close gather it may disappear
-        bui.set_party_icon_always_visible(True)
-
-
 # ba_meta export plugin
+
+
 class byFreaku(babase.Plugin):
-    def on_app_running(self):
-        bauiv1lib.mainmenu.MainMenuWindow = NewMainMenuWindow
+    def on_app_running(self): pass

@@ -1,6 +1,5 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -9,12 +8,10 @@ from bascenev1lib.actor.spazfactory import SpazFactory
 import babase
 import bauiv1 as bui
 import bascenev1 as bs
-import math
 import os
 import _babase
-import shutil
 if TYPE_CHECKING:
-    pass
+    from typing import Sequence
 
 DECIMAL_LIMIT = 7
 
@@ -24,11 +21,16 @@ PlayerSpaz.supershit = PlayerSpaz.__init__
 
 def ShitInit(self,
              player: bs.Player,
+             *,
              color: Sequence[float] = (1.0, 1.0, 1.0),
              highlight: Sequence[float] = (0.5, 0.5, 0.5),
              character: str = 'Spaz',
              powerups_expire: bool = True) -> None:
-    self.supershit(player, color, highlight, character, powerups_expire)
+    self.supershit(player,
+                   color=color,
+                   highlight=highlight,
+                   character=character,
+                   powerups_expire=powerups_expire)
     self.offt = bs.newnode('math', owner=self.node, attrs={
                            'input1': (1.2, 1.8, -0.7), 'operation': 'add'})
     self.node.connectattr('torso_position', self.offt, 'input2')

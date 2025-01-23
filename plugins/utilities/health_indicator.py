@@ -14,7 +14,7 @@ For 1.7.20+"""
 
 # Add a simple health indicator on every player and bot.
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 

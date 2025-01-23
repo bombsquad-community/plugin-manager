@@ -1,15 +1,16 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
-**Important:** Please check out the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch if you're
-using the game version (1.7.0 <= your game version <= 1.7.19) which uses API 7 plugins.
-If you're on game version (1.7.20 or a later version) where it uses API 8 plugins, then proceed with the rest of the
-README here.
+**Important:** If you are on bombsquad version less than 1.7.37 , check below.
+- for version 1.7.0 to 1.7.19 (which uses API 7), checkout the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch.
+- for version 1.7.20 to 1.7.36 (which uses API 8), checkout the [api8](https://github.com/bombsquad-community/plugin-manager/tree/api8) branch.
+
+If you have version 1.7.37 or greater (which uses API 9), proceed with the rest of the README here.
 
 -------------------------------
 
-# Plugin-Manager
+# Plugin Manager
 
-A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin manager is a plugin in itself,
+A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin Manager is a plugin in itself,
 which makes further modding of your game more convenient by providing easier access to community created content.
 
 [![DownloadIcon]][DownloadLink]
@@ -90,7 +91,7 @@ There are two different ways the plugin manager can be installed:
 
 Let's say you wanna submit this new utility-type plugin named as `sample_plugin.py`:
 ```python
-# ba_meta require api 8
+# ba_meta require api 9
 import babase
 
 # ba_meta export babase.Plugin
@@ -242,5 +243,5 @@ create something similar, with a hope we as a community can continue to keep it 
   information.
 - Any plugins you submit here are automatically assumed to be licensed under the MIT license, i.e. unless you explicitly
   specify a different license in your plugin's source code. See
-  [this plugin](https://github.com/rikkolovescats/plugin-manager/blob/f29008acdbf54988f3622ae4baa8735d83338bb5/plugins/utilities/store_event_specials.py#L1-L22)
+  [this plugin](https://github.com/bombsquad-community/plugin-manager/blob/cba1194c68ce550a71d2f3fadd9e1b8cbac4981c/plugins/utilities/store_event_specials.py#L1-L22)
   for an example.

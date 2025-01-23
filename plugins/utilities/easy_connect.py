@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# ba_meta require api 8
+# ba_meta require api 9
 
 ''' ===========================================
  EasyConnect by Mr.Smoothy                    |
  verion 1.7                                   |
  https://discord.gg/ucyaesh                   |
  Serverconnector X IPPORTRevealer             |
- for bombsquad v1.7.20+                       |
+ for bombsquad v1.7.37+                       |
  ==============================================
 '''
 
@@ -26,9 +26,9 @@
 # https://discord.gg/ucyaesh
 
 # REQUIREMENTS
-# built for bs 1.7.20 and above
+# built for bs 1.7.37 and above
 
-# by Mr.Smoothy for Bombsquad version 1.7.20+
+# by Mr.Smoothy for Bombsquad version 1.7.37+
 
 import _babase
 import babase
@@ -40,7 +40,7 @@ from bauiv1lib import popup
 from dataclasses import dataclass
 import random
 from enum import Enum
-from bauiv1lib.popup import PopupMenuWindow, PopupWindow
+from bauiv1lib.popup import PopupMenuWindow
 from typing import Any, Optional, Callable
 from bauiv1lib.gather.publictab import PublicGatherTab
 import json
@@ -114,12 +114,12 @@ class _HostLookupThread(threading.Thread):
                         from_other_thread=True)
 
 
-def newbuild_favorites_tab(self, region_height: float) -> None:
+def newbuild_favorites_tab(self, region_width: float, region_height: float) -> None:
     c_height = region_height - 20
     v = c_height - 35 - 25 - 30
     self.retry_inter = 0.0
     uiscale = bui.app.ui_v1.uiscale
-    self._width = 1240 if uiscale is babase.UIScale.SMALL else 1040
+    self._width = region_width
     x_inset = 100 if uiscale is babase.UIScale.SMALL else 0
     self._height = (578 if uiscale is babase.UIScale.SMALL else
                     670 if uiscale is babase.UIScale.MEDIUM else 800)
@@ -241,6 +241,23 @@ def newbuild_favorites_tab(self, region_height: float) -> None:
                                           border=2,
                                           margin=0,
                                           claims_left_right=True)
+    self._no_parties_added_text = bui.textwidget(
+        parent=self._container,
+        size=(0, 0),
+        h_align='center',
+        v_align='center',
+        text='',
+        color=(0.6, 0.6, 0.6),
+        scale=1.2,
+        position=(
+            (
+                (240 if uiscale is bui.UIScale.SMALL else 225)
+                + sub_scroll_width * 0.5
+            ),
+            v + sub_scroll_height * 0.5,
+        ),
+        glow_type='uniform',
+    )
 
     self._favorite_selected = None
     self._refresh_favorites()

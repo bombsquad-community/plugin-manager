@@ -1,4 +1,4 @@
-# ba_meta require api 8
+# ba_meta require api 9
 
 ###################
 # Credits - Droopy#3730. #
@@ -10,16 +10,20 @@
 from __future__ import annotations
 import _babase
 import babase
-import bascenev1 as bs
 import bauiv1 as bui
-from bauiv1lib.mainmenu import MainMenuWindow
+from bauiv1lib.ingamemenu import InGameMenuWindow
 
 
-class Manual_camera_window:
-    def __init__(self):
-        self._root_widget = bui.containerwidget(
-            on_outside_click_call=None,
-            size=(0, 0))
+class Manual_camera_window(bui.MainWindow):
+    def __init__(self, origin_widget):
+        super().__init__(
+            root_widget=bui.containerwidget(
+                on_outside_click_call=None,
+                size=(0, 0)
+            ),
+            transition='in_scale',
+            origin_widget=origin_widget,
+        )
         button_size = (50, 50)
         self._text = bui.textwidget(parent=self._root_widget,
                                     scale=0.65,
@@ -149,14 +153,9 @@ class Manual_camera_window:
                                       button_type='square',
                                       autoselect=True,
                                       position=(520, -100),
-                                      on_activate_call=self._close)
+                                      on_activate_call=self.main_window_back)
         bui.containerwidget(edit=self._root_widget,
                             cancel_button=self._done)
-
-    def _close(self):
-        bui.containerwidget(edit=self._root_widget,
-                            transition=('out_scale'))
-        MainMenuWindow()
 
     def _change_camera_position(self, direction):
         camera = _babase.get_camera_position()
@@ -212,7 +211,7 @@ class Manual_camera_window:
         _babase.set_camera_target(x, y, z)
 
 
-old_refresh_in_game = MainMenuWindow._refresh_in_game
+old_refresh_in_game = InGameMenuWindow._refresh_in_game
 
 
 def my_refresh_in_game(self, *args, **kwargs):
@@ -224,19 +223,23 @@ def my_refresh_in_game(self, *args, **kwargs):
         size=(70, 50),
         button_type='square',
         label='Manual\nCamera',
-        text_scale=1.5,
-        on_activate_call=self._manual_camera)
+        text_scale=1.5)
+
+    bui.buttonwidget(edit=camera_button,
+                     on_activate_call=bui.Call(self._manual_camera, camera_button))
     return value
 
 
-def _manual_camera(self):
-    bui.containerwidget(edit=self._root_widget, transition='out_scale')
-    Manual_camera_window()
+def _manual_camera(self, widget):
+    if not self.main_window_has_control():
+        return
+
+    self.main_window_replace(Manual_camera_window(origin_widget=widget))
 
 # ba_meta export plugin
 
 
 class ByDroopy(babase.Plugin):
     def __init__(self):
-        MainMenuWindow._refresh_in_game = my_refresh_in_game
-        MainMenuWindow._manual_camera = _manual_camera
+        InGameMenuWindow._refresh_in_game = my_refresh_in_game
+        InGameMenuWindow._manual_camera = _manual_camera

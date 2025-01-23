@@ -246,7 +246,7 @@ class TranslateWindow:
             bui.getsound('swish').play()
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export plugin
 class byFreaku(babase.Plugin):
     def __init__(self):

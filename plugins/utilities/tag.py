@@ -1,5 +1,3 @@
-# Ported by brostos to api 8
-# Tool used to make porting easier.(https://github.com/bombsquad-community/baport)
 """
 I apreciate any kind of modification. So feel free to use or edit code or change credit string.... no problem.
 
@@ -16,10 +14,8 @@ how to use:
 
 from __future__ import annotations
 from bauiv1lib.profile.edit import EditProfileWindow
-from bauiv1lib.colorpicker import ColorPicker
 from bauiv1lib.popup import PopupMenu
 from bascenev1lib.actor.playerspaz import PlayerSpaz
-from baenv import TARGET_BALLISTICA_BUILD as build_number
 import babase
 import bauiv1 as bui
 import bascenev1 as bs
@@ -95,7 +91,7 @@ def gethostname() -> str:
             if player.inputdevice.client_id == -1:
                 name = player.getname(full=True, icon=False)
                 break
-        if name == bui.app.plus.get_v1_account_name:
+        if name == bui.app.plus.get_v1_account_name():
             return '__account__'
         return name
 
@@ -113,7 +109,11 @@ def NewPlayerSzapInit(self,
                       highlight: Sequence[float] = (0.5, 0.5, 0.5),
                       character: str = 'Spaz',
                       powerups_expire: bool = True) -> None:
-    self.init(player, color, highlight, character, powerups_expire)
+    self.init(player,
+              color=color,
+              highlight=highlight,
+              character=character,
+              powerups_expire=powerups_expire)
     self.curname = gethostname()
 
     try:
@@ -153,14 +153,13 @@ def NewPlayerSzapInit(self,
 
 def NewEditProfileWindowInit(self,
                              existing_profile: Optional[str],
-                             in_main_menu: bool,
-                             transition: str = 'in_right') -> None:
+                             transition: str = 'in_right',
+                             origin_widget: bui.Widget | None = None) -> None:
     """
     New boilerplate for editprofilewindow, addeds button to call TagSettings window
     """
     self.existing_profile = existing_profile
-    self.in_main_menu = in_main_menu
-    self.init(existing_profile, in_main_menu, transition)
+    self.init(existing_profile, transition, origin_widget)
 
     v = self._height - 115.0
     x_inset = self._x_inset
@@ -183,16 +182,22 @@ def _on_tagwinbtn_press(self):
     """
     Calls tag config window passes all paramisters 
     """
-    bui.containerwidget(edit=self._root_widget, transition='out_scale')
-    bui.app.ui_v1.set_main_menu_window(
-        TagWindow(self.existing_profile,
-                  self.in_main_menu,
-                  self._name,
-                  transition='in_right').get_root_widget(), from_window=self._root_widget)
+    if not self.main_window_has_control():
+        return
 
+    self.main_window_replace(
+        TagWindow(
+            self.existing_profile,
+            self._name,
+            transition='in_right',
+            origin_widget=self.tagwinbtn
+        )
+    )
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export plugin
+
+
 class Tag(babase.Plugin):
     def __init__(self) -> None:
         """
@@ -211,15 +216,14 @@ class Tag(babase.Plugin):
         EditProfileWindow.__init__ = NewEditProfileWindowInit
 
 
-class TagWindow(bui.Window):
+class TagWindow(bui.MainWindow):
 
     def __init__(self,
                  existing_profile: Optional[str],
-                 in_main_menu: bool,
                  profilename: str,
-                 transition: Optional[str] = 'in_right'):
+                 transition: Optional[str] = 'in_right',
+                 origin_widget: bui.Widget | None = None):
         self.existing_profile = existing_profile
-        self.in_main_menu = in_main_menu
         self.profilename = profilename
 
         uiscale = bui.app.ui_v1.uiscale
@@ -233,9 +237,11 @@ class TagWindow(bui.Window):
         super().__init__(
             root_widget=bui.containerwidget(
                 size=(self._width, self._height),
-                transition=transition,
                 scale=(2.06 if uiscale is babase.UIScale.SMALL else
-                       1.4 if uiscale is babase.UIScale.MEDIUM else 1.0)))
+                       1.4 if uiscale is babase.UIScale.MEDIUM else 1.0)
+            ),
+            transition=transition,
+            origin_widget=origin_widget)
 
         self._back_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -246,7 +252,7 @@ class TagWindow(bui.Window):
             scale=0.8,
             label=babase.charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
-            on_activate_call=self._back)
+            on_activate_call=self.main_window_back)
         bui.containerwidget(edit=self._root_widget, cancel_button=self._back_button)
 
         self._save_button = bui.buttonwidget(
@@ -419,17 +425,6 @@ class TagWindow(bui.Window):
             increment=0.1,
             textscale=1.25)
 
-    def _back(self) -> None:
-        """
-        transit window into back window
-        """
-        bui.containerwidget(edit=self._root_widget,
-                            transition='out_scale')
-        bui.app.ui_v1.set_main_menu_window(EditProfileWindow(
-            self.existing_profile,
-            self.in_main_menu,
-            transition='in_left').get_root_widget(), from_window=self._root_widget)
-
     def change_val(self, config: List[str], val: bool) -> None:
         """
         chamges the value of check boxes
@@ -465,12 +460,7 @@ class TagWindow(bui.Window):
             bui.screenmessage(f"please define tag", color=(1, 0, 0))
             bui.getsound('error').play()
 
-        bui.containerwidget(edit=self._root_widget,
-                            transition='out_scale')
-        bui.app.ui_v1.set_main_menu_window(EditProfileWindow(
-            self.existing_profile,
-            self.in_main_menu,
-            transition='in_left').get_root_widget(), from_window=self._root_widget)
+        self.main_window_back()
 
 
 class CustomConfigNumberEdit:

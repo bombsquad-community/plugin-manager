@@ -1,10 +1,8 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 import bascenev1lib
 from bascenev1lib.gameutils import SharedObjects
