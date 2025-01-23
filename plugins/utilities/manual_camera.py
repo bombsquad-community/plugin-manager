@@ -226,7 +226,7 @@ def my_refresh_in_game(self, *args, **kwargs):
         text_scale=1.5)
 
     bui.buttonwidget(edit=camera_button,
-                     on_activate_call=bui.Call(self._manual_camera, camera_button)
+                     on_activate_call=bui.Call(self._manual_camera, camera_button))
     return value
 
 
