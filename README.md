@@ -1,6 +1,6 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
-**Important:** If you are on bombsquad version < 1.7.37 , check below.
+**Important:** If you are on bombsquad version less than 1.7.37 , check below.
 - for version 1.7.0 to 1.7.19 (which uses API 7), checkout the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch.
 - for version 1.7.20 to 1.7.36 (which uses API 8), checkout the [api8](https://github.com/bombsquad-community/plugin-manager/tree/api8) branch.
 
