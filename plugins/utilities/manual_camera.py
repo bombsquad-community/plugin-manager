@@ -241,5 +241,5 @@ def _manual_camera(self, widget):
 
 class ByDroopy(babase.Plugin):
     def __init__(self):
-        InGameMenuWindow._refresh_in_game=my_refresh_in_game
-        InGameMenuWindow._manual_camera=_manual_camera
+        InGameMenuWindow._refresh_in_game = my_refresh_in_game
+        InGameMenuWindow._manual_camera = _manual_camera
