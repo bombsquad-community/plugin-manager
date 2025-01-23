@@ -1,6 +1,6 @@
 ## Plugin Manager (dd-mm-yyyy)
 
-### 1.1.0 (15-01-2025)
+### 1.1.0 (24-01-2025)
 
 - Updated to bombsquad api 9. 
   
