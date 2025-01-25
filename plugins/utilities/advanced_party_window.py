@@ -77,11 +77,11 @@ def newconnect_to_party(address, port=43210, print_progress=False):
     global ip_add
     global p_port
     bs.chatmessage(" Joined IP "+ip_add+" PORT "+str(p_port))
-    dd = bs.get_connection_to_host_info()
-    if dd.get('name', '') != '':
+    dd = bs.get_connection_to_host_info_2()
+    if dd != None and dd.get('name', '') != '':
         title = dd['name']
         bs.chatmessage(title)
-    if (dd != {}):
+    if (bool(dd)):
         bs.disconnect_from_host()
 
         ip_add = address
@@ -240,8 +240,8 @@ class mututalServerThread():
         self.timer = babase.AppTimer(10, self.checkPlayers, repeat=True)
 
     def checkPlayers(self):
-        if bs.get_connection_to_host_info() != {}:
-            server_name = bs.get_connection_to_host_info()["name"]
+        if bool(bs.get_connection_to_host_info_2()):
+            server_name = bs.get_connection_to_host_info_2().name
             players = []
             for ros in bs.get_game_roster():
                 players.append(ros["display_string"])
@@ -460,9 +460,9 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             icon=bui.gettexture('menuButton'),
             iconscale=1.2)
 
-        info = bs.get_connection_to_host_info()
-        if info.get('name', '') != '':
-            title = info['name']
+        info = bs.get_connection_to_host_info_2()
+        if info != None:
+            title = info.name
         else:
             title = babase.Lstr(resource=self._r + '.titleText')
 
@@ -907,10 +907,10 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             bui.textwidget(edit=self._text_field, text="")
             return
         elif sendtext == ".info":
-            if bs.get_connection_to_host_info() == {}:
+            if bs.get_connection_to_host_info_2() == None:
                 s_build = 0
             else:
-                s_build = bs.get_connection_to_host_info()['build_number']
+                s_build = bs.get_connection_to_host_info_2()['build_number']
             s_v = "0"
             if s_build <= 14365:
                 s_v = " 1.4.148 or below"
@@ -930,9 +930,9 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             bui.textwidget(edit=self._text_field, text="")
             return
         elif sendtext == ".save":
-            info = bs.get_connection_to_host_info()
+            info = bs.get_connection_to_host_info_2()
             config = babase.app.config
-            if info.get('name', '') != '':
+            if info != None and info.get('name', '') != '':
                 title = info['name']
                 if not isinstance(config.get('Saved Servers'), dict):
                     config['Saved Servers'] = {}
@@ -1163,8 +1163,9 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                 """
             else:
                 # kick-votes appeared in build 14248
-                if (bs.get_connection_to_host_info().get('build_number', 0) <
-                        14248):
+                info = bs.get_connection_to_host_info_2()
+                if bool(info) and (info.get('build_number', 0) <
+                                   14248):
                     bui.getsound('error').play()
                     bs.broadcastmessage(
                         babase.Lstr(resource='getTicketsWindow.unavailableText'),
@@ -1554,12 +1555,12 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                 current_choice=Quickreply[0],
                                 delegate=self)
                 self._popup_type = "removeQuickReplySelect"
-            elif choice in ("hostInfo_Debug",) and isinstance(bs.get_connection_to_host_info(), dict):
-                if len(bs.get_connection_to_host_info()) > 0:
+            elif choice in ("hostInfo_Debug",) and isinstance(bs.get_connection_to_host_info_2(), dict):
+                if bs.get_connection_to_host_info_2() != None:
                     # print(_babase.get_connection_to_host_info(),type(_babase.get_connection_to_host_info()))
 
-                    ChoiceDis = list(bs.get_connection_to_host_info().keys())
-                    NewChoices = ["bs.broadcastmessage(str(bs.get_connection_to_host_info().get('%s')))" % (
+                    ChoiceDis = list(bs.get_connection_to_host_info_2().keys())
+                    NewChoices = ["bs.broadcastmessage(str(bs.get_connection_to_host_info_2().get('%s')))" % (
                         (str(i)).replace("'", r"'").replace('"', r'\\"')) for i in ChoiceDis]
                     PopupMenuWindow(position=popup_window.root_widget.get_screen_space_center(),
                                     scale=_get_popup_window_scale(),

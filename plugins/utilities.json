@@ -692,6 +692,7 @@
         }
       ],
       "versions": {
+        "3.0.1": null,
         "3.0.0": {
           "api_version": 9,
           "commit_sha": "32e5180",
@@ -735,6 +736,7 @@
         }
       ],
       "versions": {
+        "2.1.1": null,
         "2.1.0": {
           "api_version": 9,
           "commit_sha": "bb129cc",
@@ -1421,6 +1423,7 @@
         }
       ],
       "versions": {
+        "1.5.1": null,
         "1.5.0": {
           "api_version": 9,
           "commit_sha": "bb129cc",

@@ -372,8 +372,7 @@ def get_event_loop(force_fresh=False):
         def _generate_join_secret(self):
             # resp = requests.get('https://legacy.ballistica.net/bsAccessCheck').text
             try:
-                connection_info = bs.get_connection_to_host_info(
-                ) if build_number < 21727 else bs.get_connection_to_host_info_2()
+                connection_info = bs.get_connection_to_host_info_2()
                 if connection_info:
                     addr = _last_server_addr
                     port = _last_server_port
@@ -872,8 +871,7 @@ class DiscordRP(babase.Plugin):
 
     def update_status(self) -> None:
         roster = bs.get_game_roster()
-        connection_info = bs.get_connection_to_host_info(
-        ) if build_number < 21727 else bs.get_connection_to_host_info_2()
+        connection_info = bs.get_connection_to_host_info_2()
 
         self.rpc_thread.large_image_key = "bombsquadicon"
         self.rpc_thread.large_image_text = "BombSquad"
