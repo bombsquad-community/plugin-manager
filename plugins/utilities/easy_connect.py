@@ -274,7 +274,7 @@ def new_on_favorites_connect_press(self) -> None:
                           call=bs.WeakCall(
                               self._host_lookup_result)).start()
 
-        if self.retry_inter > 0 and (bs.get_connection_to_host_info() == {} or bs.get_connection_to_host_info()['build_number'] == 0):
+        if self.retry_inter > 0 and (bs.get_connection_to_host_info_2() == {} or bs.get_connection_to_host_info_2() == None or bs.get_connection_to_host_info_2()['build_number'] == 0):
             bui.screenmessage("Server full or unreachable, Retrying....")
             self._retry_timer = bs.AppTimer(self.retry_inter, babase.Call(
                 self._on_favorites_connect_press))
@@ -714,7 +714,7 @@ class PartyQuickConnect(bui.Window):
                 self.direction = "right"
 
     def connect(self, address, port):
-        if not self.closed and (bs.get_connection_to_host_info() == {} or bs.get_connection_to_host_info()['build_number'] == 0):
+        if not self.closed and (bs.get_connection_to_host_info_2() == {} or bs.get_connection_to_host_info_2() == None or bs.get_connection_to_host_info_2()['build_number'] == 0):
             bui.textwidget(edit=self._title_text, text="Retrying....("+str(self.retry_count)+")")
             self.retry_count += 1
             bs.connect_to_party(address, port=port)
