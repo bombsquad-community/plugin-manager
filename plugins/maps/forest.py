@@ -1,6 +1,4 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
@@ -94,7 +92,7 @@ class ForestMap(bs.Map):
             attrs={
                 'mesh': self.preloaddata['bgmesh'],
                 'lighting': False,
-                'shadow': True,
+                # 'shadow': True,
                 'color_texture': self.preloaddata['bgtex']
             }
         )
