@@ -1001,53 +1001,19 @@ class MoreWindow(popup.PopupWindow):
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
+        for value in plugin.info['versions'].values():
+            if value['api_version'] == _app_api_version:
+                released_on = value['released_on']
+        print(released_on)
 
-        self._root_widget = bui.containerwidget(size=(width, height),
-                                                on_outside_click_call=self._back,
-                                                transition=transition,
-                                                scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
-                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
-                                                scale_origin_stack_offset=self.scale_origin)
-
-        bui.buttonwidget(parent=self._root_widget,
-                         size=(60, 60),
-                         label="report a bug",
-                         on_activate_call=babase.Call(
-                             bui.open_url, REPOSITORY_URL + "/issues/new?template=" + PLUGIN_ISSUE_TEMPLATE)
-                         )
-
-        source_btn_pos_x = (390 if _uiscale is babase.UIScale.SMALL else
-                            450 if _uiscale is babase.UIScale.MEDIUM else 440)
-        source_btn_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
-                            110 if _uiscale is babase.UIScale.MEDIUM else 120)
-        source_button = bui.buttonwidget(parent=self._root_widget,
-                                         autoselect=True,
-                                         position=(source_btn_pos_x, source_btn_pos_y),
-                                         size=(40, 40),
-                                         button_type="square",
-                                         label="",
-                                         color=(0.6, 0.53, 0.63),
-                                         on_activate_call=lambda: bui.open_url(self.plugin.view_url))
-        bui.imagewidget(parent=self._root_widget,
-                        position=(source_btn_pos_x, source_btn_pos_y),
-                        size=(40, 40),
-                        color=(0.8, 0.95, 1),
-                        texture=bui.gettexture("file"),
-                        draw_controller=source_button)
-        bui.textwidget(parent=self._root_widget,
-                       position=(source_btn_pos_x-3, source_btn_pos_y+12),
-                       text="Source",
-                       size=(10, 10),
-                       draw_controller=source_button,
-                       color=(1, 1, 1, 1),
-                       rotate=25,
-                       scale=0.45)
-
-        print(dir(plugin))
-        # bui.textwidget(parent=self._root_widget,
-        #                size=(60,60),
-        #                text=plugin)
-
+        self._root_widget = bui.containerwidget(
+            size=(width, height),
+            on_outside_click_call=self._back,
+            transition=transition,
+            scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
+                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale_origin_stack_offset=self.scale_origin)
+        
         back_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(width * 0.1, height * 0.87),
@@ -1057,6 +1023,56 @@ class MoreWindow(popup.PopupWindow):
             button_type='backSmall',
             on_activate_call=self._back)
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
+
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width/4, height/1.5),
+            text=f"RELEASED ON: {released_on}",
+            h_align='left', v_align='center')
+
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width/4, height/2),
+            text="Source: ",
+            h_align='left', v_align='center')
+
+        source_btn_pos_x = (390 if _uiscale is babase.UIScale.SMALL else
+                            450 if _uiscale is babase.UIScale.MEDIUM else 440)
+        source_btn_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
+                            110 if _uiscale is babase.UIScale.MEDIUM else 120)
+        source_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(width/2-25, height/2-25),
+            size=(80, 80),
+            button_type="square",
+            label="",
+            color=(0.6, 0.53, 0.63),
+            on_activate_call=lambda: bui.open_url(self.plugin.view_url))
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(width/2-25, height/2-25),
+            size=(80, 80),
+            color=(0.8, 0.95, 1),
+            texture=bui.gettexture("file"),
+            draw_controller=source_button)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width/2-16, height/2-2),
+            text="Source",
+            size=(20, 20),
+            draw_controller=source_button,
+            color=(1, 1, 1, 1),
+            rotate=25,
+            scale=0.7)
+
+        bui.buttonwidget(
+            parent=self._root_widget,
+            size=(60, 60),
+            label="report a bug",
+            on_activate_call=babase.Call(
+                bui.open_url, REPOSITORY_URL + "/issues/new?template=" + PLUGIN_ISSUE_TEMPLATE)
+        )
 
     def _back(self) -> None:
         bui.getsound('swish').play()
