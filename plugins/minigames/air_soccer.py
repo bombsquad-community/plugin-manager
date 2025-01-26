@@ -1,10 +1,8 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 # BY Stary_Agent
 """Hockey game and support classes."""
 
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
@@ -52,7 +50,9 @@ class Puck(bs.Actor):
         self.last_players_to_touch: Dict[int, Player] = {}
         self.scored = False
         assert activity is not None
+        print("hi")
         assert isinstance(activity, HockeyGame)
+        print("meh")
         pmats = [shared.object_material, activity.puck_material]
         self.node = bs.newnode('prop',
                                delegate=self,
