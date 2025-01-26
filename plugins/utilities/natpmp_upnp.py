@@ -1,4 +1,5 @@
 # ba_meta require api 9
+# crafted by brostos
 #! Try patching upnpclient to use defusedxml replacement for lxml for more device support
 import babase
 import bauiv1 as bui

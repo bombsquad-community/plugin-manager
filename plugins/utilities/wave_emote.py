@@ -1,4 +1,5 @@
 # ba_meta require api 9
+# crafted by brostos
 #! Fix bug when the previous message is "hello" it will not trigger the wave emote on new round or game
 import time
 
