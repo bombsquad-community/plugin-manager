@@ -371,7 +371,6 @@ def add_port_mapping():
                                     NewExternalPort=BS_PORT,
                                     NewProtocol="UDP",
                                 )
-                                print(result["NewEnabled"])
                                 if result["NewEnabled"] and not accessible_online:
                                     if babase.do_once():
                                         babase.screenmessage(
