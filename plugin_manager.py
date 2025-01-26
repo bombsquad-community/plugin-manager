@@ -30,8 +30,9 @@ from datetime import datetime
 import logging
 
 PLUGIN_MANAGER_VERSION = "1.1.0"
-REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager" 
-PLUGIN_ISSUE_TEMPLATE = "bug_report.md" # https://github.com/bombsquad-community/plugin-manager/issues/new?template=bug_report.md
+REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
+# https://github.com/bombsquad-community/plugin-manager/issues/new?template=bug_report.md
+PLUGIN_ISSUE_TEMPLATE = "bug_report.md"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
@@ -988,8 +989,9 @@ class AuthorsWindow(popup.PopupWindow):
         bui.getsound('swish').play()
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
+
 class MoreWindow(popup.PopupWindow):
-    def __init__(self, origin_widget, plugin ):
+    def __init__(self, origin_widget, plugin):
         self.scale_origin = origin_widget.get_screen_space_center()
         bui.getsound('swish').play()
         s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.39 if _uiscale is babase.UIScale.MEDIUM else 1.67
@@ -1006,25 +1008,26 @@ class MoreWindow(popup.PopupWindow):
                                                 scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
                                                        if _uiscale is babase.UIScale.MEDIUM else 1.0),
                                                 scale_origin_stack_offset=self.scale_origin)
-        
+
         bui.buttonwidget(parent=self._root_widget,
-                         size= (60,60),
+                         size=(60, 60),
                          label="report a bug",
-                         on_activate_call=babase.Call(bui.open_url, REPOSITORY_URL + "/issues/new?template=" + PLUGIN_ISSUE_TEMPLATE)
-                        )
-        
+                         on_activate_call=babase.Call(
+                             bui.open_url, REPOSITORY_URL + "/issues/new?template=" + PLUGIN_ISSUE_TEMPLATE)
+                         )
+
         source_btn_pos_x = (390 if _uiscale is babase.UIScale.SMALL else
-                      450 if _uiscale is babase.UIScale.MEDIUM else 440)
+                            450 if _uiscale is babase.UIScale.MEDIUM else 440)
         source_btn_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
-                      110 if _uiscale is babase.UIScale.MEDIUM else 120)
+                            110 if _uiscale is babase.UIScale.MEDIUM else 120)
         source_button = bui.buttonwidget(parent=self._root_widget,
-                                       autoselect=True,
-                                       position=(source_btn_pos_x, source_btn_pos_y),
-                                       size=(40, 40),
-                                       button_type="square",
-                                       label="",
-                                       color=(0.6, 0.53, 0.63),
-                                       on_activate_call=lambda: bui.open_url(self.plugin.view_url))
+                                         autoselect=True,
+                                         position=(source_btn_pos_x, source_btn_pos_y),
+                                         size=(40, 40),
+                                         button_type="square",
+                                         label="",
+                                         color=(0.6, 0.53, 0.63),
+                                         on_activate_call=lambda: bui.open_url(self.plugin.view_url))
         bui.imagewidget(parent=self._root_widget,
                         position=(source_btn_pos_x, source_btn_pos_y),
                         size=(40, 40),
@@ -1039,12 +1042,12 @@ class MoreWindow(popup.PopupWindow):
                        color=(1, 1, 1, 1),
                        rotate=25,
                        scale=0.45)
-        
+
         print(dir(plugin))
         # bui.textwidget(parent=self._root_widget,
         #                size=(60,60),
         #                text=plugin)
-        
+
         back_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(width * 0.1, height * 0.87),
@@ -1058,6 +1061,7 @@ class MoreWindow(popup.PopupWindow):
     def _back(self) -> None:
         bui.getsound('swish').play()
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
+
 
 class PluginWindow(popup.PopupWindow):
     def __init__(self, plugin, origin_widget, button_callback=lambda: None):
@@ -1225,7 +1229,7 @@ class PluginWindow(popup.PopupWindow):
                       450 if _uiscale is babase.UIScale.MEDIUM else 440)
         more_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
                       110 if _uiscale is babase.UIScale.MEDIUM else 120)
-          # MK:
+        # MK:
 
         more_button = bui.buttonwidget(parent=self._root_widget,
                                        autoselect=True,
@@ -1236,7 +1240,7 @@ class PluginWindow(popup.PopupWindow):
                                        color=(0.6, 0.53, 0.63),
                                        )
         bui.buttonwidget(edit=more_button,
-                         on_activate_call=babase.Call(MoreWindow,more_button, self.plugin)
+                         on_activate_call=babase.Call(MoreWindow, more_button, self.plugin)
                          )
 
         bui.imagewidget(parent=self._root_widget,
@@ -1253,9 +1257,8 @@ class PluginWindow(popup.PopupWindow):
                        color=(1, 1, 1, 1),
                        rotate=25,
                        scale=0.45)
-        
-      
-        #MK:
+
+        # MK:
         # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
         if tutorial_url:
@@ -1270,14 +1273,14 @@ class PluginWindow(popup.PopupWindow):
             more_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
                           110 if _uiscale is babase.UIScale.MEDIUM else 120)
             tutorial_button = bui.buttonwidget(parent=self._root_widget,
-                                           autoselect=True,
-                                           position=(more_pos_x, more_pos_y),
-                                           size=(40, 40),
-                                           button_type="square",
-                                           label="",
-                                           color=(0.6, 0.53, 0.63),
+                                               autoselect=True,
+                                               position=(more_pos_x, more_pos_y),
+                                               size=(40, 40),
+                                               button_type="square",
+                                               label="",
+                                               color=(0.6, 0.53, 0.63),
 
-                                           on_activate_call=tutorial_confirm_window)
+                                               on_activate_call=tutorial_confirm_window)
 
             bui.imagewidget(parent=self._root_widget,
                             position=(more_pos_x, more_pos_y),
