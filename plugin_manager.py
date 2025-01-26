@@ -1013,7 +1013,7 @@ class MoreWindow(popup.PopupWindow):
             scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
                    if _uiscale is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin)
-        
+
         back_button = bui.buttonwidget(
             parent=self._root_widget,
             position=(width * 0.1, height * 0.87),
