@@ -8,9 +8,10 @@ import bascenev1 as bs
 
 last_len_msg = 0  # Initialize the global variable outside the function
 
+
 def wave_emote():
     global last_len_msg  # To modify the global variable
-    
+
     # Check if the players are in game first
     try:
         act_players = bs.get_foreground_host_activity().players
@@ -19,21 +20,21 @@ def wave_emote():
     except AttributeError:
         # Except the attribute error if the player is in a server
         return
-    
+
     # Incase chats are empty or in replay
     try:
         lastmsg = bs.get_chat_messages()[-1]
     except:
         return
-    
-    # Perform a check to see if the player is playing|spectating 
+
+    # Perform a check to see if the player is playing|spectating
     for player in act_players:
         try:
             if player.actor.node:
                 continue
         except:
             return
-    
+
     # Check if the message contains "hello"
     if len(bs.get_chat_messages()) != last_len_msg:
         if act_players and "hello" in lastmsg:
@@ -46,6 +47,7 @@ def wave_emote():
                     print(last_len_msg, "last_len_msg")
 
 # ba_meta export plugin
+
+
 class brostos(babase.Plugin):
     timer = bs.AppTimer(0.5, wave_emote, repeat=True)
-

@@ -5,7 +5,7 @@
 # ba_meta require api 9
 #!"Made to you by @brostos & @Dliwk"
 # TODO
-# - Update to the latest libs 
+# - Update to the latest libs
 # - Use account id to hash the tkn
 
 
@@ -483,7 +483,7 @@ if not ANDROID:
             if sys.platform == "win32":
                 asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
             asyncio.set_event_loop(get_event_loop())
-            
+
             while not self.should_close:
                 if time.time() - self._last_update_time > 0.1:
                     self._do_update_presence()
@@ -854,8 +854,6 @@ class Discordlogin(PopupWindow):
             PresenceUpdate().close()
 
 
-
-
 def get_class():
     if ANDROID:
         return PresenceUpdate()
@@ -901,7 +899,6 @@ class DiscordRP(babase.Plugin):
         if not ANDROID and self.rpc_thread.is_discord_running():
             self.rpc_thread.rpc.close()
             self.rpc_thread.should_close = True
-        
 
     def on_app_pause(self) -> None:
         self.rpc_thread.close()
@@ -981,12 +978,12 @@ class DiscordRP(babase.Plugin):
             if connection_info:
                 hostname = socket.gethostname()
                 local_ip = socket.gethostbyname(hostname)
-                
+
                 if bs.get_connection_to_host_info_2().address == local_ip:
                     self.rpc_thread.details = "Local Server"
                 else:
                     self.rpc_thread.details = "Online"
-                    
+
                 servername = connection_info.name
                 self.rpc_thread.party_size = max(
                     1, sum(len(client["players"]) for client in roster)
@@ -1054,7 +1051,7 @@ class DiscordRP(babase.Plugin):
             from bascenev1lib.game.thelaststand import TheLastStandGame
             from bascenev1lib.game.meteorshower import MeteorShowerGame
             from bascenev1lib.game.football import FootballCoopGame
-            from bascenev1lib.game.easteregghunt import EasterEggHuntGame 
+            from bascenev1lib.game.easteregghunt import EasterEggHuntGame
 
             # noinspection PyUnresolvedReferences,PyProtectedMember
             try:

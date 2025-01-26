@@ -93,7 +93,7 @@ def get_modules() -> None:
     }
 
     system = platform.platform()
-    
+
     if "Windows" in system:
         packages["lxml"] = {
             "url": "https://files.pythonhosted.org/packages/36/88/684d4e800f5aa28df2a991a6a622783fb73cf0e46235cfa690f9776f032e/lxml-5.3.0-cp312-cp312-win32.whl",
@@ -234,9 +234,10 @@ def get_modules() -> None:
                 with zipfile.ZipFile(package_filename, "r") as zip_ref:
                     zip_ref.extractall(install_path)
                 try:
-                    shutil.rmtree(Path(f"{install_path}/lxml-5.3.0.dist-info")) #! Remember to update accordingly
+                    # ! Remember to update accordingly
+                    shutil.rmtree(Path(f"{install_path}/lxml-5.3.0.dist-info"))
                 except:
-                    shutil.rmtree(Path(f"{install_path}/charset_normalizer-3.4.1.dist-info")) #!
+                    shutil.rmtree(Path(f"{install_path}/charset_normalizer-3.4.1.dist-info"))  # !
             remove(package_path)
         else:
             return
@@ -297,7 +298,10 @@ def play_sound(sound):
     with bs.get_foreground_host_activity().context:
         bs.getsound(sound).play()
 
+
 accessible_online = None
+
+
 @threaded
 def confirm_port():
     global accessible_online
@@ -393,14 +397,14 @@ def add_port_mapping():
                                 NewLeaseDuration=14400,
                             )
                             babase.pushcall(
-                                            babase.Call(play_sound, "shieldUp"),
-                                            from_other_thread=True,
-                                        )
+                                babase.Call(play_sound, "shieldUp"),
+                                from_other_thread=True,
+                            )
             except (SOAPError, HTTPError, UnicodeDecodeError):
                 babase.screenmessage(
                     "You will need to manualy port forward at the router :("
                 )
-                babase.pushcall(babase.Call(play_sound, "error"),from_other_thread=True,)
+                babase.pushcall(babase.Call(play_sound, "error"), from_other_thread=True,)
     except ModuleNotFoundError:
         pass
 
@@ -419,11 +423,11 @@ class Joinable(babase.Plugin):
             except ImportError:
                 try:
                     install_path = Path(f"{getcwd()}/ba_data/python")
-                    shutil.rmtree(f"{install_path}/upnpy") 
+                    shutil.rmtree(f"{install_path}/upnpy")
                     shutil.rmtree(f"{install_path}/natpmp")
                 except FileNotFoundError:
                     get_modules()
-        
+
     def on_app_resume(self) -> None:
         confirm_port()
         add_port_mapping()
