@@ -1,6 +1,4 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -13,8 +11,7 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 from bascenev1lib.actor.spazbot import (
     SpazBot, SpazBotSet,
     BomberBot, BrawlerBot, BouncyBot,
-    ChargerBot, StickyBot, TriggerBot,
-    ExplodeyBot)
+    ChargerBot, TriggerBot, ExplodeyBot)
 
 if TYPE_CHECKING:
     from typing import Any, List, Type, Optional

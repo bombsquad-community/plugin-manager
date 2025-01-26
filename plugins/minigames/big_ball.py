@@ -1,19 +1,13 @@
 # Made by MythB
-# Ported by: MysteriousBoi
 
-
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 from typing import TYPE_CHECKING
-import babase
-import bauiv1 as bui
 import bascenev1 as bs
-import random
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
 from bascenev1lib.actor.powerupbox import PowerupBoxFactory
 from bascenev1lib.gameutils import SharedObjects
-from bascenev1lib.actor.flag import Flag
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
 
@@ -47,7 +41,7 @@ class FlagKale(bs.Actor):
         elif isinstance(m, bs.OutOfBoundsMessage):
             self.handlemessage(bs.DieMessage())
         else:
-            super().handlemessage(msg)
+            super().handlemessage(m)
 
 
 class Puck(bs.Actor):
@@ -304,7 +298,7 @@ class BBGame(bs.TeamGameActivity[Player, Team]):
         super().on_begin()
 
         self.setup_standard_time_limit(self._time_limit)
-        self.setup_standard_powerup_drops()
+        self.setup_standard_powerup_drops(enable_tnt=False)
         self._puck_spawn_pos = self.map.get_flag_position(None)
         self._spawn_puck()
         # for night mode we need night actor. And same goodies for nigh mode

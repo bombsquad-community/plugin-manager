@@ -1,19 +1,17 @@
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
 from bascenev1lib.game.deathmatch import DeathMatchGame
 
 if TYPE_CHECKING:
-    from typing import Any, Sequence
+    from typing import Sequence
 
 
 lang = bs.app.lang.language
@@ -197,7 +195,6 @@ class BoxingGame(DeathMatchGame):
         import random
         from babase import _math
         from bascenev1._gameutils import animate
-        from bascenev1._coopsession import CoopSession
 
         if isinstance(self.session, bs.DualTeamSession):
             position = self.map.get_start_position(player.team.id)

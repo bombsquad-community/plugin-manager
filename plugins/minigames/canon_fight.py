@@ -1,4 +1,3 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 # Created by Mr.Smoothy -
 # https://discord.gg/ucyaesh
@@ -6,8 +5,7 @@
 #
 """DeathMatch game and support classes."""
 
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -444,4 +442,4 @@ class CanonFightGame(DeathMatchGame):
                 ('modify_part_collision', 'collide', False)
             ))
         self.wall = bs.newnode('region', attrs={'position': (
-            0.61877517104148865, 4.312626838684082, -8.68477725982666), 'scale': (3, 7, 27), 'type': 'box', 'materials': [mat]})
+            0.36877517104148865, 4.312626838684082, -8.68477725982666), 'scale': (3, 7, 27), 'type': 'box', 'materials': [mat]})

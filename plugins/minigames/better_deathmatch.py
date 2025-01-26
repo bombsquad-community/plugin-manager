@@ -1,10 +1,9 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
 # BetterDeathMatch
 # Made by your friend: @[Just] Freak#4999
 
 """Defines a very-customisable DeathMatch mini-game"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 
@@ -17,7 +16,7 @@ from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
 
 if TYPE_CHECKING:
-    from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
+    from typing import Any, Type, List, Union, Sequence, Optional
 
 
 class Player(bs.Player['Team']):

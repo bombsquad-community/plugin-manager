@@ -1,4 +1,3 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
 """
@@ -9,8 +8,7 @@ Youtube: https://www.youtube.com/c/HeySmoothy
 Website: https://bombsquad-community.web.app
 Github:  https://github.com/bombsquad-community
 """
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
@@ -24,7 +22,7 @@ from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.game.keepaway import KeepAwayGame, FlagState, Player
 from bascenev1lib.actor import spaz
 if TYPE_CHECKING:
-    from typing import Any, Sequence, Dict, Type, List, Optional, Union
+    from typing import Any, Sequence, Dict, Type, List
 
 # ba_meta export bascenev1.GameActivity
 
@@ -100,7 +98,7 @@ class ChooseQueen(KeepAwayGame):
         self._flash_flag_spawn()
         assert self._flag_spawn_pos is not None
         shared = SharedObjects.get()
-        self._flag = spaz.Spaz((0, 0, 0), character="Pixel").autoretain()
+        self._flag = spaz.Spaz(color=(0, 0, 0), character="Pixel").autoretain()
         self._flag.handlemessage(bs.StandMessage((0, 14.63, -5.52), 93))
         self._flag.node.hold_position_pressed = True
         self._flag.node.materials = (self._queen_material, shared.object_material)

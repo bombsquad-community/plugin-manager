@@ -183,6 +183,7 @@
         }
       ],
       "versions": {
+        "3.0.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "6263872",
@@ -208,6 +209,7 @@
         }
       ],
       "versions": {
+        "1.2.0": null,
         "1.1.0": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -264,6 +266,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "1b14789",
@@ -450,6 +453,7 @@
         }
       ],
       "versions": {
+        "3.0.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "f54c993",
@@ -475,6 +479,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -582,6 +587,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "505c948",
@@ -625,6 +631,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "48f9302",
@@ -661,6 +668,7 @@
         }
       ],
       "versions": {
+        "3.0.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "e8bbb61",
@@ -911,6 +919,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ca3221b",
@@ -949,6 +958,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "c39664c",
@@ -1036,6 +1046,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1257,6 +1268,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1301,6 +1313,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1320,6 +1333,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1339,6 +1353,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",

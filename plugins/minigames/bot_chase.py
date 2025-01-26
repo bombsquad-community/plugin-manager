@@ -1,15 +1,11 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 import random
-from bascenev1lib.actor.spazbot import BrawlerBot, SpazBotSet, SpazBot, SpazBotDiedMessage
-from bascenev1lib.actor.bomb import Bomb
-from bascenev1lib.actor.spaz import Spaz
+from bascenev1lib.actor.spazbot import SpazBotSet, SpazBot, SpazBotDiedMessage
 from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
