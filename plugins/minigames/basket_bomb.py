@@ -1,19 +1,13 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import babase
-import bauiv1 as bui
 import bascenev1 as bs
-import _babase
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
-from bascenev1lib.actor.powerupbox import PowerupBoxFactory
 from bascenev1lib.gameutils import SharedObjects
 from bascenev1lib.actor import playerspaz as ps
 from bascenev1lib import maps

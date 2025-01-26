@@ -1,5 +1,5 @@
 
-# ba_meta require api 8
+# ba_meta require api 9
 """
 DemolitionWar - BombFight on wooden floor flying in air.
 Author: Mr.Smoothy
@@ -13,16 +13,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
-from bascenev1 import _map
 from bascenev1lib.game.elimination import EliminationGame, Player
 from bascenev1lib.gameutils import SharedObjects
 from bascenev1lib.actor.bomb import BombFactory
 import random
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 if TYPE_CHECKING:
-    from typing import Any, Sequence
+    from typing import Any
 
 # ba_meta export bascenev1.GameActivity
 

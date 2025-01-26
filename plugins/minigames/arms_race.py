@@ -1,10 +1,4 @@
-# Ported by your friend: Freaku
-
-# Join BCS:
-# https://discord.gg/ucyaesh
-
-
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 
@@ -12,10 +6,9 @@ from typing import TYPE_CHECKING
 
 import babase
 import bascenev1 as bs
-from bascenev1lib.actor.playerspaz import PlayerSpaz
 
 if TYPE_CHECKING:
-    from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
+    from typing import Any, Type, List, Union, Sequence
 
 
 class State:

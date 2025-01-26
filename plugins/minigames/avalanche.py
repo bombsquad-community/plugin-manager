@@ -1,32 +1,28 @@
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """Avalancha mini-game."""
 
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 import random
 from typing import TYPE_CHECKING
 
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1lib.actor.bomb import Bomb
 from bascenev1lib.actor.onscreentimer import OnScreenTimer
 from bascenev1lib.game.meteorshower import *
 from bascenev1lib.actor.spazbot import *
-from bascenev1lib.actor.spaz import PunchHitMessage
 from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
-    from typing import Any, Sequence, Optional, List, Dict, Type, Type
+    from typing import Any, Sequence, Optional, List, Type, Type
 
 ## MoreMinigames.py support ##
 randomPic = ["lakeFrigidPreview", "hockeyStadiumPreview"]
 
 
 def ba_get_api_version():
-    return 8
+    return 9
 
 
 def ba_get_levels():

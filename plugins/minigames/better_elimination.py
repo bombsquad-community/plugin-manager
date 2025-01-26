@@ -1,4 +1,3 @@
-# Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
 # BetterElimination
 # Made by your friend: @[Just] Freak#4999
 
@@ -7,7 +6,7 @@
 
 """Defines a very-customisable Elimination mini-game"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 
@@ -20,7 +19,7 @@ from bascenev1lib.actor.spazfactory import SpazFactory
 from bascenev1lib.actor.scoreboard import Scoreboard
 
 if TYPE_CHECKING:
-    from typing import (Any, Tuple, Dict, Type, List, Sequence, Optional,
+    from typing import (Any, Tuple, Type, List, Sequence, Optional,
                         Union)
 
 
