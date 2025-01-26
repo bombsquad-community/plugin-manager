@@ -50,9 +50,7 @@ class Puck(bs.Actor):
         self.last_players_to_touch: Dict[int, Player] = {}
         self.scored = False
         assert activity is not None
-        print("hi")
         assert isinstance(activity, HockeyGame)
-        print("meh")
         pmats = [shared.object_material, activity.puck_material]
         self.node = bs.newnode('prop',
                                delegate=self,
