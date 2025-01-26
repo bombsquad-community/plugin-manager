@@ -1439,6 +1439,7 @@
         }
       ],
       "versions": {
+        "1.5.2" : null,
         "1.5.1": {
           "api_version": 9,
           "commit_sha": "a93fda3",
@@ -1681,12 +1682,27 @@
         }
       ],
       "versions": {
+        "1.5.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "48bd0da",
           "released_on": "03-03-2024",
           "md5sum": "15f969c23d19118d4898570cfae71c7b"
         }
+      }
+    },
+    "wave_emote": {
+      "description": "Type `hello` in chat while in game and get a wave emote",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "brostosjoined",
+          "email": "",
+          "discord": "brostos"
+        }
+      ],
+      "versions": {
+        "1.5.0": null
       }
     }
   }
