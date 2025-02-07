@@ -1674,7 +1674,6 @@ class PluginManagerWindow(bui.MainWindow):
         self.plugins_in_current_view = {}
         self.selected_alphabet_order = 'a_z'
         self.alphabet_order_selection_button = None
-        
 
         loop.create_task(self.draw_index())
 
@@ -1760,7 +1759,6 @@ class PluginManagerWindow(bui.MainWindow):
             style='bomb',
             size=48,
         )
-        
 
     @contextlib.contextmanager
     def exception_handler(self):
@@ -1786,7 +1784,6 @@ class PluginManagerWindow(bui.MainWindow):
             except:
                 pass
             raise
-
 
     async def draw_index(self):
         self.draw_search_bar()
