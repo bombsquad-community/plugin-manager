@@ -1674,6 +1674,7 @@ class PluginManagerWindow(bui.MainWindow):
         self.plugins_in_current_view = {}
         self.selected_alphabet_order = 'a_z'
         self.alphabet_order_selection_button = None
+        
 
         loop.create_task(self.draw_index())
 
@@ -1746,21 +1747,27 @@ class PluginManagerWindow(bui.MainWindow):
             parent=self._root_widget,
             position=(-5, loading_pos_y),
             size=(self._width, 25),
-            text="Loading",
+            text="",
             color=bui.app.ui_v1.title_color,
             scale=0.7,
             h_align="center",
             v_align="center",
             maxwidth=400,
         )
-        self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
+        self._loading_spinner = bui.spinnerwidget(
+            parent=self._root_widget,
+            position=(self._width * 0.5, loading_pos_y),
+            style='bomb',
+            size=48,
+        )
+        
 
     @contextlib.contextmanager
     def exception_handler(self):
         try:
             yield
         except urllib.error.URLError:
-            self._dot_timer = None
+            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
             try:
                 bui.textwidget(
                     edit=self._plugin_manager_status_text,
@@ -1773,21 +1780,13 @@ class PluginManagerWindow(bui.MainWindow):
             # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
-            self._dot_timer = None
+            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text=str(e))
             except:
                 pass
             raise
 
-    def _update_dots(self):
-        try:
-            text = cast(str, bui.textwidget(query=self._plugin_manager_status_text))
-            if text.endswith('....'):
-                text = text[0:len(text)-4]
-            bui.textwidget(edit=self._plugin_manager_status_text, text=(text + '.'))
-        except:
-            pass
 
     async def draw_index(self):
         self.draw_search_bar()
@@ -1798,7 +1797,7 @@ class PluginManagerWindow(bui.MainWindow):
         with self.exception_handler():
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
-            self._dot_timer = None
+            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
             except:
@@ -2115,18 +2114,18 @@ class PluginManagerWindow(bui.MainWindow):
 
     async def refresh(self):
         self.cleanup()
-        try:
-            bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
-        except:
-            pass
-        if self._dot_timer is None:
-            self._dot_timer = babase.AppTimer(0.5, self._update_dots, repeat=True)
+        # try:
+        #     bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
+        # except:
+        #     pass
+
+        bui.spinnerwidget(edit=self._loading_spinner, visible=True)
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
-            self._dot_timer = None
+            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
             except:
