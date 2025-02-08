@@ -1,8 +1,7 @@
 # Ported by your friend: Freaku
 
-#Join BCS:
+# Join BCS:
 # https://discord.gg/ucyaesh
-
 
 
 # ba_meta require api 9
