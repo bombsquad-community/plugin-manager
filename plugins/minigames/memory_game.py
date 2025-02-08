@@ -16,7 +16,7 @@ from __future__ import annotations
 # def spawnAllMap(self)
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 from typing import TYPE_CHECKING, overload
 import _babase
 import babase
@@ -25,6 +25,7 @@ import bascenev1 as bs
 from bascenev1lib.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Optional, List, Dict, Type, Union, Any, Literal
+
 
 
 class OnTimer(bs.Actor):
