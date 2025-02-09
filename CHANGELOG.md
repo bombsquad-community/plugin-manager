@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.1 (09-02-2025)
+
+- Added bomb spinner widget for loading animation.
+  
 ### 1.1.0 (23-01-2025)
 
 - Updated to bombsquad api 9. 
