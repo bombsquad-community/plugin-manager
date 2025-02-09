@@ -1,3 +1,9 @@
+# Ported by your friend: Freaku
+
+# Join BCS:
+# https://discord.gg/ucyaesh
+
+
 # ba_meta require api 9
 
 from __future__ import annotations
@@ -30,8 +36,11 @@ class State:
                                         enable_bomb=self.bomb,
                                         enable_pickup=self.grab)
         if self.curse:
-            spaz.curse_time = -1
-            spaz.curse()
+            try:
+                spaz.curse_time = -1
+                spaz.curse()
+            except:
+                pass
         if self.bomb:
             spaz.bomb_type = self.bomb
         spaz.set_score_text(self.name)

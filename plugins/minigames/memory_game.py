@@ -16,7 +16,7 @@ from __future__ import annotations
 # def spawnAllMap(self)
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 from typing import TYPE_CHECKING, overload
 import _babase
 import babase

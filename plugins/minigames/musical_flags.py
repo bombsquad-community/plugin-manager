@@ -31,7 +31,7 @@ class Team(bs.Team[Player]):
         self.score = 0
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export bascenev1.GameActivity
 class MFGame(bs.TeamGameActivity[Player, Team]):
     name = 'Musical Flags'

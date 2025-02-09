@@ -272,4 +272,5 @@ bs.chatmessage = new_chat_message
 
 
 class byFreaku(babase.Plugin):
-    def on_app_running(self): pass
+    def on_app_running(self):
+        pass

@@ -8,7 +8,7 @@ from bascenev1lib.actor.bomb import Bomb
 from bascenev1lib.game.meteorshower import Player, MeteorShowerGame
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export bascenev1.GameActivity
 class IcyEmitsGame(MeteorShowerGame):
     name = 'Icy Emits'
