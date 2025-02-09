@@ -2,6 +2,10 @@
 
 ### 1.1.0 (23-01-2025)
 
+- Added bomb spinner widget for loading animation.
+  
+### 1.1.0 (23-01-2025)
+
 - Updated to bombsquad api 9. 
   
 ### 1.0.23 (13-01-2025)
