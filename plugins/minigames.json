@@ -238,16 +238,11 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
-        "1.0.0": {
-          "api_version": 7,
-          "commit_sha": "0841b9e",
-          "released_on": "14-11-2022",
-          "md5sum": "ec3980f3f3a5da96c27f4cbd61f98550"
-        }
+        "1.0.0": null
       }
     }
   }
