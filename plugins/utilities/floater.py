@@ -110,7 +110,8 @@ class Floater(ba.Actor):
         self.node.connectattr('position', self.node2, 'position')
 
     def pop(self): PopupText(text="Ported by \ue048Freaku", scale=1.3, position=(
-        self.node.position[0], self.node.position[1]-1, self.node.position[2]), color=(0, 1, 1)).autoretain()  # Edit = YouNoob...
+        # Edit = YouNoob...
+        self.node.position[0], self.node.position[1]-1, self.node.position[2]), color=(0, 1, 1)).autoretain()
 
     def checkCanControl(self):
         if not self.node.exists():

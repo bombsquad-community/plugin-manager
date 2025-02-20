@@ -837,7 +837,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
             newFileName = str(ba.Lstr(resource="replayNameDefaultText").evaluate(
             )+" (%s)" % (datetime.datetime.strftime(datetime.datetime.now(), "%Y_%m_%d_%H_%M_%S"))+".brp")
             newFilePath = os.path.join(dir_path+os.sep, newFileName).encode(SystemEncode)
-            #print(curFilePath, newFilePath)
+            # print(curFilePath, newFilePath)
             # os.rename(curFilePath,newFilePath)
             shutil.copyfile(curFilePath, newFilePath)
             _ba.reset_game_activity_tracking()
@@ -1196,7 +1196,7 @@ class ModifiedPartyWindow(bastd_party.PartyWindow):
                 ba.Lstr(resource='internal.cantKickHostError'),
                 color=(1, 0, 0))
 
-        #NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_ba._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
+        # NewShareCodeWindow(origin_widget=self.get_root_widget(), delegate=None,code = "300",execText = u"_ba._disconnectClient(%d,{Value})"%self._popup_party_member_client_id)
     def joinbombspot(self):
         import random
         url = ['https://discord.gg/CbxhJTrRta', 'https://discord.gg/ucyaesh']

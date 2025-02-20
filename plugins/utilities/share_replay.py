@@ -120,7 +120,7 @@ class CommonUtilities:
                 remove(external_dir+selected_replay)
             cls_inst.on_tab_select(tab_id)  # updating the tab
             Print(selected_replay[0:-4]+" was deleted", top=True, color=red)
-        ConfirmWindow(text=f"Delete \"{selected_replay.split('.')[0]}\" \nfrom {'internal directory' if tab_id==MyTabId.INTERNAL else 'external directory'}?",
+        ConfirmWindow(text=f"Delete \"{selected_replay.split('.')[0]}\" \nfrom {'internal directory' if tab_id == MyTabId.INTERNAL else 'external directory'}?",
                       action=do_it, cancel_is_selected=True)
 
 
@@ -332,7 +332,7 @@ class ShareTabUi(WatchWindow):
 
 # ++++++++++++++++for keyboard navigation++++++++++++++++
 
-        #ba.widget(edit=self.enable_button, up_widget=decrease_button, down_widget=self.lower_text,left_widget=save_button, right_widget=save_button)
+        # ba.widget(edit=self.enable_button, up_widget=decrease_button, down_widget=self.lower_text,left_widget=save_button, right_widget=save_button)
 
 # ----------------------------------------------------------------------------------------------------
 

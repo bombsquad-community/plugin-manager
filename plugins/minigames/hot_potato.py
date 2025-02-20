@@ -912,7 +912,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             base_position = (75, 50)
             tip_scale = 0.8
             tip_title_scale = 1.2
-            vrmode = babase.app.env.vr #ba.app.vr_mode
+            vrmode = babase.app.env.vr  # ba.app.vr_mode
 
             t_offs = -350.0
             height_offs = 100.0
