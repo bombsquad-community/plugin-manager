@@ -1,7 +1,7 @@
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """
     
-    Hot Potato by TheMikirog#1984
+    Hot Potato by themikirog
     
     A random player(s) gets Marked. 
     They will die if they don't pass the mark to other players.
@@ -14,16 +14,17 @@
 
 """
 
-# ba_meta require api 8
+
+# ba_meta require api 9
+# (see https://ballistica.net/wiki/meta-tag-system)
+
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 # Define only what we need and nothing more
-from baenv import TARGET_BALLISTICA_BUILD as build_number
 import babase
-import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1lib.actor.spaz import SpazFactory
 from bascenev1lib.actor.spaz import PickupMessage
@@ -330,8 +331,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
             # If the attacker is healthy and we're stunned, do a flash and play a sound, then ignore the rest of the code.
             if self.source_player.state == PlayerState.STUNNED and msg._source_player != PlayerState.MARKED:
                 self.node.handlemessage('flash')
-                SpazFactory.get().block_sound.play(1.0, position=self.node.position)
-                return True
+                SpazFactory.get().block_sound.play(1, position=self.node.position)
 
             # Here's all the damage and force calculations unchanged from the source.
             mag = msg.magnitude * self.impact_scale
@@ -449,6 +449,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
                 # It's the same sound and flashing behavior as hitting a stunned player as a healthy player.
                 if (opposingnode.source_player.state == PlayerState.STUNNED and self.source_player.state != PlayerState.MARKED):
                     opposingnode.handlemessage('flash')
+
                     SpazFactory.get().block_sound.play(1.0, position=opposingnode.position)
                     return True
                 # If they're marked and we're healthy or stunned, pass that mark along to us.
@@ -580,6 +581,7 @@ class Player(bs.Player['Team']):
 
 
 # ba_meta export bascenev1.GameActivity
+
 class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
 
     # Let's define the basics like the name of the game, description and some tips that should appear at the start of a match.
@@ -624,17 +626,20 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
     ]
 
     # Hot Potato is strictly a Free-For-All gamemode, so only picking the gamemode in FFA playlists.
+    @override
     @classmethod
     def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
         return issubclass(sessiontype, bs.FreeForAllSession)
 
     # Most maps should work in Hot Potato. Generally maps marked as 'melee' are the most versatile map types of them all.
     # As the name implies, fisticuffs are common forms of engagement.
+    @override
     @classmethod
     def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return bs.app.classic.getmaps('melee')
 
     # Here we define everything the gamemode needs, like sounds and settings.
+
     def __init__(self, settings: dict):
         super().__init__(settings)
         self.settings = settings
@@ -732,12 +737,12 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
         if len(self.get_marked_players()) == 0:
             raise Exception("no marked players!")
 
-        self.elimination_timer_display -= 1  # Decrease our timer by one second.
         if self.elimination_timer_display > 1:
             self.elimination_timer_display -= 1  # Decrease our timer by one second.
             sound_volume = 1.0 / marked_player_amount
 
             for target in marked_players:
+
                 self._tick_sound.play(sound_volume, target.actor.node.position)
                 target.actor.marked_timer_text.text = str(self.elimination_timer_display)
 
@@ -747,6 +752,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
                 # depending on time remaining. Arrays start at index 0, so we need to decrease
                 # our variable by 1 to get the element index.
                 self._danger_tick_sounds[self.elimination_timer_display - 1].play(1.5)
+
         else:
             # Elimination timer is up! Let's eliminate all marked players.
             self.elimination_timer_display -= 1  # Decrease our timer by one second.
@@ -841,6 +847,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
             self.mark(new_victim)
 
     # This function is called when the gamemode first loads.
+    @override
     def on_begin(self) -> None:
         super().on_begin()  # Do standard gamemode on_begin behavior
 
@@ -876,7 +883,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
     def _show_tip(self) -> None:
 
         from bascenev1._gameutils import animate, GameTip
-        from babase._mgen.enums import SpecialChar
+        from bauiv1 import SpecialChar
         from babase._language import Lstr
 
         # If there's any tips left on the list, display one.
@@ -899,7 +906,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
             base_position = (75, 50)
             tip_scale = 0.8
             tip_title_scale = 1.2
-            vrmode = babase.app.vr_mode if build_number < 21282 else babase.app.env.vr
+            vrmode = babase.app.env.vr  # ba.app.vr_mode
 
             t_offs = -350.0
             height_offs = 100.0
@@ -966,6 +973,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
 
     # This function is called when a player leaves the game.
     # This is only called when the player already joined with a character.
+    @override
     def player_left(self, player: Player) -> None:
         # If the leaving player is marked, remove the mark
         if player.state == PlayerState.MARKED:
@@ -987,7 +995,8 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
         player.set_state(PlayerState.ELIMINATED)
 
     # This function is called every time a player spawns
-    def spawn_player(self, player: Player) -> bs.Actor:
+    @override
+    def spawn_player(self, player: Player) -> ba.Actor:
         position = self.map.get_ffa_start_position(self.players)
         position = (position[0],
                     position[1] - 0.3,  # Move the spawn a bit lower
@@ -1022,6 +1031,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
         bs.timer(0.5, light.delete)
 
     # Game reacts to various events
+    @override
     def handlemessage(self, msg: Any) -> Any:
         # This is called if the player dies.
         if isinstance(msg, bs.PlayerDiedMessage):
@@ -1044,6 +1054,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
                 self.mark(player)
 
     # This is called when we want to end the game and announce a victor
+    @override
     def end_game(self) -> None:
         # Proceed only if the game hasn't ended yet.
         if self.has_ended():
