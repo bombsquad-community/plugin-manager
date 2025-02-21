@@ -418,17 +418,18 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.1": {
-          "api_version": 9,
-          "commit_sha": "f06df27",
-          "released_on": "21-02-2025",
-          "md5sum": "2273f55338718a4d4c3db55ec9b01516"
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "3272ee5dd06d5ad603c6a1be189ad1d1"
         },
         "1.0.0": {
-          "api_version": 9,
-          "commit_sha": "49bcab9",
-          "released_on": "20-02-2025",
-          "md5sum": "caa8e3e6231c6464516592153b1a7a18"
+          "api_version": 7,
+          "commit_sha": "0841b9e",
+          "released_on": "14-11-2022",
+          "md5sum": "ec3980f3f3a5da96c27f4cbd61f98550"
         }
       }
     },
