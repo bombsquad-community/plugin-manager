@@ -93,10 +93,8 @@ class Icon(bs.Actor):
         self._player = player
         self._name_scale = name_scale
 
-        self._outline_tex = 
-        
-        
-        
+        self._outline_tex =
+
         gettexture('characterIconMask')
 
         # Character portrait
@@ -588,7 +586,6 @@ class Player(bs.Player['Team']):
 
 class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
 
-
     # Let's define the basics like the name of the game, description and some tips that should appear at the start of a match.
     name = 'Hot Potato'
     description = ('A random player gets marked.\n'
@@ -640,12 +637,11 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
     # As the name implies, fisticuffs are common forms of engagement.
     @override
     @classmethod
-
     def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
         return bs.app.classic.getmaps('melee')
 
-
     # Here we define everything the gamemode needs, like sounds and settings.
+
     def __init__(self, settings: dict):
         super().__init__(settings)
         self.settings = settings
@@ -913,7 +909,7 @@ class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
             tip_scale = 0.8
             tip_title_scale = 1.2
             vrmode = babase.app.env.vr  # ba.app.vr_mode
-            
+
             t_offs = -350.0
             height_offs = 100.0
             tnode = bs.newnode('text',
