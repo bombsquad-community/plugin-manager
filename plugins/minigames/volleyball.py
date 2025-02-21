@@ -1,6 +1,6 @@
 # Volley Ball (final)
 
-# Made by your friend: Freaku / @[Just] Freak#4999
+# Made by your friend: Freaku
 
 
 # Join BCS:
@@ -28,25 +28,24 @@
 
 ## 2022
 - Code cleanup
-- No longer requires a plugin
 - More accurate Goal positions
 """
 
 
-# ba_meta require api 7
+# ba_meta require api 9
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import _ba
-import ba
+import babase
 import random
-from bastd.actor.playerspaz import PlayerSpaz
-from bastd.actor.scoreboard import Scoreboard
-from bastd.actor.powerupbox import PowerupBoxFactory
-from bastd.actor.bomb import BombFactory
-from bastd.gameutils import SharedObjects
+import bascenev1 as bs
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.actor.powerupbox import PowerupBoxFactory
+from bascenev1lib.actor.bomb import BombFactory
+from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
@@ -59,7 +58,7 @@ class PuckDiedMessage:
         self.puck = puck
 
 
-class Puck(ba.Actor):
+class Puck(bs.Actor):
     def __init__(self, position: Sequence[float] = (0.0, 1.0, 0.0)):
         super().__init__()
         shared = SharedObjects.get()
@@ -72,16 +71,16 @@ class Puck(ba.Actor):
         assert activity is not None
         assert isinstance(activity, VolleyBallGame)
         pmats = [shared.object_material, activity.puck_material]
-        self.node = ba.newnode('prop',
+        self.node = bs.newnode('prop',
                                delegate=self,
                                attrs={
-                                   'model': activity.puck_model,
+                                   'mesh': activity.puck_mesh,
                                    'color_texture': activity.puck_tex,
                                    'body': 'sphere',
                                    'reflection': 'soft',
                                    'reflection_scale': [0.2],
                                    'shadow_size': 0.6,
-                                   'model_scale': 0.4,
+                                   'mesh_scale': 0.4,
                                    'body_scale': 1.07,
                                    'is_area_of_interest': True,
                                    'position': self._spawn_pos,
@@ -91,11 +90,11 @@ class Puck(ba.Actor):
         # Since it rolls on spawn, lets make gravity
         # to 0, and when another node (bomb/spaz)
         # touches it. It'll act back as our normie puck!
-        ba.animate(self.node, 'gravity_scale', {0: -0.1, 0.2: 1}, False)
+        bs.animate(self.node, 'gravity_scale', {0: -0.1, 0.2: 1}, False)
         # When other node touches, it realises its new gravity_scale
 
     def handlemessage(self, msg: Any) -> Any:
-        if isinstance(msg, ba.DieMessage):
+        if isinstance(msg, bs.DieMessage):
             assert self.node
             self.node.delete()
             activity = self._activity()
@@ -103,11 +102,11 @@ class Puck(ba.Actor):
                 activity.handlemessage(PuckDiedMessage(self))
 
         # If we go out of bounds, move back to where we started.
-        elif isinstance(msg, ba.OutOfBoundsMessage):
+        elif isinstance(msg, bs.OutOfBoundsMessage):
             assert self.node
             self.node.position = self._spawn_pos
 
-        elif isinstance(msg, ba.HitMessage):
+        elif isinstance(msg, bs.HitMessage):
             assert self.node
             assert msg.force_direction is not None
             self.node.handlemessage(
@@ -128,29 +127,29 @@ class Puck(ba.Actor):
             super().handlemessage(msg)
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
 
-class Team(ba.Team[Player]):
+class Team(bs.Team[Player]):
     """Our team type for this game."""
 
     def __init__(self) -> None:
         self.score = 0
 
 
-# ba_meta export game
-class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
+# ba_meta export bascenev1.GameActivity
+class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
     name = 'Volley Ball'
     description = 'Score some goals.\nby \ue048Freaku'
     available_settings = [
-        ba.IntSetting(
+        bs.IntSetting(
             'Score to Win',
             min_value=1,
             default=1,
             increment=1,
         ),
-        ba.IntChoiceSetting(
+        bs.IntChoiceSetting(
             'Time Limit',
             choices=[
                 ('None', 0),
@@ -162,7 +161,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
             ],
             default=0,
         ),
-        ba.FloatChoiceSetting(
+        bs.FloatChoiceSetting(
             'Respawn Times',
             choices=[
                 ('Shorter', 0.25),
@@ -173,36 +172,36 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
             ],
             default=1.0,
         ),
-        ba.BoolSetting('Epic Mode', True),
-        ba.BoolSetting('Night Mode', False),
-        ba.BoolSetting('Icy Floor', True),
-        ba.BoolSetting('Disable Punch', False),
-        ba.BoolSetting('Disable Bombs', False),
-        ba.BoolSetting('Enable Bottom Credits', True),
+        bs.BoolSetting('Epic Mode', True),
+        bs.BoolSetting('Night Mode', False),
+        bs.BoolSetting('Icy Floor', True),
+        bs.BoolSetting('Disable Punch', False),
+        bs.BoolSetting('Disable Bombs', False),
+        bs.BoolSetting('Enable Bottom Credits', True),
     ]
-    default_music = ba.MusicType.HOCKEY
+    default_music = bs.MusicType.HOCKEY
 
     @classmethod
-    def supports_session_type(cls, sessiontype: Type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.DualTeamSession)
+    def supports_session_type(cls, sessiontype: Type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.DualTeamSession)
 
     @classmethod
-    def get_supported_maps(cls, sessiontype: Type[ba.Session]) -> List[str]:
+    def get_supported_maps(cls, sessiontype: Type[bs.Session]) -> List[str]:
         return ['Open Field', 'Closed Arena']
 
     def __init__(self, settings: dict):
         super().__init__(settings)
         shared = SharedObjects.get()
         self._scoreboard = Scoreboard()
-        self._cheer_sound = ba.getsound('cheer')
-        self._chant_sound = ba.getsound('crowdChant')
-        self._foghorn_sound = ba.getsound('foghorn')
-        self._swipsound = ba.getsound('swip')
-        self._whistle_sound = ba.getsound('refWhistle')
-        self.puck_model = ba.getmodel('shield')
-        self.puck_tex = ba.gettexture('gameCircleIcon')
-        self._puck_sound = ba.getsound('metalHit')
-        self.puck_material = ba.Material()
+        self._cheer_sound = bs.getsound('cheer')
+        self._chant_sound = bs.getsound('crowdChant')
+        self._foghorn_sound = bs.getsound('foghorn')
+        self._swipsound = bs.getsound('swip')
+        self._whistle_sound = bs.getsound('refWhistle')
+        self.puck_mesh = bs.getmesh('shield')
+        self.puck_tex = bs.gettexture('gameCircleIcon')
+        self._puck_sound = bs.getsound('metalHit')
+        self.puck_material = bs.Material()
         self.puck_material.add_actions(actions=(('modify_part_collision',
                                                  'friction', 0.5)))
         self.puck_material.add_actions(conditions=('they_have_material',
@@ -233,16 +232,16 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
             conditions=('they_have_material',
                         PowerupBoxFactory.get().powerup_material),
             actions=(('modify_part_collision', 'physical', False),
-                     ('message', 'their_node', 'at_connect', ba.DieMessage())))
-        self._score_region_material = ba.Material()
+                     ('message', 'their_node', 'at_connect', bs.DieMessage())))
+        self._score_region_material = bs.Material()
         self._score_region_material.add_actions(
             conditions=('they_have_material', self.puck_material),
             actions=(('modify_part_collision', 'collide',
                       True), ('modify_part_collision', 'physical', False),
                      ('call', 'at_connect', self._handle_score)))
 
-        self._wall_material = ba.Material()
-        self._fake_wall_material = ba.Material()
+        self._wall_material = bs.Material()
+        self._fake_wall_material = bs.Material()
         self._wall_material.add_actions(
 
             actions=(
@@ -282,7 +281,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
             ))
         self.blocks = []
 
-        self._net_wall_material = ba.Material()
+        self._net_wall_material = bs.Material()
         self._net_wall_material.add_actions(
             conditions=('they_have_material', shared.player_material),
             actions=(
@@ -309,7 +308,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
         self.net_blocc = []
 
         self._puck_spawn_pos: Optional[Sequence[float]] = None
-        self._score_regions: Optional[List[ba.NodeActor]] = None
+        self._score_regions: Optional[List[bs.NodeActor]] = None
         self._puck: Optional[Puck] = None
         self._score_to_win = int(settings['Score to Win'])
         self._punchie_ = bool(settings['Disable Punch'])
@@ -321,8 +320,8 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
         self._epic_mode = bool(settings['Epic Mode'])
         # Base class overrides.
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC if self._epic_mode else
-                              ba.MusicType.TO_THE_DEATH)
+        self.default_music = (bs.MusicType.EPIC if self._epic_mode else
+                              bs.MusicType.TO_THE_DEATH)
 
     def get_instance_description(self) -> Union[str, Sequence]:
         if self._score_to_win == 1:
@@ -339,15 +338,15 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
 
         self.setup_standard_time_limit(self._time_limit)
         if self._night_mode:
-            ba.getactivity().globalsnode.tint = (0.5, 0.7, 1)
+            bs.getactivity().globalsnode.tint = (0.5, 0.7, 1)
         self._puck_spawn_pos = self.map.get_flag_position(None)
         self._spawn_puck()
 
         # Set up the two score regions.
         self._score_regions = []
         self._score_regions.append(
-            ba.NodeActor(
-                ba.newnode('region',
+            bs.NodeActor(
+                bs.newnode('region',
                            attrs={
                                'position': (5.7, 0, -0.065),
                                'scale': (10.7, 0.001, 8),
@@ -355,8 +354,8 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
                                'materials': [self._score_region_material]
                            })))
         self._score_regions.append(
-            ba.NodeActor(
-                ba.newnode('region',
+            bs.NodeActor(
+                bs.newnode('region',
                            attrs={
                                'position': (-5.7, 0, -0.065),
                                'scale': (10.7, 0.001, 8),
@@ -364,9 +363,9 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
                                'materials': [self._score_region_material]
                            })))
         self._update_scoreboard()
-        ba.playsound(self._chant_sound)
+        self._chant_sound.play()
         if self.credit_text:
-            t = ba.newnode('text',
+            t = bs.newnode('text',
                            attrs={'text': "Created by Freaku\nVolleyBall",  # Disable 'Enable Bottom Credits' when making playlist, No need to edit this lovely...
                                   'scale': 0.7,
                                   'position': (0, 0),
@@ -376,23 +375,23 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
                                   'h_align': 'center',
                                   'v_attach': 'bottom'})
         shared = SharedObjects.get()
-        self.blocks.append(ba.NodeActor(ba.newnode('region', attrs={'position': (0, 2.4, 0), 'scale': (
+        self.blocks.append(bs.NodeActor(bs.newnode('region', attrs={'position': (0, 2.4, 0), 'scale': (
             0.8, 6, 20), 'type': 'box', 'materials': (self._fake_wall_material, )})))
 
-        self.net_blocc.append(ba.NodeActor(ba.newnode('region', attrs={'position': (0, 0, 0), 'scale': (
+        self.net_blocc.append(bs.NodeActor(bs.newnode('region', attrs={'position': (0, 0, 0), 'scale': (
             0.6, 2.4, 20), 'type': 'box', 'materials': (self._net_wall_material, )})))
 
     def on_team_join(self, team: Team) -> None:
         self._update_scoreboard()
 
     def _handle_puck_player_collide(self) -> None:
-        collision = ba.getcollision()
+        collision = bs.getcollision()
         try:
             puck = collision.sourcenode.getdelegate(Puck, True)
             player = collision.opposingnode.getdelegate(PlayerSpaz,
                                                         True).getplayer(
                                                             Player, True)
-        except ba.NotFoundError:
+        except bs.NotFoundError:
             return
 
         puck.last_players_to_touch[player.team.id] = player
@@ -409,7 +408,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
         if self._puck.scored:
             return
 
-        region = ba.getcollision().sourcenode
+        region = bs.getcollision().sourcenode
         index = 0
         for index in range(len(self._score_regions)):
             if region == self._score_regions[index].node:
@@ -431,7 +430,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
 
                 for player in team.players:
                     if player.actor:
-                        player.actor.handlemessage(ba.CelebrateMessage(2.0))
+                        player.actor.handlemessage(bs.CelebrateMessage(2.0))
 
                 # If we've got the player from the scoring team that last
                 # touched us, give them points.
@@ -446,28 +445,28 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
                 if team.score >= self._score_to_win:
                     self.end_game()
 
-        ba.playsound(self._foghorn_sound)
-        ba.playsound(self._cheer_sound)
+        self._foghorn_sound.play()
+        self._cheer_sound.play()
 
         self._puck.scored = True
 
         # Kill the puck (it'll respawn itself shortly).
-        ba.emitfx(position=ba.getcollision().position, count=int(
+        bs.emitfx(position=bs.getcollision().position, count=int(
             6.0 + 7.0 * 12), scale=3, spread=0.5, chunk_type='spark')
-        ba.timer(0.7, self._kill_puck)
+        bs.timer(0.7, self._kill_puck)
 
-        ba.cameraflash(duration=7.0)
+        bs.cameraflash(duration=7.0)
         self._update_scoreboard()
 
     def end_game(self) -> None:
-        results = ba.GameResults()
+        results = bs.GameResults()
         for team in self.teams:
             results.set_team_score(team, team.score)
         self.end(results=results)
 
     def on_transition_in(self) -> None:
         super().on_transition_in()
-        activity = ba.getactivity()
+        activity = bs.getactivity()
         if self._icy_flooor:
             activity.map.is_hockey = True
 
@@ -477,7 +476,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
             self._scoreboard.set_team_value(team, team.score, winscore)
 
     # overriding the default character spawning..
-    def spawn_player(self, player: Player) -> ba.Actor:
+    def spawn_player(self, player: Player) -> bs.Actor:
         spaz = self.spawn_player_spaz(player)
 
         if self._bombies_:
@@ -493,7 +492,7 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
     def handlemessage(self, msg: Any) -> Any:
 
         # Respawn dead players if they're still in the game.
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             # Augment standard behavior...
             super().handlemessage(msg)
             self.respawn_player(msg.getplayer(Player))
@@ -501,18 +500,18 @@ class VolleyBallGame(ba.TeamGameActivity[Player, Team]):
         # Respawn dead pucks.
         elif isinstance(msg, PuckDiedMessage):
             if not self.has_ended():
-                ba.timer(2.2, self._spawn_puck)
+                bs.timer(2.2, self._spawn_puck)
         else:
             super().handlemessage(msg)
 
     def _flash_puck_spawn(self) -> None:
         # Effect >>>>>> Flashly
-        ba.emitfx(position=self._puck_spawn_pos, count=int(
+        bs.emitfx(position=self._puck_spawn_pos, count=int(
             6.0 + 7.0 * 12), scale=1.7, spread=0.4, chunk_type='spark')
 
     def _spawn_puck(self) -> None:
-        ba.playsound(self._swipsound)
-        ba.playsound(self._whistle_sound)
+        self._swipsound.play()
+        self._whistle_sound.play()
         self._flash_puck_spawn()
         assert self._puck_spawn_pos is not None
         self._puck = Puck(position=self._puck_spawn_pos)
@@ -538,7 +537,7 @@ class PointzzforH:
     points['spawn2'] = (6.857415055, 0.03938567998, 0.0) + (1.0, 1.0, 3.0)
 
 
-class VolleyBallMap(ba.Map):
+class VolleyBallMap(bs.Map):
     defs = Pointzz()
     name = "Open Field"
 
@@ -553,10 +552,10 @@ class VolleyBallMap(ba.Map):
     @classmethod
     def on_preload(cls) -> Any:
         data: Dict[str, Any] = {
-            'model': ba.getmodel('footballStadium'),
-            'vr_fill_model': ba.getmodel('footballStadiumVRFill'),
-            'collide_model': ba.getcollidemodel('footballStadiumCollide'),
-            'tex': ba.gettexture('footballStadium')
+            'mesh': bs.getmesh('footballStadium'),
+            'vr_fill_mesh': bs.getmesh('footballStadiumVRFill'),
+            'collision_mesh': bs.getcollisionmesh('footballStadiumCollide'),
+            'tex': bs.gettexture('footballStadium')
         }
         return data
 
@@ -565,60 +564,60 @@ class VolleyBallMap(ba.Map):
         shared = SharedObjects.get()
         x = -5
         while x < 5:
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, 0, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, 0, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, .25, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, .25, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, .5, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, .5, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, .75, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, .75, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, 1, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, 1, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
             x = x + 0.5
 
         y = -1
         while y > -11:
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, 4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, 4),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, -4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, -4),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, 4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, 4),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, -4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, -4),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
             y -= 1
 
         z = 0
         while z < 5:
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, z),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, -z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, -z),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, z),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, -z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, -z),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
             z += 1
 
-        self.node = ba.newnode(
+        self.node = bs.newnode(
             'terrain',
             delegate=self,
             attrs={
-                'model': self.preloaddata['model'],
-                'collide_model': self.preloaddata['collide_model'],
+                'mesh': self.preloaddata['mesh'],
+                'collision_mesh': self.preloaddata['collision_mesh'],
                 'color_texture': self.preloaddata['tex'],
                 'materials': [shared.footing_material]
             })
-        ba.newnode('terrain',
+        bs.newnode('terrain',
                    attrs={
-                       'model': self.preloaddata['vr_fill_model'],
+                       'mesh': self.preloaddata['vr_fill_mesh'],
                        'lighting': False,
                        'vr_only': True,
                        'background': True,
                        'color_texture': self.preloaddata['tex']
                    })
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.tint = (1.3, 1.2, 1.0)
         gnode.ambient_color = (1.3, 1.2, 1.0)
         gnode.vignette_outer = (0.57, 0.57, 0.57)
@@ -627,7 +626,7 @@ class VolleyBallMap(ba.Map):
         gnode.vr_near_clip = 0.5
 
 
-class VolleyBallMapH(ba.Map):
+class VolleyBallMapH(bs.Map):
     defs = PointzzforH()
     name = 'Closed Arena'
 
@@ -642,13 +641,13 @@ class VolleyBallMapH(ba.Map):
     @classmethod
     def on_preload(cls) -> Any:
         data: Dict[str, Any] = {
-            'models': (ba.getmodel('hockeyStadiumOuter'),
-                       ba.getmodel('hockeyStadiumInner')),
-            'vr_fill_model': ba.getmodel('footballStadiumVRFill'),
-            'collide_model': ba.getcollidemodel('hockeyStadiumCollide'),
-            'tex': ba.gettexture('hockeyStadium'),
+            'meshs': (bs.getmesh('hockeyStadiumOuter'),
+                      bs.getmesh('hockeyStadiumInner')),
+            'vr_fill_mesh': bs.getmesh('footballStadiumVRFill'),
+            'collision_mesh': bs.getcollisionmesh('hockeyStadiumCollide'),
+            'tex': bs.gettexture('hockeyStadium'),
         }
-        mat = ba.Material()
+        mat = bs.Material()
         mat.add_actions(actions=('modify_part_collision', 'friction', 0.01))
         data['ice_material'] = mat
         return data
@@ -658,66 +657,66 @@ class VolleyBallMapH(ba.Map):
         shared = SharedObjects.get()
         x = -5
         while x < 5:
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, 0, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, 0, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, .25, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, .25, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, .5, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, .5, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, .75, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, .75, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (0, 1, x),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (0, 1, x),
                                                      'color': (1, 1, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
             x = x + 0.5
 
         y = -1
         while y > -11:
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, 4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, 4),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, -4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (y, 0.01, -4),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, 4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, 4),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, -4),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-y, 0.01, -4),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
             y -= 1
 
         z = 0
         while z < 5:
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, z),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, -z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (11, 0.01, -z),
                                                      'color': (1, 0, 0), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, z),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
-            self.zone = ba.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, -z),
+            self.zone = bs.newnode('locator', attrs={'shape': 'circle', 'position': (-11, 0.01, -z),
                                                      'color': (0, 0, 1), 'opacity': 1, 'draw_beauty': True, 'additive': False, 'size': [0.40]})
             z += 1
 
-        self.node = ba.newnode('terrain',
+        self.node = bs.newnode('terrain',
                                delegate=self,
                                attrs={
-                                   'model':
+                                   'mesh':
                                        None,
-                                   'collide_model':
+                                   'collision_mesh':
                                        # we dont want Goalposts...
-                                       ba.getcollidemodel('footballStadiumCollide'),
+                                       bs.getcollisionmesh('footballStadiumCollide'),
                                    'color_texture':
                                        self.preloaddata['tex'],
                                    'materials': [
                                        shared.footing_material]
                                })
-        ba.newnode('terrain',
+        bs.newnode('terrain',
                    attrs={
-                       'model': self.preloaddata['vr_fill_model'],
+                       'mesh': self.preloaddata['vr_fill_mesh'],
                        'vr_only': True,
                        'lighting': False,
                        'background': True,
                    })
         mats = [shared.footing_material]
-        self.floor = ba.newnode('terrain',
+        self.floor = bs.newnode('terrain',
                                 attrs={
-                                    'model': self.preloaddata['models'][1],
+                                    'mesh': self.preloaddata['meshs'][1],
                                     'color_texture': self.preloaddata['tex'],
                                     'opacity': 0.92,
                                     'opacity_in_low_or_medium_quality': 1.0,
@@ -725,16 +724,16 @@ class VolleyBallMapH(ba.Map):
                                     'color': (0.4, 0.9, 0)
                                 })
 
-        self.background = ba.newnode(
+        self.background = bs.newnode(
             'terrain',
             attrs={
-                'model': ba.getmodel('natureBackground'),
+                'mesh': bs.getmesh('natureBackground'),
                 'lighting': False,
                 'background': True,
                 'color': (0.5, 0.30, 0.4)
             })
 
-        gnode = ba.getactivity().globalsnode
+        gnode = bs.getactivity().globalsnode
         gnode.floor_reflection = True
         gnode.debris_friction = 0.3
         gnode.debris_kill_height = -0.3
@@ -747,5 +746,17 @@ class VolleyBallMapH(ba.Map):
         # self.is_hockey = True
 
 
-ba._map.register_map(VolleyBallMap)
-ba._map.register_map(VolleyBallMapH)
+bs._map.register_map(VolleyBallMap)
+bs._map.register_map(VolleyBallMapH)
+
+
+# ba_meta export plugin
+class byFreaku(babase.Plugin):
+    def __init__(self):
+        # Reason of plugin:
+        # To register maps.
+        #
+        # Then why not include function here?
+        # On server upon first launch, plugins are not activated,
+        # (same can be case for user if disabled auto-enable plugins)
+        pass

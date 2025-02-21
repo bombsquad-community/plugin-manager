@@ -3,6 +3,200 @@
   "description": "Utilities",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/utilities",
   "plugins": {
+    "plugin_editor": {
+      "description": "An Editor which let's you view and edit plugins inside the game!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Vishuuu",
+          "email": "vishal.u338@gmail.com",
+          "discord": "vishal3308"
+        }
+      ],
+      "versions": {
+        "1.1.1": {
+          "api_version": 8,
+          "commit_sha": "bb6734a",
+          "released_on": "24-05-2024",
+          "md5sum": "9d5f8f71a4a91d4b47c9ca15a54f3a9e"
+        }
+      }
+    },
+    "party_filter": {
+      "description": "Adds Filters in the gather->public window.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yelllow",
+          "email": "im.yellow.dev@gmail.com",
+          "discord": "y.lw"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "f5b3db1774924f90381e3e4abb7b6278"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "667397e",
+          "released_on": "04-01-2025",
+          "md5sum": "b624ef90abf20588f21eb55291f9747d"
+        }
+      }
+    },
+    "sandbox": {
+      "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.2.0": {
+          "api_version": 8,
+          "commit_sha": "3a62e48",
+          "released_on": "23-01-2025",
+          "md5sum": "1404399f68a4ad40f42dd4230d378627"
+        }
+      }
+    },
+    "updown": {
+      "description": "Adds UP and DOWN buttons in party window to recall messages in chat.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "90cbaf7",
+          "released_on": "22-01-2025",
+          "md5sum": "b287c940c143bf9c4831477742dbd913"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "7c597ef8cf7966a056eb5b34c01678eb"
+        }
+      }
+    },
+    "rejoin": {
+      "description": "Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then party is full.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "2.0.2": {
+          "api_version": 9,
+          "commit_sha": "2f1d9cd",
+          "released_on": "25-01-2025",
+          "md5sum": "5df299bf8a5a8a1c8ee2a8535342f5ab"
+        },
+        "2.0.1": {
+          "api_version": 9,
+          "commit_sha": "506451f",
+          "released_on": "21-01-2025",
+          "md5sum": "13385447ed5cc2d34396a5f57b0aed67"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "a34da341e7f2055a1f57f5262fa07c79"
+        }
+      }
+    },
+    "topmsg": {
+      "description": "When chat is muted, see new chat messages on top right! (like kill logs)",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bbd7753",
+          "released_on": "22-01-2025",
+          "md5sum": "7a30597198881b7a1cee2a220230b934"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "74a592e8204e81872752a4a6eff6701e"
+        }
+      }
+    },
+    "sorry": {
+      "description": "Send a random sorry to chat, preventing revenge attempts from teammates you kill by mistake.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "thehero2012008@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "1b41b40775ed6fd98a2e3a4c4de4778e"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "333416f",
+          "released_on": "20-05-2024",
+          "md5sum": "58fd9fbfc6fbff9f617b5a1763fc6aab"
+        }
+      }
+    },
+    "translate": {
+      "description": "Translate yours/others chat. Just click on the message to translate them. Open Plugin Settings/Double click 'Trans' button to open translation settings. Compatible with other PW mods (like advanced_party_window)",
+      "external_url": "https://github.com/bombsquad-community/plugin-manager/assets/92618708/5860e44d-0b70-4a3f-a651-208a4452ea38",
+      "authors": [
+        {
+          "name": "Freaku",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "da4f281188f46d0c8e518c57c17144d4"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "fcda5f0",
+          "released_on": "09-02-2024",
+          "md5sum": "2efa68f899ff04bf345ed5e8c32886d7"
+        }
+      }
+    },
     "random_join": {
       "description": "Come visit the unknown servers around all the world! Plugin designed not to join servers with similar names more frequently than rare ones. Have fun!",
       "external_url": "",
@@ -15,15 +209,52 @@
         {
           "name": "LoupGarou",
           "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"
+          "discord": "loupgarou_"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "2d12dd560558b87f3f1fd6f134f397b8"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "f81810220b0cc13cc436434014fbe8de"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2454845",
           "released_on": "26-12-2022",
           "md5sum": "7bac6bfe837ff89e7da10a0ab45691d1"
+        }
+      }
+    },
+    "manual_camera": {
+      "description": "Adjust the games camera angle/position. Open pause menu and press 'Manual Camera' button. Useable in OFFLINE/ONLINE/REPLAYS",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Droopy",
+          "email": "",
+          "discord": "droopy25"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "022f879",
+          "released_on": "23-01-2025",
+          "md5sum": "78a27e0fce1965ffcfdb055c33d49185"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "c26342d",
+          "released_on": "05-08-2023",
+          "md5sum": "8d6716d2fca5848a39909ef6bb87ce35"
         }
       }
     },
@@ -34,10 +265,28 @@
         {
           "name": "LoupGarou",
           "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"
+          "discord": "loupgarou_"
         }
       ],
       "versions": {
+        "1.4.0": {
+          "api_version": 9,
+          "commit_sha": "3a62e48",
+          "released_on": "23-01-2025",
+          "md5sum": "3676a9d0c709bb646eff826526a1f406"
+        },
+        "1.3.2": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "1cf2d07d15dbacf0a277795f3742c14b"
+        },
+        "1.3.1": {
+          "api_version": 7,
+          "commit_sha": "d511c15",
+          "released_on": "03-08-2023",
+          "md5sum": "c1dea54adc0136638ff56993a7196519"
+        },
         "1.3.0": {
           "api_version": 7,
           "commit_sha": "ec116b3",
@@ -77,10 +326,22 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "04a6d85404f51b3026060d9525c14b09"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "beab6387e86bd842ffc8c857750b510e"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -96,10 +357,22 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "b52d84a",
+          "released_on": "21-01-2025",
+          "md5sum": "cc2d3d06a20f4c9de3f3fa3d7eccf46c"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "80f8fd9e9bd23d33daace0059029378b"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -115,10 +388,16 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "6eb01543b28a9a2c95f873aa92dbe3b2"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -134,10 +413,22 @@
         {
           "name": "JoseAng3l",
           "email": "",
-          "discord": "! JoseANG3L#0268"
+          "discord": "joseang3l"
         }
       ],
       "versions": {
+        "1.0.2": {
+          "api_version": 9,
+          "commit_sha": "37914bb",
+          "released_on": "21-01-2025",
+          "md5sum": "c1f8a382f0f64777b5415c82d6913ff2"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "ee8187a63d9e205f0355aa5c21141af2"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "fed7c24",
@@ -162,6 +453,12 @@
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "ee666a289e34c7ceca1d64ed977de4ce"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "2fda676",
@@ -177,10 +474,22 @@
         {
           "name": "LoupGarou",
           "email": "LoupGarou5418@outlook.com",
-          "discord": "ʟօʊքɢǟʀօʊ#3063"
+          "discord": "loupgarou_"
         }
       ],
       "versions": {
+        "1.3.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "499ccd84ac8deedef5596dccad2a58b7"
+        },
+        "1.2.3": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "6601d41f60b276d54770c0718158e701"
+        },
         "1.2.2": {
           "api_version": 7,
           "commit_sha": "7753b87",
@@ -209,20 +518,38 @@
     },
     "colorscheme": {
       "description": "Create custom UI colorschemes!",
-      "external_url": "https://www.youtube.com/watch?v=qatwWrBAvjc",
+      "external_url": "https://www.youtube.com/watch?v=G6824StL4eg",
       "authors": [
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         },
         {
           "name": "Vishal",
           "email": "vishal.u338@gmail.com",
-          "discord": "𝑽𝑰𝑺𝑯𝑼𝑼𝑼#2921"
+          "discord": "vishal3308"
         }
       ],
       "versions": {
+        "2.2.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "ce3ed59ed6009ced568b94105c10ae42"
+        },
+        "2.1.0": {
+          "api_version": 8,
+          "commit_sha": "464eb7c",
+          "released_on": "09-12-2023",
+          "md5sum": "517fec3938f31627c1cfd2126f1ee9da"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "0b55bc2",
+          "released_on": "20-06-2023",
+          "md5sum": "517fec3938f31627c1cfd2126f1ee9da"
+        },
         "1.2.3": {
           "api_version": 7,
           "commit_sha": "7753b87",
@@ -262,10 +589,22 @@
         {
           "name": "Rikko",
           "email": "rikkolovescats@proton.me",
-          "discord": "Rikko#7383"
+          "discord": "rikkolovescats"
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "48896fb8a1ecfdb1ce382b06db315854"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "c41cc10",
+          "released_on": "15-07-2023",
+          "md5sum": "71c3f6386433feebac94ef0b9b6a8bf4"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "63d674cf",
@@ -281,10 +620,22 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "02857d12efabced28a6d980756143aeb"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "31df84f027c98e86336a420aa509e47f"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "6beb8ddf",
@@ -300,10 +651,34 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "2.0.3": {
+          "api_version": 9,
+          "commit_sha": "6bf081a",
+          "released_on": "08-02-2025",
+          "md5sum": "e80d0282867e44f27d1efeadd13e1edf"
+        },
+        "2.0.2": {
+          "api_version": 9,
+          "commit_sha": "2c66eac",
+          "released_on": "21-01-2025",
+          "md5sum": "37a68c15b66a2deca923317db9d4c630"
+        },
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "1d45e69",
+          "released_on": "08-12-2023",
+          "md5sum": "e5ca160fd0c847697fbf61d53462a7cd"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "ef2dbcac9190a61753e2c3c0f8afc22c"
+        },
         "1.1.0": {
           "api_version": 7,
           "commit_sha": "383f774",
@@ -324,11 +699,29 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "3.0.1": {
+          "api_version": 9,
+          "commit_sha": "a93fda3",
+          "released_on": "25-01-2025",
+          "md5sum": "96d7f2fd3e503e8a80fb4a761d5f6caf"
+        },
+        "3.0.0": {
+          "api_version": 9,
+          "commit_sha": "32e5180",
+          "released_on": "22-01-2025",
+          "md5sum": "b1742bdaf76b60a2eaf62cdcfebdbd52"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "0c5ce76",
+          "released_on": "02-07-2023",
+          "md5sum": "8b05407fda379d853f5c75677b19fd85"
+        },
         "1.2.1": {
           "api_version": 7,
           "commit_sha": "64e8a5c",
@@ -355,11 +748,41 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "2.1.1": {
+          "api_version": 9,
+          "commit_sha": "a93fda3",
+          "released_on": "25-01-2025",
+          "md5sum": "7db9b514d97df4c672d5e8ef72b6be6c"
+        },
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "2929a3af42ee3547864878a77a4c66a1"
+        },
+        "2.0.2": {
+          "api_version": 8,
+          "commit_sha": "32e0f45",
+          "released_on": "12-11-2023",
+          "md5sum": "a3c20dd470939ea7831df3e4e007f303"
+        },
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "d511c15",
+          "released_on": "03-08-2023",
+          "md5sum": "6a9f37d78e2293aa0bf8eb6e5d60e702"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "da0e63d",
+          "released_on": "02-07-2023",
+          "md5sum": "7d90768d603fcf91b38ba7fa1d30501e"
+        },
         "1.0.1": {
           "api_version": 7,
           "commit_sha": "64e8a5c",
@@ -380,16 +803,65 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "8982f0e",
+          "released_on": "22-01-2025",
+          "md5sum": "df20190b079bbf80f1e061339930e5f7"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "e80ed956d637392c948725899da135e3"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "6acdea8",
           "released_on": "26-11-2022",
           "md5sum": "3ced6731c0cbe79c972e7d1c7478ce16"
+        }
+      }
+    },
+    "file_share": {
+      "description": "share/import mods, replays, custom characters/maps with link or QR code",
+      "external_url": "https://youtu.be/qtGsFU4cgic",
+      "authors": [
+        {
+          "name": "Mr.Smoothy",
+          "email": "",
+          "discord": "mr.smoothy"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "cb06090af5beb9f80965342b9a83b1e9"
+        },
+        "1.0.2": {
+          "api_version": 8,
+          "commit_sha": "505c948",
+          "released_on": "09-06-2024",
+          "md5sum": "ae32962255c357b29bd9c46c0551a19c"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "b089293",
+          "released_on": "08-12-2023",
+          "md5sum": "d89537f6737829f3527b8ed32a1b12bf"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "dbd41c4",
+          "released_on": "31-07-2023",
+          "md5sum": "e1d4852a3c2c2dbf746867016ae9fbdf"
         }
       }
     },
@@ -399,11 +871,17 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "a18a595",
+          "released_on": "08-07-2023",
+          "md5sum": "30a21cb1c739b098dcaa791e4a2cd481"
+        },
         "1.0.1": {
           "api_version": 7,
           "commit_sha": "64e8a5c",
@@ -424,11 +902,23 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "56d3b51b5929a53a7d2de04326ea7bae"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "0c5ce76",
+          "released_on": "02-07-2023",
+          "md5sum": "bb5d85fb528020e809eaebb17a388e32"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "ff4de19",
@@ -443,11 +933,29 @@
       "authors": [
         {
           "name": "Mr.Smoothy",
-          "email": "smoothy@bombsquad.ga",
-          "discord": "mr.smoothy#5824"
+          "email": "",
+          "discord": "mr.smoothy"
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "94742b9",
+          "released_on": "21-01-2025",
+          "md5sum": "6fa2e76b9d90ab9a7b801c2245f1a017"
+        },
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "a3a48c2",
+          "released_on": "08-12-2023",
+          "md5sum": "0adc53345b1616a3356a9032cdfeb82f"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "f7ae806",
+          "released_on": "03-08-2023",
+          "md5sum": "57e79be044430139f6218a61e3a107a4"
+        },
         "1.0.1": {
           "api_version": 7,
           "commit_sha": "da10318",
@@ -469,10 +977,40 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": "[Just] Freak#4999"
+          "discord": ""
         }
       ],
       "versions": {
+        "3.1.1": {
+          "api_version": 9,
+          "commit_sha": "6bf081a",
+          "released_on": "08-02-2025",
+          "md5sum": "53776b882b3c06be4d28a3d547984c46"
+        },
+        "3.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "d94cc8a8a6cef495a6e09d019ebe3eb9"
+        },
+        "3.0.1": {
+          "api_version": 8,
+          "commit_sha": "78f3c44",
+          "released_on": "27-12-2023",
+          "md5sum": "b7756605a4bc382329c078c4e399b96b"
+        },
+        "3.0.0": {
+          "api_version": 8,
+          "commit_sha": "02da437",
+          "released_on": "16-12-2023",
+          "md5sum": "ae221a7c2b938eccf63db493c247991e"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "48f9302",
+          "released_on": "28-07-2023",
+          "md5sum": "8a63ad58d24e2b61bb63645f74d876e8"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "b581d90",
@@ -482,16 +1020,22 @@
       }
     },
     "pro_unlocker": {
-      "description": "Unlocks some pro-only features - custom colors, playlist maker, etc.\n(Please support the game developer if you can!)",
+      "description": "Unlocks some pro-only features - custom colors, playlist maker, etc. (Please support the game developer if you can!)",
       "external_url": "",
       "authors": [
         {
-          "name": "Anonymous",
+          "name": "-",
           "email": "",
           "discord": ""
         }
       ],
       "versions": {
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "a18a595",
+          "released_on": "08-07-2023",
+          "md5sum": "7403fcea1855ddf561aa412d703fcc6e"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "41e239c",
@@ -507,7 +1051,7 @@
         {
           "name": "Droopy",
           "email": "",
-          "discord": "Droopy#3730"
+          "discord": "droopy25"
         }
       ],
       "versions": {
@@ -526,10 +1070,22 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "3.0.2": {
+          "api_version": 9,
+          "commit_sha": "43b3a41",
+          "released_on": "21-01-2025",
+          "md5sum": "3f6ad4656e2a04fc1a767f2760407c7b"
+        },
+        "3.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "697f1204f7722f27f2bdbbff3994763c"
+        },
         "3.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -545,10 +1101,22 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "90aaf343cf22eb024665ec5a7a4889c0"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "7b1dd1432930e6dc198780a134b88c88"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -558,16 +1126,28 @@
       }
     },
     "bomb_radius_visualizer": {
-      "description": "With this cutting edge technology, you precisely know\nhow close to the bomb you can tread.\nSupports modified blast radius values!",
+      "description": "With this cutting edge technology, you precisely know how close to the bomb you can tread. Supports modified blast radius values!",
       "external_url": "",
       "authors": [
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "4281fd65d90f314d3c8180505856a9d3"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "7313a54c35611e9d8f7d0854b6646bc7"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "0841b9e",
@@ -577,16 +1157,34 @@
       }
     },
     "disco_light": {
-      "description": "Add disco light into the game.",
+      "description": "Add disco light into the game. Do '/disco' to turn on and '/disco off' to turn off",
       "external_url": "",
       "authors": [
         {
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "discord": "crossjoy"
         }
       ],
       "versions": {
+        "2.2.0": {
+          "api_version": 9,
+          "commit_sha": "04b8460",
+          "released_on": "21-01-2025",
+          "md5sum": "2c78b1e3918053fa94d709571fef624d"
+        },
+        "2.1.0": {
+          "api_version": 8,
+          "commit_sha": "41046ae",
+          "released_on": "14-02-2024",
+          "md5sum": "bfffb346d61958c02015dde0b1520ca3"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "bb75b79a749f26ed359e0fc99f23a958"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "800125c",
@@ -596,16 +1194,58 @@
       }
     },
     "practice_tools": {
-      "description": "Powerful and comprehensive tools for practice purpose. Practice tabs can be access through party window.",
-      "external_url": "",
+      "description": "Powerful and comprehensive tools for practice purposes. Practice tabs can be accessed through party window.",
+      "external_url": "https://www.youtube.com/watch?v=7BeCcIYSXd0&t=113s&ab_channel=BOMBsquadlife",
       "authors": [
         {
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
-          "discord": "Cross Joy#0721"
+          "discord": "crossjoy"
         }
       ],
       "versions": {
+        "2.2.0": {
+          "api_version": 8,
+          "commit_sha": "41046ae",
+          "released_on": "14-02-2024",
+          "md5sum": "b02de60a80039b092ef4d826b3d61cc1"
+        },
+        "2.1.1": {
+          "api_version": 8,
+          "commit_sha": "5422dd6",
+          "released_on": "18-01-2024",
+          "md5sum": "f2b5e4ff71c3952f57957ca3ab0c2e00"
+        },
+        "2.1.0": {
+          "api_version": 8,
+          "commit_sha": "dcfe582",
+          "released_on": "09-12-2023",
+          "md5sum": "f2b5e4ff71c3952f57957ca3ab0c2e00"
+        },
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "41cc38a",
+          "released_on": "01-10-2023",
+          "md5sum": "9ed00b2c86bd62168aa1cab6ea5fdfe4"
+        },
+        "2.0.0": {
+          "api_version": 8,
+          "commit_sha": "9340deb",
+          "released_on": "31-07-2023",
+          "md5sum": "5cc5d2d1d775c726b6065679dcfe3bda"
+        },
+        "1.2.0": {
+          "api_version": 7,
+          "commit_sha": "e61958b",
+          "released_on": "19-06-2023",
+          "md5sum": "0ef91a10240b1df25595750015042a3f"
+        },
+        "1.1.0": {
+          "api_version": 7,
+          "commit_sha": "7ab4576",
+          "released_on": "15-06-2023",
+          "md5sum": "f439f1a9c325f6ac09f2bab23b10e275"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "800125c",
@@ -614,17 +1254,60 @@
         }
       }
     },
+    "health_indicator": {
+      "description": "Add a simple health indicator on every player and bot.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Cross Joy",
+          "email": "cross.joy.official@gmail.com",
+          "discord": "crossjoy"
+        }
+      ],
+      "versions": {
+        "1.3.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "e9b9817c356101038e4f3b522311c4a6"
+        },
+        "1.2.0": {
+          "api_version": 8,
+          "commit_sha": "41046ae",
+          "released_on": "14-02-2024",
+          "md5sum": "e16123cf550f433c70e53b8ec41a4e46"
+        }
+      }
+    },
     "autorun": {
-      "description": "Run without holding any buttons. Made for beginners or players on mobile.\nKeeps your character maneuverable. Start running as usual to override.",
+      "description": "Run without holding any buttons. Made for beginners or players on mobile. Keeps your character maneuverable. Start running as usual to override.",
       "external_url": "",
       "authors": [
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "f269311e8c321f912940c8127e4c6c29"
+        },
+        "1.0.2": {
+          "api_version": 8,
+          "commit_sha": "95076d1",
+          "released_on": "23-06-2024",
+          "md5sum": "3a072f0bb33bfa784670827d1b32b4d9"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "c472b9ba7be0a1f109a757c1c06b25cd"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "cb2d952",
@@ -640,15 +1323,412 @@
         {
           "name": "TheMikirog",
           "email": "",
-          "discord": "TheMikirog#1984"
+          "discord": "themikirog"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "b33c016195bc17c3ebd878570c9e3fa6"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "264b14d7ec65453b74d4680d507fcb4f"
+        },
         "1.0.0": {
           "api_version": 7,
           "commit_sha": "05ffa9f",
           "released_on": "14-01-2023",
           "md5sum": "cc1738b0326c9679453bdf1489ded483"
+        }
+      }
+    },
+    "allow_invisible_models": {
+      "description": "Changing model to None will make it invisible instead of raising an exception.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Rikko",
+          "email": "rikkolovescats@proton.me",
+          "discord": "rikkolovescats"
+        }
+      ],
+      "versions": {
+        "1.2.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "96815ba9a784ca0004ce6580eedd9b57"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "d4b1c74d4c6e6f893f0b50c4f863720e"
+        },
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "3221b3a",
+          "released_on": "22-01-2023",
+          "md5sum": "24913c665d05c3056c8ba390fe88155e"
+        }
+      }
+    },
+    "random_play": {
+      "description": "Play randomly generated FFA or Teams matches from your installed minigames and maps.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "silver_volt4",
+          "email": "",
+          "discord": "Silver_Volt4#6502"
+        }
+      ],
+      "versions": {
+        "1.1.1": {
+          "api_version": 9,
+          "commit_sha": "3540260",
+          "released_on": "21-01-2025",
+          "md5sum": "94270effa9a80a138a9c083aca087fd7"
+        },
+        "1.1.0": {
+          "api_version": 8,
+          "commit_sha": "5fb8195",
+          "released_on": "28-06-2023",
+          "md5sum": "f6c1105b34d0426327688841d7e89bb9"
+        },
+        "1.0.1": {
+          "api_version": 7,
+          "commit_sha": "3ef572f",
+          "released_on": "25-05-2023",
+          "md5sum": "f093c09b3e9439755a515ae6751e1f7e"
+        },
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "d91fea3",
+          "released_on": "25-05-2023",
+          "md5sum": "cec9a9c6f6aebddd8ec8160f7cc94b57"
+        }
+      }
+    },
+    "menu_theme": {
+      "description": "A simple UI mod for customizing the Main Menu's appearance. Go to your profiles for use",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yann",
+          "email": "",
+          "discord": "riyukiiyan"
+        }
+      ],
+      "versions": {
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "53ce44a",
+          "released_on": "29-12-2023",
+          "md5sum": "41e324d84bc79bf1283b643014802069"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "f829aca",
+          "released_on": "26-08-2023",
+          "md5sum": "4cca8e04efadf39b2be51b5b95c4e5a4"
+        }
+      }
+    },
+    "discord_richpresence": {
+      "description": "Discord Rich Presence for Bombsquad.",
+      "external_url": "https://youtu.be/SbbG9V74_E4",
+      "authors": [
+        {
+          "name": "Dliwk&brostos",
+          "email": "",
+          "discord": "dliwk&brostos"
+        }
+      ],
+      "versions": {
+        "1.5.2": {
+          "api_version": 9,
+          "commit_sha": "0db98e8",
+          "released_on": "26-01-2025",
+          "md5sum": "b00b046f8b2334d25644315c05bbc5bc"
+        },
+        "1.5.1": {
+          "api_version": 9,
+          "commit_sha": "a93fda3",
+          "released_on": "25-01-2025",
+          "md5sum": "d33cd8c65833278f35bd87013a80e883"
+        },
+        "1.5.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "af4ec55092fb22d2799d63e19c599464"
+        },
+        "1.4.3": {
+          "api_version": 8,
+          "commit_sha": "f50a546",
+          "released_on": "12-08-2024",
+          "md5sum": "44e294a7b04a3e03b96ad430afb40d20"
+        },
+        "1.4.2": {
+          "api_version": 8,
+          "commit_sha": "2b5c9ee",
+          "released_on": "22-01-2024",
+          "md5sum": "7301fb55984f9caa4018bab40c4945d0"
+        },
+        "1.4.1": {
+          "api_version": 8,
+          "commit_sha": "48c8abb",
+          "released_on": "08-12-2023",
+          "md5sum": "087728c68fb9505b06beccc9ceb8acbf"
+        },
+        "1.4.0": {
+          "api_version": 8,
+          "commit_sha": "6947777",
+          "released_on": "03-08-2023",
+          "md5sum": "1b8a85ed902e0cc7e6cebad63c984544"
+        },
+        "1.3.0": {
+          "api_version": 8,
+          "commit_sha": "7c8953c",
+          "released_on": "01-08-2023",
+          "md5sum": "1db3733c3d7d26165d75091cd8887db6"
+        },
+        "1.2.0": {
+          "api_version": 8,
+          "commit_sha": "150f49f",
+          "released_on": "28-07-2023",
+          "md5sum": "3b13d83518865a2b07b9340d59d0ab92"
+        },
+        "1.1.0": {
+          "api_version": 8,
+          "commit_sha": "90fff9b",
+          "released_on": "23-07-2023",
+          "md5sum": "69723f76a0114fe99d6c85715ad4eb49"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "230d12d",
+          "released_on": "18-07-2023",
+          "md5sum": "5fa8706f36d618f8302551dd2a0403a0"
+        }
+      }
+    },
+    "disable_friendly_fire": {
+      "description": "Disables friendly fire",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "EmperoR",
+          "email": "",
+          "discord": "EmperoR#4098"
+        }
+      ],
+      "versions": {
+        "1.0.1": {
+          "api_version": 9,
+          "commit_sha": "ea64940",
+          "released_on": "21-01-2025",
+          "md5sum": "9742d478095ac72b1780b75c17ebeb07"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "f744c41",
+          "released_on": "24-01-2024",
+          "md5sum": "203ecefa1c1eb9894cfb0d87e2d7fe09"
+        }
+      }
+    },
+    "infinity_shield": {
+      "description": "Gives you unbreakable shield",
+      "external_url": "https://youtu.be/hp7vbB-hUPg?si=i7Th0NP5xDPLN2P_",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "85193fe",
+          "released_on": "21-01-2025",
+          "md5sum": "03d98165e14886fba7f139f8610686f7"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "eb917ca19d206dfd19667181dacc1df5"
+        }
+      }
+    },
+    "only_night": {
+      "description": "Night Mode",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "-",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "4cd035b88234f5f082c706d5eb37bd28"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "255d3d6694008cc2f73d115182100b52"
+        }
+      }
+    },
+    "tag": {
+      "description": "Get a tag",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "pranav",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "commit_sha": "7d6ed3d",
+          "released_on": "22-01-2025",
+          "md5sum": "c3af893247488915d26585d0957171d8"
+        },
+        "2.0.1": {
+          "api_version": 8,
+          "commit_sha": "718039b",
+          "released_on": "24-01-2024",
+          "md5sum": "01cf9e10ab0e1bf51c07d80ff842c632"
+        }
+      }
+    },
+    "xyz_tool": {
+      "description": "Punch to save the co-ordinates",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yann",
+          "email": "",
+          "discord": "riyukiiyan"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "e2c6477",
+          "released_on": "21-01-2025",
+          "md5sum": "480b825e187e59020b339290966b5c5a"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "5063690",
+          "released_on": "03-02-2024",
+          "md5sum": "3f301456128f422b7277c667f6c5c47e"
+        }
+      }
+    },
+    "bots_can_accept_powerups": {
+      "description": "Bots can steal your powerups",
+      "external_url": "https://youtu.be/Jrk5JfveYEI?si=wYXWVxdC-3XMpuCg",
+      "authors": [
+        {
+          "name": "JoseAng3l",
+          "email": "",
+          "discord": "joseang3l"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "bb129cc",
+          "released_on": "14-01-2025",
+          "md5sum": "50e9c3ea8d7e7de5cd491987547c9cf3"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "71eae7c5d0e05821809d348ea0c64837"
+        }
+      }
+    },
+    "cheat_menu": {
+      "description": "Cheat menu on the settings window",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "pranav",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "4941d0c",
+          "released_on": "01-02-2024",
+          "md5sum": "079e857197979aabf53f232b3cce56ba"
+        }
+      }
+    },
+    "natpmp_upnp": {
+      "description": "Automatic port forwarding if upnp is enabled",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "brostosjoined",
+          "email": "",
+          "discord": "brostos"
+        }
+      ],
+      "versions": {
+        "1.5.0": {
+          "api_version": 9,
+          "commit_sha": "529fd6a",
+          "released_on": "26-01-2025",
+          "md5sum": "3ced77595e949d19e718e0e3ae42af56"
+        },
+        "1.0.0": {
+          "api_version": 8,
+          "commit_sha": "48bd0da",
+          "released_on": "03-03-2024",
+          "md5sum": "15f969c23d19118d4898570cfae71c7b"
+        }
+      }
+    },
+    "wave_emote": {
+      "description": "Type `hello` in chat while in game and get a wave emote",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "brostosjoined",
+          "email": "",
+          "discord": "brostos"
+        }
+      ],
+      "versions": {
+        "1.5.0": {
+          "api_version": 9,
+          "commit_sha": "0db98e8",
+          "released_on": "26-01-2025",
+          "md5sum": "472846d138af954b8b8085975d016a7c"
         }
       }
     }

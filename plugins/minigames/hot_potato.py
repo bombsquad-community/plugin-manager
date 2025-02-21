@@ -1,3 +1,4 @@
+# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """
     
     Hot Potato by themikirog
@@ -13,8 +14,10 @@
 
 """
 
+
 # ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
+
 
 from __future__ import annotations
 
@@ -22,7 +25,7 @@ from typing import TYPE_CHECKING, override
 
 # Define only what we need and nothing more
 import babase
-import bascenev1 as ba
+import bascenev1 as bs
 from bascenev1lib.actor.spaz import SpazFactory
 from bascenev1lib.actor.spaz import PickupMessage
 from bascenev1lib.actor.spaz import BombDiedMessage
@@ -74,7 +77,7 @@ class PlayerState(Enum):
 # Here's the behavior of each icon.
 
 
-class Icon(ba.Actor):
+class Icon(bs.Actor):
     """Creates in in-game icon on screen."""
 
     def __init__(self,
@@ -90,11 +93,15 @@ class Icon(ba.Actor):
         self._player = player
         self._name_scale = name_scale
 
-        self._outline_tex = ba.gettexture('characterIconMask')
+        self._outline_tex = 
+        
+        
+        
+        gettexture('characterIconMask')
 
         # Character portrait
         icon = player.get_icon()
-        self.node = ba.newnode('image',
+        self.node = bs.newnode('image',
                                delegate=self,
                                attrs={
                                    'texture': icon['texture'],
@@ -108,12 +115,12 @@ class Icon(ba.Actor):
                                    'attach': 'bottomCenter'
                                })
         # Player name
-        self._name_text = ba.newnode(
+        self._name_text = bs.newnode(
             'text',
             owner=self.node,
             attrs={
-                'text': ba.Lstr(value=player.getname()),
-                'color': ba.safecolor(player.team.color),
+                'text': babase.Lstr(value=player.getname()),
+                'color': babase.safecolor(player.team.color),
                 'h_align': 'center',
                 'v_align': 'center',
                 'vr_depth': 410,
@@ -124,7 +131,7 @@ class Icon(ba.Actor):
                 'v_attach': 'bottom'
             })
         # Status text (such as Marked!, Stunned! and You're Out!)
-        self._marked_text = ba.newnode(
+        self._marked_text = bs.newnode(
             'text',
             owner=self.node,
             attrs={
@@ -139,7 +146,7 @@ class Icon(ba.Actor):
                 'v_attach': 'bottom'
             })
         # Status icon overlaying the character portrait
-        self._marked_icon = ba.newnode(
+        self._marked_icon = bs.newnode(
             'text',
             owner=self.node,
             attrs={
@@ -198,10 +205,10 @@ class Icon(ba.Actor):
 
             # Animate text and icon
             animation_end_time = 1.5 if bool(self.activity.settings['Epic Mode']) else 3.0
-            ba.animate(self._marked_icon, 'opacity', {
+            bs.animate(self._marked_icon, 'opacity', {
                 0: 1.0,
                 animation_end_time: 0.0})
-            ba.animate(self._marked_text, 'opacity', {
+            bs.animate(self._marked_text, 'opacity', {
                        0: 1.0,
                        animation_end_time: 0.0})
 
@@ -237,7 +244,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
         self.dropped_bombs = []  # we use this to track bombs thrown by the player
 
         # Define a marked light
-        self.marked_light = ba.newnode('light',
+        self.marked_light = bs.newnode('light',
                                        owner=self.node,
                                        attrs={'position': self.node.position,
                                               'radius': 0.15,
@@ -246,7 +253,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
                                               'color': (1.0, 0.0, 0.0)})
 
         # Pulsing red light when the player is Marked
-        ba.animate(self.marked_light, 'radius', {
+        bs.animate(self.marked_light, 'radius', {
             0: 0.1,
             0.3: 0.15,
             0.6: 0.1},
@@ -254,12 +261,12 @@ class PotatoPlayerSpaz(PlayerSpaz):
         self.node.connectattr('position_center', self.marked_light, 'position')
 
         # Marked timer. It should be above our head, so we attach the text to the offset that's attached to the player.
-        self.marked_timer_offset = ba.newnode('math', owner=self.node, attrs={
+        self.marked_timer_offset = bs.newnode('math', owner=self.node, attrs={
             'input1': (0, 1.2, 0),
             'operation': 'add'})
         self.node.connectattr('torso_position', self.marked_timer_offset, 'input2')
 
-        self.marked_timer_text = ba.newnode('text', owner=self.node, attrs={
+        self.marked_timer_text = bs.newnode('text', owner=self.node, attrs={
             'text': '',
             'in_world': True,
             'shadow': 0.4,
@@ -280,7 +287,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
             # Add our bomb to the list of our tracked bombs
             self.dropped_bombs.append(bomb)
             # Bring a light
-            bomb.bomb_marked_light = ba.newnode('light',
+            bomb.bomb_marked_light = bs.newnode('light',
                                                 owner=bomb.node,
                                                 attrs={'position': bomb.node.position,
                                                        'radius': 0.04,
@@ -293,7 +300,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
             self.set_bombs_marked()
             # When the bomb physics node dies, call a function.
             bomb.node.add_death_action(
-                ba.WeakCall(self.bomb_died, bomb))
+                bs.WeakCall(self.bomb_died, bomb))
 
     # Here's the function that gets called when one of the player's bombs dies.
     # We reference the player's dropped_bombs list and remove the bomb that died.
@@ -311,7 +318,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
     # Since our gamemode relies heavily on players passing the mark to other players
     # we need to have access to this message. This gets called when the player takes damage for any reason.
     def handlemessage(self, msg):
-        if isinstance(msg, ba.HitMessage):
+        if isinstance(msg, bs.HitMessage):
             # This is basically the same HitMessage code as in the original Spaz.
             # The only difference is that there is no health bar and you can't die with punches or bombs.
             # Also some useless or redundant code was removed.
@@ -329,7 +336,6 @@ class PotatoPlayerSpaz(PlayerSpaz):
             if self.source_player.state == PlayerState.STUNNED and msg._source_player != PlayerState.MARKED:
                 self.node.handlemessage('flash')
                 SpazFactory.get().block_sound.play(1, position=self.node.position)
-                return True
 
             # Here's all the damage and force calculations unchanged from the source.
             mag = msg.magnitude * self.impact_scale
@@ -364,7 +370,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
 
                 # Throw up some chunks.
                 assert msg.force_direction is not None
-                ba.emitfx(position=msg.pos,
+                bs.emitfx(position=msg.pos,
                           velocity=(msg.force_direction[0] * 0.5,
                                     msg.force_direction[1] * 0.5,
                                     msg.force_direction[2] * 0.5),
@@ -372,7 +378,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
                           scale=0.3,
                           spread=0.03)
 
-                ba.emitfx(position=msg.pos,
+                bs.emitfx(position=msg.pos,
                           chunk_type='sweat',
                           velocity=(msg.force_direction[0] * 1.3,
                                     msg.force_direction[1] * 1.3 + 5.0,
@@ -387,7 +393,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
                             msg.pos[1] + msg.force_direction[1] * 0.02,
                             msg.pos[2] + msg.force_direction[2] * 0.02)
                 flash_color = (1.0, 0.8, 0.4)
-                light = ba.newnode(
+                light = bs.newnode(
                     'light',
                     attrs={
                         'position': punchpos,
@@ -396,20 +402,20 @@ class PotatoPlayerSpaz(PlayerSpaz):
                         'height_attenuated': False,
                         'color': flash_color
                     })
-                ba.timer(0.06, light.delete)
+                bs.timer(0.06, light.delete)
 
-                flash = ba.newnode('flash',
+                flash = bs.newnode('flash',
                                    attrs={
                                        'position': punchpos,
                                        'size': 0.17 + 0.17 * hurtiness,
                                        'color': flash_color
                                    })
-                ba.timer(0.06, flash.delete)
+                bs.timer(0.06, flash.delete)
 
             # Physics collision particles.
             if msg.hit_type == 'impact':
                 assert msg.force_direction is not None
-                ba.emitfx(position=msg.pos,
+                bs.emitfx(position=msg.pos,
                           velocity=(msg.force_direction[0] * 2.0,
                                     msg.force_direction[1] * 2.0,
                                     msg.force_direction[2] * 2.0),
@@ -435,9 +441,9 @@ class PotatoPlayerSpaz(PlayerSpaz):
 
             # Let's get all collision data if we can. Otherwise cancel.
             try:
-                collision = ba.getcollision()
+                collision = bs.getcollision()
                 opposingnode = collision.opposingnode
-            except ba.NotFoundError:
+            except bs.NotFoundError:
                 return True
 
             # Our grabber needs to be a Spaz
@@ -447,10 +453,8 @@ class PotatoPlayerSpaz(PlayerSpaz):
                 # It's the same sound and flashing behavior as hitting a stunned player as a healthy player.
                 if (opposingnode.source_player.state == PlayerState.STUNNED and self.source_player.state != PlayerState.MARKED):
                     opposingnode.handlemessage('flash')
-                    SpazFactory.get().block_sound.play(
-                        1.0,
-                        position=self.node.position,
-                    )
+
+                    SpazFactory.get().block_sound.play(1.0, position=opposingnode.position)
                     return True
                 # If they're marked and we're healthy or stunned, pass that mark along to us.
                 elif opposingnode.source_player.state in [PlayerState.REGULAR, PlayerState.STUNNED] and self.source_player.state == PlayerState.MARKED:
@@ -459,10 +463,10 @@ class PotatoPlayerSpaz(PlayerSpaz):
             # Our work is done. Continue with the rest of the grabbing behavior as usual.
             super().handlemessage(msg)
         # Dying is important in this gamemode and as such we need to address this behavior.
-        elif isinstance(msg, ba.DieMessage):
+        elif isinstance(msg, bs.DieMessage):
 
             # If a player left the game, inform our gamemode logic.
-            if msg.how == ba.DeathType.LEFT_GAME:
+            if msg.how == bs.DeathType.LEFT_GAME:
                 self.activity.player_left(self.source_player)
 
             # If a MARKED or STUNNED player dies, hide the text from the previous spaz.
@@ -471,7 +475,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
                                                 self.marked_timer_text.color[1],
                                                 self.marked_timer_text.color[2],
                                                 0.0)
-                ba.animate(self.marked_light, 'intensity', {
+                bs.animate(self.marked_light, 'intensity', {
                     0: self.marked_light.intensity,
                     0.5: 0.0})
 
@@ -484,7 +488,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
 # A concept of a player is very useful to reference if we don't have a player character present (maybe they died).
 
 
-class Player(ba.Player['Team']):
+class Player(bs.Player['Team']):
     """Our player type for this game."""
 
     def __init__(self) -> None:
@@ -536,8 +540,8 @@ class Player(ba.Player['Team']):
 
             self.stunned_time_remaining = stun_time  # Set our stun time remaining
             # Remove our stun once the time is up
-            self.stunned_timer = ba.Timer(stun_time + 0.1, ba.Call(self.stun_remove))
-            self.stunned_update_timer = ba.Timer(0.1, ba.Call(
+            self.stunned_timer = bs.Timer(stun_time + 0.1, babase.Call(self.stun_remove))
+            self.stunned_update_timer = bs.Timer(0.1, babase.Call(
                 self.stunned_timer_tick), repeat=True)  # Call a function every 0.1 seconds
             self.fall_times += 1  # Increase the amount of times we fell by one
             # Change the text above the Spaz's head to total stun time
@@ -581,7 +585,9 @@ class Player(ba.Player['Team']):
 
 
 # ba_meta export bascenev1.GameActivity
-class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
+
+class HotPotato(bs.TeamGameActivity[Player, bs.Team]):
+
 
     # Let's define the basics like the name of the game, description and some tips that should appear at the start of a match.
     name = 'Hot Potato'
@@ -605,8 +611,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
     # We're gonna distribute end of match session scores based on who dies first and who survives.
     # First place gets most points, then second, then third.
-    scoreconfig = ba.ScoreConfig(label='Place',
-                                 scoretype=ba.ScoreType.POINTS,
+    scoreconfig = bs.ScoreConfig(label='Place',
+                                 scoretype=bs.ScoreType.POINTS,
                                  lower_is_better=True)
 
     # These variables are self explanatory too.
@@ -615,28 +621,29 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
     # Let's define some settings the user can mess around with to fit their needs.
     available_settings = [
-        ba.IntSetting('Elimination Timer',
+        bs.IntSetting('Elimination Timer',
                       min_value=5,
                       default=15,
                       increment=1,
                       ),
-        ba.BoolSetting('Marked Players use Impact Bombs', default=False),
-        ba.BoolSetting('Epic Mode', default=False),
+        bs.BoolSetting('Marked Players use Impact Bombs', default=False),
+        bs.BoolSetting('Epic Mode', default=False),
     ]
 
     # Hot Potato is strictly a Free-For-All gamemode, so only picking the gamemode in FFA playlists.
     @override
     @classmethod
-    def supports_session_type(cls, sessiontype: type[ba.Session]) -> bool:
-        return issubclass(sessiontype, ba.FreeForAllSession)
+    def supports_session_type(cls, sessiontype: type[bs.Session]) -> bool:
+        return issubclass(sessiontype, bs.FreeForAllSession)
 
     # Most maps should work in Hot Potato. Generally maps marked as 'melee' are the most versatile map types of them all.
     # As the name implies, fisticuffs are common forms of engagement.
     @override
     @classmethod
-    def get_supported_maps(cls, sessiontype: type[ba.Session]) -> list[str]:
-        assert ba.app.classic is not None
-        return ba.app.classic.getmaps('melee')
+
+    def get_supported_maps(cls, sessiontype: type[bs.Session]) -> list[str]:
+        return bs.app.classic.getmaps('melee')
+
 
     # Here we define everything the gamemode needs, like sounds and settings.
     def __init__(self, settings: dict):
@@ -644,22 +651,22 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         self.settings = settings
 
         # Let's define all of the sounds we need.
-        self._tick_sound = ba.getsound('tick')
-        self._player_eliminated_sound = ba.getsound('playerDeath')
+        self._tick_sound = bs.getsound('tick')
+        self._player_eliminated_sound = bs.getsound('playerDeath')
         # These next sounds are arrays instead of single sounds.
         # We'll use that fact later.
-        self._danger_tick_sounds = [ba.getsound('orchestraHit'),
-                                    ba.getsound('orchestraHit2'),
-                                    ba.getsound('orchestraHit3')]
-        self._marked_sounds = [ba.getsound('powerdown01'),
-                               ba.getsound('activateBeep'),
-                               ba.getsound('hiss')]
+        self._danger_tick_sounds = [bs.getsound('orchestraHit'),
+                                    bs.getsound('orchestraHit2'),
+                                    bs.getsound('orchestraHit3')]
+        self._marked_sounds = [bs.getsound('powerdown01'),
+                               bs.getsound('activateBeep'),
+                               bs.getsound('hiss')]
 
         # Normally play KOTH music, but switch to Epic music if we're in slow motion.
         self._epic_mode = bool(settings['Epic Mode'])
         self.slow_motion = self._epic_mode
-        self.default_music = (ba.MusicType.EPIC if self._epic_mode else
-                              ba.MusicType.SCARY)
+        self.default_music = (bs.MusicType.EPIC if self._epic_mode else
+                              bs.MusicType.SCARY)
 
     # This description appears below the title card after it comes crashing when the game begins.
     def get_instance_description(self) -> str | Sequence:
@@ -684,7 +691,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
     # Returns every single marked player.
     # This piece of info is used excensively in this gamemode, so it's advantageous to have a function to cut on
     # work and make the gamemode easier to maintain
-    def get_marked_players(self) -> Sequence[ba.Player]:
+    def get_marked_players(self) -> Sequence[bs.Player]:
         marked_players = []
         for p in self.players:
             if p.state == PlayerState.MARKED:
@@ -695,7 +702,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
     def mark(self, target: Player) -> None:
         target.set_state(PlayerState.MARKED)
 
-        ba.emitfx(position=target.actor.node.position,
+        bs.emitfx(position=target.actor.node.position,
                   velocity=target.actor.node.velocity,
                   chunk_type='spark',
                   count=int(20.0+random.random()*20),
@@ -741,10 +748,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             sound_volume = 1.0 / marked_player_amount
 
             for target in marked_players:
-                self._tick_sound.play(
-                    sound_volume,
-                    position=target.actor.node.position,
-                )
+
+                self._tick_sound.play(sound_volume, target.actor.node.position)
                 target.actor.marked_timer_text.text = str(self.elimination_timer_display)
 
             # When counting down 3, 2, 1 play some dramatic sounds
@@ -752,10 +757,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                 # We store our dramatic sounds in an array, so we target a specific element on the array
                 # depending on time remaining. Arrays start at index 0, so we need to decrease
                 # our variable by 1 to get the element index.
-                _tick_sound = self._danger_tick_sounds[self.elimination_timer_display - 1]
-                _tick_sound.play(
-                    1.5
-                )
+                self._danger_tick_sounds[self.elimination_timer_display - 1].play(1.5)
+
         else:
             # Elimination timer is up! Let's eliminate all marked players.
             self.elimination_timer_display -= 1  # Decrease our timer by one second.
@@ -772,20 +775,18 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                   velocity=target.actor.node.velocity,
                   blast_radius=3.0,
                   source_player=target).autoretain()
-            ba.emitfx(position=target.actor.node.position,
+            bs.emitfx(position=target.actor.node.position,
                       velocity=target.actor.node.velocity,
                       count=int(16.0+random.random()*60),
                       scale=1.5,
                       spread=2,
                       chunk_type='spark')
-            target.actor.handlemessage(ba.DieMessage(how='marked_elimination'))
+            target.actor.handlemessage(bs.DieMessage(how='marked_elimination'))
             target.actor.shatter(extreme=True)
 
             self.match_placement.append(target.team)
 
-        self._player_eliminated_sound.play(
-            1.0
-        )
+        self._player_eliminated_sound.play(1.0)
 
         # Let the gamemode know a Marked
         self.marked_players_died()
@@ -799,13 +800,14 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                 # Let's add our lone survivor to the match placement list.
                 self.match_placement.append(alive_players[0].team)
             # Wait a while to let this sink in before we announce our victor.
-            self._end_game_timer = ba.Timer(1.25, ba.Call(self.end_game))
+            self._end_game_timer = bs.Timer(1.25, babase.Call(self.end_game))
         else:
             # There's still players remaining, so let's wait a while before marking a new player.
-            self.new_mark_timer = ba.Timer(2.0 if self.slow_motion else 4.0, ba.Call(self.new_mark))
+            self.new_mark_timer = bs.Timer(
+                2.0 if self.slow_motion else 4.0, babase.Call(self.new_mark))
 
     # Another extensively used function that returns all alive players.
-    def get_alive_players(self) -> Sequence[ba.Player]:
+    def get_alive_players(self) -> Sequence[bs.Player]:
         alive_players = []
         for player in self.players:
             if player.state == PlayerState.ELIMINATED:
@@ -840,17 +842,14 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         # Set time until marked players explode
         self.elimination_timer_display = self.settings['Elimination Timer']
         # Set a timer that calls _eliminate_tick every second
-        self.marked_tick_timer = ba.Timer(1.0, ba.Call(self._eliminate_tick), repeat=True)
+        self.marked_tick_timer = bs.Timer(1.0, babase.Call(self._eliminate_tick), repeat=True)
         # Mark all chosen victims and play a sound
         for new_victim in all_victims:
             # _marked_sounds is an array.
             # To make a nice marked sound effect, I play multiple sounds at once
             # All of them are contained in the array.
             for sound in self._marked_sounds:
-                sound.play(
-                    1.0,
-                    position=new_victim.actor.node.position,
-                )
+                bs.Sound.play(sound, 1.0, new_victim.actor.node.position)
             self.mark(new_victim)
 
     # This function is called when the gamemode first loads.
@@ -864,10 +863,11 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         # End the game if there's only one player
         if len(self.players) < 2:
             self.match_placement.append(self.players[0].team)
-            self._round_end_timer = ba.Timer(0.5, self.end_game)
+            self._round_end_timer = bs.Timer(0.5, self.end_game)
         else:
             # Pick random player(s) to get marked
-            self.new_mark_timer = ba.Timer(2.0 if self.slow_motion else 5.2, ba.Call(self.new_mark))
+            self.new_mark_timer = bs.Timer(
+                2.0 if self.slow_motion else 5.2, babase.Call(self.new_mark))
 
         self._update_icons()  # Create player state icons
 
@@ -897,8 +897,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             tip = self.tips.pop(random.randrange(len(self.tips)))
             tip_title = Lstr(value='${A}:',
                              subs=[('${A}', Lstr(resource='tipText'))])
-            icon: ba.Texture | None = None
-            sound: ba.Sound | None = None
+            icon: babase.Texture | None = None
+            sound: babase.Sound | None = None
             if isinstance(tip, GameTip):
                 icon = tip.icon
                 sound = tip.sound
@@ -913,10 +913,10 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             tip_scale = 0.8
             tip_title_scale = 1.2
             vrmode = babase.app.env.vr  # ba.app.vr_mode
-
+            
             t_offs = -350.0
             height_offs = 100.0
-            tnode = ba.newnode('text',
+            tnode = bs.newnode('text',
                                attrs={
                                    'text': tip_lstr,
                                    'scale': tip_scale,
@@ -932,7 +932,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                                })
             t2pos = (base_position[0] + t_offs - (20 if icon is None else 82),
                      base_position[1] + 2 + height_offs)
-            t2node = ba.newnode('text',
+            t2node = bs.newnode('text',
                                 owner=tnode,
                                 attrs={
                                     'text': tip_title,
@@ -948,7 +948,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                                 })
             if icon is not None:
                 ipos = (base_position[0] + t_offs - 40, base_position[1] + 1 + height_offs)
-                img = ba.newnode('image',
+                img = bs.newnode('image',
                                  attrs={
                                      'texture': icon,
                                      'position': ipos,
@@ -960,11 +960,11 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
                                      'attach': 'bottomCenter'
                                  })
                 animate(img, 'opacity', {0: 0, 1.0: 1, 4.0: 1, 5.0: 0})
-                ba.timer(5.0, img.delete)
+                bs.timer(5.0, img.delete)
             if sound is not None:
                 sound.play()
 
-            combine = ba.newnode('combine',
+            combine = bs.newnode('combine',
                                  owner=tnode,
                                  attrs={
                                      'input0': 1.0,
@@ -975,7 +975,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             combine.connectattr('output', tnode, 'color')
             combine.connectattr('output', t2node, 'color')
             animate(combine, 'input3', {0: 0, 1.0: 1, 4.0: 1, 5.0: 0})
-            ba.timer(5.0, tnode.delete)
+            bs.timer(5.0, tnode.delete)
 
     # This function is called when a player leaves the game.
     # This is only called when the player already joined with a character.
@@ -1010,8 +1010,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
         name = player.getname()
 
-        light_color = ba.normalized_color(player.color)
-        display_color = ba.safecolor(player.color, target_intensity=0.75)
+        light_color = babase.normalized_color(player.color)
+        display_color = babase.safecolor(player.color, target_intensity=0.75)
 
         # Here we actually crate the player character
         spaz = PotatoPlayerSpaz(color=player.color,
@@ -1026,24 +1026,21 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         spaz.connect_controls_to_player()
 
         # Move to the stand position and add a flash of light
-        spaz.handlemessage(ba.StandMessage(position, random.uniform(0, 360)))
-        t = ba.time()
-        self._spawn_sound.play(
-            1.0,
-            position=spaz.node.position,
-        )
-        light = ba.newnode('light', attrs={'color': light_color})
+        spaz.handlemessage(bs.StandMessage(position, random.uniform(0, 360)))
+        t = bs.time()
+        self._spawn_sound.play(1.0, position=spaz.node.position)
+        light = bs.newnode('light', attrs={'color': light_color})
         spaz.node.connectattr('position', light, 'position')
-        ba.animate(light, 'intensity', {0: 0,
+        bs.animate(light, 'intensity', {0: 0,
                                         0.25: 1,
                                         0.5: 0})
-        ba.timer(0.5, light.delete)
+        bs.timer(0.5, light.delete)
 
     # Game reacts to various events
     @override
     def handlemessage(self, msg: Any) -> Any:
         # This is called if the player dies.
-        if isinstance(msg, ba.PlayerDiedMessage):
+        if isinstance(msg, bs.PlayerDiedMessage):
             super().handlemessage(msg)
             player = msg.getplayer(Player)
 
@@ -1068,7 +1065,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         # Proceed only if the game hasn't ended yet.
         if self.has_ended():
             return
-        results = ba.GameResults()
+        results = bs.GameResults()
         # By this point our match placement list should be filled with all players.
         # Players that died/left earliest should be the first entries.
         # We're gonna use array indexes to decide match placements.

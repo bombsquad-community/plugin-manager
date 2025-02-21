@@ -205,6 +205,10 @@ def auto_apply_version_metadata(last_commit_sha):
     category_json = utilities.apply_version_metadata_to_null_version_values(last_commit_sha)
     utilities.save(category_json)
 
+    maps = CategoryVersionMetadata(os.path.join("plugins", "maps"))
+    category_json = maps.apply_version_metadata_to_null_version_values(last_commit_sha)
+    maps.save(category_json)
+
     minigames = CategoryVersionMetadata(os.path.join("plugins", "minigames"))
     category_json = minigames.apply_version_metadata_to_null_version_values(last_commit_sha)
     minigames.save(category_json)

@@ -2,5 +2,37 @@
   "name": "Maps",
   "description": "Maps",
   "plugins_base_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugins/maps",
-  "plugins": {}
+  "plugins": {
+    "forest": {
+      "description": "Basically bridgit map but outter version",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Hopeless",
+          "email": "",
+          "discord": "hope1ess_."
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "4ccfc7b",
+          "released_on": "25-01-2025",
+          "md5sum": "d9bef02a82056bfc493722a44a4bcd35"
+        },
+        "1.0.1": {
+          "api_version": 8,
+          "commit_sha": "8e5970b",
+          "released_on": "18-01-2024",
+          "md5sum": "738e250e43633bafae357ed4b999864a"
+        },
+        "1.0.0": {
+          "api_version": 7,
+          "commit_sha": "985e486",
+          "released_on": "15-06-2023",
+          "md5sum": "01fb81dc27d63789f31559140ec2bd72"
+        }
+      }
+    }
+  }
 }

@@ -1,6 +1,204 @@
 {
   "plugin_manager_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugin_manager.py",
   "versions": {
+    "1.1.1": {
+      "api_version": 9,
+      "commit_sha": "93106f2",
+      "released_on": "09-02-2025",
+      "md5sum": "0e5ec54582032a11c044d10cff3d0aa1"
+    },
+    "1.1.0": {
+      "api_version": 9,
+      "commit_sha": "004ee51",
+      "released_on": "23-01-2025",
+      "md5sum": "d58551313ae91498c0b0ba804df1066e"
+    },
+    "1.0.23": {
+      "api_version": 8,
+      "commit_sha": "1d6a41f",
+      "released_on": "13-01-2025",
+      "md5sum": "74671c01ba4b4042ba416814aa1d6060"
+    },
+    "1.0.22": {
+      "api_version": 8,
+      "commit_sha": "719c104",
+      "released_on": "07-08-2024",
+      "md5sum": "9c431e0eff32a16070afb7f59a5f0046"
+    },
+    "1.0.21": {
+      "api_version": 8,
+      "commit_sha": "b1a3aaa",
+      "released_on": "20-05-2024",
+      "md5sum": "e00d6ce92ce4651eceb5ae389ca5c4fb"
+    },
+    "1.0.20": {
+      "api_version": 8,
+      "commit_sha": "5ce10ce",
+      "released_on": "13-05-2024",
+      "md5sum": "eb49f952e59effaf4529017f4bed4f72"
+    },
+    "1.0.19": {
+      "api_version": 8,
+      "commit_sha": "b439c4b",
+      "released_on": "05-05-2024",
+      "md5sum": "5cc29a6d7eaafe883e63cd6f0e9153f4"
+    },
+    "1.0.18": {
+      "api_version": 8,
+      "commit_sha": "5af504e",
+      "released_on": "28-04-2024",
+      "md5sum": "2c231693e686971a7cc4f12d1ffa3fdd"
+    },
+    "1.0.17": {
+      "api_version": 8,
+      "commit_sha": "02530f0",
+      "released_on": "22-04-2024",
+      "md5sum": "b5f3902046731ae4cc5bc88586203238"
+    },
+    "1.0.16": {
+      "api_version": 8,
+      "commit_sha": "0839999",
+      "released_on": "22-04-2024",
+      "md5sum": "f9f3f7d3ff9fcbeee7ae01c8dc1a4ab8"
+    },
+    "1.0.15": {
+      "api_version": 8,
+      "commit_sha": "fd170eb",
+      "released_on": "22-04-2024",
+      "md5sum": "3666dbb82805bdc4885ebf6b105ebf3b"
+    },
+    "1.0.14": {
+      "api_version": 8,
+      "commit_sha": "fc5a7f1",
+      "released_on": "21-04-2024",
+      "md5sum": "d25f8b80387d532d1d8aa3b84b35b696"
+    },
+    "1.0.13": {
+      "api_version": 8,
+      "commit_sha": "2a4cb47",
+      "released_on": "21-04-2024",
+      "md5sum": "0d04386a75f692bd80875c6f97b262c5"
+    },
+    "1.0.12": {
+      "api_version": 8,
+      "commit_sha": "34bbcba",
+      "released_on": "20-04-2024",
+      "md5sum": "6d14d091d02582270c5c93b54d65efd5"
+    },
+    "1.0.11": {
+      "api_version": 8,
+      "commit_sha": "4228b3e",
+      "released_on": "20-04-2024",
+      "md5sum": "c22d4d2270e17971b6559edac845d0ff"
+    },
+    "1.0.10": {
+      "api_version": 8,
+      "commit_sha": "6dd86ef",
+      "released_on": "19-04-2024",
+      "md5sum": "06a39b09fc5c0be30a7bf2d65c350310"
+    },
+    "1.0.9": {
+      "api_version": 8,
+      "commit_sha": "88834bd",
+      "released_on": "19-04-2024",
+      "md5sum": "57157cb438d793370586e1ccc957ad30"
+    },
+    "1.0.8": {
+      "api_version": 8,
+      "commit_sha": "85b5727",
+      "released_on": "11-04-2024",
+      "md5sum": "74fbf98aa908fc2830f5973101e38b3a"
+    },
+    "1.0.7": {
+      "api_version": 8,
+      "commit_sha": "cf55d26",
+      "released_on": "21-02-2024",
+      "md5sum": "aa4cbd1f8e1618c30e5cd0bdb02ae962"
+    },
+    "1.0.6": {
+      "api_version": 8,
+      "commit_sha": "e5a0e90",
+      "released_on": "26-12-2023",
+      "md5sum": "39b379e6243d921313065fcf1f45e908"
+    },
+    "1.0.5": {
+      "api_version": 8,
+      "commit_sha": "cd1c858",
+      "released_on": "11-12-2023",
+      "md5sum": "bbd7b03d0e16b088c0df842271dbf9cc"
+    },
+    "1.0.4": {
+      "api_version": 8,
+      "commit_sha": "94abe80",
+      "released_on": "08-12-2023",
+      "md5sum": "eae81ded9f9acee862c529ca6202cc72"
+    },
+    "1.0.3": {
+      "api_version": 8,
+      "commit_sha": "2a5ce50",
+      "released_on": "06-10-2023",
+      "md5sum": "d8e6267b2eae6fc21efd77bbb47c0a07"
+    },
+    "1.0.2": {
+      "api_version": 8,
+      "commit_sha": "818ec65",
+      "released_on": "01-10-2023",
+      "md5sum": "9cd1facb888e63ba08b0607a8561991a"
+    },
+    "1.0.1": {
+      "api_version": 8,
+      "commit_sha": "7dba50e",
+      "released_on": "29-06-2023",
+      "md5sum": "099ebc828a13f9a7040486bab4932a55"
+    },
+    "1.0.0": {
+      "api_version": 8,
+      "commit_sha": "0b55bc2",
+      "released_on": "20-06-2023",
+      "md5sum": "98fa2f29c3a2d34b5ff53b7abde7ec64"
+    },
+    "0.3.5": {
+      "api_version": 7,
+      "commit_sha": "985e486",
+      "released_on": "15-06-2023",
+      "md5sum": "5da137a353b4fa35e4d9926107cf4754"
+    },
+    "0.3.4": {
+      "api_version": 7,
+      "commit_sha": "2d74b52",
+      "released_on": "14-05-2023",
+      "md5sum": "7ff90318c4c379f7f0039c13ddaeaef0"
+    },
+    "0.3.3": {
+      "api_version": 7,
+      "commit_sha": "b48119b",
+      "released_on": "13-05-2023",
+      "md5sum": "611c20732eda494d9ad7090b0bc3df54"
+    },
+    "0.3.2": {
+      "api_version": 7,
+      "commit_sha": "789f95f",
+      "released_on": "30-04-2023",
+      "md5sum": "ff679f8411e426e5e4e92a2f958eec02"
+    },
+    "0.3.1": {
+      "api_version": 7,
+      "commit_sha": "0b856ba",
+      "released_on": "04-03-2023",
+      "md5sum": "52fdce0f242b1bc52a1cbf2e7d78d230"
+    },
+    "0.3.0": {
+      "api_version": 7,
+      "commit_sha": "cb5df36",
+      "released_on": "12-02-2023",
+      "md5sum": "d149fedf64b002c97fbb883ae5629d49"
+    },
+    "0.2.2": {
+      "api_version": 7,
+      "commit_sha": "2672a5a",
+      "released_on": "18-01-2023",
+      "md5sum": "2ef9761e4a02057cd93db3d280427f12"
+    },
     "0.2.1": {
       "api_version": 7,
       "commit_sha": "8ac1032",

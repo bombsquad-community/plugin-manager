@@ -1,13 +1,13 @@
-# ba_meta require api 7
-# (see https://ballistica.net/wiki/meta-tag-system)
+# ba_meta require api 9
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import ba
+import babase
+import bascenev1 as bs
 import random
-from bastd.actor import bomb
+from bascenev1lib.actor import bomb
 
 if TYPE_CHECKING:
     from typing import Sequence
@@ -16,20 +16,28 @@ if TYPE_CHECKING:
 class NewBlast(bomb.Blast):
     def __init__(
         self,
+        *,
         position: Sequence[float] = (0.0, 1.0, 0.0),
         velocity: Sequence[float] = (0.0, 0.0, 0.0),
         blast_radius: float = 2.0,
         blast_type: str = 'normal',
-        source_player: ba.Player | None = None,
+        source_player: bs.Player | None = None,
         hit_type: str = 'explosion',
         hit_subtype: str = 'normal',
     ):
-        super().__init__(position, velocity, blast_radius, blast_type,
-                         source_player, hit_type, hit_subtype)
-        scorch_radius = light_radius = self.radius
+        super().__init__(
+            position=position,
+            velocity=velocity,
+            blast_radius=blast_radius,
+            blast_type=blast_type,
+            source_player=source_player,
+            hit_type=hit_type,
+            hit_subtype=hit_subtype
+        )
+        scorch_radius = self.radius
         if self.blast_type == 'tnt':
             scorch_radius *= 1.15
-        scorch = ba.newnode(
+        scorch = bs.newnode(
             'scorch',
             attrs={
                 'position': position,
@@ -38,11 +46,11 @@ class NewBlast(bomb.Blast):
             },
         )
         random_color = (random.random(), random.random(), random.random())
-        scorch.color = ba.safecolor(random_color)
-        ba.animate(scorch, 'presence', {3.000: 1, 13.000: 0})
-        ba.timer(13.0, scorch.delete)
+        scorch.color = babase.safecolor(random_color)
+        bs.animate(scorch, 'presence', {3.000: 1, 13.000: 0})
+        bs.timer(13.0, scorch.delete)
 
 
 # ba_meta export plugin
-class RandomColorsPlugin(ba.Plugin):
+class RandomColorsPlugin(babase.Plugin):
     bomb.Blast = NewBlast
