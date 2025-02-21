@@ -93,9 +93,7 @@ class Icon(bs.Actor):
         self._player = player
         self._name_scale = name_scale
 
-        self._outline_tex =
-
-        gettexture('characterIconMask')
+        self._outline_tex = bs.gettexture('characterIconMask')
 
         # Character portrait
         icon = player.get_icon()
