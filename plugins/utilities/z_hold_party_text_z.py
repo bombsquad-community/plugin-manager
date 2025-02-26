@@ -20,7 +20,7 @@
               Nothing... for decoration purpose.
 """
 
-from __future__ import annotations 
+from __future__ import annotations
 
 # Ballistica API.
 import bauiv1 as bui
@@ -28,35 +28,35 @@ import bauiv1 as bui
 # Ballistica Libraries.
 from bauiv1lib.party import PartyWindow
 
-    
+
 # ba_meta export plugin
 class plg(bui.Plugin):
     """ Our plugin type for the game """
-    
+
     # The party window text field's text; that to be hold.
     text: str = ""
-    
+
     # we gonna use decorators cause we need make this mod compatible with others.
     def new_init(func: function) -> function:
-    
+
         def wrapper(*args, **kwargs) -> None:
             # original code.
             func(*args, **kwargs)
             # Editing...
             bui.textwidget(edit=args[0]._text_field, text=plg.text)
-        
+
         return wrapper
     # wrapping new code.
-    PartyWindow.__init__ = new_init(PartyWindow.__init__)    
+    PartyWindow.__init__ = new_init(PartyWindow.__init__)
 
     def new_close(func: function) -> function:
 
         def wrapper(*args, **kwargs) -> None:
             # storing...
             plg.text = bui.textwidget(query=args[0]._text_field))
-            # original code.
-            func(*args, **kwargs)
-            
-        return wrapper
-    # wrapping new code.   
-    PartyWindow.close = new_close(PartyWindow.close)
+                # original code.
+                func(*args, **kwargs)
+
+                return wrapper
+                # wrapping new code.
+                PartyWindow.close = new_close(PartyWindow.close)
