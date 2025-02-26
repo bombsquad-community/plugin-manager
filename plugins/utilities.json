@@ -22,6 +22,25 @@
         }
       }
     },
+    "hold_party_text": {
+      "description": "Holds/Keeps PartyWindow input field's text",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "shailesh",
+          "email": "shaileshgabu43@gmail.com",
+          "discord": "shailesh_gabu_11"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": null,
+          "released_on": "03-02-2025",
+          "md5sum": null
+        }
+      }
+    },
     "party_filter": {
       "description": "Adds Filters in the gather->public window.",
       "external_url": "",
