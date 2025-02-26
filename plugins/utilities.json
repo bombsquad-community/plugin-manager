@@ -22,7 +22,7 @@
         }
       }
     },
-    "hold_party_text": {
+    "z_hold_party_text_z": {
       "description": "Holds/Keeps PartyWindow input field's text",
       "external_url": "",
       "authors": [
