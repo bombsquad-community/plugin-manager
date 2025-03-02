@@ -1731,6 +1731,21 @@
           "md5sum": "472846d138af954b8b8085975d016a7c"
         }
       }
+    },
+    "fast_epic_toggle": {
+      "description": "Switch between Epic/Fast mode easier in-game!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "imAnesYT",
+          "email": "",
+          "discord": "v4_y"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+        }
+      }
     }
   }
-}
+}  
