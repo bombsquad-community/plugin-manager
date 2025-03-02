@@ -1750,6 +1750,21 @@
           "md5sum": "756c221489a0759ff8f509cc22a2a823"
         }
       }
+    },
+    "Infinite_Impact_Bombs": {
+      "description": "Gives you infinity impact bombs!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "imAnesYT",
+          "email": "",
+          "discord": "v4_y"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+        }
+      }
     }
   }
 }
