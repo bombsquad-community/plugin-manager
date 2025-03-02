@@ -1746,6 +1746,21 @@
         "1.0.0": null
         }
       }
+    },
+  "infinite_impact_bombs": {
+      "description": "Gives you infinity impact bombs, you should death to clear effect",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "imAnesYT",
+          "email": "",
+          "discord": "v4_y"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+        }
+      }
     }
   }
 }
