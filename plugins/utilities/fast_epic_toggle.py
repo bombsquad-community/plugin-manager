@@ -5,6 +5,7 @@ import bauiv1 as bui
 import bauiv1lib.party
 import bascenev1 as bs
 
+
 class FastEpicSwitcher(bauiv1lib.party.PartyWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,6 +43,8 @@ class FastEpicSwitcher(bauiv1lib.party.PartyWindow):
         bui.screenmessage("Switched to Epic Mode!", color=(0, 1, 0))
 
 # ba_meta export plugin
+
+
 class ByANES(babase.Plugin):
     def __init__(self):
         bauiv1lib.party.PartyWindow = FastEpicSwitcher
