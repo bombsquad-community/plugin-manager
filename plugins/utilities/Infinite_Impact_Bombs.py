@@ -5,7 +5,6 @@ import bauiv1 as bui
 import bauiv1lib.party
 import bascenev1 as bs
 
-
 class InfiniteImpactBombs(bauiv1lib.party.PartyWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -36,12 +35,10 @@ class InfiniteImpactBombs(bauiv1lib.party.PartyWindow):
                 else:
                     spaz.bomb_type = "impact"
                     bui.screenmessage("Impact Bombs Enabled", color=(0, 1, 0))
-
+        
         self._bombs_enabled = not self._bombs_enabled
 
 # ba_meta export plugin
-
-
 class ByANES(babase.Plugin):
     def __init__(self):
         bauiv1lib.party.PartyWindow = InfiniteImpactBombs
