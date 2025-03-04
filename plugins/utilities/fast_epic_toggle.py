@@ -34,17 +34,20 @@ class FastEpicSwitcher(bauiv1lib.party.PartyWindow):
 
     def _set_fast_mode(self):
         """Set the game to Fast Mode."""
-        bs.get_foreground_host_activity().globalsnode.slow_motion = 0.5  # Fast Mode
-        bui.screenmessage("Switched to Fast Mode", color=(0, 1, 0))
+        activity = bs.get_foreground_host_activity()
+        if activity:
+            activity.globalsnode.slow_motion = 0.5  # Fast Mode
+            bui.screenmessage("Switched to Fast Mode", color=(0, 1, 0))
 
     def _set_epic_mode(self):
         """Set the game to Epic Mode."""
-        bs.get_foreground_host_activity().globalsnode.slow_motion = 1.0  # Epic Mode (Slow)
-        bui.screenmessage("Switched to Epic Mode!", color=(0, 1, 0))
+        activity = bs.get_foreground_host_activity()
+        if activity:
+            activity.globalsnode.slow_motion = 1.0  # Epic Mode (Slow)
+            bui.screenmessage("Switched to Epic Mode!", color=(0, 1, 0))
+
 
 # ba_meta export plugin
-
-
 class ByANES(babase.Plugin):
-    def __init__(self):
+    def on_app_running(self):
         bauiv1lib.party.PartyWindow = FastEpicSwitcher
