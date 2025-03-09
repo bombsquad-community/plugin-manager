@@ -46,5 +46,5 @@ class FastEpicSwitcher(bauiv1lib.party.PartyWindow):
 
 
 class ByANES(babase.Plugin):
-    def __init__(self):
+    def on_app_running(self):
         bauiv1lib.party.PartyWindow = FastEpicSwitcher
