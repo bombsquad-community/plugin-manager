@@ -1,5 +1,4 @@
 # ba_meta require api 9
-
 import babase
 import bauiv1 as bui
 import bauiv1lib.party
@@ -42,9 +41,8 @@ class FastEpicSwitcher(bauiv1lib.party.PartyWindow):
         bs.get_foreground_host_activity().globalsnode.slow_motion = 1.0  # Epic Mode (Slow)
         bui.screenmessage("Switched to Epic Mode!", color=(0, 1, 0))
 
+
 # ba_meta export plugin
-
-
 class ByANES(babase.Plugin):
-    def on_app_running(self):
+    def __init__(self):
         bauiv1lib.party.PartyWindow = FastEpicSwitcher
