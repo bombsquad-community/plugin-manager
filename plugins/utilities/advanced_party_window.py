@@ -1164,7 +1164,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             else:
                 # kick-votes appeared in build 14248
                 info = bs.get_connection_to_host_info_2()
-                if bool(info) and (info.get('build_number', 0) <
+                if bool(info) and (info.build_number <
                                    14248):
                     bui.getsound('error').play()
                     bs.broadcastmessage(
