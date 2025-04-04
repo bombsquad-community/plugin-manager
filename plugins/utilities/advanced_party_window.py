@@ -78,9 +78,8 @@ def newconnect_to_party(address, port=43210, print_progress=False):
     global p_port
     bs.chatmessage(" Joined IP "+ip_add+" PORT "+str(p_port))
     dd = bs.get_connection_to_host_info_2()
-    if dd != None and dd.get('name', '') != '':
-        title = dd['name']
-        bs.chatmessage(title)
+    title = getattr(dd,'name','')
+    bs.chatmessage(title) if dd and title else None
     if (bool(dd)):
         bs.disconnect_from_host()
 
