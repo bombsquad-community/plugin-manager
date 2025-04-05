@@ -1848,14 +1848,14 @@ class PluginManagerWindow(bui.MainWindow):
 
         if self.category_selection_button is None:
             self.category_selection_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                              position=(category_pos_x,
-                                                                        category_pos_y),
-                                                              size=b_size,
-                                                              label=label,
-                                                              button_type="square",
-                                                              textcolor=b_textcolor,
-                                                              text_scale=0.6)
-            bui.buttonwidget(b,on_activate_call=lambda: self.show_categories_window(source=b)),
+                                                                  position=(category_pos_x,
+                                                                            category_pos_y),
+                                                                  size=b_size,
+                                                                  label=label,
+                                                                  button_type="square",
+                                                                  textcolor=b_textcolor,
+                                                                  text_scale=0.6)
+            bui.buttonwidget(b, on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
             self.category_selection_button = bui.buttonwidget(edit=self.category_selection_button,
                                                               label=label)
@@ -2090,7 +2090,7 @@ class PluginManagerWindow(bui.MainWindow):
     def show_plugin_window(self, plugin):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
-    def show_categories_window(self,source):
+    def show_categories_window(self, source):
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
@@ -2182,13 +2182,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
         pos -= 20
         self._changelog_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                  position=((width * 0.2) - button_size[0] / 2 - 5,
-                                                            pos),
-                                                  size=(80, 30),
-                                                  textcolor=b_text_color,
-                                                  button_type='square',
-                                                  label='')
-        bui.buttonwidget(b,on_activate_call=lambda:ChangelogWindow(b))
+                                                      position=((width * 0.2) - button_size[0] / 2 - 5,
+                                                                pos),
+                                                      size=(80, 30),
+                                                      textcolor=b_text_color,
+                                                      button_type='square',
+                                                      label='')
+        bui.buttonwidget(b, on_activate_call=lambda: ChangelogWindow(b))
         bui.textwidget(parent=self._root_widget,
                        position=((width * 0.2) - button_size[0] / 2, pos),
                        size=(70, 30),
