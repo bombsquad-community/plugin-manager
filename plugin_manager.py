@@ -29,7 +29,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.1"
+PLUGIN_MANAGER_VERSION = "1.1.2"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1637,7 +1637,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         self._asyncio_callback = asyncio_callback
         self.scale_origin = origin_widget.get_screen_space_center()
         super().__init__(
-            position=(200, 0),
+            position=self.scale_origin,
             scale=(2.3 if _uiscale is babase.UIScale.SMALL else
                    1.65 if _uiscale is babase.UIScale.MEDIUM else 1.23),
             choices=choices,
@@ -1847,16 +1847,15 @@ class PluginManagerWindow(bui.MainWindow):
         label = f"Category: {post_label}"
 
         if self.category_selection_button is None:
-            self.category_selection_button = bui.buttonwidget(parent=self._root_widget,
+            self.category_selection_button = b = bui.buttonwidget(parent=self._root_widget,
                                                               position=(category_pos_x,
                                                                         category_pos_y),
                                                               size=b_size,
-                                                              on_activate_call=(
-                                                                  self.show_categories_window),
                                                               label=label,
                                                               button_type="square",
                                                               textcolor=b_textcolor,
                                                               text_scale=0.6)
+            bui.buttonwidget(b,on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
             self.category_selection_button = bui.buttonwidget(edit=self.category_selection_button,
                                                               label=label)
@@ -1944,10 +1943,15 @@ class PluginManagerWindow(bui.MainWindow):
                                              position=(settings_pos_x, settings_pos_y),
                                              size=(30, 30),
                                              button_type="square",
-                                             label="",
-                                             on_activate_call=babase.Call(PluginManagerSettingsWindow,
-                                                                          self.plugin_manager,
-                                                                          self._root_widget))
+                                             label="")
+        bui.buttonwidget(
+            controller_button,
+            on_activate_call=babase.Call(
+                PluginManagerSettingsWindow,
+                self.plugin_manager,
+                controller_button
+            )
+        )
         bui.imagewidget(parent=self._root_widget,
                         position=(settings_pos_x, settings_pos_y),
                         size=(30, 30),
@@ -2086,11 +2090,11 @@ class PluginManagerWindow(bui.MainWindow):
     def show_plugin_window(self, plugin):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
-    def show_categories_window(self):
+    def show_categories_window(self,source):
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
-            self._root_widget,
+            source,
             self.select_category,
         )
 
@@ -2177,15 +2181,14 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                        maxwidth=width * 0.9)
 
         pos -= 20
-        self._changelog_button = bui.buttonwidget(parent=self._root_widget,
+        self._changelog_button = b = bui.buttonwidget(parent=self._root_widget,
                                                   position=((width * 0.2) - button_size[0] / 2 - 5,
                                                             pos),
                                                   size=(80, 30),
-                                                  on_activate_call=lambda:
-                                                      ChangelogWindow(self._root_widget),
                                                   textcolor=b_text_color,
                                                   button_type='square',
                                                   label='')
+        bui.buttonwidget(b,on_activate_call=lambda:ChangelogWindow(b))
         bui.textwidget(parent=self._root_widget,
                        position=((width * 0.2) - button_size[0] / 2, pos),
                        size=(70, 30),
