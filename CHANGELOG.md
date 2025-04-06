@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.2 (06-04-2025)
+
+- Small UI fixes.
+
 ### 1.1.1 (09-02-2025)
 
 - Added bomb spinner widget for loading animation.
