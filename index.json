@@ -5,8 +5,7 @@
       "api_version": 9,
       "commit_sha": "35c2eee",
       "released_on": "05-04-2025",
-      "md5sum": "8f3e97220b71076fe8c20a19b7191318",
-      "changelog": "Small UI fixes."
+      "md5sum": "8f3e97220b71076fe8c20a19b7191318"
     },
     "1.1.1": {
       "api_version": 9,
