@@ -1,6 +1,6 @@
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
-**Important:** If you are on bombsquad version less than 1.7.37 , check below.
+**Important:** If you are on BombSquad version less than 1.7.37 , check below.
 - for version 1.7.0 to 1.7.19 (which uses API 7), checkout the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch.
 - for version 1.7.20 to 1.7.36 (which uses API 8), checkout the [api8](https://github.com/bombsquad-community/plugin-manager/tree/api8) branch.
 
@@ -10,7 +10,7 @@ If you have version 1.7.37 or greater (which uses API 9), proceed with the rest 
 
 # Plugin Manager
 
-A plugin manager for the game - [Bombsquad](https://www.froemling.net/apps/bombsquad). Plugin Manager is a plugin in itself,
+A plugin manager for the game - [BombSquad](https://www.froemling.net/apps/bombsquad). Plugin Manager is a plugin in itself,
 which makes further modding of your game more convenient by providing easier access to community created content.
 
 [![DownloadIcon]][DownloadLink]
@@ -43,7 +43,7 @@ There are two different ways the plugin manager can be installed:
 
 1. From dev console
 
-   - Enable "Show Dev Console Button" from advance bombsquad settings
+   - Enable "Show Dev Console Button" from advance BombSquad settings
    - Paste the following code in dev console
      ```py
      import urllib.request;import _babase;import os;url="https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py";plugin_path=os.path.join(_babase.env()["python_directory_user"],"plugin_manager.py");file=urllib.request.urlretrieve(url)[0];fl = open(file,'r');f=open(plugin_path, 'w+');f.write(fl.read());fl.close();f.close();print("SUCCESS")
