@@ -16,6 +16,7 @@ from bascenev1 import (
     screenmessage as push
 )
 
+
 class VeryPW(party.PartyWindow):
     def __init__(s, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -26,18 +27,18 @@ class VeryPW(party.PartyWindow):
             bw(
                 parent=s._root_widget,
                 size=(30, 30),
-                label=cs(getattr(sc,f"{['UP','DOWN'][i]}_ARROW")),
+                label=cs(getattr(sc, f"{['UP', 'DOWN'][i]}_ARROW")),
                 button_type='square',
                 enable_sound=False,
-                position=(-15,70-(i*40)),
-                on_activate_call=[s._p,s._d][i]
+                position=(-15, 70-(i*40)),
+                on_activate_call=[s._p, s._d][i]
             )
 
     def _c(s, t=""): tw(edit=s._text_field, text=t)
     def _d(s): s._p(1)
 
     def _p(s, i=0):
-        print (s._chat_texts)
+        print(s._chat_texts)
         if s._f:
             s._o = tw(query=s._text_field)
             s._f = False
@@ -65,7 +66,8 @@ class VeryPW(party.PartyWindow):
                 v_align='center',
                 size=(900, 13),
                 scale=0.55,
-                color=(1, 1, 1) if z != (s._n if s._n > -1 else s._n + len(s._w1) + 1) else (0, 0.7, 0),
+                color=(1, 1, 1) if z != (s._n if s._n > -
+                                         1 else s._n + len(s._w1) + 1) else (0, 0.7, 0),
                 position=(-0.6, 0),
                 selectable=True,
                 autoselect=True,
@@ -76,12 +78,14 @@ class VeryPW(party.PartyWindow):
             )
             tw(
                 txt,
-                on_activate_call=Call(s._copy_msg,s._w1[z])
+                on_activate_call=Call(s._copy_msg, s._w1[z])
             )
             cw(edit=s._columnwidget, visible_child=txt)
 
 # ba_meta require api 9
 # ba_meta export plugin
+
+
 class byBordd(Plugin):
     def __init__(s):
         party.PartyWindow = VeryPW
