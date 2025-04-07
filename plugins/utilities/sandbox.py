@@ -20,6 +20,7 @@ from bascenev1lib.actor.powerupbox import PowerupBox
 from bascenev1lib.actor.bomb import TNTSpawner
 from os import listdir as ls
 
+
 def error(real):  # not fake
     bui.getsound('error').play()
     with ga().context:
@@ -1558,7 +1559,8 @@ class Nice(igm):
             tn.append(i)
             try:
                 attr = getattr(blex, i) if i not in [
-                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)  # gay
+                    # gay
+                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)
             except:
                 attr = None
             typez.append(str(type(attr).__name__))
