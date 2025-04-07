@@ -1,6 +1,6 @@
 import babase as ba
 import _babase as _ba  # music control
-import bauiv1lib.mainmenu as mm
+from bauiv1lib.ingamemenu import InGameMenuWindow as igm
 import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1 import broadcastmessage as push, get_foreground_host_activity as ga
@@ -19,7 +19,6 @@ from bauiv1lib.tabs import TabRow  # BOTS and USERS
 from bascenev1lib.actor.powerupbox import PowerupBox
 from bascenev1lib.actor.bomb import TNTSpawner
 from os import listdir as ls
-
 
 def error(real):  # not fake
     bui.getsound('error').play()
@@ -48,7 +47,7 @@ def var(s, v=None):
         cfg.commit()
 
 
-class Nice(mm.MainMenuWindow):
+class Nice(igm):
     # config, trash code ik
     def_attrs = [False, "Spaz", 2.0, 0.0, 1.0, 0.4, (1, 1, 1), 3, "normal", False, False,
                  (1, 1, 1), 0.5, False, 0.0, False, False, 9.0, 5.0, 1.0, 0.7, True, False,
@@ -1559,8 +1558,7 @@ class Nice(mm.MainMenuWindow):
             tn.append(i)
             try:
                 attr = getattr(blex, i) if i not in [
-                    # gay
-                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)
+                    "punch_position", "punch_velocity", "punch_momentum_linear"] else (0, 0, 0)  # gay
             except:
                 attr = None
             typez.append(str(type(attr).__name__))
@@ -2415,7 +2413,7 @@ class Nice(mm.MainMenuWindow):
             if self.sbox.exists():
                 bui.buttonwidget(edit=self.sbox, icon=bui.gettexture('chestIcon'))
 
-        def wrap(self=mm.MainMenuWindow._refresh_in_game, *args, **kwargs):
+        def wrap(self=igm._refresh_in_game, *args, **kwargs):
             r = s(self, *args, **kwargs)
             h = 125
             v = self._height - 60.0
@@ -3108,7 +3106,7 @@ class Nice(mm.MainMenuWindow):
                 bui.textwidget(edit=preview_text4, text=currently_txt)
                 s.hl2(lmao_bots[currently_dux].node, True)
 
-                # start colntrol from here
+                # start control from here
                 i.assigninput(ba.InputType.UP_DOWN, bs.Call(s.set_x))
                 i.assigninput(ba.InputType.LEFT_RIGHT, bs.Call(s.set_y))
                 i.assigninput(ba.InputType.PICK_UP_PRESS, bs.Call(s.key, 0))
@@ -3983,7 +3981,7 @@ class Nice(mm.MainMenuWindow):
         s.preview(i, (bot.node.hurt < 1), 1)
 
     def listen_window(s):
-        global listen_widget, music_preview_image, music_preview_text, music_preview_text2, music_dux
+        global listen_widget, music_preview_image, wmusic_preview_text, music_preview_text2, music_dux
         music_dux = 8
         listen_widget = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'),
                                             size=(500, 300),
@@ -5925,7 +5923,7 @@ class CustomBotSet(SpazBotSet):
         except:
             pass
 
-# ba_meta require api 8
+# ba_meta require api 9
 # BroBordd touch grass
 # Copyright 2024, solely by BroBordd. All rights reserved.
 # ba_meta export plugin
@@ -5933,7 +5931,7 @@ class CustomBotSet(SpazBotSet):
 
 class byBordd(ba.Plugin):
     def __init__(s):
-        mm.MainMenuWindow._refresh_in_game = Nice.Button(mm.MainMenuWindow._refresh_in_game)
+        igm._refresh_in_game = Nice.Button(igm._refresh_in_game)
 
 
 # All Textures (generated)
