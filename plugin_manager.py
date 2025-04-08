@@ -1676,7 +1676,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
 
 
 class PluginManagerWindow(bui.MainWindow):
-    def __init__(self, transition: str = "in_right", origin_widget: bui.widget = None):
+    def __init__(self, transition: str = "in_right", origin_widget: bui.Widget = None):
         self.plugin_manager = PluginManager()
         self.category_selection_button = None
         self.selected_category = 'All'
@@ -2405,7 +2405,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
     def __init__(
         self,
         transition: str | None = 'in_right',
-        origin_widget: bui.widget | None = None,
+        origin_widget: bui.Widget | None = None,
     ):
         # pylint: disable=too-many-statements
         # pylint: disable=too-many-locals
@@ -2481,7 +2481,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
         x_offs4 -= x_dif
 
         def _b_title(
-            x: float, y: float, button: bui.widget, text: str | bui.Lstr
+            x: float, y: float, button: bui.Widget, text: str | bui.Lstr
         ) -> None:
             bui.textwidget(
                 parent=self._root_widget,
@@ -2640,7 +2640,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
             sel_name = bui.app.ui_v1.window_states.get(type(self), {}).get(
                 'sel_name'
             )
-            sel: bui.widget | None
+            sel: bui.Widget | None
             if sel_name == 'Controllers':
                 sel = self._controllers_button
             elif sel_name == 'Graphics':
