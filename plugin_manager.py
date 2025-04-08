@@ -850,12 +850,13 @@ class ChangelogWindow(popup.PopupWindow):
         self._transition_out = 'out_scale'
         transition = 'in_scale'
 
-        self._root_widget = bui.containerwidget(size=(width, height),
-                                                on_outside_click_call=self._back,
-                                                transition=transition,
-                                                scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
-                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
-                                                scale_origin_stack_offset=self.scale_origin)
+        self._root_widget = bui.containerwidget(
+            size=(width, height),
+            on_outside_click_call=self._back,
+            transition=transition,
+            scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5 if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale_origin_stack_offset=self.scale_origin
+        )
 
         bui.textwidget(parent=self._root_widget,
                        position=(width * 0.49, height * 0.87), size=(0, 0),
@@ -928,12 +929,14 @@ class AuthorsWindow(popup.PopupWindow):
         self._transition_out = 'out_scale'
         transition = 'in_scale'
 
-        self._root_widget = bui.containerwidget(size=(width, height),
-                                                on_outside_click_call=self._back,
-                                                transition=transition,
-                                                scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
-                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
-                                                scale_origin_stack_offset=self.scale_origin)
+        self._root_widget = bui.containerwidget(
+            size=(width, height),
+            on_outside_click_call=self._back,
+            transition=transition,
+            scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
+                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale_origin_stack_offset=self.scale_origin
+        )
 
         pos = height * 0.9
         bui.textwidget(parent=self._root_widget,
@@ -1030,12 +1033,14 @@ class PluginWindow(popup.PopupWindow):
         self._transition_out = 'out_scale'
         transition = 'in_scale'
 
-        self._root_widget = bui.containerwidget(size=(width, height),
-                                                on_outside_click_call=self._cancel,
-                                                transition=transition,
-                                                scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
-                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
-                                                scale_origin_stack_offset=self.scale_origin)
+        self._root_widget = bui.containerwidget(
+            size=(width, height),
+            on_outside_click_call=self._cancel,
+            transition=transition,
+            scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
+                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale_origin_stack_offset=self.scale_origin
+        )
 
         pos = height * 0.8
         plug_name = self.plugin.name.replace('_', ' ').title()
@@ -1146,9 +1151,11 @@ class PluginWindow(popup.PopupWindow):
                                                 text_scale=1,
                                                 label=button3_label)
 
-        bui.containerwidget(edit=self._root_widget,
-                            on_cancel_call=self._cancel,
-                            selected_child=selected_btn)
+        bui.containerwidget(
+            edit=self._root_widget,
+            on_cancel_call=self._cancel,
+            selected_child=selected_btn
+        )
 
         open_pos_x = (390 if _uiscale is babase.UIScale.SMALL else
                       450 if _uiscale is babase.UIScale.MEDIUM else 440)
@@ -1474,13 +1481,15 @@ class PluginSourcesWindow(popup.PopupWindow):
         b_textcolor = (0.75, 0.7, 0.8)
         self._transition_out = 'out_scale'
         transition = 'in_scale'
-        self._root_widget = bui.containerwidget(size=(400, 340),
-                                                on_outside_click_call=self._ok,
-                                                transition=transition,
-                                                scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
-                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
-                                                scale_origin_stack_offset=self.scale_origin,
-                                                on_cancel_call=self._ok)
+        self._root_widget = bui.containerwidget(
+            size=(400, 340),
+            on_outside_click_call=self._ok,
+            transition=transition,
+            scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
+                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale_origin_stack_offset=self.scale_origin,
+            on_cancel_call=self._ok
+        )
 
         bui.textwidget(
             parent=self._root_widget,
@@ -1667,7 +1676,7 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
 
 
 class PluginManagerWindow(bui.MainWindow):
-    def __init__(self, transition: str = "in_right", origin_widget: bui.Widget = None):
+    def __init__(self, transition: str = "in_right", origin_widget: bui.widget = None):
         self.plugin_manager = PluginManager()
         self.category_selection_button = None
         self.selected_category = 'All'
@@ -1760,11 +1769,10 @@ class PluginManagerWindow(bui.MainWindow):
             size=48,
         )
 
-    def spin(self, show=False):
+    def spin(self,show=False):
         w = self._loading_spinner
         p = self._root_widget
-        bui.spinnerwidget(w, visible=show) if w.exists(
-        ) and p.exists() and not p.transitioning_out else None
+        bui.spinnerwidget(w,visible=show) if w.exists() and p.exists() and not p.transitioning_out else None
 
     @contextlib.contextmanager
     def exception_handler(self):
@@ -1856,14 +1864,14 @@ class PluginManagerWindow(bui.MainWindow):
 
         if self.category_selection_button is None:
             self.category_selection_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                                  position=(category_pos_x,
-                                                                            category_pos_y),
-                                                                  size=b_size,
-                                                                  label=label,
-                                                                  button_type="square",
-                                                                  textcolor=b_textcolor,
-                                                                  text_scale=0.6)
-            bui.buttonwidget(b, on_activate_call=lambda: self.show_categories_window(source=b)),
+                                                              position=(category_pos_x,
+                                                                        category_pos_y),
+                                                              size=b_size,
+                                                              label=label,
+                                                              button_type="square",
+                                                              textcolor=b_textcolor,
+                                                              text_scale=0.6)
+            bui.buttonwidget(b,on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
             b = self.category_selection_button
             bui.buttonwidget(
@@ -2047,8 +2055,7 @@ class PluginManagerWindow(bui.MainWindow):
         self._last_filter_text = search_term
         self._last_filter_plugins = plugins
 
-        if not self._columnwidget.exists():
-            return
+        if not self._columnwidget.exists(): return
 
         if category == 'Installed':
             plugin_names_to_draw = tuple(
@@ -2110,7 +2117,7 @@ class PluginManagerWindow(bui.MainWindow):
     def show_plugin_window(self, plugin):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
-    def show_categories_window(self, source):
+    def show_categories_window(self,source):
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
@@ -2182,33 +2189,37 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         transition = 'in_scale'
         button_size = (32 * s, 32 * s)
         # index = await self._plugin_manager.get_index()
-        self._root_widget = bui.containerwidget(size=(width, height),
-                                                on_outside_click_call=self._ok,
-                                                transition=transition,
-                                                scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
-                                                       if _uiscale is babase.UIScale.MEDIUM else 1.0),
-                                                scale_origin_stack_offset=self.scale_origin)
+        self._root_widget = bui.containerwidget(
+            size=(width, height),
+            on_outside_click_call=self._ok,
+            transition=transition,
+            scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
+                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale_origin_stack_offset=self.scale_origin
+        )
         pos = height * 0.9
         setting_title = "Settings"
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos),
-                       size=(0, 0),
-                       h_align='center',
-                       v_align='center',
-                       text=setting_title,
-                       scale=text_scale,
-                       color=bui.app.ui_v1.title_color,
-                       maxwidth=width * 0.9)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text=setting_title,
+            scale=text_scale,
+            color=bui.app.ui_v1.title_color,
+            maxwidth=width * 0.9
+        )
 
         pos -= 20
         self._changelog_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                      position=((width * 0.2) - button_size[0] / 2 - 5,
-                                                                pos),
-                                                      size=(80, 30),
-                                                      textcolor=b_text_color,
-                                                      button_type='square',
-                                                      label='')
-        bui.buttonwidget(b, on_activate_call=lambda: ChangelogWindow(b))
+                                                  position=((width * 0.2) - button_size[0] / 2 - 5,
+                                                            pos),
+                                                  size=(80, 30),
+                                                  textcolor=b_text_color,
+                                                  button_type='square',
+                                                  label='')
+        bui.buttonwidget(b,on_activate_call=lambda:ChangelogWindow(b))
         bui.textwidget(parent=self._root_widget,
                        position=((width * 0.2) - button_size[0] / 2, pos),
                        size=(70, 30),
@@ -2392,7 +2403,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
     def __init__(
         self,
         transition: str | None = 'in_right',
-        origin_widget: bui.Widget | None = None,
+        origin_widget: bui.widget | None = None,
     ):
         # pylint: disable=too-many-statements
         # pylint: disable=too-many-locals
@@ -2468,7 +2479,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
         x_offs4 -= x_dif
 
         def _b_title(
-            x: float, y: float, button: bui.Widget, text: str | bui.Lstr
+            x: float, y: float, button: bui.widget, text: str | bui.Lstr
         ) -> None:
             bui.textwidget(
                 parent=self._root_widget,
@@ -2627,7 +2638,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
             sel_name = bui.app.ui_v1.window_states.get(type(self), {}).get(
                 'sel_name'
             )
-            sel: bui.Widget | None
+            sel: bui.widget | None
             if sel_name == 'Controllers':
                 sel = self._controllers_button
             elif sel_name == 'Graphics':
