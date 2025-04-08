@@ -29,7 +29,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.2"
+PLUGIN_MANAGER_VERSION = "1.1.1"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1760,12 +1760,17 @@ class PluginManagerWindow(bui.MainWindow):
             size=48,
         )
 
+    def spin(self,show=False):
+        w = self._loading_spinner
+        p = self._root_widget
+        bui.spinnerwidget(w,visible=show) if w.exists() and p.exists() and not p.transitioning_out else None
+
     @contextlib.contextmanager
     def exception_handler(self):
         try:
             yield
         except urllib.error.URLError:
-            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
+            self.spin()
             try:
                 bui.textwidget(
                     edit=self._plugin_manager_status_text,
@@ -1778,7 +1783,7 @@ class PluginManagerWindow(bui.MainWindow):
             # User probably went back before a bui.Window could finish loading.
             pass
         except Exception as e:
-            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
+            self.spin()
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text=str(e))
             except:
@@ -1794,7 +1799,7 @@ class PluginManagerWindow(bui.MainWindow):
         with self.exception_handler():
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
-            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
+            self.spin()
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
             except:
@@ -1840,25 +1845,30 @@ class PluginManagerWindow(bui.MainWindow):
                                                                     textcolor=b_textcolor,
                                                                     text_scale=0.6)
         else:
-            bui.buttonwidget(edit=self.alphabet_order_selection_button,
-                             label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
-                             )
+            b = self.alphabet_order_selection_button
+            bui.buttonwidget(
+                edit=b,
+                label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
+            ) if b.exists() else None
 
         label = f"Category: {post_label}"
 
         if self.category_selection_button is None:
             self.category_selection_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                                  position=(category_pos_x,
-                                                                            category_pos_y),
-                                                                  size=b_size,
-                                                                  label=label,
-                                                                  button_type="square",
-                                                                  textcolor=b_textcolor,
-                                                                  text_scale=0.6)
-            bui.buttonwidget(b, on_activate_call=lambda: self.show_categories_window(source=b)),
+                                                              position=(category_pos_x,
+                                                                        category_pos_y),
+                                                              size=b_size,
+                                                              label=label,
+                                                              button_type="square",
+                                                              textcolor=b_textcolor,
+                                                              text_scale=0.6)
+            bui.buttonwidget(b,on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
-            self.category_selection_button = bui.buttonwidget(edit=self.category_selection_button,
-                                                              label=label)
+            b = self.category_selection_button
+            bui.buttonwidget(
+                edit=b,
+                label=label
+            ) if b.exists() else None
 
     async def _on_order_button_press(self) -> None:
         self.selected_alphabet_order = ('a_z' if self.selected_alphabet_order == 'z_a' else 'z_a')
@@ -1965,19 +1975,22 @@ class PluginManagerWindow(bui.MainWindow):
         refresh_pos_y = (180 if _uiscale is babase.UIScale.SMALL else
                          108 if _uiscale is babase.UIScale.MEDIUM else 120)
 
-        controller_button = bui.buttonwidget(parent=self._root_widget,
-                                             position=(refresh_pos_x, refresh_pos_y),
-                                             size=(30, 30),
-                                             button_type="square",
-                                             label="",
-                                             on_activate_call=lambda:
-                                             loop.create_task(self.refresh()))
-        bui.imagewidget(parent=self._root_widget,
-                        position=(refresh_pos_x, refresh_pos_y),
-                        size=(30, 30),
-                        color=(0.8, 0.95, 1),
-                        texture=bui.gettexture("replayIcon"),
-                        draw_controller=controller_button)
+        controller_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(refresh_pos_x, refresh_pos_y),
+            size=(30, 30),
+            button_type="square",
+            label="",
+            on_activate_call=lambda: loop.create_task(self.refresh())
+        )
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(refresh_pos_x, refresh_pos_y),
+            size=(30, 30),
+            color=(0.8, 0.95, 1),
+            texture=bui.gettexture("replayIcon"),
+            draw_controller=controller_button
+        )
 
     def search_term_filterer(self, plugin, search_term):
         # This helps resolve "plugin name" to "plugin_name".
@@ -2033,17 +2046,18 @@ class PluginManagerWindow(bui.MainWindow):
         self._last_filter_text = search_term
         self._last_filter_plugins = plugins
 
+        if not self._columnwidget.exists(): return
+
         if category == 'Installed':
-            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin)
-                                         for plugin in plugins if plugin.is_installed)
+            plugin_names_to_draw = tuple(
+                self.draw_plugin_name(plugin) for plugin in plugins if plugin.is_installed
+            )
         else:
             plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
 
-        for plugin in self._columnwidget.get_children():
-            plugin.delete()
+        [plugin.delete() for plugin in self._columnwidget.get_children()]
         text_widget = bui.textwidget(parent=self._columnwidget)
         text_widget.delete()
-
         await asyncio.gather(*plugin_names_to_draw)
 
     async def draw_plugin_name(self, plugin):
@@ -2069,20 +2083,24 @@ class PluginManagerWindow(bui.MainWindow):
 
         plugin_name_widget_to_update = self.plugins_in_current_view.get(plugin.name)
         if plugin_name_widget_to_update:
-            bui.textwidget(edit=plugin_name_widget_to_update,
-                           color=color)
+            bui.textwidget(
+                edit=plugin_name_widget_to_update,
+                color=color
+            )
         else:
-            text_widget = bui.textwidget(parent=self._columnwidget,
-                                         size=(410, 30),
-                                         selectable=True,
-                                         always_highlight=True,
-                                         color=color,
-                                         text=plugin.name.replace('_', ' ').title(),
-                                         click_activate=True,
-                                         on_activate_call=lambda: self.show_plugin_window(plugin),
-                                         h_align='left',
-                                         v_align='center',
-                                         maxwidth=420)
+            text_widget = bui.textwidget(
+                parent=self._columnwidget,
+                size=(410, 30),
+                selectable=True,
+                always_highlight=True,
+                color=color,
+                text=plugin.name.replace('_', ' ').title(),
+                click_activate=True,
+                on_activate_call=lambda: self.show_plugin_window(plugin),
+                h_align='left',
+                v_align='center',
+                maxwidth=420
+            )
             self.plugins_in_current_view[plugin.name] = text_widget
             # XXX: This seems nicer. Might wanna use this in future.
             # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
@@ -2090,7 +2108,7 @@ class PluginManagerWindow(bui.MainWindow):
     def show_plugin_window(self, plugin):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
-    def show_categories_window(self, source):
+    def show_categories_window(self,source):
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
@@ -2120,13 +2138,13 @@ class PluginManagerWindow(bui.MainWindow):
         # except:
         #     pass
 
-        bui.spinnerwidget(edit=self._loading_spinner, visible=True)
+        self.spin(True)
 
         with self.exception_handler():
             await self.plugin_manager.refresh()
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
-            bui.spinnerwidget(edit=self._loading_spinner, visible=False)
+            self.spin()
             try:
                 bui.textwidget(edit=self._plugin_manager_status_text, text="")
             except:
@@ -2182,13 +2200,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
         pos -= 20
         self._changelog_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                      position=((width * 0.2) - button_size[0] / 2 - 5,
-                                                                pos),
-                                                      size=(80, 30),
-                                                      textcolor=b_text_color,
-                                                      button_type='square',
-                                                      label='')
-        bui.buttonwidget(b, on_activate_call=lambda: ChangelogWindow(b))
+                                                  position=((width * 0.2) - button_size[0] / 2 - 5,
+                                                            pos),
+                                                  size=(80, 30),
+                                                  textcolor=b_text_color,
+                                                  button_type='square',
+                                                  label='')
+        bui.buttonwidget(b,on_activate_call=lambda:ChangelogWindow(b))
         bui.textwidget(parent=self._root_widget,
                        position=((width * 0.2) - button_size[0] / 2, pos),
                        size=(70, 30),
