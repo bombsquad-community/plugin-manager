@@ -1760,10 +1760,11 @@ class PluginManagerWindow(bui.MainWindow):
             size=48,
         )
 
-    def spin(self,show=False):
+    def spin(self, show=False):
         w = self._loading_spinner
         p = self._root_widget
-        bui.spinnerwidget(w,visible=show) if w.exists() and p.exists() and not p.transitioning_out else None
+        bui.spinnerwidget(w, visible=show) if w.exists(
+        ) and p.exists() and not p.transitioning_out else None
 
     @contextlib.contextmanager
     def exception_handler(self):
@@ -1855,14 +1856,14 @@ class PluginManagerWindow(bui.MainWindow):
 
         if self.category_selection_button is None:
             self.category_selection_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                              position=(category_pos_x,
-                                                                        category_pos_y),
-                                                              size=b_size,
-                                                              label=label,
-                                                              button_type="square",
-                                                              textcolor=b_textcolor,
-                                                              text_scale=0.6)
-            bui.buttonwidget(b,on_activate_call=lambda: self.show_categories_window(source=b)),
+                                                                  position=(category_pos_x,
+                                                                            category_pos_y),
+                                                                  size=b_size,
+                                                                  label=label,
+                                                                  button_type="square",
+                                                                  textcolor=b_textcolor,
+                                                                  text_scale=0.6)
+            bui.buttonwidget(b, on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
             b = self.category_selection_button
             bui.buttonwidget(
@@ -2046,7 +2047,8 @@ class PluginManagerWindow(bui.MainWindow):
         self._last_filter_text = search_term
         self._last_filter_plugins = plugins
 
-        if not self._columnwidget.exists(): return
+        if not self._columnwidget.exists():
+            return
 
         if category == 'Installed':
             plugin_names_to_draw = tuple(
@@ -2108,7 +2110,7 @@ class PluginManagerWindow(bui.MainWindow):
     def show_plugin_window(self, plugin):
         PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
 
-    def show_categories_window(self,source):
+    def show_categories_window(self, source):
         PluginCategoryWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
@@ -2200,13 +2202,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
         pos -= 20
         self._changelog_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                  position=((width * 0.2) - button_size[0] / 2 - 5,
-                                                            pos),
-                                                  size=(80, 30),
-                                                  textcolor=b_text_color,
-                                                  button_type='square',
-                                                  label='')
-        bui.buttonwidget(b,on_activate_call=lambda:ChangelogWindow(b))
+                                                      position=((width * 0.2) - button_size[0] / 2 - 5,
+                                                                pos),
+                                                      size=(80, 30),
+                                                      textcolor=b_text_color,
+                                                      button_type='square',
+                                                      label='')
+        bui.buttonwidget(b, on_activate_call=lambda: ChangelogWindow(b))
         bui.textwidget(parent=self._root_widget,
                        position=((width * 0.2) - button_size[0] / 2, pos),
                        size=(70, 30),
