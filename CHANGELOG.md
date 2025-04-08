@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.3 (06-04-2025)
+
+- Hot Fix
+
 ### 1.1.2 (06-04-2025)
 
 - Small UI fixes.
