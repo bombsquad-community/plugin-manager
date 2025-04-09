@@ -20,6 +20,8 @@ import babase
 # ba_meta require api 9
 
 # ba_meta export plugin
+
+
 class WiggleDance(babase.Plugin):
     def add_dance_mechanic_to_spaz(spaz_class):
         """Add dance mechanic to the Spaz class"""
@@ -103,7 +105,8 @@ class WiggleDance(babase.Plugin):
 
             # Start visual dance timer
             if not self._dance_visual_timer:
-                self._dance_visual_timer = bs.Timer(0.5, bs.WeakCall(self._dance_visual), repeat=True)
+                self._dance_visual_timer = bs.Timer(
+                    0.5, bs.WeakCall(self._dance_visual), repeat=True)
 
         def _dance_visual(self):
             """Create visual dance effects"""
