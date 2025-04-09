@@ -1780,6 +1780,20 @@
           "md5sum": "756c221489a0759ff8f509cc22a2a823"
         }
       }
+    },
+    "vanilla_wiggle_dance": {
+      "description": "Wiggle left and right to do a silly dance!",
+      "external_url": "https://youtu.be/g7Neiz3dB3U",
+      "authors": [
+        {
+          "name": "SoK",
+          "email": "",
+          "discord": "sok05"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
