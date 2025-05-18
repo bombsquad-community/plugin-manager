@@ -17,6 +17,7 @@ only_empty = False
 ClassType = TypeVar('ClassType')
 MethodType = TypeVar('MethodType')
 
+
 def override(cls: ClassType) -> Callable[[MethodType], MethodType]:
     def decorator(new_method: MethodType) -> MethodType:
         method_name = new_method.__code__.co_name
@@ -27,6 +28,8 @@ def override(cls: ClassType) -> Callable[[MethodType], MethodType]:
     return decorator
 
 # Enhanced Gather Tab
+
+
 class EnhancedPublicGatherTab(PublicGatherTab):
     @override(PublicGatherTab)
     def _build_join_tab(self, width: float, height: float) -> None:
@@ -62,7 +65,7 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             color=(1, 1, 0.7),
             maxwidth=c_width * 0.8,
             position=(c_width * 0.5, c_height - 60))
-        
+
         bui.textwidget(
             parent=self.window_root,
             size=(0, 0),
@@ -141,7 +144,8 @@ class EnhancedPublicGatherTab(PublicGatherTab):
     def _toggle_refresh(self, _=None) -> None:
         global is_refreshing
         is_refreshing = not is_refreshing
-        bui.screenmessage(f"Refreshing {'Enabled' if is_refreshing else 'Disabled'}", color=(1, 1, 0))
+        bui.screenmessage(
+            f"Refreshing {'Enabled' if is_refreshing else 'Disabled'}", color=(1, 1, 0))
 
     @override(PublicGatherTab)
     def _toggle_full(self, _=None) -> None:
@@ -158,7 +162,7 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             only_empty = False
         bui.screenmessage(f"{'Hiding' if hide_empty else 'Showing'} Empty Parties", color=(1, 1, 0))
         if hide_empty:
-                bui.checkboxwidget(edit=self._only_empty_checkbox, value=only_empty)
+            bui.checkboxwidget(edit=self._only_empty_checkbox, value=only_empty)
         self._update_party_rows()
 
     @override(PublicGatherTab)
@@ -167,9 +171,10 @@ class EnhancedPublicGatherTab(PublicGatherTab):
         only_empty = not only_empty
         if only_empty:
             hide_empty = False
-        bui.screenmessage(f"{'Showing Only Empty' if only_empty else 'Showing All'} Parties", color=(1, 1, 0))
+        bui.screenmessage(
+            f"{'Showing Only Empty' if only_empty else 'Showing All'} Parties", color=(1, 1, 0))
         if only_empty:
-                bui.checkboxwidget(edit=self._empty_checkbox, value=hide_empty)
+            bui.checkboxwidget(edit=self._empty_checkbox, value=hide_empty)
         self._update_party_rows()
 
     @override(PublicGatherTab)
