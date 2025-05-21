@@ -66,17 +66,6 @@ class EnhancedPublicGatherTab(PublicGatherTab):
             maxwidth=c_width * 0.8,
             position=(c_width * 0.5, c_height - 60))
 
-        bui.textwidget(
-            parent=self.window_root,
-            size=(0, 0),
-            h_align='center',
-            v_align='center',
-            text='BY Yelllow',
-            scale=0.7,
-            color=(1, 1, 0),
-            maxwidth=c_width * 0.8,
-            position=(c_width * 0.5, c_height - 100))
-
         bui.buttonwidget(
             parent=self.window_root,
             position=(c_width * 0.1, c_height * 0.8),
