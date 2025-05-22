@@ -39,12 +39,12 @@ class VeryPW(party.PartyWindow):
 
     def _p(s, i=0):
         print(s._chat_texts)
+        s._w1 = gcm()
         if s._f:
             s._o = tw(query=s._text_field)
             s._f = False
-            s._n = -1
-        s._n = s._n + (1 if i else -1)
-        s._w1 = gcm()
+            s._n = 0 if i else len(s._w1)
+        s._n = (s._n + (1 if i else -1)) % len(s._w1)
         try:
             s._c((s._w1+[s._o])[s._n].split(": ", 1)[1])
         except IndexError:
