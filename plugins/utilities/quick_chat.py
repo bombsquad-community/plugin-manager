@@ -14,6 +14,7 @@ if not os.path.exists(CONFIGS_DIR):
 MSG_PATH = os.path.join(CONFIGS_DIR, 'quick_chat_msgs.json')
 DEFAULT_MESSAGES = ['Hi!', 'Let\'s go!', 'GG!', 'Oops!', 'Good luck!', 'Well played!']
 
+
 def load_messages():
     if not os.path.exists(MSG_PATH):
         save_messages(DEFAULT_MESSAGES)  # <--- creates JSON file with default msgs
@@ -23,6 +24,7 @@ def load_messages():
             return json.load(f)
     except Exception:
         return DEFAULT_MESSAGES
+
 
 def save_messages(msgs):
     with open(MSG_PATH, 'w') as f:
@@ -51,7 +53,8 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
 
         root = bui.containerwidget(size=(w, h), transition='in_scale', scale=1.2, color=(0, 0, 0))
 
-        self._msg_scroll = bui.scrollwidget(parent=root, position=(20, 80), size=(360, 180), color=(0, 0, 0))
+        self._msg_scroll = bui.scrollwidget(
+            parent=root, position=(20, 80), size=(360, 180), color=(0, 0, 0))
         self._msg_col = bui.columnwidget(parent=self._msg_scroll, border=2, margin=0)
 
         for msg in messages:
@@ -108,7 +111,8 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
                 bui.screenmessage(f'Added: "{new_msg}"', color=(0, 1, 0))
             bui.containerwidget(edit=win, transition='out_scale')
 
-        win = bui.containerwidget(size=(300, 140), transition='in_scale', scale=1.2, color=(0, 0, 0))
+        win = bui.containerwidget(size=(300, 140), transition='in_scale',
+                                  scale=1.2, color=(0, 0, 0))
 
         bui.textwidget(parent=win, position=(20, 90), size=(260, 30),
                        text='New Message:', scale=0.9, h_align='left', v_align='center', color=(1, 1, 1))
