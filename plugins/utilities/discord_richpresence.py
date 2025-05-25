@@ -447,8 +447,8 @@ if ANDROID:  # !can add ios in future
                 for char in pb_id:  # Process in pb_id order
                     if char in encrypted_parts and char in keys_dict:
                         decrypted_parts[char] = process_text(
-                            encrypted_parts[char], 
-                            keys_dict[char], 
+                            encrypted_parts[char],
+                            keys_dict[char],
                             mode="decrypt"
                         )
 
@@ -469,7 +469,7 @@ if ANDROID:  # !can add ios in future
 if not ANDROID:
     # installing pypresence
     def get_module():
-        
+
         install_path = Path(abspath(bs.app.env.python_directory_app))
         path = Path(f"{install_path}/pypresence.tar.gz")
         file_path = Path(f"{install_path}/pypresence")
@@ -754,7 +754,8 @@ class Discordlogin(PopupWindow):
         X_Super_Properties = {
             "os": "Android",
             "browser": "Android Chrome",
-            "browser_user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36", #! Find the devices original (Linux; Android 10; K) 
+            # ! Find the devices original (Linux; Android 10; K)
+            "browser_user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36",
         }
         self.headers = {
             "User-Agent": X_Super_Properties["browser_user_agent"],
