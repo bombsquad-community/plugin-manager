@@ -1822,6 +1822,8 @@
           "discord": "v4_y"
         }
       ],
-      "versions": null
+      "versions": {
+        "1.0.0": null
+      }
   }
 }
