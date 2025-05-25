@@ -1811,6 +1811,17 @@
           "md5sum": "c4a5ac3f3b5aa3de5f4b659e40106a95"
         }
       }
-    }
+    },
+    "quick_chat": {
+      "description": "Easier send messages, add/remove messages",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "imAnesYT",
+          "email": "",
+          "discord": "v4_y"
+        }
+      ],
+      "versions": null
   }
 }
