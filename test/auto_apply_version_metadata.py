@@ -98,6 +98,7 @@ class CategoryVersionMetadata:
             except json.JSONDecodeError as err:
                 print(f"Error decoding JSON: {err}")
                 raise ValueError(f"Invalid JSON in {self.category_metadata_file}")
+
     def get_plugins_having_null_version_values(self):
         for plugin_name, plugin_metadata in self.category_metadata["plugins"].items():
             for version_name, version_metadata in plugin_metadata["versions"].items():
