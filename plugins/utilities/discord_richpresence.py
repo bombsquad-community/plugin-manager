@@ -6,13 +6,13 @@
 #!"Made to you by @brostos & @Dliwk"
 # TODO
 # - Update to the latest libs
-# - Use account id to hash the tkn
 
 
 from __future__ import annotations
 from urllib.request import Request, urlopen, urlretrieve
 from pathlib import Path
 from os import getcwd, remove
+from os.path import abspath
 from bauiv1lib.popup import PopupWindow
 
 import asyncio
@@ -26,6 +26,7 @@ import time
 import threading
 import shutil
 import hashlib
+import logging
 import babase
 import _babase
 import bascenev1 as bs
@@ -115,8 +116,15 @@ MAPNAME_ID = {
     "android": "1097728392280932453",
 }
 ANDROID = babase.app.classic.platform == "android"
-APP_VERSION = _babase.app.version if build_number < 21282 else (
-    _babase.app.env.engine_version if build_number > 21823 else _babase.app.env.version)
+APP_VERSION = (
+    _babase.app.version
+    if build_number < 21282
+    else (
+        _babase.app.env.engine_version
+        if build_number > 21823
+        else _babase.app.env.version
+    )
+)
 
 
 if ANDROID:  # !can add ios in future
@@ -124,7 +132,7 @@ if ANDROID:  # !can add ios in future
     # Installing websocket
     def get_module():
         install_path = Path(
-            f"{getcwd()}/ba_data/python"
+            abspath(bs.app.env.python_directory_app)
         )  # For the guys like me on windows
         path = Path(f"{install_path}/websocket.tar.gz")
         file_path = Path(f"{install_path}/websocket")
@@ -144,7 +152,7 @@ if ANDROID:  # !can add ios in future
                         hashlib.md5(content).hexdigest()
                         == "86bc69b61947943627afc1b351c0b5db"
                     )
-                shutil.unpack_archive(filename, install_path, format='gztar')
+                shutil.unpack_archive(filename, install_path, format="gztar")
                 remove(path)
                 shutil.copytree(source_dir, file_path)
                 shutil.rmtree(Path(f"{install_path}/websocket-client-1.6.1"))
@@ -197,7 +205,7 @@ if ANDROID:  # !can add ios in future
             presencepayload = {
                 "op": 3,
                 "d": {
-                    "since":  start_time,  # Fixed the unlimited time bug
+                    "since": start_time,  # Fixed the unlimited time bug
                     "status": "online",
                     "afk": "false",
                     "activities": [
@@ -252,7 +260,7 @@ if ANDROID:  # !can add ios in future
                 pass
 
         def on_error(self, ws, error):
-            babase.print_exception(error)
+            logging.exception(error)
 
         def on_close(self, ws, close_status_code, close_msg):
             (
@@ -278,8 +286,7 @@ if ANDROID:  # !can add ios in future
 
                     def identify():
                         """Identifying to the gateway and enable by using user token and the intents we will be using e.g 256->For Presence"""
-                        byt_tkn = babase.app.config.get("token")
-                        token = bytes.fromhex(byt_tkn).decode("utf-8")
+                        token = self.brosCrypt("None")
                         identify_payload = {
                             "op": 2,
                             "d": {
@@ -326,10 +333,29 @@ if ANDROID:  # !can add ios in future
                         "r",
                     ) as f:
                         token = bytes.fromhex(f.read()).decode("utf-8")
-                babase.app.config["token"] = token
-                babase.app.config.commit()
 
-            if babase.app.config.get("token"):
+                self.brosCrypt(token)
+                try:
+                    remove(
+                        Path(
+                            f"{_babase.app.env.python_directory_user}/__pycache__/token.txt"
+                        )
+                    )
+                except FileNotFoundError:
+                    try:
+                        remove(Path(f"{getcwd()}/token.txt"))
+                    except FileNotFoundError:
+                        pass
+            try:
+                self.brosCrypt(babase.app.config.get("token"))
+            except:
+                pass
+            try:
+                del babase.app.config["token"]
+            except KeyError:
+                pass
+
+            if babase.app.config.get("encrypted_tokey"):
                 try:
                     while True:
                         urlopen("http://www.google.com", timeout=5)
@@ -345,11 +371,106 @@ if ANDROID:  # !can add ios in future
             self.do_once = True
             self.ws.close()
 
+        @staticmethod
+        def brosCrypt(naked_token):
+
+            import babase
+            import bauiv1 as bui
+
+            import random
+            import string
+            import textwrap
+
+            random_string = naked_token
+            plus = bui.app.plus
+            pb_id = plus.get_v1_account_misc_read_val_2(
+                "resolvedAccountID", None
+            ).strip("pb-==")
+
+            # Initialize the characters
+            chars = " " + string.punctuation + string.digits + string.ascii_letters
+            chars = list(chars)
+
+            # Function to encrypt or decrypt text with a given key
+            def process_text(text, key, mode="encrypt"):
+                result_text = ""
+                for letter in text:
+                    if mode == "encrypt":
+                        index = chars.index(letter)
+                        result_text += key[index]
+                    elif mode == "decrypt":
+                        index = key.index(letter)
+                        result_text += chars[index]
+                    else:
+                        raise ValueError("Mode must be 'encrypt' or 'decrypt'")
+                return result_text
+
+            def encrypt():
+                # Generate the random string and split it into parts
+                part_length = len(random_string) // len(pb_id)
+                parts = textwrap.wrap(random_string, part_length)
+
+                # Encrypt each part with its own unique key
+                encrypted_parts = {}
+                keys = {}
+
+                for i, part in enumerate(parts):
+                    key = chars.copy()
+                    random.shuffle(key)
+                    encrypted_part = process_text(part, key, mode="encrypt")
+                    encrypted_parts[pb_id[i]] = encrypted_part
+                    keys[pb_id[i]] = "".join(key)
+
+                # Concatenate all keys with (==) separator
+                master_key = "(==)".join(keys.values())
+
+                encrypted_key = {
+                    "encrypted_parts": encrypted_parts,
+                    "master_key": master_key,
+                }
+                babase.app.config["encrypted_tokey"] = encrypted_key
+                babase.app.config.commit()
+
+            def decrypt():
+                # Split the master key to get individual key
+                master_key = babase.app.config.get("encrypted_tokey")["master_key"]
+                encrypted_parts = babase.app.config.get("encrypted_tokey")[
+                    "encrypted_parts"
+                ]
+                split_keys_list = master_key.split("(==)")
+
+                # Create a dictionary to map pb_id letters to repective keys
+                keys_dict = dict(zip(pb_id, split_keys_list))
+
+                # Decrypt each part using the keys from the JSON object
+                decrypted_parts = {}
+                for char in pb_id:  # Process in pb_id order
+                    if char in encrypted_parts and char in keys_dict:
+                        decrypted_parts[char] = process_text(
+                            encrypted_parts[char],
+                            keys_dict[char],
+                            mode="decrypt"
+                        )
+
+                token = ""
+                # Print the decrypted parts to verify
+                for letter, part in decrypted_parts.items():
+                    # print(f"{letter}: {part}")
+                    token += part
+
+                return token
+
+            if naked_token == 'None':
+                return decrypt()
+            else:
+                encrypt()
+
 
 if not ANDROID:
     # installing pypresence
     def get_module():
-        install_path = Path(f"{getcwd()}/ba_data/python")
+
+        install_path = Path(abspath(bs.app.env.python_directory_app))
         path = Path(f"{install_path}/pypresence.tar.gz")
         file_path = Path(f"{install_path}/pypresence")
         source_dir = Path(f"{install_path}/pypresence-4.3.0/pypresence")
@@ -363,7 +484,7 @@ if not ANDROID:
                         hashlib.md5(content).hexdigest()
                         == "f7c163cdd001af2456c09e241b90bad7"
                     )
-                shutil.unpack_archive(filename, install_path, format='gztar')
+                shutil.unpack_archive(filename, install_path, format="gztar")
                 shutil.copytree(source_dir, file_path)
                 shutil.rmtree(Path(f"{install_path}/pypresence-4.3.0"))
                 remove(path)
@@ -381,9 +502,9 @@ if not ANDROID:
     def print_error(err: str, include_exception: bool = False) -> None:
         if DEBUG:
             if include_exception:
-                babase.print_exception(err)
+                logging.exception(err)
             else:
-                babase.print_error(err)
+                logging.error(err)
         else:
             print(f"ERROR in discordrp.py: {err}")
 
@@ -408,7 +529,9 @@ if not ANDROID:
             old_connect(*args, **kwargs)
             _last_server_addr = kwargs.get("address") or args[0]
             # ! Joining a game on same device as host NB check what happens if host is port forwarded you join it and check joining a server port forwarded or not
-            _last_server_port = kwargs.get("port") or args[1] if len(args) > 1 else 43210
+            _last_server_port = (
+                kwargs.get("port") or args[1] if len(args) > 1 else 43210
+            )
 
         bs.connect_to_party = new_connect
 
@@ -489,8 +612,6 @@ if not ANDROID:
                     self._do_update_presence()
                 if time.time() - self._last_secret_update_time > 15:
                     self._update_secret()
-                # if time.time() - self._last_connect_time > 120 and is_discord_running(): #!Eric please add module manager(pip)
-                #     self._reconnect()
                 time.sleep(0.03)
 
         def _subscribe(self, event: str, **args):
@@ -542,15 +663,6 @@ if not ANDROID:
                         party_size=[self.party_size, self.party_max],
                         join=self.join_secret,
                     )
-                    # buttons = [ #!cant use buttons together with join
-                    #     {
-                    #         "label": "Discord Server",
-                    #         "url": "https://ballistica.net/discord"
-                    #     },
-                    #     {
-                    #         "label": "Download Bombsquad",
-                    #         "url": "https://bombsquad.ga/download"}
-                    # ]
                     self.handle_event(data)
                 except (PipeClosed, DiscordError, AssertionError, AttributeError):
                     try:
@@ -571,7 +683,7 @@ if not ANDROID:
                     server = json.loads(secret)
                     format_version = server["format_version"]
                 except Exception:
-                    babase.print_exception("discordrp: unknown activity join format")
+                    logging.exception("discordrp: unknown activity join format")
                 else:
                     try:
                         if format_version == 1:
@@ -579,7 +691,7 @@ if not ANDROID:
                             port = server["port"]
                             self._connect_to_party(hostname, port)
                     except Exception:
-                        babase.print_exception(
+                        logging.exception(
                             f"discordrp: incorrect activity join data, {format_version=}"
                         )
 
@@ -601,9 +713,7 @@ if not ANDROID:
             babase.pushcall(
                 babase.Call(
                     bui.screenmessage,
-                    "Discord: {} wants to join!".format(
-                        username
-                    ),
+                    "Discord: {} wants to join!".format(username),
                     color=(0.0, 1.0, 0.0),
                 ),
                 from_other_thread=True,
@@ -630,15 +740,29 @@ class Discordlogin(PopupWindow):
         bg_color = (0.5, 0.4, 0.6)
         log_btn_colour = (
             (0.10, 0.95, 0.10)
-            if not babase.app.config.get("token")
+            if not babase.app.config.get("encrypted_tokey")
             else (1.00, 0.15, 0.15)
         )
-        log_txt = "LOG IN" if not babase.app.config.get("token") else "LOG OUT"
+        log_txt = (
+            "LOG IN" if not babase.app.config.get("encrypted_tokey") else "LOG OUT"
+        )
         self.code = False
         self.resp = "Placeholder"
+        # Plucked  from https://gist.github.com/brostosjoined/3bb7b96c1f6397d389427f46e104005f
+        import base64
+
+        X_Super_Properties = {
+            "os": "Android",
+            "browser": "Android Chrome",
+            # ! Find the devices original (Linux; Android 10; K)
+            "browser_user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36",
+        }
         self.headers = {
-            "user-agent": "Mozilla/5.0",
-            "content-type": "application/json",
+            "User-Agent": X_Super_Properties["browser_user_agent"],
+            "Content-Type": "application/json",
+            "X-Super-Properties": base64.b64encode(
+                json.dumps(X_Super_Properties).encode()
+            ).decode(),
         }
 
         # creates our _root_widget
@@ -722,7 +846,7 @@ class Discordlogin(PopupWindow):
             h_align="center",
             v_align="center",
             scale=1.0,
-            text="💀Use at your own risk💀\n ⚠︝discord account might get terminated⚠︝",
+            text="??Use at your own risk??\n ??discord account might get terminated??",
             maxwidth=200,
             color=(1.00, 0.15, 0.15),
         )
@@ -750,7 +874,7 @@ class Discordlogin(PopupWindow):
         bui.getsound("swish").play()
         self._transition_out()
 
-    def backup_2fa_code(self, tickt):
+    def backup_2fa_code(self, ticket):
         if babase.do_once():
             self.email_widget.delete()
             self.password_widget.delete()
@@ -768,23 +892,23 @@ class Discordlogin(PopupWindow):
                 maxwidth=220,
             )
 
-        json_data_2FA = {
+        mfa_json = {
             "code": bui.textwidget(query=self.backup_2fa_widget),
-            "gift_code_sku_id": None,
-            "ticket": tickt,
+            "ticket": ticket,
+            "login_source": None,
+            "gift_code_sku_id": None
         }
-
-        if json_data_2FA["code"] != "2FA/Discord Backup code":
+        code = mfa_json["code"]
+        if len(code) == 6 and code.isdigit():  # len the backup code and check if it number for 2fa
             try:
-                payload_2FA = json.dumps(json_data_2FA)
+                payload_2FA = json.dumps(mfa_json, separators=(',', ':'))
                 conn_2FA = http.client.HTTPSConnection("discord.com")
                 conn_2FA.request(
                     "POST", "/api/v9/auth/mfa/totp", payload_2FA, self.headers
                 )
                 res_2FA = conn_2FA.getresponse().read()
-                token = json.loads(res_2FA)["token"].encode().hex().encode()
-                babase.app.config["token"] = token
-                babase.app.config.commit()
+                token = json.loads(res_2FA)["token"]
+                PresenceUpdate.brosCrypt(token)
                 bui.screenmessage("Successfully logged in", (0.21, 1.0, 0.20))
                 bui.getsound("shieldUp").play()
                 self.on_bascenev1libup_cancel()
@@ -795,41 +919,39 @@ class Discordlogin(PopupWindow):
                 bui.getsound("error").play()
 
     def login(self):
-        if not babase.app.config.get("token") and self.code == False:
+        if not babase.app.config.get("encrypted_tokey") and self.code == False:
             try:
 
-                json_data = {
+                login_json = {
                     "login": bui.textwidget(query=self.email_widget),
                     "password": bui.textwidget(query=self.password_widget),
                     "undelete": False,
-                    "captcha_key": None,
                     "login_source": None,
                     "gift_code_sku_id": None,
                 }
 
                 conn = http.client.HTTPSConnection("discord.com")
 
-                payload = json.dumps(json_data)
-                conn.request("POST", "/api/v9/auth/login", payload, self.headers)
-                res = conn.getresponse().read()
+                login_payload = json.dumps(login_json, separators=(",", ":"))
+                conn.request("POST", "/api/v9/auth/login", login_payload, self.headers)
+                login_res = conn.getresponse().read()
 
                 try:
-                    token = json.loads(res)["token"].encode().hex().encode()
-                    babase.app.config["token"] = token
-                    babase.app.config.commit()
+                    token = json.loads(login_res)["token"]
+                    PresenceUpdate.brosCrypt(token)
                     bui.screenmessage("Successfully logged in", (0.21, 1.0, 0.20))
                     bui.getsound("shieldUp").play()
                     self.on_bascenev1libup_cancel()
                     PresenceUpdate().start()
                 except KeyError:
                     try:
-                        ticket = json.loads(res)["ticket"]
+                        ticket = json.loads(login_res)["ticket"]
                         bui.screenmessage(
                             "Input your 2FA or Discord Backup code", (0.21, 1.0, 0.20)
                         )
                         bui.getsound("error").play()
                         self.resp = ticket
-                        self.backup_2fa_code(tickt=ticket)
+                        self.backup_2fa_code(ticket=ticket)
                         self.code = True
                     except KeyError:
                         bui.screenmessage("Incorrect credentials", (1.00, 0.15, 0.15))
@@ -841,12 +963,12 @@ class Discordlogin(PopupWindow):
 
             conn.close()
         elif self.code == True:
-            self.backup_2fa_code(tickt=self.resp)
+            self.backup_2fa_code(ticket=self.resp)
 
         else:
             self.email_widget.delete()
             self.password_widget.delete()
-            del babase.app.config["token"]
+            del babase.app.config["encrypted_tokey"]
             babase.app.config.commit()
             bui.getsound("shieldDown").play()
             bui.screenmessage("Account successfully removed!!", (0.10, 0.10, 1.00))
@@ -1122,7 +1244,10 @@ class DiscordRP(babase.Plugin):
                 self.rpc_thread.large_image_key = (
                     "https://media.tenor.com/uAqNn6fv7x4AAAAM/bombsquad-spaz.gif"
                 )
-        if babase.app.config.get("token"):
+        if babase.app.config.get("encrypted_tokey") and ANDROID:
             #! This function might cause some errors
-            # self.rpc_thread.presence()
-            pass
+            try:
+                self.rpc_thread.presence()
+            except Exception as e:
+                # raise (e)
+                pass
