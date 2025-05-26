@@ -41,7 +41,7 @@ import _babase
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 
 
-from babase._error import print_exception, print_error, NotFoundError
+import logging
 
 from babase._language import Lstr
 
@@ -251,11 +251,11 @@ def handlemessage(self, msg: Any) -> Any:
 
         # If we've been removed from the lobby, ignore this stuff.
         if self._dead:
-            print_error('chooser got ChangeMessage after dying')
+            logging.error('chooser got ChangeMessage after dying')
             return
 
         if not self._text_node:
-            print_error('got ChangeMessage after nodes died')
+            logging.error('got ChangeMessage after nodes died')
             return
         if msg.what == 'characterchooser':
             self._click_sound.play()
