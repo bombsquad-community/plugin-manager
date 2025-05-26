@@ -943,6 +943,7 @@
         }
       ],
       "versions": {
+        "2.2.0": null,
         "2.1.0": {
           "api_version": 9,
           "commit_sha": "bb129cc",
