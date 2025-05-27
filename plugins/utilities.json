@@ -1861,6 +1861,17 @@
           "md5sum": "3ad8036b3491588bdc8a002803f2df58"
         }
       }
-    }
+    },
+    "infinite_impact_bombs": {
+      "description": "Gives you infinite impact bombs by pressing button in party window",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "imAnesYT",
+          "email": "",
+          "discord": "v4_y"
+        }
+      ],
+      "versions": null
   }
 }
