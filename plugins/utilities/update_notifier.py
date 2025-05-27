@@ -5,11 +5,11 @@
 from platform import machine
 import threading
 import time
-import webbrowser
 import urllib.request
 import re
 
 import babase
+import bauiv1 as bui
 import bascenev1 as bs
 
 
@@ -83,6 +83,11 @@ def fetch_update():
         extension = link.replace('https://files.ballistica.net/bombsquad/builds/', '')
         if build:
             if not ('server' in link_lower) and bs_platform.lower() in link_lower:
+                app = bui.app
+                subplatform = app.classic.subplatform
+                if subplatform == "google":
+                    return
+                    
                 babase.screenmessage(
                     "A new BombSquad version is available...\nRedirecting to download page", (0.21, 1.0, 0.20))
                 sound_sequence = [
@@ -101,7 +106,7 @@ def fetch_update():
                         time.sleep(delay)
                     babase.pushcall(babase.Call(play_sound, sound), from_other_thread=True)
                 time.sleep(1)
-                webbrowser.open(f'https://ballistica.net/downloads#:~:text={extension}')
+                bui.open_url(f'https://ballistica.net/downloads#:~:text={extension}')
         elif not build:
             if ('server' in link_lower) and bs_platform.lower() in link_lower:
                 GREEN = "\033[32m"
@@ -110,7 +115,7 @@ def fetch_update():
                 try:
                     print(f"{GREEN}A new BombSquad version is available...Redirecting to download page{RESET}")
                     time.sleep(4)
-                    webbrowser.open(f'https://ballistica.net/downloads#:~:text={extension}')
+                    bui.open_url(f'https://ballistica.net/downloads#:~:text={extension}')
                 except:
                     print(
                         f"{GREEN}Download the latest version using this official link-> {LIGHT_BLUE}{link}{RESET}")
