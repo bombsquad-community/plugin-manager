@@ -39,8 +39,8 @@ def fetch_update():
 
     match = re.search(r'<td class="onlydesktop">(\d+)</td>', web_content)
     if match:
-        latest_build_number = match.group(1)
-        current_build_number = babase.app.env.engine_build_number
+        latest_build_number = int(match.group(1))
+        current_build_number = int(babase.app.env.engine_build_number)
         if latest_build_number == current_build_number:
             return
 
