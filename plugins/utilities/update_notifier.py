@@ -87,7 +87,7 @@ def fetch_update():
                 subplatform = app.classic.subplatform
                 if subplatform == "google":
                     return
-                    
+
                 babase.screenmessage(
                     "A new BombSquad version is available...\nRedirecting to download page", (0.21, 1.0, 0.20))
                 sound_sequence = [
