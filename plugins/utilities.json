@@ -1862,8 +1862,8 @@
         }
       }
     },
-    "infinite_impact_bombs": {
-      "description": "Gives you infinite impact bombs by pressing button in party window",
+    "quick_chat": {
+      "description": "Easier send messages, add/remove messages",
       "external_url": "",
       "authors": [
         {
@@ -1873,5 +1873,9 @@
         }
       ],
       "versions": null
+        }
+      }
+    }
   }
 }
+
