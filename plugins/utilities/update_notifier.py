@@ -22,49 +22,50 @@ def threaded(func):
 
     return wrapper
 
+
 def play_sound(sound):
     with bs.get_foreground_host_activity().context:
         bs.getsound(sound).play()
-        
+
+
 @threaded
 def fetch_update():
     url = 'https://ballistica.net/downloads'
-    try:  
+    try:
         response = urllib.request.urlopen(url)
         web_content = response.read().decode('utf-8')
     except:
         return
-    
+
     match = re.search(r'<td class="onlydesktop">(\d+)</td>', web_content)
     if match:
         latest_build_number = match.group(1)
         current_build_number = babase.app.env.engine_build_number
         if latest_build_number == current_build_number:
             return
-        
+
     pattern = r'<a\s+href=["\']([^"\']+\.(?:apk|tar\.gz|dmg|zip))["\']'
-    
+
     # Find all matches in the HTML content
     matches = re.findall(pattern, web_content)
-    
+
     download_links = []
-    
+
     for link in matches:
         # Skip navigation links
         if link.startswith(('?', '/', 'old/')):
             continue
-            
+
         # Create full URL if needed
         if not link.startswith('http'):
             full_url = url + link
         else:
             full_url = link
-            
+
         download_links.append(full_url)
-    
-    
+
     build = babase.app.env.gui
-    bs_platform = babase.app.classic.platform   
+    bs_platform = babase.app.classic.platform
     mash = machine().lower()
     if bs_platform.lower() == 'linux':
         if mash in ("x86_64", "amd64"):
@@ -76,13 +77,14 @@ def fetch_update():
             bs_platform = "Mac_x86_64"
         elif mash in ("aarch64", "arm64"):
             bs_platform = "Mac_Arm64"
-    
+
     for link in download_links:
-        link_lower = link.lower()  
+        link_lower = link.lower()
         extension = link.replace('https://files.ballistica.net/bombsquad/builds/', '')
         if build:
             if not ('server' in link_lower) and bs_platform.lower() in link_lower:
-                babase.screenmessage("A new BombSquad version is available...\nRedirecting to download page", (0.21, 1.0, 0.20))
+                babase.screenmessage(
+                    "A new BombSquad version is available...\nRedirecting to download page", (0.21, 1.0, 0.20))
                 sound_sequence = [
                     ("drumRoll", 0),
                     ("fanfare", 0),
@@ -110,8 +112,9 @@ def fetch_update():
                     time.sleep(4)
                     webbrowser.open(f'https://ballistica.net/downloads#:~:text={extension}')
                 except:
-                    print(f"{GREEN}Download the latest version using this official link-> {LIGHT_BLUE}{link}{RESET}")
-            
+                    print(
+                        f"{GREEN}Download the latest version using this official link-> {LIGHT_BLUE}{link}{RESET}")
+
 
 # ba_meta export babase.Plugin
 class bybrostos(babase.Plugin):
