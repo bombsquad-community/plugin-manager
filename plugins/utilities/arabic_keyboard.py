@@ -20,6 +20,8 @@ while len(arabic_nums) < 26:
     arabic_nums.append('‎')
 
 # ba_meta export bauiv1.Keyboard
+
+
 class ArabicKeyboard(bauiv1.Keyboard):
     """Arabic Keyboard by \ue048Freaku"""
     name = 'Arabic Keyboard by yANES'
