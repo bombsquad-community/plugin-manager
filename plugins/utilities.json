@@ -1861,6 +1861,21 @@
           "md5sum": "3ad8036b3491588bdc8a002803f2df58"
         }
       }
+    },
+    "arabic_keyboard": {
+      "description": "Add arabic language to interal keyboard",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "imAnesYT",
+          "email": "",
+          "discord": "v4_y"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+        }
+      }
     }
   }
 }
