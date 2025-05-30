@@ -43,8 +43,8 @@ jobs:
     
     - name: Apply Version Metadata
       run: |
-        echo "Python files found in the repository:"
-        find . -type f -name "*.py"
+        echo "Python files changed in PR:"
+        git diff --name-only origin/${{ github.base_ref }}..origin/${{ github.head_ref }} | grep ".py$"
         python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
     
     - name: Commit Version Metadata
