@@ -43,7 +43,7 @@ jobs:
     
     - name: Apply Version Metadata
       run: |
-        echo "find . -type f -name "*.py"
+        echo "find . -type f -name "
         python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
     
     - name: Commit Version Metadata
