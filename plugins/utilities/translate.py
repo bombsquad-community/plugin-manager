@@ -15,8 +15,8 @@ import random
 
 show_translate_result = True
 config = babase.app.config
-default_config = {'O Source Trans Lang': 'Auto Detect', 'O Target Trans Lang': babase.app.lang.default_language,
-                  'Y Source Trans Lang': 'Auto Detect', 'Y Target Trans Lang': babase.app.lang.default_language}
+default_config = {'O Source Trans Lang': 'Auto Detect', 'O Target Trans Lang': babase.app.locale.default_locale,
+                  'Y Source Trans Lang': 'Auto Detect', 'Y Target Trans Lang': babase.app.locale.default_locale}
 
 for key in default_config:
     if not key in config:
