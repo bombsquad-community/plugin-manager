@@ -4,8 +4,6 @@
 
 # ba_meta require api 9
 #!"Made to you by @brostos & @Dliwk"
-# TODO
-# - Update to the latest libs
 
 
 from __future__ import annotations
