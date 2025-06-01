@@ -1,5 +1,6 @@
 # Released under the MIT License. See LICENSE for details.
 # BY Stary_Agent
+#
 """Hockey game and support classes."""
 
 # ba_meta require api 9
