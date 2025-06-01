@@ -46,7 +46,7 @@ jobs:
         LAST_SHORTEN_COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
         LAST_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1)
         CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r "$LAST_COMMIT_HASH")
-        echo "$CHANGED_FILES"
+        echo $CHANGED_FILES
         python test/auto_apply_version_metadata.py "$LAST_SHORTEN_COMMIT_HASH" "$CHANGED_FILES"
     
     - name: Commit Version Metadata
