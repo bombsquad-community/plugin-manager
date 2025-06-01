@@ -221,7 +221,7 @@ def auto_apply_version_metadata(last_commit_sha):
 if __name__ == "__main__":
     try:
         last_commit_sha = sys.argv[1]
-        print(type(sys.argv[2]), sys.argv[2])
+        print(type(sys.argv), sys.argv)
     except KeyError:
         raise ValueError("Last commit SHA not provided.")
     else:
