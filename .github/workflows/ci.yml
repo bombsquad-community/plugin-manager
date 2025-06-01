@@ -44,7 +44,7 @@ jobs:
     - name: Apply Version Metadata
       run: |
         echo "Log:"
-        git log --pretty=format:'%h' -n 1
+        git log --pretty=format:'%H' -n 1
         python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
     
     - name: Commit Version Metadata
