@@ -7,7 +7,7 @@ def update_plugin_json(plugin_info, category):
     name = next(iter(plugin_info))
     details = plugin_info[name]
 
-    with open(f"plugins{category}.json", 'r+') as file:
+    with open(f"plugins{category}{category}.json", 'r+') as file:
         data = json.load(file)
         try:
             # Check if plugin is already in the json
