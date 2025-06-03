@@ -40,14 +40,15 @@ jobs:
       with:
         commit_message: "[ci] auto-format"
         branch: ${{ github.head_ref }}
-    
-    - name: Apply Version Metadata
+    - name: Apply Plugin Metadata  
       run: |
-        LAST_SHORTEN_COMMIT_HASH=$(git log --pretty=format:'%h' -n 1)
         LAST_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1)
         CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r "$LAST_COMMIT_HASH")
-        echo CHANGED_FILES
-        python test/auto_apply_version_metadata.py "$LAST_SHORTEN_COMMIT_HASH" "$CHANGED_FILES"
+        python test/auto_apply_plugin_metadata.py "$CHANGED_FILES"
+
+    - name: Apply Version Metadata
+      run: |
+        python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
     
     - name: Commit Version Metadata
       uses: stefanzweifel/git-auto-commit-action@v5
