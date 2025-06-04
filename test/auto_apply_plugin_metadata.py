@@ -11,12 +11,17 @@ def update_plugin_json(plugin_info, category):
         data = json.load(file)
         try:
             # Check if plugin is already in the json
-            data['plugins'][name]
+            plugin = data['plugins'][name]
             plugman_version = int(next(iter(data["plugins"][name]["versions"])).replace('.', ''))
             current_version = int(next(iter(details["versions"])).replace('.', ''))
             # `or` In case another change was made on the plugin while still on pr
             if current_version > plugman_version or current_version == plugman_version:
-                data[name][details]["versions"][next(iter(details["versions"]))] = None
+                plugin["versions"][next(iter(details["versions"]))] = None
+                # Ensure latest version appears first
+                plugin["versions"] = dict(sorted(plugin["versions"].items(), reverse=True))
+                plugin["description"] = details["description"]
+                plugin["external_url"] = details["external_url"]
+                plugin["authors"] = details["authors"]
             elif current_version < plugman_version:
                 raise Exception('Version cant be lower than the previous')
         except KeyError:
