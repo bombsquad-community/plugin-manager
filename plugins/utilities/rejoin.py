@@ -26,7 +26,7 @@ def R(s):
         return s(t, *f, **g)
     return w
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class byBordd(v):

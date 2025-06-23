@@ -51,6 +51,6 @@ class NewBlast(bomb.Blast):
         bs.timer(13.0, scorch.delete)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class RandomColorsPlugin(babase.Plugin):
     bomb.Blast = NewBlast

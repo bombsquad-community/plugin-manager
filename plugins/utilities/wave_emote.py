@@ -46,7 +46,7 @@ def wave_emote():
                     last_len_msg = len(bs.get_chat_messages())
                     print(last_len_msg, "last_len_msg")
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class brostos(babase.Plugin):

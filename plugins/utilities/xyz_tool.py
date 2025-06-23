@@ -84,7 +84,7 @@ def replaceable_punch(self) -> None:
                             SpazFactory.get().swish_sound, 0.8))
     self._turbo_filter_add_press('punch')
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class ragingspeedhorn(babase.Plugin):

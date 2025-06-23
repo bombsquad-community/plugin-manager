@@ -13,7 +13,7 @@ def new_play_types(cls):
 
 
 # ba_meta require api 9
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class byFreaku(babase.Plugin):
     def on_app_running(self):
         TowerD.get_play_types = new_play_types

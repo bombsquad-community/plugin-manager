@@ -19,7 +19,7 @@ import babase
 
 # ba_meta require api 9
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class WiggleDance(babase.Plugin):

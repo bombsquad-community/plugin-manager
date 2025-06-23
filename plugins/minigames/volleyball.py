@@ -750,7 +750,7 @@ bs._map.register_map(VolleyBallMap)
 bs._map.register_map(VolleyBallMapH)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class byFreaku(babase.Plugin):
     def __init__(self):
         # Reason of plugin:

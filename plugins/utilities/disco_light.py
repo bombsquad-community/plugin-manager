@@ -207,7 +207,7 @@ def new_chat_message(func):
     return wrapper
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class ByCrossJoy(babase.Plugin):
     def __init__(self):
         # Replace new chat func to the original game codes.

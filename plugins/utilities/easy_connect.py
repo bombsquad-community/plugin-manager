@@ -727,7 +727,7 @@ class PartyQuickConnect(bui.Window):
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class InitalRun(babase.Plugin):
     def __init__(self):
         replace()

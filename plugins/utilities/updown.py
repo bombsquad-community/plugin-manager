@@ -83,7 +83,8 @@ class VeryPW(party.PartyWindow):
             cw(edit=s._columnwidget, visible_child=txt)
 
 # ba_meta require api 9
-# ba_meta export plugin
+
+# ba_meta export babase.Plugin
 
 
 class byBordd(Plugin):

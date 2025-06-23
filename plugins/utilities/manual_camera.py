@@ -236,7 +236,7 @@ def _manual_camera(self, widget):
 
     self.main_window_replace(Manual_camera_window(origin_widget=widget))
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class ByDroopy(babase.Plugin):

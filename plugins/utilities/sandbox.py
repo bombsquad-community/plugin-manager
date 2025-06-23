@@ -5928,7 +5928,8 @@ class CustomBotSet(SpazBotSet):
 # ba_meta require api 9
 # BroBordd touch grass
 # Copyright 2024, solely by BroBordd. All rights reserved.
-# ba_meta export plugin
+
+# ba_meta export babase.Plugin
 
 
 class byBordd(ba.Plugin):

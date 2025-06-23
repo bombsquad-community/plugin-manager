@@ -748,9 +748,7 @@ def get_player(msg, activity):
             return player
 
 
-# ba_meta export plugin
-
-
+# ba_meta export babase.Plugin
 class bySmoothy(babase.Plugin):
     def __init__(self):
         _babase.import_character = import_character

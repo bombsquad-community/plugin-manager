@@ -158,7 +158,7 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
         bui.containerwidget(edit=win, transition='out_scale')
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class ByANES(babase.Plugin):
     def on_app_running(self):
         bauiv1lib.party.PartyWindow = QuickChatPartyWindow

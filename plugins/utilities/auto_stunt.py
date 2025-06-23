@@ -539,7 +539,7 @@ def on_begin(self, *args, **kwargs) -> None:
     self._stick_nub_image.opacity = 0.0
     return original_on_begin(self, *args, **kwargs)
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class byHeySmoothy(babase.Plugin):

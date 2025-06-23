@@ -88,7 +88,7 @@ def equip_shields(self, decay: bool = False) -> None:
         self.shield.always_show_health_bar = True
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class InfinityShieldPlugin(babase.Plugin):
     Spaz.__init__ = __init__
     Spaz.equip_shields = equip_shields

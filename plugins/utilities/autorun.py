@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     Only through experimentation you can forge a failure into a success.
 """
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class AutoRun(babase.Plugin):

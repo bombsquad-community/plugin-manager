@@ -337,7 +337,7 @@ def _restore_state(self) -> None:
     except Exception:
         babase.print_exception('Error restoring gather-win state.')
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class MaxPlayersPlugin(babase.Plugin):

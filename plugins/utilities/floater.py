@@ -268,7 +268,7 @@ def new_chat_message(*args, **kwargs):
 
 bs.chatmessage = new_chat_message
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class byFreaku(babase.Plugin):

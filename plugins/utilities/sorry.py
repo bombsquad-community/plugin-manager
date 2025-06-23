@@ -60,7 +60,8 @@ class SorryPW(bauiv1lib.party.PartyWindow):
                 bs.apptimer((i-10)/10, bs.Call(s._ok, i))
 
 # ba_meta require api 9
-# ba_meta export plugin
+
+# ba_meta export babase.Plugin
 
 
 class byBordd(babase.Plugin):
