@@ -247,7 +247,8 @@ class TranslateWindow:
 
 
 # ba_meta require api 9
-# ba_meta export plugin
+
+# ba_meta export babase.Plugin
 class byFreaku(babase.Plugin):
     def __init__(self):
         bauiv1lib.party.PartyWindow = NewPW

@@ -26,9 +26,7 @@ from bascenev1lib.actor.bomb import Bomb
 if TYPE_CHECKING:
     pass
 
-# ba_meta export plugin
-
-
+# ba_meta export babase.Plugin
 class BombRadiusVisualizer(babase.Plugin):
 
     # We use a decorator to add extra code to existing code, increasing mod compatibility.

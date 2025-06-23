@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 """
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class TNTRespawnText(babase.Plugin):
 
     # This clamping function will make sure a certain value can't go above or below a certain threshold.

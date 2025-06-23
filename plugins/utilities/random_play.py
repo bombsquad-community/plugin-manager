@@ -195,7 +195,7 @@ def game_starter_factory(sessiontype: type[Session]):
     return on_run
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class RandomPlayPlugin(babase.Plugin):
     """
     A plugin that allows you to play randomly generated FFA or Teams matches by selecting a random minigame and map for each round.

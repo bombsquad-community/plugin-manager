@@ -30,9 +30,7 @@ from bascenev1lib.actor.spazfactory import SpazFactory
 if TYPE_CHECKING:
     pass
 
-# ba_meta export plugin
-
-
+# ba_meta export babase.Plugin
 class RagdollBGone(babase.Plugin):
 
     # We use a decorator to add extra code to existing code, increasing mod compatibility.

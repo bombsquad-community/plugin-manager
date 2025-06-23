@@ -68,7 +68,7 @@ def new_handlemessage_spaz_(func):
     return wrapper
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class ByCrossJoy(babase.Plugin):
 
     def __init__(self):

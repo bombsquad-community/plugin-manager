@@ -14,6 +14,7 @@
         }
       ],
       "versions": {
+        "1.1.1": null,
         "1.1.0": {
           "api_version": 9,
           "commit_sha": "4ccfc7b",

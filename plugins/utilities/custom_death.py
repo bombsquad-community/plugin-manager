@@ -37,6 +37,6 @@ def handlemessage(self, msg: Any) -> Any:
         return self.oldhandlemessage(msg)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class CustomDeath(babase.Plugin):
     Spaz.handlemessage = handlemessage

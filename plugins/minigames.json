@@ -39,6 +39,7 @@
         }
       ],
       "versions": {
+        "2.0.1": null,
         "2.0.0": {
           "api_version": 9,
           "commit_sha": "6bf081a",
@@ -319,6 +320,7 @@
         }
       ],
       "versions": {
+        "3.0.1": null,
         "3.0.0": {
           "api_version": 9,
           "commit_sha": "07f7a85",
@@ -356,6 +358,7 @@
         }
       ],
       "versions": {
+        "3.0.1": null,
         "3.0.0": {
           "api_version": 9,
           "commit_sha": "6bf081a",
@@ -1370,6 +1373,7 @@
         }
       ],
       "versions": {
+        "1.1.1": null,
         "1.1.0": {
           "api_version": 9,
           "commit_sha": "17e968d",

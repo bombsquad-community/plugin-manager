@@ -396,7 +396,7 @@ class ShareTab(WatchWindow):
             ShareTabUi(self.my_tab_container)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 class Loup(babase.Plugin):
     def on_app_running(self):

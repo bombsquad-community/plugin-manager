@@ -60,7 +60,7 @@ def modified_get_store_layout() -> Dict[str, List[Dict[str, Any]]]:
     return layout
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class Main(babase.Plugin):
     def on_app_running(self) -> None:
         bui.app.classic.store.get_store_layout = modified_get_store_layout

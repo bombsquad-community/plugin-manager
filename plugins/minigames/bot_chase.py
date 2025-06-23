@@ -208,7 +208,7 @@ class BotChaseGame(bs.TeamGameActivity[Player, Team]):
         self.end(results=results)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##

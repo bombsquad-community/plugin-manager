@@ -117,6 +117,6 @@ class ForestMap(bs.Map):
         return x_adj * x_adj + z_adj * z_adj > 1.0
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class EnableMe(babase.Plugin):
     _map.register_map(ForestMap)

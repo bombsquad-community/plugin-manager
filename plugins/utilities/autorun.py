@@ -72,9 +72,7 @@ if TYPE_CHECKING:
     Only through experimentation you can forge a failure into a success.
 """
 
-# ba_meta export plugin
-
-
+# ba_meta export babase.Plugin
 class AutoRun(babase.Plugin):
     # During my research and prototyping I figured I'd have to do some linear algebgra.
     # I didn't want to use libraries, since this is supposed to be a standalone mod.
