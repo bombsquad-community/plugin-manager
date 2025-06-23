@@ -27,6 +27,8 @@ def R(s):
     return w
 
 # ba_meta export babase.Plugin
+
+
 class byBordd(v):
     def __init__(s):
         m._refresh_in_game = R(m._refresh_in_game)

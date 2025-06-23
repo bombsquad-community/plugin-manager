@@ -237,6 +237,8 @@ def _manual_camera(self, widget):
     self.main_window_replace(Manual_camera_window(origin_widget=widget))
 
 # ba_meta export babase.Plugin
+
+
 class ByDroopy(babase.Plugin):
     def __init__(self):
         InGameMenuWindow._refresh_in_game = my_refresh_in_game

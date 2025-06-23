@@ -5,6 +5,8 @@ from bascenev1 import broadcastmessage as push, get_foreground_host_activity as 
 # ba_meta require api 9
 
 # ba_meta export babase.Plugin
+
+
 class byBordd(p):
     def ear(s):
         a = gcm()

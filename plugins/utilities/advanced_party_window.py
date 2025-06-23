@@ -2151,6 +2151,8 @@ class CustomAccountViewerWindow(viewer.AccountViewerWindow):
                 babase.print_exception('Error displaying account info.')
 
 # ba_meta export babase.Plugin
+
+
 class bySmoothy(babase.Plugin):
     def __init__(self):
         bs.connect_to_party = newconnect_to_party

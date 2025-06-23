@@ -270,6 +270,7 @@ bs.chatmessage = new_chat_message
 
 # ba_meta export babase.Plugin
 
+
 class byFreaku(babase.Plugin):
     def on_app_running(self):
         pass

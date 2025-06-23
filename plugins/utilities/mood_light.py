@@ -290,6 +290,8 @@ bs.chatmessage = new_chat_message
 Map._old_init = Map.__init__
 
 # ba_meta export babase.Plugin
+
+
 class moodlight(babase.Plugin):
     def __init__(self):
         pass

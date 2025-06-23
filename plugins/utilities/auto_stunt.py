@@ -540,6 +540,8 @@ def on_begin(self, *args, **kwargs) -> None:
     return original_on_begin(self, *args, **kwargs)
 
 # ba_meta export babase.Plugin
+
+
 class byHeySmoothy(babase.Plugin):
     def on_app_running(self):
         bs._activity.Activity.on_begin = on_begin

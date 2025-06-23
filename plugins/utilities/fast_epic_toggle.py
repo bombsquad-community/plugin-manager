@@ -43,6 +43,8 @@ class FastEpicSwitcher(bauiv1lib.party.PartyWindow):
         bui.screenmessage("Switched to Epic Mode!", color=(0, 1, 0))
 
 # ba_meta export babase.Plugin
+
+
 class ByANES(babase.Plugin):
     def on_app_running(self):
         bauiv1lib.party.PartyWindow = FastEpicSwitcher

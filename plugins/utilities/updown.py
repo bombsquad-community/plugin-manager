@@ -85,6 +85,8 @@ class VeryPW(party.PartyWindow):
 # ba_meta require api 9
 
 # ba_meta export babase.Plugin
+
+
 class byBordd(Plugin):
     def __init__(s):
         party.PartyWindow = VeryPW

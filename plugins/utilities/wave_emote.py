@@ -47,5 +47,7 @@ def wave_emote():
                     print(last_len_msg, "last_len_msg")
 
 # ba_meta export babase.Plugin
+
+
 class brostos(babase.Plugin):
     timer = bs.AppTimer(0.5, wave_emote, repeat=True)

@@ -348,6 +348,8 @@ def _update_text(self) -> None:
     self._text_node.text = text
 
 # ba_meta export babase.Plugin
+
+
 class HeySmoothy(babase.Plugin):
 
     def __init__(self):

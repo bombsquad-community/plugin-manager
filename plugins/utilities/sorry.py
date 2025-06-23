@@ -62,6 +62,8 @@ class SorryPW(bauiv1lib.party.PartyWindow):
 # ba_meta require api 9
 
 # ba_meta export babase.Plugin
+
+
 class byBordd(babase.Plugin):
     def __init__(s):
         bauiv1lib.party.PartyWindow = SorryPW

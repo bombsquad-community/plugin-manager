@@ -20,6 +20,8 @@ import babase
 # ba_meta require api 9
 
 # ba_meta export babase.Plugin
+
+
 class WiggleDance(babase.Plugin):
     def add_dance_mechanic_to_spaz(spaz_class):
         """Add dance mechanic to the Spaz class"""

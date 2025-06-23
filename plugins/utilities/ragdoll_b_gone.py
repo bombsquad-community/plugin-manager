@@ -31,6 +31,8 @@ if TYPE_CHECKING:
     pass
 
 # ba_meta export babase.Plugin
+
+
 class RagdollBGone(babase.Plugin):
 
     # We use a decorator to add extra code to existing code, increasing mod compatibility.
