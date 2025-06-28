@@ -1,4 +1,3 @@
-# Ported by brostos to api 8
 # Tool used to make porting easier.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 
@@ -7,7 +6,7 @@
 #  created in BCS (Bombsquad Consultancy Service) - opensource bombsquad mods for all
 #  discord.gg/ucyaesh    join now and give your contribution
 #  The Egg game by mr.smoothy
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -124,12 +123,6 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
     name = 'Epic Egg Game'
     description = 'Score some goals.'
     available_settings = [
-        bs.IntSetting(
-            'Score to Win',
-            min_value=1,
-            default=1,
-            increment=1,
-        ),
         bs.IntChoiceSetting(
             'Time Limit',
             choices=[
@@ -339,7 +332,7 @@ class EggGame(bs.TeamGameActivity[Player, Team]):
 
         try:
             col = source_player.team.color
-            self.flagg = Flag(pos, touchable=False, color=col).autoretain()
+            self.flagg = Flag(touchable=False, position=pos, color=col).autoretain()
             self.flagg.is_area_of_interest = True
             player_pos = source_player.node.position
 
