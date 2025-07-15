@@ -7,6 +7,7 @@ import bascenev1 as bs
 import babase
 import random
 
+
 class AuraEffect:
     def __init__(self, player: bs.Player):
         self._player = player
@@ -69,7 +70,7 @@ class AuraEffect:
 class AuraOverloadFX(babase.Plugin):
     def __init__(self):
         bs.Activity.__init__ = self._wrap_activity_init(bs.Activity.__init__)
-    
+
     def _wrap_activity_init(self, original):
         def new_init(activity_self, settings):
             original(activity_self, settings)
