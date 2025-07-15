@@ -2129,7 +2129,7 @@
     }
   }
 },
-    "snowfallModz": {
+"snowfallModz": {
       "description": "add snowfall in local match",
       "external_url": "",
       "authors": [
@@ -2141,8 +2141,10 @@
       ],
       "versions": {
         "1.0.0": null
-        "api_version": 9,
-        "released_on": "15-07-2025"
       }
-    }
+    },
+    ...
+  }
+  ...
+}
   
