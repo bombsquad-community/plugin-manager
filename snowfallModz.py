@@ -7,6 +7,7 @@ import random
 import bascenev1 as bs
 import babase
 
+
 def start_snowfall(activity: bs.Activity) -> None:
     if not hasattr(activity, 'map'):
         return
@@ -38,6 +39,8 @@ def start_snowfall(activity: bs.Activity) -> None:
     bs.timer(0.5, emit_snow, repeat=True)
 
 # ba_meta export plugin
+
+
 class SnowfallFX(babase.Plugin):
     def __init__(self):
         bs.Activity.__init__ = self._wrap_activity_init(bs.Activity.__init__)
