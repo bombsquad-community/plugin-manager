@@ -2128,4 +2128,21 @@
       }
     }
   }
-}
+},
+    "snowfallModz": {
+      "description": "add snowfall in local match",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "KritarthaT",
+          "email": "ktgamer768@gmail.com",
+          "discord": kritarthat
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+        "api_version": 9,
+        "released_on": "15-07-2025"
+      }
+    }
+  
