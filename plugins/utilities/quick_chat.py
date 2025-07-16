@@ -51,7 +51,8 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
         messages = load_messages()
         w, h = 400, 300
 
-        root = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(w, h), transition='in_scale', scale=1.2, color=(0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=root, transition='out_scale'))
+        root = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(w, h), transition='in_scale', scale=1.2, color=(
+            0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=root, transition='out_scale'))
 
         self._msg_scroll = bui.scrollwidget(
             parent=root, position=(20, 80), size=(360, 180), color=(0, 0, 0))
@@ -99,7 +100,7 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
 
     def _send_and_close(self, message: str, root_widget):
         bs.chatmessage(message)
-        bui.containerwidget(edit=root_widget, transition='out_scale')  
+        bui.containerwidget(edit=root_widget, transition='out_scale')
 
     def _add_message(self, parent):
         def save_new():
@@ -138,17 +139,18 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
 
         h = 50 + len(msgs) * 45
         h = min(h, 300)
-        win = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(300, h), transition='in_scale', scale=1.2, color=(0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=win, transition='out_scale'))
+        win = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(300, h), transition='in_scale', scale=1.2, color=(
+            0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=win, transition='out_scale'))
         col = bui.columnwidget(parent=win)
 
         bui.buttonwidget(
-                parent=col,
-                label=f'Colse',
-                size=(260, 40),
-                textcolor=(1, 1, 1),
-                color=(1, 0.2, 0.2),
-                on_activate_call=lambda: bui.containerwidget(edit=win, transition='out_scale')
-            )
+            parent=col,
+            label=f'Colse',
+            size=(260, 40),
+            textcolor=(1, 1, 1),
+            color=(1, 0.2, 0.2),
+            on_activate_call=lambda: bui.containerwidget(edit=win, transition='out_scale')
+        )
         for msg in msgs:
             bui.buttonwidget(
                 parent=col,
