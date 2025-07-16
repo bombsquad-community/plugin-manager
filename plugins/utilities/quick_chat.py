@@ -99,8 +99,7 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
 
     def _send_and_close(self, message: str, root_widget):
         bs.chatmessage(message)
-        bui.containerwidget(edit=root_widget, transition='out_scale')
-        
+        bui.containerwidget(edit=root_widget, transition='out_scale')  
 
     def _add_message(self, parent):
         def save_new():
