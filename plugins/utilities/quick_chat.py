@@ -51,7 +51,8 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
         messages = load_messages()
         w, h = 400, 300
 
-        root = bui.containerwidget(size=(w, h), transition='in_scale', scale=1.2, color=(0, 0, 0))
+        root = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(w, h), transition='in_scale', scale=1.2, color=(
+            0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=root, transition='out_scale'))
 
         self._msg_scroll = bui.scrollwidget(
             parent=root, position=(20, 80), size=(360, 180), color=(0, 0, 0))
@@ -110,9 +111,11 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
                 save_messages(msgs)
                 bui.screenmessage(f'Added: "{new_msg}"', color=(0, 1, 0))
             bui.containerwidget(edit=win, transition='out_scale')
+            bui.containerwidget(edit=parent, transition='out_scale')
+            self._open_quick_chat_menu()
 
-        win = bui.containerwidget(size=(300, 140), transition='in_scale',
-                                  scale=1.2, color=(0, 0, 0))
+        win = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(300, 140), transition='in_scale',
+                                  scale=1.2, color=(0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=win, transition='out_scale'))
 
         bui.textwidget(parent=win, position=(20, 90), size=(260, 30),
                        text='New Message:', scale=0.9, h_align='left', v_align='center', color=(1, 1, 1))
@@ -136,9 +139,18 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
 
         h = 50 + len(msgs) * 45
         h = min(h, 300)
-        win = bui.containerwidget(size=(300, h), transition='in_scale', scale=1.2, color=(0, 0, 0))
+        win = bui.containerwidget(parent=bui.get_special_widget('overlay_stack'), size=(300, h), transition='in_scale', scale=1.2, color=(
+            0, 0, 0), on_outside_click_call=lambda: bui.containerwidget(edit=win, transition='out_scale'))
         col = bui.columnwidget(parent=win)
 
+        bui.buttonwidget(
+            parent=col,
+            label=f'Colse',
+            size=(260, 40),
+            textcolor=(1, 1, 1),
+            color=(1, 0.2, 0.2),
+            on_activate_call=lambda: bui.containerwidget(edit=win, transition='out_scale')
+        )
         for msg in msgs:
             bui.buttonwidget(
                 parent=col,
@@ -146,16 +158,18 @@ class QuickChatPartyWindow(bauiv1lib.party.PartyWindow):
                 size=(260, 40),
                 textcolor=(1, 1, 1),
                 color=(0.4, 0.7, 1),
-                on_activate_call=lambda m=msg: self._confirm_delete(m, win)
+                on_activate_call=lambda m=msg: self._confirm_delete(m, win, parent)
             )
 
-    def _confirm_delete(self, msg, win):
+    def _confirm_delete(self, msg, win, parent):
         msgs = load_messages()
         if msg in msgs:
             msgs.remove(msg)
             save_messages(msgs)
             bui.screenmessage(f'Removed: "{msg}"', color=(1, 0.5, 0))
         bui.containerwidget(edit=win, transition='out_scale')
+        bui.containerwidget(edit=parent, transition='out_scale')
+        self._open_quick_chat_menu()
 
 
 # ba_meta export babase.Plugin
