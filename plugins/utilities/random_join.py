@@ -93,7 +93,8 @@ class NewPublicGatherTab(PublicGatherTab, PingThread):
     def _join_random_server(self) -> None:
         name_prefixes = set()
         parties = [p for p in self._get_parties_list() if
-                   (p.size >= randomjoin.minimum_players
+                   (randomjoin.party_name_contains in p.name
+                    and p.size >= randomjoin.minimum_players
                     and p.size < p.size_max and (randomjoin.maximum_ping == 9999
                                                  or (p.ping is not None
                                                      and p.ping <= randomjoin.maximum_ping)))]
@@ -195,6 +196,26 @@ class RandomJoinSettingsPopup(bui.Window):
             max_chars=4,
         )
         v -= 60
+        bui.textwidget(
+            parent=self._root_widget,
+            size=(0, 0),
+            h_align='right',
+            v_align='center',
+            text='Party name contains',
+            maxwidth=c_width * 0.3,
+            position=(c_width * 0.4, v),
+        )
+        self._party_name_contains_edit = bui.textwidget(
+            parent=self._root_widget,
+            size=(c_width * 0.3, 40),
+            h_align='left',
+            v_align='center',
+            text=str(randomjoin.party_name_contains),
+            editable=True,
+            description='Party name contains your input',
+            position=(c_width * 0.6, v - 20),
+            autoselect=True,
+        )
 
         # Cancel button.
         self.cancel_button = btn = bui.buttonwidget(
@@ -239,6 +260,7 @@ class RandomJoinSettingsPopup(bui.Window):
                               color=(1, 0, 0))
             bui.getsound('error').play()
             errored = True
+        party_name_contains = bui.textwidget(query=self._party_name_contains_edit)
         if errored:
             return
 
@@ -264,6 +286,7 @@ class RandomJoinSettingsPopup(bui.Window):
 
         randomjoin.maximum_ping = maximum_ping
         randomjoin.minimum_players = minimum_players
+        randomjoin.party_name_contains = party_name_contains
 
         randomjoin.commit_config()
         bui.getsound('shieldUp').play()
@@ -282,16 +305,19 @@ class RandomJoin:
         self.cached_parties: list[PartyEntry] = []
         self.maximum_ping: int = 9999
         self.minimum_players: int = 2
+        self.party_name_contains: str = 'FFA @'
         self.load_config()
 
     def load_config(self) -> None:
         cfg = babase.app.config.get('Random Join', {
             'maximum_ping': self.maximum_ping,
             'minimum_players': self.minimum_players,
+            'party_name_contains': self.party_name_contains,
         })
         try:
             self.maximum_ping = cfg['maximum_ping']
             self.minimum_players = cfg['minimum_players']
+            self.party_name_contains = cfg['party_name_contains']
         except KeyError:
             bui.screenmessage('Error: RandomJoin config is broken, resetting..',
                               color=(1, 0, 0), log=True)
@@ -302,6 +328,7 @@ class RandomJoin:
         babase.app.config['Random Join'] = {
             'maximum_ping': self.maximum_ping,
             'minimum_players': self.minimum_players,
+            'party_name_contains': self.party_name_contains,
         }
         babase.app.config.commit()
 
