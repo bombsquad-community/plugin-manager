@@ -33,7 +33,7 @@ PLUGIN_MANAGER_VERSION = "1.1.3"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
-CURRENT_TAG = "main"
+CURRENT_TAG = "autometa"
 
 _env = _babase.env()
 _uiscale = bui.app.ui_v1.uiscale
