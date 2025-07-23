@@ -8,7 +8,7 @@ plugman = dict(
     description="Changing model to None will make it invisible.",
     external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     authors=[{"name": "mr.sample", "email": "sample@sample.com", "discord": "sample"}],
-    version="1.2.2",
+    version="1.2.2"
 )
 
 original_getmesh = bs.getmesh
