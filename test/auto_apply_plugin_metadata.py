@@ -52,39 +52,38 @@ def update_plugin_json(plugin_info, category):
         file.truncate()
 
 
-def extract_plugman(plugins: str) -> dict:
+def extract_plugman(plugins):
     for plugin in plugins:
         if "plugins/" in plugin:
             # Split the path and get the part after 'plugins/'
             parts = plugin.split("plugins/")[1].split("/")
             category = parts[0]  # First part after plugins/
-    with open(plugin, "r") as f:
-        tree = ast.parse(f.read())
+            
+            with open(plugin, "r") as f:
+                tree = ast.parse(f.read())
 
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Assign) and len(node.targets) == 1:
-            target = node.targets[0]
-            if isinstance(target, ast.Name) and target.id == "plugman":
-                if isinstance(node.value, ast.Dict):
-                    # Standard dictionary format {key: value}
-                    return ast.literal_eval(node.value)
-                elif (
-                    isinstance(node.value, ast.Call)
-                    and isinstance(node.value.func, ast.Name)
-                    and node.value.func.id == "dict"
-                ):
-                    # dict() constructor format
-                    result = {}
-                    for kw in node.value.keywords:
-                        result[kw.arg] = ast.literal_eval(kw.value)
-                    return result, category
-
-    raise ValueError(
-        "Variable plugman not found in the file or has unsupported format."
-    )
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                    target = node.targets[0]
+                    if isinstance(target, ast.Name) and target.id == "plugman":
+                        if isinstance(node.value, ast.Dict):
+                            # Standard dictionary format {key: value}
+                            return ast.literal_eval(node.value)
+                        elif (
+                            isinstance(node.value, ast.Call)
+                            and isinstance(node.value.func, ast.Name)
+                            and node.value.func.id == "dict"
+                        ):
+                            # dict() constructor format
+                            result = {}
+                            for kw in node.value.keywords:
+                                result[kw.arg] = ast.literal_eval(kw.value)
+                            update_plugin_json(result, category=category)
+            raise ValueError(
+                "Variable plugman not found in the file or has unsupported format."
+            )
 
 
 if __name__ == "__main__":
     plugins = sys.argv
-    print(plugins)  # Debugging (╯°□°）╯
-    update_plugin_json(*extract_plugman(plugins))
+    extract_plugman(plugins)
