@@ -58,7 +58,7 @@ def extract_plugman(plugins):
             # Split the path and get the part after 'plugins/'
             parts = plugin.split("plugins/")[1].split("/")
             category = parts[0]  # First part after plugins/
-            
+
             with open(plugin, "r") as f:
                 tree = ast.parse(f.read())
 
