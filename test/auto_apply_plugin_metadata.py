@@ -86,4 +86,4 @@ def extract_plugman(plugins: str) -> dict:
 
 if __name__ == "__main__":
     plugins = sys.argv
-    update_plugin_json(extract_plugman(*plugins))
+    update_plugin_json(*extract_plugman(plugins))
