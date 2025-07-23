@@ -6,6 +6,8 @@ from ast import Call, Dict, Name, Constant, keyword
 
 def update_plugin_json(plugin_info, category):
     name = plugin_info["plugin_name"]
+    import os
+    print(os.getwc())
 
     with open(f"plugins/{category}/{category}.json", "r+") as file:
         data = json.load(file)
