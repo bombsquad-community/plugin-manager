@@ -5,6 +5,7 @@ from babase._mgen.enums import SpecialChar
 
 ICONS = [babase.charstr(i) for i in SpecialChar]
 
+
 class MPW(bauiv1lib.party.PartyWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,6 +62,8 @@ class MPW(bauiv1lib.party.PartyWindow):
 
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byYelllow(babase.Plugin):
     def __init__(self):
         bauiv1lib.party.PartyWindow = MPW
