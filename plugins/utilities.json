@@ -22,6 +22,19 @@
         }
       }
     },
+    "icons": {
+      "description": "Send icons easly []",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Yelllow",
+          "email": "im.yellow.dev@gmail.com",
+          "discord": "y.lw"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+    },
     "party_filter": {
       "description": "Adds Filters in the gather->public window.",
       "external_url": "",
