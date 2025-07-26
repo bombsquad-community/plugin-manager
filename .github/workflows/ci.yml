@@ -35,7 +35,8 @@ jobs:
     - name: Apply AutoPEP8
       run: |
         autopep8 --in-place --recursive --max-line-length=100 .
-    
+    - name: pull changes
+      run: git pull --rebase origin ${{ github.head_ref }}
     - name: Commit AutoPEP8
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
