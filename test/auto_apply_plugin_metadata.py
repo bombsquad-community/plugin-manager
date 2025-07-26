@@ -1,8 +1,18 @@
+plugman = dict(
+    version="1.2.0"
+)
+
 import ast
 import json
 import sys
 from urllib.request import urlopen
 
+DEBUG = True
+def debug_print(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
+        
+        
 
 def get_latest_version(plugin_name, category):
     base_url = "https://github.com/bombsquad-community/plugin-manager/raw/main/"
@@ -12,36 +22,37 @@ def get_latest_version(plugin_name, category):
         "maps": "plugins/maps.json",
         "plugman": "index.json"
     }
-
+    
     try:
         with urlopen(f"{base_url}{endpoints[category]}") as response:
             data = json.loads(response.read().decode('utf-8'))
-
+            
             # Handle plugman separately
             if category == "plugman":
                 version = next(iter(data.get("versions")))
                 return version
-
+            
             # For plugins
             plugin = data.get("plugins", {}).get(plugin_name)
             if not plugin:
                 return None
-
+                
             # Get latest version from versions dict
             if "versions" in plugin and isinstance(plugin["versions"], dict):
                 latest_version = next(iter(plugin["versions"]))  # Gets first key
                 return latest_version
-
+                
+            
     except Exception as e:
         raise e
-
+    
 
 def update_plugman_json(version):
     with open("index.json", "r+") as file:
         data = json.load(file)
         plugman_version = int(get_latest_version("plugin_manager", "plugman").replace(".", ""))
         current_version = int(version["version"].replace(".", ""))
-
+        
         if current_version > plugman_version:
             with open("index.json", "r+") as file:
                 data = json.load(file)
@@ -49,6 +60,7 @@ def update_plugman_json(version):
                 data["versions"] = dict(
                     sorted(data["versions"].items(), reverse=True)
                 )
+            
 
 
 def update_plugin_json(plugin_info, category):
@@ -61,7 +73,7 @@ def update_plugin_json(plugin_info, category):
             plugin = data["plugins"][name]
             plugman_version = int(get_latest_version(name, category).replace(".", ""))
             current_version = int(plugin_info["version"].replace(".", ""))
-            # Ensure the version is always greater from the already released version
+            # Ensure the version is always greater from the already released version 
             if current_version > plugman_version:
                 plugin["versions"][plugin_info["version"]] = None
                 # Ensure latest version appears first
@@ -90,10 +102,11 @@ def update_plugin_json(plugin_info, category):
 def extract_plugman(plugins):
     for plugin in plugins:
         if "plugins/" in plugin:
+            debug_print(plugin)
             try:
                 # Split the path and get the part after 'plugins/'
                 parts = plugin.split("plugins/")[1].split("/")
-                category = parts[0]  # First part after plugins/
+                category = parts[0]  # First part after plugins/    
             except ValueError:
                 if "plugin_manager" in plugin:
                     continue
