@@ -4,9 +4,12 @@ import sys
 from ast import Call, Dict, Name, Constant, keyword
 
 DEBUG = True
+
+
 def debug_print(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
+
 
 def update_plugin_json(plugin_info, category):
     name = plugin_info["plugin_name"]
