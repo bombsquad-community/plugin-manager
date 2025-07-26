@@ -1,25 +1,27 @@
 # Released under the MIT License. See LICENSE for details.
 # BY Stary_Agent
 """Hockey game and support classes."""
-
-# ba_meta require api 8
-# (see https://ballistica.net/wiki/meta-tag-system)
-from __future__ import annotations
 plugman = dict(
-    from bascenev1lib.gameutils import SharedObjects
-    from bascenev1lib.actor.powerupbox import PowerupBoxFactory
-    from bascenev1lib.actor.scoreboard import Scoreboard
-    from bascenev1lib.actor.playerspaz import PlayerSpaz
-    import bascenev1 as bs
-    import bauiv1 as bui
-    import babase
-    from typing import TYPE_CHECKING
     plugin_name="soccer",
     description="Shoot the ball in left or right edge of the map to score",
     external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     authors=[{"name": "mr.sample", "email": "sample@sample.com", "discord": "sample"}],
-    version="2.1.0",
+    version="2.1.0"
 )
+
+# ba_meta require api 8
+# (see https://ballistica.net/wiki/meta-tag-system)
+from __future__ import annotations
+
+from bascenev1lib.gameutils import SharedObjects
+from bascenev1lib.actor.powerupbox import PowerupBoxFactory
+from bascenev1lib.actor.scoreboard import Scoreboard
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+import bascenev1 as bs
+import bauiv1 as bui
+import babase
+from typing import TYPE_CHECKING
+
 
 
 if TYPE_CHECKING:
