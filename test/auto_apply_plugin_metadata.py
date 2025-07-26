@@ -14,6 +14,7 @@ def debug_print(*args, **kwargs):
 def update_plugin_json(plugin_info, category):
     name = plugin_info["plugin_name"]
     import os
+
     print(os.getcwd())
 
     with open(f"plugins/{category}/{category}.json", "r+") as file:
@@ -27,9 +28,7 @@ def update_plugin_json(plugin_info, category):
             if current_version > plugman_version or current_version == plugman_version:
                 plugin["versions"][plugin_info["version"]] = None
                 # Ensure latest version appears first
-                plugin["versions"] = dict(
-                    sorted(plugin["versions"].items(), reverse=True)
-                )
+                plugin["versions"] = dict(sorted(plugin["versions"].items(), reverse=True))
                 plugin["description"] = plugin_info["description"]
                 plugin["external_url"] = plugin_info["external_url"]
                 plugin["authors"] = [
@@ -89,9 +88,7 @@ def extract_plugman(plugins):
                             for kw in node.value.keywords:
                                 result[kw.arg] = ast.literal_eval(kw.value)
                             update_plugin_json(result, category=category)
-            raise ValueError(
-                "Variable plugman not found in the file or has unsupported format."
-            )
+            raise ValueError("Variable plugman not found in the file or has unsupported format.")
 
 
 if __name__ == "__main__":
