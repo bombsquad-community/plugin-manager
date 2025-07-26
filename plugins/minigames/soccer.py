@@ -4,6 +4,13 @@
 
 # ba_meta require api 8
 # (see https://ballistica.net/wiki/meta-tag-system)
+plugman = dict(
+    plugin_name="soccer",
+    description="Shoot the ball in left or right edge of the map to score",
+    external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    authors=[{"name": "mr.sample", "email": "sample@sample.com", "discord": "sample"}],
+    version="2.1.0",
+)
 
 from __future__ import annotations
 
