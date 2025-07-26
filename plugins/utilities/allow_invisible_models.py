@@ -1,15 +1,7 @@
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # ba_meta require api 9
-import bascenev1 as bs
 import babase
-plugman = dict(
-    plugin_name="allow_invisible_models",
-    description="Changing model to None will make it invisible.",
-    external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    authors=[{"name": "mr.sample", "email": "sample@sample.com", "discord": "sample"}],
-    version="1.2.2",
-)
-
+import bascenev1 as bs
 
 original_getmesh = bs.getmesh
 

@@ -3,6 +3,10 @@ import json
 import sys
 from ast import Call, Dict, Name, Constant, keyword
 
+DEBUG = True
+def debug_print(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
 
 def update_plugin_json(plugin_info, category):
     name = plugin_info["plugin_name"]
@@ -57,6 +61,7 @@ def update_plugin_json(plugin_info, category):
 def extract_plugman(plugins):
     for plugin in plugins:
         if "plugins/" in plugin:
+            debug_print(plugin)
             # Split the path and get the part after 'plugins/'
             parts = plugin.split("plugins/")[1].split("/")
             category = parts[0]  # First part after plugins/
