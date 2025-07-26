@@ -6,14 +6,16 @@ import bascenev1 as bs
 original_getmesh = bs.getmesh
 
 plugman = dict(
-  plugin_name="allow_invisible_models",
-  description="Shake as many stiies of you as possible",
-  external_url= "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-  author=["Loup", "brostos"],
-  discord="mydiscord",
-  email = "dontclickthelink@pleasedont.com",
-  version="1.0.0"
+    plugin_name="allow_invisible_models",
+    description="Shake as many stiies of you as possible",
+    external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    author=["Loup", "brostos"],
+    discord="mydiscord",
+    email="dontclickthelink@pleasedont.com",
+    version="1.0.0"
 )
+
+
 def get_mesh_gracefully(mesh):
     if mesh is not None:
         return original_getmesh(mesh)
