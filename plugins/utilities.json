@@ -22,8 +22,8 @@
         }
       }
     },
-    "icons": {
-      "description": "Send icons easly []",
+    "quick_icons": {
+      "description": "Send icons easly",
       "external_url": "",
       "authors": [
         {
