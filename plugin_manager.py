@@ -36,7 +36,6 @@ REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 CURRENT_TAG = "main"
 
 _env = _babase.env()
-_uiscale = bui.app.ui_v1.uiscale
 _app_api_version = babase.app.env.api_version
 
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
@@ -48,6 +47,7 @@ PLUGIN_DIRECTORY = _env["python_directory_user"]
 loop = babase._asyncio._asyncio_event_loop
 
 
+def _uiscale(): return bui.app.ui_v1.uiscale
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
 
 
@@ -842,7 +842,7 @@ class ChangelogWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
         self.scale_origin = origin_widget.get_screen_space_center()
         bui.getsound('swish').play()
-        s = 1.65 if _uiscale is babase.UIScale.SMALL else 1.39 if _uiscale is babase.UIScale.MEDIUM else 1.67
+        s = 1.65 if _uiscale() is babase.UIScale.SMALL else 1.39 if _uiscale() is babase.UIScale.MEDIUM else 1.67
         width = 400 * s
         height = width * 0.5
         color = (1, 1, 1)
@@ -854,7 +854,7 @@ class ChangelogWindow(popup.PopupWindow):
             size=(width, height),
             on_outside_click_call=self._back,
             transition=transition,
-            scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5 if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale=(1.5 if _uiscale() is babase.UIScale.SMALL else 1.5 if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
 
@@ -940,7 +940,7 @@ class AuthorsWindow(popup.PopupWindow):
         self.authors_info = authors_info
         self.scale_origin = origin_widget.get_screen_space_center()
         bui.getsound('swish').play()
-        s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.39 if _uiscale is babase.UIScale.MEDIUM else 1.67
+        s = 1.25 if _uiscale() is babase.UIScale.SMALL else 1.39 if _uiscale() is babase.UIScale.MEDIUM else 1.67
         width = 400 * s
         height = width * 0.8
         color = (1, 1, 1)
@@ -952,8 +952,8 @@ class AuthorsWindow(popup.PopupWindow):
             size=(width, height),
             on_outside_click_call=self._back,
             transition=transition,
-            scale=(1.5 if _uiscale is babase.UIScale.SMALL else 1.5
-                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale=(1.5 if _uiscale() is babase.UIScale.SMALL else 1.5
+                   if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
 
@@ -1004,7 +1004,7 @@ class AuthorsWindow(popup.PopupWindow):
                     size=(width * 0.8, 35 if key == 'name' else 30),
                     color=color if key == 'name' else (0.75, 0.7, 0.8),
                     scale=(
-                       (1.1 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
+                       (1.1 if key == 'name' else 0.9) if _uiscale() is babase.UIScale.SMALL else
                        (1.2 if key == 'name' else 1.0)
                    ),
                     text=text,
@@ -1059,7 +1059,7 @@ class PluginWindow(popup.PopupWindow):
     async def draw_ui(self):
         bui.getsound('swish').play()
         b_text_color = (0.75, 0.7, 0.8)
-        s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.39 if babase.UIScale.MEDIUM else 1.67
+        s = 1.25 if _uiscale() is babase.UIScale.SMALL else 1.39 if babase.UIScale.MEDIUM else 1.67
         width = 400 * s
         height = 120 + 100 * s
         color = (1, 1, 1)
@@ -1071,8 +1071,8 @@ class PluginWindow(popup.PopupWindow):
             size=(width, height),
             on_outside_click_call=self._cancel,
             transition=transition,
-            scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
-                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale=(2.1 if _uiscale() is babase.UIScale.SMALL else 1.5
+                   if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
 
@@ -1208,10 +1208,10 @@ class PluginWindow(popup.PopupWindow):
             selected_child=selected_btn
         )
 
-        open_pos_x = (390 if _uiscale is babase.UIScale.SMALL else
-                      450 if _uiscale is babase.UIScale.MEDIUM else 440)
-        open_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
-                      110 if _uiscale is babase.UIScale.MEDIUM else 120)
+        open_pos_x = (390 if _uiscale() is babase.UIScale.SMALL else
+                      450 if _uiscale() is babase.UIScale.MEDIUM else 440)
+        open_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
+                      110 if _uiscale() is babase.UIScale.MEDIUM else 120)
         open_button = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
@@ -1250,10 +1250,10 @@ class PluginWindow(popup.PopupWindow):
                     text=text,
                     action=lambda: bui.open_url(self.plugin.info["external_url"]),
                 )
-            open_pos_x = (440 if _uiscale is babase.UIScale.SMALL else
-                          500 if _uiscale is babase.UIScale.MEDIUM else 490)
-            open_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
-                          110 if _uiscale is babase.UIScale.MEDIUM else 120)
+            open_pos_x = (440 if _uiscale() is babase.UIScale.SMALL else
+                          500 if _uiscale() is babase.UIScale.MEDIUM else 490)
+            open_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
+                          110 if _uiscale() is babase.UIScale.MEDIUM else 120)
             open_button = bui.buttonwidget(
                 parent=self._root_widget,
                 autoselect=True,
@@ -1285,10 +1285,10 @@ class PluginWindow(popup.PopupWindow):
             )
 
         if to_draw_button4:
-            settings_pos_x = (60 if _uiscale is babase.UIScale.SMALL else
-                              60 if _uiscale is babase.UIScale.MEDIUM else 60)
-            settings_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
-                              110 if _uiscale is babase.UIScale.MEDIUM else 120)
+            settings_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
+                              60 if _uiscale() is babase.UIScale.MEDIUM else 60)
+            settings_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
+                              110 if _uiscale() is babase.UIScale.MEDIUM else 120)
             settings_button = bui.buttonwidget(
                 parent=self._root_widget,
                 autoselect=True,
@@ -1552,8 +1552,8 @@ class PluginSourcesWindow(popup.PopupWindow):
             size=(400, 340),
             on_outside_click_call=self._ok,
             transition=transition,
-            scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
-                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale=(2.1 if _uiscale() is babase.UIScale.SMALL else 1.5
+                   if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin,
             on_cancel_call=self._ok
         )
@@ -1570,12 +1570,12 @@ class PluginSourcesWindow(popup.PopupWindow):
             maxwidth=270,
         )
 
-        scroll_size_x = (290 if _uiscale is babase.UIScale.SMALL else
-                         300 if _uiscale is babase.UIScale.MEDIUM else 290)
-        scroll_size_y = (170 if _uiscale is babase.UIScale.SMALL else
-                         185 if _uiscale is babase.UIScale.MEDIUM else 180)
-        scroll_pos_x = (55 if _uiscale is babase.UIScale.SMALL else
-                        40 if _uiscale is babase.UIScale.MEDIUM else 60)
+        scroll_size_x = (290 if _uiscale() is babase.UIScale.SMALL else
+                         300 if _uiscale() is babase.UIScale.MEDIUM else 290)
+        scroll_size_y = (170 if _uiscale() is babase.UIScale.SMALL else
+                         185 if _uiscale() is babase.UIScale.MEDIUM else 180)
+        scroll_pos_x = (55 if _uiscale() is babase.UIScale.SMALL else
+                        40 if _uiscale() is babase.UIScale.MEDIUM else 60)
         scroll_pos_y = 105
 
         self._scrollwidget = bui.scrollwidget(
@@ -1613,8 +1613,8 @@ class PluginSourcesWindow(popup.PopupWindow):
             draw_controller=delete_source_button
         )
 
-        warning_pos_x = (43 if _uiscale is babase.UIScale.SMALL else
-                         35 if _uiscale is babase.UIScale.MEDIUM else
+        warning_pos_x = (43 if _uiscale() is babase.UIScale.SMALL else
+                         35 if _uiscale() is babase.UIScale.MEDIUM else
                          48)
         bui.textwidget(
             parent=self._root_widget,
@@ -1731,8 +1731,8 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
         self.scale_origin = origin_widget.get_screen_space_center()
         super().__init__(
             position=self.scale_origin,
-            scale=(2.3 if _uiscale is babase.UIScale.SMALL else
-                   1.65 if _uiscale is babase.UIScale.MEDIUM else 1.23),
+            scale=(2.3 if _uiscale() is babase.UIScale.SMALL else
+                   1.65 if _uiscale() is babase.UIScale.MEDIUM else 1.23),
             choices=choices,
             current_choice=current_choice,
             delegate=self
@@ -1773,13 +1773,13 @@ class PluginManagerWindow(bui.MainWindow):
 
         loop.create_task(self.draw_index())
 
-        self._width = (700 if _uiscale is babase.UIScale.SMALL
-                       else 550 if _uiscale is babase.UIScale.MEDIUM
+        self._width = (700 if _uiscale() is babase.UIScale.SMALL
+                       else 550 if _uiscale() is babase.UIScale.MEDIUM
                        else 570)
-        self._height = (500 if _uiscale is babase.UIScale.SMALL
-                        else 422 if _uiscale is babase.UIScale.MEDIUM
+        self._height = (500 if _uiscale() is babase.UIScale.SMALL
+                        else 422 if _uiscale() is babase.UIScale.MEDIUM
                         else 500)
-        top_extra = 20 if _uiscale is babase.UIScale.SMALL else 0
+        top_extra = 20 if _uiscale() is babase.UIScale.SMALL else 0
 
         if origin_widget:
             self._transition_out = "out_scale"
@@ -1790,21 +1790,21 @@ class PluginManagerWindow(bui.MainWindow):
             root_widget=bui.containerwidget(
                 size=(self._width, self._height + top_extra),
                 toolbar_visibility="menu_minimal",
-                scale=(1.9 if _uiscale is babase.UIScale.SMALL
-                       else 1.5 if _uiscale is babase.UIScale.MEDIUM
+                scale=(1.9 if _uiscale() is babase.UIScale.SMALL
+                       else 1.5 if _uiscale() is babase.UIScale.MEDIUM
                        else 1.0),
-                stack_offset=(0, -25) if _uiscale is babase.UIScale.SMALL else (0, 0)
+                stack_offset=(0, -25) if _uiscale() is babase.UIScale.SMALL else (0, 0)
             ),
             transition=transition,
             origin_widget=origin_widget,
         )
 
-        back_pos_x = 5 + (37 if _uiscale is babase.UIScale.SMALL else
-                          27 if _uiscale is babase.UIScale.MEDIUM else 68)
-        back_pos_y = self._height - (95 if _uiscale is babase.UIScale.SMALL else
-                                     65 if _uiscale is babase.UIScale.MEDIUM else 50)
+        back_pos_x = 5 + (37 if _uiscale() is babase.UIScale.SMALL else
+                          27 if _uiscale() is babase.UIScale.MEDIUM else 68)
+        back_pos_y = self._height - (95 if _uiscale() is babase.UIScale.SMALL else
+                                     65 if _uiscale() is babase.UIScale.MEDIUM else 50)
 
-        if _uiscale is bui.UIScale.SMALL:
+        if _uiscale() is bui.UIScale.SMALL:
             self._back_button = None
             bui.containerwidget(
                 edit=self._root_widget, on_cancel_call=self.main_window_back
@@ -1822,8 +1822,8 @@ class PluginManagerWindow(bui.MainWindow):
 
             bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
-        title_pos = self._height - (83 if _uiscale is babase.UIScale.SMALL else
-                                    50 if _uiscale is babase.UIScale.MEDIUM else 50)
+        title_pos = self._height - (83 if _uiscale() is babase.UIScale.SMALL else
+                                    50 if _uiscale() is babase.UIScale.MEDIUM else 50)
         bui.textwidget(
             parent=self._root_widget,
             position=(-10, title_pos),
@@ -1836,8 +1836,8 @@ class PluginManagerWindow(bui.MainWindow):
             maxwidth=270,
         )
 
-        loading_pos_y = self._height - (275 if _uiscale is babase.UIScale.SMALL else
-                                        235 if _uiscale is babase.UIScale.MEDIUM else 270)
+        loading_pos_y = self._height - (275 if _uiscale() is babase.UIScale.SMALL else
+                                        235 if _uiscale() is babase.UIScale.MEDIUM else 270)
 
         self._plugin_manager_status_text = bui.textwidget(
             parent=self._root_widget,
@@ -1905,14 +1905,14 @@ class PluginManagerWindow(bui.MainWindow):
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
-        scroll_size_x = (515 if _uiscale is babase.UIScale.SMALL else
-                         430 if _uiscale is babase.UIScale.MEDIUM else 420)
-        scroll_size_y = (245 if _uiscale is babase.UIScale.SMALL else
-                         265 if _uiscale is babase.UIScale.MEDIUM else 335)
-        scroll_pos_x = (70 if _uiscale is babase.UIScale.SMALL else
-                        50 if _uiscale is babase.UIScale.MEDIUM else 70)
-        scroll_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
-                        35 if _uiscale is babase.UIScale.MEDIUM else 40)
+        scroll_size_x = (515 if _uiscale() is babase.UIScale.SMALL else
+                         430 if _uiscale() is babase.UIScale.MEDIUM else 420)
+        scroll_size_y = (245 if _uiscale() is babase.UIScale.SMALL else
+                         265 if _uiscale() is babase.UIScale.MEDIUM else 335)
+        scroll_pos_x = (70 if _uiscale() is babase.UIScale.SMALL else
+                        50 if _uiscale() is babase.UIScale.MEDIUM else 70)
+        scroll_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
+                        35 if _uiscale() is babase.UIScale.MEDIUM else 40)
         self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
                                               size=(scroll_size_x, scroll_size_y),
                                               position=(scroll_pos_x, scroll_pos_y))
@@ -1921,10 +1921,10 @@ class PluginManagerWindow(bui.MainWindow):
                                               margin=0)
 
     def draw_category_selection_button(self, post_label):
-        category_pos_x = (440 if _uiscale is babase.UIScale.SMALL else
-                          340 if _uiscale is babase.UIScale.MEDIUM else 370)
-        category_pos_y = self._height - (141 if _uiscale is babase.UIScale.SMALL else
-                                         110 if _uiscale is babase.UIScale.MEDIUM else 110)
+        category_pos_x = (440 if _uiscale() is babase.UIScale.SMALL else
+                          340 if _uiscale() is babase.UIScale.MEDIUM else 370)
+        category_pos_y = self._height - (141 if _uiscale() is babase.UIScale.SMALL else
+                                         110 if _uiscale() is babase.UIScale.MEDIUM else 110)
         b_size = (140, 30)
         b_textcolor = (0.8, 0.8, 0.85)
 
@@ -1979,22 +1979,22 @@ class PluginManagerWindow(bui.MainWindow):
                 )
 
     def draw_search_bar(self):
-        search_bar_pos_x = (85 if _uiscale is babase.UIScale.SMALL else
-                            68 if _uiscale is babase.UIScale.MEDIUM else 75)
+        search_bar_pos_x = (85 if _uiscale() is babase.UIScale.SMALL else
+                            68 if _uiscale() is babase.UIScale.MEDIUM else 75)
         search_bar_pos_y = self._height - (
-            145 if _uiscale is babase.UIScale.SMALL else
-            110 if _uiscale is babase.UIScale.MEDIUM else 116)
+            145 if _uiscale() is babase.UIScale.SMALL else
+            110 if _uiscale() is babase.UIScale.MEDIUM else 116)
 
-        search_bar_size_x = (320 if _uiscale is babase.UIScale.SMALL else
-                             230 if _uiscale is babase.UIScale.MEDIUM else 260)
+        search_bar_size_x = (320 if _uiscale() is babase.UIScale.SMALL else
+                             230 if _uiscale() is babase.UIScale.MEDIUM else 260)
         search_bar_size_y = (
-            35 if _uiscale is babase.UIScale.SMALL else
-            35 if _uiscale is babase.UIScale.MEDIUM else 45)
+            35 if _uiscale() is babase.UIScale.SMALL else
+            35 if _uiscale() is babase.UIScale.MEDIUM else 45)
 
-        filter_txt_pos_x = (60 if _uiscale is babase.UIScale.SMALL else
-                            40 if _uiscale is babase.UIScale.MEDIUM else 50)
-        filter_txt_pos_y = search_bar_pos_y + (3 if _uiscale is babase.UIScale.SMALL else
-                                               4 if _uiscale is babase.UIScale.MEDIUM else 8)
+        filter_txt_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
+                            40 if _uiscale() is babase.UIScale.MEDIUM else 50)
+        filter_txt_pos_y = search_bar_pos_y + (3 if _uiscale() is babase.UIScale.SMALL else
+                                               4 if _uiscale() is babase.UIScale.MEDIUM else 8)
 
         bui.textwidget(parent=self._root_widget,
                        text="Filter",
@@ -2006,8 +2006,8 @@ class PluginManagerWindow(bui.MainWindow):
                        scale=0.5)
 
         filter_txt = babase.Lstr(resource='filterText')
-        search_bar_maxwidth = search_bar_size_x - (95 if _uiscale is babase.UIScale.SMALL else
-                                                   77 if _uiscale is babase.UIScale.MEDIUM else
+        search_bar_maxwidth = search_bar_size_x - (95 if _uiscale() is babase.UIScale.SMALL else
+                                                   77 if _uiscale() is babase.UIScale.MEDIUM else
                                                    85)
         self._filter_widget = bui.textwidget(parent=self._root_widget,
                                              text="",
@@ -2041,10 +2041,10 @@ class PluginManagerWindow(bui.MainWindow):
                 pass
 
     def draw_settings_icon(self):
-        settings_pos_x = (610 if _uiscale is babase.UIScale.SMALL else
-                          500 if _uiscale is babase.UIScale.MEDIUM else 510)
-        settings_pos_y = (130 if _uiscale is babase.UIScale.SMALL else
-                          60 if _uiscale is babase.UIScale.MEDIUM else 70)
+        settings_pos_x = (610 if _uiscale() is babase.UIScale.SMALL else
+                          500 if _uiscale() is babase.UIScale.MEDIUM else 510)
+        settings_pos_y = (130 if _uiscale() is babase.UIScale.SMALL else
+                          60 if _uiscale() is babase.UIScale.MEDIUM else 70)
         controller_button = bui.buttonwidget(parent=self._root_widget,
                                              position=(settings_pos_x, settings_pos_y),
                                              size=(30, 30),
@@ -2066,10 +2066,10 @@ class PluginManagerWindow(bui.MainWindow):
                         draw_controller=controller_button)
 
     def draw_refresh_icon(self):
-        refresh_pos_x = (610 if _uiscale is babase.UIScale.SMALL else
-                         500 if _uiscale is babase.UIScale.MEDIUM else 510)
-        refresh_pos_y = (180 if _uiscale is babase.UIScale.SMALL else
-                         108 if _uiscale is babase.UIScale.MEDIUM else 120)
+        refresh_pos_x = (610 if _uiscale() is babase.UIScale.SMALL else
+                         500 if _uiscale() is babase.UIScale.MEDIUM else 510)
+        refresh_pos_y = (180 if _uiscale() is babase.UIScale.SMALL else
+                         108 if _uiscale() is babase.UIScale.MEDIUM else 120)
 
         controller_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -2262,7 +2262,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
     async def draw_ui(self):
         b_text_color = (0.8, 0.8, 0.85)
-        s = 1.25 if _uiscale is babase.UIScale.SMALL else 1.27 if _uiscale is babase.UIScale.MEDIUM else 1.3
+        s = 1.25 if _uiscale() is babase.UIScale.SMALL else 1.27 if _uiscale() is babase.UIScale.MEDIUM else 1.3
         width = 380 * s
         height = 150 + 150 * s
         color = (0.9, 0.9, 0.9)
@@ -2281,8 +2281,8 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             size=(width, height),
             on_outside_click_call=self._ok,
             transition=transition,
-            scale=(2.1 if _uiscale is babase.UIScale.SMALL else 1.5
-                   if _uiscale is babase.UIScale.MEDIUM else 1.0),
+            scale=(2.1 if _uiscale() is babase.UIScale.SMALL else 1.5
+                   if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
         pos = height * 0.9
