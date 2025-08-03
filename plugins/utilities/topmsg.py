@@ -1,26 +1,31 @@
-from babase import app, Plugin as p
-from bascenev1 import gettexture as x, apptimer as z
-from bascenev1 import broadcastmessage as push, get_foreground_host_activity as ga, get_chat_messages as gcm
+# Copyright 2025 - Solely by BrotherBoard
+# Intended for personal use only
+# Bug? Feedback? Telegram >> @BroBordd
+
+"""
+TopMsg v1.1.2 - Chat top right
+
+When chat is muted, shows chat messages top right.
+Prevents spam and flooding screen.
+Does not repeat messages.
+"""
+
+from babase import app, Plugin
+from bascenev1 import (
+    get_chat_messages as gcm,
+    broadcastmessage as push,
+    apptimer as z
+)
 
 # ba_meta require api 9
-
 # ba_meta export babase.Plugin
-
-
-class byBordd(p):
+class byBordd(Plugin):
+    __init__ = lambda s: (setattr(s,'la',None),z(5,s.ear))[1]
     def ear(s):
         a = gcm()
         if a and s.la != a[-1]:
             if app.config.resolve('Chat Muted'):
-                push(a[-1], (1, 1, 1), True, s.con)
+                push(a[-1],(1,1,1),True)
             s.la = a[-1]
         z(0.1, s.ear)
 
-    def get(s):
-        with ga().context:
-            s.con = x("upButton")
-        s.la = None
-        s.ear()
-
-
-z(1.0, byBordd().get)

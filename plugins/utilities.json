@@ -55,11 +55,11 @@
     },
     "sandbox": {
       "description": "Spawn, control and bots, change music, add teams, spawn objects, change game values in real time, and much more!",
-      "external_url": "",
+      "external_url": "https://brobordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
-          "email": "thehero2012008@gmail.com",
+          "email": "brobordd@gmail.com",
           "discord": "BrotherBoard"
         }
       ],
@@ -86,15 +86,16 @@
     },
     "updown": {
       "description": "Adds UP and DOWN buttons in party window to recall messages in chat.",
-      "external_url": "",
+      "external_url": "https://brobordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
-          "email": "thehero2012008@gmail.com",
+          "email": "brobordd@gmail.com",
           "discord": "BrotherBoard"
         }
       ],
       "versions": {
+        "1.1.4": null,
         "1.1.3": {
           "api_version": 9,
           "commit_sha": "e604a3c",
@@ -128,12 +129,12 @@
       }
     },
     "rejoin": {
-      "description": "Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then party is full.",
-      "external_url": "",
+      "description": "Deprecated - Better use Power plugin. Adds a button in pause menu, which rejoins current server once clicked! if didn't work, just click again and again. if still, then party is full.",
+      "external_url": "https://brobordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
-          "email": "thehero2012008@gmail.com",
+          "email": "brobordd@gmail.com",
           "discord": "BrotherBoard"
         }
       ],
@@ -164,17 +165,108 @@
         }
       }
     },
-    "topmsg": {
-      "description": "When chat is muted, see new chat messages on top right! (like kill logs)",
-      "external_url": "",
+    "power": {
+      "description": "With one click. Experimental. Adds a dev console tab with some features I find useful. Power is mainly focused on the multiplayer side. Can be considered a good tool to have around.",
+      "external_url": "https://brobordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
-          "email": "thehero2012008@gmail.com",
+          "email": "brobordd@gmail.com",
           "discord": "BrotherBoard"
         }
       ],
       "versions": {
+        "2.7": null
+        }
+      }
+    },
+    "plugtools": {
+      "description": "Live Plugin Action. Beta. Adds a dev console tab for plugin management. For full features, read the first lines in the py file, or look in the source.",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.5": null
+        }
+      }
+    },
+    "camera": {
+      "description": "Say cheese. Adds a button to pause menu. Camera is advanced Camera allows you to change camera position and target with a very easy graphical visualization of how it would look like.",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0": null
+        }
+      }
+    },
+    "finder": {
+      "description": "Find anyone. Experimental. Useful if you are looking for someone, or just messing around. For full features, either check first lines of py file, or check source. Combine with Power plugin for better control.",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0": null
+        }
+      }
+    },
+    "path": {
+      "description": "Where it's going to be. Experimental. Path tries to predict the next position of bomb. Path relies on velocity to operate. Optionally pass spaz node (holder) to assist prediction.",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0": null
+        }
+      }
+    },
+    "replay": {
+      "description": "Simple replay player. Experimental. Adds a button to pause menu and watch menu. For full features, either read first lines of py file, or check source.",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.5": null
+        }
+      }
+    },
+    "topmsg": {
+      "description": "When chat is muted, see new chat messages on top right! (like kill logs)",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.1.2": null,
         "1.1.1": {
           "api_version": 9,
           "commit_sha": "e604a3c",
@@ -197,11 +289,11 @@
     },
     "sorry": {
       "description": "Send a random sorry to chat, preventing revenge attempts from teammates you kill by mistake.",
-      "external_url": "",
+      "external_url": "https://brobordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
-          "email": "thehero2012008@gmail.com",
+          "email": "brobordd@gmail.com",
           "discord": "BrotherBoard"
         }
       ],
