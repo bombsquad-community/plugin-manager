@@ -858,11 +858,17 @@ class ChangelogWindow(popup.PopupWindow):
             scale_origin_stack_offset=self.scale_origin
         )
 
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, height * 0.87), size=(0, 0),
-                       h_align='center', v_align='center', text='ChangeLog',
-                       scale=text_scale * 1.25, color=bui.app.ui_v1.title_color,
-                       maxwidth=width * 0.9)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, height * 0.87),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text='ChangeLog',
+            scale=text_scale * 1.25,
+            color=bui.app.ui_v1.title_color,
+            maxwidth=width * 0.9
+        )
 
         back_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -871,7 +877,8 @@ class ChangelogWindow(popup.PopupWindow):
             scale=0.8,
             label=babase.charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
-            on_activate_call=self._back)
+            on_activate_call=self._back
+        )
 
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
@@ -886,12 +893,17 @@ class ChangelogWindow(popup.PopupWindow):
             h_align = 'center'
             extra = 1
 
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, height * 0.72), size=(0, 0),
-                       h_align='center', v_align='center',
-                       text=PLUGIN_MANAGER_VERSION + released_on,
-                       scale=text_scale * 0.9, color=color,
-                       maxwidth=width * 0.9)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, height * 0.72),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text=PLUGIN_MANAGER_VERSION + released_on,
+            scale=text_scale * 0.9,
+            color=color,
+            maxwidth=width * 0.9
+        )
 
         bui.buttonwidget(
             parent=self._root_widget,
@@ -900,15 +912,22 @@ class ChangelogWindow(popup.PopupWindow):
             scale=0.8,
             label='Full ChangeLog',
             button_type='square',
-            on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md'))
+            on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md')
+        )
 
         loop_height = height * 0.62
         for log in logs:
-            bui.textwidget(parent=self._root_widget,
-                           position=(width * 0.5 * extra, loop_height), size=(0, 0),
-                           h_align=h_align, v_align='top', text=log,
-                           scale=text_scale, color=color,
-                           maxwidth=width * 0.9)
+            bui.textwidget(
+                parent=self._root_widget,
+                position=(width * 0.5 * extra, loop_height),
+                size=(0, 0),
+                h_align=h_align,
+                v_align='top',
+                text=log,
+                scale=text_scale,
+                color=color,
+                maxwidth=width * 0.9
+            )
             loop_height -= 35
 
     def _back(self) -> None:
@@ -939,11 +958,17 @@ class AuthorsWindow(popup.PopupWindow):
         )
 
         pos = height * 0.9
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos), size=(0, 0),
-                       h_align='center', v_align='center', text='Authors',
-                       scale=text_scale * 1.25, color=color,
-                       maxwidth=width * 0.9)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text='Authors',
+            scale=text_scale * 1.25,
+            color=color,
+            maxwidth=width * 0.9
+        )
 
         back_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -952,39 +977,48 @@ class AuthorsWindow(popup.PopupWindow):
             scale=0.8,
             label=babase.charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
-            on_activate_call=self._back)
+            on_activate_call=self._back
+        )
 
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
-        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
-                                              size=(width * 0.8, height * 0.75),
-                                              position=(width * 0.1, height * 0.1))
-        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
-                                              border=1,
-                                              left_border=-15,
-                                              margin=0)
+        self._scrollwidget = bui.scrollwidget(
+            parent=self._root_widget,
+            size=(width * 0.8, height * 0.75),
+            position=(width * 0.1, height * 0.1)
+            )
+        self._columnwidget = bui.columnwidget(
+            parent=self._scrollwidget,
+            border=1,
+            left_border=-15,
+            margin=0
+        )
 
         for author in self.authors_info:
             for key, value in author.items():
                 text = f"{key.title()}: {value if value != '' else 'Not Provided'}"
                 if key == 'name':
                     text = value
-                bui.textwidget(parent=self._columnwidget,
-                               size=(width * 0.8, 35 if key == 'name' else 30),
-                               color=color if key == 'name' else (0.75, 0.7, 0.8),
-                               scale=(
-                                   (1.1 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
-                                   (1.2 if key == 'name' else 1.0)
-                               ),
-                               text=text,
-                               h_align='center',
-                               v_align='center',
-                               maxwidth=420)
-            bui.textwidget(parent=self._columnwidget,
-                           size=(width * 0.8, 30),
-                           always_highlight=True,
-                           h_align='center',
-                           v_align='center')
+                bui.textwidget(
+                    parent=self._columnwidget,
+                    size=(width * 0.8, 35 if key == 'name' else 30),
+                    color=color if key == 'name' else (0.75, 0.7, 0.8),
+                    scale=(
+                       (1.1 if key == 'name' else 0.9) if _uiscale is babase.UIScale.SMALL else
+                       (1.2 if key == 'name' else 1.0)
+                   ),
+                    text=text,
+                    h_align='center',
+                    v_align='center',
+                    maxwidth=420
+                )
+            bui.textwidget(
+                parent=self._columnwidget,
+                size=(width * 0.8, 30),
+                always_highlight=True,
+                h_align='center',
+                v_align='center'
+            )
 
     def _back(self) -> None:
         bui.getsound('swish').play()
@@ -1045,41 +1079,53 @@ class PluginWindow(popup.PopupWindow):
         pos = height * 0.8
         plug_name = self.plugin.name.replace('_', ' ').title()
         plugin_title = f"{plug_name} (v{self.plugin.latest_compatible_version.number})"
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos), size=(0, 0),
-                       h_align='center', v_align='center', text=plugin_title,
-                       scale=text_scale * 1.25, color=color,
-                       maxwidth=width * 0.9)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text=plugin_title,
+            scale=text_scale * 1.25,
+            color=color,
+            maxwidth=width * 0.9
+        )
         pos -= 25
         # Author
         text = 'by ' + ', '.join([author["name"] for author in self.plugin.info["authors"]])
-        author_text_control_btn = bui.buttonwidget(parent=self._root_widget,
-                                                   position=(width * 0.49 -
-                                                             (len(text)*14/2), pos - 10),
-                                                   size=(len(text)*14, 20),
-                                                   label='',
-                                                   texture=bui.gettexture("empty"),
-                                                   on_activate_call=lambda:
-                                                       AuthorsWindow(self.plugin.info["authors"], self._root_widget))
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49 - (len(text)*14/2), pos - 10),
-                       size=(len(text)*14, 20),
-                       h_align='center',
-                       v_align='center',
-                       text=text,
-                       scale=text_scale * 0.8,
-                       color=(0.75, 0.7, 0.8),
-                       maxwidth=width * 0.9,
-                       draw_controller=author_text_control_btn,
-                       )
+        author_text_control_btn = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(width * 0.49 - (len(text)*14/2), pos - 10),
+            size=(len(text)*14, 20),
+            label='',
+            texture=bui.gettexture("empty"),
+            on_activate_call=lambda: AuthorsWindow(self.plugin.info["authors"], self._root_widget)
+        )
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49 - (len(text)*14/2), pos - 10),
+            size=(len(text)*14, 20),
+            h_align='center',
+            v_align='center',
+            text=text,
+            scale=text_scale * 0.8,
+            color=(0.75, 0.7, 0.8),
+            maxwidth=width * 0.9,
+            draw_controller=author_text_control_btn,
+        )
         pos -= 60
         # Info
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos), size=(0, 0),
-                       h_align='center', v_align='center',
-                       text=self.get_description(),
-                       scale=text_scale * 0.6, color=color,
-                       maxwidth=width * 0.95)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text=self.get_description(),
+            scale=text_scale * 0.6,
+            color=color,
+            maxwidth=width * 0.95
+        )
         b1_color = None
         b2_color = (0.8, 0.15, 0.35)
         b3_color = (0.2, 0.8, 0.3)
@@ -1113,43 +1159,48 @@ class PluginWindow(popup.PopupWindow):
             button1_action = self.install
 
         if to_draw_button1:
-            selected_btn = bui.buttonwidget(parent=self._root_widget,
-                                            position=(
-                                                width * (
-                                                    0.1 if self.plugin.is_installed and has_update else
-                                                    0.25 if self.plugin.is_installed else
-                                                    0.4), pos),
-                                            size=button_size,
-                                            on_activate_call=button1_action,
-                                            color=b1_color,
-                                            textcolor=b_text_color,
-                                            button_type='square',
-                                            text_scale=1,
-                                            label=button1_label)
+            selected_btn = bui.buttonwidget(
+                parent=self._root_widget,
+                position=(
+                    width * (0.1 if self.plugin.is_installed and has_update else
+                        0.25 if self.plugin.is_installed else 0.4), pos
+                ),
+                size=button_size,
+                on_activate_call=button1_action,
+                color=b1_color,
+                textcolor=b_text_color,
+                button_type='square',
+                text_scale=1,
+                label=button1_label
+            )
 
         if self.plugin.is_installed:
-            selected_btn = bui.buttonwidget(parent=self._root_widget,
-                                            position=(
-                                                width * (0.4 if has_update or not to_draw_button1 else 0.55), pos),
-                                            size=button_size,
-                                            on_activate_call=button2_action,
-                                            color=b2_color,
-                                            textcolor=b_text_color,
-                                            button_type='square',
-                                            text_scale=1,
-                                            label=button2_label)
+            selected_btn = bui.buttonwidget(
+                parent=self._root_widget,
+                position=(
+                    width * (0.4 if has_update or not to_draw_button1 else 0.55), pos),
+                size=button_size,
+                on_activate_call=button2_action,
+                color=b2_color,
+                textcolor=b_text_color,
+                button_type='square',
+                text_scale=1,
+                label=button2_label
+            )
 
             if has_update:
-                selected_btn = bui.buttonwidget(parent=self._root_widget,
-                                                position=(width * 0.7, pos),
-                                                size=button_size,
-                                                on_activate_call=button3_action,
-                                                color=b3_color,
-                                                textcolor=b_text_color,
-                                                autoselect=True,
-                                                button_type='square',
-                                                text_scale=1,
-                                                label=button3_label)
+                selected_btn = bui.buttonwidget(
+                    parent=self._root_widget,
+                    position=(width * 0.7, pos),
+                    size=button_size,
+                    on_activate_call=button3_action,
+                    color=b3_color,
+                    textcolor=b_text_color,
+                    autoselect=True,
+                    button_type='square',
+                    text_scale=1,
+                    label=button3_label
+                )
 
         bui.containerwidget(
             edit=self._root_widget,
@@ -1161,28 +1212,34 @@ class PluginWindow(popup.PopupWindow):
                       450 if _uiscale is babase.UIScale.MEDIUM else 440)
         open_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
                       110 if _uiscale is babase.UIScale.MEDIUM else 120)
-        open_button = bui.buttonwidget(parent=self._root_widget,
-                                       autoselect=True,
-                                       position=(open_pos_x, open_pos_y),
-                                       size=(40, 40),
-                                       button_type="square",
-                                       label="",
-                                       color=(0.6, 0.53, 0.63),
-                                       on_activate_call=lambda: bui.open_url(self.plugin.view_url))
-        bui.imagewidget(parent=self._root_widget,
-                        position=(open_pos_x, open_pos_y),
-                        size=(40, 40),
-                        color=(0.8, 0.95, 1),
-                        texture=bui.gettexture("file"),
-                        draw_controller=open_button)
-        bui.textwidget(parent=self._root_widget,
-                       position=(open_pos_x-3, open_pos_y+12),
-                       text="Source",
-                       size=(10, 10),
-                       draw_controller=open_button,
-                       color=(1, 1, 1, 1),
-                       rotate=25,
-                       scale=0.45)
+        open_button = bui.buttonwidget(
+            parent=self._root_widget,
+            autoselect=True,
+            position=(open_pos_x, open_pos_y),
+            size=(40, 40),
+            button_type="square",
+            label="",
+            color=(0.6, 0.53, 0.63),
+            on_activate_call=lambda: bui.open_url(self.plugin.view_url)
+        )
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(open_pos_x, open_pos_y),
+            size=(40, 40),
+            color=(0.8, 0.95, 1),
+            texture=bui.gettexture("file"),
+            draw_controller=open_button
+        )
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(open_pos_x-3, open_pos_y+12),
+            text="Source",
+            size=(10, 10),
+            draw_controller=open_button,
+            color=(1, 1, 1, 1),
+            rotate=25,
+            scale=0.45
+        )
 
         # Below snippet handles the tutorial button in the plugin window
         tutorial_url = self.plugin.info["external_url"]
@@ -1197,52 +1254,62 @@ class PluginWindow(popup.PopupWindow):
                           500 if _uiscale is babase.UIScale.MEDIUM else 490)
             open_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
                           110 if _uiscale is babase.UIScale.MEDIUM else 120)
-            open_button = bui.buttonwidget(parent=self._root_widget,
-                                           autoselect=True,
-                                           position=(open_pos_x, open_pos_y),
-                                           size=(40, 40),
-                                           button_type="square",
-                                           label="",
-                                           color=(0.6, 0.53, 0.63),
+            open_button = bui.buttonwidget(
+                parent=self._root_widget,
+                autoselect=True,
+                position=(open_pos_x, open_pos_y),
+                size=(40, 40),
+                button_type="square",
+                label="",
+                color=(0.6, 0.53, 0.63),
+                on_activate_call=tutorial_confirm_window
+            )
 
-                                           on_activate_call=tutorial_confirm_window)
-
-            bui.imagewidget(parent=self._root_widget,
-                            position=(open_pos_x, open_pos_y),
-                            size=(40, 40),
-                            color=(0.8, 0.95, 1),
-                            texture=bui.gettexture("frameInset"),
-                            draw_controller=open_button)
-            bui.textwidget(parent=self._root_widget,
-                           position=(open_pos_x - 3, open_pos_y + 12),
-                           text="Tutorial",
-                           size=(10, 10),
-                           draw_controller=open_button,
-                           color=(1, 1, 1, 1),
-                           rotate=25,
-                           scale=0.45)
+            bui.imagewidget(
+                parent=self._root_widget,
+                position=(open_pos_x, open_pos_y),
+                size=(40, 40),
+                color=(0.8, 0.95, 1),
+                texture=bui.gettexture("frameInset"),
+                draw_controller=open_button
+            )
+            bui.textwidget(
+                parent=self._root_widget,
+                position=(open_pos_x - 3, open_pos_y + 12),
+                text="Tutorial",
+                size=(10, 10),
+                draw_controller=open_button,
+                color=(1, 1, 1, 1),
+                rotate=25,
+                scale=0.45
+            )
 
         if to_draw_button4:
             settings_pos_x = (60 if _uiscale is babase.UIScale.SMALL else
                               60 if _uiscale is babase.UIScale.MEDIUM else 60)
             settings_pos_y = (100 if _uiscale is babase.UIScale.SMALL else
                               110 if _uiscale is babase.UIScale.MEDIUM else 120)
-            settings_button = bui.buttonwidget(parent=self._root_widget,
-                                               autoselect=True,
-                                               position=(settings_pos_x, settings_pos_y),
-                                               size=(40, 40),
-                                               button_type="square",
-                                               label="",
-                                               color=(0, 0.75, 0.75),)
+            settings_button = bui.buttonwidget(
+                parent=self._root_widget,
+                autoselect=True,
+                position=(settings_pos_x, settings_pos_y),
+                size=(40, 40),
+                button_type="square",
+                label="",
+                color=(0, 0.75, 0.75)
+            )
             bui.buttonwidget(
                 edit=settings_button,
-                on_activate_call=babase.Call(self.settings, settings_button),)
-            bui.imagewidget(parent=self._root_widget,
-                            position=(settings_pos_x, settings_pos_y),
-                            size=(40, 40),
-                            color=(0.8, 0.95, 1),
-                            texture=bui.gettexture("settingsIcon"),
-                            draw_controller=settings_button)
+                on_activate_call=babase.Call(self.settings, settings_button)
+            )
+            bui.imagewidget(
+                parent=self._root_widget,
+                position=(settings_pos_x, settings_pos_y),
+                size=(40, 40),
+                color=(0.8, 0.95, 1),
+                texture=bui.gettexture("settingsIcon"),
+                draw_controller=settings_button
+            )
 
     def _ok(self) -> None:
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
@@ -1511,29 +1578,40 @@ class PluginSourcesWindow(popup.PopupWindow):
                         40 if _uiscale is babase.UIScale.MEDIUM else 60)
         scroll_pos_y = 105
 
-        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
-                                              size=(scroll_size_x, scroll_size_y),
-                                              position=(scroll_pos_x, scroll_pos_y))
-        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
-                                              border=1,
-                                              margin=0)
+        self._scrollwidget = bui.scrollwidget(
+            parent=self._root_widget,
+            size=(scroll_size_x, scroll_size_y),
+            position=(scroll_pos_x, scroll_pos_y)
+        )
+        self._columnwidget = bui.columnwidget(
+            parent=self._scrollwidget,
+            border=1, margin=0
+        )
 
         delete_source_button_position_pos_x = 360
         delete_source_button_position_pos_y = 110
-        delete_source_button = bui.buttonwidget(parent=self._root_widget,
-                                                position=(delete_source_button_position_pos_x,
-                                                          delete_source_button_position_pos_y),
-                                                size=(25, 25), label="",
-                                                on_activate_call=self.delete_selected_source,
-                                                button_type="square",
-                                                color=(0.6, 0, 0))
+        delete_source_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(
+                delete_source_button_position_pos_x, delete_source_button_position_pos_y
+            ),
+            size=(25, 25),
+            label="",
+            on_activate_call=self.delete_selected_source,
+            button_type="square",
+            color=(0.6, 0, 0)
+        )
 
-        bui.imagewidget(parent=self._root_widget,
-                        position=(delete_source_button_position_pos_x + 2,
-                                  delete_source_button_position_pos_y),
-                        size=(25, 25), color=(5, 2, 2),
-                        texture=bui.gettexture("crossOut"),
-                        draw_controller=delete_source_button)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(
+                delete_source_button_position_pos_x + 2, delete_source_button_position_pos_y
+            ),
+            size=(25, 25),
+            color=(5, 2, 2),
+            texture=bui.gettexture("crossOut"),
+            draw_controller=delete_source_button
+        )
 
         warning_pos_x = (43 if _uiscale is babase.UIScale.SMALL else
                          35 if _uiscale is babase.UIScale.MEDIUM else
@@ -1551,26 +1629,30 @@ class PluginSourcesWindow(popup.PopupWindow):
             maxwidth=400,
         )
 
-        self._add_source_widget = bui.textwidget(parent=self._root_widget,
-                                                 size=(335, 50),
-                                                 position=(21, 22),
-                                                 h_align='left',
-                                                 v_align='center',
-                                                 editable=True,
-                                                 scale=0.75,
-                                                 maxwidth=215,
-                                                 description="Add Source")
+        self._add_source_widget = bui.textwidget(
+            parent=self._root_widget,
+            size=(335, 50),
+            position=(21, 22),
+            h_align='left',
+            v_align='center',
+            editable=True,
+            scale=0.75,
+            maxwidth=215,
+            description="Add Source"
+        )
 
-        bui.buttonwidget(parent=self._root_widget,
-                         position=(330, 28),
-                         size=(37, 37),
-                         on_activate_call=lambda: loop.create_task(self.add_source()),
-                         label="",
-                         texture=bui.gettexture("startButton"),
-                         button_type="square",
-                         color=(0, 0.9, 0),
-                         textcolor=b_textcolor,
-                         text_scale=1)
+        bui.buttonwidget(
+            parent=self._root_widget,
+            position=(330, 28),
+            size=(37, 37),
+            on_activate_call=lambda: loop.create_task(self.add_source()),
+            label="",
+            texture=bui.gettexture("startButton"),
+            button_type="square",
+            color=(0, 0.9, 0),
+            textcolor=b_textcolor,
+            text_scale=1
+        )
 
         self.draw_sources()
 
@@ -1580,15 +1662,17 @@ class PluginSourcesWindow(popup.PopupWindow):
 
         color = (1, 1, 1)
         for custom_source in babase.app.config["Community Plugin Manager"]["Custom Sources"]:
-            bui.textwidget(parent=self._columnwidget,
-                           selectable=True,
-                           color=color,
-                           text=custom_source,
-                           on_select_call=lambda: self.select_source(custom_source),
-                           h_align='left',
-                           v_align='center',
-                           scale=0.75,
-                           maxwidth=260)
+            bui.textwidget(
+                parent=self._columnwidget,
+                selectable=True,
+                color=color,
+                text=custom_source,
+                on_select_call=lambda: self.select_source(custom_source),
+                h_align='left',
+                v_align='center',
+                scale=0.75,
+                maxwidth=260
+            )
 
     def select_source(self, source):
         self.selected_source = source
@@ -1651,13 +1735,16 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
                    1.65 if _uiscale is babase.UIScale.MEDIUM else 1.23),
             choices=choices,
             current_choice=current_choice,
-            delegate=self)
+            delegate=self
+        )
         self._update_custom_sources_widget()
 
     def _update_custom_sources_widget(self):
-        bui.textwidget(edit=self._columnwidget.get_children()[-1],
-                       color=(0.5, 0.5, 0.5),
-                       on_activate_call=self.show_sources_window)
+        bui.textwidget(
+            edit=self._columnwidget.get_children()[-1],
+            color=(0.5, 0.5, 0.5),
+            on_activate_call=self.show_sources_window
+        )
 
     def popup_menu_selected_choice(self, window, choice):
 
@@ -1730,7 +1817,8 @@ class PluginManagerWindow(bui.MainWindow):
                 scale=0.8,
                 label=babase.charstr(babase.SpecialChar.BACK),
                 button_type='backSmall',
-                on_activate_call=self.main_window_back)
+                on_activate_call=self.main_window_back
+            )
 
             bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
 
@@ -1841,19 +1929,16 @@ class PluginManagerWindow(bui.MainWindow):
         b_textcolor = (0.8, 0.8, 0.85)
 
         if self.alphabet_order_selection_button is None:
-            self.alphabet_order_selection_button = bui.buttonwidget(parent=self._root_widget,
-                                                                    size=(40, 30),
-                                                                    position=(
-                                                                        category_pos_x - 47,
-                                                                        category_pos_y),
-                                                                    label=(
-                                                                        'Z - A' if self.selected_alphabet_order == 'z_a'
-                                                                        else 'A - Z'),
-                                                                    on_activate_call=(
-                                                                        lambda: loop.create_task(self._on_order_button_press())),
-                                                                    button_type="square",
-                                                                    textcolor=b_textcolor,
-                                                                    text_scale=0.6)
+            self.alphabet_order_selection_button = bui.buttonwidget(
+                parent=self._root_widget,
+                size=(40, 30),
+                position=(category_pos_x - 47, category_pos_y),
+                label='Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z',
+                on_activate_call=lambda: loop.create_task(self._on_order_button_press()),
+                button_type="square",
+                textcolor=b_textcolor,
+                text_scale=0.6
+            )
         else:
             b = self.alphabet_order_selection_button
             bui.buttonwidget(
@@ -1864,15 +1949,16 @@ class PluginManagerWindow(bui.MainWindow):
         label = f"Category: {post_label}"
 
         if self.category_selection_button is None:
-            self.category_selection_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                                  position=(category_pos_x,
-                                                                            category_pos_y),
-                                                                  size=b_size,
-                                                                  label=label,
-                                                                  button_type="square",
-                                                                  textcolor=b_textcolor,
-                                                                  text_scale=0.6)
-            bui.buttonwidget(b, on_activate_call=lambda: self.show_categories_window(source=b)),
+            self.category_selection_button = b = bui.buttonwidget(
+                parent=self._root_widget,
+                position=(category_pos_x, category_pos_y),
+                size=b_size,
+                label=label,
+                button_type="square",
+                textcolor=b_textcolor,
+                text_scale=0.6
+            )
+            bui.buttonwidget(edit=b, on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
             b = self.category_selection_button
             bui.buttonwidget(
@@ -2214,58 +2300,66 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         )
 
         pos -= 20
-        self._changelog_button = b = bui.buttonwidget(parent=self._root_widget,
-                                                      position=((width * 0.2) - button_size[0] / 2 - 5,
-                                                                pos),
-                                                      size=(80, 30),
-                                                      textcolor=b_text_color,
-                                                      button_type='square',
-                                                      label='')
+        self._changelog_button = b = bui.buttonwidget(
+            parent=self._root_widget,
+            position=((width * 0.2) - button_size[0] / 2 - 5, pos),
+            size=(80, 30),
+            textcolor=b_text_color,
+            button_type='square',
+            label=''
+        )
         bui.buttonwidget(b, on_activate_call=lambda: ChangelogWindow(b))
-        bui.textwidget(parent=self._root_widget,
-                       position=((width * 0.2) - button_size[0] / 2, pos),
-                       size=(70, 30),
-                       scale=0.6,
-                       h_align='center',
-                       v_align='center',
-                       text='ChangeLog',
-                       color=b_text_color,
-                       draw_controller=self._changelog_button,
-                       )
-        self._save_button = bui.buttonwidget(parent=self._root_widget,
-                                             position=((width * 0.82) - button_size[0] / 2, pos),
-                                             size=(73, 35),
-                                             on_activate_call=self.save_settings_button,
-                                             textcolor=b_text_color,
-                                             button_type='square',
-                                             text_scale=1,
-                                             scale=0,
-                                             selectable=False,
-                                             label="Save")
+        bui.textwidget(
+            parent=self._root_widget,
+            position=((width * 0.2) - button_size[0] / 2, pos),
+            size=(70, 30),
+            scale=0.6,
+            h_align='center',
+            v_align='center',
+            text='ChangeLog',
+            color=b_text_color,
+            draw_controller=self._changelog_button,
+        )
+        self._save_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=((width * 0.82) - button_size[0] / 2, pos),
+            size=(73, 35),
+            on_activate_call=self.save_settings_button,
+            textcolor=b_text_color,
+            button_type='square',
+            text_scale=1,
+            scale=0,
+            selectable=False,
+            label="Save"
+        )
         pos -= 40
 
         for setting, value in self.settings.items():
-            bui.checkboxwidget(parent=self._root_widget,
-                               position=(width * 0.1, pos),
-                               size=(170, 30),
-                               text=setting,
-                               value=value,
-                               on_value_change_call=babase.Call(self.toggle_setting, setting),
-                               maxwidth=500,
-                               textcolor=(0.9, 0.9, 0.9),
-                               scale=text_scale * 0.8)
+            bui.checkboxwidget(
+                parent=self._root_widget,
+                position=(width * 0.1, pos),
+                size=(170, 30),
+                text=setting,
+                value=value,
+                on_value_change_call=babase.Call(self.toggle_setting, setting),
+                maxwidth=500,
+                textcolor=(0.9, 0.9, 0.9),
+                scale=text_scale * 0.8
+            )
             pos -= 34 * text_scale
 
         pos = height - 200
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos-5),
-                       size=(0, 0),
-                       h_align='center',
-                       v_align='center',
-                       text='Contribute to plugins or to this community plugin manager!',
-                       scale=text_scale * 0.65,
-                       color=color,
-                       maxwidth=width * 0.95)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos-5),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text='Contribute to plugins or to this community plugin manager!',
+            scale=text_scale * 0.65,
+            color=color,
+            maxwidth=width * 0.95
+        )
 
         pos -= 75
         try:
@@ -2273,40 +2367,48 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         except urllib.error.URLError:
             plugin_manager_update_available = False
         discord_width = (width * 0.20) if plugin_manager_update_available else (width * 0.31)
-        self.discord_button = bui.buttonwidget(parent=self._root_widget,
-                                               position=(discord_width - button_size[0] / 2, pos),
-                                               size=button_size,
-                                               on_activate_call=lambda: bui.open_url(DISCORD_URL),
-                                               textcolor=b_text_color,
-                                               color=discord_bg_color,
-                                               button_type='square',
-                                               text_scale=1,
-                                               label="")
+        self.discord_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(discord_width - button_size[0] / 2, pos),
+            size=button_size,
+            on_activate_call=lambda: bui.open_url(DISCORD_URL),
+            textcolor=b_text_color,
+            color=discord_bg_color,
+            button_type='square',
+            text_scale=1,
+            label=""
+        )
 
-        bui.imagewidget(parent=self._root_widget,
-                        position=(discord_width+0.5 - button_size[0] / 2, pos),
-                        size=button_size,
-                        texture=bui.gettexture("discordLogo"),
-                        color=discord_fg_color,
-                        draw_controller=self.discord_button)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(discord_width+0.5 - button_size[0] / 2, pos),
+            size=button_size,
+            texture=bui.gettexture("discordLogo"),
+            color=discord_fg_color,
+            draw_controller=self.discord_button
+        )
 
         github_width = (width * 0.49) if plugin_manager_update_available else (width * 0.65)
-        self.github_button = bui.buttonwidget(parent=self._root_widget,
-                                              position=(github_width - button_size[0] / 2, pos),
-                                              size=button_size,
-                                              on_activate_call=lambda: bui.open_url(REPOSITORY_URL),
-                                              textcolor=b_text_color,
-                                              color=github_bg_color,
-                                              button_type='square',
-                                              text_scale=1,
-                                              label='')
+        self.github_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(github_width - button_size[0] / 2, pos),
+            size=button_size,
+            on_activate_call=lambda: bui.open_url(REPOSITORY_URL),
+            textcolor=b_text_color,
+            color=github_bg_color,
+            button_type='square',
+            text_scale=1,
+            label=''
+        )
 
-        bui.imagewidget(parent=self._root_widget,
-                        position=(github_width + 0.5 - button_size[0] / 2, pos),
-                        size=button_size,
-                        texture=bui.gettexture("githubLogo"),
-                        color=(1, 1, 1),
-                        draw_controller=self.github_button)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(github_width + 0.5 - button_size[0] / 2, pos),
+            size=button_size,
+            texture=bui.gettexture("githubLogo"),
+            color=(1, 1, 1),
+            draw_controller=self.github_button
+        )
 
         bui.containerwidget(edit=self._root_widget, on_cancel_call=self._ok)
 
@@ -2318,61 +2420,65 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             text_color = (0.75, 0.2, 0.2)
             button_size = (95 * s, 32 * s)
             update_button_label = f'Update to v{plugin_manager_update_available[0]}'
-            self._update_button = bui.buttonwidget(parent=self._root_widget,
-                                                   position=((width * 0.77) - button_size[0] / 2,
-                                                             pos),
-                                                   size=button_size,
-                                                   on_activate_call=lambda:
-                                                   loop.create_task(
-                                                       self.update(
-                                                           *plugin_manager_update_available
-                                                       )
-                                                   ),
-                                                   textcolor=b_text_color,
-                                                   button_type='square',
-                                                   text_scale=1,
-                                                   color=(0, 0.7, 0),
-                                                   label=update_button_label)
-            self._restart_to_reload_changes_text = bui.textwidget(parent=self._root_widget,
-                                                                  position=(width * 0.79, pos + 20),
-                                                                  size=(0, 0),
-                                                                  h_align='center',
-                                                                  v_align='center',
-                                                                  text='',
-                                                                  scale=text_scale * 0.65,
-                                                                  color=(0, 0.8, 0),
-                                                                  maxwidth=width * 0.9)
+            self._update_button = bui.buttonwidget(
+                parent=self._root_widget,
+                position=((width * 0.77) - button_size[0] / 2, pos),
+                size=button_size,
+                on_activate_call=lambda: loop.create_task(self.update(*plugin_manager_update_available)),
+                textcolor=b_text_color,
+                button_type='square',
+                text_scale=1,
+                color=(0, 0.7, 0),
+                label=update_button_label
+            )
+            self._restart_to_reload_changes_text = bui.textwidget(
+                parent=self._root_widget,
+                position=(width * 0.79, pos + 20),
+                size=(0, 0),
+                h_align='center',
+                v_align='center',
+                text='',
+                scale=text_scale * 0.65,
+                color=(0, 0.8, 0),
+                maxwidth=width * 0.9
+            )
         else:
             text_color = (0, 0.8, 0)
         pos -= 25
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos),
-                       size=(0, 0),
-                       h_align='center',
-                       v_align='center',
-                       text=f'Plugin Manager v{PLUGIN_MANAGER_VERSION}',
-                       scale=text_scale * 0.8,
-                       color=text_color,
-                       maxwidth=width * 0.9)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text=f'Plugin Manager v{PLUGIN_MANAGER_VERSION}',
+            scale=text_scale * 0.8,
+            color=text_color,
+            maxwidth=width * 0.9
+        )
         pos -= 25
-        bui.textwidget(parent=self._root_widget,
-                       position=(width * 0.49, pos),
-                       size=(0, 0),
-                       h_align='center',
-                       v_align='center',
-                       text=f'API Version: {_app_api_version}',
-                       scale=text_scale * 0.7,
-                       color=(0.4, 0.8, 1),
-                       maxwidth=width * 0.95)
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(width * 0.49, pos),
+            size=(0, 0),
+            h_align='center',
+            v_align='center',
+            text=f'API Version: {_app_api_version}',
+            scale=text_scale * 0.7,
+            color=(0.4, 0.8, 1),
+            maxwidth=width * 0.95
+        )
 
         pos = height * 0.1
 
     def toggle_setting(self, setting, set_value):
         self.settings[setting] = set_value
         check = self.settings == babase.app.config["Community Plugin Manager"]["Settings"]
-        bui.buttonwidget(edit=self._save_button,
-                         scale=0 if check else 1,
-                         selectable=(not check))
+        bui.buttonwidget(
+            edit=self._save_button,
+            scale=0 if check else 1,
+            selectable=(not check)
+        )
 
     def save_settings_button(self):
         babase.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
@@ -2390,8 +2496,10 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         else:
             bui.screenmessage("Plugin manager update successful", color=(0, 1, 0))
             bui.getsound('shieldUp').play()
-            bui.textwidget(edit=self._restart_to_reload_changes_text,
-                           text='Update Applied!\nRestart game to reload changes.')
+            bui.textwidget(
+                edit=self._restart_to_reload_changes_text,
+                text='Update Applied!\nRestart game to reload changes.'
+            )
             self._update_button.delete()
 
     def _ok(self) -> None:
