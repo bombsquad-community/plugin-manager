@@ -177,7 +177,6 @@
       ],
       "versions": {
         "2.7": null
-        }
       }
     },
     "plugtools": {
@@ -192,7 +191,6 @@
       ],
       "versions": {
         "1.5": null
-        }
       }
     },
     "camera": {
@@ -207,7 +205,6 @@
       ],
       "versions": {
         "1.0": null
-        }
       }
     },
     "finder": {
@@ -222,7 +219,6 @@
       ],
       "versions": {
         "1.0": null
-        }
       }
     },
     "path": {
@@ -237,7 +233,6 @@
       ],
       "versions": {
         "1.0": null
-        }
       }
     },
     "replay": {
@@ -252,7 +247,6 @@
       ],
       "versions": {
         "1.5": null
-        }
       }
     },
     "topmsg": {
