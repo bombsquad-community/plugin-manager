@@ -1913,12 +1913,16 @@ class PluginManagerWindow(bui.MainWindow):
                         50 if _uiscale() is babase.UIScale.MEDIUM else 70)
         scroll_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
                         35 if _uiscale() is babase.UIScale.MEDIUM else 40)
-        self._scrollwidget = bui.scrollwidget(parent=self._root_widget,
-                                              size=(scroll_size_x, scroll_size_y),
-                                              position=(scroll_pos_x, scroll_pos_y))
-        self._columnwidget = bui.columnwidget(parent=self._scrollwidget,
-                                              border=2,
-                                              margin=0)
+        self._scrollwidget = bui.scrollwidget(
+            parent=self._root_widget,
+            size=(scroll_size_x, scroll_size_y),
+            position=(scroll_pos_x, scroll_pos_y)
+        )
+        self._columnwidget = bui.columnwidget(
+            parent=self._scrollwidget,
+            border=2,
+            margin=0
+        )
 
     def draw_category_selection_button(self, post_label):
         category_pos_x = (440 if _uiscale() is babase.UIScale.SMALL else
@@ -2009,17 +2013,19 @@ class PluginManagerWindow(bui.MainWindow):
         search_bar_maxwidth = search_bar_size_x - (95 if _uiscale() is babase.UIScale.SMALL else
                                                    77 if _uiscale() is babase.UIScale.MEDIUM else
                                                    85)
-        self._filter_widget = bui.textwidget(parent=self._root_widget,
-                                             text="",
-                                             size=(search_bar_size_x, search_bar_size_y),
-                                             position=(search_bar_pos_x, search_bar_pos_y),
-                                             h_align='left',
-                                             v_align='center',
-                                             editable=True,
-                                             scale=0.8,
-                                             autoselect=True,
-                                             maxwidth=search_bar_maxwidth,
-                                             description=filter_txt)
+        self._filter_widget = bui.textwidget(
+            parent=self._root_widget,
+            text="",
+            size=(search_bar_size_x, search_bar_size_y),
+            position=(search_bar_pos_x, search_bar_pos_y),
+            h_align='left',
+            v_align='center',
+            editable=True,
+            scale=0.8,
+            autoselect=True,
+            maxwidth=search_bar_maxwidth,
+            description=filter_txt
+        )
         self._last_filter_text = ""
         self._last_filter_plugins = []
 
@@ -2045,11 +2051,13 @@ class PluginManagerWindow(bui.MainWindow):
                           500 if _uiscale() is babase.UIScale.MEDIUM else 510)
         settings_pos_y = (130 if _uiscale() is babase.UIScale.SMALL else
                           60 if _uiscale() is babase.UIScale.MEDIUM else 70)
-        controller_button = bui.buttonwidget(parent=self._root_widget,
-                                             position=(settings_pos_x, settings_pos_y),
-                                             size=(30, 30),
-                                             button_type="square",
-                                             label="")
+        controller_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(settings_pos_x, settings_pos_y),
+            size=(30, 30),
+            button_type="square",
+            label=""
+        )
         bui.buttonwidget(
             controller_button,
             on_activate_call=babase.Call(
@@ -2058,12 +2066,14 @@ class PluginManagerWindow(bui.MainWindow):
                 controller_button
             )
         )
-        bui.imagewidget(parent=self._root_widget,
-                        position=(settings_pos_x, settings_pos_y),
-                        size=(30, 30),
-                        color=(0.8, 0.95, 1),
-                        texture=bui.gettexture("settingsIcon"),
-                        draw_controller=controller_button)
+        bui.imagewidget(
+            parent=self._root_widget,
+            position=(settings_pos_x, settings_pos_y),
+            size=(30, 30),
+            color=(0.8, 0.95, 1),
+            texture=bui.gettexture("settingsIcon"),
+            draw_controller=controller_button
+        )
 
     def draw_refresh_icon(self):
         refresh_pos_x = (610 if _uiscale() is babase.UIScale.SMALL else
