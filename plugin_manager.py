@@ -1031,7 +1031,8 @@ class ChangelogWindow(popup.PopupWindow):
             size=(width, height),
             on_outside_click_call=self._back,
             transition=transition,
-            scale=(1.5 if _uiscale() is babase.UIScale.SMALL else 1.5 if _uiscale() is babase.UIScale.MEDIUM else 1.0),
+            scale=(1.5 if _uiscale() is babase.UIScale.SMALL else 1.5 if _uiscale()
+                   is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
 
@@ -1163,7 +1164,7 @@ class AuthorsWindow(popup.PopupWindow):
             parent=self._root_widget,
             size=(width * 0.8, height * 0.75),
             position=(width * 0.1, height * 0.1)
-            )
+        )
         self._columnwidget = bui.columnwidget(
             parent=self._scrollwidget,
             border=1,
@@ -1181,9 +1182,9 @@ class AuthorsWindow(popup.PopupWindow):
                     size=(width * 0.8, 35 if key == 'name' else 30),
                     color=color if key == 'name' else (0.75, 0.7, 0.8),
                     scale=(
-                       (1.1 if key == 'name' else 0.9) if _uiscale() is babase.UIScale.SMALL else
-                       (1.2 if key == 'name' else 1.0)
-                   ),
+                        (1.1 if key == 'name' else 0.9) if _uiscale() is babase.UIScale.SMALL else
+                        (1.2 if key == 'name' else 1.0)
+                    ),
                     text=text,
                     h_align='center',
                     v_align='center',
@@ -1208,7 +1209,7 @@ class PluginWindow(popup.PopupWindow):
         plugin: Plugin,
         origin_widget,
         plugins_list,
-        transition = 'in_scale',
+        transition='in_scale',
         button_callback=lambda: None,
     ):
         self.plugin: Plugin = plugin
@@ -1270,7 +1271,8 @@ class PluginWindow(popup.PopupWindow):
             if self.p_n_plugins[0] is not None:
                 previous_plugin_button = bui.buttonwidget(
                     parent=self._root_widget,
-                    position=(-12.5*s + (4 if _uiscale() is babase.UIScale.SMALL else -5), height/2 - 20*s),
+                    position=(-12.5*s + (4 if _uiscale() is babase.UIScale.SMALL else -5),
+                              height/2 - 20*s),
                     label='<',
                     size=(25, 40),
                     color=(1, 0.5, 0.5),
@@ -1281,7 +1283,8 @@ class PluginWindow(popup.PopupWindow):
             if self.p_n_plugins[1] is not None:
                 next_plugin_button = bui.buttonwidget(
                     parent=self._root_widget,
-                    position=(width - 12.5*s - (8 if _uiscale() is babase.UIScale.SMALL else 0), height/2 - 20*s),
+                    position=(width - 12.5*s - (8 if _uiscale()
+                              is babase.UIScale.SMALL else 0), height/2 - 20*s),
                     label='>',
                     size=(25, 40),
                     color=(1, 0.5, 0.5),
@@ -1376,7 +1379,7 @@ class PluginWindow(popup.PopupWindow):
                 parent=self._root_widget,
                 position=(
                     width * (0.1 if self.plugin.is_installed and has_update else
-                        0.25 if self.plugin.is_installed else 0.4), pos
+                             0.25 if self.plugin.is_installed else 0.4), pos
                 ),
                 size=button_size,
                 on_activate_call=button1_action,
@@ -2032,7 +2035,8 @@ class PluginManagerWindow(bui.MainWindow):
                 textcolor=b_textcolor,
                 text_scale=0.6
             )
-            bui.buttonwidget(edit=b, on_activate_call=lambda: self.show_categories_window(source=b)),
+            bui.buttonwidget(
+                edit=b, on_activate_call=lambda: self.show_categories_window(source=b)),
         else:
             b = self.category_selection_button
             bui.buttonwidget(
@@ -2239,8 +2243,10 @@ class PluginManagerWindow(bui.MainWindow):
 
         plugin_names_ready_to_draw = []
         for plugin in plugin_names_to_draw:
-            try: lcv = plugin.latest_compatible_version
-            except NoCompatibleVersion: continue
+            try:
+                lcv = plugin.latest_compatible_version
+            except NoCompatibleVersion:
+                continue
             plugin_names_ready_to_draw += [plugin]
 
         for i, plugin in enumerate(plugin_names_ready_to_draw):
@@ -2513,7 +2519,8 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                 parent=self._root_widget,
                 position=((width * 0.77) - button_size[0] / 2, pos),
                 size=button_size,
-                on_activate_call=lambda: loop.create_task(self.update(*plugin_manager_update_available)),
+                on_activate_call=lambda: loop.create_task(
+                    self.update(*plugin_manager_update_available)),
                 textcolor=b_text_color,
                 button_type='square',
                 text_scale=1,
