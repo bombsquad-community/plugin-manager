@@ -1,5 +1,11 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.2.1 (05-08-2025)
+
+- Cleaning up the code.
+- UI now works again for small screens.
+- Added a new feature to move through plugins.
+
 ### 1.1.3 (06-04-2025)
 
 - Hot Fix
