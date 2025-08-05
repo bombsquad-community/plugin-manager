@@ -1203,8 +1203,17 @@ class AuthorsWindow(popup.PopupWindow):
 
 
 class PluginWindow(popup.PopupWindow):
-    def __init__(self, plugin, origin_widget, button_callback=lambda: None):
-        self.plugin = plugin
+    def __init__(
+        self,
+        plugin: Plugin,
+        origin_widget,
+        plugins_list,
+        transition = 'in_scale',
+        button_callback=lambda: None,
+    ):
+        self.plugin: Plugin = plugin
+        self.transition = transition
+        self.plugins_list = plugins_list
         self.button_callback = button_callback
         self.scale_origin = origin_widget.get_screen_space_center()
 
@@ -1212,7 +1221,7 @@ class PluginWindow(popup.PopupWindow):
 
     def get_description(self, minimum_character_offset=40):
         """
-        Splits the loong plugin description into multiple lines.
+        Splits the long plugin description into multiple lines.
         """
         string = self.plugin.info["description"]
         string_length = len(string)
@@ -1237,21 +1246,48 @@ class PluginWindow(popup.PopupWindow):
         bui.getsound('swish').play()
         b_text_color = (0.75, 0.7, 0.8)
         s = 1.25 if _uiscale() is babase.UIScale.SMALL else 1.39 if babase.UIScale.MEDIUM else 1.67
-        width = 400 * s
+        width = 450 * s
         height = 120 + 100 * s
         color = (1, 1, 1)
         text_scale = 0.7 * s
-        self._transition_out = 'out_scale'
-        transition = 'in_scale'
 
         self._root_widget = bui.containerwidget(
             size=(width, height),
             on_outside_click_call=self._cancel,
-            transition=transition,
+            transition=self.transition,
             scale=(2.1 if _uiscale() is babase.UIScale.SMALL else 1.5
                    if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
+
+        i = self.plugins_list.index(self.plugin)
+        self.p_n_plugins = [
+            self.plugins_list[i-1] if (i-1 > -1) else None,
+            self.plugins_list[i+1] if (i+1 < len(self.plugins_list)) else None
+        ]
+
+        if self.p_n_plugins is not None:
+            if self.p_n_plugins[0] is not None:
+                previous_plugin_button = bui.buttonwidget(
+                    parent=self._root_widget,
+                    position=(-12.5*s + (4 if _uiscale() is babase.UIScale.SMALL else -5), height/2 - 20*s),
+                    label='<',
+                    size=(25, 40),
+                    color=(1, 0.5, 0.5),
+                    scale=s,
+                    on_activate_call=self.show_previous_plugin
+                )
+
+            if self.p_n_plugins[1] is not None:
+                next_plugin_button = bui.buttonwidget(
+                    parent=self._root_widget,
+                    position=(width - 12.5*s - (8 if _uiscale() is babase.UIScale.SMALL else 0), height/2 - 20*s),
+                    label='>',
+                    size=(25, 40),
+                    color=(1, 0.5, 0.5),
+                    scale=s,
+                    on_activate_call=self.show_next_plugin
+                )
 
         pos = height * 0.8
         plug_name = self.plugin.name.replace('_', ' ').title()
@@ -1514,6 +1550,26 @@ class PluginWindow(popup.PopupWindow):
     def settings(self, source_widget):
         self.local_plugin.launch_settings(source_widget)
 
+    def show_previous_plugin(self):
+        bui.containerwidget(edit=self._root_widget, transition='out_right')
+        PluginWindow(
+            self.p_n_plugins[0],
+            self._root_widget,
+            transition='in_left',
+            plugins_list=self.plugins_list,
+            button_callback=lambda: None
+        )
+
+    def show_next_plugin(self):
+        bui.containerwidget(edit=self._root_widget, transition='out_left')
+        PluginWindow(
+            self.p_n_plugins[1],
+            self._root_widget,
+            transition='in_right',
+            plugins_list=self.plugins_list,
+            button_callback=lambda: None
+        )
+
     @button
     def disable(self) -> None:
         self.local_plugin.disable()
@@ -1537,9 +1593,6 @@ class PluginWindow(popup.PopupWindow):
     async def update(self):
         await self.plugin.update()
         bui.getsound('shieldUp').play()
-
-
-
 
 
 class PluginSourcesWindow(popup.PopupWindow):
@@ -2174,29 +2227,33 @@ class PluginManagerWindow(bui.MainWindow):
 
         if category == 'Installed':
             plugin_names_to_draw = tuple(
-                self.draw_plugin_name(plugin) for plugin in plugins if plugin.is_installed
+                plugin for plugin in plugins if plugin.is_installed
             )
         else:
-            plugin_names_to_draw = tuple(self.draw_plugin_name(plugin) for plugin in plugins)
+            plugin_names_to_draw = plugins
 
         [plugin.delete() for plugin in self._columnwidget.get_children()]
         text_widget = bui.textwidget(parent=self._columnwidget)
         text_widget.delete()
-        await asyncio.gather(*plugin_names_to_draw)
+        # await asyncio.gather(*plugin_names_to_draw)
 
-    async def draw_plugin_name(self, plugin):
-        try:
-            latest_compatible_version = plugin.latest_compatible_version
-        except NoCompatibleVersion:
-            # We currently don't show plugins that have no compatible versions.
-            return
+        plugin_names_ready_to_draw = []
+        for plugin in plugin_names_to_draw:
+            try: lcv = plugin.latest_compatible_version
+            except NoCompatibleVersion: continue
+            plugin_names_ready_to_draw += [plugin]
+
+        for i, plugin in enumerate(plugin_names_ready_to_draw):
+            await self.draw_plugin_name(plugin, plugin_names_ready_to_draw)
+
+    async def draw_plugin_name(self, plugin, plugins_list):
 
         if plugin.is_installed:
             local_plugin = plugin.get_local()
             if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
                     color = (0.8, 0.2, 0.2)
-                elif local_plugin.version == latest_compatible_version.number:
+                elif local_plugin.version == plugin.latest_compatible_version.number:
                     color = (0, 0.95, 0.2)
                 else:
                     color = (1, 0.6, 0)
@@ -2220,7 +2277,7 @@ class PluginManagerWindow(bui.MainWindow):
                 color=color,
                 text=plugin.name.replace('_', ' ').title(),
                 click_activate=True,
-                on_activate_call=lambda: self.show_plugin_window(plugin),
+                on_activate_call=lambda: self.show_plugin_window(plugin, plugins_list),
                 h_align='left',
                 v_align='center',
                 maxwidth=420
@@ -2229,8 +2286,13 @@ class PluginManagerWindow(bui.MainWindow):
             # XXX: This seems nicer. Might wanna use this in future.
             # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
 
-    def show_plugin_window(self, plugin):
-        PluginWindow(plugin, self._root_widget, lambda: self.draw_plugin_name(plugin))
+    def show_plugin_window(self, plugin, plugins_list):
+        PluginWindow(
+            plugin,
+            self._root_widget,
+            plugins_list=plugins_list,
+            button_callback=lambda: self.draw_plugin_name(plugin, plugins_list)
+        )
 
     def show_categories_window(self, source):
         PluginCategoryWindow(
