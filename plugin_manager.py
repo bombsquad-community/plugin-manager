@@ -46,6 +46,13 @@ HEADERS = {
 PLUGIN_DIRECTORY = _env["python_directory_user"]
 loop = babase._asyncio._asyncio_event_loop
 
+open_popups = []
+
+def _add_popup(popup): open_popups.append(popup)
+
+def _remove_popup(popup): 
+    try: open_popups.remove(popup)
+    except ValueError: pass
 
 def _uiscale(): return bui.app.ui_v1.uiscale
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
@@ -1036,6 +1043,8 @@ class ChangelogWindow(popup.PopupWindow):
             scale_origin_stack_offset=self.scale_origin
         )
 
+        _add_popup(self)
+
         bui.textwidget(
             parent=self._root_widget,
             position=(width * 0.49, height * 0.87),
@@ -1110,6 +1119,7 @@ class ChangelogWindow(popup.PopupWindow):
 
     def _back(self) -> None:
         bui.getsound('swish').play()
+        _remove_popup(self)
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
@@ -1134,6 +1144,8 @@ class AuthorsWindow(popup.PopupWindow):
                    if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
+
+        _add_popup(self)
 
         pos = height * 0.9
         bui.textwidget(
@@ -1164,7 +1176,7 @@ class AuthorsWindow(popup.PopupWindow):
             parent=self._root_widget,
             size=(width * 0.8, height * 0.75),
             position=(width * 0.1, height * 0.1)
-        )
+            )
         self._columnwidget = bui.columnwidget(
             parent=self._scrollwidget,
             border=1,
@@ -1200,6 +1212,7 @@ class AuthorsWindow(popup.PopupWindow):
 
     def _back(self) -> None:
         bui.getsound('swish').play()
+        _remove_popup(self)
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
@@ -1260,6 +1273,8 @@ class PluginWindow(popup.PopupWindow):
                    if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
+
+        _add_popup(self)
 
         i = self.plugins_list.index(self.plugin)
         self.p_n_plugins = [
@@ -1528,10 +1543,12 @@ class PluginWindow(popup.PopupWindow):
             )
 
     def _ok(self) -> None:
+        _remove_popup(self)
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def _cancel(self) -> None:
         bui.getsound('swish').play()
+        _remove_popup(self)
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
     def button(fn):
@@ -1555,6 +1572,7 @@ class PluginWindow(popup.PopupWindow):
 
     def show_previous_plugin(self):
         bui.containerwidget(edit=self._root_widget, transition='out_right')
+        _remove_popup(self)
         PluginWindow(
             self.p_n_plugins[0],
             self._root_widget,
@@ -1565,6 +1583,7 @@ class PluginWindow(popup.PopupWindow):
 
     def show_next_plugin(self):
         bui.containerwidget(edit=self._root_widget, transition='out_left')
+        _remove_popup(self)
         PluginWindow(
             self.p_n_plugins[1],
             self._root_widget,
@@ -1598,7 +1617,7 @@ class PluginWindow(popup.PopupWindow):
         bui.getsound('shieldUp').play()
 
 
-class PluginSourcesWindow(popup.PopupWindow):
+class PluginCustomSourcesWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
         self.selected_source = None
 
@@ -1616,6 +1635,8 @@ class PluginSourcesWindow(popup.PopupWindow):
             scale_origin_stack_offset=self.scale_origin,
             on_cancel_call=self._ok
         )
+
+        _add_popup(self)
 
         bui.textwidget(
             parent=self._root_widget,
@@ -1780,6 +1801,7 @@ class PluginSourcesWindow(popup.PopupWindow):
 
     def _ok(self) -> None:
         bui.getsound('swish').play()
+        _remove_popup(self)
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
@@ -1814,10 +1836,11 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
 
     def show_sources_window(self):
         self._ok()
-        PluginSourcesWindow(origin_widget=self.root_widget)
+        PluginCustomSourcesWindow(origin_widget=self.root_widget)
 
     def _ok(self) -> None:
         bui.getsound('swish').play()
+        _remove_popup(self)
         bui.containerwidget(edit=self.root_widget, transition='out_scale')
 
 
@@ -1833,6 +1856,8 @@ class PluginManagerWindow(bui.MainWindow):
         self.plugins_in_current_view = {}
         self.selected_alphabet_order = 'a_z'
         self.alphabet_order_selection_button = None
+        global open_popups
+        open_popups = []
 
         loop.create_task(self.draw_index())
 
@@ -1923,6 +1948,12 @@ class PluginManagerWindow(bui.MainWindow):
     @override
     def get_main_window_state(self) -> bui.MainWindowState:
         # Support recreating our window for back/refresh purposes.
+        global open_popups
+        print(open_popups)
+        for popup in open_popups:
+            try:
+                bui.containerwidget(edit=popup._root_widget, transition='out_scale')
+            except: pass
         cls = type(self)
         return bui.BasicMainWindowState(
             create_call=lambda transition, origin_widget: cls(
@@ -2036,7 +2067,9 @@ class PluginManagerWindow(bui.MainWindow):
                 text_scale=0.6
             )
             bui.buttonwidget(
-                edit=b, on_activate_call=lambda: self.show_categories_window(source=b)),
+                edit=b,
+                on_activate_call=lambda: self.show_categories_window(source=b)
+            )
         else:
             b = self.category_selection_button
             bui.buttonwidget(
@@ -2380,6 +2413,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                    if _uiscale() is babase.UIScale.MEDIUM else 1.0),
             scale_origin_stack_offset=self.scale_origin
         )
+        _add_popup(self)
         pos = height * 0.9
         setting_title = "Settings"
         bui.textwidget(
@@ -2600,6 +2634,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
     def _ok(self) -> None:
         bui.getsound('swish').play()
+        _remove_popup(self)
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
