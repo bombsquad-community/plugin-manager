@@ -3,8 +3,9 @@
 ### 1.2.1 (05-08-2025)
 
 - Cleaning up the code.
-- UI now works again for small screens.
+- UI now works again for other scales if used from dev console.
 - Added a new feature to move through plugins.
+- Fixed popups getting stuck in background.
 
 ### 1.1.3 (06-04-2025)
 
