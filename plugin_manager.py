@@ -48,11 +48,16 @@ loop = babase._asyncio._asyncio_event_loop
 
 open_popups = []
 
+
 def _add_popup(popup): open_popups.append(popup)
 
-def _remove_popup(popup): 
-    try: open_popups.remove(popup)
-    except ValueError: pass
+
+def _remove_popup(popup):
+    try:
+        open_popups.remove(popup)
+    except ValueError:
+        pass
+
 
 def _uiscale(): return bui.app.ui_v1.uiscale
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
@@ -1176,7 +1181,7 @@ class AuthorsWindow(popup.PopupWindow):
             parent=self._root_widget,
             size=(width * 0.8, height * 0.75),
             position=(width * 0.1, height * 0.1)
-            )
+        )
         self._columnwidget = bui.columnwidget(
             parent=self._scrollwidget,
             border=1,
@@ -1953,7 +1958,8 @@ class PluginManagerWindow(bui.MainWindow):
         for popup in open_popups:
             try:
                 bui.containerwidget(edit=popup._root_widget, transition='out_scale')
-            except: pass
+            except:
+                pass
         cls = type(self)
         return bui.BasicMainWindowState(
             create_call=lambda transition, origin_widget: cls(
