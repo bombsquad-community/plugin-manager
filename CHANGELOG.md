@@ -1,6 +1,6 @@
 ## Plugin Manager (dd-mm-yyyy)
 
-### 1.2.1 (09-08-2025)
+### 1.1.4 (09-08-2025)
 
 - Cleaning up the code.
 - UI now works again for other scales if used from dev console.
