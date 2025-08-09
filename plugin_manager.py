@@ -914,7 +914,6 @@ class PluginManager:
             if full_changelog[1]:
                 pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
                 if (len(full_changelog[0].split(version)) > 1):
-                    print(len(full_changelog[0].split(version)))
                     released_on = full_changelog[0].split(version)[1].split('\n')[0]
                     matches = re.findall(pattern, full_changelog[0], re.DOTALL)
                 else:
@@ -1962,7 +1961,6 @@ class PluginManagerWindow(bui.MainWindow):
     def get_main_window_state(self) -> bui.MainWindowState:
         # Support recreating our window for back/refresh purposes.
         global open_popups
-        print(open_popups)
         for popup in open_popups:
             try:
                 bui.containerwidget(edit=popup._root_widget, transition='out_scale')
