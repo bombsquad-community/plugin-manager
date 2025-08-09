@@ -1444,6 +1444,7 @@ class PluginWindow(popup.PopupWindow):
         await self.plugin.update()
         bui.getsound('shieldUp').play()
 
+
 class PluginManager:
     def __init__(self):
         self.request_headers = HEADERS
@@ -1507,13 +1508,13 @@ class PluginManager:
             # check if the changelog was requested
             if full_changelog[1]:
                 pattern = rf"### {version} \(\d\d-\d\d-\d{{4}}\)\n(.*?)(?=### \d+\.\d+\.\d+|\Z)"
-                if (len(full_changelog[0].split(version))>1):
+                if (len(full_changelog[0].split(version)) > 1):
                     print(len(full_changelog[0].split(version)))
                     released_on = full_changelog[0].split(version)[1].split('\n')[0]
                     matches = re.findall(pattern, full_changelog[0], re.DOTALL)
                 else:
                     matches = None
-                
+
                 if matches:
                     changelog = {
                         'released_on': released_on,
@@ -1625,6 +1626,7 @@ class PluginManager:
 
     async def soft_refresh(self):
         pass
+
 
 class PluginCustomSourcesWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
