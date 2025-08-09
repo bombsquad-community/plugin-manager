@@ -1961,6 +1961,8 @@ class PluginManagerWindow(bui.MainWindow):
     def get_main_window_state(self) -> bui.MainWindowState:
         # Support recreating our window for back/refresh purposes.
         global open_popups
+        # Close all open popups if ui changes.
+        # check pr #390 for more info.
         for popup in open_popups:
             try:
                 bui.containerwidget(edit=popup._root_widget, transition='out_scale')

@@ -6,6 +6,7 @@
 - UI now works again for other scales if used from dev console.
 - Added a new feature to move through plugins.
 - Fixed popups getting stuck in background.
+- Missing version CHANGELOG no longer causes error
 
 ### 1.1.3 (06-04-2025)
 
