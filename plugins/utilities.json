@@ -95,7 +95,12 @@
         }
       ],
       "versions": {
-        "1.1.4": null,
+        "1.1.4": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "3c13d6364917c02b9055776253127cab"
+        },
         "1.1.3": {
           "api_version": 9,
           "commit_sha": "e604a3c",
@@ -176,7 +181,12 @@
         }
       ],
       "versions": {
-        "2.7": null
+        "2.7": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "6b7cc1c7f3a5ebffc70d1971032b5349"
+        }
       }
     },
     "fileman": {
@@ -190,7 +200,12 @@
         }
       ],
       "versions": {
-        "1.0": null
+        "1.0": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "87cc93d3213f948cc3524c15c00a78df"
+        }
       }
     },
     "plugtools": {
@@ -204,7 +219,12 @@
         }
       ],
       "versions": {
-        "1.5": null
+        "1.5": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "dee61f9ef3ad9faa534133c978a02c53"
+        }
       }
     },
     "camera": {
@@ -218,7 +238,12 @@
         }
       ],
       "versions": {
-        "1.0": null
+        "1.0": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "578e1335a1f9d5b3863598e7234ffa80"
+        }
       }
     },
     "finder": {
@@ -232,7 +257,12 @@
         }
       ],
       "versions": {
-        "1.0": null
+        "1.0": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "86e036b9361f806ad1cf593794fac825"
+        }
       }
     },
     "path": {
@@ -246,7 +276,12 @@
         }
       ],
       "versions": {
-        "1.0": null
+        "1.0": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "0995280087defbb7c0810cad99530558"
+        }
       }
     },
     "replay": {
@@ -260,7 +295,12 @@
         }
       ],
       "versions": {
-        "1.5": null
+        "1.5": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "e97e88170046b4822067f3164ee1dcf5"
+        }
       }
     },
     "topmsg": {
@@ -274,7 +314,12 @@
         }
       ],
       "versions": {
-        "1.1.2": null,
+        "1.1.2": {
+          "api_version": 9,
+          "commit_sha": "99611b9",
+          "released_on": "10-08-2025",
+          "md5sum": "70980bd0861af06d2345336e350fb672"
+        },
         "1.1.1": {
           "api_version": 9,
           "commit_sha": "e604a3c",
