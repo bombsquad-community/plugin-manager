@@ -179,6 +179,20 @@
         "2.7": null
       }
     },
+    "fileman": {
+      "description": "Advanced file manager. Adds a button to settings menu. Experimental. Read code to know more.",
+      "external_url": "https://brobordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0": null
+      }
+    },
     "plugtools": {
       "description": "Live Plugin Action. Beta. Adds a dev console tab for plugin management. For full features, read the first lines in the py file, or look in the source.",
       "external_url": "https://brobordd.github.io/byBordd",
