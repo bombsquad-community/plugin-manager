@@ -44,26 +44,28 @@ from bascenev1 import (
     get_game_roster as GGR
 )
 
+
 class Finder:
-    COL1 = (0,0.3,0.3)
-    COL2 = (0,0.55,0.55)
-    COL3 = (0,0.7,0.7)
-    COL4 = (0,1,1)
-    COL5 = (1,1,0)
+    COL1 = (0, 0.3, 0.3)
+    COL2 = (0, 0.55, 0.55)
+    COL3 = (0, 0.7, 0.7)
+    COL4 = (0, 1, 1)
+    COL5 = (1, 1, 0)
     MAX = 0.3
     TOP = 15
     VER = '1.0'
     MEM = []
     BST = []
     SL = None
-    def __init__(s,src):
+
+    def __init__(s, src):
         s.thr = []
         s.ikids = []
         s.busy = False
         s.s1 = s.snd('powerup01')
         c = s.__class__
         # parent
-        z = (460,400)
+        z = (460, 400)
         s.p = cw(
             scale_origin_stack_offset=src.get_screen_space_center(),
             size=z,
@@ -80,12 +82,12 @@ class Finder:
             parent=s.p,
             text='Fetch Servers',
             color=s.COL4,
-            position=(19,359)
+            position=(19, 359)
         )
         bw(
             parent=s.p,
-            position=(360,343),
-            size=(80,39),
+            position=(360, 343),
+            size=(80, 39),
             label='Fetch',
             color=s.COL2,
             textcolor=s.COL4,
@@ -96,14 +98,14 @@ class Finder:
             text='Fetches, pings, and sorts public servers.',
             color=s.COL3,
             scale=0.8,
-            position=(15,330),
+            position=(15, 330),
             maxwidth=320
         )
         # separator
         iw(
             parent=s.p,
-            size=(429,1),
-            position=(17,330),
+            size=(429, 1),
+            position=(17, 330),
             texture=gt('white'),
             color=s.COL2
         )
@@ -112,12 +114,12 @@ class Finder:
             parent=s.p,
             text='Cycle Servers',
             color=s.COL4,
-            position=(19,294)
+            position=(19, 294)
         )
         bw(
             parent=s.p,
-            position=(360,278),
-            size=(80,39),
+            position=(360, 278),
+            size=(80, 39),
             label='Cycle',
             color=s.COL2,
             textcolor=s.COL4,
@@ -128,15 +130,15 @@ class Finder:
             text='Cycles through best servers and saves their players.',
             color=s.COL3,
             scale=0.8,
-            position=(15,265),
+            position=(15, 265),
             maxwidth=320,
             v_align='center'
         )
         # separator
         iw(
             parent=s.p,
-            size=(429,1),
-            position=(17,265),
+            size=(429, 1),
+            position=(17, 265),
             texture=gt('white'),
             color=s.COL2
         )
@@ -145,12 +147,12 @@ class Finder:
             parent=s.p,
             text='Server Cycle Limit',
             color=s.COL4,
-            position=(19,230)
+            position=(19, 230)
         )
         s.top = tw(
             parent=s.p,
-            position=(398,228),
-            size=(80,50),
+            position=(398, 228),
+            size=(80, 50),
             text=str(c.TOP),
             color=s.COL4,
             editable=True,
@@ -167,76 +169,78 @@ class Finder:
             text='Maximum number of servers to cycle.',
             color=s.COL3,
             scale=0.8,
-            position=(15,201),
+            position=(15, 201),
             maxwidth=320
         )
         # separator
         iw(
             parent=s.p,
-            size=(429,1),
-            position=(17,200),
+            size=(429, 1),
+            position=(17, 200),
             texture=gt('white'),
             color=s.COL2
         )
         # players
         pl = s.plys()
-        sy = max(len(pl)*30,140)
+        sy = max(len(pl)*30, 140)
         p1 = sw(
             parent=s.p,
-            position=(20,18),
-            size=(205,172),
+            position=(20, 18),
+            size=(205, 172),
             border_opacity=0.4
         )
         p2 = ocw(
             parent=p1,
-            size=(205,sy),
+            size=(205, sy),
             background=False
         )
         0 if pl else tw(
             parent=s.p,
-            position=(90,100),
+            position=(90, 100),
             text='Cycle some servers\nto collect players',
             color=s.COL4,
             maxwidth=175,
             h_align='center'
         )
         s.kids = []
-        for _,g in enumerate(pl):
-            p,a = g
+        for _, g in enumerate(pl):
+            p, a = g
             s.kids.append(tw(
                 parent=p2,
-                size=(200,30),
+                size=(200, 30),
                 selectable=True,
                 click_activate=True,
                 color=s.COL3,
                 text=p,
-                position=(0,sy-30-30*_),
+                position=(0, sy-30-30*_),
                 maxwidth=175,
-                on_activate_call=Call(s.hl,_,p),
+                on_activate_call=Call(s.hl, _, p),
                 v_align='center'
             ))
         # info
         iw(
             parent=s.p,
-            position=(235,18),
-            size=(205,172),
+            position=(235, 18),
+            size=(205, 172),
             texture=gt('scrollWidget'),
             mesh_transparent=gm('softEdgeOutside'),
             opacity=0.4
         )
         s.tip = tw(
             parent=s.p,
-            position=(310,98),
+            position=(310, 98),
             text='Select something to\nview server info',
             color=s.COL4,
             maxwidth=170,
             h_align='center'
         ) if c.SL is None else 0
-    def hl(s,_,p):
-        [tw(t,color=s.COL3) for t in s.kids]
-        tw(s.kids[_],color=s.COL4)
+
+    def hl(s, _, p):
+        [tw(t, color=s.COL3) for t in s.kids]
+        tw(s.kids[_], color=s.COL4)
         s.info(p)
-    def info(s,p):
+
+    def info(s, p):
         [_.delete() for _ in s.ikids]
         s.ikids.clear()
         s.tip and s.tip.delete()
@@ -250,61 +254,69 @@ class Finder:
             t = str(i['nap'[_]])
             s.ikids.append(tw(
                 parent=s.p,
-                position=(250,155-40*_),
+                position=(250, 155-40*_),
                 h_align='center',
                 v_align='center',
                 maxwidth=175,
                 text=t,
                 color=s.COL4,
-                size=(175,30),
+                size=(175, 30),
                 selectable=True,
                 click_activate=True,
-                on_activate_call=Call(s.copy,t)
+                on_activate_call=Call(s.copy, t)
             ))
         s.ikids.append(bw(
             parent=s.p,
-            position=(253,30),
-            size=(166,30),
+            position=(253, 30),
+            size=(166, 30),
             label='Connect',
             color=s.COL2,
             textcolor=s.COL4,
-            oac=Call(CON,i['a'],i['p'],False)
+            oac=Call(CON, i['a'], i['p'], False)
         ))
-    def copy(s,t):
-        s.ding(1,1)
+
+    def copy(s, t):
+        s.ding(1, 1)
         TIP('Copied to clipboard!')
         COPY(t)
+
     def plys(s):
         z = []
         me = app.plus.get_v1_account_name()
-        me = [me,'\ue063'+me]
+        me = [me, '\ue063'+me]
         for _ in s.__class__.BST:
             a = _['a']
-            if (r:=_.get('roster',{})):
+            if (r := _.get('roster', {})):
                 for p in r:
                     ds = p['display_string']
-                    0 if ds in me else z.append((ds,a))
-        return sorted(z,key=lambda _: _[0].startswith('\ue030Server'))
-    def snd(s,t):
+                    0 if ds in me else z.append((ds, a))
+        return sorted(z, key=lambda _: _[0].startswith('\ue030Server'))
+
+    def snd(s, t):
         l = gs(t)
         l.play()
-        teck(uf(0.14,0.18),l.stop)
+        teck(uf(0.14, 0.18), l.stop)
         return l
+
     def bye(s):
         s.s1.stop()
-        ocw(s.p,transition='out_scale')
+        ocw(s.p, transition='out_scale')
         l = s.snd('laser')
-        f = lambda: teck(0.01,f) if s.p else l.stop()
+        def f(): return teck(0.01, f) if s.p else l.stop()
         f()
-    def ding(s,i,j):
-        a = ['Small','']
-        x,y = a[i],a[j]
+
+    def ding(s, i, j):
+        a = ['Small', '']
+        x, y = a[i], a[j]
         s.snd('ding'+x)
-        teck(0.1,gs('ding'+y).play)
+        teck(0.1, gs('ding'+y).play)
+
     def fresh(s):
-        if s.busy: BTW("Still busy!"); return
+        if s.busy:
+            BTW("Still busy!")
+            return
         TIP('Fetching servers...')
-        s.ding(1,0)
+        s.ding(1, 0)
         s.busy = True
         p = app.plus
         p.add_v1_account_transaction(
@@ -316,15 +328,17 @@ class Finder:
             callback=s.kang,
         )
         p.run_v1_account_transactions()
-    def kang(s,r):
+
+    def kang(s, r):
         c = s.__class__
         c.MEM = r['l']
         s.thr = []
         for _ in s.__class__.MEM:
-            t = Thread(target=Call(s.ping,_))
+            t = Thread(target=Call(s.ping, _))
             s.thr.append(t)
             t.start()
-        teck(s.MAX*4,s.join)
+        teck(s.MAX*4, s.join)
+
     def join(s):
         c = s.__class__
         [t.join() for t in s.thr]
@@ -333,10 +347,13 @@ class Finder:
         c.MEM.sort(key=lambda _: _['ping'])
         s.thr.clear()
         TIP(f'Loaded {len(c.MEM)} servers!')
-        s.ding(0,1)
+        s.ding(0, 1)
         s.busy = False
+
     def find(s):
-        if s.busy: BTW("Still busy!"); return
+        if s.busy:
+            BTW("Still busy!")
+            return
         c = s.__class__
         if not c.MEM:
             BTW('Fetch some servers first!')
@@ -347,44 +364,55 @@ class Finder:
             return
         top = int(t)
         if not (0 < top < len(c.MEM)):
-            BTW('Cycle count is too '+['big','small'][top<=0]+'!')
+            BTW('Cycle count is too '+['big', 'small'][top <= 0]+'!')
             return
         c.TOP = top
-        s.ding(1,0)
+        s.ding(1, 0)
         TIP('Starting cycle...')
         s.busy = True
         s.ci = s.lr = 0
         c.BST = c.MEM[:top]
         s.cycle()
+
     def cycle(s):
         _ = s.__class__.BST[s.ci]
         s.ca = _['a']
-        CON(s.ca,_['p'],False)
+        CON(s.ca, _['p'], False)
         s.wait()
-    def wait(s,i=5):
+
+    def wait(s, i=5):
         r = GGR()
-        if (r != s.lr) and r: s.__class__.BST[s.ci]['roster'] = s.lr = r; return s.next()
-        if not i: s.__class__.BST[s.ci]['roster'] = []; return s.next()
-        teck(0.1,Call(s.wait,i-1))
+        if (r != s.lr) and r:
+            s.__class__.BST[s.ci]['roster'] = s.lr = r
+            return s.next()
+        if not i:
+            s.__class__.BST[s.ci]['roster'] = []
+            return s.next()
+        teck(0.1, Call(s.wait, i-1))
+
     def next(s):
         s.ci += 1
         if s.ci >= len(s.__class__.BST):
             BYE()
-            teck(0.5,s.yay)
+            teck(0.5, s.yay)
             return
         s.cycle()
+
     def yay(s):
         TIP('Cycle finished!')
-        s.ding(0,1)
+        s.ding(0, 1)
         s.busy = False
         zw('squad_button').activate()
-        teck(0.3,byBordd.up)
-    def ping(s,_):
+        teck(0.3, byBordd.up)
+
+    def ping(s, _):
         sock = ping = None
-        a,p = _['a'],_['p']
-        sock = socket(IPT(a),SOCK_DGRAM)
-        try: sock.connect((a,p))
-        except: ping = None
+        a, p = _['a'], _['p']
+        sock = socket(IPT(a), SOCK_DGRAM)
+        try:
+            sock.connect((a, p))
+        except:
+            ping = None
         else:
             st = time()
             sock.settimeout(s.MAX)
@@ -393,7 +421,8 @@ class Finder:
                 try:
                     sock.send(b'\x0b')
                     r = sock.recv(10)
-                except: r = None
+                except:
+                    r = None
                 if r == b'\x0c':
                     yes = True
                     break
@@ -403,28 +432,29 @@ class Finder:
             _['ping'] = ping
             sock.close()
 
+
 # Patches
-bw = lambda *,oac=None,**k: obw(
+bw = lambda *, oac=None, **k: obw(
     texture=gt('white'),
     on_activate_call=oac,
     enable_sound=False,
     **k
 )
-cw = lambda *,size=None,oac=None,**k: (p:=ocw(
+cw = lambda *, size=None, oac=None, **k: (p := ocw(
     parent=zw('overlay_stack'),
     background=False,
     transition='in_scale',
     size=size,
     on_outside_click_call=oac,
     **k
-)) and (p,iw(
+)) and (p, iw(
     parent=p,
     texture=gt('softRect'),
-    size=(size[0]*1.2,size[1]*1.2),
-    position=(-size[0]*0.1,-size[1]*0.1),
+    size=(size[0]*1.2, size[1]*1.2),
+    position=(-size[0]*0.1, -size[1]*0.1),
     opacity=0.55,
-    color=(0,0,0)
-),iw(
+    color=(0, 0, 0)
+), iw(
     parent=p,
     size=size,
     texture=gt('white'),
@@ -432,40 +462,47 @@ cw = lambda *,size=None,oac=None,**k: (p:=ocw(
 ))
 
 # Global
-BTW = lambda t: (push(t,color=(1,1,0)),gs('block').play())
-TIP = lambda t: push(t,Finder.COL3)
+
+
+def BTW(t): return (push(t, color=(1, 1, 0)), gs('block').play())
+def TIP(t): return push(t, Finder.COL3)
 
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byBordd(Plugin):
     BTN = None
+
     @classmethod
     def up(c):
         c.BTN.activate() if c.BTN.exists() else None
+
     def __init__(s):
         from bauiv1lib import party
         p = party.PartyWindow
         a = '__init__'
-        o = getattr(p,a)
-        setattr(p,a,lambda z,*a,**k:(o(z,*a,**k),s.make(z))[0])
-    def make(s,z):
-        sz = (80,30)
+        o = getattr(p, a)
+        setattr(p, a, lambda z, *a, **k: (o(z, *a, **k), s.make(z))[0])
+
+    def make(s, z):
+        sz = (80, 30)
         p = z._root_widget
-        x,y = (-60,z._height-45)
+        x, y = (-60, z._height-45)
         iw(
             parent=p,
-            size=(sz[0]*1.34,sz[1]*1.4),
-            position=(x-sz[0]*0.14,y-sz[1]*0.20),
+            size=(sz[0]*1.34, sz[1]*1.4),
+            position=(x-sz[0]*0.14, y-sz[1]*0.20),
             texture=gt('softRect'),
             opacity=0.2,
-            color=(0,0,0)
+            color=(0, 0, 0)
         )
         s.b = s.__class__.BTN = bw(
             parent=p,
-            position=(x,y),
+            position=(x, y),
             label='Finder',
             color=Finder.COL1,
             textcolor=Finder.COL3,
             size=sz,
-            oac=lambda:Finder(s.b)
+            oac=lambda: Finder(s.b)
         )

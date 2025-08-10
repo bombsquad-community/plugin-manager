@@ -19,13 +19,15 @@ from bascenev1 import (
 
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byBordd(Plugin):
-    __init__ = lambda s: (setattr(s,'la',None),z(5,s.ear))[1]
+    def __init__(s): return (setattr(s, 'la', None), z(5, s.ear))[1]
+
     def ear(s):
         a = gcm()
         if a and s.la != a[-1]:
             if app.config.resolve('Chat Muted'):
-                push(a[-1],(1,1,1),True)
+                push(a[-1], (1, 1, 1), True)
             s.la = a[-1]
         z(0.1, s.ear)
-

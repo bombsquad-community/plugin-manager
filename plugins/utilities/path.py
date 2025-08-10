@@ -16,12 +16,15 @@ from bascenev1 import (
     newnode
 )
 
+
 class Path:
-    def __init__(s,node,holder=None):
-        if node.body == 'crate': return
-        s.node,s.kids = node,[]
+    def __init__(s, node, holder=None):
+        if node.body == 'crate':
+            return
+        s.node, s.kids = node, []
         s.me = holder
         s.spy()
+
     def spy(s):
         n = s.node
         if not n.exists():
@@ -29,13 +32,14 @@ class Path:
             s.kids.clear()
             return
 
-        [_.delete() for _ in s.kids]; s.kids.clear()
+        [_.delete() for _ in s.kids]
+        s.kids.clear()
 
         ip = n.position
         iv = n.velocity
         if s.me and s.me.hold_node == n:
             mv = s.me.velocity
-            iv = (iv[0]+mv[0],iv[1]+mv[1],iv[2]+mv[2])
+            iv = (iv[0]+mv[0], iv[1]+mv[1], iv[2]+mv[2])
 
         dots = 200
         ti = 1.2
@@ -48,17 +52,17 @@ class Path:
             py = ip[1] + iv[1] * t + 0.5 * -24 * t**2
             pz = ip[2] + iv[2] * t
 
-            if py <=0:
+            if py <= 0:
                 l = newnode(
                     'locator',
                     owner=n,
                     attrs={
                         'shape': 'circleOutline',
                         'size': [1],
-                        'color': (1,1,0),
+                        'color': (1, 1, 0),
                         'draw_beauty': False,
                         'additive': True,
-                        'position':(px,py,pz)
+                        'position': (px, py, pz)
                     }
                 )
                 s.kids.append(l)
@@ -67,13 +71,13 @@ class Path:
                 'text',
                 owner=n,
                 attrs={
-                    'text':'.',
-                    'scale':0.02,
-                    'position':(px, py, pz),
-                    'flatness':1,
-                    'in_world':True,
-                    'color':(1-i*4/dots,0,0),
-                    'shadow':0
+                    'text': '.',
+                    'scale': 0.02,
+                    'position': (px, py, pz),
+                    'flatness': 1,
+                    'in_world': True,
+                    'color': (1-i*4/dots, 0, 0),
+                    'shadow': 0
                 }
             )
             s.kids.append(dot_node)
@@ -81,8 +85,10 @@ class Path:
 # brobord collide grass
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byBordd(Plugin):
     def __init__(s):
         _ = __import__('bascenev1lib').actor.bomb.Bomb
         o = _.__init__
-        _.__init__ = lambda z,*a,**k: (o(z,*a,**k),Path(z.node))[0]
+        _.__init__ = lambda z, *a, **k: (o(z, *a, **k), Path(z.node))[0]
