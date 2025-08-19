@@ -24,5 +24,3 @@ for category in plugin_category:
             # Ensure old content is removed
             file.truncate()
     print(f"All {category} version have been upgraded")
-        
-            
