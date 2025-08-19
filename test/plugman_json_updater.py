@@ -5,7 +5,7 @@ plugin_category = ["maps", "minigames", "utilities"]
 plugin_names_by_category = {}
 
 for category in plugin_category:
-    with open(f"{category}.json", "r+") as file:
+    with open(f"plugins/{category}/{category}.json", "r+") as file:
         data = json.load(file)
         plugins = data["plugins"]
         plugin_names_by_category[category] = list(plugins.keys())
@@ -24,3 +24,4 @@ for category in plugin_category:
             # Ensure old content is removed
             file.truncate()
     print(f"All {category} version have been upgraded")
+
