@@ -33,15 +33,17 @@ ACCOUNTS_DIR = path.join(USER_DIR, 'account_switcher_profiles')
 if not path.exists(ACCOUNTS_DIR):
     mkdir(ACCOUNTS_DIR)
 
+
 def print_msg(text: str, color=(0.3, 1, 0.3)):
     bui.screenmessage(text, color=color)
+
 
 class AccountSwitcherUI(bui.Window):
     def __init__(self):
         # Base dimensions; the final size is controlled by the scale property.
         self._width = 600
         self._height = 400
-        
+
         self._root_widget = bui.containerwidget(
             size=(self._width, self._height),
             scale=UI_SCALE,  # Apply the global scale here
@@ -102,7 +104,7 @@ class AccountSwitcherUI(bui.Window):
             on_activate_call=self.add_new_account,
         )
         v_pos -= v_step
-        
+
         bui.buttonwidget(
             parent=self._root_widget,
             position=(btn_x, v_pos),
@@ -164,7 +166,8 @@ class AccountSwitcherUI(bui.Window):
             )
             self._profile_widgets.append(text_widget)
             bui.textwidget(
-                edit=text_widget, on_activate_call=babase.Call(self.on_select_profile, prof, text_widget)
+                edit=text_widget, on_activate_call=babase.Call(
+                    self.on_select_profile, prof, text_widget)
             )
 
     def on_select_profile(self, profile_name: str, selected_widget: bui.Widget):
@@ -187,15 +190,15 @@ class AccountSwitcherUI(bui.Window):
         account_folder = path.join(ACCOUNTS_DIR, name)
         if not path.exists(account_folder):
             mkdir(account_folder)
-        
+
         for fname in ACCOUNT_FILES:
             src = path.join(USER_DIR, fname)
             if path.exists(src):
                 try:
                     copy(src, path.join(account_folder, fname))
                 except IOError as e:
-                    print_msg(f"Error saving {fname}: {e}", color=(1,0,0))
-                    
+                    print_msg(f"Error saving {fname}: {e}", color=(1, 0, 0))
+
         print_msg(f"Saved current account as '{name}'")
         self._refresh_account_list()
 
@@ -207,7 +210,7 @@ class AccountSwitcherUI(bui.Window):
                 if path.exists(file_path):
                     remove(file_path)
             print_msg('Account files removed.')
-        
+
         ConfirmWindow(
             text='This will save your current login and then shutdown the game.\nAre you sure?',
             action=lambda: self.lock_call_exit(do_action),
@@ -261,9 +264,11 @@ class AccountSwitcherUI(bui.Window):
             cancel_is_selected=True,
         )
 
+
 # --- Monkey-Patching ---
 _original_account_settings_init = AccountSettingsWindow.__init__
 _original_on_adapter_sign_in_result = AccountSettingsWindow._on_adapter_sign_in_result
+
 
 def new_account_settings_init(self, *args, **kwargs):
     _original_account_settings_init(self, *args, **kwargs)
@@ -276,6 +281,8 @@ def new_account_settings_init(self, *args, **kwargs):
         label='Switch Accounts...',
         on_activate_call=lambda: AccountSwitcherUI()
     )
+
+
 def new_on_adapter_sign_in_result(self, result: str) -> None:
     # First, call the original method to ensure default behavior runs.
     _original_on_adapter_sign_in_result(self, result)
@@ -288,6 +295,8 @@ def new_on_adapter_sign_in_result(self, result: str) -> None:
         print_msg(f'Sign-in failed: {result}', color=(1, 0, 0))
 
 # ba_meta export babase.Plugin
+
+
 class EntryPoint(babase.Plugin):
     def on_app_running(self):
         # Apply both monkey-patches when the app runs.
