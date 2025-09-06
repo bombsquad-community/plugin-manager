@@ -2283,6 +2283,20 @@
           "md5sum": "7d1f771d40103c4cd3f9719353516ba7"
         }
       }
+    },
+    "account_switcher": {
+      "description": "Switch between multiple accounts",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "LoupGarou",
+          "email": "LoupGarou5418@outlook.com",
+          "discord": "loupgarou_"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
