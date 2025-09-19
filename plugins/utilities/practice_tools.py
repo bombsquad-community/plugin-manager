@@ -1,47 +1,46 @@
-"""Practice Tools Mod: V2.2
+"""Practice Tools Mod: V3.0
 Made by Cross Joy"""
 
-# If anyone who want to help me on giving suggestion/ fix bugs/ creating PR,
-# Can visit my github https://github.com/CrossJoy/Bombsquad-Modding
+# If anyone wants to help me by giving suggestions/fixing bugs/ creating PR,
+# Can visit my GitHub https://github.com/CrossJoy/Bombsquad-Modding
 
-# You can contact me through discord:
-# My Discord Id: Cross Joy#0721
+# You can contact me through Discord:
+# My Discord ID: Cross Joy#0721
 # My BS Discord Server: https://discord.gg/JyBY6haARJ
 
-# Some support will be much appreciated. :')
+# I would appreciate some support. :')
 # Support link: https://www.buymeacoffee.com/CrossJoy
 
 # ----------------------------------------------------------------------------
 
-# V2.2 update
-# - Enhance computability with other mods.
-# - Added setting for permanent powerups.
-# - Codes Optimization.
+# V3.0 update
+# - Updated to Api 9
+# - Fixed the bomb radius visual not properly disappearing after being disabled.
 
 # ----------------------------------------------------------------------------
-# Powerful and comprehensive tools for practice purpose.
+# Powerful and comprehensive tools for practice purposes.
 
 # Features:
 # - Spawn any bot anywhere.
-# - Can spawn power up by your own.
+# - Can spawn power-ups on your own.
 # - Bomb radius visualizer. (Thx Mikirog for some of the codes :D )
 # - Bomb Countdown.
 # and many more
 
 # Go explore the tools yourself.:)
 
-# Practice tabs can be access through party window.
+# Practice tabs can be accessed through the party window.
 # Coop and local multiplayer compatible.
-# Work on any 1.7+ ver.
+# Work on any 1.79+ ver.
 
 # FAQ:
 # Can I use it to practice with friends?
-# - Yes, but you are the only one can access the practice window.
+# - Yes, but you are the only one who can access the practice window.
 
 # Does it work when I join a public server?
 # - Not possible.
 
-# Can I use it during Coop game?
+# Can I use it during Co-op game?
 # - Yes, it works fine.
 # ----------------------------------------------------------------------------
 
@@ -82,7 +81,7 @@ from bauiv1lib.tabs import TabRow
 if TYPE_CHECKING:
     from typing import Any, Sequence, Callable, Optional
 
-version = '2.2'
+version = '3.0'
 
 
 class ConfigLoader:
@@ -159,10 +158,10 @@ class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
-        bui.set_party_icon_always_visible(True)
+        bui.set_party_window_open(True)
 
 
-# ba_meta require api 8
+# ba_meta require api 9
 # ba_meta export plugin
 class Practice(Plugin):
     __version__ = version
@@ -170,7 +169,7 @@ class Practice(Plugin):
     def on_app_running(self) -> None:
         """Plugin start point."""
 
-        if app.env.build_number < 20427:
+        if app.env.engine_build_number < 20427:
             bui.screenmessage(
                 'ok',
                 color=(.8, .1, .1))
@@ -189,73 +188,56 @@ def new_bomb_init(func):
         bomb_type = args[0].bomb_type
         fuse_bomb = ('land_mine', 'tnt', 'impact')
 
-        if babase.app.config.get("bombRadiusVisual"):
-            args[0].radius_visualizer = bs.newnode('locator',
-                                                   owner=args[0].node,
-                                                   # Remove itself when the bomb node dies.
-                                                   attrs={
-                                                       'shape': 'circle',
-                                                       'color': (1, 0, 0),
-                                                       'opacity': 0.05,
-                                                       'draw_beauty': False,
-                                                       'additive': False
-                                                   })
-            args[0].node.connectattr('position', args[0].radius_visualizer,
-                                     'position')
+        args[0].radius_visualizer = bs.newnode('locator',
+                                               owner=args[0].node,
+                                               # Remove itself when the bomb node dies.
+                                               attrs={
+                                                   'shape': 'circle',
+                                                   'color': (1, 0, 0),
+                                                   'opacity': 0.05,
+                                                   'draw_beauty': False,
+                                                   'additive': False
+                                               })
+        args[0].node.connectattr('position', args[0].radius_visualizer,
+                                 'position')
 
-            bs.animate_array(args[0].radius_visualizer, 'size', 1, {
-                0.0: [0.0],
-                0.2: [args[0].blast_radius * 2.2],
-                0.25: [args[0].blast_radius * 2.0]
+        args[0].radius_visualizer_circle = bs.newnode(
+            'locator',
+            owner=args[
+                0].node,
+            # Remove itself when the bomb node dies.
+            attrs={
+                'shape': 'circleOutline',
+                'size': [
+                    args[
+                        0].blast_radius * 2.0],
+                # Here's that bomb's blast radius value again!
+                'color': (
+                    1, 1, 0),
+                'draw_beauty': False,
+                'additive': True
             })
+        args[0].node.connectattr('position',
+                                 args[0].radius_visualizer_circle,
+                                 'position')
 
-            args[0].radius_visualizer_circle = bs.newnode(
-                'locator',
-                owner=args[
-                    0].node,
-                # Remove itself when the bomb node dies.
-                attrs={
-                    'shape': 'circleOutline',
-                    'size': [
-                        args[
-                            0].blast_radius * 2.0],
-                    # Here's that bomb's blast radius value again!
-                    'color': (
-                        1, 1, 0),
-                    'draw_beauty': False,
-                    'additive': True
-                })
+        if bomb_type == 'tnt':
+            args[0].fatal = bs.newnode('locator',
+                                       owner=args[0].node,
+                                       # Remove itself when the bomb node dies.
+                                       attrs={
+                                           'shape': 'circle',
+                                           'color': (
+                                               0.7, 0, 0),
+                                           'opacity': 0.10,
+                                           'draw_beauty': False,
+                                           'additive': False
+                                       })
             args[0].node.connectattr('position',
-                                     args[0].radius_visualizer_circle,
+                                     args[0].fatal,
                                      'position')
 
-            bs.animate(
-                args[0].radius_visualizer_circle, 'opacity', {
-                    0: 0.0,
-                    0.4: 0.1
-                })
-
-            if bomb_type == 'tnt':
-                args[0].fatal = bs.newnode('locator',
-                                           owner=args[0].node,
-                                           # Remove itself when the bomb node dies.
-                                           attrs={
-                                               'shape': 'circle',
-                                               'color': (
-                                                   0.7, 0, 0),
-                                               'opacity': 0.10,
-                                               'draw_beauty': False,
-                                               'additive': False
-                                           })
-                args[0].node.connectattr('position',
-                                         args[0].fatal,
-                                         'position')
-
-                bs.animate_array(args[0].fatal, 'size', 1, {
-                    0.0: [0.0],
-                    0.2: [args[0].blast_radius * 2.2 * 0.7],
-                    0.25: [args[0].blast_radius * 2.0 * 0.7]
-                })
+        update_bomb_visual(args[0])
 
         if babase.app.config.get(
                 "bombCountdown") and bomb_type not in fuse_bomb:
@@ -267,6 +249,44 @@ def new_bomb_init(func):
             bs.timer(2, bs.Call(count_bomb, *args, count='1', color=color))
 
     return setting
+
+
+def update_bomb_visual(bomb):
+
+    if babase.app.config.get("bombRadiusVisual"):
+        bs.animate_array(bomb.radius_visualizer, 'size', 1, {
+            0.0: [0.0],
+            0.2: [bomb.blast_radius * 2.2],
+            0.25: [bomb.blast_radius * 2.0]
+        })
+
+        bs.animate(
+            bomb.radius_visualizer_circle, 'opacity', {
+                0: 0.0,
+                0.4: 0.1
+            })
+        if bomb.bomb_type == 'tnt':
+            bs.animate_array(bomb.fatal, 'size', 1, {
+                0.0: [0.0],
+                0.2: [bomb.blast_radius * 2.2 * 0.7],
+                0.25: [bomb.blast_radius * 2.0 * 0.7]
+            })
+    else:
+        bs.animate_array(bomb.radius_visualizer, 'size', 1, {
+            0.0: [0.0],
+            0.2: [0.0],
+        })
+
+        bs.animate(
+            bomb.radius_visualizer_circle, 'opacity', {
+                0: 0.0,
+                0.4: 0.0
+            })
+        if bomb.bomb_type == 'tnt':
+            bs.animate_array(bomb.fatal, 'size', 1, {
+                0.0: [0.0],
+                0.2: [0.0],
+            })
 
 
 bascenev1lib.actor.bomb.Bomb.__init__ = new_bomb_init(
@@ -404,49 +424,12 @@ Spaz.curse = new_cursed(Spaz.curse)
 
 def bot_handlemessage(func):
     def wrapper(*args, **kwargs):
-
+        func(*args, **kwargs)
         if isinstance(args[1], bs.PowerupMessage):
             if args[1].poweruptype == 'health':
                 if babase.app.config.get("bombRadiusVisual"):
-                    if args[0]._cursed:
-                        bs.animate_array(args[0].curse_visualizer, 'size', 1, {
-                            0.0: [3 * 2.0],
-                            0.2: [0.0],
-                        })
+                    update_hit_visual(args[0])
 
-                        bs.animate(
-                            args[0].curse_visualizer_circle, 'opacity', {
-                                0.0: 0.1,
-                                0.2: 0.0,
-                            })
-
-                        bs.animate_array(args[0].curse_visualizer_fatal, 'size',
-                                         1,
-                                         {
-                                             0.0: [2.0],
-                                             0.2: [0.0],
-                        })
-
-                    bs.animate_array(args[0].bot_radius, 'size', 1, {
-                        0.0: [0],
-                        0.25: [0]
-                    })
-                    bs.animate(args[0].bot_radius, 'opacity', {
-                        0.0: 0.00,
-                        0.25: 0.0
-                    })
-
-                    bs.animate_array(args[0].radius_visualizer_circle, 'size',
-                                     1, {
-                                         0.0: [0],
-                                         0.25: [0]
-                    })
-
-                    bs.animate(
-                        args[0].radius_visualizer_circle, 'opacity', {
-                            0.0: 0.00,
-                            0.25: 0.0
-                        })
             if not (babase.app.config.get("powerupsExpire") and
                     args[0].powerups_expire):
                 if args[1].poweruptype == 'triple_bombs':
@@ -483,40 +466,83 @@ def bot_handlemessage(func):
                             bs.PowerupAcceptMessage())
                     return True
 
-        func(*args, **kwargs)
-
         if isinstance(args[1], bs.HitMessage):
-            if args[0].hitpoints <= 0:
-                bs.animate(args[0].bot_radius, 'opacity', {
-                    0.0: 0.00
-                })
-                bs.animate(
-                    args[0].radius_visualizer_circle, 'opacity', {
-                        0.0: 0.00
-                    })
-            elif babase.app.config.get('bombRadiusVisual'):
-
-                bs.animate_array(args[0].bot_radius, 'size', 1, {
-                    0.0: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045],
-                    0.25: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045]
-                })
-                bs.animate(args[0].bot_radius, 'opacity', {
-                    0.0: 0.00,
-                    0.25: 0.05
-                })
-
-                bs.animate_array(args[0].radius_visualizer_circle, 'size', 1, {
-                    0.0: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045],
-                    0.25: [(args[0].hitpoints_max - args[0].hitpoints) * 0.0045]
-                })
-
-                bs.animate(
-                    args[0].radius_visualizer_circle, 'opacity', {
-                        0.0: 0.00,
-                        0.25: 0.1
-                    })
+            update_hit_visual(args[0])
 
     return wrapper
+
+
+def update_hit_visual(node):
+    if node._cursed:
+        bs.animate_array(node.curse_visualizer, 'size', 1, {
+            0.0: [3 * 2.0],
+            0.2: [0.0],
+        })
+
+        bs.animate(
+            node.curse_visualizer_circle, 'opacity', {
+                0.0: 0.1,
+                0.2: 0.0,
+            })
+
+        bs.animate_array(node.curse_visualizer_fatal, 'size',
+                         1,
+                         {
+                             0.0: [2.0],
+                             0.2: [0.0],
+                         })
+
+    if node.hitpoints <= 0:
+        bs.animate(node.bot_radius, 'opacity', {
+            0.0: 0.00
+        })
+        bs.animate(
+            node.radius_visualizer_circle, 'opacity', {
+                0.0: 0.00
+            })
+    elif babase.app.config.get('bombRadiusVisual'):
+
+        bs.animate_array(node.bot_radius, 'size', 1, {
+            0.0: [(node.hitpoints_max - node.hitpoints) * 0.0045],
+            0.25: [(node.hitpoints_max - node.hitpoints) * 0.0045]
+        })
+        bs.animate(node.bot_radius, 'opacity', {
+            0.0: 0.00,
+            0.25: 0.05
+        })
+
+        bs.animate_array(node.radius_visualizer_circle, 'size', 1, {
+            0.0: [(node.hitpoints_max - node.hitpoints) * 0.0045],
+            0.25: [(node.hitpoints_max - node.hitpoints) * 0.0045]
+        })
+
+        bs.animate(
+            node.radius_visualizer_circle, 'opacity', {
+                0.0: 0.00,
+                0.25: 0.1
+            })
+
+    if not babase.app.config.get('bombRadiusVisual'):
+        bs.animate_array(node.bot_radius, 'size', 1, {
+            0.0: [0],
+            0.25: [0]
+        })
+        bs.animate(node.bot_radius, 'opacity', {
+            0.0: 0.00,
+            0.25: 0.0
+        })
+
+        bs.animate_array(node.radius_visualizer_circle, 'size',
+                         1, {
+                             0.0: [0],
+                             0.25: [0]
+                         })
+
+        bs.animate(
+            node.radius_visualizer_circle, 'opacity', {
+                0.0: 0.00,
+                0.25: 0.0
+            })
 
 
 Spaz.handlemessage = bot_handlemessage(Spaz.handlemessage)
@@ -1441,11 +1467,38 @@ class PowerUpPracticeTab(PracticeTab):
                     babase.app.config["bombRadiusVisual"] = True
                 else:
                     babase.app.config["bombRadiusVisual"] = False
+                activity = bs.get_foreground_host_activity()
+                # Iterate through all nodes in the activity's scene
+                for i in self.get_all_bombs():
+                    update_bomb_visual(i)
+                for i in activity.players:
+                    update_hit_visual(i.actor)
+
             elif setting == 2:
                 if value:
                     babase.app.config["powerupsExpire"] = True
                 else:
                     babase.app.config["powerupsExpire"] = False
+
+    # def get_all_bombs(self) -> list[bs.Node]:
+    #     """Returns all bomb nodes in the current activity."""
+    #     return [_.getdelegate(object) for _ in bs.getnodes() if _.getnodetype() in ('bomb','prop')]
+
+    import bascenev1 as bs
+
+    def get_all_bombs(self) -> list:
+        """Return all bomb actors (including TNT) but exclude powerups."""
+        bombs = []
+
+        for node in bs.getnodes():
+            if not node.exists():
+                continue
+            # if node.getnodetype() in ('bomb', 'prop'):
+                # Try to resolve this node as a Bomb delegate
+            delegate = node.getdelegate(Bomb)
+            if delegate is not None:
+                bombs.append(delegate)
+        return bombs
 
     def load_settings(self):
         try:
@@ -1611,14 +1664,14 @@ class PracticeWindow(bui.Window):
         OTHERS = 'others'
 
     def __del__(self):
-        bui.set_party_icon_always_visible(True)
+        bui.set_party_window_open(True)
         self.activity.globalsnode.paused = False
 
     def __init__(self,
                  transition: Optional[str] = 'in_right'):
 
         self.activity = bs.get_foreground_host_activity()
-        bui.set_party_icon_always_visible(False)
+        bui.set_party_window_open(False)
         if babase.app.config.get("pause"):
             self.activity.globalsnode.paused = True
         uiscale = bui.app.ui_v1.uiscale
@@ -1723,16 +1776,15 @@ class PracticeWindow(bui.Window):
             if tabtype is not None:
                 self._tabs[tab_id] = tabtype(self)
 
-        if bui.app.ui_v1.use_toolbars:
+        bui.widget(
+            edit=self._tab_row.tabs[tabdefs[-1][0]].button,
+            right_widget=bui.get_special_widget('back_button'),
+        )
+        if uiscale is babase.UIScale.SMALL:
             bui.widget(
-                edit=self._tab_row.tabs[tabdefs[-1][0]].button,
-                right_widget=babase.get_special_widget('party_button'),
+                edit=self._tab_row.tabs[tabdefs[0][0]].button,
+                left_widget=bui.get_special_widget('back_button'),
             )
-            if uiscale is babase.UIScale.SMALL:
-                bui.widget(
-                    edit=self._tab_row.tabs[tabdefs[0][0]].button,
-                    left_widget=babase.get_special_widget('back_button'),
-                )
 
         # -----------------------------------------------------------
 
@@ -1831,42 +1883,40 @@ class PracticeWindow(bui.Window):
             return
 
     def _restore_state(self) -> None:
-        from efro.util import enum_by_value
-
         try:
             for tab in self._tabs.values():
                 tab.restore_state()
 
             sel: bui.Widget | None
+            assert bui.app.classic is not None
             winstate = bui.app.ui_v1.window_states.get(type(self), {})
             sel_name = winstate.get('sel_name', None)
             assert isinstance(sel_name, (str, type(None)))
             current_tab = self.TabID.BOTS
-            gather_tab_val = babase.app.config.get('Practice Tab')
+            gather_tab_val = bui.app.config.get('Practice Tab')
             try:
-                stored_tab = enum_by_value(self.TabID, gather_tab_val)
+                stored_tab = self.TabID(gather_tab_val)
                 if stored_tab in self._tab_row.tabs:
                     current_tab = stored_tab
             except ValueError:
                 pass
             self._set_tab(current_tab)
-            if sel_name == 'back':
-                sel = self.back_button
+            if sel_name == 'Back':
+                sel = self._back_button
             elif sel_name == 'TabContainer':
                 sel = self._tab_container
             elif isinstance(sel_name, str) and sel_name.startswith('Tab:'):
                 try:
-                    sel_tab_id = enum_by_value(
-                        self.TabID, sel_name.split(':')[-1]
-                    )
+                    sel_tab_id = self.TabID(sel_name.split(':')[-1])
                 except ValueError:
                     sel_tab_id = self.TabID.BOTS
                 sel = self._tab_row.tabs[sel_tab_id].button
             else:
                 sel = self._tab_row.tabs[current_tab].button
             bui.containerwidget(edit=self._root_widget, selected_child=sel)
+
         except Exception:
-            babase.print_exception('Error restoring gather-win state.')
+            logging.exception('Error restoring state for %s.', self)
 
 
 org_begin = bs._activity.Activity.on_begin
@@ -1875,7 +1925,7 @@ org_begin = bs._activity.Activity.on_begin
 def new_begin(self):
     """Runs when game is began."""
     org_begin(self)
-    bui.set_party_icon_always_visible(True)
+    bui.set_party_window_open(True)
 
 
 bs._activity.Activity.on_begin = new_begin
