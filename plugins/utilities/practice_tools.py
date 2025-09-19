@@ -201,8 +201,6 @@ def new_bomb_init(func):
         args[0].node.connectattr('position', args[0].radius_visualizer,
                                  'position')
 
-
-
         args[0].radius_visualizer_circle = bs.newnode(
             'locator',
             owner=args[
@@ -222,7 +220,6 @@ def new_bomb_init(func):
         args[0].node.connectattr('position',
                                  args[0].radius_visualizer_circle,
                                  'position')
-
 
         if bomb_type == 'tnt':
             args[0].fatal = bs.newnode('locator',
@@ -290,6 +287,7 @@ def update_bomb_visual(bomb):
                 0.0: [0.0],
                 0.2: [0.0],
             })
+
 
 bascenev1lib.actor.bomb.Bomb.__init__ = new_bomb_init(
     bascenev1lib.actor.bomb.Bomb.__init__)
@@ -468,8 +466,6 @@ def bot_handlemessage(func):
                             bs.PowerupAcceptMessage())
                     return True
 
-
-
         if isinstance(args[1], bs.HitMessage):
             update_hit_visual(args[0])
 
@@ -547,6 +543,7 @@ def update_hit_visual(node):
                 0.0: 0.00,
                 0.25: 0.0
             })
+
 
 Spaz.handlemessage = bot_handlemessage(Spaz.handlemessage)
 
