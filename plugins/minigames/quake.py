@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """Quake Game Activity"""
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
