@@ -55,7 +55,7 @@ import urllib.parse
 from _thread import start_new_thread
 import threading
 version_str = "7"
-BCSSERVER = 'mods.ballistica.workers.dev'
+BCSSERVER = 'mods.69420555.xyz'
 
 cache_chat = []
 connect = bs.connect_to_party
