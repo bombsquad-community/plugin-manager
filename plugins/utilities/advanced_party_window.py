@@ -393,7 +393,7 @@ customchatThread().run()
 
 class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
     def __init__(self, origin: Sequence[float] = (0, 0)):
-        bui.set_party_window_open(True)
+        self._uiopenstate = bui.UIOpenState('classicparty')
         self._r = 'partyWindow'
         self.msg_user_selected = ''
         self._popup_type: Optional[str] = None
