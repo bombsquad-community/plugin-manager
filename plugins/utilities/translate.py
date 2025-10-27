@@ -52,7 +52,7 @@ def translate(text, _callback, source='auto', target='en'):
     for i in replace_list:
         result = result.replace(i[0], i[1])
     if show_translate_result:
-        bui.pushcall(bui.Call(_callback, result), from_other_thread=True)
+        bui.pushcall(bui.CallPartial(_callback, result), from_other_thread=True)
 
 
 class NewPW(bauiv1lib.party.PartyWindow):
@@ -155,7 +155,7 @@ class TranslateWindow:
                                                 transition='in_scale',
                                                 scale=(2 if self._uiscale is babase.UIScale.SMALL else
                                                        1.4 if self._uiscale is babase.UIScale.MEDIUM else 1.3),
-                                                on_outside_click_call=babase.Call(self._back, sound=True))
+                                                on_outside_click_call=babase.CallPartial(self._back, sound=True))
 
         self._tips_text = bui.textwidget(parent=self._root_widget,
                                          color=(0, 1, 1),
@@ -200,7 +200,7 @@ class TranslateWindow:
         self.other_source_button = PopupMenu(parent=self._root_widget,
                                              position=(54, 140),
                                              autoselect=False,
-                                             on_value_change_call=babase.Call(
+                                             on_value_change_call=babase.CallStrict(
                                                  self._set_translate_language, 'O Source Trans Lang'),
                                              choices=available_translate_languages,
                                              button_size=(150, 30),
@@ -209,7 +209,7 @@ class TranslateWindow:
         self.other_target_button = PopupMenu(parent=self._root_widget,
                                              position=(243, 140),
                                              autoselect=False,
-                                             on_value_change_call=babase.Call(
+                                             on_value_change_call=babase.CallStrict(
                                                  self._set_translate_language, 'O Target Trans Lang'),
                                              choices=available_translate_languages[1:],
                                              button_size=(150, 30),
@@ -218,7 +218,7 @@ class TranslateWindow:
         self.your_source_button = PopupMenu(parent=self._root_widget,
                                             position=(54, 55),
                                             autoselect=False,
-                                            on_value_change_call=babase.Call(
+                                            on_value_change_call=babase.CallStrict(
                                                 self._set_translate_language, 'Y Source Trans Lang'),
                                             choices=available_translate_languages,
                                             button_size=(150, 30),
@@ -227,7 +227,7 @@ class TranslateWindow:
         self.your_target_button = PopupMenu(parent=self._root_widget,
                                             position=(243, 55),
                                             autoselect=False,
-                                            on_value_change_call=babase.Call(
+                                            on_value_change_call=babase.CallStrict(
                                                 self._set_translate_language, 'Y Target Trans Lang'),
                                             choices=available_translate_languages[1:],
                                             button_size=(150, 30),
@@ -247,7 +247,6 @@ class TranslateWindow:
 
 
 # ba_meta require api 9
-
 # ba_meta export babase.Plugin
 class byFreaku(babase.Plugin):
     def __init__(self):
