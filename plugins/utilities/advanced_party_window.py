@@ -454,7 +454,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             label="\xee\x80\x90",
             autoselect=True,
             button_type='square',
-            on_activate_call=bs.WeakCall(self._on_menu_button_press),
+            on_activate_call=bs.WeakCallStrict(self._on_menu_button_press),
             color=(0.55, 0.73, 0.25),
             icon=bui.gettexture('menuButton'),
             iconscale=1.2)
@@ -633,7 +633,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         self.smoothy_mode = 1
         self.full_chat_mode = False
         self._update_timer = babase.AppTimer(1.0,
-                                             bs.WeakCall(self._update),
+                                             bs.WeakCallStrict(self._update),
                                              repeat=True)
 
         self._update()
