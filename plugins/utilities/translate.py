@@ -103,7 +103,7 @@ class NewPW(bauiv1lib.party.PartyWindow):
             maxwidth=self._scroll_width * 0.94,
             shadow=0.3,
             flatness=1.0,
-            on_activate_call=bui.Call(self._copy_msg, msg),
+            on_activate_call=bui.CallPartial(self._copy_msg, msg),
             selectable=True,
         )
 
@@ -113,7 +113,7 @@ class NewPW(bauiv1lib.party.PartyWindow):
         bui.containerwidget(edit=self._columnwidget, visible_child=txt)
 
         bui.textwidget(edit=txt,
-                       on_activate_call=bui.Call(self._translate_other, msg),
+                       on_activate_call=bui.CallPartial(self._translate_other, msg),
                        click_activate=True)
 
     def _translate_other(self, msg: str):
