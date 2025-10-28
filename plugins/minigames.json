@@ -1055,7 +1055,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "25b58cb",
+          "released_on": "28-10-2025",
+          "md5sum": "bbe28558ce336f5f5d5d5a21305c5fd4"
+        }
       }
     },
     "handball": {
