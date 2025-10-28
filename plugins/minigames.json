@@ -1044,6 +1044,19 @@
         }
       }
     },
+    "botsvsbots": {
+      "description": "Watch your team of bots fight the opposing team of bots!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "rabbitboom",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     "handball": {
       "description": "Score some goals with handball",
       "external_url": "",
