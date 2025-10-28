@@ -55,7 +55,7 @@ import urllib.parse
 from _thread import start_new_thread
 import threading
 version_str = "7"
-BCSSERVER = 'mods.69420555.xyz'
+BCSSERVER = 'mods.ballistica.workers.dev'
 
 cache_chat = []
 connect = bs.connect_to_party
@@ -393,7 +393,10 @@ customchatThread().run()
 
 class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
     def __init__(self, origin: Sequence[float] = (0, 0)):
-        self._uiopenstate = bui.UIOpenState('classicparty')
+        if _babase.env().get("build_number") >= 22597:
+            self._uiopenstate = bui.UIOpenState('classicparty')
+        else:
+            bui.set_party_window_open(True)
         self._r = 'partyWindow'
         self.msg_user_selected = ''
         self._popup_type: Optional[str] = None
@@ -703,7 +706,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                      shadow=0.3,
                                      flatness=1.0)
                 bui.textwidget(edit=txt,
-                               on_activate_call=babase.Call(
+                               on_activate_call=babase.CallPartial(
                                    self._on_chat_press,
                                    msg, txt, showMute))
 
@@ -784,7 +787,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         cbtn = bui.buttonwidget(
             parent=cnt,
             label=babase.Lstr(resource='cancelText'),
-            on_activate_call=babase.Call(
+            on_activate_call=babase.CallPartial(
                 lambda c: bui.containerwidget(edit=c, transition='out_scale'),
                 cnt),
             size=(180, 60),
@@ -794,7 +797,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                                label='Rename',
                                size=(180, 60),
                                position=(c_width - 230, 30),
-                               on_activate_call=babase.Call(
+                               on_activate_call=babase.CallPartial(
                                    self._add_nick, arg),
                                autoselect=True)
         bui.widget(edit=cbtn, right_widget=okb)
@@ -1317,7 +1320,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
                             #  client_id is more readily available though).
                             try:
                                 bui.textwidget(edit=widget,
-                                               on_activate_call=babase.Call(
+                                               on_activate_call=babase.CallPartial(
                                                    self._on_party_member_press,
                                                    self._roster[index]['client_id'],
                                                    is_host, widget))
