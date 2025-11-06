@@ -1379,27 +1379,35 @@ class Player:
         """Modified to handle scanning state with growing progress bar"""
         elapsed = self.replay_time - self.start_time
         
-        # Check for loop only if we know the duration
-        if not self.scanning and self.duration_sec and elapsed >= self.duration_sec:
+        # Determine the current max duration to check against
+        if self.scanning:
+            max_duration = self.estimated_duration
+        elif self.duration_sec:
+            max_duration = self.duration_sec
+        else:
+            max_duration = None
+        
+        # Check if elapsed exceeds duration and loop if needed
+        if max_duration and elapsed >= max_duration:
             self.loop()
+            elapsed = 0  # Reset elapsed after loop
         
         nub_x, nub_y = self.nub_pos
         
         # Calculate progress
         if self.scanning:
             # Use estimated duration for progress bar
-            # Progress bar "grows" as estimate increases
             if elapsed < self.estimated_duration:
                 progress = (elapsed / self.estimated_duration) * self.progress_width
             else:
-                # If elapsed exceeds estimate, show at 95% until scan completes
-                progress = self.progress_width * 0.95
+                # Cap at 100% if somehow elapsed exceeds estimate
+                progress = self.progress_width
         elif not self.duration_sec:
             # Fallback if scan failed
             progress = min(elapsed / max(elapsed, 1) * self.progress_width * 0.1, self.progress_width * 0.1)
         else:
-            # Normal progress calculation
-            progress = (elapsed / self.duration_sec) * self.progress_width
+            # Normal progress calculation, cap at 100%
+            progress = min((elapsed / self.duration_sec) * self.progress_width, self.progress_width)
         
         try:
             bui.imagewidget(self.nub, position=(nub_x + progress, nub_y))
