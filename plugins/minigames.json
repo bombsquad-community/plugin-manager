@@ -1626,6 +1626,20 @@
           "md5sum": "e11fbf742e6556939ac8d986e2dd430b"
         }
       }
+    },
+    "gosquad_elimination": {
+      "description": "Elimination game with big bombs meteor shower (optional), as seen in the GoSquad server.",
+      "external_url": "https://cutt.cx/gosquad",
+      "authors": [
+        {
+          "name": "goblogger",
+          "email": "",
+          "discord": "gobloggerid"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
