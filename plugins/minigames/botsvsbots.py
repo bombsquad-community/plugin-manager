@@ -53,7 +53,7 @@ class SpazBot2(SpazBot):
 
 
 class BouncyBotSemiLite(BouncyBot):
-    #nerfed bouncybot. this is due to the base bouncybot being the same lv as pro bots.
+    # nerfed bouncybot. this is due to the base bouncybot being the same lv as pro bots.
     highlight = (1, 1, 0.8)
     punchiness = 0.85
     run = False
@@ -82,7 +82,7 @@ class FroshBotShielded(FroshBot):
 
 
 class StickyBotShielded(StickyBot):
-    #shielded stickybots. *not bonus bots cuz they act the same as normal stickybots
+    # shielded stickybots. *not bonus bots cuz they act the same as normal stickybots
     default_shields = True
 
 
@@ -308,7 +308,7 @@ class BotsVSBotsGame(bs.TeamGameActivity[bs.Player, Team]):
         # Base class overrides.
         self.slow_motion = self._epic_mode
         self.spawn_time = 1.6 if self._epic_mode else 4.0
-        self.default_music = (bs.MusicType.EPIC 
+        self.default_music = (bs.MusicType.EPIC
                               if self._epic_mode else bs.MusicType.TO_THE_DEATH)
 
     @override
