@@ -53,6 +53,7 @@ class SpazBot2(SpazBot):
 
 
 class BouncyBotSemiLite(BouncyBot):
+    #nerfed bouncybot. this is due to the base bouncybot being the same lv as pro bots.
     highlight = (1, 1, 0.8)
     punchiness = 0.85
     run = False
@@ -81,6 +82,7 @@ class FroshBotShielded(FroshBot):
 
 
 class StickyBotShielded(StickyBot):
+    #shielded stickybots. *not bonus bots cuz they act the same as normal stickybots
     default_shields = True
 
 
@@ -218,6 +220,7 @@ class TeamBotSet(SpazBotSet):
             if self._punching_bots_only == False:
                 bot_types += [
                     BomberBotProShielded,
+                    StickyBotShielded,
                 ]
         if self._bonus_bots == True:
             bot_types += [
@@ -236,7 +239,6 @@ class TeamBotSet(SpazBotSet):
             if self._punching_bots_only == False:
                 bot_types += [
                     FroshBotShielded,
-                    StickyBotShielded,
                 ]
         return random.choice(bot_types)
 
@@ -259,7 +261,7 @@ class BotsVSBotsGame(bs.TeamGameActivity[bs.Player, Team]):
     """A game type based on acquiring kills."""
 
     name = 'Bots VS Bots'
-    description = 'Sit down and enjoy mobs from your team fight the opposing team for you. \n Feel free to enjoy some popcorn with it or place a bet with your friends.'  # , self._score_to_win
+    description = 'Sit down and enjoy mobs from your team fight the opposing team for you. \n Feel free to enjoy some popcorn with it or place a bet with your friends.'
 
     @override
     @classmethod
@@ -306,9 +308,8 @@ class BotsVSBotsGame(bs.TeamGameActivity[bs.Player, Team]):
         # Base class overrides.
         self.slow_motion = self._epic_mode
         self.spawn_time = 1.6 if self._epic_mode else 4.0
-        self.default_music = (
-            bs.MusicType.TO_THE_DEATH
-        )
+        self.default_music = (bs.MusicType.EPIC 
+                              if self._epic_mode else bs.MusicType.TO_THE_DEATH)
 
     @override
     def get_instance_description(self) -> str | Sequence:
@@ -328,8 +329,6 @@ class BotsVSBotsGame(bs.TeamGameActivity[bs.Player, Team]):
 
     def spawn_player(self, player: Player) -> None:
         return None
-
-    # def team_pois_set
 
     def spawn_team(self, team: Team) -> None:
         camp = self.map.get_flag_position(team.id)
