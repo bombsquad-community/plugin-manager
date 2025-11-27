@@ -1629,12 +1629,12 @@
     },
     "gosquad_elimination": {
       "description": "Elimination game with big bombs meteor shower (optional), as seen in the GoSquad server.",
-      "external_url": "https://cutt.cx/gosquad",
+      "external_url": "https://discord.gg/QmzTtvyUvd",
       "authors": [
         {
           "name": "goblogger",
           "email": "",
-          "discord": "gobloggerid"
+          "discord": "goblogger"
         }
       ],
       "versions": {

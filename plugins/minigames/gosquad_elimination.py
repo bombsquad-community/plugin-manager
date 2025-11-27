@@ -11,6 +11,7 @@ from __future__ import annotations
 import weakref
 import logging
 import random
+import enum
 from typing import TYPE_CHECKING, override
 
 import bascenev1 as bs
@@ -173,6 +174,28 @@ class Icon(bs.Actor):
         return super().handlemessage(msg)
 
 
+class BombType(enum.Enum):
+    DEFAULT = 0
+    NORMAL = 1
+    STICKY = 2
+    TRIGGER = 3
+    ICE = 4
+
+    @property
+    def as_str(self) -> str:
+        return {
+            BombType.DEFAULT: "default",
+            BombType.NORMAL: "normal",
+            BombType.STICKY: "sticky",
+            BombType.TRIGGER: "impact",
+            BombType.ICE: "ice",
+        }[self]
+
+    @staticmethod
+    def from_int(value: int) -> "BombType":
+        return BombType(value)
+
+
 class Player(bs.Player['Team']):
     """Our player type for this game."""
 
@@ -211,7 +234,7 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         settings = [
             bs.IntSetting(
                 'Lives Per Player',
-                default=1,
+                default=3,
                 min_value=1,
                 max_value=10,
                 increment=1,
@@ -239,9 +262,50 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
                 ],
                 default=1.0,
             ),
-            bs.BoolSetting('Epic Mode', default=False),
+            bs.BoolSetting('Epic Mode', default=True),
             bs.BoolSetting('Enable Speed', default=False),
-            bs.BoolSetting('Meteor Shower', default=False),
+            bs.BoolSetting('Boxing Gloves', default=True),
+            bs.BoolSetting('Equip Shield', default=False),
+            bs.BoolSetting('Meteor Shower', default=True),
+            bs.IntChoiceSetting(
+                'Meteor Delay',
+                choices=[
+                    ('None', 0),
+                    ('15 Seconds', 15),
+                    ('30 Seconds', 30),
+                    ('45 Seconds', 45),
+                    ('1 Minutes', 60),
+                    ('1.5 Minutes', 90),
+                    ('2 Minutes', 120),
+
+                ],
+                default=0,
+            ),
+            bs.IntChoiceSetting(
+                'Bomb Count',
+                choices=[
+                    ('Default', 0),
+                    ('1', 1),
+                    ('2', 2),
+                    ('3', 3),
+                    ('4', 4),
+                    ('5', 5),
+                    ('6', 6),
+                ],
+                default=0,
+            ),
+            bs.IntChoiceSetting(
+                'Bomb Type',
+                choices=[
+                    ('Default', 0),
+                    ('Normal', 1),
+                    ('Sticky', 2),
+                    ('Trigger', 3),
+                    ('Ice', 4),
+                ],
+                default=0,
+            ),
+            bs.BoolSetting('Revive Eliminated Players', default=True),
         ]
         if issubclass(sessiontype, bs.DualTeamSession):
             settings.append(bs.BoolSetting('Solo Mode', default=False))
@@ -278,12 +342,20 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         )
         self._solo_mode = bool(settings.get('Solo Mode', False))
         self._enable_speed = bool(settings.get('Enable Speed', False))
+        self._boxing_gloves = bool(settings.get('Boxing Gloves', False))
+        self._equip_shield = bool(settings.get('Equip Shield', False))
         self._meteor_shower = bool(settings.get('Meteor Shower', False))
+        self._meteor_start_time = float(settings['Meteor Delay'])
+        self._bomb_count = int(settings['Bomb Count'])
+        bomb_type_raw = BombType.from_int(settings.get('Bomb Type', 0))
+        self._bomb_type = str(bomb_type_raw.as_str)
+        self._revive_eliminated = bool(settings.get('Revive Eliminated Players', True))
 
         self._bomb_time = 3.0
         self._bomb_scale = 0.1
         self._add_player_timer: bs.Timer | None = None
-        self._add_player_phase = False
+        # add-player phase flag should be false to activate revival later
+        self._add_player_phase = not self._revive_eliminated
 
         # Base class overrides:
         self.slow_motion = self._epic_mode
@@ -377,7 +449,7 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
 
         self._update_icons()
         if self._meteor_shower:
-            self._initiate_bomb()
+            bs.timer(self._meteor_start_time, self._initiate_bomb)
 
         # We could check game-over conditions at explicit trigger points,
         # but lets just do the simple thing and poll it.
@@ -587,8 +659,16 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         if not self._solo_mode:
             bs.timer(0.3, bs.CallStrict(self._print_lives, player))
 
-        if self._enable_speed:
-            actor.equip_speed()
+        if self._boxing_gloves:
+            actor.equip_boxing_gloves()
+        if self._equip_shield:
+            actor.equip_shields()
+
+        actor.node.hockey = self._enable_speed
+        actor.bomb_count = actor.bomb_count if self._bomb_count == 0 else self._bomb_count
+        bomb_type = actor.bomb_type if self._bomb_type == 'default' else self._bomb_type
+        actor.bomb_type = bomb_type
+        actor.bomb_type_default = bomb_type
 
         # If we have any icons, update their state.
         for icon in player.icons:
@@ -699,13 +779,13 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         # If we're down to 1 or fewer living teams, start a timer to end
         # the game (allows the dust to settle and draws to occur if deaths
         # are close enough).
-        living_teams = len(self._get_living_teams())
-        if living_teams < 2:
+        if len(self._get_living_teams()) < 2:
             self._round_end_timer = bs.Timer(0.5, self.end_game)
+
         # Start the 120s timer when only 2 players remain.
-        # Do this only in ffa sessiontype with minimum 5 players.
-        elif living_teams == 2:
-            if len(self.teams) >= 5 and not self._add_player_phase:
+        # Do this only with minimum 5 players.
+        if len(self._get_living_players()) == 2:
+            if len(self.players) >= 5 and not self._add_player_phase:
                 self._add_player_phase = True
                 bs.broadcastmessage(
                     "Be ready! ⚔️ 2 random eliminated players may rejoin the game in 2 minutes.",
@@ -722,12 +802,17 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
             and any(player.lives > 0 for player in team.players)
         ]
 
+    def _get_living_players(self) -> list[Player]:
+        return [
+            player for player in self.players if player.lives > 0
+        ]
+
     def _revive_random_players(self) -> None:
         # Cancel if game already ended
         if self.has_ended():
             return
 
-        eliminated_players = [p for p in self.players if p.lives <= 0]
+        eliminated_players = [p for p in self.players if p.exists() and p.lives <= 0]
         if not eliminated_players:
             bs.broadcastmessage("No eliminated players available.", color=(0.7, 0.7, 0.7))
             return
