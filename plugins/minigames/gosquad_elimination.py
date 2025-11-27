@@ -263,8 +263,8 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
                 default=1.0,
             ),
             bs.BoolSetting('Epic Mode', default=True),
-            bs.BoolSetting('Enable Speed', default=False),
-            bs.BoolSetting('Boxing Gloves', default=True),
+            bs.BoolSetting('Equip Gloves', default=True),
+            bs.BoolSetting('Equip Speed', default=False),
             bs.BoolSetting('Equip Shield', default=False),
             bs.BoolSetting('Meteor Shower', default=True),
             bs.IntChoiceSetting(
@@ -341,8 +341,8 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
             settings.get('Balance Total Lives', False)
         )
         self._solo_mode = bool(settings.get('Solo Mode', False))
-        self._enable_speed = bool(settings.get('Enable Speed', False))
-        self._boxing_gloves = bool(settings.get('Boxing Gloves', False))
+        self._equip_gloves = bool(settings.get('Equip Gloves', False))
+        self._equip_speed = bool(settings.get('Equip Speed', False))
         self._equip_shield = bool(settings.get('Equip Shield', False))
         self._meteor_shower = bool(settings.get('Meteor Shower', False))
         self._meteor_start_time = float(settings['Meteor Delay'])
@@ -350,12 +350,10 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         bomb_type_raw = BombType.from_int(settings.get('Bomb Type', 0))
         self._bomb_type = str(bomb_type_raw.as_str)
         self._revive_eliminated = bool(settings.get('Revive Eliminated Players', True))
+        self._revive_eliminated_timer: bs.Timer | None = None
 
         self._bomb_time = 3.0
         self._bomb_scale = 0.1
-        self._add_player_timer: bs.Timer | None = None
-        # add-player phase flag should be false to activate revival later
-        self._add_player_phase = not self._revive_eliminated
 
         # Base class overrides:
         self.slow_motion = self._epic_mode
@@ -626,7 +624,7 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
             self, position: Sequence[float], velocity: Sequence[float]
     ) -> None:
         bomb_type = random.choice([
-            'land_mine', 'land_mine', 'tnt', 'tnt',
+            'land_mine', 'land_mine', 'tnt', 'tnt', 
             'impact', 'sticky', 'normal',
         ])
         bomb = Bomb(
@@ -659,16 +657,15 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         if not self._solo_mode:
             bs.timer(0.3, bs.CallStrict(self._print_lives, player))
 
-        if self._boxing_gloves:
+        if self._equip_gloves:
             actor.equip_boxing_gloves()
         if self._equip_shield:
             actor.equip_shields()
 
-        actor.node.hockey = self._enable_speed
+        actor.node.hockey = self._equip_speed
         actor.bomb_count = actor.bomb_count if self._bomb_count == 0 else self._bomb_count
         bomb_type = actor.bomb_type if self._bomb_type == 'default' else self._bomb_type
-        actor.bomb_type = bomb_type
-        actor.bomb_type_default = bomb_type
+        actor.bomb_type = actor.bomb_type_default = bomb_type
 
         # If we have any icons, update their state.
         for icon in player.icons:
@@ -758,8 +755,7 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
                 try:
                     player.team.spawn_order.remove(player)
                     player.team.spawn_order.append(player)
-                except:
-                    pass
+                except: pass
 
     def _update(self) -> None:
         if self._solo_mode:
@@ -783,16 +779,17 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
             self._round_end_timer = bs.Timer(0.5, self.end_game)
 
         # Start the 120s timer when only 2 players remain.
-        # Do this only with minimum 5 players.
-        if len(self._get_living_players()) == 2:
-            if len(self.players) >= 5 and not self._add_player_phase:
-                self._add_player_phase = True
-                bs.broadcastmessage(
-                    "Be ready! ⚔️ 2 random eliminated players may rejoin the game in 2 minutes.",
-                    color=(1, 0.7, 0.1)
-                )
-                self._add_player_timer = bs.BaseTimer(
-                    120, bs.WeakCallStrict(self._revive_random_players))
+        if (
+            len(self._get_living_players()) == 2 and
+            self._revive_eliminated and 
+            len(self.players) >= 4
+        ):
+            self._revive_eliminated = False
+            bs.broadcastmessage(
+                "Be ready! ⚔️ 2 random eliminated players may rejoin the game in 2 minutes.",
+                color=(1, 0.7, 0.1)
+            )
+            self._revive_eliminated_timer = bs.BaseTimer(120, bs.WeakCallStrict(self._revive_random_players))
 
     def _get_living_teams(self) -> list[Team]:
         return [
@@ -821,17 +818,18 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         revived = random.sample(eliminated_players, min(2, len(eliminated_players)))
         for player in revived:
             player.lives = 1
-            self.spawn_player(player)
-            for icon in player.icons:
-                icon.update_for_lives()
-                assert icon.node, icon._name_text
-                icon._name_text.opacity = 1.0
-                icon.node.color = (1, 1, 1)
-                icon.node.opacity = 1.0
+            if not self._solo_mode:
+                self.spawn_player(player)
+                for icon in player.icons:
+                    icon.update_for_lives()
+                    assert icon.node, icon._name_text
+                    icon._name_text.opacity = 1.0
+                    icon.node.color = (1, 1, 1)
+                    icon.node.opacity = 1.0
             bs.broadcastmessage(f"{player.getname(full=True)} rejoined the game!", color=(0, 1, 0))
 
         self._update_icons()
-        self._add_player_phase = False  # Allow the event to trigger again later if desired
+        self._revive_eliminated = True  # Allow the event to trigger again later
 
     @override
     def end_game(self) -> None:
