@@ -1055,7 +1055,7 @@
         }
       ],
       "versions": {
-        "1.1.0": {
+        "1.0.1": {
           "api_version": 9,
           "commit_sha": "7cf3de7",
           "released_on": "27-11-2025",
