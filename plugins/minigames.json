@@ -1626,6 +1626,25 @@
           "md5sum": "e11fbf742e6556939ac8d986e2dd430b"
         }
       }
+    },
+    "gosquad_elimination": {
+      "description": "Elimination game with big bombs meteor shower (optional), as seen in the GoSquad server.",
+      "external_url": "https://discord.gg/QmzTtvyUvd",
+      "authors": [
+        {
+          "name": "goblogger",
+          "email": "",
+          "discord": "goblogger"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "a0e13b5",
+          "released_on": "26-11-2025",
+          "md5sum": "33e6b93420cf6115e992aca534d76bfd"
+        }
+      }
     }
   }
 }
