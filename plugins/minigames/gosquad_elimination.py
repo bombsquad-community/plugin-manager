@@ -624,7 +624,7 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
             self, position: Sequence[float], velocity: Sequence[float]
     ) -> None:
         bomb_type = random.choice([
-            'land_mine', 'land_mine', 'tnt', 'tnt', 
+            'land_mine', 'land_mine', 'tnt', 'tnt',
             'impact', 'sticky', 'normal',
         ])
         bomb = Bomb(
@@ -755,7 +755,8 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
                 try:
                     player.team.spawn_order.remove(player)
                     player.team.spawn_order.append(player)
-                except: pass
+                except:
+                    pass
 
     def _update(self) -> None:
         if self._solo_mode:
@@ -781,7 +782,7 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
         # Start the 120s timer when only 2 players remain.
         if (
             len(self._get_living_players()) == 2 and
-            self._revive_eliminated and 
+            self._revive_eliminated and
             len(self.players) >= 4
         ):
             self._revive_eliminated = False
@@ -789,7 +790,8 @@ class EliminationGame(bs.TeamGameActivity[Player, Team]):
                 "Be ready! ⚔️ 2 random eliminated players may rejoin the game in 2 minutes.",
                 color=(1, 0.7, 0.1)
             )
-            self._revive_eliminated_timer = bs.BaseTimer(120, bs.WeakCallStrict(self._revive_random_players))
+            self._revive_eliminated_timer = bs.BaseTimer(
+                120, bs.WeakCallStrict(self._revive_random_players))
 
     def _get_living_teams(self) -> list[Team]:
         return [
