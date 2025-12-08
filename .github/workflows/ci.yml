@@ -1,5 +1,15 @@
 name: CI
 
+# WORD OF CAUTION:
+#   TO anyone modifying this
+#     Things will break if you modify this 
+#     without understanding how it works
+
+# A simple flow of this file:
+#   Apply AutoPEP8 → Apply Plugin Metadata → CRITICAL COMMIT (format + plugin meta) 
+#   ←              ←              ←              ←              ←              ↵
+#   ↪ Apply Version Metadata → Commit (version meta) → Tests
+
 on:
   push:
     branches:
@@ -9,48 +19,58 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12"]
     steps:
-    - uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github.head_ref }}
-        fetch-depth: 0
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install Dependencies
-      run: |
-        python -m pip install -U pip
-        python -m pip install -U pycodestyle==2.12.1 autopep8
-        python -m pip install -U -r test/pip_reqs.txt
-    
-    - name: Apply AutoPEP8
-      run: |
-        autopep8 --in-place --recursive --max-line-length=100 .
-    
-    - name: Commit AutoPEP8
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "[ci] auto-format"
-        branch: ${{ github.head_ref }}
-    
-    - name: Apply Version Metadata
-      run: |
-        python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
-    
-    - name: Commit Version Metadata
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "[ci] apply-version-metadata"
-        branch: ${{ github.head_ref }}
-    
-    - name: Execute Tests
-      run: |
-        python -m unittest discover -v
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -U pycodestyle==2.12.1 autopep8
+          python -m pip install -U -r test/pip_reqs.txt
+
+      - name: Apply AutoPEP8
+        run: |
+          autopep8 --in-place --recursive --max-line-length=100 .
+
+      - name: Apply Plugin Metadata
+        if: github.event_name == 'pull_request_target'
+      # should this only be run on pull_request_target and not pushes??
+        run: |
+          LAST_COMMIT_HASH=$(git log --pretty=format:'%H' -n 1)
+          CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r "$LAST_COMMIT_HASH")
+          python test/auto_apply_plugin_metadata.py "$CHANGED_FILES"
+
+      # This is a CRITICAL COMMIT for the next step
+      # which bases this as the commit to get the sha to store in index.json or plugin.json
+      - name: Commit Plugin Metadata and AutoPEP8
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "[ci] apply-plugin-metadata-and-formatting"
+          branch: ${{ github.head_ref }}
+
+      - name: Apply Version Metadata
+        run: |
+          python test/auto_apply_version_metadata.py $(git log --pretty=format:'%h' -n 1)
+
+      - name: Commit Version Metadata
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "[ci] apply-version-metadata"
+          branch: ${{ github.head_ref }}
+
+      - name: Refresh Repository
+        run: |
+          git fetch origin
+          git reset --hard HEAD
+
+      - name: Execute Tests
+        run: |
+          python -m unittest discover -v

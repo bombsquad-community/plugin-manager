@@ -12,9 +12,9 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -27,7 +27,7 @@ jobs:
 
       - name: set_variables
         run: |
-          output1=$(python3 test/get_latest.py get_latest_version)
+          output1=$(python3 test/get_latest.py get_latest_plugman_version)
           {
             echo "changelog<<EOF"
             python3 test/get_changes.py "$(python3 test/get_latest.py get_latest_version)"
