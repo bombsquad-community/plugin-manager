@@ -7,6 +7,8 @@ import versioning_tools
 
 DEBUG = True
 
+print("DOES THIS RUN AUTO APPLY PLUGIN METADATA?")
+
 
 def debug_print(*args, **kwargs):
     if DEBUG:

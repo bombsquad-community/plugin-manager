@@ -1,5 +1,5 @@
 import sys
-from get_latest import get_latest_version
+from get_latest import get_latest_plugman_version
 
 """if called directly from command line, it will check if given version is lower
 than latest version in index.json"""
@@ -17,9 +17,9 @@ def semantic_to_str(semantic_version: str):
     return out
 
 
-def version_is_lower(version: str):
+def plugman_version_is_lower_than(version: str):
     """Check if given version is lower than the latest entry in index.json"""
-    latest = semantic_to_str(get_latest_version())
+    latest = semantic_to_str(get_latest_plugman_version())
     version = semantic_to_str(version)
     if latest > version:
         return True
@@ -33,5 +33,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     version = sys.argv[1].replace("v", "", 1)
-    out = version_is_lower(version)
+    out = plugman_version_is_lower_than(version)
     print(int(out))
