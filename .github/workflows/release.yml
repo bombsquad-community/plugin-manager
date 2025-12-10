@@ -30,11 +30,11 @@ jobs:
           output1=$(python3 test/get_latest.py get_latest_plugman_version)
           {
             echo "changelog<<EOF"
-            python3 test/get_changes.py "$(python3 test/get_latest.py get_latest_version)"
+            python3 test/get_changelog.py "$(python3 test/get_latest.py get_latest_version)"
             echo EOF
           } >> "$GITHUB_OUTPUT"
           output2=$(python3 test/get_latest.py get_latest_api)
-          output3=$(python3 test/version_is_lower.py ${{ steps.previoustag.outputs.tag }})
+          output3=$(python3 test/versioning_tools.py ${{ steps.previoustag.outputs.tag }})
           echo "latestVersion=$output1" >> $GITHUB_OUTPUT
           echo "latestAPI=$output2" >> $GITHUB_OUTPUT
           echo "shouldRun=$output3" >> $GITHUB_OUTPUT

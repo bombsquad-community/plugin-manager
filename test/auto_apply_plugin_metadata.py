@@ -1,7 +1,9 @@
 import sys
 import json
 import ast
+import os
 import get_latest
+import versioning_tools
 
 DEBUG = True
 
@@ -11,7 +13,7 @@ def debug_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def get_latest_version(plugin_name, category):
+def get_latest_version(plugin_name, category) -> str:
     filepaths = {
         "minigames": "plugins/minigames.json",
         "utilities": "plugins/utilities.json",
@@ -49,8 +51,8 @@ def update_plugin_json(plugin_info, category):
         try:
             # Check if plugin is already in the json
             plugin = data["plugins"][name]
-            plugman_version = int(get_latest_version(name, category).replace(".", ""))
-            current_version = int(plugin_info["version"].replace(".", ""))
+            plugman_version = int(versioning_tools.semantic_to_str(get_latest_version(name, category)))
+            current_version = int(versioning_tools.semantic_to_str(plugin_info["version"]))
             # Ensure the version is always greater from the already released version
             if current_version > plugman_version:
                 plugin["versions"][plugin_info["version"]] = None
@@ -77,13 +79,13 @@ def update_plugin_json(plugin_info, category):
 
 def extract_plugman(plugins):
     for plugin in plugins:
-        if "plugins/" in plugin:
+        if "plugins"+os.sep in plugin and plugin.endswith(".py"):
 
             debug_print(plugin)
             try:
                 # Split the path and get the part after 'plugins/'
-                parts = plugin.split("plugins/")[1].split("/")
-                file_name_no_extension = plugin.split("/")[-1].replace(".py", "")
+                parts = plugin.split("plugins"+os.sep)[1].split(os.sep)
+                file_name_no_extension = plugin.split(os.sep)[-1].replace(".py", "")
                 category = parts[0]  # First part after plugins/
             except ValueError:
                 if "plugin_manager" in plugin:
