@@ -6,6 +6,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
+plugman = dict(
+    plugin_name="floating_star",
+    description="Get floating stars with colorful text",
+    external_url="",
+    authors=[
+        {"name": "BsRush_Mod", "email": "", "discord": ""},
+    ],
+    version="1.0.0",
+)
+
 import babase
 import bascenev1 as bs
 import bauiv1 as bui
