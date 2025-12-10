@@ -94,6 +94,17 @@ Let's say you wanna submit this new utility-type plugin named as `sample_plugin.
 # ba_meta require api 9
 import babase
 
+plugman = dict(
+    plugin_name="sample_plugin",
+    description="A test plugin for demonstration purposes blah blah.",
+    external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    authors=[
+        {"name": "Loup", "email": "loupg450@gmail.com", "discord": "loupgarou_"},
+        {"name": "brostos", "email": "", "discord": "brostos"}
+    ],
+    version="1.0.0",
+)
+
 # ba_meta export babase.Plugin
 class Main(babase.Plugin):
     def on_app_running(self):
@@ -107,49 +118,13 @@ class Main(babase.Plugin):
 ```
 
 You'll have to fork this repository and add your `sample_plugin.py` plugin file into the appropriate directory, which for
-utility plugin is [plugins/utilities](plugins/utilities). After that, you'll have to add an entry for your plugin
-in [plugins/utilities.json](plugins/utilities.json) so that it gets picked up by the Plugin Manager in-game.
-
-To do this, you'll have to edit the file and add something like this:
-```json
-{
-  "name": "Utilities",
-  ...
-  "plugins": {
-    ...
-    "sample_plugin": {
-      "description": "Shows screenmessages!",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "Alex",
-          "email": "alex@example.com",
-          "discord": null
-        }
-      ],
-      "versions": {
-        "1.0.0": null
-      }
-    },
-    ...
-  }
-  ...
-}
-```
-You can add whatever you wanna add to these fields. However, leave the value for your version key as `null`:
-```json
-"1.0.0": null
-```
-Version values will automatically be populated through github-actions (along with formatting your code as per PEP8 style
+utility plugin is [plugins/utilities](plugins/utilities). After that, plugin getails and version values will automatically be populated through github-actions in [plugins/utilities.json](plugins/utilities.json)(along with formatting your code as per PEP8 style
 guide) once you open a pull request.
-
-Save `utilities.json` with your modified changes and now you can create a [pull request](../../compare) with the
-plugin you've added and the modified JSON metadata file!
 
 ### Updating a Plugin
 
 - Make a [pull request](../../compare) with whatever changes you'd like to make to an existing plugin, and add a new
-  version entry in your plugin category's JSON metadata file.
+  version number in your plugin in the plugman dict.
 
 #### Example
 
@@ -160,39 +135,24 @@ diff --git a/plugins/utilities/sample_plugin.py b/plugins/utilities/sample_plugi
 index ebb7dcc..da2b312 100644
 --- a/plugins/utilities/sample_plugin.py
 +++ b/plugins/utilities/sample_plugin.py
-@@ -5,6 +5,7 @@ import babase
- class Main(babase.Plugin):
-     def on_app_running(self):
-         babase.screenmessage("Hi! I am a sample plugin!")
-
-     def has_settings_ui(self):
+@@ -9,7 +9,7 @@
+         {"name": "Loup", "email": "loupg450@gmail.com", "discord": "loupgarou_"},
+         {"name": "brostos", "email": "", "discord": "brostos"}
+     ],
+-    version="1.0.0",
++    version="1.1.0",
+ )
+ 
+ # ba_meta export babase.Plugin
+@@ -21,4 +21,4 @@
          return True
-
+ 
      def show_settings_ui(self, source_widget):
 -        babase.screenmessage("You tapped my settings!")
 +        babase.screenmessage("Hey! This is my new screenmessage!")
 ```
 
-To name this new version as `1.1.0`, add `"1.1.0": null,` just above the previous plugin version in `utilities.json`:
-```diff
-diff --git a/plugins/utilities.json b/plugins/utilities.json
-index d3fd5bc..34ce9ad 100644
---- a/plugins/utilities.json
-+++ b/plugins/utilities.json
-@@ -14,7 +14,10 @@
-         }
-       ],
-       "versions": {
--        "1.0.0": null
-+        "1.1.0": null,
-+        "1.0.0": {
-+          ...
-+        }
-       }
-     },
-     ...
-```
-That's it! Now you can make a [pull request](../../compare) with both the updated `sample_plugin.py` and `utilities.json` files.
+That's it! Now you can make a [pull request](../../compare) with the updated `sample_plugin.py` file.
 
 ## 3rd Party Plugin Sources
 

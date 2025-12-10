@@ -157,7 +157,7 @@ class BaseCategoryMetadataTestCases:
 
                     if md5sum != version_metadata["md5sum"]:
                         self.fail(
-                            f"{plugin} checksum changed;\n"
+                            f"{plugin} checksum changed for version {version_name};\n"
                             f"{version_metadata['md5sum']} (mentioned in {self.category_metadata_file}) ->\n"
                             f"{md5sum} (actual)"
                         )
@@ -177,6 +177,7 @@ class BaseCategoryMetadataTestCases:
 
                 if md5sum != latest_version_metadata["md5sum"]:
                     self.fail(
+                        f"Latest version {latest_version_name} of "
                         f"{plugin} checksum changed;\n"
                         f"{latest_version_metadata['md5sum']} (mentioned in {self.category_metadata_file}) ->\n"
                         f"{md5sum} (actual)"
