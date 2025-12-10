@@ -118,7 +118,7 @@ class Main(babase.Plugin):
 ```
 
 You'll have to fork this repository and add your `sample_plugin.py` plugin file into the appropriate directory, which for
-utility plugin is [plugins/utilities](plugins/utilities). After that, plugin getails and version values will automatically be populated through github-actions in [plugins/utilities.json](plugins/utilities.json)(along with formatting your code as per PEP8 style
+utility plugin is [plugins/utilities](plugins/utilities). After that, plugin details and version values will automatically be populated through github-actions in [plugins/utilities.json](plugins/utilities.json)(along with formatting your code as per PEP8 style
 guide) once you open a pull request.
 
 ### Updating a Plugin
