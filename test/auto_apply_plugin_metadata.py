@@ -51,7 +51,8 @@ def update_plugin_json(plugin_info, category):
         try:
             # Check if plugin is already in the json
             plugin = data["plugins"][name]
-            plugman_version = int(versioning_tools.semantic_to_str(get_latest_version(name, category)))
+            plugman_version = int(versioning_tools.semantic_to_str(
+                get_latest_version(name, category)))
             current_version = int(versioning_tools.semantic_to_str(plugin_info["version"]))
             # Ensure the version is always greater from the already released version
             if current_version > plugman_version:
