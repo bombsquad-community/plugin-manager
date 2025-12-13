@@ -92,6 +92,8 @@ class PlayerState(Enum):
 
 # I added some variety by giving Marked player unique bomb types.
 # This enum makes it easier to keep track of them.
+
+
 class MarkedBombTypes(Enum):
     REGULAR = 0
     IMPACT = 1
@@ -255,6 +257,7 @@ class Icon(ba.Actor):
 # Bombs work as intended... with the exception of one mechanic.
 # We have to patch it out.
 
+
 class PotatoBomb(Bomb):
 
     # Same function as before with bomb ownership passing code removed
@@ -295,10 +298,12 @@ class PotatoBomb(Bomb):
         if msg.srcnode:
             pass
 
+
 class FootConnectMessage(object):
     'Player stands on ground'
     pass
-    
+
+
 class FootDisconnectMessage(object):
     'Player stops touching the ground'
     pass
@@ -379,7 +384,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
     def on_pickup_press(self) -> None:
         if not self.node:
             return
-        
+
         t_ms = int(ba.time() * 1000.0)
         assert isinstance(t_ms, int)
 
@@ -388,7 +393,8 @@ class PotatoPlayerSpaz(PlayerSpaz):
             _marked = self.node.source_player.state == PlayerState.MARKED
             if not _marked and _holding_someone:
                 self._able_to_pickup = False
-                self._pickup_timer = ba.Timer(self._pickup_cooldown, ba.WeakCall(self._on_pickup_timer_timeout))
+                self._pickup_timer = ba.Timer(
+                    self._pickup_cooldown, ba.WeakCall(self._on_pickup_timer_timeout))
             self.node.pickup_pressed = True
             self.last_pickup_time_ms = t_ms
 
@@ -431,7 +437,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
             clb(self, bomb)
 
         return bomb
-    
+
     # Modified behavior when dropping bombs
     def drop_bomb(self) -> stdbomb.Bomb | None:
         # The original function returns the Bomb the player created.
@@ -495,7 +501,7 @@ class PotatoPlayerSpaz(PlayerSpaz):
             mag = msg.magnitude * self.impact_scale
             velocity_mag = msg.velocity_magnitude * self.impact_scale
             damage_scale = 0.22
-            
+
             # If we're marked, decrease the stun so its less punishing.
             victim_marked: bool = False
             if hasattr(self.node.source_player, "state"):
@@ -743,9 +749,10 @@ class Player(ba.Player['Team']):
 
         # If we just became stunned, do all of this:
         if old_state != PlayerState.STUNNED and state == PlayerState.STUNNED:
-            
+
             # Let's set our stun time based on the amount of times we fell out of the map.
-            fall_penalties_table = LENIENT_FALL_PENALTIES if self.actor.getactivity().lenient_fall_penalties else FALL_PENALTIES
+            fall_penalties_table = LENIENT_FALL_PENALTIES if self.actor.getactivity(
+            ).lenient_fall_penalties else FALL_PENALTIES
             if self.fall_times < len(fall_penalties_table):
                 stun_time = fall_penalties_table[self.fall_times]
             else:
@@ -865,10 +872,10 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
             if 'Marked Player Bomb' in settings and settings['Marked Player Bomb'] == MarkedBombTypes.IMPACT.value:
                 name = ba.Lstr(value='Impact ${A}',
-                             subs=[('${A}', name)])
+                               subs=[('${A}', name)])
             elif 'Marked Player Bomb' in settings and settings['Marked Player Bomb'] == MarkedBombTypes.STICKY.value:
                 name = ba.Lstr(value='Sticky ${A}',
-                             subs=[('${A}', name)])
+                               subs=[('${A}', name)])
 
             if 'Epic Mode' in settings and settings['Epic Mode']:
                 name = babase.Lstr(
@@ -960,7 +967,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
         # Change their bomb type depending on the variant
         if self.settings['Marked Player Bomb'] == MarkedBombTypes.IMPACT.value:
-            target.actor.blast_radius /= IMPACT_BOMB_RADIUS_SCALE # Increase blast radius of impact bombs to be on par with normal bombs
+            # Increase blast radius of impact bombs to be on par with normal bombs
+            target.actor.blast_radius /= IMPACT_BOMB_RADIUS_SCALE
             target.actor.bomb_type = 'impact'
         elif self.settings['Marked Player Bomb'] == MarkedBombTypes.STICKY.value:
             target.actor.bomb_type = 'sticky'
@@ -973,7 +981,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             return
 
         if self.settings['Marked Player Bomb'] == MarkedBombTypes.IMPACT.value:
-            target.actor.blast_radius *= IMPACT_BOMB_RADIUS_SCALE # Restore normal blast radius
+            target.actor.blast_radius *= IMPACT_BOMB_RADIUS_SCALE  # Restore normal blast radius
         target.actor.bomb_type = 'normal'
 
         target.set_state(PlayerState.REGULAR)
@@ -1080,7 +1088,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
 
     # This function is called every time we want to start a new "round" by marking a random player.
     def new_mark(self) -> None:
-        #return
+        # return
 
         # Don't mark a new player if we've already announced a victor.
         if self.has_ended():
@@ -1177,7 +1185,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
             base_position = (75, 50)
             tip_scale = 0.8
             tip_title_scale = 1.2
-            vrmode = babase.app.env.vr #ba.app.vr_mode
+            vrmode = babase.app.env.vr  # ba.app.vr_mode
 
             t_offs = -350.0
             height_offs = 100.0
@@ -1281,7 +1289,7 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         if len(player_pts) <= 0 or len(player_pts) > 4:
             return self.map.get_ffa_start_position(self.players)
 
-        target_distance = 4.0 # This distance seems to be the sweet spot
+        target_distance = 4.0  # This distance seems to be the sweet spot
         best_point = None
         best_distance_diff = float('inf')
 
@@ -1303,7 +1311,8 @@ class HotPotato(ba.TeamGameActivity[Player, ba.Team]):
         for _i in range(10):
             for box in self.map.ffa_spawn_points:
                 point = _getpt()
-                avg_distance = sum((player_pt - ba.Vec3(point[0], point[1], point[2])).length() for player_pt in player_pts) / len(player_pts)                
+                avg_distance = sum(
+                    (player_pt - ba.Vec3(point[0], point[1], point[2])).length() for player_pt in player_pts) / len(player_pts)
                 distance_diff = abs(avg_distance - target_distance)
                 if distance_diff < best_distance_diff:
                     best_distance_diff = distance_diff
