@@ -65,16 +65,18 @@ def modified_get_store_layout() -> Dict[str, List[Dict[str, Any]]]:
 class Main(babase.Plugin):
     def on_app_running(self) -> None:
         bui.app.classic.store.get_store_layout = modified_get_store_layout
+
     def has_settings_ui(self):
         return True
+
     def show_settings_ui(self, button):
         try:
             main_window = UIV1AppSubsystem().get_main_window()
             if main_window:
-                main_window.main_window_replace(lambda:StoreBrowserWindow(
+                main_window.main_window_replace(lambda: StoreBrowserWindow(
                     show_tab=StoreBrowserWindow.TabID.MINIGAMES,
                     origin_widget=button,
-                    )
+                )
                 )
             else:
                 StoreBrowserWindow(
@@ -83,4 +85,3 @@ class Main(babase.Plugin):
                 )
         except Exception as e:
             print(e)
-
