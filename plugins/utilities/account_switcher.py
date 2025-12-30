@@ -230,6 +230,7 @@ class AccountSwitcherUI(bui.Window):
         account_folder = path.join(ACCOUNTS_DIR, self._selected_profile)
 
         self.save_current_account()
+
         def do_switch():
             for fname in ACCOUNT_FILES:
                 dest = path.join(USER_DIR, fname)
