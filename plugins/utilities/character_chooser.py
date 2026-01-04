@@ -154,15 +154,13 @@ def __init__(self, vpos: float, sessionplayer: bs.SessionPlayer,
 def _set_ready(self, ready: bool) -> None:
 
     # pylint: disable=cyclic-import
-    from bauiv1lib.profile import browser as pbrowser
     from babase._general import Call
     profilename = self._profilenames[self._profileindex]
 
     # Handle '_edit' as a special case.
     if profilename == '_edit' and ready:
         with _babase.Context('ui'):
-            pbrowser.ProfileBrowserWindow(in_main_menu=False)
-
+            babase.app.classic.profile_browser_window()
             # Give their input-device UI ownership too
             # (prevent someone else from snatching it in crowded games)
             _babase.set_ui_input_device(self._sessionplayer.inputdevice)
