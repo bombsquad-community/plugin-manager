@@ -60,6 +60,7 @@ jobs:
         with:
           commit_message: "[ci] apply-plugin-metadata-and-formatting"
           branch: ${{ github.head_ref }}
+          skip_checkout: true
 
       - name: Apply Version Metadata
         run: |
@@ -70,6 +71,7 @@ jobs:
         with:
           commit_message: "[ci] apply-version-metadata"
           branch: ${{ github.head_ref }}
+          skip_checkout: true
 
       - name: Refresh Repository
         run: |
