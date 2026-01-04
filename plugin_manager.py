@@ -29,7 +29,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.4"
+PLUGIN_MANAGER_VERSION = "1.1.5"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -1035,7 +1035,6 @@ class PluginManager:
 class ChangelogWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
         self.scale_origin = origin_widget.get_screen_space_center()
-        bui.getsound('swish').play()
         s = 1.65 if _uiscale() is babase.UIScale.SMALL else 1.39 if _uiscale() is babase.UIScale.MEDIUM else 1.67
         width = 400 * s
         height = width * 0.5
@@ -1074,7 +1073,8 @@ class ChangelogWindow(popup.PopupWindow):
             scale=0.8,
             label=babase.charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
-            on_activate_call=self._back
+            on_activate_call=self._back,
+            enable_sound=False
         )
 
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
@@ -1092,7 +1092,7 @@ class ChangelogWindow(popup.PopupWindow):
 
         bui.textwidget(
             parent=self._root_widget,
-            position=(width * 0.49, height * 0.72),
+            position=(width * 0.49, height * 0.75),
             size=(0, 0),
             h_align='center',
             v_align='center',
@@ -1104,12 +1104,16 @@ class ChangelogWindow(popup.PopupWindow):
 
         bui.buttonwidget(
             parent=self._root_widget,
-            position=(width * 0.7, height * 0.72 - 20),
+            position=(width * 0.7, height * 0.72),
             size=(140, 60),
             scale=0.8,
             label='Full ChangeLog',
             button_type='square',
-            on_activate_call=lambda: bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md')
+            enable_sound=False,
+            on_activate_call=lambda: (
+                bui.getsound('deek').play() or
+                bui.open_url(REPOSITORY_URL + '/blob/main/CHANGELOG.md')
+            )
         )
 
         loop_height = height * 0.62
@@ -1119,13 +1123,13 @@ class ChangelogWindow(popup.PopupWindow):
                 position=(width * 0.5 * extra, loop_height),
                 size=(0, 0),
                 h_align=h_align,
-                v_align='top',
+                v_align='center',
                 text=log,
                 scale=text_scale,
                 color=color,
                 maxwidth=width * 0.9
             )
-            loop_height -= 35
+            loop_height -= 30
 
     def _back(self) -> None:
         bui.getsound('swish').play()
@@ -1137,7 +1141,6 @@ class AuthorsWindow(popup.PopupWindow):
     def __init__(self, authors_info, origin_widget):
         self.authors_info = authors_info
         self.scale_origin = origin_widget.get_screen_space_center()
-        bui.getsound('swish').play()
         s = 1.25 if _uiscale() is babase.UIScale.SMALL else 1.39 if _uiscale() is babase.UIScale.MEDIUM else 1.67
         width = 400 * s
         height = width * 0.8
@@ -1177,7 +1180,8 @@ class AuthorsWindow(popup.PopupWindow):
             scale=0.8,
             label=babase.charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
-            on_activate_call=self._back
+            on_activate_call=self._back,
+            enable_sound=False
         )
 
         bui.containerwidget(edit=self._root_widget, cancel_button=back_button)
@@ -1298,11 +1302,13 @@ class PluginWindow(popup.PopupWindow):
                     parent=self._root_widget,
                     position=(-12.5*s + (4 if _uiscale() is babase.UIScale.SMALL else -5),
                               height/2 - 20*s),
-                    label='<',
+                    label=bui.charstr(bui.SpecialChar.LEFT_ARROW),
                     size=(25, 40),
                     color=(1, 0.5, 0.5),
                     scale=s,
-                    on_activate_call=self.show_previous_plugin
+                    on_activate_call=self.show_previous_plugin,
+                    enable_sound=False,
+                    textcolor=(1,1,1)
                 )
 
             if self.p_n_plugins[1] is not None:
@@ -1310,14 +1316,16 @@ class PluginWindow(popup.PopupWindow):
                     parent=self._root_widget,
                     position=(width - 12.5*s - (8 if _uiscale()
                               is babase.UIScale.SMALL else 0), height/2 - 20*s),
-                    label='>',
+                    label=bui.charstr(bui.SpecialChar.RIGHT_ARROW),
                     size=(25, 40),
                     color=(1, 0.5, 0.5),
                     scale=s,
-                    on_activate_call=self.show_next_plugin
+                    on_activate_call=self.show_next_plugin,
+                    enable_sound=False,
+                    textcolor=(1,1,1)
                 )
 
-        pos = height * 0.8
+        pos = height * 0.85
         plug_name = self.plugin.name.replace('_', ' ').title()
         plugin_title = f"{plug_name} (v{self.plugin.latest_compatible_version.number})"
         bui.textwidget(
@@ -1449,10 +1457,15 @@ class PluginWindow(popup.PopupWindow):
             selected_child=selected_btn
         )
 
-        open_pos_x = (390 if _uiscale() is babase.UIScale.SMALL else
-                      450 if _uiscale() is babase.UIScale.MEDIUM else 440)
-        open_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
-                      110 if _uiscale() is babase.UIScale.MEDIUM else 120)
+        tool_top = 190
+
+        open_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
+                      60 if _uiscale() is babase.UIScale.MEDIUM else 60)
+        open_pos_y = tool_top - 45 - (
+            0 if _uiscale() is babase.UIScale.SMALL else
+            10 if _uiscale() is babase.UIScale.MEDIUM else
+            20
+        )
         open_button = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
@@ -1491,10 +1504,13 @@ class PluginWindow(popup.PopupWindow):
                     text=text,
                     action=lambda: bui.open_url(self.plugin.info["external_url"]),
                 )
-            open_pos_x = (440 if _uiscale() is babase.UIScale.SMALL else
-                          500 if _uiscale() is babase.UIScale.MEDIUM else 490)
-            open_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
-                          110 if _uiscale() is babase.UIScale.MEDIUM else 120)
+            open_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
+                          60 if _uiscale() is babase.UIScale.MEDIUM else 60)
+            open_pos_y = tool_top - 90 - (
+                0 if _uiscale() is babase.UIScale.SMALL else
+                10 if _uiscale() is babase.UIScale.MEDIUM else
+                20
+            )
             open_button = bui.buttonwidget(
                 parent=self._root_widget,
                 autoselect=True,
@@ -1528,8 +1544,11 @@ class PluginWindow(popup.PopupWindow):
         if to_draw_button4:
             settings_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
                               60 if _uiscale() is babase.UIScale.MEDIUM else 60)
-            settings_pos_y = (100 if _uiscale() is babase.UIScale.SMALL else
-                              110 if _uiscale() is babase.UIScale.MEDIUM else 120)
+            settings_pos_y = tool_top - (
+                0 if _uiscale() is babase.UIScale.SMALL else
+                10 if _uiscale() is babase.UIScale.MEDIUM else
+                20
+            )
             settings_button = bui.buttonwidget(
                 parent=self._root_widget,
                 autoselect=True,
@@ -1541,7 +1560,7 @@ class PluginWindow(popup.PopupWindow):
             )
             bui.buttonwidget(
                 edit=settings_button,
-                on_activate_call=babase.Call(self.settings, settings_button)
+                on_activate_call=babase.CallPartial(self.settings, settings_button)
             )
             bui.imagewidget(
                 parent=self._root_widget,
@@ -1857,6 +1876,10 @@ class PluginCategoryWindow(popup.PopupMenuWindow):
 
 
 class PluginManagerWindow(bui.MainWindow):
+    @override
+    def main_window_should_preserve_selection(self) -> bool:
+        return False
+
     def __init__(
         self,
         transition: str = "in_right",
@@ -2059,7 +2082,8 @@ class PluginManagerWindow(bui.MainWindow):
                 on_activate_call=lambda: loop.create_task(self._on_order_button_press()),
                 button_type="square",
                 textcolor=b_textcolor,
-                text_scale=0.6
+                text_scale=0.6,
+                enable_sound=False
             )
         else:
             b = self.alphabet_order_selection_button
@@ -2090,6 +2114,7 @@ class PluginManagerWindow(bui.MainWindow):
             ) if b.exists() else None
 
     async def _on_order_button_press(self) -> None:
+        bui.getsound('deek').play()
         self.selected_alphabet_order = ('a_z' if self.selected_alphabet_order == 'z_a' else 'z_a')
         bui.buttonwidget(edit=self.alphabet_order_selection_button,
                          label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
@@ -2179,7 +2204,7 @@ class PluginManagerWindow(bui.MainWindow):
         )
         bui.buttonwidget(
             controller_button,
-            on_activate_call=babase.Call(
+            on_activate_call=babase.CallPartial(
                 PluginManagerSettingsWindow,
                 self.plugin_manager,
                 controller_button
@@ -2206,7 +2231,11 @@ class PluginManagerWindow(bui.MainWindow):
             size=(30, 30),
             button_type="square",
             label="",
-            on_activate_call=lambda: loop.create_task(self.refresh())
+            on_activate_call=lambda: (
+                bui.getsound('deek').play() or
+                loop.create_task(self.refresh())
+            ),
+            enable_sound=False
         )
         bui.imagewidget(
             parent=self._root_widget,
@@ -2328,19 +2357,27 @@ class PluginManagerWindow(bui.MainWindow):
                 color=color,
                 text=plugin.name.replace('_', ' ').title(),
                 click_activate=True,
-                on_activate_call=lambda: self.show_plugin_window(plugin, plugins_list),
                 h_align='left',
                 v_align='center',
                 maxwidth=420
+            )
+            bui.textwidget(
+                text_widget,
+                on_activate_call=bui.CallPartial(
+                    self.show_plugin_window,
+                    plugin,
+                    plugins_list,
+                    text_widget
+                )
             )
             self.plugins_in_current_view[plugin.name] = text_widget
             # XXX: This seems nicer. Might wanna use this in future.
             # text_widget.add_delete_callback(lambda: self.plugins_in_current_view.pop(plugin.name))
 
-    def show_plugin_window(self, plugin, plugins_list):
+    def show_plugin_window(self, plugin, plugins_list, source):
         PluginWindow(
             plugin,
-            self._root_widget,
+            source,
             plugins_list=plugins_list,
             button_callback=lambda: self.draw_plugin_name(plugin, plugins_list)
         )
@@ -2482,7 +2519,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
                 size=(170, 30),
                 text=setting,
                 value=value,
-                on_value_change_call=babase.Call(self.toggle_setting, setting),
+                on_value_change_call=babase.CallPartial(self.toggle_setting, setting),
                 maxwidth=500,
                 textcolor=(0.9, 0.9, 0.9),
                 scale=text_scale * 0.8
@@ -2651,8 +2688,11 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
 
 class NewAllSettingsWindow(AllSettingsWindow):
-    """Window for selecting a settings category."""
+    @override
+    def main_window_should_preserve_selection(self) -> bool:
+        return False
 
+    """Window for selecting a settings category."""
     def __init__(
         self,
         transition: str | None = 'in_right',
@@ -2840,7 +2880,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
             size=(basew, baseh),
             button_type='square',
             label='',
-            on_activate_call=self._do_plugman,
+            on_activate_call=self._do_plugman
         )
         _b_title(x_offs6, v, pmb, bui.Lstr(value="Plugin Manager"))
         imgw = imgh = 120
@@ -2850,7 +2890,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
             size=(imgw, imgh),
             color=(0.8, 0.95, 1),
             texture=bui.gettexture('storeIcon'),
-            draw_controller=pmb,
+            draw_controller=pmb
         )
         self._restore_state()
 
@@ -2860,7 +2900,9 @@ class NewAllSettingsWindow(AllSettingsWindow):
             return
 
         self.main_window_replace(
-            PluginManagerWindow(origin_widget=self._plugman_button)
+            lambda:PluginManagerWindow(
+                origin_widget=self._plugman_button
+            )
         )
 
     def _save_state(self) -> None:
@@ -2915,7 +2957,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
 # ba_meta export babase.Plugin
 class EntryPoint(babase.Plugin):
     def on_app_running(self) -> None:
-        """Called when the app is being launched."""
+        """CallPartialed when the app is being launched."""
         from bauiv1lib.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         DNSBlockWorkaround.apply()
