@@ -1457,14 +1457,14 @@ class PluginWindow(popup.PopupWindow):
             selected_child=selected_btn
         )
 
-        tool_top = 190
+        tool_top = 195
 
         open_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
                       60 if _uiscale() is babase.UIScale.MEDIUM else 60)
         open_pos_y = tool_top - 45 - (
-            0 if _uiscale() is babase.UIScale.SMALL else
+            5 if _uiscale() is babase.UIScale.SMALL else
             10 if _uiscale() is babase.UIScale.MEDIUM else
-            20
+            15
         )
         open_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -1507,9 +1507,9 @@ class PluginWindow(popup.PopupWindow):
             open_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
                           60 if _uiscale() is babase.UIScale.MEDIUM else 60)
             open_pos_y = tool_top - 90 - (
-                0 if _uiscale() is babase.UIScale.SMALL else
+                5 if _uiscale() is babase.UIScale.SMALL else
                 10 if _uiscale() is babase.UIScale.MEDIUM else
-                20
+                15
             )
             open_button = bui.buttonwidget(
                 parent=self._root_widget,
@@ -1545,9 +1545,9 @@ class PluginWindow(popup.PopupWindow):
             settings_pos_x = (60 if _uiscale() is babase.UIScale.SMALL else
                               60 if _uiscale() is babase.UIScale.MEDIUM else 60)
             settings_pos_y = tool_top - (
-                0 if _uiscale() is babase.UIScale.SMALL else
+                5 if _uiscale() is babase.UIScale.SMALL else
                 10 if _uiscale() is babase.UIScale.MEDIUM else
-                20
+                15
             )
             settings_button = bui.buttonwidget(
                 parent=self._root_widget,
@@ -2046,7 +2046,7 @@ class PluginManagerWindow(bui.MainWindow):
             await self.select_category("All")
 
     def draw_plugins_scroll_bar(self):
-        scroll_size_x = (515 if _uiscale() is babase.UIScale.SMALL else
+        scroll_size_x = self.scrollx = (515 if _uiscale() is babase.UIScale.SMALL else
                          430 if _uiscale() is babase.UIScale.MEDIUM else 420)
         scroll_size_y = (245 if _uiscale() is babase.UIScale.SMALL else
                          265 if _uiscale() is babase.UIScale.MEDIUM else 335)
@@ -2351,7 +2351,7 @@ class PluginManagerWindow(bui.MainWindow):
         else:
             text_widget = bui.textwidget(
                 parent=self._columnwidget,
-                size=(410, 30),
+                size=(self.scrollx, 30),
                 selectable=True,
                 always_highlight=True,
                 color=color,
@@ -2359,7 +2359,7 @@ class PluginManagerWindow(bui.MainWindow):
                 click_activate=True,
                 h_align='left',
                 v_align='center',
-                maxwidth=420
+                maxwidth=self.scrollx-10
             )
             bui.textwidget(
                 text_widget,
