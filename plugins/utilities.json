@@ -2344,6 +2344,20 @@
           "md5sum": "01c6cb1a3d3b525c87caed389c8d03ed"
         }
       }
+    },
+    "floating_star": {
+      "description": "Get floating stars with colorful text",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "BsRush_Mod",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
