@@ -33,7 +33,7 @@ TEXT_CONTENT = "\ue00cBsRush Mod\ue00c"
 TEXT_SIZE = 0.01
 TEXT_COLOR = (1, 1, 1)
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class UwUuser(babase.Plugin):

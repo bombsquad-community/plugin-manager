@@ -2344,25 +2344,6 @@
           "md5sum": "01c6cb1a3d3b525c87caed389c8d03ed"
         }
       }
-    },
-    "floating_star": {
-      "description": "Get floating stars with colorful text",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "BsRush_Mod",
-          "email": "",
-          "discord": ""
-        }
-      ],
-      "versions": {
-        "1.0.0": {
-          "api_version": 9,
-          "commit_sha": "fdda8c6",
-          "released_on": "10-01-2026",
-          "md5sum": "4ae683c0ed1c60cc0603aa0fdb6e2295"
-        }
-      }
     }
   }
 }
