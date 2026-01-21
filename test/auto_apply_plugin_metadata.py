@@ -56,8 +56,9 @@ def update_plugin_json(plugin_info, category):
         try:
             # Check if plugin is already in the json
             plugin = data["plugins"][name]
-            plugman_version = int(versioning_tools.semantic_to_str(
-                get_latest_version(name, category)))
+            plugman_version = int(
+                versioning_tools.semantic_to_str(get_latest_version(name, category))
+            )
             current_version = int(versioning_tools.semantic_to_str(plugin_info["version"]))
             # Ensure the version is always greater from the already released version
             if current_version > plugman_version:
@@ -67,6 +68,9 @@ def update_plugin_json(plugin_info, category):
                 plugin["description"] = plugin_info["description"]
                 plugin["external_url"] = plugin_info["external_url"]
                 plugin["authors"] = plugin_info["authors"]
+            # In future
+            # We can clear the version metadata for if current_version = plugman_version for PRs
+            # So that its easier to update the plugin after review without changing version
             elif current_version <= plugman_version:
                 raise Exception("Version cant be lower or equal than the previous version.")
         except KeyError:
@@ -85,12 +89,12 @@ def update_plugin_json(plugin_info, category):
 
 def extract_plugman(plugins):
     for plugin in plugins:
-        if "plugins"+os.sep in plugin and plugin.endswith(".py"):
+        if "plugins" + os.sep in plugin and plugin.endswith(".py"):
 
             debug_print(plugin)
             try:
                 # Split the path and get the part after 'plugins/'
-                parts = plugin.split("plugins"+os.sep)[1].split(os.sep)
+                parts = plugin.split("plugins" + os.sep)[1].split(os.sep)
                 file_name_no_extension = plugin.split(os.sep)[-1].replace(".py", "")
                 category = parts[0]  # First part after plugins/
             except ValueError:
@@ -120,12 +124,14 @@ def extract_plugman(plugins):
                                 if kw.arg == "plugin_name":
                                     plugin_name = ast.literal_eval(kw.value)
                                     # some basic validation specific to plugin manager
-                                    if (plugin_name != plugin_name.lower()):
+                                    if plugin_name != plugin_name.lower():
                                         raise ValueError(
-                                            "Plugin name in plugman must be in snakecase.")
-                                    if (plugin_name != file_name_no_extension):
+                                            "Plugin name in plugman must be in snakecase."
+                                        )
+                                    if plugin_name != file_name_no_extension:
                                         raise ValueError(
-                                            "Plugin name in plugman does not match the file name.")
+                                            "Plugin name in plugman does not match the file name."
+                                        )
                                 result[kw.arg] = ast.literal_eval(kw.value)
                             if category:
                                 update_plugin_json(result, category=category)
