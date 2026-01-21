@@ -2363,6 +2363,20 @@
           "md5sum": "c0fc8f5d36b24977e1c997e4211601a7"
         }
       }
+    },
+    "powerup_manager": {
+      "description": "This plugin add new modded powerups and features to manage them",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "ATD",
+          "email": "anasdhaoidi001@gmail.com",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
