@@ -28,7 +28,7 @@ from bascenev1lib.actor.spaz import *
 from typing import TYPE_CHECKING
 
 plugman = dict(
-    plugin_name="atd_powerup_manager",
+    plugin_name="powerup_manager",
     description="This plugin add new modded powerups and features to manage them",
     external_url="",
     authors=[
