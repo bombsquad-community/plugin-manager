@@ -29,7 +29,7 @@ second_damage = (u'\ue048GOOD!\ue048', (0, 1, 1), '2')
 third_damage = (u'\ue041NICE!\ue041', (0.8, 0.4, 1), '3')
 fourth_damage = (u'\ue049UPPS\ue049', (1, 1, 0), '4')
 five_damage = (u'\ue043DEATH!\ue043', (1, 0, 0), '5')
-bs.broadcastmessage(u'\ue043 || \ue062WELCOME ATD\ue062 || \ue043', color=(0, 1,0)) 
+bs.broadcastmessage(u'\ue043 || \ue062WELCOME ATD\ue062 || \ue043', color=(0, 1, 0))
 
 
 def custom_effects(pos: float, effect: str = None) -> None:
@@ -79,10 +79,13 @@ def custom_effects(pos: float, effect: str = None) -> None:
 ####################################
 
 # ba_meta export babase.Plugin
+
+
 class CustomHitsPlugin(babase.Plugin):
 
     def on_punched(self, damage: int) -> None:
         pos = self.node.position
+
         def custom_text(msg: str, color: float) -> None:
             text = bs.newnode(
                 'text',
@@ -107,27 +110,27 @@ class CustomHitsPlugin(babase.Plugin):
                 0.15: 0.014,
                 2.0: 0.016
             })
-            bs.animate_array(text, 'color',3, {
-            0.0: (0, 0, 0), #Black
-            0.2: (2.55, 2.55, 2.55), #White
-            0.4: (2, 0, 0), #Red
-            0.6: (0, 2.55, 0), #Lime
-            0.8: (0, 0, 2.55), #Blue
-            1.0: (2.55, 2.55, 0), #Yellow
-            1.2: (0, 2.55, 2.55), #Cyan / Aqua
-            1.4: (2.55, 0, 2.55), #Magenta / Fuchsia
-            1.6: (1.92, 1.92, 1.92), #Silver
-            1.8: (1.28, 1.28, 1.28), #Gray            
-            2.0: (1.28, 0, 0), #Maroon
-            2.2: (1.28, 1.28, 0), #Olive            
-            2.4: (0, 1.28, 0), #Green           
-            2.6: (1.28, 0, 1.28), #Purple
-            2.8: (0, 1.28, 1.28), #Teal
-            3.0: (0, 0, 1.28), #Navy
-            3.2: (1.5, 0.5, 0), #Orange
-            3.4: (1.8, 0.5, 1.6), #Pink
-            3.6: (0.5, 0.5, 0.5), # Gray
-            }, loop = True)
+            bs.animate_array(text, 'color', 3, {
+                0.0: (0, 0, 0),  # Black
+                0.2: (2.55, 2.55, 2.55),  # White
+                0.4: (2, 0, 0),  # Red
+                0.6: (0, 2.55, 0),  # Lime
+                0.8: (0, 0, 2.55),  # Blue
+                1.0: (2.55, 2.55, 0),  # Yellow
+                1.2: (0, 2.55, 2.55),  # Cyan / Aqua
+                1.4: (2.55, 0, 2.55),  # Magenta / Fuchsia
+                1.6: (1.92, 1.92, 1.92),  # Silver
+                1.8: (1.28, 1.28, 1.28),  # Gray
+                2.0: (1.28, 0, 0),  # Maroon
+                2.2: (1.28, 1.28, 0),  # Olive
+                2.4: (0, 1.28, 0),  # Green
+                2.6: (1.28, 0, 1.28),  # Purple
+                2.8: (0, 1.28, 1.28),  # Teal
+                3.0: (0, 0, 1.28),  # Navy
+                3.2: (1.5, 0.5, 0),  # Orange
+                3.4: (1.8, 0.5, 1.6),  # Pink
+                3.6: (0.5, 0.5, 0.5),  # Gray
+            }, loop=True)
             bs.timer(2.0, text.delete)
         if damage < 200:
             custom_text(first_damage[0], first_damage[1])
