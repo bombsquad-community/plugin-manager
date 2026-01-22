@@ -2401,6 +2401,20 @@
           "md5sum": "5082acb27f3dbe701d8bd42d8948b352"
         }
       }
+    },
+    "infinity_gloves": {
+      "description": "this plugin give you infinity gloves (isn't mine)",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "ATD",
+          "email": "anasdhaoidi001@gmail.com",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
