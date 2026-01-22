@@ -2399,7 +2399,8 @@
           "commit_sha": "adfa7ef",
           "released_on": "22-01-2026",
           "md5sum": ""
-        }
+        },
+        "1.0.0": null
       }
     }
   }
