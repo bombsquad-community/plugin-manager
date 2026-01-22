@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 	from typing import Sequence
 
 plugman = dict(
-    plugin_name="Infinity Gloves",
+    plugin_name="InfinityGloves",
     description="this plugin give you infinity gloves (isn't mine)",
     external_url="",
     authors=[
