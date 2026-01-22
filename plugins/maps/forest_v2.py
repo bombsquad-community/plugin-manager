@@ -1,5 +1,15 @@
 # ba_meta require api 9
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+import bascenev1 as bs
+from bascenev1 import _map
+from bascenev1lib.gameutils import SharedObjects
+
+if TYPE_CHECKING:
+    pass
+
 plugman = dict(
     plugin_name="forest_v2",
     description="A better looking land with some trees\nNew mini games added so you can play more on this update forest",
@@ -9,17 +19,6 @@ plugman = dict(
     ],
     version="1.0.0",
 )
-
-from __future__ import annotations
-from typing import TYPE_CHECKING
-
-import bascenev1 as bs
-from bascenev1 import _map
-from bascenev1lib.gameutils import SharedObjects
-from bascenev1lib.maps import *
-
-if TYPE_CHECKING:
-    pass
 
 
 class ForestMapData:
@@ -178,6 +177,6 @@ class ForestMap(bs.Map):
         return x_adj * x_adj + z_adj * z_adj > 1.0
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class StartingbatYT(bs.Plugin):
     _map.register_map(ForestMap)
