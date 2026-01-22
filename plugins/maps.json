@@ -39,6 +39,20 @@
           "md5sum": "01fb81dc27d63789f31559140ec2bd72"
         }
       }
+    },
+    "forest_v2": {
+      "description": "A better looking land with some trees\nNew mini games added so you can play more on this update forest",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "Startingbat",
+          "email": "",
+          "discord": "startingbat"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
