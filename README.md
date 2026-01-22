@@ -84,7 +84,9 @@ There are two different ways the plugin manager can be installed:
   See [3rd party plugin sources](#3rd-party-plugin-sources) for more information.
 - New plugins are accepted through a [pull request](../../compare). Add your plugin in the minigames, utilities, or
   the category directory you feel is the most relevant to the type of plugin you're submitting, [here](plugins).
-  Then add an entry to the category's JSON metadata file.
+- You also need a `plugman` dict with the plugin metadata in the plugin (see the [example](https://github.com/bombsquad-community/plugin-manager?tab=readme-ov-file#example) below).
+   - The name of the plugin must be in snake_case and matching the file name.
+   - Must have the plugin_name, description, external_url, authors and version keys.
 - Plugin manager will also show and execute the settings icon if your `ba.Plugin` class has methods `has_settings_ui` and `show_settings_ui`; check out the [colorscheme](https://github.com/bombsquad-community/plugin-manager/blob/eb163cf86014b2a057c4a048dcfa3d5b540b7fe1/plugins/utilities/colorscheme.py#L448-L452) plugin for an example.
 
 #### Example:
