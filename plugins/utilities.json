@@ -2382,31 +2382,6 @@
           "md5sum": "120276a8d215248888e56bfc86cc66f5"
         }
       }
-    },
-    "custom_hits": {
-      "description": "when someone hited rainbow text whit effect will appear",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "ATD",
-          "email": "anasdhaoidi001@gmail.com",
-          "discord": ""
-        }
-      ],
-      "versions": {
-        "1.5": {
-          "api_version": 9,
-          "commit_sha": "adfa7ef",
-          "released_on": "22-01-2026",
-          "md5sum": ""
-        },
-        "1.0.0": {
-          "api_version": 9,
-          "commit_sha": "f8fef78",
-          "released_on": "22-01-2026",
-          "md5sum": "5082acb27f3dbe701d8bd42d8948b352"
-        }
-      }
     }
   }
 }
