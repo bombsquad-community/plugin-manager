@@ -2400,7 +2400,12 @@
           "released_on": "22-01-2026",
           "md5sum": ""
         },
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "f8fef78",
+          "released_on": "22-01-2026",
+          "md5sum": "5082acb27f3dbe701d8bd42d8948b352"
+        }
       }
     }
   }
