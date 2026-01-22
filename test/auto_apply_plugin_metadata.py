@@ -12,10 +12,7 @@ print("DOES THIS RUN AUTO APPLY PLUGIN METADATA?")
 
 def debug_print(*args, **kwargs):
     if DEBUG:
-        try:
-            print(str(*args), str(**kwargs))
-        except Exception as e:
-            print(f"something went wrong while printing debug info : {e}")
+        print(*args, **kwargs)
 
 
 def get_latest_version(plugin_name, category) -> str:
@@ -91,12 +88,13 @@ def extract_plugman(plugins):
     for plugin in plugins:
         if "plugins" + os.sep in plugin and plugin.endswith(".py"):
 
-            debug_print(plugin)
+            print(f"Processing plugin file: {plugin}")
             try:
                 # Split the path and get the part after 'plugins/'
                 parts = plugin.split("plugins" + os.sep)[1].split(os.sep)
                 file_name_no_extension = plugin.split(os.sep)[-1].replace(".py", "")
                 category = parts[0]  # First part after plugins/
+                debug_print(f"Determined category: {category}")
             except ValueError:
                 if "plugin_manager" in plugin:
                     continue
