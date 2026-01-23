@@ -20,7 +20,7 @@ plugman = dict(
     description="this plugin give you infinity gloves (isn't mine)",
     external_url="",
     authors=[
-        {"name": "ATD", "email": "anasdhaoidi001@gmail.com", "discord": ""},
+        {"name": "SOMBR1 & ATD", "email": "anasdhaoidi001@gmail.com", "discord": ""},
     ],
     version="1.0.0",
 )
