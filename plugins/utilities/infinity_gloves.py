@@ -22,7 +22,7 @@ plugman = dict(
     authors=[
         {"name": "SOMBR1 & ATD", "email": "anasdhaoidi001@gmail.com", "discord": ""},
     ],
-    version="1.0.0",
+    version="1.3.0",
 )
 
 
