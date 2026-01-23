@@ -1,7 +1,7 @@
 # ba_meta require api 9
 # mod actualizado por: SOMBR1
-# mod updated by: SOMBR1
-# (see https://ballistica.net/wiki/meta-tag-system)
+# mod updated to API 8 by: SOMBR1
+# mod updated to API 9 by: ATD
 
 from __future__ import annotations
 
