@@ -2,7 +2,11 @@
 
 ### 1.1.5 (05-01-2026)
 
-- Small UI Improvements.
+- Various UI bugfixes and improvements
+- Optimized PluginWindow displays
+- Added a compact MoreWindow
+- Better support for arrow control overall
+- Cleaned up old stuffs in code
 
 ### 1.1.4 (09-08-2025)
 
