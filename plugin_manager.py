@@ -47,21 +47,29 @@ loop = babase._asyncio._asyncio_event_loop
 
 open_popups = []
 
+
 def _add_popup(popup):
     open_popups.append(popup)
+
+
 def _remove_popup(popup):
     try:
         open_popups.remove(popup)
     except ValueError:
         pass
+
+
 def _uiscale(): return bui.app.ui_v1.uiscale
 def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\.")
-def _by_scale(a,b,c):
+
+
+def _by_scale(a, b, c):
     return (
         a if _uiscale is babase.UIScale.SMALL else
         b if _uiscale is babase.UIScale.MEDIUM else
         c
     )
+
 
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
@@ -1319,7 +1327,7 @@ class PluginWindow(popup.PopupWindow):
                 scale=s,
                 on_activate_call=self.show_previous_plugin,
                 enable_sound=False,
-                textcolor=(1,1,1)
+                textcolor=(1, 1, 1)
             )
 
         # next plugin button
@@ -1334,7 +1342,7 @@ class PluginWindow(popup.PopupWindow):
                 scale=s,
                 on_activate_call=self.show_next_plugin,
                 enable_sound=False,
-                textcolor=(1,1,1)
+                textcolor=(1, 1, 1)
             )
 
         pos = height * 0.85
@@ -1352,7 +1360,7 @@ class PluginWindow(popup.PopupWindow):
             maxwidth=width * 0.7 - 40
         )
         pos -= 25
-        
+
         # author
         text = 'by ' + ', '.join([author["name"] for author in self.plugin.info["authors"]])
         author_text_control_btn = bui.buttonwidget(
@@ -1376,7 +1384,7 @@ class PluginWindow(popup.PopupWindow):
             draw_controller=author_text_control_btn,
         )
         pos -= 60
-        
+
         # info
         bui.textwidget(
             parent=self._root_widget,
@@ -1389,7 +1397,7 @@ class PluginWindow(popup.PopupWindow):
             color=color,
             maxwidth=width * 0.95
         )
-        
+
         b1_color = None
         b2_color = (0.8, 0.15, 0.35)
         b3_color = (0.2, 0.8, 0.3)
@@ -1399,7 +1407,7 @@ class PluginWindow(popup.PopupWindow):
         to_draw_button1 = True
         to_draw_settings_button = False
         has_update = False
-        
+
         if self.plugin.is_installed:
             self.local_plugin = self.plugin.get_local()
             if not await self.local_plugin.has_plugins():
@@ -1484,11 +1492,11 @@ class PluginWindow(popup.PopupWindow):
 
         # button math
         button_x = width - 90
-        button_y = 210 - _by_scale(5,10,15)
+        button_y = 210 - _by_scale(5, 10, 15)
         button_color = (0, 0.75, 0.75)
         button_image_color = (0.8, 0.95, 1)
-        button_text_color = (1,1,1,1)
-        
+        button_text_color = (1, 1, 1, 1)
+
         # more button
         more_button = bui.buttonwidget(
             parent=self._root_widget,
@@ -1635,7 +1643,7 @@ class PluginWindow(popup.PopupWindow):
                 down_widget=leftmost_button
             )
 
-        # next plugin button  
+        # next plugin button
         if next_plugin_button is not None:
             bui.buttonwidget(
                 edit=next_plugin_button,
@@ -1787,6 +1795,7 @@ class PluginWindow(popup.PopupWindow):
         await self.plugin.update()
         bui.getsound('shieldUp').play()
 
+
 class MoreWindow:
     def __init__(self, plugin, origin=None):
         _add_popup(self)
@@ -1799,7 +1808,7 @@ class MoreWindow:
         step = 40
         margin = 20
         width = 350
-        px,py = margin,margin
+        px, py = margin, margin
         px2 = width-(margin+step)
         mw = px2-margin*2
         # root
@@ -1807,7 +1816,7 @@ class MoreWindow:
         self._root_widget = bui.containerwidget(
             on_outside_click_call=self._back,
             transition=f'in_{self.transition}',
-            scale=_by_scale(1.5,1.5,1),
+            scale=_by_scale(1.5, 1.5, 1),
             scale_origin_stack_offset=(
                 origin and
                 origin.get_screen_space_center()
@@ -1817,13 +1826,13 @@ class MoreWindow:
         # last updated
         bui.textwidget(
             parent=self._root_widget,
-            position=(px,py),
+            position=(px, py),
             h_align='left',
             v_align='center',
             maxwidth=width-margin*2,
             max_height=step,
-            size=(step,step),
-            color=(1,1,1,0.5),
+            size=(step, step),
+            color=(1, 1, 1, 0.5),
             text=(
                 last_updated and
                 f'Last updated on: {last_updated}'
@@ -1834,32 +1843,32 @@ class MoreWindow:
         py += margin+step/3
         bui.textwidget(
             parent=self._root_widget,
-            position=(px,py),
+            position=(px, py),
             h_align='left',
             v_align='center',
             maxwidth=mw,
             max_height=step,
-            size=(step,step),
-            color=(1,1,1,0.5),
+            size=(step, step),
+            color=(1, 1, 1, 0.5),
             text=f"Version {plugin.latest_compatible_version.number}"
         )
         # source url
         py += step+margin
         bui.textwidget(
             parent=self._root_widget,
-            position=(px,py),
+            position=(px, py),
             h_align='left',
             v_align='center',
             maxwidth=mw,
             max_height=step,
-            size=(step,step),
+            size=(step, step),
             text='Source URL:'
         )
         source_button = bui.buttonwidget(
             parent=self._root_widget,
             autoselect=True,
-            position=(px2,py),
-            size=(step,step),
+            position=(px2, py),
+            size=(step, step),
             color=(0.6, 0.53, 0.63),
             button_type='square',
             label='',
@@ -1870,8 +1879,8 @@ class MoreWindow:
         )
         bui.imagewidget(
             parent=self._root_widget,
-            position=(px2,py),
-            size=(step,step),
+            position=(px2, py),
+            size=(step, step),
             color=(0.8, 0.95, 1),
             texture=bui.gettexture('file'),
             draw_controller=source_button
@@ -1880,18 +1889,18 @@ class MoreWindow:
         py += step+margin
         bui.textwidget(
             parent=self._root_widget,
-            position=(px,py),
+            position=(px, py),
             h_align='left',
             v_align='center',
             maxwidth=mw,
             max_height=step,
-            size=(step,step),
+            size=(step, step),
             text='Report a bug:'
         )
         report_button = bui.buttonwidget(
             parent=self._root_widget,
-            position=(px2,py),
-            size=(step,step),
+            position=(px2, py),
+            size=(step, step),
             button_type='square',
             color=(0.6, 0.53, 0.63),
             label='',
@@ -1905,8 +1914,8 @@ class MoreWindow:
         )
         bui.imagewidget(
             parent=self._root_widget,
-            position=(px2,py),
-            size=(step,step),
+            position=(px2, py),
+            size=(step, step),
             color=(0.8, 0.95, 1),
             texture=bui.gettexture('githubLogo'),
             draw_controller=report_button
@@ -1915,8 +1924,8 @@ class MoreWindow:
         py += step+margin
         back_button = bui.buttonwidget(
             parent=self._root_widget,
-            position=(px,py),
-            size=(step,step),
+            position=(px, py),
+            size=(step, step),
             label=babase.charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
             on_activate_call=self._back,
@@ -1926,12 +1935,12 @@ class MoreWindow:
         px += margin
         bui.textwidget(
             parent=self._root_widget,
-            position=(px+(step),py),
+            position=(px+(step), py),
             h_align='left',
             v_align='center',
             maxwidth=width-margin*2,
             max_height=step*2,
-            size=(step,step),
+            size=(step, step),
             text='More info',
             scale=1.4,
             shadow=0.8
@@ -1941,7 +1950,7 @@ class MoreWindow:
         bui.containerwidget(
             edit=self._root_widget,
             cancel_button=back_button,
-            size=(width,py)
+            size=(width, py)
         )
         # navigation
         bui.buttonwidget(
@@ -1967,6 +1976,7 @@ class MoreWindow:
             up_widget=back_button,
             down_widget=source_button
         )
+
     def _back(self) -> None:
         _remove_popup(self)
         bui.getsound('swish').play()
@@ -1974,6 +1984,7 @@ class MoreWindow:
             edit=self._root_widget,
             transition=f'out_{self.transition}'
         )
+
 
 class PluginCustomSourcesWindow(popup.PopupWindow):
     def __init__(self, origin_widget):
@@ -2375,7 +2386,7 @@ class PluginManagerWindow(bui.MainWindow):
 
     def draw_plugins_scroll_bar(self):
         scroll_size_x = self.scrollx = (515 if _uiscale() is babase.UIScale.SMALL else
-                         430 if _uiscale() is babase.UIScale.MEDIUM else 420)
+                                        430 if _uiscale() is babase.UIScale.MEDIUM else 420)
         scroll_size_y = (245 if _uiscale() is babase.UIScale.SMALL else
                          265 if _uiscale() is babase.UIScale.MEDIUM else 335)
         scroll_pos_x = (70 if _uiscale() is babase.UIScale.SMALL else
@@ -2670,7 +2681,8 @@ class PluginManagerWindow(bui.MainWindow):
 
         plugin_names_ready_to_draw = []
         for plugin in plugin_names_to_draw:
-            try: plugin.latest_compatible_version
+            try:
+                plugin.latest_compatible_version
             except NoCompatibleVersion:
                 continue
             plugin_names_ready_to_draw += [plugin]
@@ -2678,9 +2690,9 @@ class PluginManagerWindow(bui.MainWindow):
         for i, plugin in enumerate(plugin_names_ready_to_draw):
             await self.draw_plugin_name(plugin, plugin_names_ready_to_draw)
         kids = self._columnwidget.get_children()
-        first_child,last_child = kids[::len(kids)-1]
-        bui.widget(first_child,up_widget=self._filter_widget)
-        bui.widget(last_child,down_widget=self._back_button)
+        first_child, last_child = kids[::len(kids)-1]
+        bui.widget(first_child, up_widget=self._filter_widget)
+        bui.widget(last_child, down_widget=self._back_button)
 
     async def draw_plugin_name(self, plugin, plugins_list):
 
@@ -3096,6 +3108,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
         return False
 
     """Window for selecting a settings category."""
+
     def __init__(
         self,
         transition: str | None = 'in_right',
@@ -3245,7 +3258,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
             label='',
             on_activate_call=self._do_audio,
         )
-        bui.buttonwidget(gfxb,right_widget=abtn)
+        bui.buttonwidget(gfxb, right_widget=abtn)
         _b_title(x_offs4, v, abtn, bui.Lstr(resource=f'{self._r}.audioText'))
         imgw = imgh = 120
         bui.imagewidget(
@@ -3307,7 +3320,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
             return
 
         self.main_window_replace(
-            lambda:PluginManagerWindow(
+            lambda: PluginManagerWindow(
                 origin_widget=self._plugman_button
             )
         )
