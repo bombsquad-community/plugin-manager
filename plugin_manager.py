@@ -1926,14 +1926,15 @@ class MoreWindow:
         px += margin
         bui.textwidget(
             parent=self._root_widget,
-            position=(px+(step+margin),py),
+            position=(px+(step),py),
             h_align='left',
             v_align='center',
             maxwidth=width-margin*2,
             max_height=step*2,
             size=(step,step),
             text='More info',
-            scale=2
+            scale=1.4,
+            shadow=0.8
         )
         # finally
         py += step+margin
