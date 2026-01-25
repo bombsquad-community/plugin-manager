@@ -1832,7 +1832,6 @@ class MoreWindow:
             maxwidth=width-margin*2,
             max_height=step,
             size=(step, step),
-            color=(1, 1, 1, 0.5),
             text=(
                 last_updated and
                 f'Last updated on: {last_updated}'
@@ -1849,8 +1848,7 @@ class MoreWindow:
             maxwidth=mw,
             max_height=step,
             size=(step, step),
-            color=(1, 1, 1, 0.5),
-            text=f"Version {plugin.latest_compatible_version.number}"
+            text=f"Version: {plugin.latest_compatible_version.number}"
         )
         # source url
         py += step+margin
@@ -1884,6 +1882,15 @@ class MoreWindow:
             color=(0.8, 0.95, 1),
             texture=bui.gettexture('file'),
             draw_controller=source_button
+        )
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(px2-3, py+12),
+            text='source',
+            size=(10, 10),
+            draw_controller=source_button,
+            rotate=25,
+            scale=0.45
         )
         # report bug
         py += step+margin
@@ -3377,7 +3384,7 @@ class NewAllSettingsWindow(AllSettingsWindow):
 # ba_meta export babase.Plugin
 class EntryPoint(babase.Plugin):
     def on_app_running(self) -> None:
-        """CallPartialed when the app is being launched."""
+        """Called when the app is being launched."""
         from bauiv1lib.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         DNSBlockWorkaround.apply()

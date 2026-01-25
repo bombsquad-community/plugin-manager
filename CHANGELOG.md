@@ -1,6 +1,6 @@
 ## Plugin Manager (dd-mm-yyyy)
 
-### 1.1.5 (05-01-2026)
+### 1.1.5 (26-01-2026)
 
 - Various UI bugfixes and improvements
 - Optimized PluginWindow displays
