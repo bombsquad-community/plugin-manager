@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - index.json
-  
+
 jobs:
   build:
     name: Create Release
@@ -22,15 +22,15 @@ jobs:
         uses: oprypin/find-latest-tag@v1.1.2
         with:
           repository: ${{ github.repository }}
-          releases-only: true  # We know that all relevant tags have a GitHub release for them.
-        id: previoustag 
+          releases-only: true # We know that all relevant tags have a GitHub release for them.
+        id: previoustag
 
       - name: set_variables
         run: |
           output1=$(python3 test/get_latest.py get_latest_plugman_version)
           {
             echo "changelog<<EOF"
-            python3 test/get_changelog.py "$(python3 test/get_latest.py get_latest_version)"
+            python3 test/get_changelog.py "$(python3 test/get_latest.py get_latest_plugman_version)"
             echo EOF
           } >> "$GITHUB_OUTPUT"
           output2=$(python3 test/get_latest.py get_latest_api)
@@ -39,8 +39,6 @@ jobs:
           echo "latestAPI=$output2" >> $GITHUB_OUTPUT
           echo "shouldRun=$output3" >> $GITHUB_OUTPUT
         id: set_variables
-      
-      
 
       - name: Bump version and push tag
         if: ${{ steps.set_variables.outputs.shouldRun == '1'  }}
@@ -50,15 +48,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: |
             ${{ steps.set_variables.outputs.latestVersion }}
-      
+
       - name: Create release
         if: ${{ steps.tag_version.outputs.new_tag }}
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: ${{ steps.tag_version.outputs.new_tag }} (api ${{ steps.set_variables.outputs.latestAPI }})
-          artifacts: "plugin_manager.py"
+          artifacts: 'plugin_manager.py'
           body: |
             ## Changelog
             ${{ steps.set_variables.outputs.changelog }}
-          
