@@ -64,9 +64,10 @@ def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\
 
 
 def _by_scale(a, b, c):
+    u = _uiscale()
     return (
-        a if _uiscale is babase.UIScale.SMALL else
-        b if _uiscale is babase.UIScale.MEDIUM else
+        a if u is babase.UIScale.SMALL else
+        b if u is babase.UIScale.MEDIUM else
         c
     )
 

@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.6 (26-01-2026)
+
+- Fix UI scaling for more window
+
 ### 1.1.5 (26-01-2026)
 
 - Various UI bugfixes and improvements
