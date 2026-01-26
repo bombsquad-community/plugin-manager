@@ -26,7 +26,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.5"
+PLUGIN_MANAGER_VERSION = "1.1.6"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -64,9 +64,10 @@ def _regexp_friendly_class_name_shortcut(string): return string.replace(".", "\\
 
 
 def _by_scale(a, b, c):
+    u = _uiscale()
     return (
-        a if _uiscale is babase.UIScale.SMALL else
-        b if _uiscale is babase.UIScale.MEDIUM else
+        a if u is babase.UIScale.SMALL else
+        b if u is babase.UIScale.MEDIUM else
         c
     )
 
