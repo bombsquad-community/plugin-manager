@@ -19,7 +19,7 @@ plugman = dict(
     authors=[
         {"name": "ATD", "email": "anasdhaoidi001@gmail.com", "discord": ""},
     ],
-    version="1.0.0",
+    version="1.0.1",
 )
 
 ####################################
@@ -29,7 +29,6 @@ second_damage = (u'\ue048GOOD!\ue048', (0, 1, 1), '2')
 third_damage = (u'\ue041NICE!\ue041', (0.8, 0.4, 1), '3')
 fourth_damage = (u'\ue049UPPS\ue049', (1, 1, 0), '4')
 five_damage = (u'\ue043DEATH!\ue043', (1, 0, 0), '5')
-bs.broadcastmessage(u'\ue043 || \ue062WELCOME ATD\ue062 || \ue043', color=(0, 1, 0))
 
 
 def custom_effects(pos: float, effect: str = None) -> None:
