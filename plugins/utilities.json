@@ -2384,7 +2384,7 @@
       }
     },
     "custom_hits": {
-      "description": "when someone hited rainbow text whit effect will appear",
+      "description": "when someone hited rainbow text whit effect will appear(this plugin work when a player hit a player and if a player hit a bot it doesn't work but if bot hit a player it works normal",
       "external_url": "",
       "authors": [
         {
@@ -2399,50 +2399,6 @@
           "commit_sha": "603aa14",
           "released_on": "22-01-2026",
           "md5sum": "5082acb27f3dbe701d8bd42d8948b352"
-        }
-      }
-    },
-    "infinity_gloves": {
-      "description": "this plugin give you infinity gloves (isn't mine)",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "SOMBR1 & ATD",
-          "email": "anasdhaoidi001@gmail.com",
-          "discord": ""
-        }
-      ],
-      "versions": {
-        "1.3.0": {
-          "api_version": 9,
-          "commit_sha": "a4c9c83",
-          "released_on": "23-01-2026",
-          "md5sum": "d8214784e4b4916b2af56b6a9bbb91d5"
-        },
-        "1.0.0": {
-          "api_version": 9,
-          "commit_sha": "cef7de0",
-          "released_on": "22-01-2026",
-          "md5sum": "afbd3cd3055254e8c8a060a484f153ee"
-        }
-      }
-    },
-    "bs_text_on_map": {
-      "description": "now your able to add text on every maps",
-      "external_url": "",
-      "authors": [
-        {
-          "name": "ATD",
-          "email": "anasdhaoidi001@gmail.com",
-          "discord": ""
-        }
-      ],
-      "versions": {
-        "1.5.0": {
-          "api_version": 9,
-          "commit_sha": "a4c9c83",
-          "released_on": "23-01-2026",
-          "md5sum": "82ba58e15220e628f1f09b9bdb3d451e"
         }
       }
     }
