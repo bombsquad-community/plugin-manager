@@ -2407,6 +2407,25 @@
           "md5sum": "5082acb27f3dbe701d8bd42d8948b352"
         }
       }
+    },
+    "players_list": {
+      "description": "A plugin that shows you live players list",
+      "external_url": "https://m.youtube.com/drap_bs",
+      "authors": [
+        {
+          "name": "Drap",
+          "email": "mrunittest@gmail.com",
+          "discord": "drap_bs"
+        }
+      ],
+      "versions": {
+        "1.7.0": {
+          "api_version": 9,
+          "commit_sha": "0d39f57",
+          "released_on": "14-02-2026",
+          "md5sum": "d8002dfc93be74d71f8e6e4aacfe6fd1"
+        }
+      }
     }
   }
 }
