@@ -1,5 +1,10 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.7 (15-02-2026)
+
+- Added function to fill form details for plugin bug report button
+- Added a new plugin bug report yaml template
+
 ### 1.1.6 (26-01-2026)
 
 - Fix UI scaling for more window
@@ -31,15 +36,15 @@
 ### 1.1.1 (09-02-2025)
 
 - Added bomb spinner widget for loading animation.
-  
+
 ### 1.1.0 (23-01-2025)
 
-- Updated to bombsquad api 9. 
-  
+- Updated to bombsquad api 9.
+
 ### 1.0.23 (13-01-2025)
 
 - Fixed a bug which wasn't letting older versions run Plugin Manager.
-  
+
 ### 1.0.22 (07-08-2024)
 
 - Fixed a few Errors and UI Bugs.
@@ -193,12 +198,10 @@
 - Added New Option in settings for Notifying new plugins.
 - Added a Discord Button to join Bombsquad's Official Discord server.
 
-
 ### 0.1.6 (15-09-2022)
 
 - Distinguish the settings button with a cyan color (previously was green) in plugin manager window.
 - Clean up some internal code.
-
 
 ### 0.1.5 (08-09-2022)
 

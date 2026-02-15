@@ -26,7 +26,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.6"
+PLUGIN_MANAGER_VERSION = "1.1.7"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -35,8 +35,8 @@ CURRENT_TAG = "main"
 _env = babase.env()
 _app_api_version = babase.app.env.api_version
 
-PLUGIN_ISSUE_TEMPLATE = "plugin-bug-report.md"
-GITHUB_ISSUE_META = "{repository_url}/issues/new?template={issue_template}"
+PLUGIN_ISSUE_TEMPLATE = "plugin-bug-report.yml"
+GITHUB_PLUGIN_ISSUE_META = "{repository_url}/issues/new?template={issue_template}"
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 CHANGELOG_META = "{repository_url}/{content_type}/{tag}/CHANGELOG.md"
 HEADERS = {
@@ -1798,8 +1798,10 @@ class PluginWindow(popup.PopupWindow):
 
 
 class MoreWindow:
-    def __init__(self, plugin, origin=None):
+    def __init__(self, plugin: Plugin, origin=None):
         _add_popup(self)
+
+        self.plugin = plugin
         # collect info
         last_updated = None
         for value in plugin.info['versions'].values():
@@ -1912,13 +1914,7 @@ class MoreWindow:
             button_type='square',
             color=(0.6, 0.53, 0.63),
             label='',
-            on_activate_call=bui.CallPartial(
-                bui.open_url,
-                GITHUB_ISSUE_META.format(
-                    repository_url=REPOSITORY_URL,
-                    issue_template=PLUGIN_ISSUE_TEMPLATE
-                )
-            )
+            on_activate_call=self._open_bug_report_url
         )
         bui.imagewidget(
             parent=self._root_widget,
@@ -1984,6 +1980,36 @@ class MoreWindow:
             up_widget=back_button,
             down_widget=source_button
         )
+
+    def _open_bug_report_url(self):
+        import platform
+        import urllib.parse
+        import baenv
+
+        LOGS_LENGTH_LIMIT = 5000
+        _logs = ""
+        for entry in baenv._EnvGlobals.get().config.log_handler.get_cached().entries:
+            _logs += entry.message + "\n"
+
+        # reduce this more if it's too long
+        error_logs = f"""```py
+{_logs[:LOGS_LENGTH_LIMIT]}
+```"""
+
+        params = {
+            "title": "[PLUGIN BUG]: " + self.plugin.name,
+            "plugin-name": self.plugin.name,
+            "plugin-version": self.plugin.create_local().version if self.plugin.is_installed else 'Not Installed',
+            "plugin-manager-version": 'v' + PLUGIN_MANAGER_VERSION,
+            "bombsquad-version": 'v' + babase.app.env.engine_version + " (" + str(babase.app.env.engine_build_number) + ")",
+            "os-version": platform.platform() if platform else babase.app.env.platform.value + babase.app.env.os_version,
+            "console-log": error_logs
+        }
+        query_string = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+        base_url = GITHUB_PLUGIN_ISSUE_META.format(
+            repository_url=REPOSITORY_URL, issue_template=PLUGIN_ISSUE_TEMPLATE)
+        final_url = f"{base_url}&{query_string}"
+        bui.open_url(final_url)
 
     def _back(self) -> None:
         _remove_popup(self)
