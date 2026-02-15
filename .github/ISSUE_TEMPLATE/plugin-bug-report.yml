@@ -1,0 +1,89 @@
+name: Plugin Bug Report
+description: Create a report about a plugin to help us improve.
+title: '[PLUGIN BUG]: <plugin-name>'
+labels: ['Plugin Bug']
+
+body:
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Plugin Name
+      description: The name of the plugin experiencing the bug.
+      placeholder: e.g. colorscheme
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: console-log
+    attributes:
+      label: Console Log
+      description: Goto settings -> advanced -> Dev Tools -> enable "Show dev console button" and reproduce the bug. Then copy and paste the console log here.
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+
+  - type: input
+    id: os-version
+    attributes:
+      label: OS with Version
+      placeholder: e.g. Windows 11 / Android 13
+
+  - type: input
+    id: bombsquad-version
+    attributes:
+      label: BombSquad Version
+      placeholder: e.g. v1.7.60
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-manager-version
+    attributes:
+      label: Plugin Manager Version
+      placeholder: e.g. v1.1.10
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin Version
+      placeholder: e.g. 2.0.1
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag and drop screenshots here to help explain the problem.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here (logs, other plugins installed, etc).
