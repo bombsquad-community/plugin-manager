@@ -38,12 +38,13 @@ which makes further modding of your game more convenient by providing easier acc
 
 ## Installation
 
-There are two different ways the plugin manager can be installed:
+There are three different ways the plugin manager can be installed:
 
 
 1. From dev console
 
    - Enable "Show Dev Console Button" from advance BombSquad settings
+   - Make sure you're connected to the internet
    - Paste the following code in dev console
      ```py
      import urllib.request;import _babase;import os;url="https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py";plugin_path=os.path.join(_babase.env()["python_directory_user"],"plugin_manager.py");file=urllib.request.urlretrieve(url)[0];fl = open(file,'r');f=open(plugin_path, 'w+');f.write(fl.read());fl.close();f.close();print("SUCCESS")
@@ -57,7 +58,7 @@ There are two different ways the plugin manager can be installed:
    manually apply updates by copying the latest plugin manager's source code again to your workspace when using this method.
 
 3. [Download plugin_manager.py][DownloadLink] to your mods directory (check it out by going into your game's
-   Settings -> Advanced -> Show Mods Folder). This is the recommended way (read next method to know why).
+   Settings -> Advanced -> Show Mods Folder).
    If you're on a newer version of Android (11 or above) and not rooted, it probably won't be possible to copy
    mods to game's mods folder. In this case, you can connect your Android phone to a computer and push `plugin_manager.py`
    [using `adb`](https://www.xda-developers.com/install-adb-windows-macos-linux/):
