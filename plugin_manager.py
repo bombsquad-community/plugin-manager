@@ -26,7 +26,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.7"
+PLUGIN_MANAGER_VERSION = "1.1.8"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -43,7 +43,12 @@ HEADERS = {
     "User-Agent": _env["legacy_user_agent_string"],
 }
 PLUGIN_DIRECTORY = _env["python_directory_user"]
-loop = babase._asyncio._asyncio_event_loop
+
+# compatibility for older API versions.
+if _env.get("build_number", 0) < 22714:
+    babase._asyncio._g_asyncio_event_loop = babase._asyncio._asyncio_event_loop
+
+loop = babase._asyncio._g_asyncio_event_loop
 
 open_popups = []
 
@@ -3415,7 +3420,7 @@ class EntryPoint(babase.Plugin):
         from bauiv1lib.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         DNSBlockWorkaround.apply()
-        asyncio.set_event_loop(babase._asyncio._asyncio_event_loop)
+        asyncio.set_event_loop(babase._asyncio._g_asyncio_event_loop)
         startup_tasks = StartupTasks()
 
         loop.create_task(startup_tasks.execute())
