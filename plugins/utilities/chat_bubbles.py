@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 plugman = dict(
-    plugin_name="chatbubbles",
+    plugin_name="chat_bubbles",
     description="Adds whatever the players say above their character, includes a few other features too!",
     external_url="",
     authors=[
