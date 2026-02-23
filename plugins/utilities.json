@@ -2438,7 +2438,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "ebfad79",
+          "released_on": "23-02-2026",
+          "md5sum": "552b0ff0492bdab6cf69c1bc2d679e0a"
+        }
       }
     },
     "enhanced_effects": {
@@ -2452,7 +2457,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "ebfad79",
+          "released_on": "23-02-2026",
+          "md5sum": "63c665905dd4619d3f99ca8977f8fbf3"
+        }
       }
     },
     "sleep_on_afk": {
@@ -2466,7 +2476,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "ebfad79",
+          "released_on": "23-02-2026",
+          "md5sum": "5de7a474c3c6b21e8ea1e1abff3c07a1"
+        }
       }
     }
   }
