@@ -2426,6 +2426,48 @@
           "md5sum": "d8002dfc93be74d71f8e6e4aacfe6fd1"
         }
       }
+    },
+    "better_camera_shake": {
+      "description": "This plugin makes the camera only shake when an explosion hits a player character, begone excessive camera shaking!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "DinoWattz",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "enhanced_effects": {
+      "description": "Explosions affect character colors, slow-mo tnt, fair colored shields, a trippy background screen and maybe more in the future!",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "DinoWattz",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "sleep_on_afk": {
+      "description": "Staying idle for 40 seconds will make your character fall asleep, they need rest too..",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "DinoWattz",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
