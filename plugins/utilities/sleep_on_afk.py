@@ -7,7 +7,7 @@ import bascenev1 as bs
 from bascenev1lib.actor.spaz import Spaz
 
 plugman = dict(
-    plugin_name="Sleep On AFK",
+    plugin_name="sleep_on_afk",
     description="Staying idle for 40 seconds will make your character fall asleep, they need rest too..",
     external_url="",
     authors=[

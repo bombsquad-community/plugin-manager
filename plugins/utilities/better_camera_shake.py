@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from typing import Any, Sequence
 
 plugman = dict(
-    plugin_name="Better Camera Shake",
+    plugin_name="better_camera_shake",
     description="This plugin makes the camera only shake when an explosion hits a player character, begone excessive camera shaking!",
     external_url="",
     authors=[

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 plugman = dict(
-    plugin_name="Enhanced Effects",
+    plugin_name="enhanced_effects",
     description="Explosions affect character colors, slow-mo tnt, fair colored shields, a trippy background screen and maybe more in the future!",
     external_url="",
     authors=[
