@@ -2502,6 +2502,25 @@
           "md5sum": "5de7a474c3c6b21e8ea1e1abff3c07a1"
         }
       }
+    },
+    "vanishing_tiles": {
+      "description": "Tiles disappear gradually. Survive each round to continue. Last player standing wins!",
+      "external_url": "https://discord.gg/sQGDsztQcy",
+      "authors": [
+        {
+          "name": "Mr.ghosty",
+          "email": "",
+          "discord": "gaurangbroyo"
+        },
+        {
+          "name": "senchx",
+          "email": "",
+          "discord": "senchx0"
+        }
+      ],
+      "versions": {
+        "2.0.0": null
+      }
     }
   }
 }
