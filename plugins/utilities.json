@@ -2384,7 +2384,7 @@
       }
     },
     "custom_hits": {
-      "description": "when someone hited rainbow text whit effect will appear",
+      "description": "when someone hited rainbow text whit effect will appear(this plugin work when a player hit a player and if a player hit a bot it doesn't work but if bot hit a player it works normal)",
       "external_url": "",
       "authors": [
         {
