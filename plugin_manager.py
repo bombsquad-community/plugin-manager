@@ -1,4 +1,7 @@
 # ba_meta require api 9
+
+from __future__ import annotations
+
 import babase
 import bauiv1 as bui
 from bauiv1lib import popup, confirm
@@ -310,6 +313,9 @@ class StartupTasks:
             babase.app.config.commit()
 
     async def update_plugin_manager(self):
+        # add logic here for updating plugman in workspaces
+        await self.plugin_manager.get_current_workspaces()
+
         if not babase.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"]:
             return
         update_details = await self.plugin_manager.get_update_details()
@@ -401,6 +407,122 @@ class StartupTasks:
             )
         except urllib.error.URLError:
             pass
+
+
+class BallisticaAPI:
+    """API client for Ballistica workspace management."""
+    # If the token is needed after the initialization, we should call get_api_key again to refresh it.
+    from efro.error import CommunicationError
+    from bacommon.restapi.v1.workspaces import (
+        WorkspacesResponse,
+        WorkspaceResponse,
+        WorkspaceFilesResponse,
+        ActiveWorkspaceResponse,
+    )
+    from bacommon.restapi.v1.accounts import AccountResponse
+    from bacommon.restapi.v1 import Endpoint
+
+    def __init__(self, url='https://www.ballistica.net/'):
+        print(f"Initializing BallisticaAPI")
+        self.url = url
+        self.api_key = None
+
+    async def initialize(self) -> BallisticaAPI:
+        """Initialize the API client by retrieving the API key."""
+        self.api_key = await self.get_api_key()
+        return self
+
+    async def get_api_key(self, max_retries=3, initial_delay=2.0, retry_delay=2.0) -> str:
+        """Get a transient API key with automatic retry."""
+        await asyncio.sleep(initial_delay)
+        print("Requesting API key...")
+        for attempt in range(max_retries):
+            try:
+                loop_instance = asyncio.get_event_loop()
+                future = loop_instance.create_future()
+
+                def on_response(api_key):
+                    future.set_result(api_key)
+
+                babase.app.plus.accounts.primary.request_transient_api_key(on_response)
+                api_key = await asyncio.wait_for(future, timeout=10.0)
+
+                # Validate we got a real key, not an error
+                if isinstance(api_key, str) and api_key.startswith('bsac-'):
+                    print(f'API key retrieval successful: {api_key[:20]}...')
+                    return api_key
+                elif isinstance(api_key, self.CommunicationError):
+                    print(f'Communication error while getting API key: {api_key}')
+                    raise api_key
+                else:
+                    raise ValueError(f'Invalid API key: {api_key}')
+
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(retry_delay)
+                else:
+                    print(f'Failed to get API key: {e}')
+                    raise
+
+    def _make_request(self, api_key: str, Endpoint: str) -> str:
+        """Make an HTTP GET request to the API and return the response text."""
+        headers = {'Authorization': f'Bearer {api_key}'}
+        try:
+            response = urllib.request.urlopen(
+                urllib.request.Request(self.url + Endpoint, headers=headers)
+            )
+            if response.getcode() == 200:
+                return response.read().decode('utf-8')
+            else:
+                raise Exception(f'API request failed with status {response.getcode()}')
+        except urllib.error.HTTPError as e:
+            raise Exception(f'HTTP Error: {e.code} - {e.reason}')
+
+    async def get_account(self, api_key: str, account_id: str) -> AccountResponse:
+        """Get account info. Pass 'me' for the authenticated account."""
+
+        from bacommon.restapi.v1.accounts import AccountResponse
+        from efro.dataclassio import dataclass_from_json
+
+        self.Endpoint = self.Endpoint.ACCOUNT.format(account_id=account_id)
+        response_text = await loop.run_in_executor(None, self._make_request, api_key, self.Endpoint)
+        return dataclass_from_json(AccountResponse, response_text)
+
+    async def get_workspaces(self, api_key: str) -> WorkspacesResponse:
+        """List all workspaces for the authenticated account."""
+        from efro.dataclassio import dataclass_from_json
+        
+        response_text = await loop.run_in_executor(
+            None, self._make_request, api_key, self.Endpoint.WORKSPACES
+        )
+        return dataclass_from_json(self.WorkspacesResponse, response_text)
+
+    async def get_workspace(self, api_key: str, workspace_id: str) -> WorkspaceResponse:
+        """Fetch metadata for a single workspace."""
+
+        from bacommon.restapi.v1.workspaces import WorkspaceResponse
+        from efro.dataclassio import dataclass_from_json
+
+        self.Endpoint = self.Endpoint.WORKSPACE.format(workspace_id=workspace_id)
+        response_text = await loop.run_in_executor(None, self._make_request, api_key, self.Endpoint)
+        return dataclass_from_json(self.WorkspaceResponse, response_text)
+
+    async def get_workspace_files(self, api_key: str, workspace_id: str) -> WorkspaceFilesResponse:
+        """Get flat listing of all files and directories in the workspace."""
+        from efro.dataclassio import dataclass_from_json
+
+        self.Endpoint = self.Endpoint.WORKSPACE_FILES.format(workspace_id=workspace_id)
+        response_text = await loop.run_in_executor(None, self._make_request, api_key, self.Endpoint)
+        return dataclass_from_json(self.WorkspaceFilesResponse, response_text)
+
+    async def get_active_workspace(self, api_key: str) -> ActiveWorkspaceResponse:
+        """Fetch the active workspace for the authenticated account."""
+        from efro.dataclassio import dataclass_from_json
+
+        response_text = await loop.run_in_executor(
+            None, self._make_request, api_key, self.Endpoint.WORKSPACES_ACTIVE
+        )
+        return dataclass_from_json(self.ActiveWorkspaceResponse, response_text)
 
 
 class Category:
@@ -948,6 +1070,12 @@ class PluginManager:
                          'info': 'Could not get ChangeLog due to Internet Issues.'}
         self.set_changelog_global_cache(changelog)
         self._changelog_setup_in_progress = False
+
+    async def get_current_workspaces(self):
+        self.api = BallisticaAPI()
+        await self.api.initialize()
+        print((await self.api.get_workspaces(self.api.api_key)).workspaces)
+
 
     async def setup_plugin_categories(self, plugin_index):
         # A hack to have the "All" category show at the top.
