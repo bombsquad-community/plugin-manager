@@ -115,10 +115,6 @@ def _regexp_friendly_class_name_shortcut(string):
     return string.replace(".", "\\.")
 
 
-def _by_scale(a, b, c):
-    """Backward compatibility wrapper for UIConfig.scale_value."""
-    return UIConfig.scale_value(a, b, c)
-
 
 REGEXP = {
     "plugin_api_version": re.compile(b"(?<=ba_meta require api )(.*)"),
@@ -2170,7 +2166,7 @@ class MoreWindow:
         self._root_widget = bui.containerwidget(
             on_outside_click_call=self._back,
             transition=f'in_{self.transition}',
-            scale=_by_scale(1.5, 1.5, 1),
+            scale=UIConfig.scale_value(1.5, 1.5, 1),
             scale_origin_stack_offset=(origin and origin.get_screen_space_center() or None),
         )
         # last updated
