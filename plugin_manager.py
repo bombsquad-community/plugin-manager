@@ -1656,7 +1656,7 @@ class PluginWindow(popup.PopupWindow):
         partitioned_string_length = len(partitioned_string)
 
         while partitioned_string_length != string_length:
-            next_empty_space = string[partitioned_string_length + minimum_character_offset:].find(
+            next_empty_space = string[partitioned_string_length + minimum_character_offset :].find(
                 " "
             )
             next_word_end_position = (
@@ -1926,41 +1926,20 @@ class PluginWindow(popup.PopupWindow):
         tutorial_url = self.plugin.info['external_url']
         if tutorial_url:
             button_y -= 50
-            tutorial_button = bui.buttonwidget(
-                parent=self._root_widget,
-                autoselect=True,
-                position=(button_x, button_y),
-                size=(40, 40),
-                button_type="square",
-                label="",
-                color=button_color,
-            )
-            bui.imagewidget(
+            tutorial_button = UIHelpers.create_icon_button_with_text(
                 parent=self._root_widget,
                 position=(button_x, button_y),
                 size=(40, 40),
-                color=button_image_color,
-                texture=bui.gettexture("frameInset"),
-                draw_controller=tutorial_button,
-            )
-            bui.textwidget(
-                parent=self._root_widget,
-                position=(button_x - 3, button_y + 12),
-                text="Tutorial",
-                size=(10, 10),
-                draw_controller=tutorial_button,
-                color=button_text_color,
-                rotate=25,
-                scale=0.45,
-            )
-            bui.buttonwidget(
-                tutorial_button,
-                on_activate_call=bui.CallPartial(
-                    confirm.ConfirmWindow,
+                texture='frameInset',
+                on_activate=lambda: confirm.ConfirmWindow(
                     text=f'This will take you to:\n{tutorial_url}',
                     origin_widget=tutorial_button,
                     action=bui.CallPartial(bui.open_url, tutorial_url),
                 ),
+                text='Tutorial',
+                text_color=button_text_color,
+                btn_color=button_color,
+                icon_color=button_image_color,
             )
         # navigation #XXX
         if button1 and button2 and button3:
