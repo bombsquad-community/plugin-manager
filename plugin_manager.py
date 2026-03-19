@@ -1656,7 +1656,7 @@ class PluginWindow(popup.PopupWindow):
         partitioned_string_length = len(partitioned_string)
 
         while partitioned_string_length != string_length:
-            next_empty_space = string[partitioned_string_length + minimum_character_offset :].find(
+            next_empty_space = string[partitioned_string_length + minimum_character_offset:].find(
                 " "
             )
             next_word_end_position = (
