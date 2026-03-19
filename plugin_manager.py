@@ -382,26 +382,74 @@ class UIHelpers:
     """Helper functions for creating common UI patterns."""
 
     @staticmethod
-    def create_icon_button(parent, position, size, texture, on_activate, color=None, tooltip=None):
-        if color is None:
-            color = (0, 0.75, 0.75)
+    def create_icon_button(
+        parent, position, size, texture, on_activate, icon_color=None, btn_color=None
+    ):
+        # Build buttonwidget kwargs
+        button_kwargs = {
+            'parent': parent,
+            'position': position,
+            'size': size,
+            'button_type': 'square',
+            'label': '',
+            'on_activate_call': on_activate,
+        }
+        if btn_color is not None:
+            button_kwargs['color'] = btn_color
 
-        button = bui.buttonwidget(
-            parent=parent,
-            position=position,
-            size=size,
-            button_type='square',
-            label='',
-            color=color,
-            on_activate_call=on_activate,
+        button = bui.buttonwidget(**button_kwargs)
+
+        # Build imagewidget kwargs
+        image_kwargs = {
+            'parent': parent,
+            'position': position,
+            'size': size,
+            'texture': bui.gettexture(texture),
+            'draw_controller': button,
+        }
+        if icon_color is not None:
+            image_kwargs['color'] = icon_color
+
+        bui.imagewidget(**image_kwargs)
+        return button
+
+    @staticmethod
+    def create_icon_button_with_text(
+        parent,
+        position,
+        size,
+        texture,
+        on_activate,
+        text,
+        text_position=None,
+        text_color=None,
+        icon_color=None,
+        btn_color=None,
+        text_scale=0.45,
+        text_rotate=25,
+    ):
+        """Create an icon button with optional text overlay."""
+        button = UIHelpers.create_icon_button(
+            parent, position, size, texture, on_activate, icon_color, btn_color
         )
-        bui.imagewidget(
+
+        # Add text overlay
+        if text_position is None:
+            # Default text position (rotated at bottom-left)
+            text_position = (position[0] - 3, position[1] + 12)
+
+        if text_color is None:
+            text_color = (1, 1, 1)
+
+        bui.textwidget(
             parent=parent,
-            position=position,
-            size=size,
-            color=(0.8, 0.95, 1),
-            texture=bui.gettexture(texture),
+            position=text_position,
+            text=text,
+            size=(10, 10),
             draw_controller=button,
+            color=text_color,
+            rotate=text_rotate,
+            scale=text_scale,
         )
         return button
 
@@ -1608,7 +1656,7 @@ class PluginWindow(popup.PopupWindow):
         partitioned_string_length = len(partitioned_string)
 
         while partitioned_string_length != string_length:
-            next_empty_space = string[partitioned_string_length + minimum_character_offset:].find(
+            next_empty_space = string[partitioned_string_length + minimum_character_offset :].find(
                 " "
             )
             next_word_end_position = (
@@ -1846,63 +1894,32 @@ class PluginWindow(popup.PopupWindow):
         button_y = 210 - UIConfig.scale_value(5, 10, 15)
         button_color = (0, 0.75, 0.75)
         button_image_color = (0.8, 0.95, 1)
-        button_text_color = (1, 1, 1, 1)
+        button_text_color = UIConfig.get_color('text_primary')
 
         # more button
-        more_button = bui.buttonwidget(
+        more_button = UIHelpers.create_icon_button_with_text(
             parent=self._root_widget,
             position=(button_x, button_y),
             size=(40, 40),
-            button_type='square',
-            label='',
-            color=button_color,
-        )
-        bui.buttonwidget(
-            edit=more_button,
-            on_activate_call=babase.CallPartial(MoreWindow, plugin=self.plugin, origin=more_button),
-        )
-        bui.imagewidget(
-            parent=self._root_widget,
-            position=(button_x, button_y),
-            size=(40, 40),
-            color=button_image_color,
-            texture=bui.gettexture('file'),
-            draw_controller=more_button,
-        )
-        bui.textwidget(
-            parent=self._root_widget,
-            position=(button_x - 3, button_y + 12),
+            texture='file',
+            on_activate=lambda: MoreWindow(plugin=self.plugin, origin=more_button),
             text='More...',
-            size=(10, 10),
-            draw_controller=more_button,
-            color=button_text_color,
-            rotate=25,
-            scale=0.45,
+            text_color=button_text_color,
+            btn_color=button_color,
+            icon_color=button_image_color,
         )
 
         # settings button
         if to_draw_settings_button:
             button_y -= 50
-            settings_button = bui.buttonwidget(
-                parent=self._root_widget,
-                autoselect=True,
-                position=(button_x, button_y),
-                size=(40, 40),
-                button_type="square",
-                label="",
-                color=button_color,
-            )
-            bui.buttonwidget(
-                edit=settings_button,
-                on_activate_call=babase.CallPartial(self.settings, settings_button),
-            )
-            bui.imagewidget(
+            settings_button = UIHelpers.create_icon_button(
                 parent=self._root_widget,
                 position=(button_x, button_y),
                 size=(40, 40),
-                color=button_image_color,
-                texture=bui.gettexture("settingsIcon"),
-                draw_controller=settings_button,
+                texture='settingsIcon',
+                on_activate=babase.CallPartial(self.settings, None),
+                btn_color=button_color,
+                icon_color=button_image_color,
             )
 
         # tutorial
@@ -2201,32 +2218,16 @@ class MoreWindow:
             size=(step, step),
             text='Source URL:',
         )
-        source_button = bui.buttonwidget(
-            parent=self._root_widget,
-            autoselect=True,
-            position=(px2, py),
-            size=(step, step),
-            color=(0.6, 0.53, 0.63),
-            button_type='square',
-            label='',
-            on_activate_call=bui.CallPartial(bui.open_url, plugin.view_url),
-        )
-        bui.imagewidget(
+        source_button = UIHelpers.create_icon_button_with_text(
             parent=self._root_widget,
             position=(px2, py),
             size=(step, step),
-            color=(0.8, 0.95, 1),
-            texture=bui.gettexture('file'),
-            draw_controller=source_button,
-        )
-        bui.textwidget(
-            parent=self._root_widget,
-            position=(px2 - 3, py + 12),
+            texture='file',
+            on_activate=bui.CallPartial(bui.open_url, plugin.view_url),
             text='source',
-            size=(10, 10),
-            draw_controller=source_button,
-            rotate=25,
-            scale=0.45,
+            text_color=(1, 1, 1),
+            btn_color=(0.6, 0.53, 0.63),
+            icon_color=(0.8, 0.95, 1),
         )
         # report bug
         py += step + margin
@@ -2240,22 +2241,14 @@ class MoreWindow:
             size=(step, step),
             text='Report a bug:',
         )
-        report_button = bui.buttonwidget(
+        report_button = UIHelpers.create_icon_button(
             parent=self._root_widget,
             position=(px2, py),
             size=(step, step),
-            button_type='square',
-            color=(0.6, 0.53, 0.63),
-            label='',
-            on_activate_call=self._open_bug_report_url,
-        )
-        bui.imagewidget(
-            parent=self._root_widget,
-            position=(px2, py),
-            size=(step, step),
-            color=(0.8, 0.95, 1),
-            texture=bui.gettexture('githubLogo'),
-            draw_controller=report_button,
+            texture='githubLogo',
+            on_activate=self._open_bug_report_url,
+            btn_color=(0.6, 0.53, 0.63),
+            icon_color=(0.8, 0.95, 1),
         )
         # back
         py += step + margin
@@ -3032,7 +3025,7 @@ class PluginManagerWindow(bui.MainWindow):
             size=(30, 30),
             texture='replayIcon',
             on_activate=lambda: (bui.getsound('deek').play() or loop.create_task(self.refresh())),
-            color=(0.8, 0.95, 1),
+            icon_color=(0.8, 0.95, 1),
         )
         bui.widget(self._scrollwidget, right_widget=controller_button)
 
@@ -3243,9 +3236,6 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
         # Subtracting the default bluish-purple color from the texture, so it's as close
         # as to white as possible.
-        discord_fg_color = UIConfig.get_color('discord_fg')
-        discord_bg_color = UIConfig.get_color('discord_bg')
-        github_bg_color = UIConfig.get_color('github_bg')
         text_scale = 0.7 * s
         self._transition_out = 'out_scale'
         transition = 'in_scale'
@@ -3350,53 +3340,31 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         except urllib.error.URLError:
             plugin_manager_update_available = False
         discord_width = (width * 0.20) if plugin_manager_update_available else (width * 0.31)
-        self.discord_button = bui.buttonwidget(
+        self.discord_button = UIHelpers.create_icon_button(
             parent=self._root_widget,
             position=(discord_width - button_size[0] / 2, pos),
             size=button_size,
-            on_activate_call=lambda: bui.open_url(DISCORD_URL),
-            textcolor=b_text_color,
-            color=discord_bg_color,
-            button_type='square',
-            text_scale=1,
-            label="",
-            down_widget=self._changelog_button,
+            texture='discordLogo',
+            on_activate=lambda: bui.open_url(DISCORD_URL),
+            btn_color=UIConfig.get_color('discord_bg'),
+            icon_color=UIConfig.get_color('discord_fg'),
         )
+        bui.widget(self.discord_button, down_widget=self._changelog_button)
         bui.widget(self._changelog_button, up_widget=self.discord_button)
 
-        bui.imagewidget(
-            parent=self._root_widget,
-            position=(discord_width + 0.5 - button_size[0] / 2, pos),
-            size=button_size,
-            texture=bui.gettexture("discordLogo"),
-            color=discord_fg_color,
-            draw_controller=self.discord_button,
-        )
-
         github_width = (width * 0.49) if plugin_manager_update_available else (width * 0.65)
-        self.github_button = bui.buttonwidget(
+        self.github_button = UIHelpers.create_icon_button(
             parent=self._root_widget,
             position=(github_width - button_size[0] / 2, pos),
             size=button_size,
-            on_activate_call=lambda: bui.open_url(REPOSITORY_URL),
-            textcolor=b_text_color,
-            color=github_bg_color,
-            button_type='square',
-            text_scale=1,
-            label='',
-            up_widget=self.checkboxes[-1],
-            down_widget=self._changelog_button,
+            texture='githubLogo',
+            on_activate=lambda: bui.open_url(REPOSITORY_URL),
+            btn_color=UIConfig.get_color('github_bg'),
+            icon_color=UIConfig.get_color('github_fg'),
         )
-
-        bui.imagewidget(
-            parent=self._root_widget,
-            position=(github_width + 0.5 - button_size[0] / 2, pos),
-            size=button_size,
-            texture=bui.gettexture("githubLogo"),
-            color=(1, 1, 1),
-            draw_controller=self.github_button,
+        bui.widget(
+            self.github_button, up_widget=self.checkboxes[-1], down_widget=self._changelog_button
         )
-
         bui.containerwidget(edit=self._root_widget, on_cancel_call=self._ok)
 
         try:
