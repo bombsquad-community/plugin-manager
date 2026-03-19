@@ -3473,11 +3473,12 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             right_widget=(check and self.checkboxes[0] or self._save_button),
             left_widget=(check and self.checkboxes[0] or self._save_button),
         )
-        bui.widget(
-            self._update_button,
-            up_widget=(check and self.checkboxes[0] or self._save_button),
-            down_widget=(check and self._changelog_button or self._save_button),
-        )
+        if hasattr(self, '_update_button'):
+            bui.widget(
+                self._update_button,
+                up_widget=(check and self.checkboxes[0] or self._save_button),
+                down_widget=(check and self._changelog_button or self._save_button),
+            )
 
     def save_settings_button(self):
         babase.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
