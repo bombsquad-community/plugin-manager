@@ -56,8 +56,8 @@ plugman = dict(
     external_url="https://www.youtube.com/watch?v=QrES1jQGXF0",
     authors=[
         {"name": "Mr.Smoothy", "email": "", "discord": "mr.smoothy"},
-    ]
-    version="2.1.6",
+    ],
+    version="2.1.7",
 )
 
 #  added advanced ID revealer
