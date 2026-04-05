@@ -19,6 +19,37 @@ https://bombsquad-community.web.app/mods
 
 '''
 
+import threading
+from _thread import start_new_thread
+import urllib.parse
+import urllib.request
+from typing import TYPE_CHECKING, cast
+import _babase
+import bascenev1 as bs
+import bauiv1 as bui
+import babase
+import time
+import math
+from dataclasses import dataclass
+from bauiv1lib.confirm import ConfirmWindow
+from bauiv1lib.colorpicker import ColorPickerExact
+from typing import List, Sequence, Optional, Dict, Any, Union
+import bauiv1lib.party as bascenev1lib_party
+import ssl
+import datetime
+import base64
+from babase._general import Call
+from bauiv1lib.popup import PopupMenuWindow, PopupWindow
+from bauiv1lib.account import viewer
+import os
+import urllib
+import copy
+import shutil
+import sys
+import re
+import json
+import codecs
+import traceback
 plugman = dict(
     plugin_name="advanced_party_window",
     description="Advanced your party window with lots of feature",
@@ -33,37 +64,6 @@ plugman = dict(
 # live ping
 
 # Made by Mr.Smoothy - Plasma Boson
-import traceback
-import codecs
-import json
-import re
-import sys
-import shutil
-import copy
-import urllib
-import os
-from bauiv1lib.account import viewer
-from bauiv1lib.popup import PopupMenuWindow, PopupWindow
-from babase._general import Call
-import base64
-import datetime
-import ssl
-import bauiv1lib.party as bascenev1lib_party
-from typing import List, Sequence, Optional, Dict, Any, Union
-from bauiv1lib.colorpicker import ColorPickerExact
-from bauiv1lib.confirm import ConfirmWindow
-from dataclasses import dataclass
-import math
-import time
-import babase
-import bauiv1 as bui
-import bascenev1 as bs
-import _babase
-from typing import TYPE_CHECKING, cast
-import urllib.request
-import urllib.parse
-from _thread import start_new_thread
-import threading
 version_str = "7"
 BCSSERVER = 'mods.ballistica.workers.dev'
 
@@ -903,11 +903,11 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             babase.print_exception()
 
         self._menu_popup = PopupMenuWindow(position=widget.get_screen_space_center(),
-                        scale=_get_popup_window_scale(),
-                        choices=choices,
-                        choices_display=choices_display,
-                        current_choice="@ this guy",
-                        delegate=self)
+                                           scale=_get_popup_window_scale(),
+                                           choices=choices,
+                                           choices_display=choices_display,
+                                           current_choice="@ this guy",
+                                           delegate=self)
         self._popup_party_member_client_id = client_id
         self._popup_party_member_is_host = is_host
         self._popup_type = "partyMemberPress"
