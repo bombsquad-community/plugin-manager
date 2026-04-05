@@ -57,7 +57,7 @@ plugman = dict(
     authors=[
         {"name": "Mr.Smoothy", "email": "", "discord": "mr.smoothy"},
     ],
-    version="2.1.6",
+    version="2.1.7",
 )
 
 #  added advanced ID revealer
