@@ -1054,6 +1054,12 @@
         }
       ],
       "versions": {
+        "2.1.6": {
+          "api_version": 9,
+          "commit_sha": "3aa666f",
+          "released_on": "05-04-2026",
+          "md5sum": "d2b66f98b5a24aa14eb6b1ed9de2d5dc"
+        },
         "2.1.5": {
           "api_version": 9,
           "commit_sha": "a36e3c2",
