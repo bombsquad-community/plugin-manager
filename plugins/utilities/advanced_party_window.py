@@ -19,6 +19,16 @@ https://bombsquad-community.web.app/mods
 
 '''
 
+plugman = dict(
+    plugin_name="advanced_party_window",
+    description="Advanced your party window with lots of feature",
+    external_url="https://www.youtube.com/watch?v=QrES1jQGXF0",
+    authors": [
+        {"name": "Mr.Smoothy", "email": "", "discord": "mr.smoothy"},
+    ]
+    version="2.1.6",
+)
+
 #  added advanced ID revealer
 # live ping
 
