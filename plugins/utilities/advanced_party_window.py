@@ -461,6 +461,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             color=(0.55, 0.73, 0.25),
             icon=bui.gettexture('menuButton'),
             iconscale=1.2)
+        self._menu_popup: PopupMenuWindow | None = None
 
         info = bs.get_connection_to_host_info_2()
         if info != None:
@@ -864,7 +865,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
             choices.append("hostInfo_Debug")
             DisChoices.append(_getTransText("Debug_for_Host_Info", isBaLstr=True))
 
-        PopupMenuWindow(
+        self._menu_popup = PopupMenuWindow(
             position=self._menu_button.get_screen_space_center(),
             scale=_get_popup_window_scale(),
             choices=choices,
@@ -891,7 +892,7 @@ class ModifiedPartyWindow(bascenev1lib_party.PartyWindow):
         except:
             babase.print_exception()
 
-        PopupMenuWindow(position=widget.get_screen_space_center(),
+        self._menu_popup = PopupMenuWindow(position=widget.get_screen_space_center(),
                         scale=_get_popup_window_scale(),
                         choices=choices,
                         choices_display=choices_display,
