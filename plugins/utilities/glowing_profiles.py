@@ -18,7 +18,8 @@ plugman = dict(
     version="1.0.0",
 )
 
-file_dependence=Path("simpleredefiner.py")
+file_dependence = Path("simpleredefiner.py")
+
 
 def get_locale(*args):
     return "Error"
@@ -134,9 +135,11 @@ class Chooser:
         self._update_text()
 
 # ba_meta export babase.Plugin
+
+
 class Glowing(babase.Plugin):
-	def __init__(self):
-		if file_path.exists():
-			pass
-		else:
-			babase.screenmessage(f"File {file_dependence} not installed. Please, install!")
+    def __init__(self):
+        if file_path.exists():
+            pass
+        else:
+            babase.screenmessage(f"File {file_dependence} not installed. Please, install!")

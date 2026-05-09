@@ -20,6 +20,7 @@ plugman = dict(
     version="1.0.0",
 )
 
+
 def redefine_method(dst: Tuple[Any, str], src: Tuple[Any, str]) -> None:
     if hasattr(getattr(*src), '__redefine_type') and getattr(*src).__redefine_type in (
             RedefineFlag.DECORATE_PRE, RedefineFlag.DECORATE_AFTER, RedefineFlag.DECORATE_ADVANCED):
@@ -98,5 +99,7 @@ def redefine_flag(*flags: RedefineFlag) -> Callable[[Callable], Callable]:
 
     return decorator
 # ba_meta export babase.Plugin
+
+
 class Simpleredefiner(babase.Plugin):
-	pass
+    pass
