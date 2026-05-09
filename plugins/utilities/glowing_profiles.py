@@ -2,8 +2,6 @@
 import babase
 import _babase
 from pathlib import Path
-import bauiv1 as bui
-
 import bascenev1 as bs
 
 from simpleredefiner import redefine_flag, redefine_class_methods, RedefineFlag
@@ -139,7 +137,7 @@ class Chooser:
 
 class Glowing(babase.Plugin):
     def __init__(self):
-        if file_path.exists():
+        if file_dependence.exists():
             pass
         else:
             babase.screenmessage(f"File {file_dependence} not installed. Please, install!")
