@@ -13,7 +13,7 @@ plugman = dict(
     authors=[
         {"name": "andrejkuroglo8", "email": "andrejkuroglo8@gmail.com", "discord": "andrewku"},
     ],
-    version="1.0.1",
+    version="1.0.0",
 )
 
 file_dependence = Path("simpleredefiner.py")
