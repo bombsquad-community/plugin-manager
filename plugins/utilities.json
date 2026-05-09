@@ -2569,6 +2569,34 @@
           "md5sum": "487c0520dc833f15942941e0dbc82f1e"
         }
       }
+    },
+    "glowing_profiles": {
+      "description": "This plugin gives your profile glowlight, just like on some servers, but only offline. Dependences: simpleredefiner",
+      "external_url": "https://m.youtube.com/watch?v=Jb_dKz99rhY",
+      "authors": [
+        {
+          "name": "andrejkuroglo8",
+          "email": "andrejkuroglo8@gmail.com",
+          "discord": "andrewku"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
+    },
+    "simpleredefiner": {
+      "description": "Plugin redefine classes and methods, when it is addressed",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "andrejkuroglo8",
+          "email": "andrejkuroglo8@gmail.com",
+          "discord": "andrewku"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
