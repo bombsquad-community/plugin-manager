@@ -2581,7 +2581,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "66ccfec",
+          "released_on": "09-05-2026",
+          "md5sum": "faa0c022fb4f73938022e27832100567"
+        }
       }
     },
     "simpleredefiner": {
@@ -2595,7 +2600,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "66ccfec",
+          "released_on": "09-05-2026",
+          "md5sum": "4119c3097882cf2470b23f0cdcbef77c"
+        }
       }
     }
   }
