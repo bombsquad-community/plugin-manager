@@ -2571,7 +2571,7 @@
       }
     },
     "glowing_profiles": {
-      "description": "This plugin gives your profile glowlight, just like on some servers, but only offline. Dependences: simpleredefiner",
+      "description": "This plugin gives your profile glowlight, just like on some servers, but only offline.",
       "external_url": "https://m.youtube.com/watch?v=Jb_dKz99rhY",
       "authors": [
         {
@@ -2581,6 +2581,7 @@
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 9,
           "commit_sha": "d5cf26b",
