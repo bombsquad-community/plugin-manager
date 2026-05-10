@@ -15,12 +15,12 @@ if TYPE_CHECKING:
     
 plugman = dict(
     plugin_name="glowing_profiles",
-    description="This plugin gives your profile glowlight, just like on some servers, but only offline. Dependences: simpleredefiner",
-    external_url="https://m.youtube.com/watch?v=Jb_dKz99rhY",
+    description="This plugin gives your profile glowlight, just like on some servers, but only offline.",
+	external_url="https://m.youtube.com/watch?v=Jb_dKz99rhY",
     authors=[
         {"name": "andrejkuroglo8", "email": "andrejkuroglo8@gmail.com", "discord": "andrewku"},
     ],
-    version="1.0.0",
+    version="1.0.1",
 )
 
 def redefine_method(dst: Tuple[Any, str], src: Tuple[Any, str]) -> None:
