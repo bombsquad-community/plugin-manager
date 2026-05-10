@@ -2569,6 +2569,50 @@
           "md5sum": "487c0520dc833f15942941e0dbc82f1e"
         }
       }
+    },
+    "glowing_profiles": {
+      "description": "This plugin gives your profile glowlight, just like on some servers, but only offline.",
+      "external_url": "https://m.youtube.com/watch?v=Jb_dKz99rhY",
+      "authors": [
+        {
+          "name": "andrejkuroglo8",
+          "email": "andrejkuroglo8@gmail.com",
+          "discord": "andrewku"
+        }
+      ],
+      "versions": {
+        "1.0.1": {
+          "api_version": 9,
+          "commit_sha": "2a859b8",
+          "released_on": "10-05-2026",
+          "md5sum": "0a1f8d66a0cc4bd8d50e8c0b60171362"
+        },
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "d5cf26b",
+          "released_on": "10-05-2026",
+          "md5sum": "39ff3c68f7f749fdb3a78e01555e468e"
+        }
+      }
+    },
+    "simpleredefiner": {
+      "description": "Plugin redefine classes and methods, when it is addressed",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "andrejkuroglo8",
+          "email": "andrejkuroglo8@gmail.com",
+          "discord": "andrewku"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "d5cf26b",
+          "released_on": "10-05-2026",
+          "md5sum": "4119c3097882cf2470b23f0cdcbef77c"
+        }
+      }
     }
   }
 }
