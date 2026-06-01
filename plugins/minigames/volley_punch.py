@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 plugman = dict(
-    plugin_name="VolleyPunch",
+    plugin_name="volley_punch",
     description="Have fun with your friends in this new volley game !",
     external_url="https://github.com/Scriptz1/Learn.py-Installer/blob/main/volleypunch.py",
     authors=[
