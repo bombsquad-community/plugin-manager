@@ -1663,6 +1663,25 @@
           "md5sum": "33e6b93420cf6115e992aca534d76bfd"
         }
       }
+    },
+    "volley_punch": {
+      "description": "Have fun with your friends in this new volley game !",
+      "external_url": "https://github.com/Scriptz1/Learn.py-Installer/blob/main/volleypunch.py",
+      "authors": [
+        {
+          "name": "Learn.py",
+          "email": "phillipians36@gmail.com",
+          "discord": "Learning .py"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "576a9c0",
+          "released_on": "01-06-2026",
+          "md5sum": "be998b599896ed0e8dd5f2545fae6173"
+        }
+      }
     }
   }
 }
