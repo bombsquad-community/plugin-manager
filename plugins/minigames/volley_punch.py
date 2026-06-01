@@ -10,10 +10,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import babase
-import _babase
-import math
-import random
+import babase, _babase
+import math, random
 import bascenev1 as bs
 import bauiv1 as bui
 import math
@@ -30,7 +28,7 @@ if TYPE_CHECKING:
 
 
 plugman = dict(
-    plugin_name="volley_punch",
+    plugin_name="VolleyPunch",
     description="Have fun with your friends in this new volley game !",
     external_url="https://github.com/Scriptz1/Learn.py-Installer/blob/main/volleypunch.py",
     authors=[
@@ -38,7 +36,6 @@ plugman = dict(
     ],
     version="1.0.0",
 )
-
 
 class PuckDiedMessage:
     """Inform something that a puck has died."""
@@ -80,6 +77,9 @@ class Puck(bs.Actor):
                                    'position': self._spawn_pos,
                                    'materials': pmats
                                })
+
+
+
 
     def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, bs.DieMessage):
@@ -197,7 +197,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         self._chant_sound = bs.getsound('crowdChant')
         self.one_sound = bs.getsound('announceOne')
         self.two_sound = bs.getsound('announceTwo')
-        self.three_sound = bs.getsound('announceThree')  # unused.. yet
+        self.three_sound = bs.getsound('announceThree') # unused.. yet
         self._swipsound = bs.getsound('swip')
         self._whistle_sound = bs.getsound('refWhistle')
         self.puck_mesh = bs.getmesh('shield')
@@ -243,7 +243,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                       True), ('modify_part_collision', 'physical', False),
                      ('call', 'at_connect', self._handle_score)))
 
-        self._fake_wall_material = bs.Material()  # i'll fix this. trust
+        self._fake_wall_material = bs.Material() #i'll fix this. trust
 
         self._net_wall_material = bs.Material()
         self._net_material = bs.Material()
@@ -263,25 +263,30 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                  'friction', -10),
                 ('call', 'at_connect', self.slow_down)))
 
+
+
+
         self._puck_spawn_pos: Optional[Sequence[float]] = None
         self._score_regions: Optional[List[bs.NodeActor]] = None
         self._puck: Optional[Puck] = None
         self._score_to_win = int(settings['Score to Win'])
         self._time_limit = float(settings['Time Limit'])
-        self.credit_text = bool(settings['Enable Credits'])  # i did the freaku credit thing
+        self.credit_text = bool(settings['Enable Credits']) # i did the freaku credit thing
         self._epic_mode = bool(settings['Epic Mode'])
+
 
         # the ball is too fast for the players and the map is soo huge its a good poc - brostos
         self.ball_size = float(settings['Ball size (m)'])
         self.ball_speed = float(settings['Ball Average Speed'])
 
+
         # Base class overrides.
         self.slow_motion = self._epic_mode
         self.default_music = (bs.MusicType.EPIC if self._epic_mode else
                               bs.MusicType.TO_THE_DEATH)
-        self.s: list = []
-        self.w: list = []
-        self.n: list = []
+        self.s : list = []
+        self.w : list = []
+        self.n : list = []
         self.last_interaction_time = -9999
         self.smashed = -9999
         self.interactions_timer = None
@@ -309,60 +314,58 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         super().on_begin()
 
         self.setup_standard_time_limit(self._time_limit)
-        self._puck_spawn_pos = (-4, 1, 0) if random.random() < 0.5 else (4, 1, 0)
+        self._puck_spawn_pos = (-4, 1 ,0) if random.random() < 0.5 else (4, 1, 0)
         self._spawn_puck()
 
         # Set up the two score regions.
         self._score_regions = []
         self.commentary_text = bs.newnode(
-            'text',
-            attrs=dict(
-                text='',
-                scale=0.012,
-                position=(0, 3.1, -5.8),
-                in_world=True,
-                flatness=1,
-                shadow=0,
-                color=(1, 1, 1, 0.5),
-                h_align='center',
-                v_align='top',
-                h_attach='center',
-                v_attach='top',
-            ))
+                'text',
+                attrs=dict(
+                    text='',
+                    scale=0.012,
+                    position=(0, 3.1, -5.8),
+                    in_world=True,
+                    flatness=1,
+                    shadow=0,
+                    color=(1,1,1,0.5),
+                    h_align= 'center',
+                    v_align= 'top',
+                    h_attach= 'center',
+                    v_attach= 'top',
+                ))
         self.touches_indicator = bs.newnode(
-            'text',
-            attrs=dict(
-                text='',
-                scale=0.025,
-                position=(0, 3, -5.8),
-                in_world=True,
-                flatness=1,
-                shadow=0,
-                color=(1, 1, 1, 0.5),
-                h_align='center',
-                v_align='top',
-                h_attach='center',
-                v_attach='top',
-            ))
+                'text',
+                attrs=dict(
+                    text='',
+                    scale=0.025,
+                    position=(0, 3, -5.8),
+                    in_world=True,
+                    flatness=1,
+                    shadow=0,
+                    color=(1,1,1,0.5),
+                    h_align= 'center',
+                    v_align= 'top',
+                    h_attach= 'center',
+                    v_attach= 'top',
+                ))
         self.guide = bs.newnode(
-            'text',
-            attrs=dict(
-                text='PUNCH TO TAP THE BALL \nPICKUP TO CUFF \nBOMB TO GLIDE / DIVE \nJUMP UNDER A MID AIR BALL WITH THE BAR FILLED TO SMASH \nTHE ULT BAR FILLS AS YOU PLAY',
-                scale=0.005,
-                position=(0, 2.7, -5.8),
-                in_world=True,
-                flatness=1,
-                shadow=0,
-                color=(1, 1, 1, 0.5),
-                h_align='center',
-                v_align='top',
-                h_attach='center',
-                v_attach='top',
-            ))
-        bs.animate_array(self.guide, 'color', 4, {0: (1, 1, 1, 0.5), 1: (
-            1, 1, 1, 1), 2: (1, 1, 1, 0.5)}, loop=True)
-        self.interactions_timer = bs.Timer(
-            1 / 120, self.interactions, repeat=True)  # time, function, repeat
+                'text',
+                attrs=dict(
+                    text='PUNCH TO TAP THE BALL \nPICKUP TO CUFF \nBOMB TO GLIDE / DIVE \nJUMP UNDER A MID AIR BALL WITH THE BAR FILLED TO SMASH \nTHE ULT BAR FILLS AS YOU PLAY',
+                    scale=0.005,
+                    position=(0, 2.7, -5.8),
+                    in_world=True,
+                    flatness=1,
+                    shadow=0,
+                    color=(1,1,1,0.5),
+                    h_align= 'center',
+                    v_align= 'top',
+                    h_attach= 'center',
+                    v_attach= 'top',
+                ))
+        bs.animate_array(self.guide, 'color',4, {0: (1,1,1,0.5), 1: (1,1,1,1), 2: (1,1,1,0.5)}, loop=True)
+        self.interactions_timer = bs.Timer(1 / 120, self.interactions, repeat=True)  # time, function, repeat
         self._score_regions.append(
             bs.NodeActor(
                 bs.newnode('region',
@@ -394,16 +397,16 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                                   'h_align': 'center',
                                   'v_attach': 'bottom'})
 
-        # Create the net and regions.
-        mat = bs.Material()  # spam this whenever u want a material THEN add some properties
+        #Create the net and regions.
+        mat = bs.Material() # spam this whenever u want a material THEN add some properties
         mat.add_actions(actions=('modify_part_collision',
-                                 'collide', False))
+                             'collide', False))
         net = bs.newnode(
             'prop',
             attrs={
                 'body': 'puck',
                 'body_scale': 0,
-                'position': (0, 0, 0),
+                'position': (0,0,0),
                 'mesh_scale': 1,
                 'mesh': bs.getmesh('volleyball_net'),
                 'color_texture': bs.gettexture('black'),
@@ -416,6 +419,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
             },
         )
 
+
         self.s.append(bs.NodeActor(bs.newnode('region', attrs={'position': (0, 2.4, 0), 'scale': (
             0.8, 6, 20), 'type': 'box', 'materials': (self._fake_wall_material, )})))
 
@@ -424,9 +428,9 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         self.n.append(bs.NodeActor(bs.newnode('region', attrs={'position': (0, 0, 0), 'scale': (
             0.6, 2.75, 20), 'type': 'box', 'materials': (self._net_material, )})))
         self.n.append(bs.NodeActor(bs.newnode('region', attrs={'position': (0, 0, -5.9), 'scale': (
-            20, 20, 0.8), 'type': 'box', 'materials': (self._net_wall_material, self._net_material)})))
+            20, 20, 0.8), 'type': 'box', 'materials': (self._net_wall_material, self._net_material )})))
         self.n.append(bs.NodeActor(bs.newnode('region', attrs={'position': (0, 0, 5.9), 'scale': (
-            20, 20, 0.8), 'type': 'box', 'materials': (self._net_wall_material, self._net_material)})))
+            20, 20, 0.8), 'type': 'box', 'materials': (self._net_wall_material, self._net_material )})))
 
     def slow_down(self):
         if not self._puck:
@@ -464,17 +468,15 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     if self.commentary_text.exists():
                         self.commentary_text.text = text[:index]
 
-                self._timers.append(
-                    bs.Timer(0.9 + 3.0 + (0.015 * (total_chars - i)), hide, repeat=False))
+                self._timers.append(bs.Timer(0.9 + 3.0 + (0.015 * (total_chars - i)), hide, repeat=False))
 
         start_clear()
 
     def vignette(self, final_color, longer):
         """Aesthetic reasons."""
         glb = bs.getactivity().globalsnode
-        base_color = (0.57, 0.57, 0.57)
-        bs.animate_array(glb, 'vignette_outer', 3, {0: base_color, 0.1: (
-            final_color[0] / 1.2, final_color[1] / 1.2, final_color[2] / 1.2), (1 if longer else 0.5): base_color})
+        base_color = (0.57,0.57,0.57)
+        bs.animate_array(glb, 'vignette_outer', 3, {0: base_color, 0.1: (final_color[0] / 1.2, final_color[1] / 1.2, final_color[2] / 1.2), (1 if longer else 0.5): base_color})
 
     def interactions(self):
         """Some personalized stuff and my deepest secrets.
@@ -684,6 +686,8 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     v_attach='top',
                 ))
 
+
+
         everything = bs.getnodes()
         everyone = []
         closest_distance = 9999
@@ -692,8 +696,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         # i won't explain what "curve" is... look by yourself
         if not self.curve and not self._puck.scored:
             if bs.time() < self.smashed:
-                random_pos = (random.uniform(
-                    0.1, 0.7) + self._puck.node.position[0], self._puck.node.position[1], random.uniform(0.1, 0.7) + self._puck.node.position[2])
+                random_pos = (random.uniform(0.1, 0.7) + self._puck.node.position[0],self._puck.node.position[1],random.uniform(0.1, 0.7) + self._puck.node.position[2])
                 e = bs.newnode(
                     'explosion',
                     attrs={
@@ -739,31 +742,31 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                 self.touches_indicator.color = indicator_color
                 self.touches_indicator.text = str(3 - self._puck.touches)
 
-        for human in everything:  # doesn't make much sense, but I hope u understand I want players nodes.
+        for human in everything: # doesn't make much sense, but I hope u understand I want players nodes.
             if human.getnodetype() == "spaz":
                 everyone.append(human)
 
         for player_node in everyone:
-            if not player_node.exists():  # why wouldn't u exist at first
+            if not player_node.exists(): # why wouldn't u exist at first
                 continue
 
-            # not wanting to do that Euclidean thingy
-            distance = math.dist(player_node.position, self._puck.node.position)
+
+            distance = math.dist(player_node.position, self._puck.node.position) # not wanting to do that Euclidean thingy
             player_node.hold_node = None
             player_node.getdelegate(object).impact_scale = 0
             if distance < closest_distance:
-                closest_player = player_node  # him, the closest one
-                closest_distance = distance  # his distance with the volleyball
+                closest_player = player_node # him, the closest one
+                closest_distance = distance # his distance with the volleyball
 
-        good: bool = (self._puck.touches < 3 and
-                      bs.time() - self.last_interaction_time > 0.4 and
-                      not self._puck.scored)
+        good : bool = (self._puck.touches < 3 and
+                       bs.time() - self.last_interaction_time > 0.4 and
+                       not self._puck.scored)
         # bs.time() is the current bombsquad time :) bs for bombsquad.
+
 
         delegate = closest_player.getdelegate(object)
         now = bs.time()
-        can_jump = (delegate.last_jump_time_ms >
-                    delegate._jump_cooldown and closest_player.position[1] < 1)
+        can_jump = (delegate.last_jump_time_ms > delegate._jump_cooldown and closest_player.position[1] < 1)
 
         if closest_player.jump_pressed and can_jump:
             ppos = closest_player.position
@@ -779,19 +782,19 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                 50,  # small force
             )
 
+
         punched = now < delegate.punched
         pickup = now < delegate.pickup
         bombed = now < delegate.bombed
         curved = now < delegate.curved
 
-        # SO if broski is the nearest AND broski is near enough...
-        if closest_player and closest_distance < 4 and good:
+
+        if closest_player and closest_distance < 4 and good: # SO if broski is the nearest AND broski is near enough...
             player = spaz = delegate
             ball = self._puck.node  # ball node
             you = closest_player.position  # already a node
             in_air = (you[1] > 0.8)
-            # Ball goes where you look but always tries to go to the other side. (tell me if u guys want it to go totally where you're looking at)
-            if closest_distance < (1.35 if not in_air else 1.6) and (closest_player.punch_pressed or punched):
+            if closest_distance < (1.35 if not in_air else 1.6) and (closest_player.punch_pressed or punched): # Ball goes where you look but always tries to go to the other side. (tell me if u guys want it to go totally where you're looking at)
                 self.difficulty += 0.6 / 75
                 e = bs.newnode(
                     'explosion',
@@ -816,78 +819,38 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     self.one_sound.play()
                 else:
                     ball.color_texture = green
-                # This is for the sound, you probably didn't know that!
-                bs.getsound("impactHard").play()
+                bs.getsound("impactHard").play() # This is for the sound, you probably didn't know that!
 
-                sight = (bs.Vec3(you) - bs.Vec3(closest_player.position_forward)
-                         ).normalized() * (12 if delegate.percentage < 95 else 30)  # Sight factor
-                speed = 6 if delegate.percentage < 95 else 20  # bar full
 
-                if curved:
-                    start_pos = ball.position
-                    end_pos = (sight[0] * 2, -1, -sight[2])
-                    duration = 1.1
-                    fps = 144
-                    total_steps = int(duration * fps)
-                    curved_time = bs.time() + 0.15
-                    self.curving = True
 
-                    z_offset = -4.0 if sight[0] < 0 else 4.0
+                sight = (bs.Vec3(you) - bs.Vec3(closest_player.position_forward)).normalized() * (12 if delegate.percentage < 95 else 30) # Sight factor
+                speed = 6 if delegate.percentage < 95 else 20 # bar full
 
-                    def move_to_point(step):
-                        if not ball.exists():
-                            return
-                        if ball.position[1] < 1 and bs.time() > curved_time:
-                            return
-                        if not self.curving:
-                            return
-
-                        t = step / total_steps
-
-                        x = start_pos[0] + (end_pos[0] - start_pos[0]) * t
-                        y = start_pos[1] + (end_pos[1] - start_pos[1]) * t
-                        z = start_pos[2] + (end_pos[2] - start_pos[2]) * t
-
-                        y += math.sin(t * math.pi) * 3.0
-
-                        # Ajout de la courbe latérale
-                        z += math.sin(t * math.pi) * z_offset
-
-                        # --- LIMITE SUR L'AXE Z ---
-                        # On force z à rester entre -5 et 5
-                        z = max(-5.0, min(5.0, z))
-                        # --------------------------
-
-                        ball.position = (x, y, z)
-
-                        if step < total_steps:
-                            bs.timer(1 / fps, lambda: move_to_point(step + 1))
-
-                    move_to_point(0)
-                else:
-                    # normal
-                    self.curving = False
-                    if in_air and delegate.percentage > 95:
-                        if closest_player.position[0] < 0:
-                            vel = (12 * 1.6, 0, sight[2]) * speed
-                        else:
-                            vel = (-12 * 1.6, 0, sight[2]) * speed
-                    else:
-                        if closest_player.position[0] < 0:
-                            vel = (4.8 * 1.6, 0, sight[2]) * speed
-                        else:
-                            vel = (-4.8 * 1.6, 0, sight[2]) * speed
-
-                    # smth
-                    dist_from_middle = math.dist(you, (0, 2, 0))
-                    height = (max(dist_from_middle * 2.75, 7) * 0.8)
-                    if in_air and delegate.percentage > 95:
-                        height = -4 * 2 / dist_from_middle
-
-                    ball.velocity = (vel[0], height, vel[2])
+                # normal
+                self.curving = False
                 if in_air and delegate.percentage > 95:
-                    audio = random.choice(['explosion01', 'explosion02',
-                                          'explosion03', 'explosion04', 'explosion05'])
+                    if closest_player.position[0] < 0:
+                        vel = (12 * 1.6, 0, sight[2]) * speed
+                    else:
+                        vel = (-12 * 1.6, 0, sight[2]) * speed
+                else:
+                    if closest_player.position[0] < 0:
+                        vel = (4.8 * 1.6, 0, sight[2]) * speed
+                    else:
+                        vel = (-4.8 * 1.6, 0, sight[2]) * speed
+
+                # smth
+                dist_from_middle = math.dist(you, (0, 2, 0))
+                height = (max(dist_from_middle * 2.75, 7) * 0.8)
+                if in_air and delegate.percentage <= 95:
+                    height = 3.5
+                    vel = (vel[0] * 1.5, height, vel[2])
+                if in_air and delegate.percentage > 95:
+                    height = -4 * 2 / dist_from_middle
+
+                ball.velocity = (vel[0], height, vel[2])
+                if in_air and delegate.percentage > 95:
+                    audio = random.choice(['explosion01','explosion02','explosion03','explosion04','explosion05'])
                     bs.getsound(audio).play()
                     self.smashed = bs.time() + 1
                     self.smasher = closest_player
@@ -900,7 +863,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     self.write(
                         f'{player.name} {self.hit_text}', closest_player.color)
 
-                # prettiness here
+                #prettiness here
                 ppos = you
                 f = (bs.Vec3(ball.position) - bs.Vec3(you)).normalized()
                 closest_player.handlemessage(
@@ -913,8 +876,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     f[2],
                     400,  # small force
                 )
-            # Ball goes straight up in the air. idk what it is called.
-            if closest_distance < 1.35 and (closest_player.pickup_pressed or pickup):
+            if closest_distance < 1.35 and (closest_player.pickup_pressed or pickup): # Ball goes straight up in the air. idk what it is called.
                 self.write(
                     f'{player.name} {self.control_text}', closest_player.color)
                 y_diff = abs(self._puck.node.position[1] - closest_player.position[1])
@@ -923,6 +885,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     self.difficulty += 0.6 / 75
                     self.last_interaction_time = bs.time()
                     self.curve = False
+
 
                     self._puck.touches += 1
 
@@ -951,10 +914,9 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     )
                     bs.timer(1, e.delete)
 
-                    direction = (bs.Vec3(you) -
-                                 bs.Vec3(closest_player.position_forward)).normalized()
+                    direction = (bs.Vec3(you) - bs.Vec3(closest_player.position_forward)).normalized()
                     ball.velocity = (-you[0] * 0.04, 12.8, direction[2] * 0.1)
-            if closest_player.bomb_pressed and not delegate.gliding or bombed and not delegate.gliding:  # gliding.. variant coming soon
+            if closest_player.bomb_pressed and not delegate.gliding or bombed and not delegate.gliding: # gliding.. variant coming soon
                 self.write(
                     f'{player.name} {self.save_text}', closest_player.color)
                 delegate.gliding = True
@@ -990,6 +952,12 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
 
                 # variant soon
 
+
+
+
+
+
+
     def on_team_join(self, team: Team) -> None:
         self._update_scoreboard()
 
@@ -1022,7 +990,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
             'explosion',
             attrs={
                 'position': self._puck.node.position,
-                'color': (0, 0, 0),
+                'color': (0,0,0),
                 'radius': .1,
                 'big': True,
             }
@@ -1054,7 +1022,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
 
                 for player in team.players:
                     if player.actor:
-                        player.actor.handlemessage(bs.CelebrateMessage(2.0))  # yay we scored
+                        player.actor.handlemessage(bs.CelebrateMessage(2.0)) # yay we scored
                         player.actor.percentage = min(player.actor.percentage + 15, 100)
                         # dont mind this ;(
                         scorch = bs.newnode(
@@ -1079,8 +1047,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         self._puck.scored = True
 
         # Kill the puck (it'll respawn itself shortly).
-        # Animation ! 0 sec = 0.25 of size in our case
-        bs.animate(self._puck.node, 'mesh_scale', {0: 0.25, 0.4: 0})
+        bs.animate(self._puck.node, 'mesh_scale', {0: 0.25, 0.4 : 0}) # Animation ! 0 sec = 0.25 of size in our case
         bs.timer(0.7, self._kill_puck)
 
         bs.cameraflash(duration=7.0)
@@ -1104,7 +1071,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
     # overriding the default character spawning..
     def spawn_player(self, player: Player) -> bs.Actor:
         spaz = self.spawn_player_spaz(player)
-        spaz.bomb_count = 0  # No bombs for yall bahaha
+        spaz.bomb_count = 0 # No bombs for yall bahaha
         # Now we want to make that your punches are useless too
         # But we will need the button to work so let's put the damage to 0 and some custom stuff
         spaz._punch_power_scale = 0
@@ -1118,9 +1085,10 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
 
         spaz.can_curve = False
 
+
         spaz.last_angle = 0
         spaz.total_rotation = 0.0
-        spaz.rotation_direction = 0  # 0: neutre, 1: clockwise, -1: not clockwise
+        spaz.rotation_direction = 0
 
         spaz.gliding = False
         spaz.smashed = False
@@ -1138,7 +1106,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         )
         spaz.node.connectattr('position', spaz.bar, 'position')
         spaz.bar.always_show_health_bar = True
-        spaz.node.name = ''  # bahaha but you'll sspazuseful
+        spaz.node.name = '' # bahaha but you'll sspazuseful
 
         def check():
             if spaz.node.exists():
@@ -1159,6 +1127,7 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                 else:
                     spaz.node.name = ''
 
+
                 spaz.bar.hurt = min(1.0 - float(spaz.percentage) / 100, 1)
 
                 # Curved ball part
@@ -1174,42 +1143,12 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
                     dx /= length
                     dz /= length
 
-                spaz.angle = math.degrees(math.atan2(-dx, -dz))  # trust
+                spaz.angle = math.degrees(math.atan2(-dx, -dz)) # trust
 
-        # checks if u turn ! Not in the game yet !
-        def check_270_rotation():
-            now = bs.time()
-            current_angle = spaz.angle
 
-            delta = current_angle - spaz.last_angle
-            if delta > 180:
-                delta -= 360
-            if delta < -180:
-                delta += 360
 
-            current_dir = 1 if delta > 0 else -1
-
-            if spaz.rotation_direction != 0 and current_dir != spaz.rotation_direction:
-                spaz.total_rotation = 0
-
-            spaz.rotation_direction = current_dir
-
-            spaz.total_rotation += abs(delta)
-
-            if spaz.total_rotation >= 250:
-                spaz.curved = now + 0.40
-                spaz.total_rotation = 0
-
-            spaz.last_angle = current_angle
 
         spaz.check_timer1 = bs.Timer(1/30, check, repeat=True)
-        # spaz.check_timer2 = bs.Timer(1/30, check_270_rotation, repeat=True)
-
-        # spaz.node.hold_node = spaz.node ... nevermind
-
-        # By the way when you have a node but want his player just do
-        # player = node.getdelegate(object)
-        # i dont know why you'll need it but here it is
 
         return spaz
 
@@ -1225,17 +1164,17 @@ class VolleyBallGame(bs.TeamGameActivity[Player, Team]):
         # Respawn dead pucks.
         elif isinstance(msg, PuckDiedMessage):
             if not self.has_ended():
-                bs.timer(2, self._spawn_puck)  # 2 secs to breathe bahahaha
+                bs.timer(2, self._spawn_puck)
         else:
             super().handlemessage(msg)
+
 
     def _spawn_puck(self) -> None:
         self._swipsound.play()
         self._whistle_sound.play()
         assert self._puck_spawn_pos is not None
         self._puck = Puck(position=self._puck_spawn_pos)
-        self.timer = bs.Timer(1 / 144, self.lock_it, repeat=True)  # 144 ?.. yes
-
+        self.timer = bs.Timer(1 / 144, self.lock_it, repeat=True)
     def lock_it(self):
         if self._puck is None:
             return
@@ -1289,5 +1228,6 @@ class ModInstaller:
                 print(f"DEBUG ERROR: {e}")
                 bui.screenmessage("Installation Failed!", color=(1, 0, 0))
                 bui.getsound('kronk2').play()
+
 
         bs.apptimer(2.5, _do_install)
