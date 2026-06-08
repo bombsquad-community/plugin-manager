@@ -1,98 +1,14 @@
 # ba_meta require api 9
 
-plugman = dict(
-    plugin_name="fluffyplaylisteditor",
-    description="A simple not-so advanced Playlist Editor",
-    external_url="https://discord.com/channels/1001896771347304639/1483463979450896445",
-    authors=[
-        {"name": "FluffyPal", "email": "", "discord": "fluffypal"}
-    ],
-    version="1.1.0",
+from bascenev1._playlist import filter_playlist  # , PlaylistType
+from random import choice  # , randint, randrange
+from bascenev1 import (
+    get_filtered_map_name,
+    get_map_class,
+    get_map_display_string,
 )
-
-### Started: 12 Mar 2026 at night from scratch
-# - Learning workflow
-# - configuring packages
-# - PlaylistEditWindow UI Polishing (I HATE UI POLISHING)
-
-### Continued: 13 Mar 2026
-# - PlaylistEditGameWindow UI Polishing (AAAA.. oh, found a bug)
-# - Implemented GameEdit configs reset and restore
-# - Implemented GameEdit map quick navigation buttons
-# - Lazy TypedDict PlaylistType
-
-### Continued: 17 Mar 2026
-# - PlaylistEditController logics overwrite
-# - Implemented PlaylistEdit duplicate game
-# - Refactor filter_playlist
-# - Implemented logics to show invalid games/maps in PlaylistEdit
-# - Refine GameEdit reset and restore
-
-### Continued: 7 June 2026
-# - Fixed map select not recorded on MapSelect
-# - Added batch game adding within supported maps
-
-
-import logging
-from copy import deepcopy
-from random import choice #, randint, randrange
-
-
-import bauiv1 as bui
-import bascenev1 as bs
-
-import babase
-from babase import app, Plugin
-
-
-#======= PLAYLIST PARENT =======#
-from bascenev1._playlist import filter_playlist #, PlaylistType
-from bauiv1lib.playlist import PlaylistTypeVars
-
-#======= PLAYLIST BORWSER =======#
-# Main Playlist Browser Window For Starting The Playlist
-# Then goes to PlaylistCustomizeBrowserWindow if pressing "customize..."
-#from bauiv1lib.playlist.browser import PlaylistBrowserWindow
-
-#import bauiv1lib.playlist.customizebrowser
-#from bauiv1lib.playlist.customizebrowser import PlaylistCustomizeBrowserWindow
-
-#======= PLAYLIST ADDING/EDITING =======#
-## Main packages to modify
-#- Game edit window
-import bauiv1lib.playlist.edit
-from bauiv1lib.playlist.edit import PlaylistEditWindow
-
-#from bauiv1lib.playlist.addgame import PlaylistAddGameWindow
-
-#- Playlist games edit window
-import bauiv1lib.playlist.editgame
-from bauiv1lib.playlist.editgame import PlaylistEditGameWindow
-
-# Window for adding registered games to the playlist and then goes to PlaylistEditController for editing
-# The UI that shows games GameActivities names on the left and desc on the right
-# And "Get More Games..." on the bottom
-# After selecting the game, we goes to PlaylistEditGameWindow for configuring the game Settings and Map
-import bauiv1lib.playlist.editcontroller
-from bauiv1lib.playlist.editcontroller import PlaylistEditController
-
-#- Game map select window
-#import bauiv1lib.playlist.mapselect
-#from bauiv1lib.playlist.mapselect import PlaylistMapSelectWindow
-
-
-#======= PLAYLIST PLAYING =======#
-# This is used when we wanna "play" the playlist
-#from bauiv1lib.play import PlayWindow, PlaylistSelectContext
-
-#from bauiv1lib.playoptions import PlayOptionsWindow
-
-
-
-#======= UI Packages =======#
-from babase import (
-    get_virtual_screen_size
-)
+from typing import Callable, Sequence, Literal, TypedDict, Any, cast
+from bauiv1lib.confirm import ConfirmWindow
 from bauiv1 import (
     # Window utils
     Window, MainWindowState,
@@ -113,11 +29,94 @@ from bauiv1 import (
     gettexture,
     Mesh, Texture, Lstr,
 )
-from bauiv1lib.confirm import ConfirmWindow
+from babase import (
+    get_virtual_screen_size
+)
+from bauiv1lib.playlist.editcontroller import PlaylistEditController
+import bauiv1lib.playlist.editcontroller
+from bauiv1lib.playlist.editgame import PlaylistEditGameWindow
+import bauiv1lib.playlist.editgame
+from bauiv1lib.playlist.edit import PlaylistEditWindow
+import bauiv1lib.playlist.edit
+from bauiv1lib.playlist import PlaylistTypeVars
+from babase import app, Plugin
+import babase
+import bascenev1 as bs
+import bauiv1 as bui
+from copy import deepcopy
+import logging
+plugman = dict(
+    plugin_name="fluffyplaylisteditor",
+    description="A simple not-so advanced Playlist Editor",
+    external_url="https://discord.com/channels/1001896771347304639/1483463979450896445",
+    authors=[
+        {"name": "FluffyPal", "email": "", "discord": "fluffypal"}
+    ],
+    version="1.1.0",
+)
 
-#======= Type Hints =======#
-#from enum import Enum
-from typing import Callable, Sequence, Literal, TypedDict, Any, cast
+# Started: 12 Mar 2026 at night from scratch
+# - Learning workflow
+# - configuring packages
+# - PlaylistEditWindow UI Polishing (I HATE UI POLISHING)
+
+# Continued: 13 Mar 2026
+# - PlaylistEditGameWindow UI Polishing (AAAA.. oh, found a bug)
+# - Implemented GameEdit configs reset and restore
+# - Implemented GameEdit map quick navigation buttons
+# - Lazy TypedDict PlaylistType
+
+# Continued: 17 Mar 2026
+# - PlaylistEditController logics overwrite
+# - Implemented PlaylistEdit duplicate game
+# - Refactor filter_playlist
+# - Implemented logics to show invalid games/maps in PlaylistEdit
+# - Refine GameEdit reset and restore
+
+# Continued: 7 June 2026
+# - Fixed map select not recorded on MapSelect
+# - Added batch game adding within supported maps
+
+
+# ======= PLAYLIST PARENT =======#
+
+# ======= PLAYLIST BORWSER =======#
+# Main Playlist Browser Window For Starting The Playlist
+# Then goes to PlaylistCustomizeBrowserWindow if pressing "customize..."
+# from bauiv1lib.playlist.browser import PlaylistBrowserWindow
+
+# import bauiv1lib.playlist.customizebrowser
+# from bauiv1lib.playlist.customizebrowser import PlaylistCustomizeBrowserWindow
+
+# ======= PLAYLIST ADDING/EDITING =======#
+# Main packages to modify
+# - Game edit window
+
+# from bauiv1lib.playlist.addgame import PlaylistAddGameWindow
+
+# - Playlist games edit window
+
+# Window for adding registered games to the playlist and then goes to PlaylistEditController for editing
+# The UI that shows games GameActivities names on the left and desc on the right
+# And "Get More Games..." on the bottom
+# After selecting the game, we goes to PlaylistEditGameWindow for configuring the game Settings and Map
+
+# - Game map select window
+# import bauiv1lib.playlist.mapselect
+# from bauiv1lib.playlist.mapselect import PlaylistMapSelectWindow
+
+
+# ======= PLAYLIST PLAYING =======#
+# This is used when we wanna "play" the playlist
+# from bauiv1lib.play import PlayWindow, PlaylistSelectContext
+
+# from bauiv1lib.playoptions import PlayOptionsWindow
+
+
+# ======= UI Packages =======#
+
+# ======= Type Hints =======#
+# from enum import Enum
 
 
 class UntotalOldTypedPlaylistDict(TypedDict, total=False):
@@ -129,17 +128,22 @@ class UntotalOldTypedPlaylistDict(TypedDict, total=False):
     is_map_invalid: bool
     is_game_invalid: bool
 
+
 class OldTypedPlaylistDict(TypedDict):
     map: str
     level: str
+
 
 class TypedPlaylistDict(UntotalOldTypedPlaylistDict):
     settings: OldTypedPlaylistDict
     type: str
 
+
 TypedPlaylistType = list[TypedPlaylistDict]
 
-#-------------------------- UI TOOLS --------------------------#
+# -------------------------- UI TOOLS --------------------------#
+
+
 def buttonwidget(
     *,
     edit: Widget | None = None,
@@ -154,7 +158,7 @@ def buttonwidget(
     up_widget: Widget | None = None,
     left_widget: Widget | None = None,
     right_widget: Widget | None = None,
-    #texture: Texture | None = None,
+    # texture: Texture | None = None,
     text_scale: float | None = None,
     textcolor: Sequence[float] | None = None,
     enable_sound: bool | None = None,
@@ -226,13 +230,14 @@ def buttonwidget(
         better_bg_fit=better_bg_fit
     )
 
+
 def create_container(size: tuple[float, float], **kwargs) -> Widget:
     """Create the main window with overlay."""
     # Container
     p = containerwidget(
-        #parent=get_special_widget('overlay_stack'),
+        # parent=get_special_widget('overlay_stack'),
         background=False,
-        #transition='in_scale',
+        # transition='in_scale',
         size=size,
         **kwargs
     )
@@ -257,7 +262,7 @@ def create_container(size: tuple[float, float], **kwargs) -> Widget:
         tilt_scale=6,
         color=tuple(col*1.5 for col in color_theme.get_color('primary'))
     )
-    f = imagewidget( # Foreground
+    f = imagewidget(  # Foreground
         texture=gettexture('white'),
         parent=p,
         size=size,
@@ -272,34 +277,45 @@ def create_container(size: tuple[float, float], **kwargs) -> Widget:
 
     return p
 
+
 def create_confirm(callback: Callable, text: str) -> Callable:
     return lambda: ConfirmWindow(
         text=f"{text}?",
-        color=color_theme.get_color('primary'), # pyright: ignore[reportArgumentType]
+        color=color_theme.get_color('primary'),  # pyright: ignore[reportArgumentType]
         action=callback
     )
 
+
 _SOUND_VOL = 1.2
+
+
 def play_error_sound():
     bui.getsound('error').play(_SOUND_VOL)
+
 
 def play_guncocking_sound():
     bui.getsound('gunCocking').play(_SOUND_VOL)
 
+
 def play_ding_sound():
     bui.getsound('ding').play(_SOUND_VOL)
+
 
 def play_powerdown_sound():
     bui.getsound('powerdown01').play(_SOUND_VOL)
 
+
 def play_shield_down_sound():
     bui.getsound('shieldDown').play(_SOUND_VOL)
+
 
 def play_shield_up_sound():
     bui.getsound('shieldUp').play(_SOUND_VOL)
 
+
 def play_deek_sound():
     bui.getsound(choice(['deek', 'deek2'])).play(_SOUND_VOL)
+
 
 def play_click_sound():
     bui.getsound('click01').play(_SOUND_VOL)
@@ -324,6 +340,8 @@ class ScreenmessageColors:
 _COLOR_TYPE = Literal[
     'bg', 'primary', 'secondary', 'tertiary', 'unknown'
 ]
+
+
 class ColorTheme:
     main_color: Sequence[float] = (0.8, 0.8, 0.8)
     colors: dict[_COLOR_TYPE, Sequence[float]] = {
@@ -341,7 +359,7 @@ class ColorTheme:
 color_theme = ColorTheme()
 
 
-#-------------------------- MAIN --------------------------#
+# -------------------------- MAIN --------------------------#
 class FluffyPlaylistEditController(PlaylistEditController):
     def __init__(
         self,
@@ -386,7 +404,7 @@ class FluffyPlaylistEditController(PlaylistEditController):
                 ],
                 sessiontype=sessiontype,
                 remove_unowned=False,
-                #add_resolved_type=True, # HACK: This would cause json error as we save a Python class which aren't serializable
+                # add_resolved_type=True, # HACK: This would cause json error as we save a Python class which aren't serializable
                 name=existing_playlist_name,
                 print_exc=False
             )
@@ -426,7 +444,6 @@ class FluffyPlaylistEditController(PlaylistEditController):
         # skip back to there once we're fully done.
         self._back_state = editwindow.main_window_back_state
 
-
     def duplicate_game_pressed(self) -> bool:
         """Duplicate the currently selected game in the playlist and insert it just after."""
         if not self._playlist or self._selected_index is None:
@@ -459,7 +476,8 @@ class FluffyPlaylistEditController(PlaylistEditController):
 
         entry = self._playlist[self._selected_index]
         if (epic_setting := 'Epic Mode') in entry['settings'] and isinstance(entry['settings'][epic_setting], bool):
-            self._playlist[self._selected_index]['settings'][epic_setting] = not entry['settings'][epic_setting] # pyright: ignore[reportGeneralTypeIssues]
+            # pyright: ignore[reportGeneralTypeIssues]
+            self._playlist[self._selected_index]['settings'][epic_setting] = not entry['settings'][epic_setting]
         else:
             play_error_sound()
             return False
@@ -473,7 +491,8 @@ class FluffyPlaylistEditController(PlaylistEditController):
 
         entry = self._playlist[self._selected_index]
         if (solo_setting := 'Solo Mode') in entry['settings'] and isinstance(entry['settings'][solo_setting], bool):
-            self._playlist[self._selected_index]['settings'][solo_setting] = not entry['settings'][solo_setting] # pyright: ignore[reportGeneralTypeIssues]
+            # pyright: ignore[reportGeneralTypeIssues]
+            self._playlist[self._selected_index]['settings'][solo_setting] = not entry['settings'][solo_setting]
         else:
             play_error_sound()
             return False
@@ -531,7 +550,8 @@ class FluffyPlaylistEditController(PlaylistEditController):
                 subclassof=bs.GameActivity
             )
         except AttributeError as e:
-            bs.screenmessage(f'Can\'t edit game: {e}. Maybe try fix it?', ScreenmessageColors.YELLOW)
+            bs.screenmessage(
+                f'Can\'t edit game: {e}. Maybe try fix it?', ScreenmessageColors.YELLOW)
             play_error_sound()
             return
 
@@ -543,11 +563,11 @@ class FluffyPlaylistEditController(PlaylistEditController):
 
         self._show_edit_ui(
             gametype=cls,
-            settings=playlist['settings'], # pyright: ignore[reportArgumentType]
+            settings=playlist['settings'],  # pyright: ignore[reportArgumentType]
             from_window=from_window,
         )
 
-    def _show_edit_ui( # pyright: ignore[reportIncompatibleMethodOverride]
+    def _show_edit_ui(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
         gametype: type[bs.GameActivity],
         settings: TypedPlaylistDict | None,
@@ -577,7 +597,7 @@ class FluffyPlaylistEditController(PlaylistEditController):
         assert self._pre_game_edit_state is None
         self._pre_game_edit_state = editwindow.main_window_back_state
 
-    def _edit_game_done( # pyright: ignore[reportIncompatibleMethodOverride]
+    def _edit_game_done(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, config: TypedPlaylistDict | None, from_window: bui.MainWindow
     ) -> None:
         """Called after finished editing/adding a game"""
@@ -616,7 +636,6 @@ class FluffyPlaylistEditController(PlaylistEditController):
                         self._playlist.insert(insert_index, new_config)
                         insert_index += 1
 
-
             play_guncocking_sound()
 
         # If we're adding, jump to before the add started.
@@ -635,7 +654,6 @@ class FluffyPlaylistEditController(PlaylistEditController):
         self._pre_game_add_state = None
         self._is_batch_add = False
 
-
     def _get_supported_maps_for_game(self, config: TypedPlaylistDict, gametype: type[bs.GameActivity]):
         assert app.classic is not None
         store = app.classic.store
@@ -649,7 +667,6 @@ class FluffyPlaylistEditController(PlaylistEditController):
         valid_maps -= to_remove
 
         return sorted(valid_maps)
-
 
     def batch_add_game_pressed(self, from_window: MainWindow):
         self._is_batch_add = True
@@ -665,12 +682,12 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
     ):
         self._list_widgets: list[Widget] = []
         self._editcontroller = editcontroller
-        editcontroller._is_batch_add = False # HACK: Couldn't think of any clean idea :p
+        editcontroller._is_batch_add = False  # HACK: Couldn't think of any clean idea :p
 
         self._r = 'editGameListWindow'
         prev_selection: str | None = self._editcontroller.get_edit_ui_selection()
 
-        ### Container Setup
+        # Container Setup
         uiscale = app.ui_v1.uiscale
         is_small_ui = uiscale is UIScale.SMALL
         # Keep a constant aspect ratio for all UIScale values.
@@ -690,25 +707,25 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
         self._width = int(self._width)
         self._height = int(self._height)
 
-        MainWindow.__init__(self, # pyright: ignore[reportArgumentType]
-            root_widget=create_container(
-                size=(self._width, self._height),
-                scale=(
-                    1.20 if is_small_ui else
-                    0.80 if uiscale is UIScale.MEDIUM else
-                    0.60
-                ),
-                toolbar_visibility=(
-                    'menu_minimal_no_back'
-                    if is_small_ui
-                    else 'menu_full'
-                ),
-            ),
-            transition=transition,
-            origin_widget=origin_widget,
-        )
+        MainWindow.__init__(self,  # pyright: ignore[reportArgumentType]
+                            root_widget=create_container(
+                                size=(self._width, self._height),
+                                scale=(
+                                    1.20 if is_small_ui else
+                                    0.80 if uiscale is UIScale.MEDIUM else
+                                    0.60
+                                ),
+                                toolbar_visibility=(
+                                    'menu_minimal_no_back'
+                                    if is_small_ui
+                                    else 'menu_full'
+                                ),
+                            ),
+                            transition=transition,
+                            origin_widget=origin_widget,
+                            )
 
-        ### Widgets/children
+        # Widgets/children
         # Buttons
         self.b_color = b_color = color_theme.get_color('primary')
         self.b_textcolor = b_textcolor = color_theme.get_color('secondary')
@@ -1028,8 +1045,8 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
                 subs=[
                     ('${NAME}', name),
                     ('${MAP}', bs.get_map_display_string(
-                               bs.get_filtered_map_name(pentry['settings']['map'])),
-                    ),
+                        bs.get_filtered_map_name(pentry['settings']['map'])),
+                     ),
                 ],
             )
         elif 'map' in pentry:
@@ -1038,8 +1055,8 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
                 subs=[
                     ('${NAME}', name),
                     ('${MAP}', bs.get_map_display_string(
-                               bs.get_filtered_map_name(pentry['map'])),
-                    ),
+                        bs.get_filtered_map_name(pentry['map'])),
+                     ),
                 ],
             )
         else:
@@ -1048,12 +1065,10 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
 
         return sval
 
-
     def _duplicate_selected_game(self) -> None:
         if self._editcontroller.duplicate_game_pressed():
             play_guncocking_sound()
             self._refresh()
-
 
     def _move_down(self) -> None:
         if len(self._editcontroller.get_playlist()) > 1:
@@ -1063,18 +1078,15 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
         if len(self._editcontroller.get_playlist()) > 1:
             super()._move_up()
 
-
     def _toggle_epic_mode(self):
         if self._editcontroller.toggle_epic_mode():
             play_guncocking_sound()
             self._refresh()
 
-
     def _toggle_solo_mode(self):
         if self._editcontroller.toggle_solo_mode():
             play_guncocking_sound()
             self._refresh()
-
 
     def _refresh(self) -> None:
         # Need to grab this here as rebuilding the list will
@@ -1083,15 +1095,17 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
 
         while self._list_widgets:
             self._list_widgets.pop().delete()
-        for index, pentry in enumerate(self._editcontroller.get_playlist()): # pyright: ignore[reportAssignmentType]
+        # pyright: ignore[reportAssignmentType]
+        for index, pentry in enumerate(self._editcontroller.get_playlist()):
             pentry: TypedPlaylistDict
             try:
                 cls = babase.getclass(pentry['type'], subclassof=bs.GameActivity)
-                desc = cls.get_settings_display_string(pentry) # pyright: ignore[reportArgumentType]
+                # pyright: ignore[reportArgumentType]
+                desc = cls.get_settings_display_string(pentry)
                 color = (0.8, 0.8, 0.8, 1.0)
             except Exception:
-                #logging.exception('Error in playlist refresh.')
-                #desc = "(invalid: '" + pentry['type'] + "')"
+                # logging.exception('Error in playlist refresh.')
+                # desc = "(invalid: '" + pentry['type'] + "')"
                 desc = self._get_invalid_game_name(pentry)
                 color = color_theme.get_color('unknown')
 
@@ -1129,11 +1143,6 @@ class FluffyPlaylistEditWindow(PlaylistEditWindow):
         self._editcontroller.batch_add_game_pressed(from_window=self)
 
 
-from bascenev1 import (
-    get_filtered_map_name,
-    get_map_class,
-    get_map_display_string,
-)
 class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
 
     def __init__(
@@ -1205,7 +1214,7 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
                 filtered_map_name = get_filtered_map_name(raw_map)
                 if filtered_map_name not in unowned_maps:
                     self._map = filtered_map_name
-            #else:
+            # else:
             #    raise Exception()
         except Exception:
             logging.exception('Error getting map for editor.')
@@ -1224,7 +1233,7 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
             else:
                 self._settings = config
         else:
-            self._settings: OldTypedPlaylistDict = {} # pyright: ignore[reportAttributeAccessIssue]
+            self._settings: OldTypedPlaylistDict = {}  # pyright: ignore[reportAttributeAccessIssue]
         self._settings['map'] = self._map
 
         self._default_settings = deepcopy(self._settings)
@@ -1238,7 +1247,7 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
             raise RuntimeError(f'No map preview tex found for {self._map}.')
         self._choice_selections: dict[str, int] = {}
 
-        ### Container Setup
+        # Container Setup
         uiscale = app.ui_v1.uiscale
         is_small_ui = uiscale is UIScale.SMALL
         # Keep a constant aspect ratio for all UIScale values.
@@ -1249,32 +1258,32 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
         self._width = width = int(base_width * 1.65)
         self._height = height = int(base_width / aspect_ratio)
 
-        y_extra2 = 50 # For topper widget elements
+        y_extra2 = 50  # For topper widget elements
 
         # Adjust x_inset proportionally to width
         self.x_inset = int(width * (0.09 if is_small_ui else 0.0225))
         self.yoffs = yoffs = -68 if is_small_ui else -30
 
         MainWindow.__init__(self,
-            root_widget=containerwidget(
-                size=(width, height),
-                color=color_theme.get_color('bg'),
-                scale=(
-                    1.10 if is_small_ui else
-                    0.80 if uiscale is UIScale.MEDIUM else
-                    0.70
-                ),
-                toolbar_visibility=(
-                    'menu_minimal_no_back'
-                    if uiscale is UIScale.SMALL
-                    else 'menu_full'
-                ),
-            ),
-            transition=transition,
-            origin_widget=origin_widget,
-        )
+                            root_widget=containerwidget(
+                                size=(width, height),
+                                color=color_theme.get_color('bg'),
+                                scale=(
+                                    1.10 if is_small_ui else
+                                    0.80 if uiscale is UIScale.MEDIUM else
+                                    0.70
+                                ),
+                                toolbar_visibility=(
+                                    'menu_minimal_no_back'
+                                    if uiscale is UIScale.SMALL
+                                    else 'menu_full'
+                                ),
+                            ),
+                            transition=transition,
+                            origin_widget=origin_widget,
+                            )
 
-        ### Widgets/children
+        # Widgets/children
         b_color = color_theme.get_color('primary')
         b_textcolor = color_theme.get_color('secondary')
 
@@ -1312,7 +1321,8 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
 
         self.add_button = add_button = original_buttonwidget(
             parent=self._root_widget,
-            position=(width - ((255 if is_small_ui else 235) + self.x_inset), height - 82 + y_extra2 + yoffs),
+            position=(width - ((255 if is_small_ui else 235) + self.x_inset),
+                      height - 82 + y_extra2 + yoffs),
             size=(200, 65),
             scale=0.75,
             text_scale=1.3,
@@ -1338,7 +1348,8 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
             color=b_color,
             textcolor=b_textcolor,
             label=reset_config_text,
-            on_activate_call=create_confirm(self._reset_settings, reset_config_text.replace('\n', ' ')),
+            on_activate_call=create_confirm(
+                self._reset_settings, reset_config_text.replace('\n', ' ')),
             icon=gettexture('replayIcon'),
             iconscale=1.5
         )
@@ -1355,7 +1366,8 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
             textcolor=b_textcolor,
             label=restore_config_text,
             on_activate_call=(
-                create_confirm(self._restore_settings, restore_config_text.replace('\n', ' ')) if not is_add else play_error_sound
+                create_confirm(self._restore_settings, restore_config_text.replace(
+                    '\n', ' ')) if not is_add else play_error_sound
             ),
             icon=gettexture('leftButton'),
             iconscale=1.5
@@ -1408,14 +1420,14 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
         # Only update keys which are different, and track if anything actually changed
         for key, value in self._default_settings.items():
             if key not in self._settings or self._settings[key] != value:
-                #print(f'key restored: {self._settings[key]} -> {key}')
+                # print(f'key restored: {self._settings[key]} -> {key}')
                 self._settings[key] = value
                 updated = True
 
         # Check if map changed, update relevant attrs
         restored_map = get_filtered_map_name(self._settings['map'])
         if self._map != restored_map:
-            #print(f'map restored: {self._map} -> {restored_map}')
+            # print(f'map restored: {self._map} -> {restored_map}')
             self._map = restored_map
             try:
                 self.map_tex_name = get_map_class(self._map).get_preview_texture_name()
@@ -1457,7 +1469,8 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
         """Shift selection in the valid maps list by target (wrap around)"""
         valid_maps = self._valid_maps_owned
 
-        cur_map = self._map; assert cur_map
+        cur_map = self._map
+        assert cur_map
         try:
             cur_map_index = valid_maps.index(cur_map)
         except ValueError:
@@ -1481,11 +1494,11 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
 
         scroll_width = self._width - (86 + (3 if is_small_ui else 5.5) * self.x_inset)
 
-        spacing = 47 # Scroller playlist config items spacing
-        y_extra = 15 # For scroller widget
+        spacing = 47  # Scroller playlist config items spacing
+        y_extra = 15  # For scroller widget
 
         # Calc our total height we'll need
-        scroll_height = map_height + 10 # map select and margin
+        scroll_height = map_height + 10  # map select and margin
         scroll_height += spacing * len(self._settings_defs)
 
         if not self._scrollwidget:
@@ -1552,7 +1565,7 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
 
         self._map_buttonwidget = None
         if len(self._valid_maps_owned) > 1:
-            original_buttonwidget( # map_prev
+            original_buttonwidget(  # map_prev
                 parent=self._subcontainer,
                 position=(h + scroll_width * 0.46 - 50 - 1, v - 63),
                 size=(35, 35),
@@ -1564,7 +1577,7 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
                 enable_sound=False,
                 repeat=True,
             )
-            original_buttonwidget( # map_next
+            original_buttonwidget(  # map_next
                 parent=self._subcontainer,
                 position=(h + scroll_width * (0.655 if is_small_ui else 0.6225) + 5, v - 63),
                 size=(35, 35),
@@ -1616,7 +1629,8 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
         )
         v -= map_height
 
-        config = self._settings; assert config
+        config = self._settings
+        assert config
         for setting in self._settings_defs:
             value = setting.default
             value_type = type(value)
@@ -1660,12 +1674,12 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
                         )
                     if not isinstance(choice[1], value_type):
                         invalid = True
-                        #raise TypeError(
+                        # raise TypeError(
                         #    'Choice type does not match default value; choice:'
                         #    + repr(choice)
                         #    + '; setting:'
                         #    + repr(setting)
-                        #)
+                        # )
                 if value_type not in (int, float):
                     raise TypeError(
                         'Choice type setting must have int or float default; '
@@ -1867,6 +1881,8 @@ class FluffyPlaylistEditGameWindow(PlaylistEditGameWindow):
 
 
 original_filter_playlist = filter_playlist
+
+
 def new_filter_playlist(
     playlist: TypedPlaylistDict,
     sessiontype: type[bs.Session],
@@ -1899,7 +1915,7 @@ def new_filter_playlist(
         unowned_maps = []
         unowned_game_types = set()
 
-    for entry in deepcopy(playlist): # pyright: ignore[reportAssignmentType]
+    for entry in deepcopy(playlist):  # pyright: ignore[reportAssignmentType]
         entry: TypedPlaylistDict
         # 'map' used to be called 'level' here.
         if 'level' in entry:
@@ -2066,8 +2082,8 @@ def new_filter_playlist(
         # but, we couldn't get game's GameActivity class name from `entry['type']`
         except AttributeError as e:
             logging.warning(
-                    'Get class failed while scanning playlist \'%s\': %s', name, e
-                )
+                'Get class failed while scanning playlist \'%s\': %s', name, e
+            )
             entry['is_game_invalid'] = True
 
         # We 'manually' add some of basic ba*.setting(s) to the filter
@@ -2089,13 +2105,15 @@ def new_filter_playlist(
 
 
 def apply_packages():
-    bauiv1lib.playlist.editcontroller.PlaylistEditController = FluffyPlaylistEditController # Playlist editor controller for PlaylistEditWindow
+    # Playlist editor controller for PlaylistEditWindow
+    bauiv1lib.playlist.editcontroller.PlaylistEditController = FluffyPlaylistEditController
 
-    bauiv1lib.playlist.editgame.PlaylistEditGameWindow = FluffyPlaylistEditGameWindow # Playlist Game Editer Window
-    bauiv1lib.playlist.edit.PlaylistEditWindow = FluffyPlaylistEditWindow # Playlist Editor Window
+    bauiv1lib.playlist.editgame.PlaylistEditGameWindow = FluffyPlaylistEditGameWindow  # Playlist Game Editer Window
+    bauiv1lib.playlist.edit.PlaylistEditWindow = FluffyPlaylistEditWindow  # Playlist Editor Window
 
     bs.filter_playlist = new_filter_playlist
-    bs._playlist.filter_playlist = new_filter_playlist # pyright: ignore[reportAttributeAccessIssue]
+    # pyright: ignore[reportAttributeAccessIssue]
+    bs._playlist.filter_playlist = new_filter_playlist
 
 
 # ba_meta export babase.Plugin
