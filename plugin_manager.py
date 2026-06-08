@@ -2,7 +2,7 @@
 import babase
 import bauiv1 as bui
 from bauiv1lib import popup, confirm
-from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
+from babase._meta import _DEPRECATED_EXPORT_SHORTCUTS
 from bauiv1lib.settings.allsettings import AllSettingsWindow
 
 import urllib.request
@@ -82,7 +82,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(
         bytes(
             "(ba_meta export (plugin|{})\n+class )(.*)\\(".format(
-                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["plugin"]),
+                _regexp_friendly_class_name_shortcut(_DEPRECATED_EXPORT_SHORTCUTS["plugin"]),
             ),
             "utf-8"
         ),
