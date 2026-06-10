@@ -2588,6 +2588,25 @@
           "md5sum": "6346cd7146baf41eef8926dced23fdfe"
         }
       }
+    },
+    "fluffyplaylisteditor": {
+      "description": "A simple not-so advanced Playlist Editor",
+      "external_url": "https://discord.com/channels/1001896771347304639/1483463979450896445",
+      "authors": [
+        {
+          "name": "FluffyPal",
+          "email": "",
+          "discord": "fluffypal"
+        }
+      ],
+      "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "commit_sha": "99cf837",
+          "released_on": "08-06-2026",
+          "md5sum": "3ead338c768fbdffe022aadcbdc8c1d8"
+        }
+      }
     }
   }
 }
