@@ -1694,8 +1694,8 @@
       "external_url": "https://discord.gg/sQGDsztQcy",
       "authors": [
         {
-          "name": "Mr.Paradox",
-          "email": "microsoftusergame@gmail.com",
+          "name": "Mr.ghosty",
+          "email": "",
           "discord": "gaurangbroyo"
         },
         {
@@ -1705,6 +1705,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "1.0.2": {
           "api_version": 9,
           "commit_sha": "edaed70",
