@@ -1,10 +1,5 @@
 # ba_meta require api 9
 from __future__ import annotations
-from bascenev1lib.gameutils import SharedObjects
-import bascenev1 as bs
-import babase
-import random
-from typing import Optional, List, Dict, Any
 
 # Vanishing Tiles - BombSquad Minigame
 # Tiles disappear one by one. Survive all rounds to win.
@@ -15,11 +10,17 @@ plugman = dict(
     description="Tiles disappear gradually. Survive each round to continue. Last player standing wins!",
     external_url="https://discord.gg/sQGDsztQcy",
     authors=[
-        {"name": "Mr.Paradox", "email": "microsoftusergame@gmail.com", "discord": "gaurangbroyo"},
+        {"name": "Mr.ghosty", "email": "", "discord": "gaurangbroyo"},
         {"name": "senchx",    "email": "", "discord": "senchx0"},
     ],
-    version="1.0.2",
+    version="2.1.0",
 )
+
+from typing import Optional, List, Dict, Any
+import random
+import babase
+import bascenev1 as bs
+from bascenev1lib.gameutils import SharedObjects
 
 
 class Player(bs.Player['Team']):
@@ -35,7 +36,7 @@ class Team(bs.Team[Player]):
 # ba_meta export bascenev1.GameActivity
 class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
 
-    name = 'Vanishing Tiles'
+    name        = 'Vanishing Tiles'
     description = 'Tiles disappear one by one. Be the last one standing!'
     scoreconfig = bs.ScoreConfig(label='Survived', scoretype=bs.ScoreType.MILLISECONDS)
     announce_player_deaths = True
@@ -57,19 +58,19 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
 
     def __init__(self, settings: dict) -> None:
         super().__init__(settings)
-        self._epic_mode = bool(settings.get('Epic Mode', False))
-        self._show_credits = bool(settings.get('Show Credits', True))
+        self._epic_mode:     bool  = bool(settings.get('Epic Mode', False))
+        self._show_credits:  bool  = bool(settings.get('Show Credits', True))
         self.default_music = bs.MusicType.EPIC if self._epic_mode else bs.MusicType.SURVIVAL
 
-        self._round = 1
-        self._removing = False
+        self._round:          int   = 1
+        self._removing:       bool  = False
         self._game_start_time: Optional[float] = None
 
         self._tile_nodes:   Dict[int, bs.Node] = {}
         self._region_nodes: Dict[int, bs.Node] = {}
-        self._present_tile_ids: set[int] = set()
+        self._present_tile_ids: set[int]       = set()
 
-        self._remove_speed = 1.8
+        self._remove_speed: float = 1.8
 
         self._collide_mat = bs.Material()
         self._collide_mat.add_actions(actions=(('modify_part_collision', 'collide', True),))
@@ -77,8 +78,8 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
         self._no_collide_mat.add_actions(actions=(('modify_part_collision', 'collide', False),))
 
         self._default_tex = bs.gettexture('powerupHealth')
-        self._warn_tex = bs.gettexture('powerupCurse')
-        self._final_tex = bs.gettexture('powerupPunch')
+        self._warn_tex    = bs.gettexture('powerupCurse')
+        self._final_tex   = bs.gettexture('powerupPunch')
 
         self._hud_round:   Optional[bs.Node] = None
         self._hud_players: Optional[bs.Node] = None
@@ -103,7 +104,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
 
         if self._show_credits:
             self._credit_node = bs.newnode('text', attrs={
-                'text': 'Made by Mr.Paradox & senchx',
+                'text': 'Made by Mr.Ghosty',
                 'scale': 0.7, 'position': (0, 8), 'shadow': 0.8, 'flatness': 1.0,
                 'color': (1.0, 0.3, 0.8, 1.0), 'h_align': 'center', 'v_attach': 'bottom',
             })
@@ -162,7 +163,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
             self._hud_players.text = f'Players alive: {alive}'
         if self._hud_tiles:
             self._hud_tiles.color = (1.0, 0.3, 0.3, 1) if urgent else (0.5, 1.0, 0.5, 1)
-            self._hud_tiles.text = f'Tiles left: {tiles}'
+            self._hud_tiles.text  = f'Tiles left: {tiles}'
 
     def _show_round_banner(self) -> None:
         node = bs.newnode('text', attrs={
@@ -194,7 +195,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
             (-1.5, 2, -9), (-1.5, 2, -6), (-1.5, 2, -3), (-1.5, 2, 0),
             (-4.5, 2, -9), (-4.5, 2, -6), (-4.5, 2, -3), (-4.5, 2, 0),
         ]
-        model = bs.getmesh('buttonSquareOpaque')
+        model  = bs.getmesh('buttonSquareOpaque')
         shared = SharedObjects.get()
         for i, pos in enumerate(positions):
             tile = bs.newnode('prop', attrs={
@@ -207,7 +208,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
                 'position': pos, 'scale': (3.5, 0.1, 3.5), 'type': 'box',
                 'materials': [self._collide_mat, shared.footing_material],
             })
-            self._tile_nodes[i] = tile
+            self._tile_nodes[i]   = tile
             self._region_nodes[i] = region
             self._present_tile_ids.add(i)
         self._refresh_hud()
@@ -220,7 +221,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
     def _make_final_tile(self) -> None:
         try:
             tile_id = list(self._present_tile_ids)[0]
-            tile = self._tile_nodes.get(tile_id)
+            tile    = self._tile_nodes.get(tile_id)
             if tile and tile.exists():
                 tile.color_texture = self._final_tex
         except Exception:
@@ -247,7 +248,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
         bs.timer(self._remove_speed, self._remove_next_tile)
 
     def _remove_tile(self, tile_id: int) -> None:
-        tile = self._tile_nodes.get(tile_id)
+        tile   = self._tile_nodes.get(tile_id)
         region = self._region_nodes.get(tile_id)
         if tile is None or not tile.exists():
             self._present_tile_ids.discard(tile_id)
@@ -344,12 +345,12 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
         if self.has_ended():
             return
         cur_time = bs.time()
-        start = self._game_start_time or cur_time
-        results = bs.GameResults()
+        start    = self._game_start_time or cur_time
+        results  = bs.GameResults()
         for team in self.teams:
             longest = 0.0
             for p in team.players:
-                death = p.death_time or (cur_time + 1)
+                death   = p.death_time or (cur_time + 1)
                 longest = max(longest, death - start)
             results.set_team_score(team, int(longest * 1000))
 
@@ -377,7 +378,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
 
 class VanishingTilesMapDefs:
     points = {'spawn1': (0, 3, -5)}
-    boxes = {
+    boxes  = {
         'area_of_interest_bounds': (0, 4, -5, 0, 0, 0, 16, 8, 16),
         'map_bounds':              (0, 4, -5, 0, 0, 0, 30, 14, 30),
     }
@@ -403,10 +404,7 @@ class VanishingTilesMap(bs.Map):
         })
 
 
-try:
-    bs.register_map(VanishingTilesMap)
-except Exception:
-    bs._map.register_map(VanishingTilesMap)
+bs._map.register_map(VanishingTilesMap)
 
 
 # ba_meta export babase.Plugin
