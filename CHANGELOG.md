@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.9 (11-06-2026)
+
+- Fix for bs 1.7.63
+
 ### 1.1.8 (23-02-2026)
 
 - Fix for bs 1.7.61 build no 22714
