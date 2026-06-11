@@ -1694,7 +1694,7 @@
       "external_url": "https://discord.gg/sQGDsztQcy",
       "authors": [
         {
-          "name": "Mr.ghosty",
+          "name": "Mr.Paradox",
           "email": "",
           "discord": "gaurangbroyo"
         },
@@ -1705,6 +1705,7 @@
         }
       ],
       "versions": {
+        "2.1.1": null,
         "2.1.0": {
           "api_version": 9,
           "commit_sha": "0749053",
