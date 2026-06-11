@@ -15,10 +15,10 @@ plugman = dict(
     description="Tiles disappear gradually. Survive each round to continue. Last player standing wins!",
     external_url="https://discord.gg/sQGDsztQcy",
     authors=[
-        {"name": "Mr.ghosty", "email": "", "discord": "gaurangbroyo"},
+        {"name": "Mr.Paradox", "email": "", "discord": "gaurangbroyo"},
         {"name": "senchx",    "email": "", "discord": "senchx0"},
     ],
-    version="2.1.0",
+    version="2.1.1",
 )
 
 
@@ -103,7 +103,7 @@ class VanishingTilesGame(bs.TeamGameActivity[Player, Team]):
 
         if self._show_credits:
             self._credit_node = bs.newnode('text', attrs={
-                'text': 'Made by Mr.Ghosty',
+                'text': 'Made by Mr.Paradox',
                 'scale': 0.7, 'position': (0, 8), 'shadow': 0.8, 'flatness': 1.0,
                 'color': (1.0, 0.3, 0.8, 1.0), 'h_align': 'center', 'v_attach': 'bottom',
             })
@@ -403,14 +403,12 @@ class VanishingTilesMap(bs.Map):
         })
 
 
-bs._map.register_map(VanishingTilesMap)
+try:
+    bs._map.register_map(VanishingTilesMap)
+except Exception:
+    pass
 
 
 # ba_meta export babase.Plugin
 class Main(babase.Plugin):
-    def __init__(self) -> None:
-        babase.app.classic.add_coop_practice_level(bs.Level(
-            name='Vanishing Tiles', displayname='Vanishing Tiles',
-            gametype=VanishingTilesGame, settings={},
-            preview_texture_name='powerupHealth',
-        ))
+    pass
