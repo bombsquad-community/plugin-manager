@@ -54,13 +54,6 @@ if _env.get("build_number", 0) < 22714:
     babase._asyncio._g_asyncio_event_loop = babase._asyncio._asyncio_event_loop
 
 loop = babase._asyncio._g_asyncio_event_loop
-
-if _env.get("build_number", 0) < 22852:
-    from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
-else:
-    from babase._meta import _DEPRECATED_EXPORT_SHORTCUTS
-    EXPORT_CLASS_NAME_SHORTCUTS = _DEPRECATED_EXPORT_SHORTCUTS
-
 open_popups = []
 
 
@@ -93,7 +86,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(
         bytes(
             "(ba_meta export (plugin|{})\n+class )(.*)\\(".format(
-                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["plugin"]),
+                _regexp_friendly_class_name_shortcut("babase.Plugin"),
             ),
             "utf-8"
         ),
