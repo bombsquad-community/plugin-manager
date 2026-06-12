@@ -1,11 +1,10 @@
 # ba_meta require api 9
+
 import babase
 import bauiv1 as bui
 from bauiv1lib import popup, confirm
-from babase._meta import _DEPRECATED_EXPORT_SHORTCUTS
 from bauiv1lib.settings.allsettings import AllSettingsWindow
 
-import urllib.request
 import http.client
 import socket
 import json
@@ -15,18 +14,24 @@ import re
 import os
 import sys
 import copy
+import urllib
 import asyncio
 import pathlib
 import hashlib
 import contextlib
 
-from typing import override
 from datetime import datetime
+from typing import override, Callable, Any
 
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.9"
+# Workspace related Modules
+from bacommon.restapi.v1 import Endpoint
+from efro.dataclassio import dataclass_from_json
+from bacommon.restapi.v1.workspaces import WorkspaceResponse, WorkspaceFilesResponse
+
+PLUGIN_MANAGER_VERSION = "1.2.0"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -49,6 +54,12 @@ if _env.get("build_number", 0) < 22714:
     babase._asyncio._g_asyncio_event_loop = babase._asyncio._asyncio_event_loop
 
 loop = babase._asyncio._g_asyncio_event_loop
+
+if _env.get("build_number", 0) < 22852:
+    from babase._meta import EXPORT_CLASS_NAME_SHORTCUTS
+else:
+    from babase._meta import _DEPRECATED_EXPORT_SHORTCUTS
+    EXPORT_CLASS_NAME_SHORTCUTS = _DEPRECATED_EXPORT_SHORTCUTS
 
 open_popups = []
 
@@ -82,7 +93,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(
         bytes(
             "(ba_meta export (plugin|{})\n+class )(.*)\\(".format(
-                _regexp_friendly_class_name_shortcut(_DEPRECATED_EXPORT_SHORTCUTS["plugin"]),
+                _regexp_friendly_class_name_shortcut(EXPORT_CLASS_NAME_SHORTCUTS["plugin"]),
             ),
             "utf-8"
         ),
@@ -96,8 +107,9 @@ REGEXP = {
         ),
     ),
 }
-DISCORD_URL = "https://ballistica.net/discord"
 
+LINK = "https://www.ballistica.net"
+DISCORD_URL = f"{LINK}/discord"
 
 _CACHE = {}
 
@@ -873,6 +885,9 @@ class PluginManager:
         self.module_path = sys.modules[__name__].__file__
         self._index_setup_in_progress = False
         self._changelog_setup_in_progress = False
+        self._api_key = None
+        self._wplugin = None
+        self._wid = None
 
     async def get_index(self):
         if not self._index:
@@ -1024,6 +1039,116 @@ class PluginManager:
                     commit_sha = info["commit_sha"]
                 return version, commit_sha
 
+    @contextlib.contextmanager
+    def exception_handler(self):
+        try:
+            yield
+        except urllib.error.HTTPError as e:
+            print(f"HTTP error occurred: {e.code} - {e.reason}")
+        except urllib.error.URLError as e:
+            print(f"Failed to reach server: {e.reason}")
+        except json.JSONDecodeError:
+            print("Error decoding JSON response.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        
+    def request(self, url, data=None, headers={}, method="GET"):
+        req = urllib.request.Request(url, data=data, headers=headers, method=method)
+        return send_network_request(req)
+
+    def get_api_key(self, func: Callable, extra: [Any] = []):
+        if self._api_key is None:
+            babase.app.plus.accounts.primary.request_transient_api_key(babase.CallPartial(func, extra))
+        else:
+            func(extra, self._api_key)
+
+    def update_plugman(self, response, content):
+        if self._wplugin:
+            content_length = response.headers.get("Content-Length")
+            file_data = content
+            file_size, file_sha = len(file_data), hashlib.sha256(file_data).hexdigest()
+            
+            url = (LINK + Endpoint.WORKSPACE_FILE.format(workspace_id=self._wid, file_path=f"{__name__}.py"))
+            headers = {
+                "Authorization": f"Bearer {self._api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            if content_length and int(content_length) != file_size:
+                print(f"Warning: Content-Length header ({content_length}) differs from actual size ({file_size}). Using actual.")
+
+            with self.exception_handler():
+                response1 = self.request(
+                    url, 
+                    data=json.dumps({
+                        "op": "upload-init",
+                        "size": file_size,
+                        "sha256": file_sha
+                    }).encode("utf-8"), 
+                    headers=headers, 
+                    method="POST"
+                )
+                init_data = json.loads(response1.read().decode("utf-8"))
+
+                response2 = self.request(
+                    init_data.get("upload_url"), 
+                    data=file_data, 
+                    headers={"Content-Type": "application/octet-stream"}, 
+                    method="PUT"
+                )
+                response2.read() 
+
+                response3 = self.request(
+                    url, 
+                    data=json.dumps({
+                        "op": "upload-finalize",
+                        "session_id": init_data.get("session_id")
+                    }).encode("utf-8"), 
+                    headers=headers, 
+                    method="POST"
+                )
+                response1.close()
+                response2.close()
+                response3.close()
+
+            print("Plugin Updated in Workspace")
+        else:
+            print("Updating Plugin in Device")
+            with open(self.module_path, "wb") as fout:
+                fout.write(response.read())
+            print("Plugin Updated in Workspace")
+
+    def check_location(self, extra = [], api_key = None):
+        self._api_key = api_key
+
+        req = urllib.request.Request(LINK + Endpoint.WORKSPACES_ACTIVE)
+        req.add_header("Authorization", f"Bearer {self._api_key}")
+
+        with self.exception_handler():
+            response = send_network_request(req)
+            if response.status != 200:
+                raise Exception(f"HTTP Error: {response.status}")
+            data = response.read().decode("utf-8")
+            response.close()
+            if data == "null":
+                self._wplugin, self._wid = False, ''
+            else:
+                workspace = dataclass_from_json(WorkspaceResponse, data)
+                req = urllib.request.Request(LINK + Endpoint.WORKSPACE_FILES.format(
+                    workspace_id=workspace.id
+                ))
+                req.add_header("Authorization", f"Bearer {self._api_key}")
+                response = send_network_request(req)
+                if response.status != 200:
+                    raise Exception(f"HTTP Error: {response.status}")
+                files = dataclass_from_json(WorkspaceFilesResponse, response.read().decode("utf-8"))
+                response.close()
+                if f"{__name__}.py" in [x.path for x in files.entries]:
+                    self._wplugin, self._wid = True, workspace.id
+                else:
+                    self._wplugin, self._wid = False, ''
+            self.update_plugman(extra[0], extra[1])
+
     async def update(self, to_version=None, commit_sha=None):
         index = await self.get_index()
         if to_version is None:
@@ -1038,8 +1163,8 @@ class PluginManager:
         content = response.read()
         if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
             raise MD5CheckSumFailed("MD5 checksum failed during plugin manager update.")
-        with open(self.module_path, "wb") as fout:
-            fout.write(content)
+        
+        self.get_api_key(self.check_location, extra=[response, content])
         return to_version_info
 
     async def soft_refresh(self):
@@ -2814,11 +2939,11 @@ class PluginManagerWindow(bui.MainWindow):
 
     async def refresh(self):
         self.cleanup()
-        # try:
-        #     bui.textwidget(edit=self._plugin_manager_status_text, text="Refreshing")
-        # except:
-        #     pass
 
+        try:
+            bui.textwidget(edit=self._plugin_manager_status_text, text="")
+        except:
+            pass
         self.spin(True)
 
         with self.exception_handler():
@@ -2826,10 +2951,6 @@ class PluginManagerWindow(bui.MainWindow):
             await self.plugin_manager.setup_changelog()
             await self.plugin_manager.setup_index()
             self.spin()
-            try:
-                bui.textwidget(edit=self._plugin_manager_status_text, text="")
-            except:
-                pass
             await self.select_category(self.selected_category)
 
     def soft_refresh(self):
