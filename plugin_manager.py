@@ -26,6 +26,11 @@ from typing import override, Callable, Any
 # Modules used for overriding AllSettingsWindow
 import logging
 
+# Workspace related Modules
+from bacommon.restapi.v1 import Endpoint
+from efro.dataclassio import dataclass_from_json
+from bacommon.restapi.v1.workspaces import WorkspaceResponse, WorkspaceFilesResponse
+
 PLUGIN_MANAGER_VERSION = "1.1.10"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
