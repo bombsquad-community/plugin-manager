@@ -2,7 +2,6 @@
 import babase
 import bauiv1 as bui
 from bauiv1lib import popup, confirm
-from babase._meta import _DEPRECATED_EXPORT_SHORTCUTS
 from bauiv1lib.settings.allsettings import AllSettingsWindow
 
 import urllib.request
@@ -26,7 +25,7 @@ from datetime import datetime
 # Modules used for overriding AllSettingsWindow
 import logging
 
-PLUGIN_MANAGER_VERSION = "1.1.9"
+PLUGIN_MANAGER_VERSION = "1.1.10"
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
@@ -82,7 +81,7 @@ REGEXP = {
     "plugin_entry_points": re.compile(
         bytes(
             "(ba_meta export (plugin|{})\n+class )(.*)\\(".format(
-                _regexp_friendly_class_name_shortcut(_DEPRECATED_EXPORT_SHORTCUTS["plugin"]),
+                _regexp_friendly_class_name_shortcut("babase.Plugin"),
             ),
             "utf-8"
         ),
