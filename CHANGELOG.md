@@ -1,5 +1,9 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.1.10 (12-06-2026)
+
+- Fix for older bs versions using `EXPORT_CLASS_NAME_SHORTCUTS` import
+
 ### 1.1.9 (11-06-2026)
 
 - Fix for bs 1.7.63
