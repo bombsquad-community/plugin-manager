@@ -192,7 +192,7 @@ def _resolve_player(entry: dict) -> tuple[str, str, list, bool]:
     Note: ``babase.app.plus.accounts.primary.accountid`` only returns the
     *local* player's own ID; it cannot be used for remote roster entries.
     """
-    v2_name   = entry.get('display_string') or 'Unknown'
+    v2_name = entry.get('display_string') or 'Unknown'
     client_id = entry.get('client_id', 0)
     account_id = ''
 
@@ -236,8 +236,8 @@ def _resolve_player(entry: dict) -> tuple[str, str, list, bool]:
                 break
 
     is_stable = bool(account_id)
-    pb_id     = account_id if is_stable else (v2_name or f'client_{client_id}')
-    profiles  = [
+    pb_id = account_id if is_stable else (v2_name or f'client_{client_id}')
+    profiles = [
         pl.get('name') for pl in entry.get('players', []) if pl.get('name')
     ]
     return pb_id, v2_name, profiles, is_stable
@@ -346,7 +346,7 @@ def _firebase_put(
     def _run() -> None:
         try:
             body = json.dumps(value).encode('utf-8')
-            req  = urllib.request.Request(url, data=body, method='PUT')
+            req = urllib.request.Request(url, data=body, method='PUT')
             req.add_header('Content-Type', 'application/json; charset=utf-8')
             with urllib.request.urlopen(req, timeout=10) as resp:
                 result = json.loads(resp.read().decode('utf-8'))
@@ -495,13 +495,13 @@ class FriendManagerRatingWindow(bui.Window):
     """
 
     _RATINGS_PATH = f'/{_RATING_KEY}/ratings'
-    _ISSUES_URL   = 'https://github.com/bombsquad-community/plugin-manager/issues'
+    _ISSUES_URL = 'https://github.com/bombsquad-community/plugin-manager/issues'
 
     def __init__(self, origin_widget: bui.Widget | None = None):
         width, height = 460, 390
         uiscale = bui.app.ui_v1.uiscale
         self._selected_stars: int = 0
-        self._submitted: bool     = False
+        self._submitted: bool = False
         self._account_id: str | None = _get_account_id()
         self._star_btns: list[bui.Widget] = []
 
@@ -575,11 +575,11 @@ class FriendManagerRatingWindow(bui.Window):
         )
 
         # Interactive star buttons
-        star_w     = 56
-        star_gap   = 6
-        total_sw   = 5 * star_w + 4 * star_gap
-        sx         = (width - total_sw) / 2
-        sy         = height - 245
+        star_w = 56
+        star_gap = 6
+        total_sw = 5 * star_w + 4 * star_gap
+        sx = (width - total_sw) / 2
+        sy = height - 245
 
         for i in range(5):
             btn = bui.buttonwidget(
@@ -656,8 +656,8 @@ class FriendManagerRatingWindow(bui.Window):
 
         ratings = [v for v in data.values()
                    if isinstance(v, (int, float)) and 1 <= v <= 5]
-        count   = len(ratings)
-        avg     = sum(ratings) / count if count else 0.0
+        count = len(ratings)
+        avg = sum(ratings) / count if count else 0.0
 
         bui.textwidget(
             edit=self._stats_text,
@@ -671,7 +671,7 @@ class FriendManagerRatingWindow(bui.Window):
 
         # Pre-fill the player's own rating if they've voted before
         if self._account_id:
-            key      = _firebase_key(self._account_id)
+            key = _firebase_key(self._account_id)
             existing = data.get(key)
             if isinstance(existing, (int, float)) and 1 <= int(existing) <= 5:
                 stars = int(existing)
@@ -722,7 +722,7 @@ class FriendManagerRatingWindow(bui.Window):
             )
             return
 
-        key  = _firebase_key(self._account_id)
+        key = _firebase_key(self._account_id)
         path = f'{self._RATINGS_PATH}/{key}.json'
         bui.buttonwidget(
             edit=self._submit_btn,
@@ -935,7 +935,7 @@ class FriendHelpWindow(bui.Window):
 
 class FriendListWindow(bui.Window):
     def __init__(self, origin_widget: bui.Widget | None = None):
-        self._width  = 680
+        self._width = 680
         self._height = 480
         self._origin_widget = origin_widget
         uiscale = bui.app.ui_v1.uiscale
@@ -1023,9 +1023,9 @@ class FriendListWindow(bui.Window):
         for child in self._column.get_children():
             child.delete()
 
-        total      = len(FriendManager.friends)
+        total = len(FriendManager.friends)
         online_ids = {_resolve_player(e)[0] for e in _safe_roster()}
-        online     = sum(1 for pid in FriendManager.friends if pid in online_ids)
+        online = sum(1 for pid in FriendManager.friends if pid in online_ids)
 
         # Live title — kept compact so it never overflows into the toolbar.
         # Format: "Friends (58)"  or  "Friends ● 1/58"
@@ -1053,10 +1053,10 @@ class FriendListWindow(bui.Window):
 
         row_w = self._width - 60   # row width inside scroll
         for pb_id, data in sorted_friends:
-            is_online  = pb_id in online_ids
-            is_stable  = data.get('stable_id', True)
-            name       = data.get('v2_name', 'Unknown')
-            warn       = '' if is_stable else ' ⚠️'
+            is_online = pb_id in online_ids
+            is_stable = data.get('stable_id', True)
+            name = data.get('v2_name', 'Unknown')
+            warn = '' if is_stable else ' ⚠️'
 
             row = bui.containerwidget(
                 parent=self._column,
@@ -1107,8 +1107,8 @@ class FriendListWindow(bui.Window):
 
             # Quick-remove button (arms on first tap, fires on second)
             rm_btn: list[bui.Widget] = []    # mutable cell for the closure
-            armed:  list[bool]       = [False]
-            timer:  list[object]     = [None]
+            armed:  list[bool] = [False]
+            timer:  list[object] = [None]
 
             def _on_remove(
                 _pid: str = pb_id,
@@ -1122,6 +1122,7 @@ class FriendListWindow(bui.Window):
                     if _btn and _btn[0].exists():
                         bui.buttonwidget(edit=_btn[0], label='✓ Sure?',
                                          color=(0.85, 0.2, 0.2))
+
                     def _disarm() -> None:
                         _armed[0] = False
                         if _btn and _btn[0].exists():
@@ -1246,7 +1247,7 @@ def auto_update_friends() -> None:
         _baseline_taken = True
         return
 
-    now     = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     current_online_friend_ids: set[str] = set()
     updated = False
 
@@ -1277,7 +1278,7 @@ def auto_update_friends() -> None:
                 if v2_name in old_names:
                     migrated = FriendManager.friends.pop(old_key)
                     migrated['stable_id'] = True
-                    migrated['v2_name']   = v2_name
+                    migrated['v2_name'] = v2_name
                     FriendManager.friends[pb_id] = migrated
                     FriendManager.save()
                     updated = False  # already saved above
@@ -1352,9 +1353,9 @@ def apply_friend_manager_patches() -> None:
 
     # At runtime plugin_manager.py has already replaced AllSettingsWindow
     # with NewAllSettingsWindow, so this reference targets the live class.
-    _target_cls  = _allsettings.AllSettingsWindow
-    _old_init    = _target_cls.__init__
-    _old_save    = _target_cls._save_state
+    _target_cls = _allsettings.AllSettingsWindow
+    _old_init = _target_cls.__init__
+    _old_save = _target_cls._save_state
     _old_restore = _target_cls._restore_state
 
     # ------------------------------------------------------------------
@@ -1367,23 +1368,23 @@ def apply_friend_manager_patches() -> None:
         # the Friends button and the repositioned row-2 buttons align to
         # the same column grid as row 1.
         uiscale = bui.app.ui_v1.uiscale
-        small   = uiscale is babase.UIScale.SMALL
-        height  = 490
+        small = uiscale is babase.UIScale.SMALL
+        height = 490
         x_inset = 125 if small else 105
-        basew   = 280 if small else 230
-        baseh   = 170
+        basew = 280 if small else 230
+        baseh = 170
 
         x_offs = x_inset + (105 if small else 72) - basew
-        x_dif  = (basew - 7) / 2   # 136.5 (SMALL) or 111.5 (normal)
+        x_dif = (basew - 7) / 2   # 136.5 (SMALL) or 111.5 (normal)
         v_row1 = height - 265       # 225 — upper boundary of row 2
 
         # Column x-positions for row 2 after the shift (match row 1):
         #   col1 ≈  86.5 / 58.5   (Advanced)
         #   col2 ≈ 359.5 / 281.5  (Plugin Manager)
         #   col3 ≈ 632.5 / 504.5  (Friends — new)
-        col1   = x_offs + 1 * (basew - 7) - x_dif
-        col2   = x_offs + 2 * (basew - 7) - x_dif
-        col3   = x_offs + 3 * (basew - 7) - x_dif
+        col1 = x_offs + 1 * (basew - 7) - x_dif
+        col2 = x_offs + 2 * (basew - 7) - x_dif
+        col3 = x_offs + 3 * (basew - 7) - x_dif
         v_row2 = v_row1 - (baseh - 5)  # 60
 
         # Track every widget created in row 2 (y < v_row1 = 225) so we can
@@ -1396,39 +1397,39 @@ def apply_friend_manager_patches() -> None:
         _iw0 = bui.imagewidget
 
         def _bw(*a: object, **kw: object) -> bui.Widget:
-            w   = _bw0(*a, **kw)
+            w = _bw0(*a, **kw)
             pos = kw.get('position')
             if pos is not None and 'edit' not in kw and pos[1] < v_row1:
                 _row2.append(('button', w, pos[0], pos[1]))
             return w
 
         def _tw(*a: object, **kw: object) -> bui.Widget:
-            w   = _tw0(*a, **kw)
+            w = _tw0(*a, **kw)
             pos = kw.get('position')
             if (pos is not None
-                    and 'edit'  not in kw
+                    and 'edit' not in kw
                     and 'query' not in kw
                     and pos[1] < v_row1):
                 _row2.append(('text', w, pos[0], pos[1]))
             return w
 
         def _iw(*a: object, **kw: object) -> bui.Widget:
-            w   = _iw0(*a, **kw)
+            w = _iw0(*a, **kw)
             pos = kw.get('position')
             if pos is not None and 'edit' not in kw and pos[1] < v_row1:
                 _row2.append(('image', w, pos[0], pos[1]))
             return w
 
         bui.buttonwidget = _bw  # type: ignore[assignment]
-        bui.textwidget   = _tw  # type: ignore[assignment]
-        bui.imagewidget  = _iw  # type: ignore[assignment]
+        bui.textwidget = _tw  # type: ignore[assignment]
+        bui.imagewidget = _iw  # type: ignore[assignment]
         try:
             _old_init(self, transition, origin_widget)
         finally:
             # Restore originals even if _old_init raises.
             bui.buttonwidget = _bw0  # type: ignore[assignment]
-            bui.textwidget   = _tw0  # type: ignore[assignment]
-            bui.imagewidget  = _iw0  # type: ignore[assignment]
+            bui.textwidget = _tw0  # type: ignore[assignment]
+            bui.imagewidget = _iw0  # type: ignore[assignment]
 
         # Shift every live row-2 widget left by x_dif so they align with
         # the row-1 column grid, freeing a clean 3rd slot for Friends.
@@ -1512,7 +1513,7 @@ def apply_friend_manager_patches() -> None:
     def _new_save_state(self) -> None:
         try:
             sel = self._root_widget.get_selected_child()
-            fb  = getattr(self, '_friends_button', None)
+            fb = getattr(self, '_friends_button', None)
             if fb is not None and sel == fb:
                 assert bui.app.classic is not None
                 bui.app.ui_v1.window_states[type(self)] = {'sel_name': 'Friends'}
