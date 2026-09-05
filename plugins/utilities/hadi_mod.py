@@ -1,4 +1,13 @@
 # ba_meta require api 9
+# Plugin Manager metadata
+plugman = dict(
+    plugin_name="hadi_mod",
+    description="HADI Mod for BombSquad.",
+    external_url="https://github.com/hadichegenix-png",
+    authors=[{"name": "Hadi"}],
+    version="1.0.0",
+)
+
 """
 ============================================================
  HADI MOD — نسخه‌ی دقیق، بر پایه‌ی سورس واقعی بازی (1.7.62 / API 9)
@@ -726,4 +735,4 @@ class HadiModPlugin(babase.Plugin):
     def __init__(self):
         babase.screenmessage("HADI MOD LOADED", color=(1.0, 0.0, 0.0))
         _install_mainmenu_patch()
-        _install_ingamemenu_patchadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhadi_menu_mod.pyhplugins/utilities/hadi_mod.py()
+        _install_ingamemenu_patch()
