@@ -2583,6 +2583,25 @@
           "md5sum": "3ead338c768fbdffe022aadcbdc8c1d8"
         }
       }
+    },
+    "friend_manager": {
+      "description": "Build a real friend list while playing online! Click any player's name in a party to add them as a friend - their account ID and every profile name they've played under gets saved automatically, so you'll recognize them even if they switch profiles later. Get notified when a friend joins your party. Find your full friend list anytime from Settings -> Friends.",
+      "external_url": "",
+      "authors": [
+        {
+          "name": "KIRA",
+          "email": "",
+          "discord": ""
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "caeb7d2",
+          "released_on": "06-07-2026",
+          "md5sum": "978c1f209502d9f5a604b56035fb68db"
+        }
+      }
     }
   }
 }
