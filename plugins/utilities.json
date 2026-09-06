@@ -384,10 +384,16 @@
         {
           "name": "Freaku",
           "email": "",
-          "discord": ""
+          "discord": "freakyyyy"
         }
       ],
       "versions": {
+        "1.1.4": {
+          "api_version": 9,
+          "commit_sha": "bf54671",
+          "released_on": "06-09-2026",
+          "md5sum": "4e150afbf00ff0341f0c7ee2cb00cedb"
+        },
         "1.1.3": {
           "api_version": 9,
           "commit_sha": "23f90dc",

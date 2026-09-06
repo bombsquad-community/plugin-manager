@@ -19,7 +19,7 @@ __author__ = "Freaku"
 
 plugman = dict(
     description="Translate yours/others chat. Just click on the message to translate them. Open Plugin Settings/Double click 'Trans' button to open translation settings. Compatible with other PW mods (like advanced_party_window)",
-    external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    external_url="https://github.com/bombsquad-community/plugin-manager/assets/92618708/5860e44d-0b70-4a3f-a651-208a4452ea38",
     authors=[
         {"name": __author__, "email": "", "discord": "freakyyyy"}
     ],
@@ -30,6 +30,8 @@ show_translate_result = True
 config = babase.app.config
 
 # Convert Ballistica Locale -> this mod's language name.
+
+
 def get_default_translate_language():
     locale = babase.app.locale.default_locale
 
@@ -97,7 +99,6 @@ for key in ('O Target Trans Lang', 'Y Target Trans Lang'):
         config[key] = default_language
 
 
-
 # Language names -> Google Translate language codes.
 translate_languages = {
     'Auto Detect': 'auto',
@@ -148,15 +149,13 @@ available_translate_languages.remove('Auto Detect')
 available_translate_languages.insert(0, 'Auto Detect')
 
 
-
 def translate(text, _callback, source='auto', target='en'):
     try:
         text = urllib.parse.quote(text)
         url = f'https://translate.google.com/m?tl={target}&sl={source}&q={text}'
         request = urllib.request.Request(url)
         data = urllib.request.urlopen(request).read().decode('utf-8')
-        result = data[(data.find('"result-container">'))+len('"result-container">')
-                       :data.find('</div><div class="links-container">')]
+        result = data[(data.find('"result-container">'))+len('"result-container">'):data.find('</div><div class="links-container">')]
         replace_list = [('&#39;', '\''), ('&quot;', '"'), ('&amp;', '&')]
         for i in replace_list:
             result = result.replace(i[0], i[1])
@@ -186,7 +185,7 @@ class NewPW(bauiv1lib.party.PartyWindow):
 
     def _translate_your_chat(self):
         global show_translate_result
-    
+
         if (
             babase.apptime() - self._last_time_pressed_translate
             < self._double_press_interval
@@ -249,7 +248,7 @@ class NewPW(bauiv1lib.party.PartyWindow):
 
     def _translate_other(self, txt, msg):
         global show_translate_result
-    
+
         if (
             babase.apptime() - self._last_time_pressed_msg
             < self._double_press_interval
@@ -270,7 +269,7 @@ class NewPW(bauiv1lib.party.PartyWindow):
         if len(msg.split(':')) > 1:
             nickname = msg.split(':')[0] + ': '
             split_msg = ':'.join(msg.split(':')[1:])[1:]
-    
+
         def _apply_translation(translated):
             if txt.exists():
                 bui.textwidget(
