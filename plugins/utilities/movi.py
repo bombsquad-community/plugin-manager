@@ -3,7 +3,7 @@
 # Bug? Feedback? Telegram >> @BroBordd
 
 """
-Movi v1.0 - Movie Maker
+Movi v1.0.0 - Movie Maker
 
 A simple movie maker with native BRP replay export.
 Includes timeline sequencing, node manipulation,
@@ -36,7 +36,7 @@ from zlib import decompress, compress
 from ctypes import pythonapi, c_long, py_object
 from contextlib import redirect_stdout, redirect_stderr
 
-__version__ = '1.0'
+__version__ = '1.0.0'
 
 plugman = dict(
     plugin_name="movi",
@@ -53,7 +53,7 @@ plugman = dict(
             "discord": "BrotherBoard"
         },
     ],
-    version='1.0',
+    version=__version__,
 )
 
 class Tracker:
