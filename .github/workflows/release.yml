@@ -7,6 +7,18 @@ on:
     paths:
       - index.json
 
+# ci.yml's "[ci] apply-version-metadata" push is what fills the null entry in
+# index.json, so it matches the path filter above and starts a run of its own.
+# Under GITHUB_TOKEN that push started nothing; under a PAT it does, which can
+# put two runs of this workflow in flight for one release - both reading the
+# same "previous tag" and both trying to create the same new one. Serialising
+# them means the second sees the tag the first published and no-ops via
+# versioning_tools.py. Never cancel-in-progress: a cancelled run can leave a
+# tag created with no release attached to it.
+concurrency:
+  group: create-release
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Create Release
