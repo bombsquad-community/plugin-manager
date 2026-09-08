@@ -205,7 +205,9 @@ jobs:
       # only: autopep8 and GitPython are unpinned and already ran above with
       # the credential live.
       - name: Drop push credentials
-        run: git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+        run: |
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git config --local --unset-all "http.${GITHUB_SERVER_URL}/.extraheader" || true
 
       - name: Execute Tests
         run: |
