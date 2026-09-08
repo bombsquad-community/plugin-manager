@@ -23,25 +23,42 @@ name: CI
 # whole change, which restored the old bytes rather than recording the new
 # ones.
 #
-# The auto-commit steps below push with a PAT (secrets.PAT), NOT the
-# default GITHUB_TOKEN. main's "require a pull request before merging"
-# ruleset refuses GITHUB_TOKEN pushes outright:
+# The auto-commit steps below push with a GitHub App installation token,
+# NOT the default GITHUB_TOKEN. main's "require a pull request before
+# merging" ruleset refuses GITHUB_TOKEN pushes outright:
 #
 #   remote: error: GH006: Protected branch update failed for refs/heads/main.
 #   remote: - Changes must be made through a pull request.
 #
 # That is a protection-rule rejection, not a permissions problem, so no
 # `permissions:` value can fix it - the token already had contents: write
-# when it was refused. The fix is that the PAT's account sits on that
+# when it was refused. The fix is that the pushing actor sits on that
 # ruleset's bypass list. GITHUB_TOKEN cannot be given a ruleset bypass at
 # all: bypass actors may be repository roles, teams, installed GitHub Apps
 # or Dependabot, and the built-in Actions integration is none of those.
+# An installed App is, which is why this pushes as one.
+#
+# SETUP, all of which must hold or the push fails:
+#   - An App owned by this org with Contents: Read and write, installed on
+#     THIS repository.
+#   - secrets.APP_ID and secrets.APP_PRIVATE_KEY (the whole .pem, BEGIN and
+#     END lines included).
+#   - The App added to the "main: Require pr before merging" ruleset's
+#     bypass list. Installing it is NOT what grants the bypass; that is a
+#     separate setting and forgetting it produces the GH006 above.
+#
+# An App is used here rather than a personal access token because an
+# installation token is minted per run and expires in an hour, so there is
+# no long-lived credential to rotate. A PAT held this job for years and
+# then silently expired, which broke every push to main until someone
+# noticed the red X.
 #
 # CONSEQUENCE, and the reason for the job-level `if:` below: unlike
-# GITHUB_TOKEN, a PAT's pushes DO start new workflow runs. Without the guard
-# this workflow re-enters itself on its own commits, forever. Skipping those
-# re-runs loses nothing, because the strict test run at the end of this job
-# already ran against the final tree it produced.
+# GITHUB_TOKEN, an App installation token's pushes DO start new workflow
+# runs. Without the guard this workflow re-enters itself on its own
+# commits, forever. Skipping those re-runs loses nothing, because the
+# strict test run at the end of this job already ran against the final tree
+# it produced.
 #
 # The guard keys on the COMMITTER IDENTITY that the three auto-commit steps
 # below set, NOT on the commit message. A message guard is unsafe here:
@@ -58,8 +75,8 @@ on:
     branches:
       - main
 
-# Least privilege: the pushes in this job authenticate with PAT, so
-# GITHUB_TOKEN itself never needs write.
+# Least privilege: the pushes in this job authenticate with the App
+# installation token, so GITHUB_TOKEN itself never needs write.
 permissions:
   contents: read
 
@@ -70,43 +87,67 @@ jobs:
     # nothing else. Do not remove without first moving the pushes back to an
     # identity whose commits do not trigger workflows.
     #
-    # The repository check keeps forks out of a job they cannot pass: they
-    # have no PAT, and their main is not authoritative for anything.
+    # The repository check keeps forks out of a job they cannot pass: the
+    # App is not installed on them, and their main is not authoritative for
+    # anything.
     if: >-
       github.repository == 'bombsquad-community/plugin-manager' &&
       github.event.head_commit.committer.name != 'plugman-ci'
     runs-on: ubuntu-latest
     steps:
-      # Fail fast and legibly. Without this, a missing secret surfaces as an
-      # opaque authentication error at the first auto-commit step, five steps
-      # later, which reads like a protection problem rather than a config one.
+      # Fail fast and legibly on unset secrets. Without this, a missing one
+      # surfaces further down as an opaque authentication failure that reads
+      # like a protection problem rather than a config one.
       #
-      # Failing the whole job - tests included - is deliberate. With no PAT
-      # the metadata steps still run and the suite still passes, because both
-      # work on this runner's tree; the result would be a green check over a
-      # main whose committed manifests were never stamped. That is the exact
-      # trap ci-apply.yml's MERGE GATE comment describes. No signal beats a
-      # false one.
-      - name: Check PAT is configured
+      # Failing the whole job - tests included - is deliberate. With no push
+      # credential the metadata steps still run and the suite still passes,
+      # because both work on this runner's tree; the result would be a green
+      # check over a main whose committed manifests were never stamped. That
+      # is the exact trap ci-apply.yml's MERGE GATE comment describes. No
+      # signal beats a false one.
+      - name: Check App credentials are configured
         env:
-          PAT: ${{ secrets.PAT }}
+          APP_ID: ${{ secrets.APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
         run: |
           set -euo pipefail
-          if [ -z "$PAT" ]; then
-            echo "secrets.PAT is not set." >&2
-            echo "This workflow cannot push to main without it: the branch ruleset" >&2
-            echo "rejects GITHUB_TOKEN pushes (GH006). See the header comment." >&2
+          MISSING=""
+          [ -n "$APP_ID" ] || MISSING="$MISSING secrets.APP_ID"
+          [ -n "$APP_PRIVATE_KEY" ] || MISSING="$MISSING secrets.APP_PRIVATE_KEY"
+          if [ -n "$MISSING" ]; then
+            echo "Not set:$MISSING" >&2
+            echo "This workflow cannot push to main without them: the branch" >&2
+            echo "ruleset rejects GITHUB_TOKEN pushes (GH006). See SETUP in the" >&2
+            echo "header comment." >&2
             exit 1
           fi
+
+      # Mints an installation token scoped to this repository, valid for an
+      # hour and revoked by this action's post step. Nothing long-lived is
+      # stored anywhere.
+      #
+      # This must come BEFORE the checkout, since the checkout is what hands
+      # the token to git.
+      - name: Mint an App installation token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          # Hands the PAT to git. persist-credentials defaults to true, and
-          # that is precisely what makes the three git-auto-commit-action
-          # steps below push as the bypassing account rather than as
-          # github-actions[bot]. They need no configuration of their own.
-          token: ${{ secrets.PAT }}
+          # Hands the installation token to git. persist-credentials defaults
+          # to true, and that is precisely what makes the three
+          # git-auto-commit-action steps below push as the bypassing App
+          # rather than as github-actions[bot]. They need no configuration of
+          # their own.
+          #
+          # Note this only sets the AUTHOR of the push. The COMMITTER name
+          # that the job-level `if:` guard keys on is set explicitly by each
+          # auto-commit step below, so it is unaffected by the token change.
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -199,11 +240,11 @@ jobs:
           commit_user_name: "plugman-ci"
           commit_user_email: "plugman-ci@users.noreply.github.com"
 
-      # Every push is done by this point. Drop the PAT from .git/config before
-      # handing control to the repo's own test suite, so that code cannot
-      # reach a credential that bypasses main's ruleset. Partial mitigation
-      # only: autopep8 and GitPython are unpinned and already ran above with
-      # the credential live.
+      # Every push is done by this point. Drop the installation token from
+      # .git/config before handing control to the repo's own test suite, so
+      # that code cannot reach a credential that bypasses main's ruleset.
+      # Partial mitigation only: autopep8 and GitPython are unpinned and
+      # already ran above with the credential live.
       - name: Drop push credentials
         run: |
           git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
