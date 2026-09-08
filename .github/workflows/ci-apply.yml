@@ -21,10 +21,12 @@ name: PR Apply
 # 3. NEVER identify the target PR by commit sha alone. A sha is a value, not an
 #    identity: forks share object storage, so anyone can push ANOTHER PR's head
 #    commit onto a branch of their own, open a PR at it, and then close that PR
-#    mid-run so the commit -> PR lookup below resolves to the victim's PR - at
-#    which point this job would push the attacker's artifact to the victim's
-#    branch. The resolved PR must be pinned to workflow_run.head_repository AND
+#    mid-run so a commit -> PR lookup resolves to the victim's PR - at which
+#    point this job would push the attacker's artifact to the victim's branch.
+#    The resolved PR must be pinned to workflow_run.head_repository AND
 #    head_branch AND head_sha, so a run can only ever write to its own branch.
+#    The lookup below therefore searches by head repo + head branch and then
+#    re-checks all three; do not "simplify" it back to a sha lookup.
 #
 # On trust: a fork PR fully controls ci-check.yml itself (GitHub runs the
 # workflow file from the PR's own merge ref for `pull_request` events - that
@@ -58,10 +60,10 @@ jobs:
       # Resolves which PR this run belongs to using ONLY trusted inputs: the
       # workflow_run payload (set by GitHub, not forgeable by the PR author)
       # and the REST API. workflow_run.pull_requests is empty for fork PRs,
-      # hence the commit -> PR association lookup. That lookup ANSWERS with a
-      # PR but does not PROVE it is this run's PR - a sha can be adopted by any
-      # fork even though it cannot be forged - so the result is pinned to the
-      # payload's head repo/branch/sha below. See HARD RULE 3 in the header.
+      # hence the lookup by head repo + head branch below. That lookup ANSWERS
+      # with a PR but does not PROVE it is this run's PR, so the result is
+      # pinned to the payload's head repo/branch/sha before anything is
+      # applied. See HARD RULE 3 in the header.
       - name: Resolve and validate PR (trusted sources only)
         id: pr
         env:
@@ -80,9 +82,27 @@ jobs:
             exit 1
           }
 
-          # The sha -> PR association is eventually consistent: a run that
-          # starts seconds after the contributor's push can legitimately see
-          # an empty list. Poll before giving up.
+          # The PR is looked up by HEAD REPO + HEAD BRANCH, not through the
+          # sha -> PR association endpoint (repos/{repo}/commits/{sha}/pulls).
+          # That endpoint does not answer for a fork PR: the head commit is not
+          # reachable from any ref of THIS repo, so the association index has
+          # nothing to return and the call yields [] indefinitely - it is not
+          # slow, it never resolves. It has in fact never resolved a fork PR
+          # here; the runs that looked green before the loud-failure change
+          # were the old `skip` path exiting 0 on "Not exactly one PR
+          # associated" having applied nothing at all.
+          #
+          # Listing by head is exact and available the moment the PR exists,
+          # and it narrows on precisely the two payload fields HARD RULE 3
+          # already demands the resolved PR match. Every pin below - head repo,
+          # head branch, head sha, state, base - still has to hold, so this
+          # relaxes nothing: it only replaces a lookup that returns nothing
+          # with one that returns the branch's PRs.
+          #
+          # `state=all` rather than `state=open` so a PR closed or merged
+          # between PR Check and this run still resolves and takes the
+          # "PR not open; skipping" path below, instead of looking like a PR
+          # that could not be identified at all.
           #
           # Both terminal outcomes below FAIL rather than `skip`. `skip` exits
           # 0, which paints the whole job green - and a green PR Apply that
@@ -92,30 +112,44 @@ jobs:
           # none of our business (PR closed, not targeting main). "I could not
           # identify the PR" is neither: it means the fixups were dropped on
           # the floor, and that must be visible.
+
+          # Both values land in a URL below, so they are shape-checked here
+          # rather than trusted for being payload-supplied. `head` takes the
+          # OWNER of the head repo, not its full name.
+          RUN_HEAD_OWNER="${RUN_HEAD_REPO%%/*}"
+          [[ "$RUN_HEAD_OWNER" =~ ^[A-Za-z0-9._-]+$ ]] || {
+            echo "Unexpected workflow_run head repo shape; refusing." >&2
+            exit 1
+          }
+          [[ "$RUN_HEAD_BRANCH" =~ ^[A-Za-z0-9._/-]{1,255}$ ]] || {
+            echo "Unexpected workflow_run head branch shape; refusing." >&2
+            exit 1
+          }
+          HEAD_FILTER="${RUN_HEAD_OWNER}:${RUN_HEAD_BRANCH}"
+
           for attempt in 1 2 3 4 5; do
-            gh api "repos/${REPO}/commits/${RUN_HEAD_SHA}/pulls" > pulls.json
+            gh api "repos/${REPO}/pulls?state=all&per_page=100&head=${HEAD_FILTER}" \
+              > pulls.json
             N_PULLS="$(jq 'length' pulls.json)"
             [ "$N_PULLS" = "0" ] || break
-            echo "No PR associated with ${RUN_HEAD_SHA} yet (attempt ${attempt}/5); retrying in 10s."
+            echo "No PR for ${HEAD_FILTER} yet (attempt ${attempt}/5); retrying in 10s."
             sleep 10
           done
 
           if [ "$N_PULLS" = "0" ]; then
-            echo "No PR associated with ${RUN_HEAD_SHA} after 5 attempts." >&2
+            echo "No PR found for head ${HEAD_FILTER} after 5 attempts." >&2
             echo "Formatting/metadata fixups were NOT applied to the branch." >&2
             exit 1
           fi
 
-          # More than one PR sharing a head sha is the ambiguity HARD RULE 3
-          # exists for: pushing would risk writing to the wrong branch. Fail
-          # closed, but fail loudly - silence here is what bit us before.
-          if [ "$N_PULLS" != "1" ]; then
-            echo "${N_PULLS} PRs share head ${RUN_HEAD_SHA}; cannot resolve which one this run belongs to." >&2
-            echo "Failing closed: nothing was applied. A maintainer must apply the fixups manually." >&2
-            exit 1
-          fi
-
-          PR_NUMBER="$(jq -r '.[0].number' pulls.json)"
+          # Several PRs from one head branch is ordinary history - a branch
+          # reused after an earlier PR was closed - and NOT the ambiguity HARD
+          # RULE 3 guards against: every candidate here shares the same head
+          # repo and branch by construction, so whichever is picked, this job
+          # can only ever write to the branch the run came from. Take the
+          # newest by PR number (explicitly, rather than leaning on the API's
+          # default ordering); if it is stale or closed the pins below skip.
+          PR_NUMBER="$(jq -r 'max_by(.number) | .number' pulls.json)"
           [[ "$PR_NUMBER" =~ ^[0-9]+$ ]] || skip "Bad PR number; skipping."
 
           gh pr view "$PR_NUMBER" --repo "$REPO" \
