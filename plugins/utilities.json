@@ -2608,6 +2608,25 @@
           "md5sum": "d926c2baa964d1b8601a2d921f74b76b"
         }
       }
+    },
+    "coolbox": {
+      "description": "Coolbox is an advanced menu that can do almost everything! Access the menu from pause menu. This is a clean refactored version of Sandbox. Written from scratch.",
+      "external_url": "https://BroBordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "e418644f",
+          "released_on": "12-09-2026",
+          "md5sum": "daf1adaf227527ac25688e8c08866637"
+        }
+      }
     }
   }
 }
