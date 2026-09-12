@@ -59,6 +59,7 @@ plugman = dict(
 class Tracker:
     def __init__(self):
         self.active = {}
+        self.active_actors = {}
         self.active_sounds = {}
         self.active_timers = {}
         self.active_codes = defaultdict(dict)
@@ -108,6 +109,7 @@ class Editor:
         s.timeline = []
         s.timeline_index = 0
         s.active = {}
+        s.active_actors = {}
         s.active_sounds = {}
         s.active_timers = {}
         s.active_key_schedule = {}
@@ -625,10 +627,7 @@ class Editor:
         b = s.toast_bg
         t,desc = inp or ('','')
         if not s.blame:
-            s.blame = Eval.BLAME(
-                Const.BLAME(),
-                Const.BLAME_CHARSET
-            )
+            s.blame = Strings.BLAME
         desc and bui.buttonwidget(
             b,on_activate_call=bui.CallPartial(
                 s.toast,
@@ -1916,11 +1915,16 @@ class Editor:
                     Eval.SOUND(Const.BAD_SOUND).play()
                     return
                 s.forgive_prev_off = True
+                node_mem = s.memory[id(s.sl)]
+                is_spaz = node_mem.get('data', {}).get('type') == 'spaz'
+                placeholder = (
+                    Strings.SPAZ_CODE_PLACEHOLDER if is_spaz else None
+                )
                 s.event_window(
                     6,
                     force_title=Strings.CODE_EDITOR,
                     on_done=lambda final: add_key(final,n,offset_val,mem),
-                    initial_code=data.get('code')
+                    initial_code=data.get('code') or placeholder
                 )
             def add_key(final,n,off,mem):
                 actual_time = mem['start'] + off
@@ -8023,6 +8027,7 @@ class Editor:
                         for k, v in attrs.items():
                             setattr(actor.node, k, v)
                         tracker.active[key] = n = actor.node
+                        tracker.active_actors[key] = actor
                         if position is not None:
                             activity = bs.get_foreground_host_activity()
                             def call(activity=activity,position=position,actor=actor):
@@ -8040,6 +8045,13 @@ class Editor:
             else:
                 if key in tracker.active:
                     tracker.active.pop(key).delete()
+                tracker.active_actors.pop(key, None)
+                if key in tracker.active_codes:
+                    codes = tracker.active_codes.pop(key)
+                    if 'main' in codes:
+                        codes['main'].on_end()
+                    for child in codes.get('children', []):
+                        child.on_end()
 
         if what == 1:
             if start:
@@ -8198,6 +8210,7 @@ class Editor:
                         for _ in t.active.values():
                             if _.exists(): _.delete()
                         t.active.clear()
+                        t.active_actors.clear()
                         for _ in t.active_sounds:
                             if _.exists(): _.delete()
                         t.active_sounds.clear()
@@ -8252,7 +8265,7 @@ class Editor:
                         Eval.SOUND(Const.BAD_SOUND).play()
 
         elif action == 1:
-            if btn_id in tracker.active_codes:
+            if btn_id in tracker.active_codes and 'main' in tracker.active_codes[btn_id]:
                 parent_runner = tracker.active_codes[btn_id]['main']
                 child_runner = CodeRunner(
                     on_error=lambda e: s.toast(Format.ERROR(e)),
@@ -8260,6 +8273,14 @@ class Editor:
                 )
                 child_runner.on_start(key_data['data']['code'])
                 tracker.active_codes[btn_id]['children'].append(child_runner)
+            else:
+                bot = tracker.active_actors.get(btn_id)
+                runner = CodeRunner(
+                    on_error=lambda e: s.toast(Format.ERROR(e)),
+                    extra_namespace={'bot': bot} if bot is not None else None
+                )
+                runner.on_start(key_data['data']['code'])
+                tracker.active_codes[btn_id].setdefault('children', []).append(runner)
 
         elif action == 2:
             da = key_data['data']
@@ -10015,6 +10036,19 @@ class _StringsEN:
     SAVED_AS_HELP = 'Full path: {}'
     CODE = 'Code'
     CODE_HELP = "Keyframes continue from the\nevent's code. All variables and\nstate are shared."
+    SPAZ_CODE_PLACEHOLDER = '\n'.join((
+        '# This keyframe runs on the spaz\'s "bot" object',
+        '# bot is the Spaz actor - full API exposed',
+        '#',
+        '# Example: make it walk forward for a bit',
+        '# bot.node.move_up_down = 1.0',
+        '# bs.timer(1.0, lambda: bot.node.exists() and setattr(bot.node, "move_up_down", 0.0))',
+        '#',
+        '# Other things you can do:',
+        '# bot.node.punch_pressed = True',
+        '# bot.handlemessage(bs.StandMessage((0, 1, 0), 0))',
+        '# bot.node.handlemessage(bs.CelebrateMessage(duration=2.0))',
+    ))
     EXTEND_CODE = 'Parallel Code'
     CODE_EDITOR = 'Code Editor'
     COPY = 'Copy'
@@ -10321,6 +10355,48 @@ class _StringsEN:
         'Refreshing the timeline'
     )
     SETTING_FILL_ASPECT_RATIO = 'Fill Outside Frame'
+    BLAME = (
+        'Did you just click again?',
+        'Did you come here to make a film or start a beef with the UI?',
+        'This is fine, Everything is fine (Except your movie progress)',
+        'The timeline is lonely, Go give it some nodes',
+        'You should be keyframing instead of clicking',
+        'The real movie was the clicks we made along the way',
+        'Your render queue called, It said hello?',
+        "Great directors didn't become great by spamming toasts",
+        'This button has a family, Think about them',
+        "I'm not angry, Just wondering about your priorities",
+        "The nodes aren't gonna place themselves bestie",
+        "Plot twist there's no achievement for this",
+        "Fun fact clicking here doesn't speed up rendering",
+        'Your movie could be done by now, Just saying',
+        'Breaking news local filmmaker discovers toast notifications',
+        'Camera? Unmoved, Nodes? Zero, Hotel? Trivago',
+        'This is technically procrastination but go off I guess',
+        'Okay but have you considered making something?',
+        'The timeline weeps, Can you hear it?',
+        'Director mode disabled, Toast mode very enabled',
+        'I respect the commitment to absolutely nothing',
+        'What are we doing here? Really',
+        'Your FPS called, It wants purpose',
+        'This is a movie editor not a toast simulator',
+        'The entire film industry is waiting on you',
+        'Imagine if you put this energy into keyframes',
+        'Zero nodes, Zero progress, Infinite clicks',
+        "The cinematography handbook doesn't mention this technique",
+        'Press triangle, Literally anything else, Please',
+        'Your actors are just standing there, Menacingly',
+        'This is between you and your productivity now',
+        "The toast doesn't judge, I do though",
+        'Legendary directors started with zero toasts, Think about it',
+        'What would a real director do? Probably not this',
+        'Achievement unlocked Professional Time Waster',
+        'The editor supports you, Questions you, But supports you',
+        'Are we having fun? Is this fun for you?',
+        'My expectations were low but holy hell',
+        'The universe is vast, Your timeline is empty, Coincidence?',
+        "Bro discovered the one button that does nothing and won't stop",
+    )
 
 
 class _StringsMeta(type):
@@ -10949,7 +11025,7 @@ class Const:
         'PLAY_STATION_CROSS_BUTTON'
     )
     EVENT_KEYS = {
-        0: (0,3),
+        0: (0,1,3),
         2: (2,),
         6: (1,)
     }
@@ -10973,43 +11049,34 @@ class Const:
     CIRCLE = 'PLAY_STATION_CIRCLE_BUTTON'
     BACK = 'BACK'
     THEME_ICON = 'LOGO_FLAT'
-    BLAME_CHARSET = " ()',?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
     DO_NOTHING = lambda:None
-    BLAME = lambda: (
-        '{Wp48S^xk9=GL@E0stWa8~^|S5YJf5;0J63A6)<hiq;LsE8+6)_!8wlJgD2B;9B|#tpRK5'
-        'GCU|nmj0kz<}AdtfLdZb6+!sQ4OUYK6Q8uy*r^_3`Pcu$YW|C=9;{Y(LL1VnyQ*>B{gpqX'
-        'dk#@9?UBPn;2%V#jMSPv_1XgyAJ^ZvYCOsN&;+crKe;d^f*1&xO5^OsH3p{1PWZr2DvZX#'
-        'Q(asi+>+1LJ3~Qw$fLY?PWe0Gz8+_A7Di@~MP;^#5AkfTHb%IeI)Caw!BokT0(B=(PBwFM'
-        'J`y4mX1FWa8Uc<=Zf?~Q^yB!g9w1-Ks>f=OJA!hqouOgMGKK+K<}ReB;Y*XYGvVu?pxK;0'
-        '%D0$KY!tzmUe!969j2GtKACX6T0Rc4wuI|fIo}Q1><Z{CT{od3#5&02lWo)$FCe_<5~*HM'
-        'nBlD2qayQnlBUHBT2XsgCZQ-dx;buhBS@YyKW+~KQcCm;IByjf3-we{=2u*1Y^0M(j$HWk'
-        'IWHE~yH_D-wLG~_mX1L<IjBf}soW?)??_d_qs|=35NNufR(c#fv2qnAeqdmdp}`G&t)0;}'
-        'WJ6k?{Y40s)mPa;Q<@j?s#eLU9MD~%Tr+YWPZ^zHI(Xo|4k(=>mcXg)cg(+@UNr_t_FI@@'
-        'K-z`vn!j^;vk3jjV~X?AF#}P5-lM@%Cm(E@*d0FbkeodJ^wCY=H}(suiou^zL}})0AxqiM'
-        'f9o>9`gZTUUMFRuXQ1^80Sed9lNtj1TBkASgF`=Ob9Ll~2$YYYb#|Q;&`99IjGc~in__wo'
-        'iPNw?$28MM-FVrS%b&Y$h9=Oi+t0%a%YIX}>Gr<z#Z*yz@R_tj1}<W_b-_in?%9}es&E?D'
-        '=q4#J*EC_<r^XPK>?}vc^toT;Juz3GE5ivr@NgN<cUK!%@DZ@{GS$|%XxMcfYB1jY3T5JB'
-        'D1S;;wio{syRoRdt419oa!bUns%Gg)eg~VvuoY>aO&Jl5l2R;2eGynkua*2)$i2kE1SDu&'
-        '{fQ=D7ZZ?YLF;Krit7Y<MW5FOq6{vVcevZZe2FQrD6=6^U@8{nV!zCzo?W`fILCS@mqZbM'
-        'HC&KLY9KG=cD&Wy#o@6(s#)Tr9YTqDuP6-uhb|nzWe>FA*F^Ze6aAM--qkd2l<g|iWz%f!'
-        'AIwz9Spi%I@Cg`YO=Sz7LLh*<Y+=mRh4i=-43mqK4X1FQ=02y(=9;{9%4hj%g#`2bbmz<&'
-        'V(K(f_Hg+bOH4LG7M2GOC&q>cLC{U{DR)fW57r#Z@fs1Nb(eQY`_!vq?shD>Bk5E?lhEEM'
-        'F*ga;#^a?rEOgo?)H<xv3hAFE>l*mC@H&L_`LBwqpgQQ934D*<v<7`V_P8d%*-894y5ak%'
-        'XGm@_Sns?57LUIp!FQBP{HMJc5U&6LwATGxLn1;>00FxQ?G69{MaZMAvBYQl0ssI200dcD'
-    )
-    FONT_METRICS = loads(decompress(b85decode(
-        'c$`&KXG0Y+5d13|QHmH-F6}H>Y4+Zpf)znQl&Xlo-DI+P+<v=xvpYMPY~G'
-        'PLC3-KDSIGu9D^80($Y_++CZmxkFeRg7A<u|jcQX1=;Y5a3Hu7vnNvaUhc'
-        '~11kN|Kory_42dW-8ZdsiLa`r#YO-&`IYy57F~%#4NLVp&+H5FRGGJ7jv7'
-        'DWK%H>&5&WpGSo5T81f7Sh9X0Wp`O{i#L#6{d4-{?49y`kM@PSwqgGi4)b'
-        '&hx85~{14a6B!>@eacPxlszN#-^#*EZF8Ow=89E^wj641?4y{Uxl4!uPW1'
-        'lf>5@^aSH;(OoDSTNUoXb&RwX_qpH$4j)2ESsL*OtfiHC46-?U!jJfrcRm'
-        '}Q_&GQ#d;ve5s~h_gl%Y^x4GUi*r$mKs#-|;PL?5LO)bn;syh8(B@(MPS-'
-        'o<LEp#a{4XtqB9MRNTS_Z<R7_X$B(>N5&`dt6_N2g+p)WnHcNI_Oz1YuD1'
-        '-C|73{&HV;B5Z_Bx-M39-W81smf|hN65<dpg+uY7i4u55+q-hJW1Ga1Xzg'
-        'xTq;`WB-_fK3Mu&X}=VOmbVPwM_4GSl9{(fBt0mMPkk^6~ihe}flx{2woD'
-        '1Pc'
-    )))
+
+    FONT_METRICS = {
+        ' ': 6.9609375, '!': 7.8203125, '"': 7.9921875, '#': 14.8671875,
+        '$': 13.921875, '%': 19.078125, '&': 23.03125, "'": 5.328125,
+        '(': 11.0859375, ')': 11.0859375, '*': 15.5546875, '+': 13.921875,
+        ',': 6.9609375, '-': 6.015625, '.': 6.9609375, '/': 12.71875,
+        '0': 13.921875, '1': 13.921875, '2': 13.921875, '3': 13.921875,
+        '4': 13.921875, '5': 13.921875, '6': 13.921875, '7': 13.921875,
+        '8': 13.921875, '9': 13.921875, ':': 6.9609375, ';': 6.9609375,
+        '<': 13.921875, '=': 13.921875, '>': 13.921875, '?': 11.515625,
+        '@': 20.96875, 'A': 16.7578125, 'B': 15.8984375, 'C': 15.5546875,
+        'D': 16.15625, 'E': 14.3515625, 'F': 13.1484375, 'G': 15.8984375,
+        'H': 17.1015625, 'I': 7.90625, 'J': 9.625, 'K': 15.7265625,
+        'L': 13.234375, 'M': 20.8828125, 'N': 17.1015625, 'O': 17.1015625,
+        'P': 15.0390625, 'Q': 17.359375, 'R': 15.984375, 'S': 15.5546875,
+        'T': 15.0390625, 'U': 16.15625, 'V': 15.46875, 'W': 20.453125,
+        'X': 15.296875, 'Y': 15.46875, 'Z': 14.953125, '[': 9.625,
+        '\\': 8.6796875, ']': 9.625, '^': 14.09375, '_': 12.03125,
+        '`': 9.28125, 'a': 12.546875, 'b': 12.890625, 'c': 11.7734375,
+        'd': 13.0625, 'e': 12.6328125, 'f': 8.59375, 'g': 13.40625,
+        'h': 13.0625, 'i': 6.359375, 'j': 7.3046875, 'k': 12.375,
+        'l': 6.1875, 'm': 20.3671875, 'n': 13.3203125, 'o': 13.0625,
+        'p': 12.6328125, 'q': 12.6328125, 'r': 10.2265625, 's': 12.4609375,
+        't': 8.765625, 'u': 13.40625, 'v': 12.375, 'w': 17.359375,
+        'x': 12.2890625, 'y': 12.375, 'z': 11.2578125, '{': 9.625,
+        '|': 8.1640625, '}': 9.625, '~': 13.921875,
+    }
     AUTOSAVE_INTERVAL = 25
     AUTOSAVE_AREA = 70
     AUTOSAVE_MARGIN = 20
@@ -11221,12 +11288,6 @@ class Eval:
     SOUND = lambda s: (
         bui.getsound(s) if Settings.sound_allowed(s) else Const.SILENT_SOUND
     )
-    BLAME = lambda s,c: ''.join(
-        c[i] if i < len(c) else '\x00'
-        for i in __import__('lzma').decompress(
-            __import__('base64').b85decode(s)
-        )
-    ).split('\x00')
     SHADOW = lambda px,py,sx,sy,d=0.16: (
         (px-sx*d,py-sy*d),
         (sx+sx*(d*2),sy+sy*(d*2))
@@ -11614,9 +11675,10 @@ def _make_tracked_spaz(OriginalSpaz, runner):
 class CodeRunner:
     _SHARED = {}
 
-    def __init__(self, on_error=None, parent_runner=None):
+    def __init__(self, on_error=None, parent_runner=None, extra_namespace=None):
         self.on_error = on_error
         self.parent_runner = parent_runner
+        self.extra_namespace = extra_namespace
 
         if parent_runner:
             self.namespace = parent_runner.namespace
@@ -11689,6 +11751,8 @@ class CodeRunner:
             'Bubble': Bubble,
             '_SHARED': CodeRunner._SHARED
         })
+        if self.extra_namespace:
+            self.namespace.update(self.extra_namespace)
 
         try:
             with bs.get_foreground_host_activity().context:
@@ -13923,5 +13987,3 @@ def get_presets():
 
 
     return presets
-
-
