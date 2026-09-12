@@ -54,14 +54,21 @@ plugman = dict(
     version='1.0.0',
 )
 
+
 class Coolbox:
     @classmethod
-    def state(s,t=0):
-        bui.apptimer(0 if t else 0.13, bs.CallPartial(bui.buttonwidget, s.in_source, icon=bui.gettexture(f"chest{'Open' if t else ''}Icon")))
+    def state(s, t=0):
+        bui.apptimer(0 if t else 0.13, bs.CallPartial(bui.buttonwidget, s.in_source,
+                     icon=bui.gettexture(f"chest{'Open' if t else ''}Icon")))
+
     def __init__(s, fresh=True, in_source=None, fb=None, fake=False, extra=None):
         # safe
-        if not bs.get_foreground_host_activity(): btw(random.choice(NAH())); return
-        if STATE(): btw('Coolbox is already running!'); return
+        if not bs.get_foreground_host_activity():
+            btw(random.choice(NAH()))
+            return
+        if STATE():
+            btw('Coolbox is already running!')
+            return
         if in_source:
             s.__class__.in_source = in_source
             s.state(1)
@@ -80,44 +87,47 @@ class Coolbox:
             note_scale=0.5
         )
         # Buttons
-        x,y = z.size
+        x, y = z.size
         w = z.widget
         mem = globals()
         kids = []
         for k in range(5):
             for j in range(3):
-                l,i = s.get(j,k)
+                l, i = s.get(j, k)
                 b = bw(
                     p=w,
                     label=l,
-                    pos=(47+171.5*j,300-64*k),
-                    size=(173,64),
+                    pos=(47+171.5*j, 300-64*k),
+                    size=(173, 64),
                     icon=bui.gettexture(i),
                 )
                 bcls = mem[l]
-                args = (w,b,i,in_source,s.__class__,extra)
-                if not fake: bw(b,oac=bs.CallPartial(bcls, *args))
-                if fb == bcls.__name__: bui.apptimer(0.5, bs.CallPartial(bcls, *args))
+                args = (w, b, i, in_source, s.__class__, extra)
+                if not fake:
+                    bw(b, oac=bs.CallPartial(bcls, *args))
+                if fb == bcls.__name__:
+                    bui.apptimer(0.5, bs.CallPartial(bcls, *args))
                 kids.append(b)
     """Icons and names"""
-    def get(s,j,k):
+    def get(s, j, k):
         return (
-            ('Spawn','cuteSpaz'),
-            ('Modify','advancedIcon'),
-            ('Control','controllerIcon'),
-            ('Effect','graphicsIcon'),
-            ('Deploy','star'),
-            ('Listen','audioIcon'),
-            ('Build','cursor'),
-            ('Tweak','menuIcon'),
-            ('Tune','settingsIcon'),
-            ('Gather','achievementTeamPlayer'),
-            ('Load','inventoryIcon'),
-            ('Quick','nextLevelIcon'),
-            ('Scene','nub'),
-            ('Camera','tv'),
-            ('About','heart')
+            ('Spawn', 'cuteSpaz'),
+            ('Modify', 'advancedIcon'),
+            ('Control', 'controllerIcon'),
+            ('Effect', 'graphicsIcon'),
+            ('Deploy', 'star'),
+            ('Listen', 'audioIcon'),
+            ('Build', 'cursor'),
+            ('Tweak', 'menuIcon'),
+            ('Tune', 'settingsIcon'),
+            ('Gather', 'achievementTeamPlayer'),
+            ('Load', 'inventoryIcon'),
+            ('Quick', 'nextLevelIcon'),
+            ('Scene', 'nub'),
+            ('Camera', 'tv'),
+            ('About', 'heart')
         )[k*3+j]
+
 
 class Bot(bs_spazbot.SpazBot):
     """A Bombsquad Bot"""
@@ -126,7 +136,7 @@ class Bot(bs_spazbot.SpazBot):
         char=None,
         ignore=False,
         name='Bot',
-        name_color=(1,1,1),
+        name_color=(1, 1, 1),
         mesh=[],
         ctex=None,
         ctex2=None
@@ -144,84 +154,118 @@ class Bot(bs_spazbot.SpazBot):
         n.name, n.name_color = name, name_color
         n.color_texture, n.color_mask_texture = bs.gettexture(ctex), bs.gettexture(ctex2)
         a = DIR('mesh')
-        for i,m in enumerate(mesh):
-            if not m: continue
-            setattr(n,a[i],bs.getmesh(m))
+        for i, m in enumerate(mesh):
+            if not m:
+                continue
+            setattr(n, a[i], bs.getmesh(m))
         s.act = []
         s.uid = None
         s.group_id = var('lastid')
         s.held_count = 0
         s.last_player_attacked_by = None
         s.last_player_held_by = None
-        ignore if ignore else bs.timer(0.1,s.load)
-    def move(s,x=32767,y=32767):
+        ignore if ignore else bs.timer(0.1, s.load)
+
+    def move(s, x=32767, y=32767):
         s.on_move_left_right(x)
         s.on_move_up_down(y)
+
     def stop(s):
-        s.move(0,0)
-    def move_to(s,t,min=0.7,time=10,chain=None):
+        s.move(0, 0)
+
+    def move_to(s, t, min=0.7, time=10, chain=None):
         nah = 0
+
         def f(b=False):
             nonlocal nah
-            if nah: s.stop(); return
-            try: p = s.node.position
-            except: return
-            if t == p: return
+            if nah:
+                s.stop()
+                return
+            try:
+                p = s.node.position
+            except:
+                return
+            if t == p:
+                return
             dx = t[0]-p[0]
             dz = p[2]-t[2]
             if b:
                 m = (dx**2+dz**2)**0.5
-                try: s.move(dx/m,dz/m)
-                except ZeroDivisionError: pass
-            if math.dist((p[0],p[2]),(t[0],t[2])) < min:
+                try:
+                    s.move(dx/m, dz/m)
+                except ZeroDivisionError:
+                    pass
+            if math.dist((p[0], p[2]), (t[0], t[2])) < min:
                 nah = 1
                 s.stop()
-                if (chain is not None): s.wait(0.2,chain)
+                if (chain is not None):
+                    s.wait(0.2, chain)
                 return
-            bs.timer(0.01,f)
+            bs.timer(0.01, f)
+
         def g():
             nonlocal nah
-            if (not nah) and (chain is not None): s.wait(0.2,chain)
+            if (not nah) and (chain is not None):
+                s.wait(0.2, chain)
             nah = 1
         f(True)
-        bs.timer(time,g)
-    def follow(s,n,min=0.7,time=10,chain=None):
+        bs.timer(time, g)
+
+    def follow(s, n, min=0.7, time=10, chain=None):
         nah = 0
+
         def f():
             nonlocal nah
-            if nah or not n.exists(): s.stop(); return
+            if nah or not n.exists():
+                s.stop()
+                return
             try:
                 p = s.node.position
                 t = n.position
-            except: return
-            if t == p: return
+            except:
+                return
+            if t == p:
+                return
             dx = t[0]-p[0]
             dz = p[2]-t[2]
             m = (dx**2+dz**2)**0.5
-            if (min is not None) and math.dist((p[0],p[2]),(t[0],t[2])) < min:
+            if (min is not None) and math.dist((p[0], p[2]), (t[0], t[2])) < min:
                 s.stop()
                 nah = 1
-                if (chain is not None): s.wait(0.2,chain)
+                if (chain is not None):
+                    s.wait(0.2, chain)
                 return
             else:
-                try: s.move(dx/m,dz/m)
-                except ZeroDivisionError: pass
+                try:
+                    s.move(dx/m, dz/m)
+                except ZeroDivisionError:
+                    pass
             bs.timer(0.01, f)
+
         def g():
             nonlocal nah
-            if (not nah) and (chain is not None): s.wait(0.2,chain)
+            if (not nah) and (chain is not None):
+                s.wait(0.2, chain)
             nah = 1
         f() if n is not None else n
-        if time is not None: bs.timer(time,g)
-    def wait(s,i,chain=None):
-        if chain is not None: bs.timer(i,lambda: s.load(chain+1))
-    def key(s,i,chain=None):
-        [getattr(s,f"on_{['jump','bomb','pickup','punch'][i]}_{['press','release'][j]}")() for j in [0,1]]
-        if chain is not None: s.wait(0.2,chain)
-    def say(s,t,u,chain=None):
-        if not s.node.exists(): return
+        if time is not None:
+            bs.timer(time, g)
+
+    def wait(s, i, chain=None):
+        if chain is not None:
+            bs.timer(i, lambda: s.load(chain+1))
+
+    def key(s, i, chain=None):
+        [getattr(s, f"on_{['jump', 'bomb', 'pickup', 'punch'][i]}_{['press', 'release'][j]}")()
+         for j in [0, 1]]
+        if chain is not None:
+            s.wait(0.2, chain)
+
+    def say(s, t, u, chain=None):
+        if not s.node.exists():
+            return
         bs.timer(
-            [0,0.1][not chain],
+            [0, 0.1][not chain],
             lambda: Bubble(
                 node=s.node,
                 text=t,
@@ -229,30 +273,46 @@ class Bot(bs_spazbot.SpazBot):
                 color=s.node.color,
             )
         )
-        if chain is not None: s.wait(0.2,chain)
-    def load(s,i=None):
-        if i is None: s.act = var('act').copy(); i = 0
-        try: a = s.act[i]
-        except: return
+        if chain is not None:
+            s.wait(0.2, chain)
+
+    def load(s, i=None):
+        if i is None:
+            s.act = var('act').copy()
+            i = 0
+        try:
+            a = s.act[i]
+        except:
+            return
         t = a[0]
-        if t == 0: s.say(*a[1:],i)
-        elif t == 1: s.move_to(*a[1:],i)
-        elif t == 2: s.wait(a[1],i)
+        if t == 0:
+            s.say(*a[1:], i)
+        elif t == 1:
+            s.move_to(*a[1:], i)
+        elif t == 2:
+            s.wait(a[1], i)
         elif t == 3:
             j = a[1]-1
             k = a[2]-1
-            if k < 0: s.load(i+1); return
-            s.act[i] = [t,j+1,k-1]
+            if k < 0:
+                s.load(i+1)
+                return
+            s.act[i] = [t, j+1, k-1]
             s.load(j)
-        elif t == 4: s.key(a[1],i)
+        elif t == 4:
+            s.key(a[1], i)
         elif t == 5:
             who = a[1]
-            if who == 'me': n = getme(1).node
+            if who == 'me':
+                n = getme(1).node
             else:
                 n = None
                 for j in bs.getnodes():
-                    if str(j) == who: n = j; break
-            s.follow(n,*a[2:],i)
+                    if str(j) == who:
+                        n = j
+                        break
+            s.follow(n, *a[2:], i)
+
 
 class Bubble:
     __doc__ = ("""
@@ -284,35 +344,40 @@ class Bubble:
         >>>
     """)
     __mem__ = {}
+
     def __init__(
         s,
         node: 'bascenev1.Node',
         text: str = 'Hello!',
-        color: tuple = (1,1,1),
+        color: tuple = (1, 1, 1),
         time: float | int = 4,
         mode: int = 0,
-        res: list = [('█'),('▼')]
+        res: list = [('█'), ('▼')]
     ) -> None:
-        if not 0 <= mode <= 5 : raise ValueError(f'mode can be an integer from 0 to 5, not {mode}')
-        if not mode: mode = random.choice([1,2,3,4,5])
-        s.ans,s.kids,s.mats,s.time = [],[],[],time
-        s.node,s.dead,s.text = node,False,text
-        s.color,s.mode,s.res = color,mode,res
+        if not 0 <= mode <= 5:
+            raise ValueError(f'mode can be an integer from 0 to 5, not {mode}')
+        if not mode:
+            mode = random.choice([1, 2, 3, 4, 5])
+        s.ans, s.kids, s.mats, s.time = [], [], [], time
+        s.node, s.dead, s.text = node, False, text
+        s.color, s.mode, s.res = color, mode, res
         # destroy existing bubbles if possible
         s.mem = lambda: s.__class__.__mem__
         m = s.mem()
-        o = m.get(node,0)
-        if not getattr(o,'dead',1): bs.timer(0.2,bs.CallPartial(o.delete,force=True))
+        o = m.get(node, 0)
+        if not getattr(o, 'dead', 1):
+            bs.timer(0.2, bs.CallPartial(o.delete, force=True))
         s.show()
         m[node] = s
+
     def show(s):
-        q,l,r = s.mats,s.kids,s.ans
+        q, l, r = s.mats, s.kids, s.ans
         # offset
         m = bs.newnode(
             'math',
             owner=s.node,
             attrs={
-                'input1': (0,1.65,0),
+                'input1': (0, 1.65, 0),
                 'operation': 'add'
             }
         )
@@ -328,7 +393,7 @@ class Bubble:
                 'in_world': True,
                 'shadow': 1.0,
                 'flatness': 1.0,
-                'color': (c[0],c[1],c[2],0.2),
+                'color': (c[0], c[1], c[2], 0.2),
                 'scale': 0.01,
                 'h_align': 'center'
             }
@@ -361,19 +426,19 @@ class Bubble:
                 'math',
                 owner=m,
                 attrs={
-                    'input1': (ok,1.65,0),
+                    'input1': (ok, 1.65, 0),
                     'operation': 'add'
                 }
             )
-            mat.append([p2,ok])
-            s.node.connectattr('position',p2,'input2')
-            p2.connectattr('output',p1,'position')
+            mat.append([p2, ok])
+            s.node.connectattr('position', p2, 'input2')
+            p2.connectattr('output', p1, 'position')
             sf += x
         l += txt
         q += [mat[i][0] for i in range(len(mat))]
         # connect
-        s.node.connectattr('position',m,'input2')
-        m.connectattr('output',b,'position')
+        s.node.connectattr('position', m, 'input2')
+        m.connectattr('output', b, 'position')
         # hardcoded animators
         # conditionally used based on animation
         z = s.time
@@ -382,12 +447,12 @@ class Bubble:
             b,
             'scale',
             {
-                0:0,
+                0: 0,
                 z*0.041: 0.014,
                 z*0.154: 0.014,
                 z*0.167: 0.010,
                 z*0.98: 0.010,
-                z:0
+                z: 0
             },
         )
         r.append(a)
@@ -397,10 +462,10 @@ class Bubble:
             'input1',
             3,
             {
-                0:(0,1.2,0),
-                z*0.04:(0,1.65,0),
-                z*0.98:(0,1.65,0),
-                z:(0,1.2,0)
+                0: (0, 1.2, 0),
+                z*0.04: (0, 1.65, 0),
+                z*0.98: (0, 1.65, 0),
+                z: (0, 1.2, 0)
             }
         )
         r.append(a)
@@ -410,16 +475,16 @@ class Bubble:
                 txt[i],
                 'scale',
                 {
-                    0:0,
+                    0: 0,
                     z*0.041: 0.015,
                     z*0.154: 0.015,
                     z*0.167: 0.010,
                     z*0.98: 0.010,
-                    z:0
+                    z: 0
                 },
             )
             for i in range(len(mat))
-        ] if s.mode in [1,4] else []
+        ] if s.mode in [1, 4] else []
         # move text up down
         r += [
             bs.animate_array(
@@ -427,95 +492,104 @@ class Bubble:
                 'input1',
                 3,
                 {
-                    0:(mat[i][1]/4,1.2,0),
-                    z*0.04:(mat[i][1]*1.5,1.65,0),
-                    z*0.154:(mat[i][1]*1.5,1.65,0),
-                    z*0.167:(mat[i][1],1.65,0),
-                    z*0.98:(mat[i][1],1.65,0),
-                    z:(mat[i][1]/4,1.2,0)
+                    0: (mat[i][1]/4, 1.2, 0),
+                    z*0.04: (mat[i][1]*1.5, 1.65, 0),
+                    z*0.154: (mat[i][1]*1.5, 1.65, 0),
+                    z*0.167: (mat[i][1], 1.65, 0),
+                    z*0.98: (mat[i][1], 1.65, 0),
+                    z: (mat[i][1]/4, 1.2, 0)
                 }
             )
             for i in range(len(mat))
-        ] if s.mode in [1,4] else []
+        ] if s.mode in [1, 4] else []
         # slide in overshoot letter by letter
         ok = (z*0.04*1.6)
-        hm = [0.03,0.05][s.mode==2]
+        hm = [0.03, 0.05][s.mode == 2]
         r += [
             bs.animate_array(
                 j[0],
                 'input1',
                 3,
                 {
-                    0.5+i*hm:(j[1],1.4,0),
-                    0.5+i*hm+(ok*0.6):(j[1],1.9,0),
-                    0.5+i*hm+ok:(j[1],1.65,0),
-                    (z-(z*0.02)):(j[1],1.65,0),
-                    z:(j[1],1.2,0)
+                    0.5+i*hm: (j[1], 1.4, 0),
+                    0.5+i*hm+(ok*0.6): (j[1], 1.9, 0),
+                    0.5+i*hm+ok: (j[1], 1.65, 0),
+                    (z-(z*0.02)): (j[1], 1.65, 0),
+                    z: (j[1], 1.2, 0)
                 }
             )
-            for i,j in enumerate(mat)
-        ] if s.mode in [2,5] else []
+            for i, j in enumerate(mat)
+        ] if s.mode in [2, 5] else []
         # fade in letter by letter
         r += [
             bs.animate(
                 txt[i],
                 'opacity',
                 {
-                    0.5+i*hm:0,
-                    (0.5+i*hm+ok)*0.98:1,
-                    z*0.9:1,
-                    z:0
+                    0.5+i*hm: 0,
+                    (0.5+i*hm+ok)*0.98: 1,
+                    z*0.9: 1,
+                    z: 0
                 }
             )
             for i in range(len(mat))
-        ] if s.mode in [2,4,5] else []
+        ] if s.mode in [2, 4, 5] else []
         # scale slide up text
         r += [
             bs.animate(
                 txt[i],
                 'scale',
                 {
-                    0:0,
+                    0: 0,
                     z*0.154: 0,
                     z*0.167: 0.010,
                     z*0.98: 0.010,
-                    z:0
+                    z: 0
                 },
             )
             for i in range(len(mat))
         ] if s.mode == 3 else []
         # autokill
-        bs.timer(z,s.delete)
-    def delete(s,force=False):
-        if s.dead: return
+        bs.timer(z, s.delete)
+
+    def delete(s, force=False):
+        if s.dead:
+            return
         s.dead = True
-        [i.delete() for i in s.ans if hasattr(i,'delete')]
-        bs.timer(0.2,lambda:[i.delete() for i in s.kids+s.mats if hasattr(i,'delete')])
-        if not force: return
+        [i.delete() for i in s.ans if hasattr(i, 'delete')]
+        bs.timer(0.2, lambda: [i.delete() for i in s.kids+s.mats if hasattr(i, 'delete')])
+        if not force:
+            return
         [bs.animate(
             i,
             'opacity',
             {
-                0:i.opacity,
-                0.2:0
+                0: i.opacity,
+                0.2: 0
             }
         ) for i in s.kids]
 
+
 _rgb_cycle_combines = []
+
 
 class icw:
     """Instant container maker"""
     INS = []
+
     @classmethod
     def on_resume(cls):
-        bui.apptimer(0.01,lambda: [i.update() for i in cls.INS])
+        bui.apptimer(0.01, lambda: [i.update() for i in cls.INS])
+
     def __del__(s):
         s.__class__.INS.delete(s)
-    def snd(s,t):
+
+    def snd(s, t):
         l = bui.getsound(t)
         l.play()
-        bui.apptimer(random.uniform(0.14,0.18),l.stop)
+        bui.apptimer(random.uniform(0.14, 0.18), l.stop)
         return l
+
     def __init__(
         s, title, shadow=False, icon=None, show_tog=False,
         back_anim='out_right', nuke_anim='out_scale',
@@ -523,27 +597,27 @@ class icw:
         show_nuke=True, show_back=True, in_source=None,
         out_source=None, cls=None, source_cls=None,
         outside_action=None, note=None, note_scale=0.7,
-        note_pos=(50,15), extra=None, auto_offset=True,
+        note_pos=(50, 15), extra=None, auto_offset=True,
         *a, **k
     ) -> None:
         s.snd('powerup01') if in_source else 0
         s.__class__.INS.append(s)
         r = bui.get_virtual_screen_size()
         k.update({
-            'parent':gos(),
-            'transition':'in_scale' if in_source else 'in_right',
-            'size':k.get('size',0) or (600,450),
-            'on_outside_click_call':lambda:s.nuke(True) if outside_action == 'nuke' else s.back(True) if outside_action == 'back' else lambda:None,
-            'scale':[1.5,1.1,0.8][UIS()],
-            'scale_origin_stack_offset':gc(in_source) if in_source else (0,0),
-            'position':(r[0]*0.8,r[1]*0.05)
+            'parent': gos(),
+            'transition': 'in_scale' if in_source else 'in_right',
+            'size': k.get('size', 0) or (600, 450),
+            'on_outside_click_call': lambda: s.nuke(True) if outside_action == 'nuke' else s.back(True) if outside_action == 'back' else lambda: None,
+            'scale': [1.5, 1.1, 0.8][UIS()],
+            'scale_origin_stack_offset': gc(in_source) if in_source else (0, 0),
+            'position': (r[0]*0.8, r[1]*0.05)
         })
         s.size = k['size']
         s.ouis = bui.app.ui_v1.uiscale
-        x,y = s.size
-        s.widget = w = cw(*a,**k)
+        x, y = s.size
+        s.widget = w = cw(*a, **k)
         s.ao = auto_offset
-        s.cls = cls(w,x,y,in_source,source_cls,extra) if cls else None
+        s.cls = cls(w, x, y, in_source, source_cls, extra) if cls else None
         s.on_back = on_back
         s.on_nuke = on_nuke
         s.nuke_anim = nuke_anim
@@ -558,27 +632,28 @@ class icw:
             b = sbw(
                 p=w,
                 button_type='backSmall',
-                pos=([30,55][s.size[0]>400],y-70),
+                pos=([30, 55][s.size[0] > 400], y-70),
                 oac=s.back,
                 label=bui.charstr(bui.SpecialChar.BACK),
             )
-            cw(w,cancel_button=b)
+            cw(w, cancel_button=b)
             s.back_button = b
         if show_nuke:
             b = bw(
                 p=w,
-                pos=(510,y-70),
+                pos=(510, y-70),
                 oac=s.nuke,
-                size=(43,43),
+                size=(43, 43),
                 label=bui.charstr(bui.SpecialChar.CLOSE),
             )
-            if not show_back: cw(w,cancel_button=b)
+            if not show_back:
+                cw(w, cancel_button=b)
             s.nuke_button = b
         if show_tog:
             b = bw(
                 p=w,
-                size=(43,43),
-                pos=(455,y-70),
+                size=(43, 43),
+                pos=(455, y-70),
                 oac=s.toggle,
             )
             s.tog_button = b
@@ -586,7 +661,8 @@ class icw:
         # Icon shadow title
         c = var('t')
         for i in range(2):
-            if not i and not shadow: continue
+            if not i and not shadow:
+                continue
             tw(
                 p=w,
                 text=title,
@@ -594,35 +670,36 @@ class icw:
                 h_align='left' if icon else 'center',
                 v_align='center',
                 color=c if i else darken(c),
-                pos=(x/2.2+i*5,y-65+i*2),
+                pos=(x/2.2+i*5, y-65+i*2),
                 maxwidth=x/1.8,
             )
         if icon:
             bui.imagewidget(
                 parent=w,
-                position=(215,y-75),
-                size=(50,50),
+                position=(215, y-75),
+                size=(50, 50),
                 texture=bui.gettexture(icon)
             )
         if note:
             tw(
                 p=w,
                 pos=note_pos,
-                color=(1,1,1,0.2),
+                color=(1, 1, 1, 0.2),
                 text='* '+note,
                 scale=note_scale
             )
         s.update()
     """Update"""
     def update(s):
-        if not s.widget.exists() or s.widget.transitioning_out: return
+        if not s.widget.exists() or s.widget.transitioning_out:
+            return
         r = bui.get_virtual_screen_size()
         i = UIS()
         j = UIS(1)
         if s.ouis != j:
             s.ouis = j
-            [bui.apptimer(z,bs.CallPartial(bui.app.set_ui_scale,j)) for z in [0.01,0.1]]
-        a,b = [(0.2,0.007),(0.3,-0.0034),(0.33,0.0026)][i]
+            [bui.apptimer(z, bs.CallPartial(bui.app.set_ui_scale, j)) for z in [0.01, 0.1]]
+        a, b = [(0.2, 0.007), (0.3, -0.0034), (0.33, 0.0026)][i]
         ef = s.in_source
         of = gc(ef) if ef and ef.exists() else None
         cw(
@@ -631,70 +708,81 @@ class icw:
                 (a*s.size[0]/600)*r[0],
                 r[1]*(b*s.size[1]/450)
             ) if s.ao else of,
-            scale=[1.5,1.1,0.8][i],
+            scale=[1.5, 1.1, 0.8][i],
             scale_origin_stack_offset=of
         )
     """Class specific"""
     def prekill(s):
         s.snd('laser')
-        s.cls.back() if s.cls and hasattr(s.cls,'back') else None
+        s.cls.back() if s.cls and hasattr(s.cls, 'back') else None
     """On back"""
     def back(s, by_button=False):
         if by_button:
-            try: s.back_button.activate()
-            except: pass
+            try:
+                s.back_button.activate()
+            except:
+                pass
         else:
             s.prekill()
             s.on_back() if callable(s.on_back) else None
             cw(s.widget, transition=s.back_anim if s.in_source else 'out_right')
     """On nuke"""
-    def nuke(s,by_button=False):
-        if not hasm(): pause(0)
+    def nuke(s, by_button=False):
+        if not hasm():
+            pause(0)
         if by_button:
-            try: s.nuke_button.activate()
-            except: pass
+            try:
+                s.nuke_button.activate()
+            except:
+                pass
         else:
-            if s.out_source: forbtn(s.widget,s.out_source,60)
+            if s.out_source:
+                forbtn(s.widget, s.out_source, 60)
             s.prekill()
             s.on_nuke()
             cw(s.widget, transition=s.nuke_anim if s.out_source else 'out_right')
             if s.source_cls and s.out_source:
                 s.source_cls.state()
     """Toggle pause"""
-    def toggle(s,dry=False):
-        assert hasattr(s,'tog_button')
-        i = [[1,0],[0,1]][dry][pause()]
-        bw(s.tog_button, label=bui.charstr([bui.SpecialChar.PAUSE_BUTTON,bui.SpecialChar.PLAY_BUTTON][i]))
-        if dry: return
+    def toggle(s, dry=False):
+        assert hasattr(s, 'tog_button')
+        i = [[1, 0], [0, 1]][dry][pause()]
+        bw(s.tog_button, label=bui.charstr(
+            [bui.SpecialChar.PAUSE_BUTTON, bui.SpecialChar.PLAY_BUTTON][i]))
+        if dry:
+            return
         bui.getsound('deek').play()
         pause(i)
 
+
 class itw:
     """Indent text widget"""
-    def __init__(s,*a,**k) -> None:
+    def __init__(s, *a, **k) -> None:
         s.a = a
         s.k = k
-        k.update({'h_align':'center',
-                  'v_align':'center'})
-        s.position = k.get('position',(0,0))
-        s.text = k.get('text','')
-        s.h = k.get('size',(0,30))[1]
+        k.update({'h_align': 'center',
+                  'v_align': 'center'})
+        s.position = k.get('position', (0, 0))
+        s.text = k.get('text', '')
+        s.h = k.get('size', (0, 30))[1]
         s.kids = []
         s.set_text(s.text)
     """Set text"""
-    def set_text(s,text) -> None:
+    def set_text(s, text) -> None:
         s.text = text
         z = len(text)
         p = list(s.position)
-        m = s.max = max(text.replace('\\n','') or [''],key=GSW)
+        m = s.max = max(text.replace('\\n', '') or [''], key=GSW)
         l = s.max_len = GSW(str(m))/1.2
-        s.total = l*len(max(text.split('\\n') or [''],key=len))
+        s.total = l*len(max(text.split('\\n') or [''], key=len))
         [k.delete() for k in s.kids]
         s.kids.clear()
         x = 0
         for i in range(z):
-            p[0] += [l,0][i==0]
-            if x: x = 0; continue
+            p[0] += [l, 0][i == 0]
+            if x:
+                x = 0
+                continue
             j = text[i]
             k = text[i+1] if (i+1) < z else j
             if j == '\\' and k == 'n':
@@ -702,43 +790,44 @@ class itw:
                 p[1] = p[1] - s.h
                 x = 1
                 continue
-            s.k.update({'position':(p[0],p[1]),
-                        'text':j,
-                        'size':(l,s.h)})
-            s.kids.append(tw(*s.a,**s.k))
+            s.k.update({'position': (p[0], p[1]),
+                        'text': j,
+                        'size': (l, s.h)})
+            s.kids.append(tw(*s.a, **s.k))
     """Set color"""
-    def set_color(s,color):
-        [tw(t,color=color) for t in s.kids]
+    def set_color(s, color):
+        [tw(t, color=color) for t in s.kids]
+
 
 class ctw:
     """Conditional text widget"""
     def __init__(
-        s,*a,allow=[],tint=True,hint='',
-        bad_image=None,conf=None,type=None,
-        on_conf=(lambda *a: None),flash=False,
-        on_edit=(lambda *a: None),blank=False,
+        s, *a, allow=[], tint=True, hint='',
+        bad_image=None, conf=None, type=None,
+        on_conf=(lambda *a: None), flash=False,
+        on_edit=(lambda *a: None), blank=False,
         **k
     ):
         k.update({
-            'editable':True,
-            'v_align':'center',
-            'h_align':'center',
-            'allow_clear_button':False,
-            'color':k.get('color',(1,1,1)),
-            'description':k.get('description',hint) or 'Enter',
-            'glow_type':'uniform'
+            'editable': True,
+            'v_align': 'center',
+            'h_align': 'center',
+            'allow_clear_button': False,
+            'color': k.get('color', (1, 1, 1)),
+            'description': k.get('description', hint) or 'Enter',
+            'glow_type': 'uniform'
         })
         s.color = k['color']
-        s.widget = t = tw(*a,**k)
+        s.widget = t = tw(*a, **k)
         k.update({
             'editable': False,
             'text': hint,
-            'color': (0.5,0.5,0.5),
-            'maxwidth':k.get('size')[0]
+            'color': (0.5, 0.5, 0.5),
+            'maxwidth': k.get('size')[0]
         })
-        s.widget2 = u = tw(*a,**k)
+        s.widget2 = u = tw(*a, **k)
         s.type = type
-        s.conf = conf if isinstance(conf,tuple) else (conf,conf)
+        s.conf = conf if isinstance(conf, tuple) else (conf, conf)
         s.forgive = s.silent = s.bad = False
         s.on_edit = on_edit
         s.blank = blank
@@ -751,66 +840,84 @@ class ctw:
         s.old = s.get_text()
         s.spy()
     """Blink"""
-    def blink(s, c=(0,1,0)):
+    def blink(s, c=(0, 1, 0)):
         oc = s.color
         tw(s.widget, color=c)
+
         def f():
-            try: tw(s.widget, color=oc)
-            except: pass
-        bui.apptimer(0.3,f)
+            try:
+                tw(s.widget, color=oc)
+            except:
+                pass
+        bui.apptimer(0.3, f)
     """Get current text"""
     def get_text(s):
         return tw(query=s.widget)
     """Set text gracefully"""
-    def set_text(s,t,silent=False):
-        if t is None: return
-        if s.get_text() == t: return
+    def set_text(s, t, silent=False):
+        if t is None:
+            return
+        if s.get_text() == t:
+            return
         s.forgive = True
         tw(s.widget, text=t)
         tw(s.widget, color=s.color)
-        if silent: s.silent = True
+        if silent:
+            s.silent = True
     """Spy on input"""
     def spy(s):
-        if not s.widget.exists(): return
+        if not s.widget.exists():
+            return
         v = s.get_text()
         t = s.widget
         u = s.widget2
-        tw(u,color=(0.5,0.5,0.5,0 if v else 1))
+        tw(u, color=(0.5, 0.5, 0.5, 0 if v else 1))
         bool = s.allow if s.allow is True else not v.translate({ord(c): None for c in s.allow})
         if bool and s.type == 'encoding':
-            try: CHECK(v)
-            except: bool = False
+            try:
+                CHECK(v)
+            except:
+                bool = False
         if v and not bool:
             if not s.bad:
-                push(f'Invalid {s.hint}',color=(1,0,0))
+                push(f'Invalid {s.hint}', color=(1, 0, 0))
                 bui.getsound('error').play()
                 s.bad = True
-                if s.tint: tw(t,color=(1,0,0))
-                if s.bad_image: bui.imagewidget(s.bad_image,opacity=1)
+                if s.tint:
+                    tw(t, color=(1, 0, 0))
+                if s.bad_image:
+                    bui.imagewidget(s.bad_image, opacity=1)
         elif s.bad:
             s.bad = False
-            if s.tint: tw(t,color=(1,1,1))
-            if s.bad_image: bui.imagewidget(s.bad_image,opacity=0)
+            if s.tint:
+                tw(t, color=(1, 1, 1))
+            if s.bad_image:
+                bui.imagewidget(s.bad_image, opacity=0)
         if bool and v != s.old:
-            if s.flash and s.old: s.blink()
+            if s.flash and s.old:
+                s.blink()
             s.old = v
-            if s.forgive: s.forgive = False
-            else: s.on_edit(s.hint, v)
+            if s.forgive:
+                s.forgive = False
+            else:
+                s.on_edit(s.hint, v)
             if s.conf[0]:
-                var(s.conf[0],v if (v or s.blank) else var(s.conf[1]))
+                var(s.conf[0], v if (v or s.blank) else var(s.conf[1]))
                 s.on_conf()
                 if s.type == 'encoding' and not s.silent:
                     gun()
-                elif s.silent: s.silent = False
+                elif s.silent:
+                    s.silent = False
         bui.apptimer(0.1, s.spy)
+
 
 class SoundManager:
     """Sound manager"""
-    def __init__(s,source=None,on_back=None,cols=None,prf=''):
+    def __init__(s, source=None, on_back=None, cols=None, prf=''):
         w = icw(
             title='Sound',
             outside_action='back',
-            size=(350,400),
+            size=(350, 400),
             show_nuke=False,
             on_back=on_back,
             in_source=source,
@@ -827,14 +934,14 @@ class SoundManager:
             b = bw(
                 p=w,
                 label=j.split('_')[0],
-                size=(200,45),
-                pos=(50,y)
+                size=(200, 45),
+                pos=(50, y)
             )
-            bw(b,oac=bs.CallPartial(SoundPipe,pipe=s.fresh,source=b,action=i,prf=prf))
+            bw(b, oac=bs.CallPartial(SoundPipe, pipe=s.fresh, source=b, action=i, prf=prf))
             b = pbw(
                 p=w,
-                pos=(260,y+7),
-                size=(25.5,25.5),
+                pos=(260, y+7),
+                size=(25.5, 25.5),
                 tex=s.cols()
             )
             s.kids.append(b)
@@ -842,82 +949,87 @@ class SoundManager:
         sbw(
             p=w,
             icon=bui.gettexture('backIcon'),
-            pos=(275,330),
+            pos=(275, 330),
             color=darken(var('bg')),
             oac=s.reset
         )
     """Update"""
     def update(s):
         for o in range(len(DIR('sounds'))):
-            v = var(f'{s.prf}sound{o}') or [0,0]
+            v = var(f'{s.prf}sound{o}') or [0, 0]
             t = v[1]
             i = v[0]
             if t == 1:
                 ah = AUDIO()
                 t = ah[i]
-                bw(s.kids[o],texture=bui.gettexture('audioIcon'),oac=bs.CallPartial(bs.broadcastmessage,t),color=(1,1,1),tint_texture=bui.gettexture('black'))
+                bw(s.kids[o], texture=bui.gettexture('audioIcon'), oac=bs.CallPartial(
+                    bs.broadcastmessage, t), color=(1, 1, 1), tint_texture=bui.gettexture('black'))
             else:
                 char = list(s.D.values())[i]
-                bw(s.kids[o],texture=bui.gettexture(char.icon_texture),tint_texture=bui.gettexture(char.icon_mask_texture),oac=bs.CallPartial(bs.broadcastmessage,list(s.D)[i],color=var(s.cols()[2])),color=(1,1,1))
+                bw(s.kids[o], texture=bui.gettexture(char.icon_texture), tint_texture=bui.gettexture(
+                    char.icon_mask_texture), oac=bs.CallPartial(bs.broadcastmessage, list(s.D)[i], color=var(s.cols()[2])), color=(1, 1, 1))
     """Reset"""
     def reset(s):
         c = var(f'{s.prf}char')
-        fixsounds(c,prf=s.prf)
+        fixsounds(c, prf=s.prf)
         bui.getsound('block').play()
-        push('Restored default sounds!',color=(0.5,0.5,1))
+        push('Restored default sounds!', color=(0.5, 0.5, 1))
         s.update()
     """Fresh"""
-    def fresh(s,i,j):
+    def fresh(s, i, j):
         o, t = j
-        var(f'{s.prf}sound{o}',[i,t])
+        var(f'{s.prf}sound{o}', [i, t])
         s.update()
+
 
 class SoundPipe:
     """Sound pipe"""
-    def __init__(s,pipe=lambda:None,source=None,action=None,prf=''):
+    def __init__(s, pipe=lambda: None, source=None, action=None, prf=''):
         s.pipe = pipe
         s.z = icw(
             title=DIR('sounds')[action],
             show_nuke=False,
             in_source=source,
             outside_action='back',
-            size=(400,200),
+            size=(400, 200),
             back_anim='out_scale'
         )
         w = s.z.widget
-        t = var(f'{prf}sound{action}') or [0,0]
+        t = var(f'{prf}sound{action}') or [0, 0]
         t = AUDIO()[t[0]] if t[1] else NAME()[t[0]]
         s.t = tw(
             p=w,
-            pos=(175,85),
+            pos=(175, 85),
             h_align='center',
             text=t
         )
         b = bw(
             p=w,
-            pos=(50,25),
-            size=(150,50),
+            pos=(50, 25),
+            size=(150, 50),
             label='Characters'
         )
-        bw(b,oac=bs.CallPartial(CharPicker,pipe=s.pick,source=b,what='Select a sound',extra=[action,0],prf=None))
+        bw(b, oac=bs.CallPartial(CharPicker, pipe=s.pick, source=b,
+           what='Select a sound', extra=[action, 0], prf=None))
         b = bw(
             p=w,
-            pos=(200,25),
-            size=(150,50),
+            pos=(200, 25),
+            size=(150, 50),
             label='All Sounds'
         )
-        bw(b,oac=bs.CallPartial(SoundPicker,source=b,pipe=s.pick,extra=[action,1]))
+        bw(b, oac=bs.CallPartial(SoundPicker, source=b, pipe=s.pick, extra=[action, 1]))
     """Redirect all"""
-    def pick(s,i,j):
+    def pick(s, i, j):
         s.z.back()
-        s.pipe(i,j)
+        s.pipe(i, j)
+
 
 class SoundPicker:
     """Sound picker"""
-    def __init__(s,source=None,pipe=lambda a:None,what='Select a sound',extra=None):
+    def __init__(s, source=None, pipe=lambda a: None, what='Select a sound', extra=None):
         s.pipe = pipe
         s.extra = extra
-        size = (600,500)
+        size = (600, 500)
         al = s.al = AUDIO()
         s.z = z = icw(
             title=what,
@@ -932,21 +1044,21 @@ class SoundPicker:
         ss = 30 * v
         sv = bui.scrollwidget(
             parent=w,
-            size=(210,360),
-            position=(60,50),
+            size=(210, 360),
+            position=(60, 50),
             color=var('bg')
         )
         cv = cw(
             parent=sv,
             background=False,
-            size=(280,ss)
+            size=(280, ss)
         )
         s.texts = []
         # List sounds
         s.n = lambda: var('sp') or 0
-        j = {'parent':cv,'size':(280,30)}
+        j = {'parent': cv, 'size': (280, 30)}
         for i in range(v):
-            p = (10,(ss-30)-i*30)
+            p = (10, (ss-30)-i*30)
             t = tw(
                 pos=p,
                 maxwidth=210,
@@ -956,56 +1068,58 @@ class SoundPicker:
             )
             bw(
                 pos=p,
-                oac=bs.CallPartial(s.preview,i,extra),
+                oac=bs.CallPartial(s.preview, i, extra),
                 texture=bui.gettexture('empty'),
                 **j
             )
             s.texts.append(t)
         s.t = tw(
             p=w,
-            pos=(300,370),
+            pos=(300, 370),
             maxwidth=290,
             text=al[s.n()]
         )
-        s.up = lambda: cw(cv,visible_child=s.texts[s.n()])
+        s.up = lambda: cw(cv, visible_child=s.texts[s.n()])
         bw(
             p=w,
             label='Pick',
-            size=(100,50),
-            pos=(460,50),
-            oac=lambda: s.pick(s.n(),extra)
+            size=(100, 50),
+            pos=(460, 50),
+            oac=lambda: s.pick(s.n(), extra)
         )
         for i in range(4):
-            j = ['ouyaOButton','ouyaAButton','upButton','downButton'][i]
-            k = [s.play,s.stop,s.prev,s.next][i]
+            j = ['ouyaOButton', 'ouyaAButton', 'upButton', 'downButton'][i]
+            k = [s.play, s.stop, s.prev, s.next][i]
             sbw(
                 p=w,
                 icon=bui.gettexture(j),
-                pos=(300+50*i,300),
-                repeat=i>1,
+                pos=(300+50*i, 300),
+                repeat=i > 1,
                 oac=k
             )
         c = chk(
             parent=w,
-            on_value_change_call=lambda auto: var('spa',auto),
-            position=(300,50),
-            size=(100,50),
+            on_value_change_call=lambda auto: var('spa', auto),
+            position=(300, 50),
+            size=(100, 50),
             value=var('spa') or False,
             text='Autoplay'
         )
-        chk(c,color=darken(var('bg')),textcolor=(1,1,1))
+        chk(c, color=darken(var('bg')), textcolor=(1, 1, 1))
         s.update(True)
     """Prev"""
     def prev(s):
         n = s.n() - 1
-        if n < 0: n = len(s.al) - 1
-        var('sp',n)
+        if n < 0:
+            n = len(s.al) - 1
+        var('sp', n)
         s.update()
     """Next"""
     def next(s):
         n = s.n() + 1
-        if n >= len(s.al): n = 0
-        var('sp',n)
+        if n >= len(s.al):
+            n = 0
+        var('sp', n)
         s.update()
     """Play"""
     def play(s):
@@ -1014,41 +1128,45 @@ class SoundPicker:
         s.v.play()
     """Stop"""
     def stop(s):
-        try: s.v.stop()
-        except: pass
+        try:
+            s.v.stop()
+        except:
+            pass
     """Update"""
-    def update(s,first=False):
+    def update(s, first=False):
         for i in range(len(s.texts)):
-            tw(s.texts[i],color=(0,1,0) if s.n() == i else (1,1,1))
+            tw(s.texts[i], color=(0, 1, 0) if s.n() == i else (1, 1, 1))
         s.up()
-        if var('spa') and not first: s.play()
+        if var('spa') and not first:
+            s.play()
     """Preview"""
-    def preview(s,n,e):
+    def preview(s, n, e):
         s.stop()
         t = s.al[n]
-        var('sp',n)
+        var('sp', n)
         tw(s.t, text=t)
         s.update()
     """Redirect"""
-    def pick(s,i,j):
+    def pick(s, i, j):
         s.stop()
         gun()
-        s.pipe(i,j)
+        s.pipe(i, j)
         s.z.back()
+
 
 class MeshManager:
     """Mesh manager"""
-    def __init__(s,source=None,on_back=None,prf='',cols=None):
+    def __init__(s, source=None, on_back=None, prf='', cols=None):
         w = icw(
             title='Mesh',
-            size=(400,530),
+            size=(400, 530),
             show_nuke=False,
             in_source=source,
             outside_action='back',
             on_back=on_back,
             back_anim='out_scale' if source else 'out_right',
             note_scale=0.55,
-            note_pos=(25,15),
+            note_pos=(25, 15),
             note='Some characters use kronk parts, it\'s not a bug.'
         ).widget
         s.kids = []
@@ -1058,32 +1176,32 @@ class MeshManager:
         mem = DIR('mesh')
         s.prf = prf
         for i in range(len(mem)):
-            px = [55,55,110,111,111,111,110,55,111][i]
-            py = [245,190,350,90,189,45,237,300,140][i]
-            sx = [50,50,100,100,100,100,100,50,100][i]
-            sy = [50,50,100,45,50,40,120,50,45][i]
+            px = [55, 55, 110, 111, 111, 111, 110, 55, 111][i]
+            py = [245, 190, 350, 90, 189, 45, 237, 300, 140][i]
+            sx = [50, 50, 100, 100, 100, 100, 100, 50, 100][i]
+            sy = [50, 50, 100, 45, 50, 40, 120, 50, 45][i]
             l = mem[i][:-5]
             b = bw(
                 p=w,
-                pos=(100+px,py),
-                size=(sx,sy),
-                text_scale=[1,1.5][sx<51],
+                pos=(100+px, py),
+                size=(sx, sy),
+                text_scale=[1, 1.5][sx < 51],
                 label=l.split('_')[0]
             )
-            bw(b,oac=bs.CallPartial(MeshPipe,pipe=s.fresh,source=b,part=i,title=l,prf=prf))
-            tx = [105,105,325,325,325,325,325,105,325][i]
-            ty = [253,199,385,97,199,49,282,307,147][i]
+            bw(b, oac=bs.CallPartial(MeshPipe, pipe=s.fresh, source=b, part=i, title=l, prf=prf))
+            tx = [105, 105, 325, 325, 325, 325, 325, 105, 325][i]
+            ty = [253, 199, 385, 97, 199, 49, 282, 307, 147][i]
             t = pbw(
                 p=w,
-                pos=(tx,ty),
-                size=(25.5,25.5),
+                pos=(tx, ty),
+                size=(25.5, 25.5),
                 tex=s.cols()
             )
             s.kids.append(t)
         sbw(
             p=w,
             icon=bui.gettexture('backIcon'),
-            pos=(320,461),
+            pos=(320, 461),
             color=darken(var('bg')),
             oac=s.reset
         )
@@ -1091,66 +1209,72 @@ class MeshManager:
         for i in range(2):
             b = bw(
                 p=w,
-                pos=(50,115-73*i),
-                size=(160,70)
+                pos=(50, 115-73*i),
+                size=(160, 70)
             )
-            j = ['Texture','Mask'][i]
-            bw(b,oac=bs.CallPartial(TexPipe,source=b,pipe=s.update,prf=prf,mask=i,what=j))
+            j = ['Texture', 'Mask'][i]
+            bw(b, oac=bs.CallPartial(TexPipe, source=b, pipe=s.update, prf=prf, mask=i, what=j))
             tw(
                 p=w,
-                pos=(120,135-73*i),
+                pos=(120, 135-73*i),
                 h_align='center',
                 text=j
             )
             s.img.append(bui.imagewidget(
                 parent=w,
-                position=(68,135-73*i),
+                position=(68, 135-73*i),
                 draw_controller=b,
-                size=(30,30)
+                size=(30, 30)
             ))
         b = bw(
             p=w,
-            pos=(50,350),
+            pos=(50, 350),
             label='Select All',
             text_scale=1.3,
-            size=(160,100)
+            size=(160, 100)
         )
-        bw(b,oac=lambda: CharPicker(pipe=s.all,source=b,note='To avoid confusion, character will be fully changed.',prf=None))
+        bw(b, oac=lambda: CharPicker(pipe=s.all, source=b,
+           note='To avoid confusion, character will be fully changed.', prf=None))
         s.update()
     """Set all"""
-    def all(s,i,e=None):
+    def all(s, i, e=None):
         na = NAME()
         n = na[i]
         s.reset(n)
-        if var(f'{s.prf}tchar') in na: var(f'{s.prf}tchar',n)
-        var(f'{s.prf}char',n)
-        push('Character changed!',color=(1,1,0))
+        if var(f'{s.prf}tchar') in na:
+            var(f'{s.prf}tchar', n)
+        var(f'{s.prf}char', n)
+        push('Character changed!', color=(1, 1, 0))
         s.on_back() if callable(s.on_back) else None
     """Reset"""
-    def reset(s,c=None):
+    def reset(s, c=None):
         if not c:
             c = var(f'{s.prf}char')
             bui.getsound('block').play()
-            push('Restored default mesh!',color=(0.5,0.5,1))
-        fixmesh(c,prf=s.prf)
+            push('Restored default mesh!', color=(0.5, 0.5, 1))
+        fixmesh(c, prf=s.prf)
         s.update()
     """Update previews"""
     def update(s):
         for i in range(len(DIR('mesh'))):
             g = var(f'{s.prf}mesh{i}')
-            bw(s.kids[i],texture=bui.gettexture('menuIcon'),color=(1,1,1),oac=bs.CallPartial(bs.broadcastmessage,g))
-        bui.imagewidget(s.img[0],texture=bui.gettexture(var(f'{s.prf}ctex') or get_ctex(var('char'))))
-        bui.imagewidget(s.img[1],texture=bui.gettexture(var(f'{s.prf}ctex2') or get_ctex2(var('char'))))
+            bw(s.kids[i], texture=bui.gettexture('menuIcon'), color=(
+                1, 1, 1), oac=bs.CallPartial(bs.broadcastmessage, g))
+        bui.imagewidget(s.img[0], texture=bui.gettexture(
+            var(f'{s.prf}ctex') or get_ctex(var('char'))))
+        bui.imagewidget(s.img[1], texture=bui.gettexture(
+            var(f'{s.prf}ctex2') or get_ctex2(var('char'))))
     """Fresh"""
-    def fresh(s,j,n):
-        var(f'{s.prf}mesh{j}',n)
+    def fresh(s, j, n):
+        var(f'{s.prf}mesh{j}', n)
         s.update()
+
 
 class MeshPicker:
     """Mesh picker"""
-    def __init__(s,source=None,pipe=lambda a:None,what='Select a mesh',mem=None,extra=None):
+    def __init__(s, source=None, pipe=lambda a: None, what='Select a mesh', mem=None, extra=None):
         s.pipe = pipe
-        size = (420,500)
+        size = (420, 500)
         al = s.al = mem or MESH()
         s.z = z = icw(
             title=what,
@@ -1165,20 +1289,20 @@ class MeshPicker:
         ss = 30 * v
         sv = bui.scrollwidget(
             parent=w,
-            size=(310,360),
-            position=(60,50),
+            size=(310, 360),
+            position=(60, 50),
             color=var('bg')
         )
         cv = cw(
             parent=sv,
             background=False,
-            size=(380,ss)
+            size=(380, ss)
         )
         s.texts = []
         # List meshes
         s.n = lambda: var('mp') or 0
         for i in range(v):
-            p = (10,(ss-30)-i*30)
+            p = (10, (ss-30)-i*30)
             j = al[i]
             t = tw(
                 pos=p,
@@ -1186,43 +1310,48 @@ class MeshPicker:
                 v_align='center',
                 text=j,
                 p=cv,
-                size=(280,30),
+                size=(280, 30),
                 click_activate=True,
                 selectable=True,
-                on_activate_call=bs.CallPartial(s.fresh,i,j)
+                on_activate_call=bs.CallPartial(s.fresh, i, j)
             )
             s.texts.append(t)
-        s.up = lambda: cw(cv,visible_child=s.texts[s.n()])
+        s.up = lambda: cw(cv, visible_child=s.texts[s.n()])
         bw(
             p=w,
             label='Pick',
-            size=(100,50),
-            pos=(270,0),
-            oac=bs.CallPartial(s.pick,extra)
+            size=(100, 50),
+            pos=(270, 0),
+            oac=bs.CallPartial(s.pick, extra)
         )
         s.fresh()
     """Refresh"""
-    def fresh(s,i=None,j=None):
+    def fresh(s, i=None, j=None):
         if i is not None:
-            var('mp',i)
+            var('mp', i)
             s.m = j
-            [tw(t,color=(1,1,1)) for t in s.texts]
-        else: i = s.n()
-        tw(s.texts[i],color=(0,1,0))
+            [tw(t, color=(1, 1, 1)) for t in s.texts]
+        else:
+            i = s.n()
+        tw(s.texts[i], color=(0, 1, 0))
         s.up()
     """Redirect"""
-    def pick(s,e):
+    def pick(s, e):
         n = s.n()
         try:
-            with bs.get_foreground_host_activity().context: bs.getmesh(s.m)
-        except: btw("Can't use this mesh!"); return
+            with bs.get_foreground_host_activity().context:
+                bs.getmesh(s.m)
+        except:
+            btw("Can't use this mesh!")
+            return
         gun()
-        s.pipe(n,e)
+        s.pipe(n, e)
         s.z.back()
+
 
 class MeshPipe:
     """Mesh pipe"""
-    def __init__(s,pipe=lambda:None,source=None,part=None,prf='',title=None):
+    def __init__(s, pipe=lambda: None, source=None, part=None, prf='', title=None):
         s.pipe = pipe
         s.part = part
         s.mem = MESH()
@@ -1232,40 +1361,42 @@ class MeshPipe:
             show_nuke=False,
             in_source=source,
             outside_action='back',
-            size=(400,200),
+            size=(400, 200),
             back_anim='out_scale'
         )
         w = s.z.widget
         t = var(f'{prf}mesh{part}')
         s.t = tw(
             p=w,
-            pos=(175,85),
+            pos=(175, 85),
             h_align='center',
             text=t
         )
         b = bw(
             p=w,
-            pos=(50,25),
-            size=(150,50),
+            pos=(50, 25),
+            size=(150, 50),
             label='Characters'
         )
-        bw(b,oac=bs.CallPartial(CharPicker,pipe=s.pick,source=b,what=f'Get {title} from',extra=0,prf=None))
+        bw(b, oac=bs.CallPartial(CharPicker, pipe=s.pick,
+           source=b, what=f'Get {title} from', extra=0, prf=None))
         b = bw(
             p=w,
-            pos=(200,25),
-            size=(150,50),
+            pos=(200, 25),
+            size=(150, 50),
             label='All Meshes'
         )
-        bw(b,oac=bs.CallPartial(MeshPicker,source=b,pipe=s.pick,extra=1,mem=s.mem,what=f'Pick a mesh'))
+        bw(b, oac=bs.CallPartial(MeshPicker, source=b, pipe=s.pick, extra=1, mem=s.mem, what=f'Pick a mesh'))
     """Redirect all"""
-    def pick(s,i,j):
+    def pick(s, i, j):
         s.z.back()
-        m = s.mem[i] if j else getattr(SPAZ()[i],s.title+'_mesh')
-        s.pipe(s.part,m)
+        m = s.mem[i] if j else getattr(SPAZ()[i], s.title+'_mesh')
+        s.pipe(s.part, m)
+
 
 class TexPipe:
     """Texture pipe"""
-    def __init__(s,pipe=lambda:None,source=None,prf='',mask=False,what='Texture'):
+    def __init__(s, pipe=lambda: None, source=None, prf='', mask=False, what='Texture'):
         s.pipe = pipe
         s.mask = mask
         s.z = icw(
@@ -1273,45 +1404,47 @@ class TexPipe:
             show_nuke=False,
             in_source=source,
             outside_action='back',
-            size=(400,200),
+            size=(400, 200),
             back_anim='out_scale'
         )
         w = s.z.widget
         s.prf = prf
-        s.vs = f"{s.prf}ctex{['','2'][s.mask]}"
-        s.vf = [get_ctex,get_ctex2][mask]
+        s.vs = f"{s.prf}ctex{['', '2'][s.mask]}"
+        s.vf = [get_ctex, get_ctex2][mask]
         v = var(s.vs) or s.vf(var('char'))
         s.t = tw(
             p=w,
-            pos=(175,85),
+            pos=(175, 85),
             h_align='center',
             text=v
         )
         b = bw(
             p=w,
-            pos=(50,25),
-            size=(150,50),
+            pos=(50, 25),
+            size=(150, 50),
             label='Characters'
         )
-        bw(b,oac=bs.CallPartial(CharPicker,pipe=bs.CallPartial(s.pick,0),source=b,what='Get texture from',prf=None))
+        bw(b, oac=bs.CallPartial(CharPicker, pipe=bs.CallPartial(
+            s.pick, 0), source=b, what='Get texture from', prf=None))
         b = bw(
             p=w,
-            pos=(200,25),
-            size=(150,50),
+            pos=(200, 25),
+            size=(150, 50),
             label='All Textures'
         )
-        bw(b,oac=bs.CallPartial(TexPicker,source=b,pipe=bs.CallPartial(s.pick,1)))
+        bw(b, oac=bs.CallPartial(TexPicker, source=b, pipe=bs.CallPartial(s.pick, 1)))
     """On pick"""
-    def pick(s,n,p,e=None):
+    def pick(s, n, p, e=None):
         s.z.back()
-        var(s.vs,ALL()[p] if n else s.vf(NAME()[p]))
+        var(s.vs, ALL()[p] if n else s.vf(NAME()[p]))
         s.pipe()
+
 
 class TexPicker:
     """Texture picker"""
-    def __init__(s,source=None,pipe=lambda a:None,what='Select a texture'):
+    def __init__(s, source=None, pipe=lambda a: None, what='Select a texture'):
         s.pipe = pipe
-        size = (600,500)
+        size = (600, 500)
         al = s.al = ALL()
         s.z = z = icw(
             title=what,
@@ -1327,14 +1460,14 @@ class TexPicker:
         ss = 100 * v
         sv = bui.scrollwidget(
             parent=w,
-            size=(510,360),
-            position=(60,50),
+            size=(510, 360),
+            position=(60, 50),
             color=var('bg')
         )
         cv = cw(
             parent=sv,
             background=False,
-            size=(480,ss)
+            size=(480, ss)
         )
         # List textures
         txt = {}
@@ -1343,36 +1476,38 @@ class TexPicker:
                 n = (i*h)+j
                 b = bw(
                     p=cv,
-                    size=(65,65),
-                    pos=(j*85,(ss-65)-i*100),
+                    size=(65, 65),
+                    pos=(j*85, (ss-65)-i*100),
                     texture=bui.gettexture(al[n]),
                 )
-                bw(b, color=(1,1,1), oac=bs.CallPartial(s.pick,n))
+                bw(b, color=(1, 1, 1), oac=bs.CallPartial(s.pick, n))
                 t = al[n]
                 m = 15
-                if len(t) > m: t = t[:m]+'\n'+t[m:]
+                if len(t) > m:
+                    t = t[:m]+'\n'+t[m:]
                 o = tw(p=cv,
-                    maxwidth=65,
-                    max_height=25,
-                    pos=(j*85,(ss-100)-i*100),
-                    v_align='top',
-                    text=t
-                )
+                       maxwidth=65,
+                       max_height=25,
+                       pos=(j*85, (ss-100)-i*100),
+                       v_align='top',
+                       text=t
+                       )
                 txt[al[n]] = o
     """Redirect"""
-    def pick(s,n):
+    def pick(s, n):
         gun()
         s.pipe(n)
         s.z.back()
 
+
 class CharPicker:
     """Character picker"""
     def __init__(
-        s,pipe,source=None,what='Select a character',
-        note='',extra=None,cols=None,prf=''
+        s, pipe, source=None, what='Select a character',
+        note='', extra=None, cols=None, prf=''
     ):
         s.pipe = pipe
-        size = (600,500)
+        size = (600, 500)
         ah = s.ah = SPAZ()
         v = 1+len(ah) // 3
         s.z = z = icw(
@@ -1388,47 +1523,50 @@ class CharPicker:
         sv = bui.scrollwidget(
             parent=w,
             color=var('bg'),
-            size=(510,360),
-            position=(60,50))
+            size=(510, 360),
+            position=(60, 50))
         cv = cw(
             parent=sv,
             background=False,
-            size=(480,v*150+180))
+            size=(480, v*150+180))
         # List characters
         txt = {}
         hm = NAME()
-        mem = [COLS,cols][bool(cols)]()
+        mem = [COLS, cols][bool(cols)]()
         for i in range(v):
             for j in range(3):
                 n = (i*3)+j
-                if n >= len(ah): continue
+                if n >= len(ah):
+                    continue
                 xp = 30+j*150
                 yp = 1160-(i*180)-40
                 pbw(
                     p=cv,
-                    size=(120,120),
-                    pos=(xp,yp-20),
+                    size=(120, 120),
+                    pos=(xp, yp-20),
                     texture=bui.gettexture(ah[n].icon_texture),
                     tint_texture=bui.gettexture(ah[n].icon_mask_texture),
-                    oac=bs.CallPartial(s.pick,n,extra),
+                    oac=bs.CallPartial(s.pick, n, extra),
                     tex=mem
                 )
                 t = tw(
                     p=cv,
                     maxwidth=120,
-                    pos=(xp+35,yp-52),
+                    pos=(xp+35, yp-52),
                     h_align='center',
                     v_align='center',
                     text=hm[n],
                     color=var(mem[2])
                 )
                 txt[hm[n]] = t
-        if prf is not None: cw(cv, visible_child=txt[var(f'{prf}char')])
+        if prf is not None:
+            cw(cv, visible_child=txt[var(f'{prf}char')])
     """Redirect"""
-    def pick(s,n,e):
+    def pick(s, n, e):
         gun()
         s.z.back()
-        s.pipe(n,*([e] if e is not None else []))
+        s.pipe(n, *([e] if e is not None else []))
+
 
 class SpazPicker:
     """Spaz picker"""
@@ -1442,15 +1580,17 @@ class SpazPicker:
         note=None
     ):
         s.pipe = pipe
-        s.deny = [deny,deny_msg]
-        with bs.get_foreground_host_activity().context: all = [_ for _ in KIDS() if getattr(_,'exists',lambda:False)() and not getattr(_.getdelegate(object),'_dead',True)]
+        s.deny = [deny, deny_msg]
+        with bs.get_foreground_host_activity().context:
+            all = [_ for _ in KIDS() if getattr(_, 'exists', lambda: False)()
+                   and not getattr(_.getdelegate(object), '_dead', True)]
         l = len(all)
-        v = l//3+[1,0][l%3<1]
+        v = l//3+[1, 0][l % 3 < 1]
         yl = v*185
         s.z = z = icw(
             title=what,
             in_source=source,
-            size=(600,500),
+            size=(600, 500),
             outside_action='back',
             show_nuke=False,
             back_anim='out_scale',
@@ -1460,42 +1600,48 @@ class SpazPicker:
         sv = bui.scrollwidget(
             color=var('bg'),
             parent=w,
-            size=(510,360),
-            position=(60,50)
+            size=(510, 360),
+            position=(60, 50)
         )
         cv = cw(
             parent=sv,
             background=False,
-            size=(480,yl)
+            size=(480, yl)
         )
         yl -= 150
         # List characters
         tex = ALL()
         for i in range(v):
             for j in range(3):
-                try: k = (i*3)+j; n = all[k]
-                except: return
-                ui = NTEX(n,tex)
+                try:
+                    k = (i*3)+j
+                    n = all[k]
+                except:
+                    return
+                ui = NTEX(n, tex)
                 pbw(
                     p=cv,
-                    size=(120,120),
-                    pos=(155*j+30,yl-185*i),
-                    oac=bs.CallPartial(s.pick,n),
+                    size=(120, 120),
+                    pos=(155*j+30, yl-185*i),
+                    oac=bs.CallPartial(s.pick, n),
                     **ui[0]
                 )
                 tw(
                     p=cv,
                     maxwidth=120,
-                    pos=(155*j+65,yl-185*i-35),
+                    pos=(155*j+65, yl-185*i-35),
                     h_align='center',
                     color=ui[1],
                     text=n.name or 'Unnamed'
                 )
     """Clean up"""
-    def pick(s,n):
-        if n in s.deny[0]: btw(s.deny[1]); return
+    def pick(s, n):
+        if n in s.deny[0]:
+            btw(s.deny[1])
+            return
         s.z.back()
         s.pipe(n)
+
 
 class ColorPicker:
     """Color picker"""
@@ -1510,13 +1656,13 @@ class ColorPicker:
         mode: int = 0,
     ):
         s.mode = mode
-        s.color = (var(what) or (1,1,1))
+        s.color = (var(what) or (1, 1, 1))
         s.what = what
         s.on_back = on_back
         s.in_source = in_source
         size = (450, 570)
-        x,y = s.x,s.y = size
-        s.rgb = ['Red','Green','Blue']
+        x, y = s.x, s.y = size
+        s.rgb = ['Red', 'Green', 'Blue']
         z = icw(
             show_nuke=False,
             in_source=in_source,
@@ -1527,7 +1673,7 @@ class ColorPicker:
             outside_action='back',
             note='To support neon colors, a 12-point hex is used.',
             note_scale=0.5,
-            note_pos=(50,6)
+            note_pos=(50, 6)
         )
         w = s.w = z.widget
         s.kids = {}
@@ -1535,30 +1681,31 @@ class ColorPicker:
         s.shad = []
         char = D()[var(chr)]
         # Color preview
-        pre = MK(char,id,id2)[mode>1]
+        pre = MK(char, id, id2)[mode > 1]
         tex = bui.imagewidget(
             parent=w,
-            color=(1,1,1),
-            size=(165,165),
-            position=(45,320),
+            color=(1, 1, 1),
+            size=(165, 165),
+            position=(45, 320),
             **pre
         )
-        if s.mode == 2: bui.imagewidget(tex, color=s.color)
+        if s.mode == 2:
+            bui.imagewidget(tex, color=s.color)
         s.pre = tex
         # RGBH editables
         for i in range(4):
-            e = [*s.rgb,'Hex'][i]
-            c = [(1,0,0),(0,1,0),(0,0,1),s.color][i]
+            e = [*s.rgb, 'Hex'][i]
+            c = [(1, 0, 0), (0, 1, 0), (0, 0, 1), s.color][i]
             t = str(float(s.color[i]))[:5] if i < 3 else c2h(s.color)
-            v = ['-#abcdef0123456789','-0.123456789'][i<3]
+            v = ['-#abcdef0123456789', '-0.123456789'][i < 3]
             xp = 220
             yp = 437-i*33
             bi = bui.imagewidget(
                 parent=w,
-                position=(xp+194,yp),
-                size=(33,33),
+                position=(xp+194, yp),
+                size=(33, 33),
                 opacity=0,
-                color=(30,0,0),
+                color=(30, 0, 0),
                 texture=bui.gettexture('crossOut'),
             )
             o = ctw(
@@ -1569,18 +1716,18 @@ class ColorPicker:
                 bad_image=bi,
                 hint=e,
                 color=c,
-                size=(195,33),
+                size=(195, 33),
                 text=t,
-                pos=(xp,yp)
+                pos=(xp, yp)
             )
             s.kids[e] = o
         # Random button
         bw(
             p=w,
-            size=(50,50),
+            size=(50, 50),
             scale=0.9,
             color=darken(var('bg')),
-            pos=(380,500),
+            pos=(380, 500),
             oac=s.randomize,
             icon=bui.gettexture('replayIcon'),
             button_type='regular',
@@ -1592,16 +1739,16 @@ class ColorPicker:
             for j in range(5):
                 r = bw(
                     p=s.w,
-                    size=(68,68),
-                    pos=(56+j*73,237-i*69)
+                    size=(68, 68),
+                    pos=(56+j*73, 237-i*69)
                 )
                 s.rans.append(r)
         # Shade row
         for j in range(5):
             r = bw(
                 p=s.w,
-                size=(68,68),
-                pos=(56+j*73,30)
+                size=(68, 68),
+                pos=(56+j*73, 30)
             )
             s.shad.append(r)
         s.shade()
@@ -1611,17 +1758,18 @@ class ColorPicker:
         c = s.color
         for i in range(5):
             h = (i+0.5)/2
-            d = (c[0]*h,c[1]*h,c[2]*h)
+            d = (c[0]*h, c[1]*h, c[2]*h)
             bw(
                 s.shad[i],
                 color=d,
-                oac=bs.CallPartial(s.set,d)
+                oac=bs.CallPartial(s.set, d)
             )
     """Randomize"""
-    def randomize(s,silent=False):
+    def randomize(s, silent=False):
         min = -1
         max = 1
-        ran = [[tuple([random.uniform(min+k/4,max+k/2) for i in range(3)]) for j in range(5)] for k in range(3)]
+        ran = [[tuple([random.uniform(min+k/4, max+k/2) for i in range(3)])
+                for j in range(5)] for k in range(3)]
         lol = (i for i in s.rans)
         for i in range(3):
             for j in range(5):
@@ -1629,19 +1777,19 @@ class ColorPicker:
                 r = bw(
                     next(lol),
                     color=c,
-                    oac=bs.CallPartial(s.set,c),
+                    oac=bs.CallPartial(s.set, c),
                 )
         None if silent else bui.getsound('cashRegister2').play()
     """Set color"""
-    def set(s,c):
+    def set(s, c):
         bui.getsound('tap').play()
         for i in range(3):
             var(s.what+s.rgb[i], c[i])
             w = s.kids[s.rgb[i]].widget
             tw(w, text=str(c[i])[:5])
-            tw(w, color=(1,0,0) if i < 1 else \
-                        (0,1,0) if i < 2 else \
-                        (0,0,1))
+            tw(w, color=(1, 0, 0) if i < 1 else
+                        (0, 1, 0) if i < 2 else
+                        (0, 0, 1))
         var(s.what+'Hex', c2h(c))
         s.fresh(None)
     """Obtain rgb"""
@@ -1649,46 +1797,54 @@ class ColorPicker:
         a = []
         for i in s.rgb:
             o = var(s.what+i)
-            v = float(o if o not in [None,''] else 1.0)
+            v = float(o if o not in [None, ''] else 1.0)
             a.append(v)
         return a
     """Obtain hex"""
     def get_hex(s):
         return c2h(s.get_rgb())
     """On edit"""
-    def on_edit(s,k,v):
-        if v == '' and k == 'Hex': return
-        var(s.what+k,v)
+    def on_edit(s, k, v):
+        if v == '' and k == 'Hex':
+            return
+        var(s.what+k, v)
         if k in s.rgb:
             if not '.' in v and v:
                 v = v+".0"
                 s.kids[k].set_text(v)
-            var(s.what+'Hex',s.get_hex())
+            var(s.what+'Hex', s.get_hex())
         elif k == 'Hex':
             if not v.startswith('#') and len(v) < 13:
                 v = '#'+v
                 s.kids['Hex'].set_text(v)
-            if len(v.replace('#','')) < 12:
-                for i in range(12-len(v)): v += '0'
-            try: c = h2c(v)
-            except: return
-            [var(s.what+s.rgb[i],c[i]) for i in range(len(s.rgb))]
+            if len(v.replace('#', '')) < 12:
+                for i in range(12-len(v)):
+                    v += '0'
+            try:
+                c = h2c(v)
+            except:
+                return
+            [var(s.what+s.rgb[i], c[i]) for i in range(len(s.rgb))]
         s.fresh(k)
     """Refresh values"""
-    def fresh(s,k):
+    def fresh(s, k):
         if k == 'Hex':
             for i in s.rgb:
                 v = var(s.what+i)
-                if v == '': continue
+                if v == '':
+                    continue
                 s.kids[i].set_text(str(v)[:5])
         else:
             s.kids['Hex'].set_text(var(s.what+'Hex'))
         c = s.get_rgb()
         s.color = c
         s.shade()
-        if not s.mode: bui.imagewidget(s.pre, tint_color=c)
-        elif s.mode < 2: bui.imagewidget(s.pre, tint2_color=c)
-        else: bui.imagewidget(s.pre, color=c)
+        if not s.mode:
+            bui.imagewidget(s.pre, tint_color=c)
+        elif s.mode < 2:
+            bui.imagewidget(s.pre, tint2_color=c)
+        else:
+            bui.imagewidget(s.pre, color=c)
         tw(s.kids['Hex'].widget, color=s.color)
     """On back"""
     def back(s):
@@ -1696,15 +1852,16 @@ class ColorPicker:
         bw(s.in_source, color=s.color)
         s.on_back() if callable(s.on_back) else None
 
+
 class NodeManager:
     """Node manager"""
-    def __init__(s,node,source=None,pipe=None) -> None:
+    def __init__(s, node, source=None, pipe=None) -> None:
         s.node = node
         z = icw(
             in_source=source,
             title='Manage',
             show_nuke=False,
-            size=(450,300),
+            size=(450, 300),
             back_anim='out_scale',
             out_source=source,
             on_back=pipe
@@ -1713,31 +1870,35 @@ class NodeManager:
         s.t = atw(
             p=w,
             obj=node,
-            pos=(70,65),
+            pos=(70, 65),
             scale=1.3,
-            size=(280,30)
+            size=(280, 30)
         )
         s.btns = []
         for i in range(3):
-            j = ['CallPartial','Random','Modify'][i]
-            m = ['startButton','replayIcon','settingsIcon'][i]
-            o = [s.call,s.random,s.modify][i]
+            j = ['CallPartial', 'Random', 'Modify'][i]
+            m = ['startButton', 'replayIcon', 'settingsIcon'][i]
+            o = [s.call, s.random, s.modify][i]
             b = bw(
                 p=w,
                 label=j,
                 icon=bui.gettexture(m),
-                size=(130,35),
-                oac=bs.CallPartial(s.t.insp,f=o),
-                pos=(30+130*i,20)
+                size=(130, 35),
+                oac=bs.CallPartial(s.t.insp, f=o),
+                pos=(30+130*i, 20)
             )
             s.btns.append(b)
     """Random"""
-    def random(s,a):
+    def random(s, a):
         t = s.t.typ.__name__
         o = None
-        if t == 'tuple': o = tuple([round(random.uniform(0,1),1) for _ in [0,0,0]])
-        if t in ['float','int']: o = random.randrange(0,100)
-        if o is None: btw('Unrecognized type!'); return
+        if t == 'tuple':
+            o = tuple([round(random.uniform(0, 1), 1) for _ in [0, 0, 0]])
+        if t in ['float', 'int']:
+            o = random.randrange(0, 100)
+        if o is None:
+            btw('Unrecognized type!')
+            return
         Modder(
             obj=s.node,
             source=s.btns[1],
@@ -1747,13 +1908,19 @@ class NodeManager:
             label='Apply'
         )
     """CallPartial"""
-    def call(s,a):
-        if not callable(a): btw('Not callable!'); return
-        CallPartialer(obj=a,source=s.btns[0])
+    def call(s, a):
+        if not callable(a):
+            btw('Not callable!')
+            return
+        CallPartialer(obj=a, source=s.btns[0])
     """Modify"""
-    def modify(s,a):
-        if s.t.dead: btw('Object is dead!'); return
-        if callable(a): btw("You can't modify a callable!"); return
+    def modify(s, a):
+        if s.t.dead:
+            btw('Object is dead!')
+            return
+        if callable(a):
+            btw("You can't modify a callable!")
+            return
         Modder(
             obj=s.node,
             source=s.btns[2],
@@ -1761,11 +1928,12 @@ class NodeManager:
             old=a
         )
 
+
 class Confirm:
     """Action confirmer"""
-    def __init__(s,source,pipe,title,label):
+    def __init__(s, source, pipe, title, label):
         z = icw(
-            size=(280,150),
+            size=(280, 150),
             title=title,
             auto_offset=False,
             back_anim='out_scale',
@@ -1775,20 +1943,21 @@ class Confirm:
         )
         bw(
             p=z.widget,
-            pos=(20,10),
-            size=(240,50),
+            pos=(20, 10),
+            size=(240, 50),
             label=label,
-            oac=lambda:(pipe(),z.back())
+            oac=lambda: (pipe(), z.back())
         )
+
 
 class CallPartialer:
     """Object caller"""
-    def __init__(s,source,obj):
+    def __init__(s, source, obj):
         z = icw(
             in_source=source,
             show_nuke=False,
             back_anim='out_scale',
-            size=(450,500),
+            size=(450, 500),
             title='CallPartial'
         )
         w = z.widget
@@ -1796,91 +1965,98 @@ class CallPartialer:
         tw(
             p=w,
             text=str(obj),
-            color=(0,1,0),
-            pos=(50,390),
+            color=(0, 1, 0),
+            pos=(50, 390),
             v_align='center',
             maxwidth=380
         )
         tw(
             p=w,
             text=GETSIG(obj),
-            color=(0,0.6,1),
-            pos=(50,362),
+            color=(0, 0.6, 1),
+            pos=(50, 362),
             v_align='center',
             maxwidth=380
         )
         s.at = ctw(
             allow=True,
             p=w,
-            pos=(50,330),
-            size=(380,30),
+            pos=(50, 330),
+            size=(380, 30),
             description='Arguments will be passed to target method (eg. "True, 37, DieMessage"). Leave blank to pass nothing. Any input here will be evaluated, which means you can use args defined in Coolbox too! Enter',
             hint='Args separated by comma'
         )
         d = bui.hscrollwidget(
             parent=w,
             color=var('bg'),
-            position=(44,70),
-            size=(385,250)
+            position=(44, 70),
+            size=(385, 250)
         )
         s.c = cw(
             parent=d,
-            size=(385,250),
+            size=(385, 250),
             background=False
         )
         s.log = tw(
             p=s.c,
-            pos=(0,210),
+            pos=(0, 210),
             max_height=250
         )
         s.log2 = itw(
             parent=s.c,
-            position=(0,210),
+            position=(0, 210),
             max_height=250
         )
         ok = chk(
             parent=w,
-            position=(50,45),
+            position=(50, 45),
             text='Same character width (beta)',
-            textcolor=(1,1,1),
+            textcolor=(1, 1, 1),
             scale=0.7,
             value=var('icall')
         )
-        chk(ok,on_value_change_call=lambda v:(var('icall',v),chk(ok,value=v)))
+        chk(ok, on_value_change_call=lambda v: (var('icall', v), chk(ok, value=v)))
         bw(
             p=w,
-            pos=(325,20),
+            pos=(325, 20),
             icon=bui.gettexture('startButton'),
             label='CallPartial',
-            size=(100,40),
+            size=(100, 40),
             oac=s.call
         )
     """Real call"""
     def call(s):
-        try: o = str(s.obj(*eval(f"[{s.at.get_text()}]")))
-        except: bui.getsound('error').play(); o = traceback.format_exc(); c = (1,0,0)
-        else: bui.getsound('ding').play(); c = (0,1,0)
+        try:
+            o = str(s.obj(*eval(f"[{s.at.get_text()}]")))
+        except:
+            bui.getsound('error').play()
+            o = traceback.format_exc()
+            c = (1, 0, 0)
+        else:
+            bui.getsound('ding').play()
+            c = (0, 1, 0)
         if var('icall'):
-            tw(s.log,text='')
-            s.log2.set_text(o.replace('\n','\\n'))
-            s.log2.set_color((1,1,0))
-            bui.apptimer(0.5,lambda:s.log2.set_color(c))
+            tw(s.log, text='')
+            s.log2.set_text(o.replace('\n', '\\n'))
+            s.log2.set_color((1, 1, 0))
+            bui.apptimer(0.5, lambda: s.log2.set_color(c))
             m = s.log2.total+20
         else:
-            m = GSW(max(o.splitlines(),key=len))+20
-            tw(s.log,text=o,color=(1,1,0))
+            m = GSW(max(o.splitlines(), key=len))+20
+            tw(s.log, text=o, color=(1, 1, 0))
             s.log2.set_text('')
-            bui.apptimer(0.5,lambda:tw(s.log,color=c))
-        cw(s.c,visible_child=s.log,size=([m,385][m<385],250))
+            bui.apptimer(0.5, lambda: tw(s.log, color=c))
+        cw(s.c, visible_child=s.log, size=([m, 385][m < 385], 250))
+
 
 class Modder:
     """Object modifier"""
-    def __init__(s,source,obj,attr,old,title='Modify',label='Modify'):
+    def __init__(s, source, obj, attr, old, title='Modify', label='Modify'):
         s.obj = obj
         s.attr = attr
         s.z = icw(
             title=title,
-            size=(450,180),
+            size=(450, 180),
             show_nuke=False,
             back_anim='out_scale',
             in_source=source
@@ -1890,18 +2066,18 @@ class Modder:
             allow=True,
             hint='New value (eg. True or "string")',
             description='Any input here will be evaluated. Which means you have to use quotes for strings (eg. "Name"), functions defined in coolbox.py can be used here! eg. gbt(\'agentColor\'). Enter',
-            size=(400,30),
+            size=(400, 30),
             text=f'"{old}"' if type(old) is str else str(old),
             p=w,
-            pos=(28,68)
+            pos=(28, 68)
         )
         b = bw(
-           p=w,
-           pos=(330,20),
-           icon=bui.gettexture('settingsIcon'),
-           label=label,
-           size=(100,40),
-           oac=s.mod
+            p=w,
+            pos=(330, 20),
+            icon=bui.gettexture('settingsIcon'),
+            label=label,
+            size=(100, 40),
+            oac=s.mod
         )
     """Actually modify"""
     def mod(s):
@@ -1911,54 +2087,57 @@ class Modder:
                 v = eval(v)
                 if s.attr == 'position' and isinstance(v, (tuple, list)) and len(v) == 3:
                     v = tuple(round(c, 2) for c in v)
-                setattr(s.obj,s.attr,v)
-        except Exception as E: err(str(E))
+                setattr(s.obj, s.attr, v)
+        except Exception as E:
+            err(str(E))
         else:
             bui.getsound('ding').play()
             s.z.back()
-            push('Success!',color=(0,1,0))
-            if Zoom.__ob__ == s.obj: return
-            Zoom(s.obj) if len(getattr(s.obj,'position',(0,0))) == 3 else None
+            push('Success!', color=(0, 1, 0))
+            if Zoom.__ob__ == s.obj:
+                return
+            Zoom(s.obj) if len(getattr(s.obj, 'position', (0, 0))) == 3 else None
+
 
 class atw:
     """Attribute text widget"""
-    def __init__(s,scale,obj,p,pos,size,*a,**k):
+    def __init__(s, scale, obj, p, pos, size, *a, **k):
         k.update({
-            'position':pos,
-            'editable':True,
-            'description':'Start typing to see matches. Write a star "*" to list all attrs. Enter',
-            'parent':p,
-            'maxwidth':size[0]+50,
-            'scale':scale,
-            'size':size
+            'position': pos,
+            'editable': True,
+            'description': 'Start typing to see matches. Write a star "*" to list all attrs. Enter',
+            'parent': p,
+            'maxwidth': size[0]+50,
+            'scale': scale,
+            'size': size
         })
-        s.widget = tw(*a,**k)
+        s.widget = tw(*a, **k)
         k.update({
-            'editable':False,
-            'text':'try "color" or "*"'
+            'editable': False,
+            'text': 'try "color" or "*"'
         })
-        s.widget2 = tw(*a,**k)
+        s.widget2 = tw(*a, **k)
         bw(
             p=p,
-            pos=(400,pos[1]),
-            size=(35,35),
+            pos=(400, pos[1]),
+            size=(35, 35),
             label=bui.charstr(bui.SpecialChar.UP_ARROW),
-            oac=lambda:bui.getsound('tap').play()
+            oac=lambda: bui.getsound('tap').play()
         )
         s.kids = []
         for i in range(4):
-            j = ['Type','Value','Name',str(obj)][i]
-            c = [(1,1,0),(0,1,1),(0,1,0),(1,0,1)][i]
+            j = ['Type', 'Value', 'Name', str(obj)][i]
+            c = [(1, 1, 0), (0, 1, 1), (0, 1, 0), (1, 0, 1)][i]
             s.kids.append(tw(p=p,
-               text=j,
-               maxwidth=400,
-               color=c,
-               v_align='center',
-               pos=(25,100+(30*i))))
+                             text=j,
+                             maxwidth=400,
+                             color=c,
+                             v_align='center',
+                             pos=(25, 100+(30*i))))
         s.parent = p
         s.pos = pos
         s.obj = obj
-        s.type = getattr(obj,'getnodetype',lambda:'idk')()
+        s.type = getattr(obj, 'getnodetype', lambda: 'idk')()
         s.typ = 'Type'
         s.x, s.y = size
         s.attrs = dir(obj)
@@ -1971,64 +2150,75 @@ class atw:
         s.spy()
         s.tip(True)
     """Inspect"""
-    def insp(s,f):
-        if s.valid(): return f(s.get(s.text))
+    def insp(s, f):
+        if s.valid():
+            return f(s.get(s.text))
         btw('Attribute does not exist!')
     """Get"""
-    def get(s,t):
-        return getattr(s.obj,t,None) if not (s.type == 'spaz' and t in BAD()) else (0,0,0)
+    def get(s, t):
+        return getattr(s.obj, t, None) if not (s.type == 'spaz' and t in BAD()) else (0, 0, 0)
     """Control hint"""
-    def tip(s,b):
-        tw(s.widget2,color=(0.5,0.5,0.5,1 if b else 0))
+    def tip(s, b):
+        tw(s.widget2, color=(0.5, 0.5, 0.5, 1 if b else 0))
     """Drop height"""
     def ht(s):
         l = len(s.prev)
         return (s.ty * (s.cnt if l > s.cnt else l) + 10)
     """Get text"""
     def get_text(s):
-        if s.parent.transitioning_out or not s.parent.exists(): return
+        if s.parent.transitioning_out or not s.parent.exists():
+            return
         return tw(query=s.widget)
     """Set text"""
-    def set_text(s,t):
+    def set_text(s, t):
         ot = s.get_text()
-        if ot == t: s.clear(False)
-        tw(s.widget,text=t)
+        if ot == t:
+            s.clear(False)
+        tw(s.widget, text=t)
     """Validate"""
     def valid(s):
         for i in s.prev:
-            if i == s.text: return True
+            if i == s.text:
+                return True
     """Spy"""
     def spy(s):
-        if not s.dead and not s.obj.exists(): s.dead = True
+        if not s.dead and not s.obj.exists():
+            s.dead = True
         try:
-            if s.parent.transitioning_out or not s.parent.exists(): raise
+            if s.parent.transitioning_out or not s.parent.exists():
+                raise
             s.text = s.get_text()
-            s.active = s.parent.get_selected_child() in [s.widget,s.root]
-        except: return
+            s.active = s.parent.get_selected_child() in [s.widget, s.root]
+        except:
+            return
         if s.text:
             s.apply(s.valid())
             if (s.old != s.text) and s.active:
                 s.old = s.text
                 s.refine()
                 s.drop()
-        if (not s.text and s.dropped) or (not s.active and s.dropped): s.clear(False)
+        if (not s.text and s.dropped) or (not s.active and s.dropped):
+            s.clear(False)
         bui.apptimer(0.1, s.spy)
     """Apply for granted"""
-    def apply(s,d):
+    def apply(s, d):
         a = s.text if d else 'Name'
         v = s.get(a) if d else 'Value'
         t = type(v) if d else 'Type'
-        [tw(s.kids[i],color=[(1,1,0),(0,1,1),(0,1,0)][i],text=f'{[t,v,a][i]}') for i in range(3)]
+        [tw(s.kids[i], color=[(1, 1, 0), (0, 1, 1), (0, 1, 0)]
+            [i], text=f'{[t, v, a][i]}') for i in range(3)]
         s.typ = t
     """Refine prev"""
     def refine(s):
         s.prev = []
         [s.prev.append(p) if s.text in "*"+p else None for p in s.attrs]
     """Clear drop"""
-    def clear(s,b):
+    def clear(s, b):
         s.dropped = b
-        if not b: s.anim(s.ht(),-1,True)
-        elif s.root: s.root.delete()
+        if not b:
+            s.anim(s.ht(), -1, True)
+        elif s.root:
+            s.root.delete()
         s.tip((not b) and (not s.text))
     """Dropdown"""
     def drop(s):
@@ -2039,42 +2229,42 @@ class atw:
         l = len(s.prev)*s.ty
         s.root = bui.scrollwidget(
             parent=s.parent,
-            size=(s.x+60,s.ht() if s.dropped else 0),
+            size=(s.x+60, s.ht() if s.dropped else 0),
             highlight=False,
             color=var('bg'),
             border_opacity=0.0,
-            position=(s.px,s.py-s.ht())
+            position=(s.px, s.py-s.ht())
         )
         c = cw(
             parent=s.root,
-            size=(s.x+60,l),
+            size=(s.x+60, l),
             background=False
         )
         bui.imagewidget(
             parent=c,
-            size=(s.x+1500,l+1000),
+            size=(s.x+1500, l+1000),
             texture=bui.gettexture('black'),
             opacity=0.7,
-            position=(-300,-500)
+            position=(-300, -500)
         )
         r = bui.hscrollwidget(
             parent=c,
-            size=(s.x+40,l+200),
+            size=(s.x+40, l+200),
             color=var('bg'),
             border_opacity=0.0,
             highlight=False,
-            position=(0,s.py-60)
+            position=(0, s.py-60)
         )
         c = cw(
             parent=r,
-            size=(s.x,s.x),
+            size=(s.x, s.x),
             background=False
         )
         tl = tw(
             p=c,
-            size=(1,1),
+            size=(1, 1),
             text=" ",
-            pos=(0,l))
+            pos=(0, l))
         top = s.x
         for i in range(len(s.prev)):
             u = s.prev[i]
@@ -2082,63 +2272,72 @@ class atw:
             t = tw(
                 p=c,
                 text=u,
-                size=(s.x,s.ty),
-                color=(0.6,0.6,0.6),
-                pos=(0,y),
+                size=(s.x, s.ty),
+                color=(0.6, 0.6, 0.6),
+                pos=(0, y),
                 selectable=True,
                 click_activate=True,
-                on_activate_call=bs.CallPartial(s.set_text,u)
+                on_activate_call=bs.CallPartial(s.set_text, u)
             )
             txt = type(s.get(u)).__name__
             uw = GSW(u+" ")
             tw(
                 p=c,
                 text=txt,
-                size=(s.x,s.ty),
-                color=(1,1,0),
-                pos=(uw,y)
+                size=(s.x, s.ty),
+                color=(1, 1, 0),
+                pos=(uw, y)
             )
             new = GSW(u+" "+txt)
-            if new > top: top = new
+            if new > top:
+                top = new
             o = None
             for j in range(len(u)):
-                f = u.find(s.text,j)
-                if f < 0: break
-                if o == f: continue
+                f = u.find(s.text, j)
+                if f < 0:
+                    break
+                if o == f:
+                    continue
                 o = f
                 tw(
                     p=c,
                     text=s.text,
-                    size=(s.x,s.ty),
-                    color=(0,1,0),
-                    pos=(GSW(u[:o]),y)
+                    size=(s.x, s.ty),
+                    color=(0, 1, 0),
+                    pos=(GSW(u[:o]), y)
                 )
-        if not b: s.anim(0,1)
+        if not b:
+            s.anim(0, 1)
         cw(
             c,
-            size=(top+20,l+20),
+            size=(top+20, l+20),
             visible_child=tl
         )
     """Animate"""
-    def anim(s,i,r,nuke=False):
+    def anim(s, i, r, nuke=False):
         if (i > s.ht()) or (i < 0):
-            if nuke: s.root.delete(); s.old = None
+            if nuke:
+                s.root.delete()
+                s.old = None
             return
-        try: bui.scrollwidget(s.root, size=(s.x+60,i), position=(s.px,s.py-i))
-        except: return
-        bui.apptimer(0.0005, bs.CallPartial(s.anim,i+(1*r),r,nuke))
+        try:
+            bui.scrollwidget(s.root, size=(s.x+60, i), position=(s.px, s.py-i))
+        except:
+            return
+        bui.apptimer(0.0005, bs.CallPartial(s.anim, i+(1*r), r, nuke))
+
 
 class NodePicker:
     """Node picker"""
-    def __init__(s,pipe,source=None,which='node',allow='all',note=''):
+    def __init__(s, pipe, source=None, which='node', allow='all', note=''):
         s.zins = None
         s.op = pause()
         s.z = icw(
             in_source=source,
             title='Select a '+which,
             back_anim='out_scale',
-            size=(600,600),
-            on_back=lambda:(npause(s.op),s.zins.x() if s.zins else None),
+            size=(600, 600),
+            on_back=lambda: (npause(s.op), s.zins.x() if s.zins else None),
             show_nuke=False,
             note=note,
             note_scale=0.6
@@ -2152,9 +2351,9 @@ class NodePicker:
         s.blind = False
         sv = bui.scrollwidget(
             parent=w,
-            size=(500,350),
+            size=(500, 350),
             color=var('bg'),
-            position=(50,50)
+            position=(50, 50)
         )
         s.cv = cw(
             parent=sv,
@@ -2162,62 +2361,70 @@ class NodePicker:
         )
         c = tuple([0.4 for i in range(3)])
         for i in range(3):
-            j = ['Type','Position','Extra'][i]
-            k = [65,195,430][i]
+            j = ['Type', 'Position', 'Extra'][i]
+            k = [65, 195, 430][i]
             tw(
                 p=w,
                 text=j,
-                size=(40,20),
+                size=(40, 20),
                 color=c,
-                pos=(k,410)
+                pos=(k, 410)
             )
         v = var('npp')
         s.btns = []
         for i in range(6):
-            j = ['', 'Delete', 'Refresh','Manage','Clone','Pick'][i]
-            k = ['black', 'textClearButton', 'replayIcon', 'menuIcon', 'achievementFreeLoader', 'ouyaOButton'][i]
-            l = ([40,210,380]*2)[i]
+            j = ['', 'Delete', 'Refresh', 'Manage', 'Clone', 'Pick'][i]
+            k = ['black', 'textClearButton', 'replayIcon',
+                 'menuIcon', 'achievementFreeLoader', 'ouyaOButton'][i]
+            l = ([40, 210, 380]*2)[i]
             o = [s.toggle, s.delete, s.refresh, s.advanced, s.clone, s.pick][i]
             b = bw(
                 p=w,
-                pos=(l,[430,480][i<3]),
+                pos=(l, [430, 480][i < 3]),
                 label=j,
-                size=(170,45),
+                size=(170, 45),
                 icon=bui.gettexture(k),
                 oac=o
             )
             s.btns.append(b)
         s.up()
-        s.toggle(0,False)
+        s.toggle(0, False)
     """Advanced"""
     def advanced(s):
         n = s.now()
-        if not n: return
+        if not n:
+            return
         n = s.nuds[s.sl]
-        NodeManager(source=s.btns[3],node=n)
+        NodeManager(source=s.btns[3], node=n)
     """Toggle pause"""
-    def toggle(s,f=1,d=True):
+    def toggle(s, f=1, d=True):
         v = var('npp')
-        if f: var('npp',[1,0][v]); v = not v
-        if d: bui.getsound('deek').play()
-        bw(s.btns[0], label=['Pause','Resume'][v], icon=bui.gettexture(['achievementFootballShutout','startButton'][v]))
+        if f:
+            var('npp', [1, 0][v])
+            v = not v
+        if d:
+            bui.getsound('deek').play()
+        bw(s.btns[0], label=['Pause', 'Resume'][v], icon=bui.gettexture(
+            ['achievementFootballShutout', 'startButton'][v]))
         npause()
     """Confirm safely"""
-    def confirm(s,what,f):
+    def confirm(s, what, f):
         Confirm(
             source=s.btns[1],
             title=what,
             label='Confirm (Risky!)',
-            pipe=lambda:(f(),z.back())
+            pipe=lambda: (f(), z.back())
         )
     """Locate node"""
     def delete(s):
         n = s.now()
-        if not n: return
+        if not n:
+            return
+
         def f():
             s.sl = None
             n.delete()
-        s.confirm('Delete',f)
+        s.confirm('Delete', f)
     """Refresh nodes"""
     def refresh(s):
         ding()
@@ -2225,41 +2432,53 @@ class NodePicker:
         s.up()
     """Obtain safely"""
     def now(s):
-        if s.sl is None: btw('Select a node!'); return
+        if s.sl is None:
+            btw('Select a node!')
+            return
         return s.nuds[s.sl]
     """Clone node"""
     def clone(s):
         n = s.now()
-        if not n: return
+        if not n:
+            return
+
         def f():
             d = dir(n)
             all = {}
             for i in d:
-                a = getattr(n,i)
-                if i.startswith('_') or callable(a): continue
+                a = getattr(n, i)
+                if i.startswith('_') or callable(a):
+                    continue
                 all[i] = a
             with bs.get_foreground_host_activity().context:
-                try: c = bs.newnode(n.getnodetype(),attrs=all)
-                except: return
+                try:
+                    c = bs.newnode(n.getnodetype(), attrs=all)
+                except:
+                    return
             SPARK(c.position)
-            push('Cloned!', color=(0,1,0))
-        s.confirm('Clone',f)
+            push('Cloned!', color=(0, 1, 0))
+        s.confirm('Clone', f)
     """Pick"""
     def pick(s):
         n = s.now()
-        if not n: return
+        if not n:
+            return
         if s.allow == '3D':
             try:
                 p = n.position
-                if len(p) != 3: raise
-            except: btw('Must be a 3D node!'); return
+                if len(p) != 3:
+                    raise
+            except:
+                btw('Must be a 3D node!')
+                return
         s.blind = True
         s.pipe(n)
         npause(0)
         s.z.back()
     """Update"""
     def up(s):
-        with bs.get_foreground_host_activity().context: a = bs.getnodes()
+        with bs.get_foreground_host_activity().context:
+            a = bs.getnodes()
         l = len(a)
         y = l * 30
         [[o.delete() for o in j] for j in s.kids]
@@ -2267,42 +2486,45 @@ class NodePicker:
         s.nuds.clear()
         for i in range(l):
             n = a[i]
-            p = n.position if hasattr(n,'position') else ()
+            p = n.position if hasattr(n, 'position') else ()
             q = len(p) if p else 0
             t = n.getnodetype()
             s.kids.append([])
             f = y-30*(i+1)
             for j in range(3):
-                x = [10,140,375][j]
-                k = [t,str(rnd(p)).replace('()','N/A'),bui.charstr(bui.SpecialChar.LOGO_FLAT) if hasattr(n,'color') else bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][j]
-                m = [120,200,150][j]
+                x = [10, 140, 375][j]
+                k = [t, str(rnd(p)).replace('()', 'N/A'), bui.charstr(bui.SpecialChar.LOGO_FLAT)
+                     if hasattr(n, 'color') else bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][j]
+                m = [120, 200, 150][j]
                 t = tw(
                     p=s.cv,
                     text=k,
                     maxwidth=m,
-                    size=(m,25),
+                    size=(m, 25),
                     h_align='left',
-                    color=n.color if hasattr(n,'color') and j == 2 else (1,1,1),
+                    color=n.color if hasattr(n, 'color') and j == 2 else (1, 1, 1),
                     v_align='center',
                     selectable=True,
                     click_activate=True,
-                    on_activate_call=bs.CallPartial(s.select,i),
-                    pos=(x,f)
+                    on_activate_call=bs.CallPartial(s.select, i),
+                    pos=(x, f)
                 )
                 s.kids[-1].append(t)
-            t = str(getattr(n,'color_texture',0) or getattr(n,'texture','"empty"'))
+            t = str(getattr(n, 'color_texture', 0) or getattr(n, 'texture', '"empty"'))
             p1 = t.find('"')+1
-            p2 = t[p1:t.find('"',p1)]
-            try: t = bui.gettexture(p2)
-            except: t = bui.gettexture('empty')
+            p2 = t[p1:t.find('"', p1)]
+            try:
+                t = bui.gettexture(p2)
+            except:
+                t = bui.gettexture('empty')
             g = bui.imagewidget(
                 parent=s.cv,
-                size=(25,25),
-                position=(x+40,f),
+                size=(25, 25),
+                position=(x+40, f),
                 texture=t
             )
             s.nuds.append(n)
-        cw(s.cv, size=(500,y))
+        cw(s.cv, size=(500, y))
         s.eye()
     """Check for existence"""
     def eye(s):
@@ -2312,105 +2534,134 @@ class NodePicker:
             if not n.exists():
                 for t in k:
                     try:
-                        if s.w.exists and s.w.transitioning_out: return
-                        if t.exists: tw(t, color=(1,0,0))
-                    except: return
+                        if s.w.exists and s.w.transitioning_out:
+                            return
+                        if t.exists:
+                            tw(t, color=(1, 0, 0))
+                    except:
+                        return
                 if s.sl is not None and s.sl == z:
                     btw('Selected node has died just now!')
                     s.sl = None
             z += 1
-        if not s.blind: bui.apptimer(0.1,s.eye)
+        if not s.blind:
+            bui.apptimer(0.1, s.eye)
     """Highlight"""
     def hl(s, sl):
-        if (sl is None): return
-        try: n = s.nuds[sl]
-        except: return
+        if (sl is None):
+            return
+        try:
+            n = s.nuds[sl]
+        except:
+            return
         if not n.exists():
             btw('Node is dead!')
             return False
-        c = (1,1,1)
+        c = (1, 1, 1)
         try:
             k = s.kids[s.sl]
-            [tw(k[i],color=c) for i in range(2)]
-        except: pass
-        c = (0,1,0)
+            [tw(k[i], color=c) for i in range(2)]
+        except:
+            pass
+        c = (0, 1, 0)
         try:
             k = s.kids[sl]
-            [tw(k[i],color=c) for i in range(2)]
+            [tw(k[i], color=c) for i in range(2)]
             cw(s.cv, visible_child=k[0])
-        except IndexError: return
-        if len(getattr(n,'position',(0,0))) > 2:
+        except IndexError:
+            return
+        if len(getattr(n, 'position', (0, 0))) > 2:
             s.zins = Zoom(n)
         return sl
     """Select"""
-    def select(s,i):
+    def select(s, i):
         r = s.hl(i)
-        if r is not False: s.sl = r
+        if r is not False:
+            s.sl = r
+
 
 class Zoom:
     """Smooth zoomer"""
     __up__ = False
     __ob__ = None
-    def __init__(s,n):
+
+    def __init__(s, n):
         s.n = n
         c = s.__class__
         s.u = lambda: c.__up__
-        s.v = lambda b: setattr(c,'__up__',b)
-        s.w = lambda b: setattr(c,'__ob__',b)
-        s.x = lambda: (s.v(False),_ba.set_camera_manual(False),s.w(None))
+        s.v = lambda b: setattr(c, '__up__', b)
+        s.w = lambda b: setattr(c, '__ob__', b)
+        s.x = lambda: (s.v(False), _ba.set_camera_manual(False), s.w(None))
         s.step = 0
-        if s.u(): s.x(); bui.apptimer(0.1,s.focus)
-        else: s.focus(); s.w(n)
+        if s.u():
+            s.x()
+            bui.apptimer(0.1, s.focus)
+        else:
+            s.focus()
+            s.w(n)
+
     def focus(s):
         s.v(True)
         s.w(s.n)
         s.step = 1
         s._focus()
-        bui.apptimer(1.5,bs.CallPartial(setattr,s,'step',2))
+        bui.apptimer(1.5, bs.CallPartial(setattr, s, 'step', 2))
+
     def _focus(s):
-        if not s.u() or not s.n.exists(): s.x(); return
+        if not s.u() or not s.n.exists():
+            s.x()
+            return
         if s.step == 2:
             _ba.set_camera_manual(True)
             s.zoom()
             return
-        if s.step == 4: s.x(); return
+        if s.step == 4:
+            s.x()
+            return
         _ba.set_camera_target(*s.n.position)
-        bui.apptimer(0.01,s._focus)
+        bui.apptimer(0.01, s._focus)
+
     def zoom(s):
-        if not s.u() or not s.n.exists(): s.x(); return
+        if not s.u() or not s.n.exists():
+            s.x()
+            return
         p = _ba.get_camera_position()
         q = s.n.position
-        d = math.dist(p,q)
+        d = math.dist(p, q)
         if d < 5:
             s.step = 3
             s._focus()
-            bui.apptimer(2,bs.CallPartial(setattr,s,'step',4))
+            bui.apptimer(2, bs.CallPartial(setattr, s, 'step', 4))
             return
         e = 0.01+d*0.005
-        e = min(e,0.8)
+        e = min(e, 0.8)
         dx = q[0]-p[0]
         dy = q[1]-p[1]
         dz = q[2]-p[2]
         sx = dx*e
         sy = dy*e
         sz = dz*e
-        _ba.set_camera_position(*(p[0]+sx,p[1]+sy,p[2]+sz))
+        _ba.set_camera_position(*(p[0]+sx, p[1]+sy, p[2]+sz))
         _ba.set_camera_target(*q)
-        bui.apptimer(0.0081,s.zoom)
+        bui.apptimer(0.0081, s.zoom)
+
 
 class ActionManager:
     """Action manager"""
-    actions = lambda c=0: ['Say','MoveTo','Wait','GoTo','Key','Follow']
+    def actions(c=0): return ['Say', 'MoveTo', 'Wait', 'GoTo', 'Key', 'Follow']
+
     @classmethod
     def classes(cls):
         g = globals()
         return [g['Action'+i] for i in cls.actions()]
+
     @classmethod
-    def which(cls,s):
+    def which(cls, s):
         n = s.__class__
         i = cls.classes().index(n)
-        return (cls.actions()[i],i)
-    def __init__(s,source=None):
+        return (cls.actions()[i], i)
+
+    def __init__(s, source=None):
         s.z = icw(
             in_source=source,
             show_nuke=False,
@@ -2420,93 +2671,112 @@ class ActionManager:
         )
         w = s.z.widget
         sv = bui.scrollwidget(parent=w,
-                size=(400,310),
-                color=var('bg'),
-                position=(60,50))
+                              size=(400, 310),
+                              color=var('bg'),
+                              position=(60, 50))
         s.cv = cw(parent=sv,
                   background=False,
-                  size=(400,0))
+                  size=(400, 0))
         b = bw(p=w,
-               size=(100,50),
-               pos=(470,310),
+               size=(100, 50),
+               pos=(470, 310),
                label='Add',
                icon=bui.gettexture('powerupHealth'))
-        bw(b,oac=bs.CallPartial(ActionPipe,source=b,pipe=s.add,what='Add'))
+        bw(b, oac=bs.CallPartial(ActionPipe, source=b, pipe=s.add, what='Add'))
         s.kids = []
         for i in range(3):
-            j = [s.edit,s.replace,s.delete][i]
-            k = ['Edit','Replace','Delete'][i]
-            l = [256,202,148][i]
-            m = ['settingsIcon','replayIcon','crossOut'][i]
+            j = [s.edit, s.replace, s.delete][i]
+            k = ['Edit', 'Replace', 'Delete'][i]
+            l = [256, 202, 148][i]
+            m = ['settingsIcon', 'replayIcon', 'crossOut'][i]
             b = bw(p=w,
-                   size=(100,50),
-                   pos=(470,l),
+                   size=(100, 50),
+                   pos=(470, l),
                    label=k,
                    icon=bui.gettexture(m),
                    oac=j)
             s.kids.append(b)
-        for i in [-1,1]:
-            j = ['Up','Down'][i<0]
-            k = [94,40][i<0]
+        for i in [-1, 1]:
+            j = ['Up', 'Down'][i < 0]
+            k = [94, 40][i < 0]
             bw(p=w,
-               size=(100,50),
-               pos=(470,k),
+               size=(100, 50),
+               pos=(470, k),
                label=j,
                icon=bui.gettexture(f'{j.lower()}Button'),
                repeat=True,
-               oac=bs.CallPartial(s.nav,-i))
+               oac=bs.CallPartial(s.nav, -i))
         s.texts = []
         s.sl = None
         s.update()
     """Index control"""
-    def nav(s,i):
+    def nav(s, i):
         l = len(var('act'))-1
-        if s.sl is None: i = [0,l][i<0]
-        else: i = s.sl + i
-        if i < 0 or i > l: bui.getsound('block').play(); return
+        if s.sl is None:
+            i = [0, l][i < 0]
+        else:
+            i = s.sl + i
+        if i < 0 or i > l:
+            bui.getsound('block').play()
+            return
         s.select(i)
         bui.getsound('tap').play()
     """Conditional collect"""
-    def collect(s,i):
-        if i == 0: a = [0,var('say'),var('tsay')]
-        elif i == 1: a = [i,[round(float(var(f'move{i}')),3) for i in range(3)],float(var('smove')),float(var('tmove'))]
-        elif i == 2: a = [i,round(float(var('wait')),3)]
-        elif i == 3: a = [i,int(var('goto')),int(var('egoto'))]
-        elif i == 4: a = [i,var('lastkey')]
-        elif i == 5: a = [i,var('follow'),float(var('sfollow')),float(var('tfollow'))]
-        else: bs.broadcastmessage('nah '+str(i)); return
+    def collect(s, i):
+        if i == 0:
+            a = [0, var('say'), var('tsay')]
+        elif i == 1:
+            a = [i, [round(float(var(f'move{i}')), 3)
+                     for i in range(3)], float(var('smove')), float(var('tmove'))]
+        elif i == 2:
+            a = [i, round(float(var('wait')), 3)]
+        elif i == 3:
+            a = [i, int(var('goto')), int(var('egoto'))]
+        elif i == 4:
+            a = [i, var('lastkey')]
+        elif i == 5:
+            a = [i, var('follow'), float(var('sfollow')), float(var('tfollow'))]
+        else:
+            bs.broadcastmessage('nah '+str(i))
+            return
         return a
     """Add action"""
-    def add(s,i):
+    def add(s, i):
         o = var('act')
         a = s.collect(i)
         o.append(a)
-        var('act',o)
+        var('act', o)
         s.update()
     """Edit action"""
     def edit(s):
-        if s.sl is None: btw('Select an action to edit!'); return
+        if s.sl is None:
+            btw('Select an action to edit!')
+            return
         o = var('act')
         v = o[s.sl]
         i = v[0]
+
         def f():
             a = s.collect(i)
             o[s.sl] = a
-            var('act',o)
+            var('act', o)
             s.update()
             gun()
-        s.classes()[i](source=s.kids[0],pipe=lambda z: f())
+        s.classes()[i](source=s.kids[0], pipe=lambda z: f())
     """Replace action"""
     def replace(s):
-        if s.sl is None: btw('Select an action to replace!'); return
+        if s.sl is None:
+            btw('Select an action to replace!')
+            return
         o = var('act')
+
         def f(i):
             a = s.collect(i)
             o[s.sl] = a
-            var('act',o)
+            var('act', o)
             s.update()
             gun()
-        ActionPipe(source=s.kids[1],pipe=lambda i: f(i),what='Replace')
+        ActionPipe(source=s.kids[1], pipe=lambda i: f(i), what='Replace')
     """Update"""
     def update(s):
         v = var('act')
@@ -2515,7 +2785,7 @@ class ActionManager:
         s.texts.clear()
         w = s.cv
         y = l*30+10
-        cw(w,size=(400,y))
+        cw(w, size=(400, y))
         with bs.get_foreground_host_activity().context:
             nn = bs.getnodes()
             ns = [str(nn[i]) for i in range(len(nn))]
@@ -2526,35 +2796,41 @@ class ActionManager:
             t = tw(
                 p=w,
                 text=f'{i+1} {mem[a[0]]} {a[1:]}',
-                size=(350,30),
+                size=(350, 30),
                 maxwidth=350,
                 selectable=True,
                 click_activate=True,
-                on_activate_call=bs.CallPartial(s.select,i),
+                on_activate_call=bs.CallPartial(s.select, i),
                 v_align='center',
-                pos=(20,(y-40)-i*30)
+                pos=(20, (y-40)-i*30)
             )
             s.texts.append(t)
             if a[0] == 5 and a[1] != 'me' and not a[1] in ns:
-                tw(t, color=(1,0,0), on_activate_call=bs.CallPartial(s.select,i,dead=True))
+                tw(t, color=(1, 0, 0), on_activate_call=bs.CallPartial(s.select, i, dead=True))
         s.sl = None
     """Update selection"""
     def up(s):
-        [tw(s.texts[i],color=[(1,1,1),(0,1,0)][i==s.sl]) for i in range(len(s.texts))]
-        cw(s.cv,visible_child=s.texts[s.sl])
+        [tw(s.texts[i], color=[(1, 1, 1), (0, 1, 0)][i == s.sl]) for i in range(len(s.texts))]
+        cw(s.cv, visible_child=s.texts[s.sl])
     """Select"""
-    def select(s,i,dead=False):
+    def select(s, i, dead=False):
         s.sl = i
         s.up()
-        if dead: btw('Follow node is dead!\nAction will be ignored. Pick the node again.')
+        if dead:
+            btw('Follow node is dead!\nAction will be ignored. Pick the node again.')
     """Delete selected"""
     def delete(s):
-        if s.sl is not None: var('act').pop(s.sl); s.update(); bui.getsound('pop01').play()
-        else: btw('Select an action to delete!')
+        if s.sl is not None:
+            var('act').pop(s.sl)
+            s.update()
+            bui.getsound('pop01').play()
+        else:
+            btw('Select an action to delete!')
+
 
 class ActionPipe:
     """Action pipe"""
-    def __init__(s,pipe,source=None,what='Action'):
+    def __init__(s, pipe, source=None, what='Action'):
         s.pipe = pipe
         ah = ActionManager.actions()
         eh = ActionManager.classes()
@@ -2563,140 +2839,148 @@ class ActionPipe:
         s.z = icw(in_source=source,
                   show_nuke=False,
                   back_anim='out_scale',
-                  size=(300,y),
+                  size=(300, y),
                   title=what)
         w = s.z.widget
         for i in range(l):
             b = bw(p=w,
-                   pos=(25,(y-150)-60*i),
-                   size=(250,55),
+                   pos=(25, (y-150)-60*i),
+                   size=(250, 55),
                    label=ah[i])
-            bw(b,oac=bs.CallPartial(eh[i],s.pick,b))
+            bw(b, oac=bs.CallPartial(eh[i], s.pick, b))
     """Redirect"""
-    def pick(s,i):
+    def pick(s, i):
         s.z.back()
         s.pipe(i)
 
+
 class ActionSay:
     """Action Say"""
-    def __init__(s,pipe,source=None):
+    def __init__(s, pipe, source=None):
         s.which = ActionManager.which(s)
         s.pipe = pipe
         s.z = icw(
             in_source=source,
             title=s.which[0],
-            size=(450,230),
+            size=(450, 230),
             back_anim='out_scale',
             show_nuke=False,
             note='The more the duration, the slower the animation.',
-            note_pos=(15,10),
+            note_pos=(15, 10),
             note_scale=0.6
         )
         w = s.z.widget
         s.txt = []
         for i in range(2):
-            j = ['Say','And last for duration'][i]
-            k = [120,90][i]
-            l = ['say','tsay'][i]
-            m = [True,'0123456789'][i]
-            n = [80,310][i]
-            o = [330,100][i]
-            p = ['text','seconds'][i]
-            tw(p=w,text=j,pos=(30,k))
-            s.txt.append(ctw(conf=l,text=var(l),allow=m,hint=p,pos=(n,k),p=w,size=(o,30),h_align='left'))
+            j = ['Say', 'And last for duration'][i]
+            k = [120, 90][i]
+            l = ['say', 'tsay'][i]
+            m = [True, '0123456789'][i]
+            n = [80, 310][i]
+            o = [330, 100][i]
+            p = ['text', 'seconds'][i]
+            tw(p=w, text=j, pos=(30, k))
+            s.txt.append(ctw(conf=l, text=var(l), allow=m, hint=p,
+                         pos=(n, k), p=w, size=(o, 30), h_align='left'))
         bw(
             p=w,
-            pos=(330,30),
-            size=(80,50),
+            pos=(330, 30),
+            size=(80, 50),
             oac=s.pick,
             label='Done'
         )
     """Pick"""
     def pick(s):
         for t in s.txt:
-            if t.bad or not t.get_text(): err(f'Invalid {t.hint}!\nFix your input!'); return
-        [var(['say','tsay'][i],s.txt[i].get_text()) for i in [0,1]]
+            if t.bad or not t.get_text():
+                err(f'Invalid {t.hint}!\nFix your input!')
+                return
+        [var(['say', 'tsay'][i], s.txt[i].get_text()) for i in [0, 1]]
         s.z.back()
         gun()
         s.pipe(s.which[1])
 
+
 class ActionFollow:
     """Action follow"""
-    def __init__(s,pipe,source=None):
+    def __init__(s, pipe, source=None):
         s.which = ActionManager.which(s)
         s.z = icw(
             in_source=source,
             title=s.which[0],
-            size=(450,230),
+            size=(450, 230),
             back_anim='out_scale',
             show_nuke=False,
             note="Keep in mind that dist is relevant to target's center",
             note_scale=0.6,
-            note_pos=(15,5)
+            note_pos=(15, 5)
         )
         w = s.z.widget
         s.pipe = pipe
         for i in range(2):
-            j = ['Me','Pick'][i]
+            j = ['Me', 'Pick'][i]
             b = bw(p=w,
                    label=j,
-                   pos=(25,90-55*i),
-                   size=(100,50))
-            o = [bs.CallPartial(s.pick,'me'),bs.CallPartial(NodePicker,s.pick,b,allow='3D',note='Coolbox stores picked nodes as strings for portability')][i]
-            bw(b,oac=o)
+                   pos=(25, 90-55*i),
+                   size=(100, 50))
+            o = [bs.CallPartial(s.pick, 'me'), bs.CallPartial(
+                NodePicker, s.pick, b, allow='3D', note='Coolbox stores picked nodes as strings for portability')][i]
+            bw(b, oac=o)
         for i in range(3):
-            j = ['Stop following when:','- Distance is less than','- Time is more than'][i]
-            k = [105,70,40][i]
-            l = [300,200][i>1]
+            j = ['Stop following when:', '- Distance is less than', '- Time is more than'][i]
+            k = [105, 70, 40][i]
+            l = [300, 200][i > 1]
             tw(p=w,
-               pos=(135,k),
+               pos=(135, k),
                maxwidth=l,
                text=j)
         for i in range(2):
-            j = [380,340][i]
-            k = [67,37][i]
-            l = ['sfollow','tfollow'][i]
-            m = ['Bot might keep following until timeout if distance is too narrow or zero, enter','Time starts from the moment action is played, stop following when time is more than'][i]
+            j = [380, 340][i]
+            k = [67, 37][i]
+            l = ['sfollow', 'tfollow'][i]
+            m = ['Bot might keep following until timeout if distance is too narrow or zero, enter',
+                 'Time starts from the moment action is played, stop following when time is more than'][i]
             ctw(p=w,
-                pos=(j,k),
-                size=(65,30),
+                pos=(j, k),
+                size=(65, 30),
                 allow='0.123456789',
                 conf=l,
                 description=m,
                 text=var(l))
     """Redirect"""
-    def pick(s,n):
-        var('follow',str(n))
+    def pick(s, n):
+        var('follow', str(n))
         s.pipe(s.which[1])
         s.z.back()
         gun()
 
+
 class ActionKey:
     """Action send key"""
-    def __init__(s,pipe,source=None):
+    def __init__(s, pipe, source=None):
         s.which = ActionManager.which(s)
         s.z = icw(
             in_source=source,
             title=s.which[0],
-            size=(250,300),
+            size=(250, 300),
             back_anim='out_scale',
             show_nuke=False
         )
         w = s.z.widget
         s.pipe = pipe
         for i in range(4):
-            j = [105,155,105,55][i]
-            k = [50,100,150,100][i]
-            l = ['Jump','Bomb','PickUp','Punch'][i]
+            j = [105, 155, 105, 55][i]
+            k = [50, 100, 150, 100][i]
+            l = ['Jump', 'Bomb', 'PickUp', 'Punch'][i]
             sbw(
                 p=w,
-                pos=(j,k),
+                pos=(j, k),
                 icon=bui.gettexture('button'+l),
-                oac=bs.CallPartial(s.set,i)
+                oac=bs.CallPartial(s.set, i)
             )
     """Initial set"""
-    def set(s,i):
-        var('lastkey',i)
+    def set(s, i):
+        var('lastkey', i)
         s.pick()
     """Pick"""
     def pick(s):
@@ -2704,51 +2988,54 @@ class ActionKey:
         s.pipe(s.which[1])
         gun()
 
+
 class ActionGoTo:
     """Action go to"""
-    def __init__(s,pipe,source=None):
+    def __init__(s, pipe, source=None):
         s.which = ActionManager.which(s)
         s.z = icw(in_source=source,
                   title=s.which[0],
-                  size=(500,200),
+                  size=(500, 200),
                   back_anim='out_scale',
                   show_nuke=False)
         w = s.z.widget
         s.pipe = pipe
-        t = tw(pos=(60,90),
+        t = tw(pos=(60, 90),
                p=w,
                text='Go to action with index')
         for i in range(2):
-            j = ['Usable for','times'][i]
-            t = tw(pos=(60+190*i,50),
+            j = ['Usable for', 'times'][i]
+            t = tw(pos=(60+190*i, 50),
                    p=w,
                    text=j)
         s.t = ctw(p=w,
-              text=var('goto'),
-              pos=(315,85),
-              size=(65,40),
-              conf='goto',
-              description='Simulate a loop by going to a previous action again, or skip specific next actions. Enter',
-              hint='num',
-              allow='01223456789')
+                  text=var('goto'),
+                  pos=(315, 85),
+                  size=(65, 40),
+                  conf='goto',
+                  description='Simulate a loop by going to a previous action again, or skip specific next actions. Enter',
+                  hint='num',
+                  allow='01223456789')
         s.u = ctw(p=w,
-              text=var('egoto'),
-              pos=(180,45),
-              size=(65,40),
-              conf='egoto',
-              description='Expire after being used for',
-              hint='num',
-              allow='01223456789')
+                  text=var('egoto'),
+                  pos=(180, 45),
+                  size=(65, 40),
+                  conf='egoto',
+                  description='Expire after being used for',
+                  hint='num',
+                  allow='01223456789')
         bw(p=w,
-           pos=(390,30),
-           size=(80,40),
+           pos=(390, 30),
+           size=(80, 40),
            oac=s.pick,
            label='Done')
     """Pick"""
     def pick(s):
         t = s.t.get_text()
         u = s.u.get_text()
-        if s.t.bad or (not t) or (not u): err('Fix your input!'); return
+        if s.t.bad or (not t) or (not u):
+            err('Fix your input!')
+            return
         if ((int(t) <= 0) or (int(t) >= len(var('act')))):
             err('No such action exists!')
             return
@@ -2759,106 +3046,114 @@ class ActionGoTo:
         s.pipe(s.which[1])
         gun()
 
+
 class ActionWait:
     """Action wait"""
-    def __init__(s,pipe,source=None):
+    def __init__(s, pipe, source=None):
         s.which = ActionManager.which(s)
         s.z = icw(in_source=source,
                   title=s.which[0],
-                  size=(500,200),
+                  size=(500, 200),
                   back_anim='out_scale',
                   show_nuke=False)
         w = s.z.widget
         s.pipe = pipe
         for i in range(2):
-            j = ['Keep waiting for','seconds'][i]
-            t = tw(pos=(60+260*i,80),
-               p=w,
-               text=j)
+            j = ['Keep waiting for', 'seconds'][i]
+            t = tw(pos=(60+260*i, 80),
+                   p=w,
+                   text=j)
         s.t = ctw(p=w,
                   text=var('wait'),
-                  pos=(248,75),
-                  size=(65,40),
+                  pos=(248, 75),
+                  size=(65, 40),
                   conf='wait',
                   description='Do nothing for',
                   hint='num',
                   allow='0.1223456789')
         bw(p=w,
-           pos=(390,30),
-           size=(80,40),
+           pos=(390, 30),
+           size=(80, 40),
            oac=s.pick,
            label='Done')
     """Pick"""
     def pick(s):
-        if s.t.bad: err('Fix your input!'); return
+        if s.t.bad:
+            err('Fix your input!')
+            return
         s.z.back()
         s.pipe(s.which[1])
         gun()
 
+
 class ActionMoveTo:
     """Action move to"""
-    def __init__(s,pipe,source=None):
+    def __init__(s, pipe, source=None):
         s.which = ActionManager.which(s)
         s.z = icw(in_source=source,
                   title=s.which[0],
-                  size=(500,230),
+                  size=(500, 230),
                   back_anim='out_scale',
                   show_nuke=False)
         w = s.z.widget
         s.pipe = pipe
         s.pos = []
-        tw(pos=(30,120),
+        tw(pos=(30, 120),
            p=w,
            text='Directly move towards')
-        tw(pos=(30,80),
+        tw(pos=(30, 80),
            p=w,
            text='Stop when distance is less than')
-        tw(pos=(30,40),
+        tw(pos=(30, 40),
            p=w,
            text='Or when time is more than')
         for i in range(3):
-            j = ['X','Y','Z'][i]
+            j = ['X', 'Y', 'Z'][i]
             t = ctw(p=w,
                     text=var(f'move{i}'),
-                    pos=(290+60*i,115),
-                    size=(55,40),
+                    pos=(290+60*i, 115),
+                    size=(55, 40),
                     conf=f'move{i}',
                     hint=j+' position',
                     allow='-0.1223456789')
             s.pos.append(t)
         s.t = ctw(p=w,
                   text=var('smove'),
-                  pos=(380,75),
-                  size=(60,40),
+                  pos=(380, 75),
+                  size=(60, 40),
                   conf='smove',
                   description='Minimum distance between bot and target',
                   hint='Dist',
                   allow='0.1223456789')
         s.u = ctw(p=w,
                   text=var('tmove'),
-                  pos=(325,35),
-                  size=(60,40),
+                  pos=(325, 35),
+                  size=(60, 40),
                   conf='tmove',
                   description='Timeout before force stopping if dist is not met',
                   hint='Time',
                   allow='0.1223456789')
         bw(p=w,
-           pos=(390,30),
-           size=(80,40),
+           pos=(390, 30),
+           size=(80, 40),
            oac=s.pick,
            label='Done')
     """Pick"""
     def pick(s):
-        for t in s.pos+[s.t,s.u]:
-            if t.bad: err('Fix your input!'); return
+        for t in s.pos+[s.t, s.u]:
+            if t.bad:
+                err('Fix your input!')
+                return
         s.z.back()
         s.pipe(s.which[1])
         gun()
 
+
 class ConPipe:
     """Conditional pipe"""
-    cons = lambda: ['Has Group ID','In Team']
-    def __init__(s,source,pipe):
+    def cons(): return ['Has Group ID', 'In Team']
+
+    def __init__(s, source, pipe):
         s.pipe = pipe
         mem = s.__class__.cons()
         l = len(mem)
@@ -2867,9 +3162,9 @@ class ConPipe:
             in_source=source,
             show_nuke=False,
             back_anim='out_scale',
-            size=(300,y),
+            size=(300, y),
             note='Ignored until found',
-            note_pos=(15,10),
+            note_pos=(15, 10),
             note_scale=0.6,
             title='Condition',
             outside_action='back',
@@ -2881,19 +3176,20 @@ class ConPipe:
             j = mem[i]
             b = bw(
                 p=w,
-                pos=(25,(y-150)-60*i),
-                size=(250,55),
+                pos=(25, (y-150)-60*i),
+                size=(250, 55),
                 label=j
             )
-            bw(b,oac=bs.CallPartial(s.collect,b,i))
+            bw(b, oac=bs.CallPartial(s.collect, b, i))
     """Collect"""
-    def collect(s,b,i):
+    def collect(s, b, i):
         s.extra = i
-        Collector(source=b,pipe=s.pick,allow=['01223456789',True][i])
+        Collector(source=b, pipe=s.pick, allow=['01223456789', True][i])
     """Redirect"""
-    def pick(s,t):
+    def pick(s, t):
         s.z.back()
-        s.pipe([s.extra,t])
+        s.pipe([s.extra, t])
+
 
 class Collector:
     """Value collector"""
@@ -2917,7 +3213,7 @@ class Collector:
             show_nuke=False,
             back_anim='out_scale',
             auto_offset=False,
-            size=(300,150+[0,30][two]),
+            size=(300, 150+[0, 30][two]),
             title=title
         )
         w = s.z.widget
@@ -2925,55 +3221,63 @@ class Collector:
             p=w,
             allow=allow,
             hint=first,
-            size=(200,30),
-            pos=(30,30)
+            size=(200, 30),
+            pos=(30, 30)
         )
         s.t2 = ctw(
             p=w,
             allow=dallow,
             hint=double,
-            size=(200,30),
-            pos=(30,65)
+            size=(200, 30),
+            pos=(30, 65)
         ) if two else None
         bw(
             label='Done',
             p=w,
-            pos=(230,30),
-            size=(50,30),
+            pos=(230, 30),
+            size=(50, 30),
             oac=bs.CallPartial(s.pick)
         )
+
     def pick(s):
         t = s.t.get_text()
-        if s.t.bad or (not t and not s.raw): err(f'Invalid {"Input" if s.raw else s.t.hint}!\nFix your input!'); return
+        if s.t.bad or (not t and not s.raw):
+            err(f'Invalid {"Input" if s.raw else s.t.hint}!\nFix your input!')
+            return
         if s.two:
             t2 = s.t2.get_text()
-            if s.raw and t == "": v = ''
+            if s.raw and t == "":
+                v = ''
             elif s.raw:
-                try: v = eval(t)
+                try:
+                    v = eval(t)
                 except Exception as e:
                     err(str(e))
                     return
-            else: v = t
-            r = (t2,v)
-        else: r = t
+            else:
+                v = t
+            r = (t2, v)
+        else:
+            r = t
         s.z.back()
         s.pipe(r)
 
+
 class Overlay:
     """Controls overlay"""
-    def __init__(s,build=False):
+    def __init__(s, build=False):
         s.colors = [
-            [(0.2,0.6,0.2),(0.4,1,0.4)],
-            [(0.6,0,0),(1,0,0)],
-            [(0.2,0.6,0.6),(0.4,1,1)],
-            [(0.6,0.6,0.2),(1,1,0.4)],
-            [(0.3,0.23,0.5),(0.2,0.13,0.3)]
+            [(0.2, 0.6, 0.2), (0.4, 1, 0.4)],
+            [(0.6, 0, 0), (1, 0, 0)],
+            [(0.2, 0.6, 0.6), (0.4, 1, 1)],
+            [(0.6, 0.6, 0.2), (1, 1, 0.4)],
+            [(0.3, 0.23, 0.5), (0.2, 0.13, 0.3)]
         ]
         s.pics = []
         s.texts = []
         s.pos = []
         s.nub = []
-        s.old = [0,0,0]
+        s.old = [0, 0, 0]
         with bs.get_foreground_host_activity().context:
             # This is a bascenev1 scene overlay, not a bauiv1 window - it
             # has to use the scene 'attach' node attr (like Scoreboard and
@@ -2983,9 +3287,9 @@ class Overlay:
             # 'topRight' + small negative offsets keeps this pinned to the
             # bottom-right corner regardless of resolution.
             for i in range(4):
-                j = ['Jump','Bomb','PickUp','Punch'][i]
-                k = [-210,-160,-210,-260][i]
-                l = [-175,-125,-75,-125][i]
+                j = ['Jump', 'Bomb', 'PickUp', 'Punch'][i]
+                k = [-210, -160, -210, -260][i]
+                l = [-175, -125, -75, -125][i]
                 c = s.colors[i][0]
                 n = bs.newnode(
                     'image',
@@ -2993,24 +3297,24 @@ class Overlay:
                         'texture': bs.gettexture('button'+j),
                         'absolute_scale': True,
                         'attach': 'topRight',
-                        'position': (k,l),
-                        'scale': (60,60),
+                        'position': (k, l),
+                        'scale': (60, 60),
                         'color': c
                     }
                 )
                 s.pics.append(n)
-                j = (['Down','Exit','Up','Build'] if build else ['Down','Pick','Up','Boost'])[i]
-                k = [-210,-130,-210,-295][i]
-                l = [-230,-125,-20,-125][i]
-                h = ['center','left','center','right'][i]
-                v = ['bottom','center','top','center'][i]
+                j = (['Down', 'Exit', 'Up', 'Build'] if build else ['Down', 'Pick', 'Up', 'Boost'])[i]
+                k = [-210, -130, -210, -295][i]
+                l = [-230, -125, -20, -125][i]
+                h = ['center', 'left', 'center', 'right'][i]
+                v = ['bottom', 'center', 'top', 'center'][i]
                 n = bs.newnode(
                     'text',
                     attrs={
                         'text': j,
                         'h_attach': 'right',
                         'v_attach': 'top',
-                        'position': (k,l),
+                        'position': (k, l),
                         'color': c,
                         'h_align': h,
                         'v_align': v
@@ -3018,22 +3322,22 @@ class Overlay:
                 )
                 s.texts.append(n)
             for i in range(3):
-                c = s.colors[[1,0,2][i]][0]
+                c = s.colors[[1, 0, 2][i]][0]
                 n = bs.newnode(
                     'text',
                     attrs={
                         'text': '0',
                         'h_attach': 'right',
                         'v_attach': 'top',
-                        'position': (-170,[-190,-220,-250][i]),
+                        'position': (-170, [-190, -220, -250][i]),
                         'color': c,
                         'h_align': 'left'
                     }
                 )
                 s.pos.append(n)
-            s.np = (-20,-205)
-            for i in [0,1]:
-                j = [110,60][i]
+            s.np = (-20, -205)
+            for i in [0, 1]:
+                j = [110, 60][i]
                 n = bs.newnode(
                     'image',
                     attrs={
@@ -3041,61 +3345,67 @@ class Overlay:
                         'absolute_scale': True,
                         'attach': 'topRight',
                         'position': s.np,
-                        'scale': (j,j),
+                        'scale': (j, j),
                         'color': s.colors[4][i]
                     }
                 )
                 s.nub.append(n)
             s.fade()
     """Color overlays"""
-    def set(s,i,c):
+    def set(s, i, c):
         s.pics[i].color = s.texts[i].color = c
     """Color position"""
-    def pset(s,i,c):
+    def pset(s, i, c):
         s.pos[i].color = c
     """Simulate pressed"""
-    def press(s,i):
-        s.set(i,s.colors[i][1])
+    def press(s, i):
+        s.set(i, s.colors[i][1])
         s.pics[i].opacity = 1.0
     """Simulate released"""
-    def release(s,i):
-        s.set(i,s.colors[i][0])
+    def release(s, i):
+        s.set(i, s.colors[i][0])
         s.pics[i].opacity = 0.7
     """Get all nodes"""
     def nodes(s):
         return s.pics+s.texts+s.pos+s.nub
     """Update position"""
-    def up(s,x,y,z,lr,ud):
-        new = [x,y,z]
+    def up(s, x, y, z, lr, ud):
+        new = [x, y, z]
         for i in range(3):
-            c = s.colors[[1,0,2][i]]
-            if s.old[i] == new[i]: s.pset(i,c[0]); continue
+            c = s.colors[[1, 0, 2][i]]
+            if s.old[i] == new[i]:
+                s.pset(i, c[0])
+                continue
             t = s.pos[i]
-            t.text = str(round(new[i],5))
-            s.pset(i,c[1])
+            t.text = str(round(new[i], 5))
+            s.pset(i, c[1])
         s.old = new
-        [setattr(s.nub[i],'opacity',[[0.5,0.2],[0.7,0.3]][bool(lr or ud)][i]) for i in [0,1]]
+        [setattr(s.nub[i], 'opacity', [[0.5, 0.2], [0.7, 0.3]][bool(lr or ud)][i]) for i in [0, 1]]
         p = s.np
         m = math.sqrt(lr**2+ud**2) or 1
-        d = 25*min(math.sqrt(lr**2+ud**2),1)
+        d = 25*min(math.sqrt(lr**2+ud**2), 1)
         lr /= m
         ud /= m
-        s.nub[1].position = (p[0]+lr*d,p[1]+ud*d)
+        s.nub[1].position = (p[0]+lr*d, p[1]+ud*d)
     """Fade"""
-    def fade(s,i=0):
-        [bs.timer(1, bs.animate(n,'opacity',{0:i,0.5:abs(i-0.7)}).delete) for n in s.nodes()]
+    def fade(s, i=0):
+        [bs.timer(1, bs.animate(n, 'opacity', {0: i, 0.5: abs(i-0.7)}).delete) for n in s.nodes()]
     """Destroy overlay"""
     def destroy(s):
         with bs.get_foreground_host_activity().context:
-            bs.timer(0.2,lambda:s.fade(0.7))
-            bs.timer(1,lambda: [n.delete() for n in s.nodes()])
+            bs.timer(0.2, lambda: s.fade(0.7))
+            bs.timer(1, lambda: [n.delete() for n in s.nodes()])
+
 
 class Mapper:
     """In-Game position mapper"""
     last = 0
+
     def __init__(s, pipe, pos=None, on_exit=None, build=False) -> None:
         s.tired = time.time_ns() - s.__class__.last < 10**9
-        if s.tired: btw('Cool down!'); return
+        if s.tired:
+            btw('Cool down!')
+            return
         p = pos or getpos()
         s.pipe = pipe
         s.on_exit = on_exit
@@ -3131,14 +3441,15 @@ class Mapper:
                     'is_area_of_interest': True
                 }
             )
-            bs.timer(0.1, bs.animate(n,'mesh_scale',{0:2,0.1:0.5}).delete)
-            SND('laser',p)
+            bs.timer(0.1, bs.animate(n, 'mesh_scale', {0: 2, 0.1: 0.5}).delete)
+            SND('laser', p)
             s.safe = None
             def f(): s.safe = s.node.exists()
-            bui.apptimer(1,f)
+            bui.apptimer(1, f)
             s.step = s.ostep = 0.008
             l = len(KIDS())
-            if l > 15: s.step = s.ostep = 0.008 + l/200
+            if l > 15:
+                s.step = s.ostep = 0.008 + l/200
         s.node = n
         s.wait = 0.001
         s.bstep = s.step * (20/8)
@@ -3147,7 +3458,7 @@ class Mapper:
         s.overlay = Overlay(build=s.build_mode)
         binds = {
             'UP_DOWN': lambda a: s.manage(a),
-            'LEFT_RIGHT': lambda a: s.manage(a,1),
+            'LEFT_RIGHT': lambda a: s.manage(a, 1),
             'PICK_UP_PRESS': lambda: s.start(2),
             'JUMP_PRESS': lambda: s.start(0),
             'PICK_UP_RELEASE': lambda: s.stop(2),
@@ -3165,7 +3476,8 @@ class Mapper:
         s.move()
     """Handle events"""
     def handlemessage(s, m):
-        if isinstance(m, bs.OutOfBoundsMessage): s.destroy()
+        if isinstance(m, bs.OutOfBoundsMessage):
+            s.destroy()
     """Destroy"""
     def destroy(s):
         with bs.get_foreground_host_activity().context:
@@ -3177,106 +3489,128 @@ class Mapper:
     """Reset input"""
     def reset(s):
         me = getme()
-        if not me: return
+        if not me:
+            return
         me.resetinput()
-        with bs.get_foreground_host_activity().context: me.actor.connect_controls_to_player()
+        with bs.get_foreground_host_activity().context:
+            me.actor.connect_controls_to_player()
     """Manage movement"""
-    def manage(s,a,lr=0):
-        if lr: s.llr = a; return
+    def manage(s, a, lr=0):
+        if lr:
+            s.llr = a
+            return
         s.lud = a
     """Move"""
     def move(s):
         m = getme(1)
-        if (not m) or m._dead: s.destroy(); bs.broadcastmessage('nah2')
-        try: p = s.getpos()
+        if (not m) or m._dead:
+            s.destroy()
+            bs.broadcastmessage('nah2')
+        try:
+            p = s.getpos()
         except:
             if STATE():
                 STATE(False)
-                if bs.get_foreground_host_activity() != bs.get_foreground_host_activity(): return
-                bui.apptimer(1,s.fail)
+                if bs.get_foreground_host_activity() != bs.get_foreground_host_activity():
+                    return
+                bui.apptimer(1, s.fail)
             return
-        s.setpos((p[0]+s.llr*s.step,p[1],p[2]-s.lud*s.step))
-        s.overlay.up(*p,s.llr,s.lud)
+        s.setpos((p[0]+s.llr*s.step, p[1], p[2]-s.lud*s.step))
+        s.overlay.up(*p, s.llr, s.lud)
         _ba.set_camera_target(*p)
-        bui.apptimer(s.wait,s.move)
+        bui.apptimer(s.wait, s.move)
     """Start elevating"""
-    def start(s,i):
+    def start(s, i):
         s.overlay.press(i)
         s.mode = i
         s.loop(i)
     """Keep elevating"""
-    def loop(s,i):
-        if s.mode != i: return
-        try: p = list(s.node.position)
-        except: return
+    def loop(s, i):
+        if s.mode != i:
+            return
+        try:
+            p = list(s.node.position)
+        except:
+            return
         p[1] += s.step if i else -s.step
         s.node.position = tuple(p)
         bui.apptimer(s.wait, lambda: s.loop(i))
     """Stop elevating"""
-    def stop(s,i):
+    def stop(s, i):
         s.overlay.release(i)
         s.mode = 4
     """Get position"""
     def getpos(s):
         return s.node.position
     """Set position"""
-    def setpos(s,p):
+    def setpos(s, p):
         s.node.position = p
     """Pick position (single-shot: exits mapper immediately)"""
     def pick(s):
         s.overlay.press(1)
         s.overlay.destroy()
-        try: p = s.node.position
-        except: return
+        try:
+            p = s.node.position
+        except:
+            return
         with bs.get_foreground_host_activity().context:
-            SND('powerup01',p)
-            bs.timer(0.1, bs.animate(s.node,'mesh_scale',{0:0.5,0.1:1.5}).delete)
-            bs.timer(0.1,lambda: (SPARK(p),s.node.delete()))
+            SND('powerup01', p)
+            bs.timer(0.1, bs.animate(s.node, 'mesh_scale', {0: 0.5, 0.1: 1.5}).delete)
+            bs.timer(0.1, lambda: (SPARK(p), s.node.delete()))
         STATE(False)
         s.pipe(p)
-        bui.apptimer(1,s.reset)
+        bui.apptimer(1, s.reset)
         s.__class__.last = time.time_ns()
     """Boost"""
-    def boost(s,i=1):
+    def boost(s, i=1):
         s.step = s.bstep if i else s.ostep
         s.overlay.press(3) if i else s.overlay.release(3)
         if i:
-            try: SND('punch01',s.node.position,2)
-            except: return
+            try:
+                SND('punch01', s.node.position, 2)
+            except:
+                return
         with bs.get_foreground_host_activity().context:
-            try: s.node.color_texture = bs.gettexture(s.btex if i else s.tex)
-            except: return
+            try:
+                s.node.color_texture = bs.gettexture(s.btex if i else s.tex)
+            except:
+                return
     """Build at current position (repeatable - does not exit)"""
     def build(s):
         s.overlay.press(3)
-        try: p = s.node.position
-        except: return
+        try:
+            p = s.node.position
+        except:
+            return
         with bs.get_foreground_host_activity().context:
             bs.timer(0.1, lambda: s.overlay.release(3))
-            SND('gunCocking',p)
-            bs.timer(0.2, bs.animate(s.node,'mesh_scale',{0:0.5,0.1:0.3,0.2:0.5}).delete)
+            SND('gunCocking', p)
+            bs.timer(0.2, bs.animate(s.node, 'mesh_scale', {0: 0.5, 0.1: 0.3, 0.2: 0.5}).delete)
             SPARK(p)
         s.pipe(p)
     """Exit mapper without building (graceful pick-style animation, no shatter)"""
     def exit(s):
         s.overlay.press(1)
         s.overlay.destroy()
-        try: p = s.node.position
-        except: p = None
+        try:
+            p = s.node.position
+        except:
+            p = None
         with bs.get_foreground_host_activity().context:
             if p:
-                SND('powerup01',p)
-                bs.timer(0.1, bs.animate(s.node,'mesh_scale',{0:0.5,0.1:1.5}).delete)
-                bs.timer(0.1,lambda: (SPARK(p),s.node.delete()))
+                SND('powerup01', p)
+                bs.timer(0.1, bs.animate(s.node, 'mesh_scale', {0: 0.5, 0.1: 1.5}).delete)
+                bs.timer(0.1, lambda: (SPARK(p), s.node.delete()))
             else:
                 s.node.delete()
         STATE(False)
         s.__class__.last = time.time_ns()
-        if s.on_exit and p: bui.apptimer(1, bs.CallPartial(s.on_exit, p))
+        if s.on_exit and p:
+            bui.apptimer(1, bs.CallPartial(s.on_exit, p))
         bui.apptimer(1, s.reset)
     """Complain"""
     def complain(s):
-        push('You destroyed the mapper!',color=(1,0,0))
+        push('You destroyed the mapper!', color=(1, 0, 0))
         bui.getsound('swip').play()
         s.overlay.destroy()
         None if s.safe else btw('Mapper was destroyed too early.\nFix your positions!')
@@ -3285,14 +3619,17 @@ class Mapper:
     pipe (dispatch) requires a real position and must not be called
     with none."""
     def fail(s):
-        if not s.build_mode: s.pipe()
+        if not s.build_mode:
+            s.pipe()
         s.complain()
+
 
 def NEW(f):
     """New class-based entry decorator"""
-    def g(w,b,i,in_source,source_cls,extra):
-        if hasm(): RESUME()
-        cw(w,transition="out_right")
+    def g(w, b, i, in_source, source_cls, extra):
+        if hasm():
+            RESUME()
+        cw(w, transition="out_right")
         cls = icw(
             in_source=b,
             out_source=in_source,
@@ -3303,17 +3640,18 @@ def NEW(f):
             extra=extra,
             nuke_anim='out_scale' if in_source else 'out_right',
             source_cls=source_cls,
-            on_back=lambda:Coolbox(fresh=False, in_source=in_source)
+            on_back=lambda: Coolbox(fresh=False, in_source=in_source)
         ).cls
         return cls
     g.__name__ = f.__name__
     g.__cls__ = f
     return g
 
+
 @NEW
 class Spawn:
     """Spawn bots to game"""
-    def __init__(s,*a):
+    def __init__(s, *a):
         s.args = a
         xoff = 45
         yoff = 45
@@ -3325,16 +3663,16 @@ class Spawn:
         # Main buttons
         s.b = pbw(
             p=a[0],
-            pos=(58.5,225),
-            size=(136,136),
+            pos=(58.5, 225),
+            size=(136, 136),
             tex=COLS()
         )
-        c = lambda: CharPicker(pipe=s.fresh,source=s.b)
-        bw(s.b, oac=c, color=(1,1,1))
+        def c(): return CharPicker(pipe=s.fresh, source=s.b)
+        bw(s.b, oac=c, color=(1, 1, 1))
         # Text
         s.t = tw(
             p=a[0],
-            pos=(100,193),
+            pos=(100, 193),
             h_align='center',
             maxwidth=170
         )
@@ -3354,11 +3692,11 @@ class Spawn:
         s.pos = []
         tx = 38
         for i in range(3):
-            e = ['X','Y','Z'][i]
+            e = ['X', 'Y', 'Z'][i]
             t = ctw(
                 flash=True,
                 p=a[0],
-                size=(150,45),
+                size=(150, 45),
                 conf=f'pos{i}',
                 hint=e+' Position',
                 allow='-0.1223456789',
@@ -3367,30 +3705,30 @@ class Spawn:
             s.pos.append(t)
         # Position smalls
         for j in range(3):
-            i = ['scorch','slash','touchArrowsActions'][j]
-            c = [s.dot,s.invert,s.same][j]
+            i = ['scorch', 'slash', 'touchArrowsActions'][j]
+            c = [s.dot, s.invert, s.same][j]
             sbw(
                 p=a[0],
                 pos=(230+50*j, 150),
-                size=(43,43),
+                size=(43, 43),
                 icon=bui.gettexture(i),
                 icon_tint=-8,
-                cons=[None,CONS()[0]][j==2],
+                cons=[None, CONS()[0]][j == 2],
                 oac=c
             )
         # Position buttons
         for i in range(2):
             bw(
                 p=a[0],
-                pos=(222,30+60*i),
-                icon=bui.gettexture(['touchArrows','cursor'][i]),
-                size=(160,55),
-                label=['Teleport','Map'][i],
+                pos=(222, 30+60*i),
+                icon=bui.gettexture(['touchArrows', 'cursor'][i]),
+                size=(160, 55),
+                label=['Teleport', 'Map'][i],
                 cons={
                     **CONS()[0],
-                    **[{},CONS()[1]][i]
+                    **[{}, CONS()[1]][i]
                 },
-                oac=[s.teleport,s.map][i]
+                oac=[s.teleport, s.map][i]
             )
         # Character smalls
         s.csm = {}
@@ -3399,8 +3737,8 @@ class Spawn:
             f = e[i]
             t = bw(
                 p=a[0],
-                pos=(60+50*i,150),
-                size=(38,38),
+                pos=(60+50*i, 150),
+                size=(38, 38),
             )
             oac = bs.CallPartial(
                 ColorPicker,
@@ -3417,31 +3755,31 @@ class Spawn:
             s.csm[f] = t
         # Character buttons
         for i in range(2):
-            j = ['Sound','Mesh'][i]
-            k = ['audioIcon','menuIcon'][i]
+            j = ['Sound', 'Mesh'][i]
+            k = ['audioIcon', 'menuIcon'][i]
             b = bw(
                 p=a[0],
-                pos=(48,30+60*i),
+                pos=(48, 30+60*i),
                 icon=bui.gettexture(k),
-                size=(160,55),
+                size=(160, 55),
                 label=j
             )
-            bw(b,oac=bs.CallPartial([SoundManager,MeshManager][i],source=b,on_back=s.fresh))
+            bw(b, oac=bs.CallPartial([SoundManager, MeshManager][i], source=b, on_back=s.fresh))
         # Attributes
         s.t2 = ctw(
             p=a[0],
-            pos=(408,315),
-            size=(150,45),
+            pos=(408, 315),
+            size=(150, 45),
             allow=True,
             text=var('tchar'),
-            conf=('tchar','char'),
+            conf=('tchar', 'char'),
             description='Name',
             on_conf=s.fresh
         ).widget
         s.t3 = ctw(
             p=a[0],
-            pos=(408,270),
-            size=(150,45),
+            pos=(408, 270),
+            size=(150, 45),
             allow="01223456789",
             text=var('lastid'),
             conf='lastid',
@@ -3450,8 +3788,8 @@ class Spawn:
         ).widget
         s.seed_t = ctw(
             p=a[0],
-            pos=(410,225),
-            size=(150,45),
+            pos=(410, 225),
+            size=(150, 45),
             allow=True,
             conf='seed',
             type='encoding',
@@ -3461,34 +3799,34 @@ class Spawn:
             description='Seed includes name, character, colors, mesh, sounds and custom name. Sharing seed will share all these. Enter'
         )
         for i in range(3):
-            j = ['replayIcon','file','logIcon'][i]
-            k = [s.randomize,s.copy,s.paste][i]
+            j = ['replayIcon', 'file', 'logIcon'][i]
+            k = [s.randomize, s.copy, s.paste][i]
             sbw(
                 p=a[0],
-                pos=(410+50*i,150),
+                pos=(410+50*i, 150),
                 icon=bui.gettexture(j),
                 oac=k
             )
         s.sbtn = []
         for i in range(2):
-            j = ['Spawn','Actions'][i]
-            k = ['downButton','trophy'][i]
+            j = ['Spawn', 'Actions'][i]
+            k = ['downButton', 'trophy'][i]
             l = [
                 s.spawn,
                 lambda: ActionManager(source=s.sbtn[1])
             ][i]
             b = bw(
                 p=a[0],
-                pos=(398,30+60*i),
+                pos=(398, 30+60*i),
                 icon=bui.gettexture(k),
-                size=(160,55),
+                size=(160, 55),
                 label=j,
                 oac=l
             )
             s.sbtn.append(b)
         # Resume
         s.fresh()
-        [tw(s.pos[i],text=var(f'pos{i}')) for i in range(3)]
+        [tw(s.pos[i], text=var(f'pos{i}')) for i in range(3)]
         if ex and rnd(ex) != getpos():
             bui.apptimer(0.2, lambda: (s.setpos(ex), gun()))
     """Copy seed"""
@@ -3496,63 +3834,76 @@ class Spawn:
         bui.clipboard_set_text(var('seed'))
         bui.getsound('ding').play()
         s.seed_t.blink()
-        push('Copied seed to clipboard!',color=(0,1,0))
+        push('Copied seed to clipboard!', color=(0, 1, 0))
     """Paste seed"""
     def paste(s):
-        s.seed_t.set_text(PASTE(),silent=True)
+        s.seed_t.set_text(PASTE(), silent=True)
         gun()
-        s.seed_t.blink((0,1,1))
-        push('Pasted seed from clipboard!',color=(0,1,1))
+        s.seed_t.blink((0, 1, 1))
+        push('Pasted seed from clipboard!', color=(0, 1, 1))
     """Randomize seed"""
     def randomize(s):
-        if not s.can_ran: (setattr(s,'can_blud',False),btw(random.choice(SLOWDOWN())),bui.apptimer(5,bs.CallPartial(setattr,s,'can_blud',True))) if s.can_blud else bui.getsound('block').play(); return
+        if not s.can_ran:
+            (setattr(s, 'can_blud', False), btw(random.choice(SLOWDOWN())), bui.apptimer(
+                5, bs.CallPartial(setattr, s, 'can_blud', True))) if s.can_blud else bui.getsound('block').play()
+            return
         s.can_ran = False
-        s.seed_t.set_text(RANDOM(),silent=True)
+        s.seed_t.set_text(RANDOM(), silent=True)
         bui.getsound('cashRegister2').play()
-        push('Randomized seed!',color=(1,1,0))
-        bui.apptimer(0.2,lambda:setattr(s,'can_ran',True))
+        push('Randomized seed!', color=(1, 1, 0))
+        bui.apptimer(0.2, lambda: setattr(s, 'can_ran', True))
     """Refresh previews"""
-    def fresh(s,i=None,ms=True,silent=True):
-        if i is not None: c = cc = NAME()[i]; var('char',c); var('tchar',c); fixall()
-        else: c = var('char'); cc = var('tchar')
+    def fresh(s, i=None, ms=True, silent=True):
+        if i is not None:
+            c = cc = NAME()[i]
+            var('char', c)
+            var('tchar', c)
+            fixall()
+        else:
+            c = var('char')
+            cc = var('tchar')
         mem = COLS()
-        n = var(mem[2]) or (1,1,1)
-        [tw(t,text=cc,color=n) for t in [s.t,s.t2]]
+        n = var(mem[2]) or (1, 1, 1)
+        [tw(t, text=cc, color=n) for t in [s.t, s.t2]]
         char = D()[c]
-        tc = var(mem[0]) or (1,1,1)
-        tc2 = var(mem[1]) or (1,1,1)
+        tc = var(mem[0]) or (1, 1, 1)
+        tc2 = var(mem[1]) or (1, 1, 1)
         bw(
             s.b,
             texture=bui.gettexture(char.icon_texture),
-            color=(1,1,1),
+            color=(1, 1, 1),
             tint_texture=bui.gettexture(char.icon_mask_texture),
             tint_color=tc,
             tint2_color=tc2
         )
-        [bw(s.csm[z],color=var(z) or (1,1,1)) for z in list(s.csm.keys())]
+        [bw(s.csm[z], color=var(z) or (1, 1, 1)) for z in list(s.csm.keys())]
         # char, tchar, main, hl, name, (*mesh,ctex,ctex2), (*sounds)
         if ms:
-            e = SEED(c,cc,tuple(tc),tuple(tc2),tuple(n))
-            var('seed',e)
-            s.seed_t.set_text(e,silent=silent)
-            s.seed_t.blink((1,1,0))
+            e = SEED(c, cc, tuple(tc), tuple(tc2), tuple(n))
+            var('seed', e)
+            s.seed_t.set_text(e, silent=silent)
+            s.seed_t.blink((1, 1, 0))
     """Apply seed"""
     def apply(s):
-        try: a = CHECK(var('seed'))
-        except: push('Found a bad seed in memory'); return
+        try:
+            a = CHECK(var('seed'))
+        except:
+            push('Found a bad seed in memory')
+            return
         mem = COLS()
-        var('char',a[0])
-        var('tchar',a[1])
-        var(mem[0],a[2])
-        var(mem[1],a[3])
-        var(mem[2],a[4])
+        var('char', a[0])
+        var('tchar', a[1])
+        var(mem[0], a[2])
+        var(mem[1], a[3])
+        var(mem[2], a[4])
         arr = list(a[5])
-        for i in range(len(DIR('mesh'))): var(f'mesh{i}',arr[i])
-        var('ctex',arr[-2])
-        var('ctex2',arr[-1])
-        [var(f'sound{i}',a[6][i]) for i in range(len(DIR('sounds')))]
+        for i in range(len(DIR('mesh'))):
+            var(f'mesh{i}', arr[i])
+        var('ctex', arr[-2])
+        var('ctex2', arr[-1])
+        [var(f'sound{i}', a[6][i]) for i in range(len(DIR('sounds')))]
         s.fresh(ms=False)
-        s.seed_t.blink((1,1,0))
+        s.seed_t.blink((1, 1, 0))
     """Actually spawn"""
     def spawn(s):
         a = bs.get_foreground_host_activity()
@@ -3576,49 +3927,50 @@ class Spawn:
         bs.getsound('spawn').play(position=pos)
         n.handlemessage('flash')
         n.is_area_of_interest = True
-        b.handlemessage(bs.StandMessage(pos,0))
-        FOCUS(n,2,1)
+        b.handlemessage(bs.StandMessage(pos, 0))
+        FOCUS(n, 2, 1)
         # Apply sounds
         set_sounds(n)
     """Teleport"""
     def teleport(s):
         me = getme(1)
         n = me.node
-        FOCUS(n,2,1)
+        FOCUS(n, 2, 1)
         p = getpos()
         me.handlemessage(bs.StandMessage(p, 0))
         n.handlemessage('flash')
-        SND('spawn',p)
+        SND('spawn', p)
     """Draw dot"""
     def dot(s):
         p = getpos()
-        LOOK(p, on_found=lambda: push('Located positon!', color=(1,1,1)))
+        LOOK(p, on_found=lambda: push('Located positon!', color=(1, 1, 1)))
     """Invert position"""
     def invert(s):
         p = getpos()
-        s.setpos((-p[0],p[1],-p[2]))
+        s.setpos((-p[0], p[1], -p[2]))
         bui.getsound('deek').play()
-        push('Inverted position!',color=(0.5,0.7,1))
+        push('Inverted position!', color=(0.5, 0.7, 1))
     """Same player position"""
     def same(s):
         s.setpos(getme(1).node.position)
         gun()
-        push('Used your position!', color=(1,0.7,0.2))
+        push('Used your position!', color=(1, 0.7, 0.2))
     """Set position"""
-    def setpos(s,p):
+    def setpos(s, p):
         p = rnd(p)
-        [tw(s.pos[i],text=str(p[i])) for i in range(3)]
+        [tw(s.pos[i], text=str(p[i])) for i in range(3)]
     """Map position"""
     def map(s):
-        s.mapper = Mapper(pipe=s.pick,pos=getpos())
+        s.mapper = Mapper(pipe=s.pick, pos=getpos())
         None if s.mapper.tired else cw(s.args[0], transition='out_right')
     """Pick position"""
-    def pick(s,p=None):
+    def pick(s, p=None):
         Coolbox(fb=s.__class__.__name__, fake=True, extra=(p or getpos()))
+
 
 class shadow:
     """Widget blocker"""
-    def __init__(s,p,pos,size,conf):
+    def __init__(s, p, pos, size, conf):
         s.add = s.pro = 0
         s.conf = conf
         s.size = size
@@ -3639,90 +3991,98 @@ class shadow:
     """Refresh"""
     def fresh(s):
         v = var(s.conf)
-        bui.scrollwidget(s.b,size=([s.size,(0,0)][v]))
-        s.add = [0.01,-0.01][v]
+        bui.scrollwidget(s.b, size=([s.size, (0, 0)][v]))
+        s.add = [0.01, -0.01][v]
+
         def f(j):
-            if s.add != j: return
-            if s.pro > 0.8: s.pro = 0.8; return
-            if s.pro < 0: s.pro = 0; return
+            if s.add != j:
+                return
+            if s.pro > 0.8:
+                s.pro = 0.8
+                return
+            if s.pro < 0:
+                s.pro = 0
+                return
             s.pro += j
-            bui.imagewidget(s.a,opacity=s.pro)
-            bui.apptimer(0.001,bs.CallPartial(f,j))
+            bui.imagewidget(s.a, opacity=s.pro)
+            bui.apptimer(0.001, bs.CallPartial(f, j))
         f(s.add)
+
 
 @NEW
 class Modify:
     """Modify in-game players and bots"""
-    def __init__(s,*a):
+    def __init__(s, *a):
         s.a = a
         s.mem = WHAT()
         w = a[0]
         q = bui.scrollwidget(
             parent=w,
             color=var('bg'),
-            size=(150,270),
-            position=(50,100)
+            size=(150, 270),
+            position=(50, 100)
         )
         s.c = cw(
             parent=q,
-            size=(150,100),
+            size=(150, 100),
             background=False
         )
         for i in range(3):
             tw(
-                text=['Position','Template','Who?'][i],
-                pos=([435,250,75][i],[70,200][i<1]),
+                text=['Position', 'Template', 'Who?'][i],
+                pos=([435, 250, 75][i], [70, 200][i < 1]),
                 h_align='center',
-                size=(100,30),
+                size=(100, 30),
                 p=w
             )
             b = bw(
                 p=w,
-                pos=(53+50*i,25),
-                label=[bui.charstr(bui.SpecialChar.UP_ARROW),'?','&'][i],
-                text_scale=[1.2,1.4][i>0],
-                size=(40,40),
-                **([{},{'cons':CONS()[0]}][i>1])
+                pos=(53+50*i, 25),
+                label=[bui.charstr(bui.SpecialChar.UP_ARROW), '?', '&'][i],
+                text_scale=[1.2, 1.4][i > 0],
+                size=(40, 40),
+                **([{}, {'cons': CONS()[0]}][i > 1])
             )
             o = [
-                bs.CallPartial(SpazPicker,source=b,pipe=s.add,note="It's recommended to modify one spaz at a time"),
-                bs.CallPartial(ConPipe,source=b,pipe=s.add),
-                bs.CallPartial(s.kang,source=b)
+                bs.CallPartial(SpazPicker, source=b, pipe=s.add,
+                               note="It's recommended to modify one spaz at a time"),
+                bs.CallPartial(ConPipe, source=b, pipe=s.add),
+                bs.CallPartial(s.kang, source=b)
             ][i]
             bw(b, oac=o)
         # Char name
         s.ct = tw(
             p=w,
-            pos=(274,197),
+            pos=(274, 197),
             maxwidth=150,
             h_align='center',
             text=var('mchar')
         )
         b = bw(
             p=w,
-            pos=(227,25),
+            pos=(227, 25),
             icon=bui.gettexture('achievementOutline'),
             label='Load',
-            size=(150,40)
+            size=(150, 40)
         )
-        bw(b,oac=bs.CallPartial(SpazPicker,source=b,pipe=s.load,what='Copy who?'))
+        bw(b, oac=bs.CallPartial(SpazPicker, source=b, pipe=s.load, what='Copy who?'))
         bw(
             p=w,
-            pos=(410,153),
+            pos=(410, 153),
             icon=bui.gettexture('cursor'),
             label='Map',
-            size=(150,40),
+            size=(150, 40),
             oac=s.map,
             cons=CONS()[1]
         )
         # Position editables
         s.pos = []
         for i in range(3):
-            j = ['X','Y','Z'][i]+' Position'
+            j = ['X', 'Y', 'Z'][i]+' Position'
             t = ctw(
                 parent=w,
-                pos=(410,310-40*i),
-                size=(150,40),
+                pos=(410, 310-40*i),
+                size=(150, 40),
                 allow='-0.1223456789',
                 hint=j,
                 conf=f'mpos{i}',
@@ -3737,8 +4097,8 @@ class Modify:
             f = e[i]
             t = bw(
                 p=a[0],
-                pos=(230+50*i,153),
-                size=(40,40)
+                pos=(230+50*i, 153),
+                size=(40, 40)
             )
             oac = bs.CallPartial(
                 ColorPicker,
@@ -3750,26 +4110,26 @@ class Modify:
                 mode=i,
                 chr='mchar'
             )
-            bw(t, oac=oac, color=var(f) or (1,1,1))
+            bw(t, oac=oac, color=var(f) or (1, 1, 1))
             s.cbs.append(t)
             b = sbw(
                 p=a[0],
-                pos=(230+50*i,103),
-                icon=bui.gettexture(['audioIcon','menuIcon','textClearButton'][i])
+                pos=(230+50*i, 103),
+                icon=bui.gettexture(['audioIcon', 'menuIcon', 'textClearButton'][i])
             )
-            bw(b,oac=[
-                bs.CallPartial(SoundManager,source=b,prf='m',cols=s.cols),
-                bs.CallPartial(MeshManager,source=b,prf='m',cols=s.cols),
-                bs.CallPartial(s.creset,source=b)
+            bw(b, oac=[
+                bs.CallPartial(SoundManager, source=b, prf='m', cols=s.cols),
+                bs.CallPartial(MeshManager, source=b, prf='m', cols=s.cols),
+                bs.CallPartial(s.creset, source=b)
             ][i])
         # Character preview
         b = s.pre = bw(
             p=a[0],
-            pos=(235,230),
-            color=(1,1,1),
-            size=(130,130)
+            pos=(235, 230),
+            color=(1, 1, 1),
+            size=(130, 130)
         )
-        bw(b,oac=bs.CallPartial(CharPicker,source=s.pre,pipe=s.pipe,cols=s.cols,prf='m'))
+        bw(b, oac=bs.CallPartial(CharPicker, source=s.pre, pipe=s.pipe, cols=s.cols, prf='m'))
         s.targets = []
         s.kids = []
         # Name editable
@@ -3779,8 +4139,8 @@ class Modify:
             hint='Name',
             conf='mtchar',
             text=var('mtchar'),
-            pos=(410,109),
-            size=(150,35)
+            pos=(410, 109),
+            size=(150, 35)
         )
         s.ct2 = s.nm.widget
         # Healh editable
@@ -3790,9 +4150,9 @@ class Modify:
             description='Health ranges from 1 to 1000. Enter',
             conf='mhp',
             text=var('mhp'),
-            pos=(410,72),
+            pos=(410, 72),
             allow='0.1223456789',
-            size=(150,35)
+            size=(150, 35)
         )
         # Modify button
         bw(
@@ -3800,39 +4160,39 @@ class Modify:
             oac=s.modify,
             label='Modify',
             icon=bui.gettexture('settingsIcon'),
-            pos=(410,25),
-            size=(150,40)
+            pos=(410, 25),
+            size=(150, 40)
         )
         # What button
         b = sbw(
             p=a[0],
             icon=bui.gettexture('menuButton'),
-            pos=(102,380),
-            size=(40,40)
+            pos=(102, 380),
+            size=(40, 40)
         )
-        bw(b,oac=bs.CallPartial(s.what,b))
+        bw(b, oac=bs.CallPartial(s.what, b))
         # Attr button
         b = sbw(
             p=a[0],
             icon=bui.gettexture('file'),
-            pos=(152,380),
-            size=(40,40),
+            pos=(152, 380),
+            size=(40, 40),
         )
-        bw(b,oac=bs.CallPartial(s.attr,b))
+        bw(b, oac=bs.CallPartial(s.attr, b))
         # Shadows
         s.shads = []
         for i in range(7):
             j = [
-                (225,200),(225,150),
-                (225,100),(275,100),
-                (400,195),(405,107),
-                (405,70)
+                (225, 200), (225, 150),
+                (225, 100), (275, 100),
+                (400, 195), (405, 107),
+                (405, 70)
             ][i]
             k = [
-                (150,170),(150,50),
-                (50,50),(50,50),
-                (170,160),(160,40),
-                (160,40)
+                (150, 170), (150, 50),
+                (50, 50), (50, 50),
+                (170, 160), (160, 40),
+                (160, 40)
             ][i]
             s.shads.append(
                 shadow(
@@ -3851,19 +4211,23 @@ class Modify:
         s.pipe(var('mchar'))
         s.spy()
     """Edit attrs"""
-    def attr(s,b):
+    def attr(s, b):
         a = s.targets
-        if not len(a): btw('Select a target first!'); return
-        if len(a) > 1: btw('This only works on one target!'); return
+        if not len(a):
+            btw('Select a target first!')
+            return
+        if len(a) > 1:
+            btw('This only works on one target!')
+            return
         t = a[0]
-        NodeManager(source=b,node=t,pipe=s.fresh)
+        NodeManager(source=b, node=t, pipe=s.fresh)
     """Optional modify"""
-    def what(s,source=None):
+    def what(s, source=None):
         z = icw(
             in_source=source,
             title='Modify what?',
             back_anim='out_scale',
-            size=(300,335),
+            size=(300, 335),
             show_nuke=False,
             outside_action='back'
         )
@@ -3874,50 +4238,59 @@ class Modify:
             chk(
                 text=j,
                 value=var(k),
-                on_value_change_call=bs.CallPartial(s.opipe,k,i),
+                on_value_change_call=bs.CallPartial(s.opipe, k, i),
                 parent=w,
-                size=(200,20),
-                position=(30,235-35*i)
+                size=(200, 20),
+                position=(30, 235-35*i)
             )
     """Optional pipe"""
-    def opipe(s,k,i,b):
-        var(k,b)
+    def opipe(s, k, i, b):
+        var(k, b)
         s.shads[i].fresh()
     """Actually modify"""
     def modify(s):
         # node | [0,gid] | [1,tem]
         l = []
-        with bs.get_foreground_host_activity().context: mem = KIDS()
+        with bs.get_foreground_host_activity().context:
+            mem = KIDS()
         for t in s.targets:
-            if isinstance(t,list):
+            if isinstance(t, list):
                 if t[0]:
                     for i in mem:
                         j = i.source_player
                         l.append(i) if j and j.team.name.evaluate() == t[1] else None
-                else: [l.append(i) if getattr(i.getdelegate(object),'group_id',0) == t[1] else None for i in mem]
-            else: l.append(t)
+                else:
+                    [l.append(i) if getattr(i.getdelegate(object), 'group_id', 0)
+                     == t[1] else None for i in mem]
+            else:
+                l.append(t)
         if not len(l):
             btw('No targets found!')
             return
         co = s.cols()
         for n in l:
-            [setattr(n,['color','highlight','name_color'][i],var(co[i]) or (1,1,1)) for i in range(3)] if var('what1') else None
-            t = s.nm.get_text(); setattr(n,'name',t) if t and var('what5') else None
-            t = s.ht.get_text(); [setattr(n.getdelegate(object),'hitpoints',float(t)),setattr(n,'hurt',1-(float(t)/1000))] if t and var('what6') else None
-            n.handlemessage(bs.StandMessage(s.getpos(),0)) if var('what4') else None
-        nam,spa = NAME(),SPAZ()
+            [setattr(n, ['color', 'highlight', 'name_color'][i], var(co[i]) or (1, 1, 1))
+             for i in range(3)] if var('what1') else None
+            t = s.nm.get_text()
+            setattr(n, 'name', t) if t and var('what5') else None
+            t = s.ht.get_text()
+            [setattr(n.getdelegate(object), 'hitpoints', float(t)), setattr(
+                n, 'hurt', 1-(float(t)/1000))] if t and var('what6') else None
+            n.handlemessage(bs.StandMessage(s.getpos(), 0)) if var('what4') else None
+        nam, spa = NAME(), SPAZ()
         mem = spa[nam.index(var('mchar'))]
-        ok = ['color_texture','color_mask_texture']
-        ok2 = DIR('mesh'); z = range(len(ok2))
+        ok = ['color_texture', 'color_mask_texture']
+        ok2 = DIR('mesh')
+        z = range(len(ok2))
         tex = [var(f'mmesh{i}') for i in z]
         act = bs.get_foreground_host_activity()
         with act.context:
-            mem = [bs.gettexture(var('mctex')), bs.gettexture(getattr(mem,ok[1])), mem.style]
+            mem = [bs.gettexture(var('mctex')), bs.gettexture(getattr(mem, ok[1])), mem.style]
             tex = [bs.getmesh(tex[i]) for i in z]
-            [[setattr(n,ok[i],mem[i]) for i in range(2)] for n in l] if var('what0') else None
-            [[setattr(n,ok2[i],tex[i]) for i in z] for n in l] if var('what3') else None
-            [set_sounds(n,prf='m',spa=spa) for n in l] if var(f'what2') else None
-            SND('gunCocking',l[0].position)
+            [[setattr(n, ok[i], mem[i]) for i in range(2)] for n in l] if var('what0') else None
+            [[setattr(n, ok2[i], tex[i]) for i in z] for n in l] if var('what3') else None
+            [set_sounds(n, prf='m', spa=spa) for n in l] if var(f'what2') else None
+            SND('gunCocking', l[0].position)
             # style
             st = mem[2]
             mem = BRUH()
@@ -3926,43 +4299,55 @@ class Modify:
                 n.style = st
                 if (ot in mem[0] and st not in mem[0]) or st in mem[1]:
                     sp = n.source_player
-                    if sp: pass # TODO: recreate player when needed
+                    if sp:
+                        pass  # TODO: recreate player when needed
                     else:
-                        b = Bot(NAME()[0],ignore=True)
+                        b = Bot(NAME()[0], ignore=True)
                         b.uid = UUID()
                         bn = b.node
                         act.customdata[b.uid] = b
                         mem = BAD()
                         for i in dir(bn):
-                            if i == 'node': continue
-                            if i.startswith('_') or i in mem: continue
-                            try: j = getattr(n,i)
-                            except AttributeError: continue
-                            if callable(j): continue
-                            try: setattr(bn,i,j)
-                            except RuntimeError: continue
+                            if i == 'node':
+                                continue
+                            if i.startswith('_') or i in mem:
+                                continue
+                            try:
+                                j = getattr(n, i)
+                            except AttributeError:
+                                continue
+                            if callable(j):
+                                continue
+                            try:
+                                setattr(bn, i, j)
+                            except RuntimeError:
+                                continue
                         p = n.position
-                        p = (p[0],p[1]-0.6,p[2])
-                        b.handlemessage(bs.StandMessage(p,0))
+                        p = (p[0], p[1]-0.6, p[2])
+                        b.handlemessage(bs.StandMessage(p, 0))
                         s.targets[s.targets.index(n)] = bn
                         c = Control.__cls__
-                        if c.__n__ == n: c.__n__ = bn; c.__in__.ln(b)
+                        if c.__n__ == n:
+                            c.__n__ = bn
+                            c.__in__.ln(b)
                         n.delete()
                 n.handlemessage('flash')
         s.fresh(False)
         ding()
     """Kang hold node"""
-    def kang(s,source=None):
+    def kang(s, source=None):
         n = getme(1).node.hold_node
-        if not n or n.getnodetype() != 'spaz': btw('You are not holding a spaz!'); return
+        if not n or n.getnodetype() != 'spaz':
+            btw('You are not holding a spaz!')
+            return
         Confirm(
             source=source,
             title='Held player',
             label='Add as target',
-            pipe=bs.CallPartial(s.add,n)
+            pipe=bs.CallPartial(s.add, n)
         )
     """Confirm reset"""
-    def creset(s,source=None):
+    def creset(s, source=None):
         Confirm(
             source=source,
             title='Sure?',
@@ -3972,42 +4357,43 @@ class Modify:
     """Reset"""
     def reset(s):
         o = NAME()[0]
-        var('mchar',o)
-        [var(c,(1,1,1)) for c in s.cols()]
-        [bw(b,color=(1,1,1)) for b in s.cbs]
-        tw(s.ct2,color=(1,1,1))
-        fixall(o,prf='m')
+        var('mchar', o)
+        [var(c, (1, 1, 1)) for c in s.cols()]
+        [bw(b, color=(1, 1, 1)) for b in s.cbs]
+        tw(s.ct2, color=(1, 1, 1))
+        fixall(o, prf='m')
         s.fresh()
         bui.getsound('swip').play()
     """Load spaz"""
-    def load(s,n):
+    def load(s, n):
         ui = NTEX(n)
-        var('mtchar',n.name)
+        var('mtchar', n.name)
         c = s.cols()
-        var(c[0],ui[0]['tint_color'])
-        var(c[1],ui[0]['tint2_color'])
-        var(c[2],ui[1])
-        [bw(s.cbs[i],color=var(c[i])) for i in range(3)]
+        var(c[0], ui[0]['tint_color'])
+        var(c[1], ui[0]['tint2_color'])
+        var(c[2], ui[1])
+        [bw(s.cbs[i], color=var(c[i])) for i in range(3)]
         s.pipe(ICONS().index(ui[2]+'Icon'))
         o = n.getdelegate(object)
-        s.ht.set_text(str(round(o.hitpoints,1)))
+        s.ht.set_text(str(round(o.hitpoints, 1)))
         gun()
     """Character pipe"""
-    def pipe(s,i):
-        if isinstance(i,str): i = NAME().index(i)
+    def pipe(s, i):
+        if isinstance(i, str):
+            i = NAME().index(i)
         else:
             ok = NAME()[i]
-            var('mchar',ok)
-            var('mhp','1000.0')
+            var('mchar', ok)
+            var('mhp', '1000.0')
             fixall(prf='m')
         c = s.cols()
-        ui = MK(SPAZ()[i],c[0],c[1])
-        tw(s.ct,text=var('mchar'),color=var(c[2]))
-        tw(s.ct2,text=var('mtchar'),color=var(c[2]))
+        ui = MK(SPAZ()[i], c[0], c[1])
+        tw(s.ct, text=var('mchar'), color=var(c[2]))
+        tw(s.ct2, text=var('mtchar'), color=var(c[2]))
         s.ht.set_text('1000.0')
-        bw(s.pre,**ui[0])
+        bw(s.pre, **ui[0])
     """Set position"""
-    def setpos(s,p):
+    def setpos(s, p):
         p = rnd(p)
         h = []
         for i in range(3):
@@ -4016,71 +4402,78 @@ class Modify:
             n = str(p[i])
             h.append(t) if o != n else None
             t.set_text(n)
-        bui.apptimer(0.2,lambda:([t.blink() for t in h],gun())) if h else None
+        bui.apptimer(0.2, lambda: ([t.blink() for t in h], gun())) if h else None
     """Get position"""
     def getpos(s):
         return rnd(tuple([float(var(f'mpos{i}')) for i in range(3)]))
     """Map"""
     def map(s):
-        s.mapper = Mapper(pipe=s.pick,pos=s.getpos())
+        s.mapper = Mapper(pipe=s.pick, pos=s.getpos())
         None if s.mapper.tired else cw(s.a[0], transition='out_right')
     """Pick"""
-    def pick(s,p=None):
-        Coolbox(fb=s.__class__.__name__, fake=True, extra=[p or s.getpos(),s.targets])
+    def pick(s, p=None):
+        Coolbox(fb=s.__class__.__name__, fake=True, extra=[p or s.getpos(), s.targets])
     """Add target"""
-    def add(s,t):
-        if t in s.targets: btw('Target already exists!'); return
+    def add(s, t):
+        if t in s.targets:
+            btw('Target already exists!')
+            return
         s.targets.append(t)
         gun()
         s.fresh(pipe=False)
     """Remove target"""
-    def remove(s,n):
+    def remove(s, n):
         s.targets.remove(n)
         bui.getsound('pop01').play()
         s.fresh()
     """Refresh"""
-    def fresh(s,pipe=True):
+    def fresh(s, pipe=True):
         a = s.targets
         l = len(a)
         [k.delete() for k in s.kids]
         tex = ALL()
         for i in range(l):
             n = a[i]
-            b = not isinstance(n,list)
+            b = not isinstance(n, list)
             if b:
-                ui = NTEX(n,tex)
-                t = getattr(n,'name','') or f'Target {i+1}'
+                ui = NTEX(n, tex)
+                t = getattr(n, 'name', '') or f'Target {i+1}'
             else:
-                ui = {'color':(1,1,1),'texture':bui.gettexture(['achievementSharingIsCaring','achievementTeamPlayer'][n[0]])},(1,1,1)
+                ui = {'color': (1, 1, 1), 'texture': bui.gettexture(
+                    ['achievementSharingIsCaring', 'achievementTeamPlayer'][n[0]])}, (1, 1, 1)
                 t = n[1]
-            k1 = [bw,pbw][b](
+            k1 = [bw, pbw][b](
                 p=s.c,
-                pos=(10,i*155+29),
-                size=(110,110),
-                oac=bs.CallPartial(s.remove,n),
+                pos=(10, i*155+29),
+                size=(110, 110),
+                oac=bs.CallPartial(s.remove, n),
                 **ui[0]
             )
             k2 = tw(
                 p=s.c,
-                pos=(40,i*155-5),
+                pos=(40, i*155-5),
                 h_align='center',
                 maxwidth=105,
                 max_height=40,
                 text=t,
                 color=ui[1]
             )
-            [s.kids.append(k) for k in [k1,k2]]
-        cw(s.c, size=(100,l*155))
+            [s.kids.append(k) for k in [k1, k2]]
+        cw(s.c, size=(100, l*155))
         v = var('mchar')
-        if pipe and v: s.pipe(NAME().index(v))
+        if pipe and v:
+            s.pipe(NAME().index(v))
     """Spy"""
     def spy(s):
-        if not s.c.exists() or s.c.transitioning_out: return
+        if not s.c.exists() or s.c.transitioning_out:
+            return
         for n in s.targets:
-            if isinstance(n,list) or n.exists(): continue
+            if isinstance(n, list) or n.exists():
+                continue
             btw(f'Target no. {s.targets.index(n)+1} is dead!')
             s.remove(n)
-        bui.apptimer(0.1,s.spy)
+        bui.apptimer(0.1, s.spy)
+
 
 @NEW
 class Control:
@@ -4088,81 +4481,90 @@ class Control:
     __up__ = False
     __in__ = None
     __n__ = None
+
     @classmethod
     def spy(c):
-        if not c.__up__: return
+        if not c.__up__:
+            return
         i = c.__in__
         n = c.__n__
         m = getme(1)
-        if not m or m._dead and i: i.reset(n,True); c.__in__ = None; return
-        if not n or not n.exists() or n.getdelegate(object)._dead and i: i.reset(n); c.__in__ = None; return
-        bui.apptimer(0.1,c.spy)
-    def __init__(s,*a):
+        if not m or m._dead and i:
+            i.reset(n, True)
+            c.__in__ = None
+            return
+        if not n or not n.exists() or n.getdelegate(object)._dead and i:
+            i.reset(n)
+            c.__in__ = None
+            return
+        bui.apptimer(0.1, c.spy)
+
+    def __init__(s, *a):
         w = s.w = a[0]
         s.n = None
         # Target preview
         s.b = bw(
             p=w,
-            color=(1,1,1),
-            pos=(63.5,225),
-            size=(136,136),
+            color=(1, 1, 1),
+            pos=(63.5, 225),
+            size=(136, 136),
             texture=bui.gettexture('achievementEmpty')
         )
-        bw(s.b,oac=s.pick)
+        bw(s.b, oac=s.pick)
         s.t = tw(
             p=w,
             text='Who?',
             maxwidth=170,
-            pos=(105,193),
+            pos=(105, 193),
             h_align='center'
         )
         c = [
-            (0.4,1,0.4),
-            (1,0,0),
-            (0.4,1,1),
-            (1,1,0.4),
-            [(0.3,0.23,0.5),(0.4,0.26,0.6)]
+            (0.4, 1, 0.4),
+            (1, 0, 0),
+            (0.4, 1, 1),
+            (1, 1, 0.4),
+            [(0.3, 0.23, 0.5), (0.4, 0.26, 0.6)]
         ]
         bw(
             p=w,
             oac=s.apply,
             label='Apply',
             icon=bui.gettexture('settingsIcon'),
-            pos=(410,15),
-            size=(150,40)
+            pos=(410, 15),
+            size=(150, 40)
         )
         b = bw(
             p=w,
             label='Hold',
             icon=bui.gettexture('achievementOutline'),
-            pos=(235,15),
-            size=(150,40)
+            pos=(235, 15),
+            size=(150, 40)
         )
-        bw(b,oac=bs.CallPartial(s.hold,b))
+        bw(b, oac=bs.CallPartial(s.hold, b))
         bw(
             p=w,
             label='Right arm',
             icon=bui.gettexture('rightButton'),
-            pos=(235,155),
-            size=(150,40),
-            oac=bs.CallPartial(s.yay,'_r'),
+            pos=(235, 155),
+            size=(150, 40),
+            oac=bs.CallPartial(s.yay, '_r'),
             repeat=True
         )
         bw(
             p=w,
             label='Left arm',
             icon=bui.gettexture('leftButton'),
-            pos=(235,108),
-            size=(150,40),
-            oac=bs.CallPartial(s.yay,'_l'),
+            pos=(235, 108),
+            size=(150, 40),
+            oac=bs.CallPartial(s.yay, '_l'),
             repeat=True
         )
         bw(
             p=w,
             label='Both arms',
             icon=bui.gettexture('upButton'),
-            pos=(235,60),
-            size=(150,40),
+            pos=(235, 60),
+            size=(150, 40),
             oac=s.yay,
             repeat=True
         )
@@ -4172,27 +4574,27 @@ class Control:
         s.sb = bw(
             p=w,
             oac=s.start,
-            pos=(58.5,15),
-            size=(150,40),
+            pos=(58.5, 15),
+            size=(150, 40),
             cons=CONS()[0]
         )
         s.start(dry=True)
         for i in range(5):
-            j = ['Jump','Bomb','PickUp','Punch','Move'][i]
+            j = ['Jump', 'Bomb', 'PickUp', 'Punch', 'Move'][i]
             y = 175-30*i
             x = 410
             l = c[i]
             t = tw(
                 p=w,
                 text=j,
-                pos=(x+35,y)
+                pos=(x+35, y)
             )
-            if i<4:
+            if i < 4:
                 bui.imagewidget(
                     parent=w,
-                    size=(30,30),
+                    size=(30, 30),
                     color=c[i],
-                    position=(x+4,y),
+                    position=(x+4, y),
                     texture=bui.gettexture(f'button{j}')
                 )
             else:
@@ -4200,22 +4602,22 @@ class Control:
                     parent=w,
                     color=l[k],
                     texture=bui.gettexture('nub'),
-                    size=[(35,35),(20,20)][k],
-                    position=(x+1+7*k,y-2+7*k)
-                ) for k in [0,1]]
+                    size=[(35, 35), (20, 20)][k],
+                    position=(x+1+7*k, y-2+7*k)
+                ) for k in [0, 1]]
                 l = l[1]
-            tw(t,color=l)
+            tw(t, color=l)
             v = f'cont{i}'
             b = var(v)
             bb = sbw(
                 parent=w,
                 textcolor=l,
-                size=(20,20),
+                size=(20, 20),
                 text_scale=0.7,
-                position=(x+115,y+5),
-                label=['',bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][b],
+                position=(x+115, y+5),
+                label=['', bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][b],
             )
-            bw(bb,oac=bs.CallPartial(s.check,bb,i,b))
+            bw(bb, oac=bs.CallPartial(s.check, bb, i, b))
         for i in range(4):
             j = [
                 'Block him',
@@ -4227,27 +4629,27 @@ class Control:
             chk(
                 parent=s.w,
                 text='',
-                position=(63.5,155-33*i),
+                position=(63.5, 155-33*i),
                 value=var(v),
-                size=(170,30),
-                on_value_change_call=bs.CallPartial(s.cconf,v)
+                size=(170, 30),
+                on_value_change_call=bs.CallPartial(s.cconf, v)
             )
             tw(
                 p=s.w,
                 text=j,
                 maxwidth=95,
-                position=(100.5,158-33*i),
+                position=(100.5, 158-33*i),
             )
         for i in range(4):
-            j = [460,505,460,415][i]
-            k = [218,265,312,265][i]
-            l = ['Jump','Bomb','PickUp','Punch'][i]
+            j = [460, 505, 460, 415][i]
+            k = [218, 265, 312, 265][i]
+            l = ['Jump', 'Bomb', 'PickUp', 'Punch'][i]
             sbw(
                 p=s.w,
-                pos=(j,k),
+                pos=(j, k),
                 color=c[i],
-                size=(50,50),
-                oac=bs.CallPartial(s.key,i),
+                size=(50, 50),
+                oac=bs.CallPartial(s.key, i),
                 texture=bui.gettexture('button'+l)
             )
         s.mbs = []
@@ -4258,25 +4660,25 @@ class Control:
             for j in range(3):
                 ij = i*3+j
                 k = [
-                    '','DOWN'+h,'',
-                    'LEFT'+h,'DPAD_CENTER_BUTTON','RIGHT'+h,
-                    '','UP'+h,''
+                    '', 'DOWN'+h, '',
+                    'LEFT'+h, 'DPAD_CENTER_BUTTON', 'RIGHT'+h,
+                    '', 'UP'+h, ''
                 ][ij]
                 b = bw(
                     p=s.w,
-                    label=bui.charstr(getattr(bui.SpecialChar,k)) if k else k,
+                    label=bui.charstr(getattr(bui.SpecialChar, k)) if k else k,
                     repeat=True,
-                    size=(40,40),
-                    position=(240+50*j,225+50*i)
+                    size=(40, 40),
+                    position=(240+50*j, 225+50*i)
                 )
-                bw(b,oac=bs.CallPartial(s.move,i,j,b))
+                bw(b, oac=bs.CallPartial(s.move, i, j, b))
                 s.mbs.append(b)
         for i in range(4):
             j = [
-                (237.5,215),
-                (360,190),
-                (385,312.5),
-                (262.5,337.5)
+                (237.5, 215),
+                (360, 190),
+                (385, 312.5),
+                (262.5, 337.5)
             ][i]
             tw(
                 parent=s.w,
@@ -4286,164 +4688,197 @@ class Control:
             )
         tw(
             text='Long press to run',
-            color=(0.2,0.2,0.2),
-            position=(235,195),
+            color=(0.2, 0.2, 0.2),
+            position=(235, 195),
             parent=s.w,
             scale=0.71
         )
         n = cls.__n__
-        s.fresh(n,False) if n else n
+        s.fresh(n, False) if n else n
     """Celebrate"""
-    def yay(s,pr=''):
-        if s.nah(): return
-        s.n.handlemessage('celebrate'+pr,100)
+    def yay(s, pr=''):
+        if s.nah():
+            return
+        s.n.handlemessage('celebrate'+pr, 100)
     """Hold"""
-    def hold(s,b):
-        if s.nah(): return
-        if s.n.hold_node: btw("Target's already holding something!"); return
-        NodePicker(pipe=lambda n: (bs.broadcastmessage(random.choice(HOLDSELF())) if s.n == n else None,bui.apptimer(0.2,lambda:(bs.broadcastmessage('Now resume the game to see changes') if pause() else None) if s.holds(n) else None)),source=b,allow='3D')
+    def hold(s, b):
+        if s.nah():
+            return
+        if s.n.hold_node:
+            btw("Target's already holding something!")
+            return
+        NodePicker(pipe=lambda n: (bs.broadcastmessage(random.choice(HOLDSELF())) if s.n == n else None, bui.apptimer(0.2, lambda: (
+            bs.broadcastmessage('Now resume the game to see changes') if pause() else None) if s.holds(n) else None)), source=b, allow='3D')
     """Safe hold"""
-    def holds(s,w):
+    def holds(s, w):
         if w.getnodetype() in HOLDABLE():
             s.n.hold_node = w
             return True
         btw("You can't hold that!")
     """Move target"""
-    def move(s,i,j,b):
-        if s.nah(): return
+    def move(s, i, j, b):
+        if s.nah():
+            return
         o = s.n.getdelegate(object)
         if s.mb != b:
             s.mb = b
-            bw(b,color=(0,1,0)) if i*3+j != 4 else None
-            [bw(_,color=var('bg')) for _ in s.mbs if _ != b]
+            bw(b, color=(0, 1, 0)) if i*3+j != 4 else None
+            [bw(_, color=var('bg')) for _ in s.mbs if _ != b]
         else:
             with bs.get_foreground_host_activity().context:
                 o.on_run(1)
                 s.ls = time.time_ns()
-                bs.timer(0.1,s.stop)
-        v = 32767; a = [-v,0,v]
-        x,y = a[j],a[i]
+                bs.timer(0.1, s.stop)
+        v = 32767
+        a = [-v, 0, v]
+        x, y = a[j], a[i]
         o.on_move_left_right(x)
         o.on_move_up_down(y)
     """Stop running"""
     def stop(s):
         i = time.time_ns() - s.ls
-        if i < 0.8*10**8: return
-        else: s.n.getdelegate(object).on_run(0)
+        if i < 0.8*10**8:
+            return
+        else:
+            s.n.getdelegate(object).on_run(0)
     """Back gracefully"""
     def back(s):
-        if s.mb and s.mbs.index(s.mb) != 4: s.move(1,1,s.mbs[4])
+        if s.mb and s.mbs.index(s.mb) != 4:
+            s.move(1, 1, s.mbs[4])
     """Control config"""
-    def cconf(s,v,b):
-        var(v,b)
-        if s.__class__.__up__ and getattr(s,'tcconf',True):
+    def cconf(s, v, b):
+        var(v, b)
+        if s.__class__.__up__ and getattr(s, 'tcconf', True):
             s.tcconf = False
             bs.broadcastmessage('Restart control to apply changes')
-            bui.apptimer(5,bs.CallPartial(setattr,s,'tcconf',True))
+            bui.apptimer(5, bs.CallPartial(setattr, s, 'tcconf', True))
     """Send key"""
-    def key(s,i):
-        if s.nah(): return
-        with bs.get_foreground_host_activity().context: [getattr(s.n.getdelegate(object),f"on_{['jump','bomb','pickup','punch'][i]}_{['press','release'][j]}")() for j in [0,1]]
+    def key(s, i):
+        if s.nah():
+            return
+        with bs.get_foreground_host_activity().context:
+            [getattr(s.n.getdelegate(
+                object), f"on_{['jump', 'bomb', 'pickup', 'punch'][i]}_{['press', 'release'][j]}")() for j in [0, 1]]
     """Custom check"""
-    def check(s,bb,i,b):
+    def check(s, bb, i, b):
         b = not b
-        var(f'cont{i}',b)
-        bw(bb,label=['',bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][b],oac=bs.CallPartial(s.check,bb,i,b))
+        var(f'cont{i}', b)
+        bw(bb, label=['', bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)]
+           [b], oac=bs.CallPartial(s.check, bb, i, b))
         bui.getsound('deek').play()
     """Conditional CharPicker"""
     def pick(s):
-        SpazPicker(source=s.b,pipe=s.fresh,deny=[s.n],deny_msg="Already picked!")
+        SpazPicker(source=s.b, pipe=s.fresh, deny=[s.n], deny_msg="Already picked!")
     """Verify"""
     def nah(s):
-        if s.n is None: btw('No target selected!'); return 1
-        elif (getattr(s.n,'exists',lambda:False)() and s.n.getdelegate(object)._dead) or (not s.n.exists()): btw('Selected target is dead!'); return 1
+        if s.n is None:
+            btw('No target selected!')
+            return 1
+        elif (getattr(s.n, 'exists', lambda: False)() and s.n.getdelegate(object)._dead) or (not s.n.exists()): btw('Selected target is dead!'); return 1
     """Apply inputs"""
-    def apply(s,n=None,l=None):
+    def apply(s, n=None, l=None):
         if not n:
-            if s.nah(): return
+            if s.nah():
+                return
             p = s.n.source_player
-            if not p: btw("Not an actual player!"); return
+            if not p:
+                btw("Not an actual player!")
+                return
             n = s.n
-        else: p = n.source_player
+        else:
+            p = n.source_player
         o = n.getdelegate(object)
         p.resetinput()
         l = l or [var(f'cont{i}') for i in range(5)]
-        p.customdata['cont'] = (l,n)
+        p.customdata['cont'] = (l, n)
         d = {'RUN': o.on_run}
-        z = lambda a,i=0: getattr(o,f"on_{a}_{['press','release'][i]}")
+        def z(a, i=0): return getattr(o, f"on_{a}_{['press', 'release'][i]}")
         d.update({
             'UP_DOWN': o.on_move_up_down,
             'LEFT_RIGHT': o.on_move_left_right
         }) if l[4] else None
         d.update({
             'PICK_UP_PRESS': z('pickup'),
-            'PICK_UP_RELEASE': z('pickup',1)
+            'PICK_UP_RELEASE': z('pickup', 1)
         }) if l[2] else None
         d.update({
             'JUMP_PRESS': z('jump'),
-            'JUMP_RELEASE': z('jump',1)
+            'JUMP_RELEASE': z('jump', 1)
         }) if l[0] else None
         d.update({
             'BOMB_PRESS': z('bomb'),
-            'BOMB_RELEASE': z('bomb',1)
+            'BOMB_RELEASE': z('bomb', 1)
         }) if l[1] else None
         d.update({
             'PUNCH_PRESS': z('punch'),
-            'PUNCH_RELEASE': z('punch',1)
+            'PUNCH_RELEASE': z('punch', 1)
         }) if l[3] else None
-        with bs.get_foreground_host_activity().context: LN(d,p)
+        with bs.get_foreground_host_activity().context:
+            LN(d, p)
         ding()
-        push('Applied controls!',color=(0,1,0))
+        push('Applied controls!', color=(0, 1, 0))
         n.handlemessage('flash')
     """Start control"""
-    def start(s,dry=False,shut=False,tran=False,hm=False):
-        if not dry and s.nah(): return
+    def start(s, dry=False, shut=False, tran=False, hm=False):
+        if not dry and s.nah():
+            return
         me = getme(1).node
         c = s.__class__
         if s.n == me and not shut:
             bui.getsound('block').play()
-            if not getattr(s,'lmao1',True): return
+            if not getattr(s, 'lmao1', True):
+                return
             s.lmao1 = False
-            bs.broadcastmessage(random.choice(["Now that's some self control lmao","Trying to control yourself?","Anyone but that.","But this is YOU!"]))
-            bui.apptimer(5,bs.CallPartial(setattr,s,'lmao1',True))
+            bs.broadcastmessage(random.choice(
+                ["Now that's some self control lmao", "Trying to control yourself?", "Anyone but that.", "But this is YOU!"]))
+            bui.apptimer(5, bs.CallPartial(setattr, s, 'lmao1', True))
             return
         b = s.__class__.__up__
-        if not dry: s.__class__.__up__ = b = not b
-        bw(s.sb,label=['Start','Stop'][b],icon=bui.gettexture(f"ouya{['O','A'][b]}Button"))
-        if dry: return
-        if not b: s.reset(tran=tran,hm=hm); return
+        if not dry:
+            s.__class__.__up__ = b = not b
+        bw(s.sb, label=['Start', 'Stop'][b], icon=bui.gettexture(f"ouya{['O', 'A'][b]}Button"))
+        if dry:
+            return
+        if not b:
+            s.reset(tran=tran, hm=hm)
+            return
         s.__class__.__n__ = s.n
         o = s.n.getdelegate(object)
-        cw(s.w,transition='out_right') if var('cconf1') else None
-        z = lambda a,i=0: getattr(o,f"on_{a}_{['press','release'][i]}")
+        cw(s.w, transition='out_right') if var('cconf1') else None
+        def z(a, i=0): return getattr(o, f"on_{a}_{['press', 'release'][i]}")
         gun()
-        bs.broadcastmessage(f"Now {s.n.name or 'This spaz'} moves "+['like','instead of'][var('cconf3')]+' you!', color=(0,1,0))
+        bs.broadcastmessage(f"Now {s.n.name or 'This spaz'} moves " +
+                            ['like', 'instead of'][var('cconf3')]+' you!', color=(0, 1, 0))
         s.__class__.spy()
-        if var('cconf2'): me.invincible = True
+        if var('cconf2'):
+            me.invincible = True
         with bs.get_foreground_host_activity().context:
             s.ln(o)
             s.n.handlemessage('flash')
-            FOCUS(s.n,2,1)
+            FOCUS(s.n, 2, 1)
             sp = s.n.source_player
             if sp:
-                if var('cconf0'): sp.resetinput()
+                if var('cconf0'):
+                    sp.resetinput()
                 return
             Bubble(
                 node=s.n,
                 time=4,
-                text=bui.charstr(getattr(bui.SpecialChar,random.choice([
+                text=bui.charstr(getattr(bui.SpecialChar, random.choice([
                     'DPAD_CENTER_BUTTON',
                     'LOGO_FLAT'
                 ])))+' '+random.choice(CONSTR()),
                 color=s.n.color
             )
             p = s.n.position
-            bs.timer(1,lambda:(o.on_jump_press(),o.on_jump_release()) if math.dist(p,o.node.position) < 0.2 else None)
+            bs.timer(1, lambda: (o.on_jump_press(), o.on_jump_release())
+                     if math.dist(p, o.node.position) < 0.2 else None)
     """Link"""
-    def ln(s,o):
+    def ln(s, o):
         m = getme(1)
         v = var('cconf3')
-        a = lambda i: lambda e=None: (getattr(o,i)(*([e] if e is not None else [])),getattr(m,i)(*([e] if e is not None else [])) if not v else None)
+        def a(i): return lambda e=None: (getattr(o, i)(
+            *([e] if e is not None else [])), getattr(m, i)(*([e] if e is not None else [])) if not v else None)
         LN({
             'UP_DOWN': a('on_move_up_down'),
             'LEFT_RIGHT': a('on_move_left_right'),
@@ -4458,67 +4893,86 @@ class Control:
             'RUN': a('on_run')
         })
     """Reset"""
-    def reset(s,n=None,host=False,tran=False,hm=False):
+    def reset(s, n=None, host=False, tran=False, hm=False):
         b = n is not None
         me = getme()
         c = s.__class__
         o = n.getdelegate(object) if b else None
-        if b and n != s.__class__.__n__: return # denied
-        if b and o._dead: bs.broadcastmessage('Target died!'+random.choice([' LOL','','','']),color=(1,1,0))
-        elif b and host: btw('You died!'); me.resetinput(); o.on_move_up_down(0.0); o.on_move_left_right(0.0)
-        else: push(['Stopped','Transferred'][tran and hm]+' control!',color=(1,1,0)); tran if tran else ding()
+        if b and n != s.__class__.__n__:
+            return  # denied
+        if b and o._dead:
+            bs.broadcastmessage('Target died!'+random.choice([' LOL', '', '', '']), color=(1, 1, 0))
+        elif b and host:
+            btw('You died!')
+            me.resetinput()
+            o.on_move_up_down(0.0)
+            o.on_move_left_right(0.0)
+        else:
+            push(['Stopped', 'Transferred'][tran and hm]+' control!', color=(1, 1, 0))
+            tran if tran else ding()
         sp = c.__n__.source_player
         if sp:
-            l = sp.customdata.get('cont',0)
-            if l and l[1].exists(): s.apply(n,l[0])
-            else: sp.actor.connect_controls_to_player()
+            l = sp.customdata.get('cont', 0)
+            if l and l[1].exists():
+                s.apply(n, l[0])
+            else:
+                sp.actor.connect_controls_to_player()
         c.__n__ = None
         c.__up__ = False
-        cw(s.w,transition='out_right') if s.w.exists() and not s.w.transitioning_out and b and o._dead else None
-        if host: return # host died
+        cw(s.w, transition='out_right') if s.w.exists(
+        ) and not s.w.transitioning_out and b and o._dead else None
+        if host:
+            return  # host died
         me.resetinput()
-        with bs.get_foreground_host_activity().context: me.actor.connect_controls_to_player()
+        with bs.get_foreground_host_activity().context:
+            me.actor.connect_controls_to_player()
         h = me.actor.node
         h.handlemessage('flash')
-        if h.invincible: h.invincible = False
+        if h.invincible:
+            h.invincible = False
     """Refresh"""
-    def fresh(s,n,b=True):
-        s.move(1,1,s.mbs[4]) if s.n else None
+    def fresh(s, n, b=True):
+        s.move(1, 1, s.mbs[4]) if s.n else None
         s.n = n
         ui = NTEX(n)
-        tw(s.t,text=getattr(n,'name','') or 'Unnamed',color=ui[1])
-        bw(s.b,**ui[0],mask_texture=bui.gettexture('characterIconMask'))
-        if not b: return
+        tw(s.t, text=getattr(n, 'name', '') or 'Unnamed', color=ui[1])
+        bw(s.b, **ui[0], mask_texture=bui.gettexture('characterIconMask'))
+        if not b:
+            return
         gun()
         c = s.__class__
         if c.__up__:
-            bub = Bubble.__mem__.get(c.__n__,0)
+            bub = Bubble.__mem__.get(c.__n__, 0)
             hm = n != getme(1).node
-            s.start(shut=True,tran=True,hm=hm)
+            s.start(shut=True, tran=True, hm=hm)
             s.start() if hm else None
-            if not bub: return
-            with bs.get_foreground_host_activity().context: bub.delete(force=True)
+            if not bub:
+                return
+            with bs.get_foreground_host_activity().context:
+                bub.delete(force=True)
+
 
 @NEW
 class Effect:
     """Apply an effect to anyone"""
     MEM = {}
-    def __init__(s,w,*a):
+
+    def __init__(s, w, *a):
         s.n = None
         s.kids = []
         s.b = bw(
             p=w,
-            color=(1,1,1),
-            pos=(60,225),
-            size=(136,136),
+            color=(1, 1, 1),
+            pos=(60, 225),
+            size=(136, 136),
             texture=bui.gettexture('achievementEmpty')
         )
-        bw(s.b,oac=s.pick)
+        bw(s.b, oac=s.pick)
         s.t = tw(
             p=w,
             text='Who?',
             maxwidth=170,
-            pos=(101.5,193),
+            pos=(101.5, 193),
             h_align='center'
         )
         s1 = bui.scrollwidget(
@@ -4530,7 +4984,7 @@ class Effect:
         s.p1 = cw(
             parent=s1,
             background=False,
-            size=(150,0)
+            size=(150, 0)
         )
         s2 = bui.scrollwidget(
             color=var('bg'),
@@ -4542,7 +4996,7 @@ class Effect:
         p2 = cw(
             parent=s2,
             background=False,
-            size=(150,155*len(res))
+            size=(150, 155*len(res))
         )
         tw(
             parent=w,
@@ -4570,137 +5024,172 @@ class Effect:
         for y in range(5):
             for x in range(2):
                 _ = y*2+x
-                i,j = r1[_]
-                f = bs.CallPartial(s.pup,j) if _ else lambda: Collector(source=s.more[0],pipe=lambda t: wga(lambda: Bubble(s.n,t,s.n.color)))
+                i, j = r1[_]
+                f = bs.CallPartial(s.pup, j) if _ else lambda: Collector(
+                    source=s.more[0], pipe=lambda t: wga(lambda: Bubble(s.n, t, s.n.color)))
                 s.more.append(bw(
-                    size=(60,60),
-                    position=(405+x*70,315-65*y),
+                    size=(60, 60),
+                    position=(405+x*70, 315-65*y),
                     parent=w,
                     icon=bui.gettexture(i),
-                    oac=bs.CallPartial(s.nah,f),
+                    oac=bs.CallPartial(s.nah, f),
                     iconscale=1.2
                 ))
-        for _,g in enumerate(res):
-            t,x = g
+        for _, g in enumerate(res):
+            t, x = g
             tw(
                 parent=p2,
                 maxwidth=140,
-                position=(40,0+_*155),
+                position=(40, 0+_*155),
                 text=t,
                 max_height=30,
                 h_align='center'
             )
             bw(
                 parent=p2,
-                size=(90,90),
-                position=(22,18+20+_*155),
+                size=(90, 90),
+                position=(22, 18+20+_*155),
                 texture=bui.gettexture(x),
-                color=(1,1,1),
-                oac=bs.CallPartial(s.nah,bs.CallPartial(s.add,_))
+                color=(1, 1, 1),
+                oac=bs.CallPartial(s.nah, bs.CallPartial(s.add, _))
             )
-    def pup(s,j):
+
+    def pup(s, j):
         s.n.handlemessage(bs.PowerupMessage(j))
         bui.getsound('powerup01').play()
-    def add(s,_):
-        if _ in s.MEM.get(s.n,[]): btw('Already applied!'); return
+
+    def add(s, _):
+        if _ in s.MEM.get(s.n, []):
+            btw('Already applied!')
+            return
         bui.getsound('powerup01').play()
         s.man(_)
         s.check()
-    def man(s,_,a=True):
-        e = lambda z:_==z
-        o = s.MEM.get(s.n,[])
-        [o.remove,o.append][a](_)
+
+    def man(s, _, a=True):
+        def e(z): return _ == z
+        o = s.MEM.get(s.n, [])
+        [o.remove, o.append][a](_)
         s.MEM[s.n] = o
         if e(0):
-            v = [1.2,15][a]
+            v = [1.2, 15][a]
             t = '_punch_power_scale'
             b = DLG(s.n)
-            h = bs.CallPartial(setattr,b,t,v)
+            h = bs.CallPartial(setattr, b, t, v)
             h()
-            if not a: return
-            g = bs.CallPartial(getattr,b,t)
-            f = lambda: s.n and (_ in s.MEM[s.n]) and (h() if g() != v else 0,bs.timer(0.2,f))
-            with bs.get_foreground_host_activity().context: f()
+            if not a:
+                return
+            g = bs.CallPartial(getattr, b, t)
+            def f(): return s.n and (_ in s.MEM[s.n]) and (h() if g() != v else 0, bs.timer(0.2, f))
+            with bs.get_foreground_host_activity().context:
+                f()
         if e(1):
-            v = [400,0][a]
+            v = [400, 0][a]
             t = '_punch_cooldown'
             b = DLG(s.n)
-            h = bs.CallPartial(setattr,b,t,v)
+            h = bs.CallPartial(setattr, b, t, v)
             h()
-            if not a: return
-            g = bs.CallPartial(getattr,b,t)
-            f = lambda: s.n and (_ in s.MEM[s.n]) and (h() if g() != v else 0,bs.timer(0.2,f))
-            with bs.get_foreground_host_activity().context: f()
-        if e(2): s.set(hockey=a)
+            if not a:
+                return
+            g = bs.CallPartial(getattr, b, t)
+            def f(): return s.n and (_ in s.MEM[s.n]) and (h() if g() != v else 0, bs.timer(0.2, f))
+            with bs.get_foreground_host_activity().context:
+                f()
+        if e(2):
+            s.set(hockey=a)
         if e(3):
-            if not a: return
-            f = lambda: s.n and (_ in s.MEM.get(s.n,[])) and (s.n.handlemessage('knockout',500),bs.timer(0.4,f))
-            with bs.get_foreground_host_activity().context: f(); Bubble(time=4,node=s.n,color=s.n.color,text=random.choice(ZZZ()))
-        if e(4): s.set(invincible=a)
-        if e(5): s.set(shattered=a)
-        if e(6): s.set(frozen=a)
+            if not a:
+                return
+
+            def f(): return s.n and (_ in s.MEM.get(s.n, [])) and (
+                s.n.handlemessage('knockout', 500), bs.timer(0.4, f))
+            with bs.get_foreground_host_activity().context:
+                f()
+                Bubble(time=4, node=s.n, color=s.n.color, text=random.choice(ZZZ()))
+        if e(4):
+            s.set(invincible=a)
+        if e(5):
+            s.set(shattered=a)
+        if e(6):
+            s.set(frozen=a)
         s.n.handlemessage('flash')
-    def rem(s,i):
-        if not i in s.MEM.get(s.n,[]): btw('Effect isn\'t applied... hmm?'); return
+
+    def rem(s, i):
+        if not i in s.MEM.get(s.n, []):
+            btw('Effect isn\'t applied... hmm?')
+            return
         bui.getsound('pop01').play()
-        s.man(i,False)
+        s.man(i, False)
         s.check()
+
     def check(s):
-        [_.delete() for _ in s.kids]; s.kids.clear()
+        [_.delete() for _ in s.kids]
+        s.kids.clear()
         res = [_[0] for _ in s.res()]
-        mem = s.MEM.get(s.n,[])
-        for _,i in enumerate(mem):
+        mem = s.MEM.get(s.n, [])
+        for _, i in enumerate(mem):
             t = tw(
                 parent=s.p1,
-                size=(150,30),
+                size=(150, 30),
                 click_activate=True,
                 selectable=True,
-                position=(0,_*35),
+                position=(0, _*35),
                 text=res[i],
-                on_activate_call=bs.CallPartial(s.nah,bs.CallPartial(s.rem,i))
+                on_activate_call=bs.CallPartial(s.nah, bs.CallPartial(s.rem, i))
             )
             s.kids.append(t)
-        cw(s.p1,size=(150,len(mem)*35))
-    def res(s,i=0):
+        cw(s.p1, size=(150, len(mem)*35))
+
+    def res(s, i=0):
         return [[
-            ('Super punch','achievementSuperPunch'),
-            ('Fast punch','nextLevelIcon'),
-            ('Super speed','achievementGotTheMoves'),
-            ('Good night','achievementOffYouGo'),
-            ('Invincible','star'),
-            ('Shatter','achievementCrossHair'),
-            ('Freeze','ouyaUButton')
-        ],[
-            ('achievementOutline','none'),
-            ('powerupHealth','health'),
-            ('powerupCurse','curse'),
-            ('powerupStickyBombs','sticky_bombs'),
-            ('powerupImpactBombs','impact_bombs'),
-            ('powerupIceBombs','ice_bombs'),
-            ('powerupBomb','triple_bombs'),
-            ('powerupLandMines','land_mines'),
-            ('powerupShield','shield'),
-            ('powerupPunch','punch')
+            ('Super punch', 'achievementSuperPunch'),
+            ('Fast punch', 'nextLevelIcon'),
+            ('Super speed', 'achievementGotTheMoves'),
+            ('Good night', 'achievementOffYouGo'),
+            ('Invincible', 'star'),
+            ('Shatter', 'achievementCrossHair'),
+            ('Freeze', 'ouyaUButton')
+        ], [
+            ('achievementOutline', 'none'),
+            ('powerupHealth', 'health'),
+            ('powerupCurse', 'curse'),
+            ('powerupStickyBombs', 'sticky_bombs'),
+            ('powerupImpactBombs', 'impact_bombs'),
+            ('powerupIceBombs', 'ice_bombs'),
+            ('powerupBomb', 'triple_bombs'),
+            ('powerupLandMines', 'land_mines'),
+            ('powerupShield', 'shield'),
+            ('powerupPunch', 'punch')
         ]][i]
+
     def sleep(s):
-        k = lambda: s.n and (s.n.handlemessage('knockout',1000),bs.timer(0.9,k))
-        with bs.get_foreground_host_activity().context: k()
-    def set(s,obj=False,**k):
+        def k(): return s.n and (s.n.handlemessage('knockout', 1000), bs.timer(0.9, k))
+        with bs.get_foreground_host_activity().context:
+            k()
+
+    def set(s, obj=False, **k):
         n = s.n.getdelegate(object) if obj else s.n
-        [setattr(n,a,v) for a,v in k.items()]
+        [setattr(n, a, v) for a, v in k.items()]
+
     def pick(s):
-        SpazPicker(source=s.b,pipe=s.fresh,deny=[s.n],deny_msg="Already picked!")
-    def fresh(s,n):
+        SpazPicker(source=s.b, pipe=s.fresh, deny=[s.n], deny_msg="Already picked!")
+
+    def fresh(s, n):
         gun()
         s.n = n
         ui = NTEX(n)
-        tw(s.t,text=getattr(n,'name',0) or 'Unnamed',color=ui[1])
-        bw(s.b,**ui[0],mask_texture=bui.gettexture('characterIconMask'))
+        tw(s.t, text=getattr(n, 'name', 0) or 'Unnamed', color=ui[1])
+        bw(s.b, **ui[0], mask_texture=bui.gettexture('characterIconMask'))
         s.check()
-    def nah(s,f):
-        if s.n is None: btw('No target selected!'); return 1
-        elif (getattr(s.n,'exists',lambda:False)() and getattr(s.n.getdelegate(object),'_dead',True)) or (not s.n.exists()): btw('Selected node is dead!\nPick a new target'); return 1
-        f(); return True
+
+    def nah(s, f):
+        if s.n is None:
+            btw('No target selected!')
+            return 1
+        elif (getattr(s.n, 'exists', lambda: False)() and getattr(s.n.getdelegate(object), '_dead', True)) or (not s.n.exists()): btw('Selected node is dead!\nPick a new target'); return 1
+        f()
+        return True
+
 
 @NEW
 class Deploy:
@@ -4711,66 +5200,67 @@ class Deploy:
             f = bs_bomb.BombFactory.get()
             o = bs_gameutils.SharedObjects.get()
         return {
-            ('Safe Bomb','spinner0'):[
+            ('Safe Bomb', 'spinner0'): [
                 'bomb',
                 {
-                    'mesh':f.bomb_mesh,
-                    'color_texture':f.regular_tex,
-                    'shadow_size':0.5,
-                    'materials':[
+                    'mesh': f.bomb_mesh,
+                    'color_texture': f.regular_tex,
+                    'shadow_size': 0.5,
+                    'materials': [
                         o.object_material,
                         o.footing_material,
                         f.bomb_material
                     ]
                 }
             ],
-            ('Safe TNT','tnt'):[
+            ('Safe TNT', 'tnt'): [
                 'prop',
                 {
-                    'mesh':f.tnt_mesh,
-                    'body':'crate',
-                    'color_texture':f.tnt_tex,
-                    'shadow_size':0.5,
-                    'materials':[
+                    'mesh': f.tnt_mesh,
+                    'body': 'crate',
+                    'color_texture': f.tnt_tex,
+                    'shadow_size': 0.5,
+                    'materials': [
                         o.object_material,
                         o.footing_material,
                         f.bomb_material
                     ]
                 }
             ],
-            ('Light Ball','nub'):[
+            ('Light Ball', 'nub'): [
                 'prop',
                 {
-                    'mesh':f.bomb_mesh,
-                    'body':'sphere',
-                    'color_texture':GA(lambda:bs.gettexture('white')),
-                    'shadow_size':0.6,
-                    'gravity_scale':0.5,
-                    'materials':[
+                    'mesh': f.bomb_mesh,
+                    'body': 'sphere',
+                    'color_texture': GA(lambda: bs.gettexture('white')),
+                    'shadow_size': 0.6,
+                    'gravity_scale': 0.5,
+                    'materials': [
                         o.object_material,
                         o.footing_material,
                         f.bomb_material
                     ]
                 }
             ],
-            ('Gold Coin','coin'):[
+            ('Gold Coin', 'coin'): [
                 'prop',
                 {
-                    'mesh':GA(lambda:bs.getmesh('puck')),
-                    'body':'puck',
-                    'color_texture':GA(lambda:bs.gettexture('tokens4')),
-                    'reflection':'sharper',
-                    'reflection_scale':[5,5,5],
-                    'materials':[
+                    'mesh': GA(lambda: bs.getmesh('puck')),
+                    'body': 'puck',
+                    'color_texture': GA(lambda: bs.gettexture('tokens4')),
+                    'reflection': 'sharper',
+                    'reflection_scale': [5, 5, 5],
+                    'materials': [
                         o.object_material,
                         o.footing_material
                     ]
                 }
             ]
         }
-    def __init__(s,w,*a):
+
+    def __init__(s, w, *a):
         s.w = w
-        s.data = {'attrs':{}}
+        s.data = {'attrs': {}}
         s.atkids = []
         s.edbs = []
         s.pos = []
@@ -4786,29 +5276,30 @@ class Deploy:
         s.prp = cw(
             parent=prp1,
             background=False,
-            size=(150,py)
+            size=(150, py)
         )
         s.vc = ex[2] if ex else 0
-        for _,g in enumerate(mem.items()):
-            tx,at = g
+        for _, g in enumerate(mem.items()):
+            tx, at = g
             y = py-150-150*_
             b = bw(
                 parent=s.prp,
-                size=(100,100),
+                size=(100, 100),
                 texture=bui.gettexture(tx[1]),
-                position=(15,y+50),
-                color=(1,1,1),
-                oac=bs.CallPartial(s.load,at,_)
+                position=(15, y+50),
+                color=(1, 1, 1),
+                oac=bs.CallPartial(s.load, at, _)
             )
             t = tw(
                 parent=s.prp,
                 maxwidth=140,
                 text=tx[0],
-                position=(40,y+15),
+                position=(40, y+15),
                 h_align='center',
                 v_align='center'
             )
-            if _ == s.vc: cw(s.prp,visible_child=t)
+            if _ == s.vc:
+                cw(s.prp, visible_child=t)
         tw(
             parent=w,
             position=(82.0, 26.7),
@@ -4852,7 +5343,7 @@ class Deploy:
             position=(316.4, 298.9),
             size=(150.0, 30),
             text='None',
-            color=(0.5,0.5,0.5),
+            color=(0.5, 0.5, 0.5),
             maxwidth=150
         )
         tw(
@@ -4881,7 +5372,7 @@ class Deploy:
             oac=s.pick
         )
         for _ in range(3):
-            h = ['X','Y','Z'][_]
+            h = ['X', 'Y', 'Z'][_]
             s.pos.append(ctw(
                 parent=w,
                 position=(293.3, 222.9-37*_),
@@ -4934,20 +5425,24 @@ class Deploy:
         # finally
         s.fattr()
         s.chk(ex)
-    def load(s,at,vc):
+
+    def load(s, at, vc):
         s.vc = vc
-        ty,da = at
+        ty, da = at
         s.propt.set_text(ty)
         s.data['attrs'] = da
         s.fattr()
-    def chk(s,ex):
-        if not ex: return
-        p,da,_ = ex
+
+    def chk(s, ex):
+        if not ex:
+            return
+        p, da, _ = ex
         if p and p != s.getpos():
-            bui.apptimer(0.2, lambda:s.setpos(p))
+            bui.apptimer(0.2, lambda: s.setpos(p))
         s.data = da
         s.fattr()
         s.fresh()
+
     def make(s):
         p = s.getpos()
         d = s.data
@@ -4955,20 +5450,21 @@ class Deploy:
         if not a:
             btw('No attrs!')
             return
-        a.update({'position':p})
+        a.update({'position': p})
         with bs.get_foreground_host_activity().context:
             try:
                 bs.newnode(
                     type=var('dplprop') or 'prop',
-                    owner=d.get('owner',None),
+                    owner=d.get('owner', None),
                     name=var('dplname'),
                     attrs=a
                 )
             except Exception as e:
                 err(str(e))
-        SND('spawn',p)
-    def _fattr(s,t):
-        a,v = t
+        SND('spawn', p)
+
+    def _fattr(s, t):
+        a, v = t
         if not a:
             bs.broadcastmessage('Cancelled!')
             return
@@ -4976,30 +5472,31 @@ class Deploy:
             bs.broadcastmessage('Updated existing attribute!')
         s.data['attrs'][a] = v
         s.fattr()
+
     def fattr(s):
         i = len(s.data['attrs'])
-        cw(s.atp,size=(260,i*70+35))
+        cw(s.atp, size=(260, i*70+35))
         [_.delete() for _ in s.atkids]
         s.atkids.clear()
         s.edbs.clear()
         # attrs
-        for _,g in enumerate(s.data['attrs'].items()):
-            a,v = g
+        for _, g in enumerate(s.data['attrs'].items()):
+            a, v = g
             y = 35+_*70
             s.atkids.append(tw(
                 parent=s.atp,
                 text=a,
                 v_align='center',
                 maxwidth=210,
-                position=(5,y+35)
+                position=(5, y+35)
             ))
-            dv = f"'{v}'" if isinstance(v,str) else str(v)
+            dv = f"'{v}'" if isinstance(v, str) else str(v)
             edb = bw(
-                position=(200,y+35),
+                position=(200, y+35),
                 label='!',
                 parent=s.atp,
-                oac=bs.CallPartial(s.eattr,a,dv,old=(a,v),_=_),
-                size=(30,30)
+                oac=bs.CallPartial(s.eattr, a, dv, old=(a, v), _=_),
+                size=(30, 30)
             )
             s.atkids.append(edb)
             s.edbs.append(edb)
@@ -5008,50 +5505,54 @@ class Deploy:
                 text=dv,
                 v_align='center',
                 maxwidth=190,
-                position=(5,y+4),
-                color=(0.7,0.7,0.7)
+                position=(5, y+4),
+                color=(0.7, 0.7, 0.7)
             ))
             s.atkids.append(bw(
-                position=(200,y+4),
-                size=(30,26),
+                position=(200, y+4),
+                size=(30, 26),
                 label='-',
                 parent=s.atp,
-                oac=bs.CallPartial(s.dattr,a)
+                oac=bs.CallPartial(s.dattr, a)
             ))
         s.atkids.append(tw(
             text='Add an attribute',
-            position=(5,0),
+            position=(5, 0),
             parent=s.atp,
             v_align='center',
             maxwidth=210
         ))
         s.aattrb = bw(
             label='+',
-            position=(200,0),
-            size=(30,30),
+            position=(200, 0),
+            size=(30, 30),
             parent=s.atp,
             oac=s.aattr
         )
         s.atkids.append(s.aattrb)
-    def dattr(s,a):
+
+    def dattr(s, a):
         s.data['attrs'].pop(a)
         bui.getsound('pop01').play()
         s.fattr()
-    def eattr(s,a,dv,old,_):
+
+    def eattr(s, a, dv, old, _):
         Collector(
             source=s.edbs[_],
             first=dv,
             double=a,
             two=True,
             title='Edit',
-            pipe=bs.CallPartial(s._eattr,old=old),
+            pipe=bs.CallPartial(s._eattr, old=old),
             raw=True
         )
-    def _eattr(s,t,old):
-        a,v = t
+
+    def _eattr(s, t, old):
+        a, v = t
         s.data['attrs'].pop(old[0])
         s.data['attrs'][a or old[0]] = v if v != "" else old[1]
         s.fattr()
+
     def aattr(s):
         Collector(
             source=s.aattrb,
@@ -5062,27 +5563,36 @@ class Deploy:
             pipe=s._fattr,
             raw=True
         )
+
     def pick(s):
         NodePicker(
             source=s.pickb,
             pipe=s.fresh,
             allow='3D'
         )
-    def fresh(s,n=None):
-        if n: s.data['owner'] = n
-        else: n = s.data.get('owner',None)
-        if not n: return
+
+    def fresh(s, n=None):
+        if n:
+            s.data['owner'] = n
+        else:
+            n = s.data.get('owner', None)
+        if not n:
+            return
         t = str(n)[1:][:-1]
         t = t[t.find('Node ')+5:t.find("'")]+n.getnodetype()
-        tw(s.ownert,text=t,color=(1,1,1))
+        tw(s.ownert, text=t, color=(1, 1, 1))
+
     def map(s):
-        s.mapper = Mapper(pipe=s.mup,pos=s.getpos())
-        None if s.mapper.tired else cw(s.w,transition='out_right')
-    def mup(s,p=None):
-        Coolbox(fb=s.__class__.__name__, fake=True, extra=(p or s.getpos(),s.data,s.vc))
+        s.mapper = Mapper(pipe=s.mup, pos=s.getpos())
+        None if s.mapper.tired else cw(s.w, transition='out_right')
+
+    def mup(s, p=None):
+        Coolbox(fb=s.__class__.__name__, fake=True, extra=(p or s.getpos(), s.data, s.vc))
+
     def getpos(s):
         return rnd(tuple([float(var(f'dpl{i}')) for i in range(3)]))
-    def setpos(s,p):
+
+    def setpos(s, p):
         p = rnd(p)
         h = []
         for i in range(3):
@@ -5091,7 +5601,8 @@ class Deploy:
             n = str(p[i])
             h.append(t) if o != n else None
             t.set_text(n)
-        bui.apptimer(0.2,lambda:([t.blink() for t in h],gun())) if h else None
+        bui.apptimer(0.2, lambda: ([t.blink() for t in h], gun())) if h else None
+
 
 @NEW
 class Listen:
@@ -5262,42 +5773,44 @@ class Listen:
         except Exception as e:
             err("Failed to restore default music.")
 
+
 @NEW
 class Tune:
     """The nice settings window"""
-    
+
     def __init__(s, *a):
         w = s.w = a[0]
-        
+
         sv = bui.scrollwidget(
             parent=w,
             position=(50, 50),
             color=var('bg'),
             size=(500, 320)
         )
-        
+
         items = [
             ('npp', 'Auto-Pause', 'Automatically pause the match when Coolbox opens.'),
             ('icall', 'Fixed Width Logs', 'Use fixed-width fonts for CallPartial logs to align text.'),
             ('spa', 'Autoplay Sounds', 'Automatically play sounds when scrolling through the Sound Picker.'),
             ('cconf0', 'Control: Block Host', 'Block your normal player inputs when remote Control starts.'),
             ('cconf1', 'Control: Auto-Close', 'Close the Coolbox UI automatically when Control starts.'),
-            ('cconf2', 'Control: Invincibility', 'Make your original spaz invincible while controlling a bot.'),
+            ('cconf2', 'Control: Invincibility',
+             'Make your original spaz invincible while controlling a bot.'),
             ('cconf3', 'Control: Intercept', 'Prevent the remote bot from performing its original AI actions.')
         ]
-        
+
         count = len(items)
         ss = max(320, count * 60 + 20)
-        
+
         s.cv = cw(
             parent=sv,
             background=False,
             size=(480, ss)
         )
-        
+
         for i, (key, title, desc) in enumerate(items):
             p_y = ss - 60 - (i * 60)
-            
+
             chk(
                 parent=s.cv,
                 position=(20, p_y + 25),
@@ -5306,7 +5819,7 @@ class Tune:
                 text=title,
                 on_value_change_call=bs.CallPartial(s.toggle, key)
             )
-            
+
             tw(
                 p=s.cv,
                 position=(55, p_y + 5),
@@ -5315,12 +5828,13 @@ class Tune:
                 scale=0.65,
                 maxwidth=400
             )
-            
+
     def toggle(s, key, val):
         var(key, val)
         if key == 'npp':
             npause(1 if val else 0)
         bui.getsound('click01').play()
+
 
 @NEW
 class Quick:
@@ -5345,7 +5859,7 @@ class Quick:
             value=bool(var('epic_mode')), text='Epic Slow-Motion',
             on_value_change_call=s.epic
         )
-        
+
         chk(
             parent=w, position=(40, 185), size=(200, 30),
             value=bool(type(s)._disco_on), text='Disco Lighting',
@@ -5356,7 +5870,7 @@ class Quick:
             p=w, pos=(40, 105), size=(220, 55),
             label='Meteor Shower', icon=bui.gettexture('powerupBomb'), oac=s.meteors
         )
-        
+
         bw(
             p=w, pos=(40, 40), size=(220, 55),
             label='Earthquake', icon=bui.gettexture('achievementOnslaught'), oac=s.quake
@@ -5374,7 +5888,8 @@ class Quick:
         ]
 
         for lbl, ic, act, p in b_list:
-            bw(p=w, pos=p, size=(120, 55), label=lbl, icon=bui.gettexture(ic), oac=bs.CallPartial(s.mass, act))
+            bw(p=w, pos=p, size=(120, 55), label=lbl,
+               icon=bui.gettexture(ic), oac=bs.CallPartial(s.mass, act))
 
     def epic(s, v):
         var('epic_mode', v)
@@ -5404,10 +5919,10 @@ class Quick:
             p = (random.uniform(-9, 9), 12, random.uniform(-6, 6))
             with bs.get_foreground_host_activity().context:
                 bs_bomb.Bomb(position=p, bomb_type='normal').autoretain()
-        
+
         for i in range(25):
             bui.apptimer(i * 0.15, drop)
-            
+
         push("Meteors Incoming!", color=(1, 0.5, 0))
         bui.getsound('shieldDown').play()
 
@@ -5437,6 +5952,7 @@ class Quick:
                     a._punch_power_scale = 10
         ding()
         push(f"Applied {act}!", color=(0, 1, 0))
+
 
 @NEW
 class Tweak:
@@ -5471,7 +5987,7 @@ class Tweak:
             row = i // 3
             bx = 45 + col * 175
             by = 315 - row * 65
-            
+
             b = bw(
                 p=w, pos=(bx, by), size=(160, 55),
                 label=lbl, icon=bui.gettexture(ic),
@@ -5505,7 +6021,8 @@ class Tweak:
         NodePicker(source=b, allow='3D', pipe=bs.CallPartial(s._bubble_prompt, b))
 
     def _bubble_prompt(s, b, n):
-        Collector(source=b, pipe=bs.CallPartial(s._apply_bubble, n), first='Message', title='Bubble Text')
+        Collector(source=b, pipe=bs.CallPartial(s._apply_bubble, n),
+                  first='Message', title='Bubble Text')
 
     def _apply_bubble(s, n, txt):
         if not n.exists():
@@ -5537,7 +6054,8 @@ class Tweak:
             err(f"Teleport failed: {e}")
 
     def find_name(s, b):
-        Collector(source=b, pipe=bs.CallPartial(s._f_name, b), first='Node name', title='Find by Name')
+        Collector(source=b, pipe=bs.CallPartial(s._f_name, b),
+                  first='Node name', title='Find by Name')
 
     def _f_name(s, b, t):
         with bs.get_foreground_host_activity().context:
@@ -5548,7 +6066,8 @@ class Tweak:
         btw('Node not found!')
 
     def find_type(s, b):
-        Collector(source=b, pipe=bs.CallPartial(s._f_type, b), first='Node type', title='Find by Type')
+        Collector(source=b, pipe=bs.CallPartial(s._f_type, b),
+                  first='Node type', title='Find by Type')
 
     def _f_type(s, b, t):
         with bs.get_foreground_host_activity().context:
@@ -5574,17 +6093,18 @@ class Tweak:
         bui.getsound('shieldDown').play()
 
     def draw_line(s, b):
-        NodePicker(source=b, allow='3D', pipe=lambda n1: NodePicker(source=b, allow='3D', pipe=lambda n2: s._draw(n1, n2)))
+        NodePicker(source=b, allow='3D', pipe=lambda n1: NodePicker(
+            source=b, allow='3D', pipe=lambda n2: s._draw(n1, n2)))
 
     def _draw(s, n1, n2, count=30):
         if count <= 0 or not n1.exists() or not n2.exists():
             return
-        
+
         p1 = n1.position
         p2 = n2.position
         d = math.dist(p1, p2)
         steps = max(2, int(d * 5))
-        
+
         with bs.get_foreground_host_activity().context:
             for i in range(steps):
                 t = i / (steps - 1)
@@ -5594,10 +6114,10 @@ class Tweak:
                     p1[2] + t * (p2[2] - p1[2])
                 )
                 bs.emitfx(position=p, chunk_type='spark', count=1, scale=0.5)
-                
+
         if count == 30:
             ding()
-            
+
         bui.apptimer(0.1, lambda: s._draw(n1, n2, count - 1))
 
     def map_coord(s, b):
@@ -5673,7 +6193,8 @@ class Tweak:
             with bs.get_foreground_host_activity().context:
                 for combine in _rgb_cycle_combines:
                     try:
-                        if combine.exists(): combine.delete()
+                        if combine.exists():
+                            combine.delete()
                     except Exception:
                         pass
             _rgb_cycle_combines = []
@@ -5681,34 +6202,36 @@ class Tweak:
             ding()
             push('RGB Cycle Off!', color=(1, 1, 0))
 
+
 @NEW
 class Gather:
     """Modify party and team based stuff"""
-    
+
     def __init__(s, *a):
         w = s.w = a[0]
         s.sl_t = None
-        
+
         # Left Panel: Team List
         s.tsv = bui.scrollwidget(parent=w, color=var('bg'), position=(30, 65), size=(180, 305))
         s.tcv = cw(parent=s.tsv, background=False)
-        
+
         # Add Team Button
         bw(
-            p=w, pos=(30, 20), size=(180, 40), 
-            label='Create Team', icon=bui.gettexture('achievementTeamPlayer'), 
+            p=w, pos=(30, 20), size=(180, 40),
+            label='Create Team', icon=bui.gettexture('achievementTeamPlayer'),
             oac=s.add_team
         )
-        
+
         # Right Panel: Team & Player Details
         s.dsv = bui.scrollwidget(parent=w, color=var('bg'), position=(220, 20), size=(350, 350))
         s.dcv = cw(parent=s.dsv, background=False)
-        
+
         s.refresh()
         s.spy()
-        
+
     def spy(s):
-        if not s.w.exists(): return
+        if not s.w.exists():
+            return
         try:
             teams = bs.get_foreground_host_activity().teams
             c_t = len(teams)
@@ -5723,7 +6246,7 @@ class Gather:
 
     def add_team(s):
         Collector(source=s.w, pipe=s._add_team, first='Team Name', title='Create Team')
-        
+
     def _add_team(s, name):
         tid = var('g_tid') or 2
         try:
@@ -5737,66 +6260,80 @@ class Gather:
             err(f"Failed: {e}")
 
     def refresh(s):
-        if not s.w.exists(): return
+        if not s.w.exists():
+            return
         [k.delete() for k in s.tcv.get_children()]
         try:
             teams = bs.get_foreground_host_activity().teams
         except:
             return
-            
+
         ss = max(305, len(teams) * 45)
         cw(s.tcv, size=(160, ss))
-        
+
         valid_sl = False
         for i, t in enumerate(teams):
-            if t == s.sl_t: valid_sl = True
+            if t == s.sl_t:
+                valid_sl = True
             y = ss - 40 - (i * 45)
             n = t.name.evaluate() if hasattr(t.name, 'evaluate') else t.name
-            sl_color = tuple(min(1.0, ch * 1.4 + 0.15) for ch in t.color) if t == s.sl_t else t.color
+            sl_color = tuple(min(1.0, ch * 1.4 + 0.15)
+                             for ch in t.color) if t == s.sl_t else t.color
             b = bw(
                 p=s.tcv, pos=(5, y), size=(150, 35), label=n, color=sl_color,
                 textcolor=var('t'),
                 oac=bs.CallPartial(s.show_team, t)
             )
-                
-        if not valid_sl: s.sl_t = None
+
+        if not valid_sl:
+            s.sl_t = None
         s.show_team(s.sl_t)
 
     def show_team(s, t):
         s.sl_t = t
         [k.delete() for k in s.dcv.get_children()]
-        if not t: return
-        
+        if not t:
+            return
+
         players = t.players
         count = len(players)
         ss = max(350, 180 + count * 45)
         cw(s.dcv, size=(330, ss))
-        
+
         n = t.name.evaluate() if hasattr(t.name, 'evaluate') else t.name
-        
-        tw(p=s.dcv, pos=(10, ss - 40), size=(310, 30), text=n, color=t.color, scale=1.2, h_align='center', v_align='center')
-        
-        bw(p=s.dcv, pos=(10, ss - 85), size=(100, 35), label='Rename', oac=bs.CallPartial(s.rename_team, t))
-        
+
+        tw(p=s.dcv, pos=(10, ss - 40), size=(310, 30), text=n,
+           color=t.color, scale=1.2, h_align='center', v_align='center')
+
+        bw(p=s.dcv, pos=(10, ss - 85), size=(100, 35),
+           label='Rename', oac=bs.CallPartial(s.rename_team, t))
+
         c_btn = bw(p=s.dcv, pos=(115, ss - 85), size=(100, 35), label='Color', color=t.color)
         var('t_col', t.color)
-        bw(c_btn, oac=bs.CallPartial(ColorPicker, in_source=c_btn, id='t_col', what='t_col', id2='t_col', chr='char', on_back=bs.CallPartial(s.recolor_team, t), mode=2))
-        
-        bw(p=s.dcv, pos=(220, ss - 85), size=(100, 35), label='Nuke', icon=bui.gettexture('crossOut'), oac=bs.CallPartial(s.nuke_team, t))
-        
-        bw(p=s.dcv, pos=(10, ss - 130), size=(100, 35), label='Gather', icon=bui.gettexture('achievementTeamPlayer'), oac=bs.CallPartial(s.gather_team, t))
-        bw(p=s.dcv, pos=(115, ss - 130), size=(100, 35), label='Smite', icon=bui.gettexture('achievementOffYouGo'), oac=bs.CallPartial(s.smite_team, t))
-        bw(p=s.dcv, pos=(220, ss - 130), size=(100, 35), label='Heal', icon=bui.gettexture('powerupHealth'), oac=bs.CallPartial(s.heal_team, t))
-        
-        tw(p=s.dcv, pos=(10, ss - 170), text=f'Players ({count}):', color=(0.5, 0.5, 0.5), scale=0.8)
-        
+        bw(c_btn, oac=bs.CallPartial(ColorPicker, in_source=c_btn, id='t_col', what='t_col',
+           id2='t_col', chr='char', on_back=bs.CallPartial(s.recolor_team, t), mode=2))
+
+        bw(p=s.dcv, pos=(220, ss - 85), size=(100, 35), label='Nuke',
+           icon=bui.gettexture('crossOut'), oac=bs.CallPartial(s.nuke_team, t))
+
+        bw(p=s.dcv, pos=(10, ss - 130), size=(100, 35), label='Gather',
+           icon=bui.gettexture('achievementTeamPlayer'), oac=bs.CallPartial(s.gather_team, t))
+        bw(p=s.dcv, pos=(115, ss - 130), size=(100, 35), label='Smite',
+           icon=bui.gettexture('achievementOffYouGo'), oac=bs.CallPartial(s.smite_team, t))
+        bw(p=s.dcv, pos=(220, ss - 130), size=(100, 35), label='Heal',
+           icon=bui.gettexture('powerupHealth'), oac=bs.CallPartial(s.heal_team, t))
+
+        tw(p=s.dcv, pos=(10, ss - 170),
+           text=f'Players ({count}):', color=(0.5, 0.5, 0.5), scale=0.8)
+
         for i, p in enumerate(players):
             y = ss - 210 - (i * 45)
             p_name = p.getname()
-            
-            tw(p=s.dcv, pos=(10, y + 5), text=p_name, maxwidth=150, color=getattr(p, 'color', (1,1,1)))
-            
-            bw(p=s.dcv, pos=(170, y), size=(70, 35), label='Fetch', oac=bs.CallPartial(s.fetch_player, p))
+
+            tw(p=s.dcv, pos=(10, y + 5), text=p_name, maxwidth=150, color=getattr(p, 'color', (1, 1, 1)))
+
+            bw(p=s.dcv, pos=(170, y), size=(70, 35), label='Fetch',
+               oac=bs.CallPartial(s.fetch_player, p))
             bw(p=s.dcv, pos=(245, y), size=(70, 35), label='Goto', oac=bs.CallPartial(s.goto_player, p))
 
     def _refresh_scoreboard(s, t):
@@ -5814,8 +6351,9 @@ class Gather:
             pass
 
     def rename_team(s, t):
-        Collector(source=s.w, pipe=bs.CallPartial(s._rename_team, t), first='New Name', title='Rename Team')
-        
+        Collector(source=s.w, pipe=bs.CallPartial(s._rename_team, t),
+                  first='New Name', title='Rename Team')
+
     def _rename_team(s, t, name):
         try:
             with bs.get_foreground_host_activity().context:
@@ -5870,7 +6408,8 @@ class Gather:
 
     def gather_team(s, t):
         me = getme(1)
-        if not me or not me.node.exists(): return
+        if not me or not me.node.exists():
+            return
         pos = me.node.position
         for p in t.players:
             if p.actor and p.actor.node.exists():
@@ -5883,7 +6422,7 @@ class Gather:
             if p.actor and p.actor.node.exists():
                 p.actor.node.handlemessage(bs.DieMessage())
         ding()
-        
+
     def heal_team(s, t):
         for p in t.players:
             if p.actor and p.actor.node.exists():
@@ -5892,17 +6431,20 @@ class Gather:
 
     def fetch_player(s, p):
         me = getme(1)
-        if not me or not me.node.exists(): return
+        if not me or not me.node.exists():
+            return
         if p.actor and p.actor.node.exists():
             p.actor.node.handlemessage(bs.StandMessage(me.node.position, 0))
             ding()
 
     def goto_player(s, p):
         me = getme(1)
-        if not me or not me.node.exists(): return
+        if not me or not me.node.exists():
+            return
         if p.actor and p.actor.node.exists():
             me.node.handlemessage(bs.StandMessage(p.actor.node.position, 0))
             ding()
+
 
 @NEW
 class Load:
@@ -6410,21 +6952,24 @@ class Load:
         cw(s.w, transition='out_right')
         bui.apptimer(0.1, lambda: Coolbox(fb=p['t']))
 
+
 class Mapper2D:
 
     last = 0
 
     def __init__(s, pipe, pos=None, on_exit=None):
         s.tired = time.time_ns() - s.__class__.last < 10**9
-        if s.tired: btw('Cool down!'); return
-        
+        if s.tired:
+            btw('Cool down!')
+            return
+
         p = pos if pos and len(pos) == 2 else (0, 0)
         if pos and len(pos) == 3:
             p = (pos[0], pos[1])
-            
+
         s.pipe = pipe
         s.on_exit = on_exit
-        
+
         with bs.get_foreground_host_activity().context:
             s.node = bs.newnode('image', attrs={
                 'texture': bs.gettexture('achievementCrossHair'),
@@ -6434,19 +6979,19 @@ class Mapper2D:
                 'color': (0, 1, 0)
             })
             bui.getsound('laser').play()
-            
+
             s.safe = None
             def f(): s.safe = s.node.exists()
             bui.apptimer(1, f)
-            
+
             s.step = s.ostep = 3.0
-            
+
         s.wait = 0.01
         s.bstep = s.step * 3
         s.llr = s.lud = 0.0
-        
+
         s.overlay = Overlay(build=True)
-        
+
         LN({
             'UP_DOWN': lambda a: s.manage(a, 0),
             'LEFT_RIGHT': lambda a: s.manage(a, 1),
@@ -6457,23 +7002,28 @@ class Mapper2D:
         s.move()
 
     def manage(s, a, lr=0):
-        if lr: s.llr = a
-        else: s.lud = a
+        if lr:
+            s.llr = a
+        else:
+            s.lud = a
 
     def move(s):
         m = getme(1)
-        if not m or m._dead: s.destroy(); return
-        try: p = s.node.position
+        if not m or m._dead:
+            s.destroy()
+            return
+        try:
+            p = s.node.position
         except:
             if STATE():
                 STATE(False)
                 bui.apptimer(1, s.fail)
             return
-        
+
         new_p = (p[0] + s.llr * s.step, p[1] + s.lud * s.step)
         s.node.position = new_p
         s.overlay.up(new_p[0], new_p[1], 0, s.llr, s.lud)
-        
+
         bui.apptimer(s.wait, s.move)
 
     def destroy(s):
@@ -6485,7 +7035,8 @@ class Mapper2D:
 
     def reset(s):
         me = getme()
-        if not me: return
+        if not me:
+            return
         me.resetinput()
         with bs.get_foreground_host_activity().context:
             me.actor.connect_controls_to_player()
@@ -6493,13 +7044,15 @@ class Mapper2D:
     """Build at current position (repeatable - does not exit)"""
     def build(s):
         s.overlay.press(3)
-        try: p = s.node.position
-        except: return
+        try:
+            p = s.node.position
+        except:
+            return
 
         with bs.get_foreground_host_activity().context:
             bs.timer(0.1, lambda: s.overlay.release(3))
             bui.getsound('gunCocking').play()
-            bs.animate_array(s.node,'scale',2,{0:(50,50),0.1:(30,30),0.2:(50,50)})
+            bs.animate_array(s.node, 'scale', 2, {0: (50, 50), 0.1: (30, 30), 0.2: (50, 50)})
 
         s.pipe((p[0], p[1], 0.0))
 
@@ -6507,18 +7060,21 @@ class Mapper2D:
     def exit(s):
         s.overlay.press(1)
         s.overlay.destroy()
-        try: p = s.node.position
-        except: p = None
+        try:
+            p = s.node.position
+        except:
+            p = None
         with bs.get_foreground_host_activity().context:
             if p:
                 bui.getsound('powerup01').play()
-                bs.animate_array(s.node,'scale',2,{0:(50,50),0.1:(0,0)})
+                bs.animate_array(s.node, 'scale', 2, {0: (50, 50), 0.1: (0, 0)})
                 bs.timer(0.1, s.node.delete)
             else:
                 s.node.delete()
         STATE(False)
         s.__class__.last = time.time_ns()
-        if s.on_exit and p: bui.apptimer(1, bs.CallPartial(s.on_exit, (p[0],p[1],0.0)))
+        if s.on_exit and p:
+            bui.apptimer(1, bs.CallPartial(s.on_exit, (p[0], p[1], 0.0)))
         bui.apptimer(1, s.reset)
 
     def complain(s):
@@ -6563,7 +7119,7 @@ class Build:
             color=var('bg'),
             size=(140, 320)
         )
-        
+
         s.cv = cw(
             parent=sv,
             background=False,
@@ -6577,7 +7133,8 @@ class Build:
             background=False
         )
 
-        s.modes = ['Prop Builder', 'Text Builder', 'Light Builder', 'Image Builder', 'Node Tools', 'Fun Tools']
+        s.modes = ['Prop Builder', 'Text Builder', 'Light Builder',
+                   'Image Builder', 'Node Tools', 'Fun Tools']
         s.m_btns = []
         for i, m in enumerate(s.modes):
             b = bw(
@@ -6627,10 +7184,11 @@ class Build:
         r3y = 85
 
         def lbl(txt, ypos):
-            s.kids.append(tw(p=s.rp, pos=(tx, ypos), size=(lw, bh), text=txt, v_align='center', h_align='left', maxwidth=lw))
+            s.kids.append(tw(p=s.rp, pos=(tx, ypos), size=(lw, bh), text=txt,
+                          v_align='center', h_align='left', maxwidth=lw))
 
         if m == 0:
-            p0y,p1y,p2y,p3y,p4y,p5y = 245,210,175,140,105,70
+            p0y, p1y, p2y, p3y, p4y, p5y = 245, 210, 175, 140, 105, 70
 
             lbl('Mesh:', p0y)
             bm = bw(p=s.rp, pos=(bx, p0y), size=(bw_sz, bh), label=var('b_mesh'))
@@ -6775,7 +7333,8 @@ class Build:
                 p=s.rp, pos=(95, 215), size=(200, 45), label='Pick & Edit',
                 icon=bui.gettexture('menuIcon')
             )
-            bw(b1, oac=bs.CallPartial(NodePicker, source=b1, pipe=lambda n: NodeManager(node=n, source=b1)))
+            bw(b1, oac=bs.CallPartial(NodePicker, source=b1,
+               pipe=lambda n: NodeManager(node=n, source=b1)))
             s.kids.append(b1)
 
             b2 = bw(
@@ -6986,17 +7545,19 @@ class Build:
 
     def rain_props(s):
         p = getpos()
+
         def drop():
             if not s.w.exists():
                 return
             rp = (p[0] + random.uniform(-6, 6), p[1] + 15, p[2] + random.uniform(-6, 6))
             s.do_prop(rp, True)
-        
+
         for i in range(25):
             bui.apptimer(i * 0.1, drop)
-            
+
         bui.getsound('spawn').play()
         push('Raining Props!', color=(0, 1, 1))
+
 
 @NEW
 class Camera:
@@ -7061,7 +7622,8 @@ class Camera:
         labels = ['↑', '←', '·', '→', '↓', 'Y↑', 'Y↓']
         for (lbl, pos, delta), txt in zip(arrows, labels):
             if delta is None:
-                tw(p=w, pos=pos, text='✛', h_align='center', size=(40, 40), v_align='center', color=(0.4, 0.4, 0.4))
+                tw(p=w, pos=pos, text='✛', h_align='center', size=(
+                    40, 40), v_align='center', color=(0.4, 0.4, 0.4))
                 continue
             bw(
                 p=w, pos=pos, size=(40, 40),
@@ -7388,7 +7950,8 @@ class Scene:
                         if not callable(val):
                             if hasattr(val, 'delete') and hasattr(val, 'exists'):
                                 try:
-                                    if val.exists(): val.delete()
+                                    if val.exists():
+                                        val.delete()
                                 except Exception:
                                     pass
                             delattr(old_map, attr)
@@ -7398,8 +7961,10 @@ class Scene:
             shared = SharedObjects.get()
             for node in bs.getnodes():
                 if node.getnodetype() == 'terrain' and node != old_map.node:
-                    try: node.delete()
-                    except Exception: pass
+                    try:
+                        node.delete()
+                    except Exception:
+                        pass
             for attr in ['bottom', 'floor', 'stands', 'background', 'railing',
                          'bg_collide', 'stem', 'player_wall', 'bg2', 'node_bottom']:
                 if hasattr(old_map, attr):
@@ -7505,7 +8070,8 @@ class Scene:
             # spawn/teleport into the old map's (possibly void) coordinates.
             old_map.spawn_points = old_map.get_def_points('spawn') or [(0, 0, 0, 0, 0, 0)]
             old_map.ffa_spawn_points = old_map.get_def_points('ffa_spawn') or [(0, 0, 0, 0, 0, 0)]
-            old_map.spawn_by_flag_points = old_map.get_def_points('spawn_by_flag') or [(0, 0, 0, 0, 0, 0)]
+            old_map.spawn_by_flag_points = old_map.get_def_points('spawn_by_flag') or [
+                (0, 0, 0, 0, 0, 0)]
             flag_pts = old_map.get_def_points('flag') or [(0, 0, 0)]
             old_map.flag_points = [p[:3] for p in flag_pts]
             old_map.flag_points_default = old_map.get_def_point('flag_default') or (0, 1, 0)
@@ -7527,6 +8093,7 @@ class Scene:
                     pos = old_map.get_start_position(i)
                     v.node.handlemessage(bs.StandMessage(pos, 0))
 
+
 @NEW
 class About:
     """About Coolbox"""
@@ -7534,34 +8101,41 @@ class About:
         w, x, y = a[0], a[1], a[2]
 
         tw(
-            p=w, pos=(x/2, y-170), size=(0,0), text='COOLBOX',
+            p=w, pos=(x/2, y-170), size=(0, 0), text='COOLBOX',
             h_align='center', v_align='center', scale=3.2,
-            color=(0.1,0.7,1), big=True
+            color=(0.1, 0.7, 1), big=True
         )
 
         tw(
-            p=w, pos=(x/2, y-270), size=(0,0), text='version 1.0',
+            p=w, pos=(x/2, y-270), size=(0, 0), text='version 1.0',
             h_align='center', v_align='center', scale=0.9,
             color=var('t')
         )
 
         tw(
-            p=w, pos=(x/2, y-305), size=(0,0), text='made with love and tea',
+            p=w, pos=(x/2, y-305), size=(0, 0), text='made with love and tea',
             h_align='center', v_align='center', scale=0.9,
             color=var('t')
         )
 
         tw(
-            p=w, pos=(x/2, y-355), size=(0,0), text='special thanks to: YOU for trying coolbox!',
+            p=w, pos=(x/2, y-355), size=(0, 0), text='special thanks to: YOU for trying coolbox!',
             h_align='center', v_align='center', scale=0.8, maxwidth=x*0.85,
-            color=(1,0.85,0.3)
+            color=(1, 0.85, 0.3)
         )
 
 # Dynamic Resources
 # Stored as callabes and only called when needed
 # Very beneficial for performance and memory
-def D(): d = bui.app.classic.spaz_appearances; [d.pop(i) for i in d.copy() if i != 'Pascal' and d[i].default_color == (0.3,0.5,0.8)]; return d
+
+
+def D(): d = bui.app.classic.spaz_appearances; [d.pop(i) for i in d.copy(
+) if i != 'Pascal' and d[i].default_color == (0.3, 0.5, 0.8)]; return d
+
+
 _INIT_CWD = os.getcwd()
+
+
 def BASE():
     app_py_dir = getattr(bui.app.env, "python_directory_app", None)
     if app_py_dir:
@@ -7581,30 +8155,45 @@ def BASE():
         "ballistica_files",
         "ba_data"
     )
-#BASE = lambda: os.path.join(os.path.dirname(bui.app.env.cache_directory),'ballistica_files','ba_data')
-NAME = lambda: list(D())
-SPAZ = lambda: list(D().values())
-KIDS = lambda: [i for i in bs.getnodes() if i.getnodetype() == 'spaz']
-ALL = lambda: sorted([i[:-4] for i in os.listdir(os.path.join(BASE(),'textures'))])
-AUDIO = lambda: sorted([i[:-4] for i in os.listdir(os.path.join(BASE(),'audio'))])
-MESH = lambda: sorted([i[:-4] for i in os.listdir(os.path.join(BASE(),'meshes'))])
-ICONS = lambda: [i.icon_texture for i in SPAZ()]
-CTEX = lambda: [i.color_texture for i in SPAZ()]
-def DIR(t): a = dir(SPAZ()[0]); b = []; [b.append(i) if i.endswith('_'+t) else None for i in a]; return b
-CONS = lambda: [
-    {lambda:getme(1):lambda:btw('Join the game first!')},
-    {lambda:not pause():lambda:btw('Resume the game first!')}
+
+# BASE = lambda: os.path.join(os.path.dirname(bui.app.env.cache_directory),'ballistica_files','ba_data')
+
+
+def NAME(): return list(D())
+def SPAZ(): return list(D().values())
+def KIDS(): return [i for i in bs.getnodes() if i.getnodetype() == 'spaz']
+
+
+def ALL(): return sorted([i[:-4] for i in os.listdir(os.path.join(BASE(), 'textures'))])
+def AUDIO(): return sorted([i[:-4] for i in os.listdir(os.path.join(BASE(), 'audio'))])
+def MESH(): return sorted([i[:-4] for i in os.listdir(os.path.join(BASE(), 'meshes'))])
+def ICONS(): return [i.icon_texture for i in SPAZ()]
+def CTEX(): return [i.color_texture for i in SPAZ()]
+
+
+def DIR(t): a = dir(SPAZ()[0]); b = []; [b.append(i)
+                                         if i.endswith('_'+t) else None for i in a]; return b
+
+
+def CONS(): return [
+    {lambda: getme(1): lambda: btw('Join the game first!')},
+    {lambda: not pause(): lambda: btw('Resume the game first!')}
 ]
-def BRUH(): mem = SPAZ(); return [[mem[i].style for i in [8,11,12,13]],mem[1].style]
+def BRUH(): mem = SPAZ(); return [[mem[i].style for i in [8, 11, 12, 13]], mem[1].style]
+
 
 # String Resources
 # Stored in disk, not in memory
 # Lambda is called on runtime when needed
-COLS = lambda: ['Main','Highlight','Name']
-WHAT = lambda: ['Character','Colors','Sound','Mesh','Position','Name','Health']
-BAD = lambda: ['punch_velocity','punch_position','punch_momentum_linear']
-HOLDABLE = lambda: ['prop','spaz','flag']
-ZZZ = lambda: [
+def COLS(): return ['Main', 'Highlight', 'Name']
+
+
+def WHAT(): return ['Character', 'Colors', 'Sound', 'Mesh', 'Position', 'Name', 'Health']
+def BAD(): return ['punch_velocity', 'punch_position', 'punch_momentum_linear']
+def HOLDABLE(): return ['prop', 'spaz', 'flag']
+
+
+def ZZZ(): return [
     'zzz',
     'I sleep',
     'naah bro I\'m out',
@@ -7622,7 +8211,9 @@ ZZZ = lambda: [
     'Don\'t wake me up.',
     'Z for Zleep. zzz.'
 ]
-SLOWDOWN = lambda: [
+
+
+def SLOWDOWN(): return [
     'Take it easy blud',
     'Cool down pal',
     'At least look at it',
@@ -7648,14 +8239,18 @@ SLOWDOWN = lambda: [
     'Too fast eh',
     'A 0.2s delay is too much to ask?'
 ]
-HOLDSELF = lambda: [
+
+
+def HOLDSELF(): return [
     'You sure like holding yourself lmfao',
     'You look funny that way',
     'Holding your own neck LOL',
     'Is that a new form of suicide',
     'What are you doing lmao'
 ]
-CONSTR = lambda: [
+
+
+def CONSTR(): return [
     'Yes!',
     'Where should I go?',
     'Let\'s get this done',
@@ -7673,7 +8268,9 @@ CONSTR = lambda: [
     'You move, I move.',
     'Controls linked!'
 ]
-NAH = lambda: [
+
+
+def NAH(): return [
     "You're not the host!",
     "Nice try, but you're not in charge here.",
     "Host privileges required.",
@@ -7707,74 +8304,109 @@ NAH = lambda: [
 
 # Config
 # Our database is babase.app.config
+
+
 def var(s, v=None, cb=True):
     cfg = bui.app.config
-    if cb: s = 'cb_'+s
-    if v is None: return cfg.get(s,v)
+    if cb:
+        s = 'cb_'+s
+    if v is None:
+        return cfg.get(s, v)
     else:
         cfg[s] = v
         cfg.commit()
-def con(n,v): var(n,v) if var(n) is None else None
-def reset_conf(): cfg = bui.app.config; [(cfg.pop(c) if c.startswith('cb_') else None) for c in cfg.copy()]; cfg.commit()
+
+
+def con(n, v): var(n, v) if var(n) is None else None
+def reset_conf(): cfg = bui.app.config; [(cfg.pop(c) if c.startswith(
+    'cb_') else None) for c in cfg.copy()]; cfg.commit()
+
 
 # Patches
 # These few lines save huge amounts of lines later
-f = ba.PluginSubsystem.on_screen_size_change; ba.PluginSubsystem.on_screen_size_change = lambda *a,**k: (icw.on_resume(),f(*a,**k))
-f = ba.PluginSubsystem.on_ui_scale_change; ba.PluginSubsystem.on_ui_scale_change = lambda *a,**k: (icw.on_resume(),f(*a,**k))
-gos = lambda: bui.get_special_widget("overlay_stack")
-chk = lambda *a,**k: (k.update({'color':var('bg'),'textcolor':var('t')}),bui.checkboxwidget(*a,**k))[1]
-def bw(*a,cons={},oac=None,pos=None,p=None,**k):
+f = ba.PluginSubsystem.on_screen_size_change
+ba.PluginSubsystem.on_screen_size_change = lambda *a, **k: (icw.on_resume(), f(*a, **k))
+f = ba.PluginSubsystem.on_ui_scale_change
+ba.PluginSubsystem.on_ui_scale_change = lambda *a, **k: (icw.on_resume(), f(*a, **k))
+def gos(): return bui.get_special_widget("overlay_stack")
+
+
+chk = lambda *a, **k: (k.update({'color': var('bg'), 'textcolor': var('t')}),
+                       bui.checkboxwidget(*a, **k))[1]
+
+
+def bw(*a, cons={}, oac=None, pos=None, p=None, **k):
     if cons:
         o = oac
-        oac = lambda: None if None in [True if c() else [cons[c](),None][1] for c in cons] else o()
+        def oac(): return None if None in [True if c() else [
+            cons[c](), None][1] for c in cons] else o()
     None if len(a) else k.update({
-        'label':k.get('label',''),
-        'button_type':k.get('button_type','square'),
-        'color':k.get('color',var('bg')),
-        'textcolor':k.get('textcolor',var('t')),
-        'enable_sound':k.get('nable_sound',False)
+        'label': k.get('label', ''),
+        'button_type': k.get('button_type', 'square'),
+        'color': k.get('color', var('bg')),
+        'textcolor': k.get('textcolor', var('t')),
+        'enable_sound': k.get('nable_sound', False)
     })
-    if pos: k['position'] = pos
-    if p: k['parent'] = p
-    if oac: k['on_activate_call'] = oac
-    return bui.buttonwidget(*a,**k)
-def cw(*a,**k):
-    only(k,'color',var('bg'))
-    only(k,'parent', gos())
-    return bui.containerwidget(*a,**k)
-def tw(*a,p=None,pos=None,**k):
-    only(k,'color',var('t'))
-    if p: k['parent'] = p
-    if pos: k['position'] = pos
-    return bui.textwidget(*a,**k)
-def pbw(*a,tex=None,**k):
-    b = bw(*a,**k)
-    if tex: bw(b,tint_color=var(tex[0]) or (1,1,1),tint2_color=var(tex[1]) or (1,1,1))
-    bw(b,color=(1,1,1),mask_texture=bui.gettexture('characterIconMask'))
+    if pos:
+        k['position'] = pos
+    if p:
+        k['parent'] = p
+    if oac:
+        k['on_activate_call'] = oac
+    return bui.buttonwidget(*a, **k)
+
+
+def cw(*a, **k):
+    only(k, 'color', var('bg'))
+    only(k, 'parent', gos())
+    return bui.containerwidget(*a, **k)
+
+
+def tw(*a, p=None, pos=None, **k):
+    only(k, 'color', var('t'))
+    if p:
+        k['parent'] = p
+    if pos:
+        k['position'] = pos
+    return bui.textwidget(*a, **k)
+
+
+def pbw(*a, tex=None, **k):
+    b = bw(*a, **k)
+    if tex:
+        bw(b, tint_color=var(tex[0]) or (1, 1, 1), tint2_color=var(tex[1]) or (1, 1, 1))
+    bw(b, color=(1, 1, 1), mask_texture=bui.gettexture('characterIconMask'))
     return b
-def sbw(*a,**k):
+
+
+def sbw(*a, **k):
     k.update({
-        'label':k.get('label',''),
-        'size':k.get('size',(43,43)),
-        'iconscale':k.get('iconscale',1.2),
-        'text_scale':k.get('text_scale',1.4)
+        'label': k.get('label', ''),
+        'size': k.get('size', (43, 43)),
+        'iconscale': k.get('iconscale', 1.2),
+        'text_scale': k.get('text_scale', 1.4)
     })
-    b = bw(*a,**k)
+    b = bw(*a, **k)
     return b
+
 
 # Mini tools
 # May look dirty, but they're extremely useful
-err = lambda t: (bui.getsound('error').play(),bs.broadcastmessage(t,color=(1,0,0)))
-btw = lambda t: (bui.getsound('block').play(),bs.broadcastmessage(t,color=(1,1,0)))
-darken = lambda c: (c[0]/2,c[1]/2,c[2]/2)
-gc = lambda w: w.get_screen_space_center()
-smol = lambda c: [i/255 for i in c]
-huge = lambda c: [int(i*255) for i in c]
-gun = lambda: bui.getsound('gunCocking').play()
-ding = lambda: bui.getsound('dingSmallHigh').play()
-UUID = lambda: str(uuid.uuid4())[:5]
+def err(t): return (bui.getsound('error').play(), bs.broadcastmessage(t, color=(1, 0, 0)))
+def btw(t): return (bui.getsound('block').play(), bs.broadcastmessage(t, color=(1, 1, 0)))
+def darken(c): return (c[0]/2, c[1]/2, c[2]/2)
+def gc(w): return w.get_screen_space_center()
+def smol(c): return [i/255 for i in c]
+def huge(c): return [int(i*255) for i in c]
+def gun(): return bui.getsound('gunCocking').play()
+def ding(): return bui.getsound('dingSmallHigh').play()
+def UUID(): return str(uuid.uuid4())[:5]
+
+
 def GA(f):
-    with bs.get_foreground_host_activity().context: return f()
+    with bs.get_foreground_host_activity().context:
+        return f()
+
 
 # CJK-packed seed system (ported from movi.py) - denser than plain digit strings
 CJK_SEED_RANGES = (
@@ -7792,80 +8424,124 @@ CJK_SEED_RANGES = (
     (0x31350, 0x323AF),  # CJK Unified Ideographs Extension H
     (0x323B0, 0x3347F),  # CJK Unified Ideographs Extension J
 )
+
+
 def _cjk_build_table():
     table = []
     cum = 0
-    for lo,hi in CJK_SEED_RANGES:
+    for lo, hi in CJK_SEED_RANGES:
         size = hi-lo+1
-        table.append((cum,cum+size-1,lo))
+        table.append((cum, cum+size-1, lo))
         cum += size
-    return table,cum
-CJK_SEED_TABLE,CJK_SEED_BASE = _cjk_build_table()
+    return table, cum
+
+
+CJK_SEED_TABLE, CJK_SEED_BASE = _cjk_build_table()
+
+
 def cjk_digit_to_char(d):
-    for start,end,lo in CJK_SEED_TABLE:
+    for start, end, lo in CJK_SEED_TABLE:
         if start <= d <= end:
             return chr(lo+(d-start))
     raise ValueError(f'seed digit out of range: {d}')
+
+
 def cjk_char_to_digit(c):
     cp = ord(c)
     cum = 0
-    for lo,hi in CJK_SEED_RANGES:
+    for lo, hi in CJK_SEED_RANGES:
         size = hi-lo+1
         if lo <= cp <= hi:
             return cum+(cp-lo)
         cum += size
     raise ValueError(f'not a valid seed character: {c!r}')
+
+
 def cjk_encode_int(n):
-    if n == 0: return cjk_digit_to_char(0)
+    if n == 0:
+        return cjk_digit_to_char(0)
     digits = []
     while n:
-        n,r = divmod(n,CJK_SEED_BASE)
+        n, r = divmod(n, CJK_SEED_BASE)
         digits.append(r)
     return ''.join(cjk_digit_to_char(d) for d in reversed(digits))
+
+
 def cjk_decode_int(s):
     n = 0
     for c in s:
         n = n*CJK_SEED_BASE + cjk_char_to_digit(c)
     return n
+
+
 def ENCODE(a):
-    c=zlib.compress(json.dumps(a,separators=(',',':'),sort_keys=True).encode('utf-8'))
-    return cjk_encode_int(int.from_bytes(c,'big'))
+    c = zlib.compress(json.dumps(a, separators=(',', ':'), sort_keys=True).encode('utf-8'))
+    return cjk_encode_int(int.from_bytes(c, 'big'))
+
+
 def DECODE(s):
-    n=cjk_decode_int(s)
-    b=n.to_bytes((n.bit_length()+7)//8,'big')
+    n = cjk_decode_int(s)
+    b = n.to_bytes((n.bit_length()+7)//8, 'big')
     return json.loads(zlib.decompress(b).decode('utf-8'))
-hasm = lambda: bui.app.ui_v1.has_main_window()
-c2h = lambda c: '#{:04x}{:04x}{:04x}'.format(*huge(c))
-DLG = lambda n: n.getdelegate(object)
+
+
+def hasm(): return bui.app.ui_v1.has_main_window()
+def c2h(c): return '#{:04x}{:04x}{:04x}'.format(*huge(c))
+def DLG(n): return n.getdelegate(object)
+
+
 def h2c(h):
     h = h.lstrip('#')
-    return smol([int(h[i:i+4],16) for i in [0,4,8]])
-def push(t,**k):
+    return smol([int(h[i:i+4], 16) for i in [0, 4, 8]])
+
+
+def push(t, **k):
     v = var('lpush') or []
-    if t in v: t = f'{t} [x{v[1]}]'; v = [v[0],v[1]+1]
-    else: v = [t,2]
-    var('lpush',v)
-    bs.broadcastmessage(t,top=True,**k)
+    if t in v:
+        t = f'{t} [x{v[1]}]'
+        v = [v[0], v[1]+1]
+    else:
+        v = [t, 2]
+    var('lpush', v)
+    bs.broadcastmessage(t, top=True, **k)
+
+
 def UIS(j=0):
     i = bui.app.ui_v1.uiscale
-    return [[[2,1][i==bui.UIScale.MEDIUM],0][i==bui.UIScale.SMALL],i][j]
-def only(k,v,d): k[v] = r = k.get(v,d); return r
-def forbtn(w,b,xoff=0):
+    return [[[2, 1][i == bui.UIScale.MEDIUM], 0][i == bui.UIScale.SMALL], i][j]
+
+
+def only(k, v, d): k[v] = r = k.get(v, d); return r
+
+
+def forbtn(w, b, xoff=0):
     p = gc(b)
-    cw(w, scale_origin_stack_offset=(p[0]-xoff,p[1]))
+    cw(w, scale_origin_stack_offset=(p[0]-xoff, p[1]))
+
+
 def PASTE():
-    try: return ba.clipboard_get_text()
-    except: pass
+    try:
+        return ba.clipboard_get_text()
+    except:
+        pass
+
+
 def CHECK(v): d = DECODE(v); d[4]; return d
+
+
 def RANDOM():
     mem = NAME()
     n = random.choice(mem)
-    c = [[round(random.uniform(0,2),2) for i in range(3)] for i in range(3)]
-    return SEED(n,n if n != mem[0] else random.choice(bs.get_random_names()),tuple(c[0]),tuple(c[1]),tuple(c[2]),fix=n)
+    c = [[round(random.uniform(0, 2), 2) for i in range(3)] for i in range(3)]
+    return SEED(n, n if n != mem[0] else random.choice(bs.get_random_names()), tuple(c[0]), tuple(c[1]), tuple(c[2]), fix=n)
+
+
 def getme(actor=0):
     for p in bs.get_foreground_host_activity().players:
         if p.sessionplayer.inputdevice.client_id == -1:
             return p.actor if actor else p
+
+
 def RESUME():
     u = bui.app.ui_v1
     c = bui.app.classic
@@ -7873,33 +8549,51 @@ def RESUME():
     u.clear_main_window()
     [z() for z in c.main_menu_resume_callbacks]
     c.main_menu_resume_callbacks.clear()
-def npause(i=None): bs.get_foreground_host_activity().globalsnode.paused = i if i is not None else var('npp')
+
+
+def npause(i=None): bs.get_foreground_host_activity(
+).globalsnode.paused = i if i is not None else var('npp')
+
+
 def pause(i=None):
     g = bs.get_foreground_host_activity().globalsnode
-    if i is None: return g.paused
+    if i is None:
+        return g.paused
     g.paused = i
-def FOCUS(p,i,node=0):
+
+
+def FOCUS(p, i, node=0):
     FOC = 0
+
     def f():
         nonlocal FOC
-        if FOC: return
-        try: _ba.set_camera_target(*(p.position if node else p))
-        except: return
-        bui.apptimer(0.01,f)
+        if FOC:
+            return
+        try:
+            _ba.set_camera_target(*(p.position if node else p))
+        except:
+            return
+        bui.apptimer(0.01, f)
+
     def g():
         nonlocal FOC
         FOC = 1
-    f(); bui.apptimer(i, g)
+    f()
+    bui.apptimer(i, g)
+
+
 def SPARK(p):
     with bs.get_foreground_host_activity().context:
-        SND('ding',p)
+        SND('ding', p)
         bs.emitfx(position=p,
-               scale=1,
-               count=70,
-               chunk_type='spark')
+                  scale=1,
+                  count=70,
+                  chunk_type='spark')
+
+
 def MESS(p):
     with bs.get_foreground_host_activity().context:
-        SND('shatter',p)
+        SND('shatter', p)
         bs.emitfx(
             position=p,
             scale=1,
@@ -7907,158 +8601,213 @@ def MESS(p):
             spread=0.1,
             chunk_type='ice'
         )
-def LOOK(p,on_found=lambda: None):
-    d = math.dist(p,_ba.get_camera_target())/17
+
+
+def LOOK(p, on_found=lambda: None):
+    d = math.dist(p, _ba.get_camera_target())/17
     h = bui.getsound('shieldUp')
-    FOCUS(p,2)
+    FOCUS(p, 2)
     h.play() if d > 0.3 else None
     bui.apptimer(d, lambda: (None if pause() else SPARK(p), h.stop(), on_found()))
+
+
 def getpos(): return rnd(tuple([float(var(f'pos{i}')) for i in range(3)]))
-def rnd(p): return tuple([round(i,3) for i in p])
-def SND(s,p,v=3):
-    with bs.get_foreground_host_activity().context: bs.getsound(s).play(v,position=p)
+def rnd(p): return tuple([round(i, 3) for i in p])
+
+
+def SND(s, p, v=3):
+    with bs.get_foreground_host_activity().context:
+        bs.getsound(s).play(v, position=p)
+
+
 def STATE(b=None):
-    if b is None: return var('active')
-    var('active',b)
-def fixsounds(c=None,prf=''):
+    if b is None:
+        return var('active')
+    var('active', b)
+
+
+def fixsounds(c=None, prf=''):
     c = c or var(f'{prf}char')
     n = NAME()
-    [var(f'{prf}sound{i}',[n.index(c),0]) for i in range(len(DIR('sounds')))]
-def fixmesh(c=None,prf=''):
+    [var(f'{prf}sound{i}', [n.index(c), 0]) for i in range(len(DIR('sounds')))]
+
+
+def fixmesh(c=None, prf=''):
     c = SPAZ()[NAME().index(c or var(f'{prf}char'))]
-    mem = DIR('mesh'); z = range(len(mem))
-    [var(f'{prf}mesh{i}',getattr(c,mem[i])) for i in z]
-    var(f'{prf}ctex',c.color_texture)
-    var(f'{prf}ctex2',c.color_mask_texture)
-def fixall(c=None,prf=''): fixmesh(c,prf); fixsounds(c,prf)
+    mem = DIR('mesh')
+    z = range(len(mem))
+    [var(f'{prf}mesh{i}', getattr(c, mem[i])) for i in z]
+    var(f'{prf}ctex', c.color_texture)
+    var(f'{prf}ctex2', c.color_mask_texture)
+
+
+def fixall(c=None, prf=''): fixmesh(c, prf); fixsounds(c, prf)
 def get_ctex(c): return SPAZ()[NAME().index(c)].color_texture
 def get_ctex2(c): return SPAZ()[NAME().index(c)].color_mask_texture
-def set_sounds(n,prf='',dr=None,aud=None,spa=None):
+
+
+def set_sounds(n, prf='', dr=None, aud=None, spa=None):
     a = dr or DIR(f'sounds')
     aud = aud or AUDIO()
     spa = spa or SPAZ()
     for i in range(len(a)):
         j = var(f'{prf}sound{i}')
-        if not j: continue
-        if j[1]: v = [bs.getsound(aud[j[0]])]
-        else: v = [bs.getsound(k) for k in getattr(spa[j[0]],a[i])]
-        setattr(n,a[i],v)
+        if not j:
+            continue
+        if j[1]:
+            v = [bs.getsound(aud[j[0]])]
+        else:
+            v = [bs.getsound(k) for k in getattr(spa[j[0]], a[i])]
+        setattr(n, a[i], v)
+
+
 def mesh_seed():
     r = []
     mem = SPAZ()[NAME().index(var('char'))]
     ok = DIR('mesh')
     for i in range(len(ok)):
-        c = var(f'mesh{i}') or getattr(mem,ok[i])
+        c = var(f'mesh{i}') or getattr(mem, ok[i])
         r.append(c)
-    return r+[var('ctex') or get_ctex(var('char')),var('ctex2') or get_ctex2(var('char'))]
+    return r+[var('ctex') or get_ctex(var('char')), var('ctex2') or get_ctex2(var('char'))]
+
+
 def sound_seed(): return [var(f'sound{i}') for i in range(len(DIR('sounds')))]
-def SEED(char,tchar,main,hl,name,fix=None): fixall(fix) if fix else None; return ENCODE([char,tchar,main,hl,name,mesh_seed(),sound_seed()])
-def LN(d,o=None): me = o or getme(); [me.assigninput(getattr(ba.InputType,k), d[k]) for k in d]
-def GSW(t): return _ba.get_string_width(t,suppress_warning=True)
+def SEED(char, tchar, main, hl, name, fix=None): fixall(fix) if fix else None; return ENCODE(
+    [char, tchar, main, hl, name, mesh_seed(), sound_seed()])
+
+
+def LN(d, o=None): me = o or getme(); [me.assigninput(getattr(ba.InputType, k), d[k]) for k in d]
+def GSW(t): return _ba.get_string_width(t, suppress_warning=True)
+
+
 def GETSIG(o):
-    try: return f"Supported args: {list(inspect.signature(o).parameters.keys())}"
-    except: return 'No signature found :('
-def NTEX(n,tex=None):
-    t = str(getattr(n,'color_texture','"black"'))
+    try:
+        return f"Supported args: {list(inspect.signature(o).parameters.keys())}"
+    except:
+        return 'No signature found :('
+
+
+def NTEX(n, tex=None):
+    t = str(getattr(n, 'color_texture', '"black"'))
     f = t.find('"')+1
-    c = t[f:t.find('"',f)].replace('Color','')
+    c = t[f:t.find('"', f)].replace('Color', '')
     b = c+'Icon' in (tex or ALL())
     return {
-        'texture':bui.gettexture(c+['','Icon'][b]),
-        'tint_texture':bui.gettexture(c+['','IconColorMask'][b]),
-        'tint_color':getattr(n,'color',(1,1,1)),
-        'tint2_color':getattr(n,'highlight',(1,1,1))
-    },getattr(n,'name_color',(1,1,1)),c
-def MK(ch,f,g):
-    j = {'tint_color':var(f)}
+        'texture': bui.gettexture(c+['', 'Icon'][b]),
+        'tint_texture': bui.gettexture(c+['', 'IconColorMask'][b]),
+        'tint_color': getattr(n, 'color', (1, 1, 1)),
+        'tint2_color': getattr(n, 'highlight', (1, 1, 1))
+    }, getattr(n, 'name_color', (1, 1, 1)), c
+
+
+def MK(ch, f, g):
+    j = {'tint_color': var(f)}
     return [{
-        'tint2_color':var(g),
-        'mask_texture':bui.gettexture('characterIconMask'),
-        'tint_texture':bui.gettexture(ch.icon_mask_texture),
-        'texture':bui.gettexture(ch.icon_texture),
+        'tint2_color': var(g),
+        'mask_texture': bui.gettexture('characterIconMask'),
+        'tint_texture': bui.gettexture(ch.icon_mask_texture),
+        'texture': bui.gettexture(ch.icon_texture),
         **j
-    },{'texture':bui.gettexture('buttonSquare'),**j}]
-def clone(n,a):
+    }, {'texture': bui.gettexture('buttonSquare'), **j}]
+
+
+def clone(n, a):
     sp = n.source_player
     b = bs_playerspaz.PlayerSpaz(player=sp) if sp else Bot(NAME()[0])
     bn = b.node
     a.customdata[UUID()] = b
     mem = BAD()
     for i in dir(bn):
-        if i.startswith('_') or i in mem: continue
-        try: j = getattr(n,i)
-        except AttributeError: continue
-        if callable(j): continue
-        try: setattr(bn,i,j)
-        except RuntimeError: continue
+        if i.startswith('_') or i in mem:
+            continue
+        try:
+            j = getattr(n, i)
+        except AttributeError:
+            continue
+        if callable(j):
+            continue
+        try:
+            setattr(bn, i, j)
+        except RuntimeError:
+            continue
     p = n.position
-    p = (p[0],p[1]-0.6,p[2])
-    b.handlemessage(bs.StandMessage(p,0))
+    p = (p[0], p[1]-0.6, p[2])
+    b.handlemessage(bs.StandMessage(p, 0))
     if sp:
         b.connect_controls_to_player()
         sp.actor = b
-        print (sp.actor == b, sp.actor.node == bn)
-    return [sp,bn]
+        print(sp.actor == b, sp.actor.node == bn)
+    return [sp, bn]
+
+
 def wga(f):
-    with bs.get_foreground_host_activity().context: f()
+    with bs.get_foreground_host_activity().context:
+        f()
+
 
 # Init
 # Our default values on first run
 c = NAME()[0]
 d = {
     'first': True,
-    'char':c,
-    'tchar':c,
-    'mchar':c,
-    't':(1,1,1),
-    'bg':(0.13,0.13,0.13),
-    'act':[],
-    'egoto':'1',
-    'wait':'1',
-    'smove':'1.1',
-    'sfollow':'1.1',
-    'tmove':'10',
-    'tfollow':'10',
-    'goto':'1',
-    'icall':0,
-    'uis':None,
-    'npp':1,
-    'say':'hi please kill me',
-    'tsay':'3',
-    'dplprop':'prop',
-    'dplname':'',
-    'cconf3':1
-}; [con(i,d[i]) for i in d]
+    'char': c,
+    'tchar': c,
+    'mchar': c,
+    't': (1, 1, 1),
+    'bg': (0.13, 0.13, 0.13),
+    'act': [],
+    'egoto': '1',
+    'wait': '1',
+    'smove': '1.1',
+    'sfollow': '1.1',
+    'tmove': '10',
+    'tfollow': '10',
+    'goto': '1',
+    'icall': 0,
+    'uis': None,
+    'npp': 1,
+    'say': 'hi please kill me',
+    'tsay': '3',
+    'dplprop': 'prop',
+    'dplname': '',
+    'cconf3': 1
+}
+[con(i, d[i]) for i in d]
 for i in range(3):
-    con(f'pos{i}','0')
-    con(f'mpos{i}','0')
-    con(f'move{i}','0')
-    con(f'dpl{i}','0')
-    con(f'bld{i}','0')
-    con(f'cconf{i}',[1,1,0,1][i])
-[con(f'cont{i}',True) for i in range(5)]
-[con(f'what{i}',True) for i in range(len(WHAT()))]
-var('active',False)
-var('lpush','')
-if var('first'): var('first',False); fixall(prf='m')
-del c,d
+    con(f'pos{i}', '0')
+    con(f'mpos{i}', '0')
+    con(f'move{i}', '0')
+    con(f'dpl{i}', '0')
+    con(f'bld{i}', '0')
+    con(f'cconf{i}', [1, 1, 0, 1][i])
+[con(f'cont{i}', True) for i in range(5)]
+[con(f'what{i}', True) for i in range(len(WHAT()))]
+var('active', False)
+var('lpush', '')
+if var('first'):
+    var('first', False)
+    fixall(prf='m')
+del c, d
 
 # brobord collide grass
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byBordd(ba.Plugin):
     def __init__(s):
         og = bui_igm.InGameMenuWindow._refresh_in_game
-        def entry(s,*a,**k):
-            r = og(s,*a,**k)
+
+        def entry(s, *a, **k):
+            r = og(s, *a, **k)
             w = bw(
-               p=s._root_widget,
-               pos=(-80, s._height-50),
-               label="Coolbox",
-               icon=bui.gettexture('chestIcon'),
-               iconscale=0.8,
-               scale=1.0,
-               size=(100, 40)
+                p=s._root_widget,
+                pos=(-80, s._height-50),
+                label="Coolbox",
+                icon=bui.gettexture('chestIcon'),
+                iconscale=0.8,
+                scale=1.0,
+                size=(100, 40)
             )
             bw(w, oac=lambda: Coolbox(fresh=True, in_source=w))
             return r
