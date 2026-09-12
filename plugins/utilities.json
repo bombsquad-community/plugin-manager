@@ -2589,6 +2589,20 @@
           "md5sum": "3ead338c768fbdffe022aadcbdc8c1d8"
         }
       }
+    },
+    "movi": {
+      "description": "A simple movie maker with native BRP replay export. Includes timeline sequencing, node manipulation, custom cameras, code injection, VFX presets, and more.",
+      "external_url": "https://BroBordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }
