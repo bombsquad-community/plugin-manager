@@ -45,6 +45,13 @@ permissions:
   contents: write
   pull-requests: write
   actions: read # required to download an artifact from another workflow run
+  # Required by the "Report metadata fixpoint status" step below. `statuses`
+  # is its own scope: `contents: write` does NOT imply it, and once a
+  # permissions block is declared every unlisted scope is `none`. Without
+  # this the status POST 403s, that step exits 1, and the `if: failure()`
+  # step comments "patch touched a disallowed path, or a conflict occurred"
+  # on a PR where the patch applied perfectly.
+  statuses: write
 
 concurrency:
   group: pr-apply-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
