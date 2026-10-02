@@ -29,6 +29,7 @@ plugman = dict(
 if TYPE_CHECKING:
     from typing import Any, Type, Union, Sequence, Optional
 
+
 class Icon(bs.Actor):
     """Creates Live PLayer Character Spaz in-game icon on screen."""
 
@@ -174,88 +175,90 @@ class Icon(bs.Actor):
             return None
         return super().handlemessage(msg)
 
+
 Translate_Texts: dict[str, dict[str, str]] = {
-'gameEnds': { # >> 
-    'id': 'Permainan Berakhir',
-    'en': 'Game Ends',
-},
-'gameName': { 
-    'id': 'Bom Melayang',
-    'en': 'Floating Impact',
-},
-'gameDesc': { 
-    'id': 'Hindari bom melayang',
-    'en': 'Dodge the floating impact bomb',
-},
-'gameDescInGame': { 
-    'id': 'Hindari bom melayang',
-    'en': 'Dodge the floating impact bomb',
-},
-'settingTimeLimit': { # Time Limit
-    'id': 'Batas Waktu (Detik)',
-    'en': 'Time Limit (Seconds)',
-},
-'settingPlayerLives': { # Player Lives
-    'id': 'Nyawa Pemain',
-    'en': 'Player Lives',
-},
-'settingMaxHit': { # MaxHit
-    'id': 'Hit Maksimal',
-    'en': 'Max Hit',
-},
-'settingMaxHit1': {
-    'id': 'Mati Instan',
-    'en': 'Instant Death',
-},
-'settingMaxHit2': { 
-    'id': '2 Hit',
-    'en': '2 Hits',
-},
-'settingMaxHit3': { 
-    'id': '3 Hit',
-    'en': '3 Hits',
-},
-'settingMaxHit4': { 
-    'id': '4 Hit',
-    'en': '4 Hits',
-},
-'settingMaxHit5': { 
-    'id': '5 Hit',
-    'en': '5 Hits',
-},
-'settingBoxCount': { # Box Count
-    'id': 'Jumlah Kotak',
-    'en': 'Box Count',
-},
-'settingBombVelocity': { # Bomb Velocity
-    'id': 'Kecepatan Bom',
-    'en': 'Bomb Velocity',
-},
-'settingBombVelocitySlow': { 
-    'id': 'Lambat',
-    'en': 'Slow',
-},
-'settingBombVelocityNormal': { 
-    'id': 'Normal',
-    'en': 'Normal',
-},
-'settingBombVelocityFast': { 
-    'id': 'Cepat',
-    'en': 'Fast',
-},
-'settingBombVelocityVeryFast': { 
-    'id': 'Sangat Cepat',
-    'en': 'Very Fast',
-},
-'settingBombFollowsPlayer': { 
-    'id': 'Bom Ngikut Player',
-    'en': 'Bomb Follows Player',
-},
-'settingEpicMode': { # Epic Mode
-    'id': 'Mode Epik',
-    'en': 'Epic Mode',
-}}
+    'gameEnds': {  # >>
+        'id': 'Permainan Berakhir',
+        'en': 'Game Ends',
+    },
+    'gameName': {
+        'id': 'Bom Melayang',
+        'en': 'Floating Impact',
+    },
+    'gameDesc': {
+        'id': 'Hindari bom melayang',
+        'en': 'Dodge the floating impact bomb',
+    },
+    'gameDescInGame': {
+        'id': 'Hindari bom melayang',
+        'en': 'Dodge the floating impact bomb',
+    },
+    'settingTimeLimit': {  # Time Limit
+        'id': 'Batas Waktu (Detik)',
+        'en': 'Time Limit (Seconds)',
+    },
+    'settingPlayerLives': {  # Player Lives
+        'id': 'Nyawa Pemain',
+        'en': 'Player Lives',
+    },
+    'settingMaxHit': {  # MaxHit
+        'id': 'Hit Maksimal',
+        'en': 'Max Hit',
+    },
+    'settingMaxHit1': {
+        'id': 'Mati Instan',
+        'en': 'Instant Death',
+    },
+    'settingMaxHit2': {
+        'id': '2 Hit',
+        'en': '2 Hits',
+    },
+    'settingMaxHit3': {
+        'id': '3 Hit',
+        'en': '3 Hits',
+    },
+    'settingMaxHit4': {
+        'id': '4 Hit',
+        'en': '4 Hits',
+    },
+    'settingMaxHit5': {
+        'id': '5 Hit',
+        'en': '5 Hits',
+    },
+    'settingBoxCount': {  # Box Count
+        'id': 'Jumlah Kotak',
+        'en': 'Box Count',
+    },
+    'settingBombVelocity': {  # Bomb Velocity
+        'id': 'Kecepatan Bom',
+        'en': 'Bomb Velocity',
+    },
+    'settingBombVelocitySlow': {
+        'id': 'Lambat',
+        'en': 'Slow',
+    },
+    'settingBombVelocityNormal': {
+        'id': 'Normal',
+        'en': 'Normal',
+    },
+    'settingBombVelocityFast': {
+        'id': 'Cepat',
+        'en': 'Fast',
+    },
+    'settingBombVelocityVeryFast': {
+        'id': 'Sangat Cepat',
+        'en': 'Very Fast',
+    },
+    'settingBombFollowsPlayer': {
+        'id': 'Bom Ngikut Player',
+        'en': 'Bomb Follows Player',
+    },
+    'settingEpicMode': {  # Epic Mode
+        'id': 'Mode Epik',
+        'en': 'Epic Mode',
+    }}
 """Global Langs"""
+
 
 def get_app_lang_as_id():
     """
@@ -269,7 +272,10 @@ def get_app_lang_as_id():
     elif App_Lang == 'English':
         lang_id = 'en'
     return lang_id
+
+
 app_lang = get_app_lang_as_id()
+
 
 def get_lang_text(key: str) -> str:
     """
@@ -282,25 +288,32 @@ def get_lang_text(key: str) -> str:
         return f"EmptyText: {'*[{}]'.format(key)}"
     return text
 
+
 """############################### Game Management ###############################"""
+
+
 class Player(bs.Player['Team']):
     def __init__(self) -> None:
-        self.survived: bool = True # To track their "alive" state
-        self.lives = 1 # For counting player Lives
+        self.survived: bool = True  # To track their "alive" state
+        self.lives = 1  # For counting player Lives
         self.hitpoint_tag: bs.Node | None = None
-        self.death_time: Optional[float] = None # To track their died time
-        self.icons: list[Icon] = [] # Their icons
+        self.death_time: Optional[float] = None  # To track their died time
+        self.icons: list[Icon] = []  # Their icons
+
 
 class Team(bs.Team[Player]):
     def __init__(self) -> None:
         self.score = 0
         self.spawn_order = []
+
+
 """############################### Game Management ###############################"""
 
 
 class FpHitByBomb:
     def __init__(self, playerspaz: FpPlayerSpaz) -> None:
         self.playerspaz = playerspaz
+
 
 class FpBomb(Bomb):
     def explode(self):
@@ -328,6 +341,7 @@ _colors_len = len(_colors)
 
 COLORS_KEYS = {rainbow_delay*a: col for a, col in enumerate(_colors)}
 
+
 class FpPlayerSpaz(PlayerSpaz):
     def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, bs.HitMessage):
@@ -335,7 +349,8 @@ class FpPlayerSpaz(PlayerSpaz):
                 return super().handlemessage(msg)
 
             elif msg.hit_subtype == "impact":
-                if self.node.invincible: return # type: ignore
+                if self.node.invincible:
+                    return  # type: ignore
 
                 msg.flat_damage = 0.0
                 msg.kick_back = 0.0
@@ -357,7 +372,7 @@ class FpPlayerSpaz(PlayerSpaz):
 # ba_meta export bascenev1.GameActivity
 class FluffysGame5(bs.TeamGameActivity[Player, Team]):
     name = get_lang_text('gameName')
-    description = f"{get_lang_text('gameDesc')}!\nBy FluffyPal :)" # Game selection Desc
+    description = f"{get_lang_text('gameDesc')}!\nBy FluffyPal :)"  # Game selection Desc
     scoreconfig = bs.ScoreConfig(
         label='Survived',
         scoretype=bs.ScoreType.MILLISECONDS,
@@ -371,40 +386,40 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
             cls, sessiontype: Type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(get_lang_text('settingTimeLimit'),
-                min_value=0,
-                max_value=600,
-                increment=60,
-                default=180
-            ),
+                          min_value=0,
+                          max_value=600,
+                          increment=60,
+                          default=180
+                          ),
             bs.IntChoiceSetting(get_lang_text('settingMaxHit'),
-                choices=[
-                    (get_lang_text('settingMaxHit1'), 1),
-                    (get_lang_text('settingMaxHit2'), 2),
-                    (get_lang_text('settingMaxHit3'), 3),
-                    (get_lang_text('settingMaxHit4'), 4),
-                    (get_lang_text('settingMaxHit5'), 5)
-                ],
+                                choices=[
+                (get_lang_text('settingMaxHit1'), 1),
+                (get_lang_text('settingMaxHit2'), 2),
+                (get_lang_text('settingMaxHit3'), 3),
+                (get_lang_text('settingMaxHit4'), 4),
+                (get_lang_text('settingMaxHit5'), 5)
+            ],
                 default=4
             ),
             bs.IntSetting(get_lang_text('settingPlayerLives'),
-                min_value=1,
-                max_value=2,
-                increment=1,
-                default=1
-            ),
+                          min_value=1,
+                          max_value=2,
+                          increment=1,
+                          default=1
+                          ),
             bs.IntSetting(get_lang_text('settingBoxCount'),
-                min_value=4,
-                max_value=8,
-                increment=2,
-                default=6
-            ),
+                          min_value=4,
+                          max_value=8,
+                          increment=2,
+                          default=6
+                          ),
             bs.IntChoiceSetting(get_lang_text('settingBombVelocity'),
-                choices=[
-                    ('Slow', 2),
-                    ('Normal', 4),
-                    ('Fast', 6),
-                    ('Very Fast', 8)
-                ],
+                                choices=[
+                ('Slow', 2),
+                ('Normal', 4),
+                ('Fast', 6),
+                ('Very Fast', 8)
+            ],
                 default=4
             ),
             bs.BoolSetting(get_lang_text('settingBombFollowsPlayer'), default=False),
@@ -443,14 +458,14 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         self._is_aim_bot = bool(settings[get_lang_text('settingBombFollowsPlayer')])
         self._epic_mode = bool(settings[get_lang_text('settingEpicMode')])
 
-        self.aim_timer          : bs.Timer | None = None
-        self.delay_update_timer : bs.Timer | None = None
+        self.aim_timer: bs.Timer | None = None
+        self.delay_update_timer: bs.Timer | None = None
 
         self.bombs: list[FpBomb] = []
 
         musics = [
-           bs.MusicType.SURVIVAL, bs.MusicType.FLYING, bs.MusicType.MARCHING,
-           bs.MusicType.GRAND_ROMP, bs.MusicType.FORWARD_MARCH
+            bs.MusicType.SURVIVAL, bs.MusicType.FLYING, bs.MusicType.MARCHING,
+            bs.MusicType.GRAND_ROMP, bs.MusicType.FORWARD_MARCH
         ]
 
         """Default Configurations"""
@@ -481,13 +496,13 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
             player.lives = 0
 
             assert self._timer is not None
-            player.death_time = self._timer.getstarttime() # Make Their Scores To Zero
+            player.death_time = self._timer.getstarttime()  # Make Their Scores To Zero
             return
 
         self._players_ingame.append(player)
         player.icons = [Icon(player, position=(0, 75), scale=0.8, show_lives=True)]
         player.lives = self._player_lives
-        self.spawn_player(player) # Spawn Player
+        self.spawn_player(player)  # Spawn Player
 
     def on_player_leave(self, player: Player) -> None:
         """Main Func To Handle Player Leaves Logic"""
@@ -506,9 +521,9 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         """On Game Begin"""
         super().on_begin()
 
-        self._timer = OnScreenTimer() # Timer
+        self._timer = OnScreenTimer()  # Timer
         assert self._timer is not None
-        self._timer.start() # Start Timer
+        self._timer.start()  # Start Timer
         self.setup_standard_time_limit(self._time_limit)
         """self.credit = bs.newnode('text', attrs={
                             'text': "Created By FluffyPal",
@@ -535,8 +550,8 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
 
         self._team_count = len(self.teams)
 
-        self._update_icons() # Update Player' Icons
-        #self.setup_standard_powerup_drops()
+        self._update_icons()  # Update Player' Icons
+        # self.setup_standard_powerup_drops()
 
         self.make_round()
         bs.timer(3 if not self.globalsnode.slow_motion else 3*0.3, self.check_end)
@@ -550,12 +565,14 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         bs.timer(delay*1.5, self.start_aim)
 
     def start_select_random_box_and_aim(self, player: Player | None = None):
-        if self.has_ended() and not any(player.survived for player in self.players): return
+        if self.has_ended() and not any(player.survived for player in self.players):
+            return
 
         box = choice(self._bomb_boxes)
         box.aim_player(player)
         delay = self._call_bomb_delay if not self.globalsnode.slow_motion else self._call_bomb_delay * 0.4
-        self.aim_timer = bs.Timer(delay, bs.CallPartial(self.start_select_random_box_and_aim, player))
+        self.aim_timer = bs.Timer(delay, bs.CallPartial(
+            self.start_select_random_box_and_aim, player))
 
     def start_aim(self):
         self.start_select_random_box_and_aim()
@@ -584,13 +601,15 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         for i in range(boxes_per_side):
             x_pos = -x_bound
             z_pos = z_bound * (i / (boxes_per_side - 1)) * 2 - z_bound
-            b = BombBox(position=(x_pos, y_pos, z_pos), velocity_strength=self._bomb_speed, is_aimbot=self._is_aim_bot)
+            b = BombBox(position=(x_pos, y_pos, z_pos),
+                        velocity_strength=self._bomb_speed, is_aimbot=self._is_aim_bot)
             self._bomb_boxes.append(b)
 
         for i in range(boxes_per_side):
             x_pos = x_bound
             z_pos = z_bound * (i / (boxes_per_side - 1)) * 2 - z_bound
-            b = BombBox(position=(x_pos, y_pos, z_pos), velocity_strength=self._bomb_speed, is_aimbot=self._is_aim_bot)
+            b = BombBox(position=(x_pos, y_pos, z_pos),
+                        velocity_strength=self._bomb_speed, is_aimbot=self._is_aim_bot)
             self._bomb_boxes.append(b)
 
     def add_wall(self):
@@ -603,7 +622,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         material.add_actions(
             conditions=(
                 ('they_are_different_node_than_us',),
-                'and', 
+                'and',
                 ('they_have_material', shared.player_material)
             ),
             actions=(
@@ -612,7 +631,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
             ),
         )
 
-        bs.newnode( # wall_x_left
+        bs.newnode(  # wall_x_left
             'region',
             attrs={
                 'position': (-x_bound, 5.5, 0),
@@ -621,7 +640,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
                 'materials': [material],
             }
         )
-        bs.newnode( # wall_x_right
+        bs.newnode(  # wall_x_right
             'region',
             attrs={
                 'position': (x_bound, 5.5, 0),
@@ -630,7 +649,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
                 'materials': [material],
             }
         )
-        bs.newnode( # wall_z_top
+        bs.newnode(  # wall_z_top
             'region',
             attrs={
                 'position': (0, 5.5, -z_bound),
@@ -639,7 +658,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
                 'materials': [material],
             }
         )
-        bs.newnode( # wall_z_bottom
+        bs.newnode(  # wall_z_bottom
             'region',
             attrs={
                 'position': (0, 5.5, z_bound+0.5),
@@ -672,9 +691,9 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
             self.credit_nodes.append(node)
 
             bs.animate_array(node, 'color', 3,
-                keys=COLORS_KEYS, # pyright: ignore[reportArgumentType]
-                loop=True, offset=rainbow_start_delay*i
-            )
+                             keys=COLORS_KEYS,  # pyright: ignore[reportArgumentType]
+                             loop=True, offset=rainbow_start_delay*i
+                             )
 
     def _update_icons(self) -> None:
         # In free-for-all mode, everyone is just lined up along the bottom.
@@ -726,7 +745,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         for icon in player.icons:
             icon.handle_player_spawned()
 
-        maxhp = self.hp_range * self._max_hit # Each dmg will be self.hp_range
+        maxhp = self.hp_range * self._max_hit  # Each dmg will be self.hp_range
         spaz.hitpoints = maxhp
         spaz.hitpoints_max = maxhp
 
@@ -753,17 +772,17 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         hitpoint_text = f'{int(hitpoint)}' if hitpoint > 1 else charstr(SpecialChar.SKULL)
 
         text_node = bs.newnode('text',
-            owner=playerspaz.node,
-            attrs={
-            'text': hitpoint_text,
-            'in_world': True,
-            'shadow': 1.25,
-            'color':player.color,
-            'flatness': 2.0,
-            'scale': 0.0175,
-            'h_align': 'center'
-            }
-        )
+                               owner=playerspaz.node,
+                               attrs={
+                                   'text': hitpoint_text,
+                                   'in_world': True,
+                                   'shadow': 1.25,
+                                   'color': player.color,
+                                   'flatness': 2.0,
+                                   'scale': 0.0175,
+                                   'h_align': 'center'
+                               }
+                               )
 
         playerspaz.node.connectattr('torso_position', math_node, 'input2')
         math_node.connectattr('output', text_node, 'position')
@@ -781,7 +800,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
             elif (hitpoint := self.get_player_hitpoint(player)) > 0:
                 hitpoint_text = f'{int(hitpoint)}' if hitpoint > 1 else charstr(SpecialChar.SKULL)
 
-            else: # hitpoint <= 0
+            else:  # hitpoint <= 0
                 hitpoint_text = charstr(SpecialChar.LOGO_FLAT)
 
             player.hitpoint_tag.text = hitpoint_text
@@ -809,7 +828,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
                     assert isinstance(player_killing.actor, FpPlayerSpaz)
                     player_killing.actor.node.handlemessage(
                         "celebrate_r", (2000 if not self.globalsnode.slow_motion else 2000*0.5)
-                    ) # Hooray
+                    )  # Hooray
 
             if player.lives <= 0:
                 curtime = bs.time()
@@ -827,7 +846,7 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
             player = playerspaz.getplayer(Player, True)
 
             if playerspaz.hitpoints > 50:
-                playerspaz.hitpoints -= 50 # Each dmg will be 50
+                playerspaz.hitpoints -= 50  # Each dmg will be 50
 
             else:
                 playerspaz.handlemessage(bs.DieMessage(False, bs.DeathType.IMPACT))
@@ -853,7 +872,8 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
 
     def end_game(self) -> None:
         """End game logic for timer and lives based games"""
-        if self.has_ended(): return
+        if self.has_ended():
+            return
 
         players: list[Player] = []
         if len(self._players_ingame) > 1 and self._team_count > 1:
@@ -914,7 +934,10 @@ class FluffysGame5(bs.TeamGameActivity[Player, Team]):
         for player in players:
             self.update_hitpoint_tag(player)
 
+
 """###################################### Props ######################################"""
+
+
 class BombBox(bs.Actor):
     def __init__(self, position: Sequence[float], velocity_strength: float = 4, is_aimbot: bool = False) -> None:
 
@@ -969,12 +992,12 @@ class BombBox(bs.Actor):
             }
         )
 
-    ########## Main Trigger
+    # Main Trigger
     def aim_player(self, player: Player | None):
         """Aim random `alive` player with Bomb"""
         if not player:
             players: list[Player] = self.activity.players
-            if alive_players := [p for p in players if p.is_alive()]: # Let's find player that is not ded
+            if alive_players := [p for p in players if p.is_alive()]:  # Let's find player that is not ded
                 player = choice(alive_players)
             else:
                 return
@@ -1000,12 +1023,12 @@ class BombBox(bs.Actor):
             self._update_bomb_position_straight(player, bomb)
         self.pulse_box()
 
-    ########## AIM TYPE
+    # AIM TYPE
     def _update_bomb_position_aimbot(self, player: Player, bomb: FpBomb):
         """Target a bomb to player: constantly following player"""
-        #if not player.is_alive() and bomb.node.exists():
-            #bomb.node.gravity_scale = 1
-            #return
+        # if not player.is_alive() and bomb.node.exists():
+        # bomb.node.gravity_scale = 1
+        # return
         if player.exists() and bomb.node.exists():
             p_pos = player.node.position
             p_init_pos = (p_pos[0], self.bomb_y_pos, p_pos[2])
@@ -1018,7 +1041,7 @@ class BombBox(bs.Actor):
             time_follow = 1 if not self.activity.slow_motion else 1*0.3
             bs.timer(time_follow, bs.CallPartial(self._update_bomb_position_aimbot, player, bomb))
 
-    ########## AIM TYPE
+    # AIM TYPE
     def _update_bomb_position_straight(self, player: Player, bomb: FpBomb):
         """Target a bomb to player: straight with constant speed from initial position"""
         if player.exists() and bomb.node.exists():
@@ -1030,7 +1053,8 @@ class BombBox(bs.Actor):
 
             direction = (bs.Vec3(p_init_pos) - bs.Vec3(b_init_pos)).normalized()
             bomb.node.velocity = (direction * self.velocity_strength)
-            bs.timer(99, bs.CallPartial(self._update_bomb_position_straight, player, bomb)) # HACK: The hek do it need this to move
+            # HACK: The hek do it need this to move
+            bs.timer(99, bs.CallPartial(self._update_bomb_position_straight, player, bomb))
 
     def pulse_box(self):
         bs.animate(
