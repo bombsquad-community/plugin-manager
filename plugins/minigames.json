@@ -1718,6 +1718,25 @@
           "md5sum": "152e2e149b2686619c44aa7880a7e460"
         }
       }
+    },
+    "floating_impact": {
+      "description": "A fun-type minigame where players should avoid \"bullets\" (Bullet Hell Minigame)",
+      "external_url": "https://discord.com/channels/1001896771347304639/1554062155374928003",
+      "authors": [
+        {
+          "name": "FluffyPal",
+          "email": "",
+          "discord": "fluffypal"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "aa538deb",
+          "released_on": "02-10-2026",
+          "md5sum": "78ac4c5f6cc15d8a8b7ce88794538502"
+        }
+      }
     }
   }
 }
