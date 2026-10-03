@@ -2208,7 +2208,7 @@ class NodePicker:
             source=s.btns[1],
             title=what,
             label='Confirm (Risky!)',
-            pipe=lambda:(f(),z.back())
+            pipe=f
         )
     """Locate node"""
     def delete(s):
@@ -7560,7 +7560,7 @@ class About:
 # Dynamic Resources
 # Stored as callabes and only called when needed
 # Very beneficial for performance and memory
-def D(): d = bui.app.classic.spaz_appearances; [d.pop(i) for i in d.copy() if i != 'Pascal' and d[i].default_color == (0.3,0.5,0.8)]; return d
+def D(): d = bui.app.classic.spaz_appearances.copy(); [d.pop(i) for i in d.copy() if i != 'Pascal' and d[i].default_color == (0.3,0.5,0.8)]; return d
 _INIT_CWD = os.getcwd()
 def BASE():
     app_py_dir = getattr(bui.app.env, "python_directory_app", None)
