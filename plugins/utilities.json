@@ -2639,7 +2639,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "890df5f3",
+          "released_on": "04-10-2026",
+          "md5sum": "03eee160990638debed3eef43d28340e"
+        }
       }
     }
   }
