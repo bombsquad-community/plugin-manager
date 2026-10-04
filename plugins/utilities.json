@@ -2620,7 +2620,12 @@
         }
       ],
       "versions": {
-        "1.0.0": null
+        "1.0.0": {
+          "api_version": 9,
+          "commit_sha": "af2c9632",
+          "released_on": "04-10-2026",
+          "md5sum": "687ab5195181d595a5b66b9214a8a380"
+        }
       }
     }
   }
