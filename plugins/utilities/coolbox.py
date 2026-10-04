@@ -1,5 +1,5 @@
 # Copyright 2026 - Solely by BrotherBoard
-# Free for anyone to use
+# Intended for personal use only
 # Bug? Feedback? Telegram >> @GalaxyA14user
 
 """
