@@ -2627,6 +2627,20 @@
           "md5sum": "687ab5195181d595a5b66b9214a8a380"
         }
       }
+    },
+    "checkboom": {
+      "description": "Simple turn-based game",
+      "external_url": "https://BroBordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard"
+        }
+      ],
+      "versions": {
+        "1.0.0": null
+      }
     }
   }
 }

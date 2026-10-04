@@ -40,6 +40,7 @@ plugman = dict(
 
 DEBUG = False
 
+
 class Strings:
     CHECKBOOM = 'Checkboom'
     DESCRIPTION = f'A turn-based game.\nVersion {__version__}'
@@ -107,16 +108,17 @@ class Strings:
     CONTINUE = 'Press ${B}PUNCH to continue'
     PROCEEDING = 'Proceeding...'
 
+
 class Checkboard(bs.Map):
     name = 'Checkboard'
-    defs = type('',(),{
-        'points':{
+    defs = type('', (), {
+        'points': {
             'spawn1': (0, 0, 5, 0, 0, 5),
             'spawn2': (0, 0, -5, 0, 0, -5),
         },
-        'boxes':{
-            'area_of_interest_bounds': (0,0,0, 0,0,0, 10,10,10),
-            'map_bounds': (0,0,0, 0,0,0, 200,200,200),
+        'boxes': {
+            'area_of_interest_bounds': (0, 0, 0, 0, 0, 0, 10, 10, 10),
+            'map_bounds': (0, 0, 0, 0, 0, 0, 200, 200, 200),
         }
     })
 
@@ -195,6 +197,7 @@ class Checkboard(bs.Map):
                 )
                 self.inner_fills[(round(x, 1), round(z, 1))] = inner_fill
 
+
 def loop_array(node, attr, size, keys):
     combine = bs.newnode('combine', owner=node, attrs={'size': size})
     items = sorted(keys.items())
@@ -230,17 +233,22 @@ def pfx(a, dmg, d, dead=False):
         bs.getsound('superPunch').play(1.0, position=pos)
     if dmg >= 350:
         bs.show_damage_count('-' + str(int(dmg / 10)) + '%', pos, d)
-    bs.emitfx(position=pos, velocity=(d[0] * 0.5, d[1] * 0.5, d[2] * 0.5), count=min(20, 3 + int(dmg * 0.01)), scale=0.4, spread=0.05)
-    bs.emitfx(position=pos, chunk_type='sweat', velocity=(d[0] * 1.3, d[1] * 1.3 + 5.0, d[2] * 1.3), count=min(40, 3 + int(dmg * 0.06)), scale=1.0, spread=0.3)
+    bs.emitfx(position=pos, velocity=(d[0] * 0.5, d[1] * 0.5, d[2] * 0.5),
+              count=min(20, 3 + int(dmg * 0.01)), scale=0.4, spread=0.05)
+    bs.emitfx(position=pos, chunk_type='sweat', velocity=(
+        d[0] * 1.3, d[1] * 1.3 + 5.0, d[2] * 1.3), count=min(40, 3 + int(dmg * 0.06)), scale=1.0, spread=0.3)
     if dmg >= 250:
-        bs.emitfx(position=pos, chunk_type='spark', velocity=(0.0, 3.0, 0.0), count=min(40, int(dmg * 0.08)), scale=0.6, spread=0.5)
+        bs.emitfx(position=pos, chunk_type='spark', velocity=(0.0, 3.0, 0.0),
+                  count=min(40, int(dmg * 0.08)), scale=0.6, spread=0.5)
     c = (1.0, 0.8, 0.4)
-    light = bs.newnode('light', attrs={'position': pos, 'radius': 0.15 + h * 0.2, 'intensity': 0.5 * (1.0 + h), 'height_attenuated': False, 'color': c})
+    light = bs.newnode('light', attrs={'position': pos, 'radius': 0.15 + h * 0.2,
+                       'intensity': 0.5 * (1.0 + h), 'height_attenuated': False, 'color': c})
     flash = bs.newnode('flash', attrs={'position': pos, 'size': 0.3 + 0.36 * h, 'color': c})
     bs.timer(0.08 + h * 0.05, light.delete)
     bs.timer(0.08 + h * 0.05, flash.delete)
     if dmg >= 300:
-        boom = bs.newnode('explosion', attrs={'position': pos, 'velocity': (0.0, 0.0, 0.0), 'radius': 0.3 + dmg * 0.001, 'big': False})
+        boom = bs.newnode('explosion', attrs={'position': pos, 'velocity': (
+            0.0, 0.0, 0.0), 'radius': 0.3 + dmg * 0.001, 'big': False})
         bs.timer(0.5, boom.delete)
 
 
@@ -254,10 +262,12 @@ def fl(n, c, hi=2.0, lo=1.0):
 def readable(c, lo=0.45):
     # lighten
     c = tuple(max(0.0, min(1.0, float(v))) for v in c[:3])
-    lum = lambda x: 0.2126 * x[0] + 0.7152 * x[1] + 0.0722 * x[2]
-    if lum(c) >= lo: return c
+    def lum(x): return 0.2126 * x[0] + 0.7152 * x[1] + 0.0722 * x[2]
+    if lum(c) >= lo:
+        return c
     k = 0.0
-    while k < 1.0 and lum(tuple(v + (1 - v) * k for v in c)) < lo: k += 0.05
+    while k < 1.0 and lum(tuple(v + (1 - v) * k for v in c)) < lo:
+        k += 0.05
     return tuple(v + (1 - v) * k for v in c)
 
 
@@ -352,6 +362,7 @@ class Piece(Spaz):
                     return
         super().handlemessage(msg)
 
+
 class Floater(bs.Actor):
     def __init__(self, game, pos, col, instant=False):
         super().__init__()
@@ -386,25 +397,30 @@ class Floater(bs.Actor):
         rot = game.rotating
         self.timers = [
             bs.Timer(uniform(4, 8), lambda: _s() and _s().gtick(), repeat=True),
-            bs.Timer(uniform(1.0, 2.5) if rot else uniform(3, 6), lambda: _s() and _s().push(), repeat=True),
+            bs.Timer(uniform(1.0, 2.5) if rot else uniform(3, 6),
+                     lambda: _s() and _s().push(), repeat=True),
             bs.Timer(0.25, lambda: _s() and _s().chk(), repeat=True),
             bs.Timer(self.life, lambda: _s() and _s().fade())
         ]
         self.push()
 
     def gtick(self):
-        if not self.node: return
+        if not self.node:
+            return
         y = self.node.position[1]
         # flip
         self.up = not self.up
-        if y > 7.0: self.up = False
-        if y < 1.0: self.up = True
+        if y > 7.0:
+            self.up = False
+        if y < 1.0:
+            self.up = True
         g = uniform(0.004, 0.012) * (-1 if self.up else 1)
         bs.animate(self.node, 'gravity_scale', {0: self.g, uniform(3.0, 6.0): g})
         self.g = g
 
     def push(self):
-        if not self.node: return
+        if not self.node:
+            return
         g = self.gm()
         rot = g and g.rotating
         p = self.node.position
@@ -412,26 +428,32 @@ class Floater(bs.Actor):
         d = [cos(a), uniform(-0.3, 0.3), sin(a)]
         # shy
         if abs(p[0]) < 5.0 and abs(p[2]) < 5.0:
-            d[0] += p[0] * 0.03; d[2] += p[2] * 0.03
+            d[0] += p[0] * 0.03
+            d[2] += p[2] * 0.03
         # steer
         if not rot and p[2] > 0 and abs(p[0]) < 0.81 * p[2] + 1.0:
             d[2] -= 1
             d[0] += 0.5 if p[0] >= 0 else -0.5
         n = (d[0] ** 2 + d[1] ** 2 + d[2] ** 2) ** 0.5 or 1.0
         m = uniform(20, 50) * (self.s / 0.35) ** 3 * (2.2 if rot else 1.0)
-        self.node.handlemessage('impulse', p[0], p[1], p[2], 0, 0, 0, m, 0, 0, 0, d[0] / n, d[1] / n, d[2] / n)
+        self.node.handlemessage('impulse', p[0], p[1], p[2], 0,
+                                0, 0, m, 0, 0, 0, d[0] / n, d[1] / n, d[2] / n)
 
     def chk(self):
-        if not self.node: return
+        if not self.node:
+            return
         x, y, z = self.node.position
         g = self.gm()
         if g and g.rotating:
-            if y < -1.0 or y > 16.0 or abs(x) > 33.0 or abs(z) > 33.0 or (abs(x) < 3.95 and abs(z) < 3.95): self.fade()
+            if y < -1.0 or y > 16.0 or abs(x) > 33.0 or abs(z) > 33.0 or (abs(x) < 3.95 and abs(z) < 3.95):
+                self.fade()
             return
-        if y < -1.0 or y > 14.0 or abs(x) > 21.0 or z < -25.0 or (abs(x) < 3.95 and abs(z) < 3.95) or z > 25.0 or (z > 0 and abs(x) < 0.81 * z - 0.5): self.fade()
+        if y < -1.0 or y > 14.0 or abs(x) > 21.0 or z < -25.0 or (abs(x) < 3.95 and abs(z) < 3.95) or z > 25.0 or (z > 0 and abs(x) < 0.81 * z - 0.5):
+            self.fade()
 
     def fade(self):
-        if self.dying or not self.node: return
+        if self.dying or not self.node:
+            return
         self.dying = True
         bs.animate(self.node, 'mesh_scale', {0: self.s, 0.4: 0})
         bs.animate(self.light, 'intensity', {0: self.li, 0.4: 0})
@@ -445,11 +467,15 @@ class Floater(bs.Actor):
             self.timers = []
             self.node and self.node.delete()
             g and g.mkfloater()
-        elif isinstance(msg, bs.DieMessage): self.fade()
-        else: super().handlemessage(msg)
+        elif isinstance(msg, bs.DieMessage):
+            self.fade()
+        else:
+            super().handlemessage(msg)
 
 # ba_meta export bascenev1.GameActivity
-class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
+
+
+class Checkboom(bs.TeamGameActivity[bs.Player, bs.Team]):
     name = Strings.CHECKBOOM
     description = Strings.DESCRIPTION
 
@@ -461,7 +487,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
     def get_available_settings(cls, sessiontype):
         return [
             bs.BoolSetting('Fancy Graphics', default=True),
-            bs.IntChoiceSetting('Turn Time', choices=[('None', 0), ('15 Seconds', 15), ('30 Seconds', 30), ('60 Seconds', 60)], default=0),
+            bs.IntChoiceSetting('Turn Time', choices=[
+                                ('None', 0), ('15 Seconds', 15), ('30 Seconds', 30), ('60 Seconds', 60)], default=0),
             bs.BoolSetting('Powerups', default=True),
             bs.BoolSetting('Pre-Placed Pieces', default=False),
         ]
@@ -518,7 +545,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.memory['cooldowns'] = {}
         self.playing = False
         self.fmat = bs.Material()
-        self.fmat.add_actions(conditions=('they_dont_have_material', self.fmat), actions=('modify_part_collision', 'collide', False))
+        self.fmat.add_actions(conditions=('they_dont_have_material', self.fmat),
+                              actions=('modify_part_collision', 'collide', False))
         self.memory['floaters'] = []
         self.st = self.new_st()
         self.turn_t0 = None
@@ -552,7 +580,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             attrs={
                 'v_attach': 'top',
                 'h_align': 'center',
-                'position': (0,-50)
+                'position': (0, -50)
             }
         )
         self.legend = []
@@ -613,9 +641,11 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         super().on_begin()
         cap_players(bs.getsession())
         _s = ref(self)
-        self.memory['timers']['bounds'] = bs.Timer(0.1, lambda: _s() and _s().bounds_tick(), repeat=True)
+        self.memory['timers']['bounds'] = bs.Timer(
+            0.1, lambda: _s() and _s().bounds_tick(), repeat=True)
         if self.fancy:
-            self.memory['timers']['floaters'] = bs.Timer(0.3, lambda: _s() and _s().floaters_tick(), repeat=True)
+            self.memory['timers']['floaters'] = bs.Timer(
+                0.3, lambda: _s() and _s().floaters_tick(), repeat=True)
             self.floaters_tick(True)
         self.sanity_tick()
 
@@ -623,7 +653,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         # offset
         return bs.StandMessage((pos[0], pos[1] - 0.2, pos[2]), rot)
 
-    def alert(self, text, color=(1,1,1)):
+    def alert(self, text, color=(1, 1, 1)):
         self.subtext.text = text
         self.subtext.color = color
 
@@ -645,7 +675,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         else:
             orig_color, orig_hl = tuple(spaz.node.color), tuple(spaz.node.highlight)
         bs.animate_array(spaz.node, 'color', 3, {0.0: spaz.node.color, 0.2: (0.35, 0.35, 0.35)})
-        bs.animate_array(spaz.node, 'highlight', 3, {0.0: spaz.node.highlight, 0.2: (0.2, 0.2, 0.2)})
+        bs.animate_array(spaz.node, 'highlight', 3, {
+                         0.0: spaz.node.highlight, 0.2: (0.2, 0.2, 0.2)})
         self.memory['cooldowns'][spaz] = {
             'team_id': tid,
             'turns_left': turns,
@@ -710,6 +741,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         pid = id(spaz)
         run_val = [0]
         _s, _b = ref(self), ref(spaz)
+
         def pulse_tick():
             s, b = _s(), _b()
             if not s or not b or not b.node or not b.is_alive() or getattr(b, 'is_dead', False):
@@ -729,10 +761,12 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             return
         pid = id(piece)
         _s, _b = ref(self), ref(piece)
+
         def run_tick():
             s, b = _s(), _b()
             if not s or not b or not b.node or not b.is_alive() or b.claimed_by is not None:
-                if s and b: s.stop_run(b)
+                if s and b:
+                    s.stop_run(b)
                 return
 
             sq = s.memory['squares'].get(b)
@@ -778,7 +812,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         _s, _p, _t = ref(self), ref(player), ref(target)
         if isinstance(target, Piece):
-            player.assigninput(bs.InputType.BOMB_PRESS, lambda: (_s() and _p() and _t()) and _s().release_control(_p(), _t()))
+            player.assigninput(bs.InputType.BOMB_PRESS, lambda: (
+                _s() and _p() and _t()) and _s().release_control(_p(), _t()))
             player.assigninput(bs.InputType.BOMB_RELEASE, lambda: None)
         else:
             player.assigninput(bs.InputType.BOMB_PRESS, lambda: None)
@@ -790,7 +825,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         actor.team_id = player.team.id
         actor.is_master = True
         actor.is_dead = False
-        if DEBUG: actor.hitpoints = actor.hitpoints_max = 50
+        if DEBUG:
+            actor.hitpoints = actor.hitpoints_max = 50
         actor.orig_pos = self.map.defs.points[f'spawn{player.team.id+1}'][:3]
         actor.orig_rot = 0 if player.team.id else 180
         _s, _a = ref(self), ref(actor)
@@ -798,11 +834,14 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.memory['team_colors'][player.team.id] = getattr(player.team, 'color', actor.node.color)
         old_pick = actor.on_pickup_press
         _p = ref(player)
+
         def safe_pick():
             old_pick()
+
             def chk():
                 s, a, p = _s(), _a(), _p()
-                if not s or not a or not p or not a.node or not a.node.hold_node: return
+                if not s or not a or not p or not a.node or not a.node.hold_node:
+                    return
                 for tid, bots in s.memory['spazzes'].items():
                     if tid != p.team.id and any(b and b.node == a.node.hold_node for b in bots):
                         a.node.hold_node = None
@@ -837,7 +876,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.sanity_tick()
 
     def handlemessage(self, actor, msg):
-        if not actor or not actor.node: return
+        if not actor or not actor.node:
+            return
         # prestart
         if isinstance(msg, bs.OutOfBoundsMessage) and not self.memory.get('started'):
             return self.respawn_spaz(actor)
@@ -915,6 +955,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         spaz.on_run(0)
 
         _s, _sp = ref(self), ref(spaz)
+
         def dead_tick():
             s, sp = _s(), _sp()
             if not s or not sp or not sp.node:
@@ -932,44 +973,60 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         return [a for a in [p.actor for p in self.memory['players'].values()] + list(self.memory['placeholder_masters'].values()) + [b for t in self.memory['spazzes'].values() for b in t] if a and a.node]
 
     def tally(self, v):
-        t = getattr(v, 'team_id', 0); k, d = (self.memory['players'].get(i) for i in (1 - t, t))
+        t = getattr(v, 'team_id', 0)
+        k, d = (self.memory['players'].get(i) for i in (1 - t, t))
         if (role := self.get_spaz_role(v)) != 'king':
             self.st[1 - t]['caps'][role] = self.st[1 - t]['caps'].get(role, 0) + 1
             self.st[t]['lost'] += 1
-        k and self.stats.player_scored(k, 0, kill=True, display=False, screenmessage=False, showpoints=False)
+        k and self.stats.player_scored(k, 0, kill=True, display=False,
+                                       screenmessage=False, showpoints=False)
         (d and not getattr(v, 'is_master', False)) and self.stats.player_was_killed(d, killed=True, killer=k)
 
     def mdead(self, m, lt=None):
         # result
-        if self.game_over: return
+        if self.game_over:
+            return
         self.game_over = True
         lt = getattr(m, 'team_id', 0) if lt is None else lt
         wt, _s, _m, mid = 1 - lt, ref(self), (ref(m) if m else (lambda: None)), id(m)
         self.end_clock(self.current_turn_team_id)
         self.turn_active, self.pending_action = False, None
-        self.stop_all_move_repeats(); self.clear_selection()
+        self.stop_all_move_repeats()
+        self.clear_selection()
         [self.hide_team_selector(t) for t in list(self.team_selectors)]
-        [(p := self.memory['players'].get(t)) and (c := self.memory['control'].get(t)) and self.release_control(p, c) for t in (wt, lt)]
-        [self.memory['timers'].__setitem__(k, None) for k in list(self.memory['timers']) if not str(k).startswith('dead_knock_') and k != 'floaters']
+        [(p := self.memory['players'].get(t)) and (c := self.memory['control'].get(t))
+         and self.release_control(p, c) for t in (wt, lt)]
+        [self.memory['timers'].__setitem__(k, None) for k in list(
+            self.memory['timers']) if not str(k).startswith('dead_knock_') and k != 'floaters']
         self.hide_legend(0.5)
         [p.resetinput() for p in self.players]
-        for a in self.actors(): a.node.hold_node = None; a.on_move_left_right(0); a.on_move_up_down(0); a.on_run(0)
+        for a in self.actors():
+            a.node.hold_node = None
+            a.on_move_left_right(0)
+            a.on_move_up_down(0)
+            a.on_run(0)
         # loser
         m and m.node and setattr(m.node, 'name', '')
+
         def zz():
             s, a = _s(), _m()
-            if not s or not a or not a.node: return s and s.memory['timers'].__setitem__(f'dead_knock_{mid}', None)
-            a.node.handlemessage('knockout', 100); a.node.color, a.node.highlight = (0.35,) * 3, (0.2,) * 3
+            if not s or not a or not a.node:
+                return s and s.memory['timers'].__setitem__(f'dead_knock_{mid}', None)
+            a.node.handlemessage('knockout', 100)
+            a.node.color, a.node.highlight = (0.35,) * 3, (0.2,) * 3
         if m:
-            zz(); self.memory['timers'][f'dead_knock_{mid}'] = bs.Timer(0.09, zz, repeat=True)
+            zz()
+            self.memory['timers'][f'dead_knock_{mid}'] = bs.Timer(0.09, zz, repeat=True)
         # winner
-        ws = [a for a in self.actors() if getattr(a, 'team_id', None) == wt and a.is_alive() and not getattr(a, 'is_dead', False)]
+        ws = [a for a in self.actors() if getattr(a, 'team_id', None) == wt and a.is_alive()
+              and not getattr(a, 'is_dead', False)]
         [a.node.handlemessage('knockout', 0.0) for a in ws if a.node]
         [self.restore_spaz_from_cooldown(a) for a in ws if self.is_on_cooldown(a)]
         self.alert('')
         bs.setmusic(None)
         wp = self.memory['players'].get(wt)
-        wname = wp.team.name if wp and wp.team else self.teams[wt].name if len(self.teams) > wt else f'Team {wt + 1}'
+        wname = wp.team.name if wp and wp.team else self.teams[wt].name if len(
+            self.teams) > wt else f'Team {wt + 1}'
         wtext = bui.Lstr(value=Strings.TEAM_WINS, subs=[('${TEAM}', wname)])
         total = 5.9
 
@@ -977,17 +1034,21 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             if (s := _s()) and s.game_over:
                 for a in ws:
                     if a and a.node and a.is_alive():
-                        a.node.handlemessage('celebrate', 900); d = uniform(0, 0.35)
-                        bs.timer(d, lambda a=a: a.node and a.on_jump_press()); bs.timer(d + 0.12, lambda a=a: a.node and a.on_jump_release())
+                        a.node.handlemessage('celebrate', 900)
+                        d = uniform(0, 0.35)
+                        bs.timer(d, lambda a=a: a.node and a.on_jump_press())
+                        bs.timer(d + 0.12, lambda a=a: a.node and a.on_jump_release())
 
         def on_wins():
             s = _s()
             if not s or not s.game_over:
                 return
             bs.setmusic(s.default_music)
-            cel(); s.memory['timers']['celebrate'] = bs.Timer(0.8, cel, repeat=True)
+            cel()
+            s.memory['timers']['celebrate'] = bs.Timer(0.8, cel, repeat=True)
             # sequence
-            s.memory['timers']['analysis'] = bs.Timer(2.0, lambda: (s2 := _s()) and s2.show_analysis(wt))
+            s.memory['timers']['analysis'] = bs.Timer(
+                2.0, lambda: (s2 := _s()) and s2.show_analysis(wt))
 
         def stt():
             s = _s()
@@ -996,7 +1057,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         t = self.memory['timers']
         # overlay
-        self.memory['win_overlay'] = ov = bs.newnode('image', attrs={'texture': bs.gettexture('white'), 'absolute_scale': True, 'attach': 'center', 'scale': (4000, 3000), 'color': (0, 0, 0), 'opacity': 0.0})
+        self.memory['win_overlay'] = ov = bs.newnode('image', attrs={'texture': bs.gettexture(
+            'white'), 'absolute_scale': True, 'attach': 'center', 'scale': (4000, 3000), 'color': (0, 0, 0), 'opacity': 0.0})
         self.memory['win_2d'].append(ov)
         t['wtt'] = bs.Timer(1.0, stt)
 
@@ -1004,13 +1066,17 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         return {t: {'time': 0.0, 'turns': 0, 'longest': 0.0, 'caps': {}, 'lost': 0, 'mov': 0, 'atk': 0, 'spc': 0} for t in (0, 1)}
 
     def end_clock(self, tid):
-        if tid is None or self.turn_t0 is None: return
+        if tid is None or self.turn_t0 is None:
+            return
         d, self.turn_t0 = bs.time() - self.turn_t0, None
         r = self.st[tid]
-        r['time'] += d; r['turns'] += 1; r['longest'] = max(r['longest'], d)
+        r['time'] += d
+        r['turns'] += 1
+        r['longest'] = max(r['longest'], d)
 
     def show_analysis(self, wt):
-        if not self.game_over: return
+        if not self.game_over:
+            return
         self.globalsnode.camera_mode = 'rotate'
         # burst
         self.rotating = True
@@ -1023,20 +1089,29 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         def tm(x): return f'{int(x // 60)}:{x % 60:04.1f}'
         order = (('queen', 'Q'), ('rook', 'R'), ('bishop', 'B'), ('knight', 'N'), ('pawn', 'P'))
-        def cp(c): return f"{sum(c.values())}" + (' (' + ' '.join(f'{c[k]}{l}' for k, l in order if c.get(k)) + ')' if c else '')
-        def left(t): return sum(1 for a in self.memory['spazzes'].get(t, []) if a and not getattr(a, 'is_dead', False))
+
+        def cp(c): return f"{sum(c.values())}" + (' (' +
+                                                  ' '.join(f'{c[k]}{l}' for k, l in order if c.get(k)) + ')' if c else '')
+
+        def left(t): return sum(1 for a in self.memory['spazzes'].get(
+            t, []) if a and not getattr(a, 'is_dead', False))
         S = self.st
         # rows
         rows = (
-            ('Time used', [tm(S[t]['time']) for t in (0, 1)], [S[t]['time'] for t in (0, 1)], 'low'),
+            ('Time used', [tm(S[t]['time'])
+             for t in (0, 1)], [S[t]['time'] for t in (0, 1)], 'low'),
             ('Turns', [str(S[t]['turns']) for t in (0, 1)], None, None),
-            ('Avg turn', [tm(S[t]['time'] / max(1, S[t]['turns'])) for t in (0, 1)], [S[t]['time'] / max(1, S[t]['turns']) for t in (0, 1)], 'low'),
+            ('Avg turn', [tm(S[t]['time'] / max(1, S[t]['turns'])) for t in (0, 1)],
+             [S[t]['time'] / max(1, S[t]['turns']) for t in (0, 1)], 'low'),
             ('Longest turn', [tm(S[t]['longest']) for t in (0, 1)], None, None),
-            ('Captured', [cp(S[t]['caps']) for t in (0, 1)], [sum(S[t]['caps'].values()) for t in (0, 1)], 'high'),
+            ('Captured', [cp(S[t]['caps']) for t in (0, 1)], [
+             sum(S[t]['caps'].values()) for t in (0, 1)], 'high'),
             ('Lost', [str(S[t]['lost']) for t in (0, 1)], [S[t]['lost'] for t in (0, 1)], 'low'),
-            ('Moves / Attacks / Specials', [f"{S[t]['mov']} / {S[t]['atk']} / {S[t]['spc']}" for t in (0, 1)], None, None),
+            ('Moves / Attacks / Specials',
+             [f"{S[t]['mov']} / {S[t]['atk']} / {S[t]['spc']}" for t in (0, 1)], None, None),
             ('Pieces left', [str(left(t)) for t in (0, 1)], [left(t) for t in (0, 1)], 'high'),
-            ('Score', [str(self.tsc(t, t == wt)) for t in (0, 1)], [self.tsc(t, t == wt) for t in (0, 1)], 'high'),
+            ('Score', [str(self.tsc(t, t == wt))
+             for t in (0, 1)], [self.tsc(t, t == wt) for t in (0, 1)], 'high'),
         )
         gold, grey = (1.0, 0.9, 0.5, 1.0), (0.7, 0.7, 0.8, 1.0)
         xs = (-190, 190)
@@ -1045,7 +1120,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             def mk():
                 if pop and not self.game_over:
                     return
-                t = Text(txt, position=(x, y), h_align=Text.HAlign.CENTER, v_align=Text.VAlign.CENTER, color=col, scale=sc, maxwidth=mw, transition=None if pop else Text.Transition.FADE_IN, transition_delay=0.0 if pop else d)
+                t = Text(txt, position=(x, y), h_align=Text.HAlign.CENTER, v_align=Text.VAlign.CENTER, color=col, scale=sc,
+                         maxwidth=mw, transition=None if pop else Text.Transition.FADE_IN, transition_delay=0.0 if pop else d)
                 t.autoretain()
                 self.memory['win_2d'].append(t.node)
             # instant
@@ -1054,21 +1130,25 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         d0 = 0.6
         for t in (0, 1):
             nm = self.teams[t].name if len(self.teams) > t else f'Team {t + 1}'
-            tx(bui.Lstr(value='${T}', subs=[('${T}', nm)]), xs[t], 42, tuple(self.get_team_color(t)) + (1.0,), 1.1, d0, 260)
+            tx(bui.Lstr(value='${T}', subs=[('${T}', nm)]), xs[t],
+               42, tuple(self.get_team_color(t)) + (1.0,), 1.1, d0, 260)
         bs.timer(d0, bs.getsound('swip').play)
         for i, (lab, vals, cmpv, better) in enumerate(rows):
-            d, y, last = d0 + 0.4 * (i + 1) + (0.5 if i == len(rows) - 1 else 0.0), 12 - 25 * i, i == len(rows) - 1
+            d, y, last = d0 + 0.4 * (i + 1) + (0.5 if i == len(rows) -
+                                               1 else 0.0), 12 - 25 * i, i == len(rows) - 1
             win = [False, False]
             if cmpv and cmpv[0] != cmpv[1]:
                 win[0 if (cmpv[0] > cmpv[1]) == (better == 'high') else 1] = True
             tx(lab, 0, y, (0.5, 0.5, 0.6, 1.0), 0.7, d + 0.1 if last else d, 220, pop=last)
             for t in (0, 1):
-                tx(vals[t], xs[t], y, gold if win[t] else grey, 1.2 if last else 0.9, d + 0.1, 260, pop=last)
+                tx(vals[t], xs[t], y, gold if win[t] else grey,
+                   1.2 if last else 0.9, d + 0.1, 260, pop=last)
             if last:
                 bs.timer(d + 0.1, bs.getsound('cashRegister').play)
 
         # prompt
         _s, _wt = ref(self), wt
+
         def ask():
             s = _s()
             if not s or not s.game_over:
@@ -1081,11 +1161,13 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             s.memory['win_2d'].append(n)
             fl(n, (1, 1, 1), 1.0, 0.6)
             bs.animate(n, 'opacity', {0: 0, 0.4: 1})
+
             def go():
                 s2 = _s()
                 if not s2 or not s2.game_over:
                     return
-                for q in s2.players: q.resetinput()
+                for q in s2.players:
+                    q.resetinput()
                 bs.getsound('punch01').play()
                 n.exists() and n.delete()
                 s2.memory['win_2d'].append(bs.newnode('text', attrs={
@@ -1099,7 +1181,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.memory['timers']['cont'] = bs.Timer(d + 0.9, ask)
 
     def fin(self, wt):
-        if not self.game_over: return
+        if not self.game_over:
+            return
         r = bs.GameResults()
         for t in self.teams:
             r.set_team_score(t, self.tsc(t.id, t.id == wt))
@@ -1198,7 +1281,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             master_bot.team_id = team_id
             master_bot.orig_pos = (ksq[0], 0, ksq[1])
             master_bot.orig_rot = rotation
-            master_bot.handlemessage = lambda m, s=ref(self), b=ref(master_bot): s() and b() and s().handlemessage(b(), m)
+            master_bot.handlemessage = lambda m, s=ref(self), b=ref(
+                master_bot): s() and b() and s().handlemessage(b(), m)
             master_bot.handlemessage(self.init_stand(master_bot.orig_pos, master_bot.orig_rot))
             self.recolor(master_bot, occupied=True)
             self.memory['placeholder_masters'][team_id] = master_bot
@@ -1243,7 +1327,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.memory['legend_on'] = True
             self.memory['timers']['legend'] = arr = []
             for n in self.legend:
-                 n in self.rel or arr.append(bs.Timer(1, bs.animate(n, 'opacity', {0: 0, 0.6: 0.7}).delete))
+                n in self.rel or arr.append(
+                    bs.Timer(1, bs.animate(n, 'opacity', {0: 0, 0.6: 0.7}).delete))
 
     def remove_team(self, team_id):
         t = self.memory['timers']
@@ -1311,8 +1396,9 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             )
             origin.node.name = ''
 
-            bs.animate_array(origin.node, 'color', 3, {0: origin.node.color, 0.3: (0.5,0.5,0.5)})
-            bs.animate_array(origin.node, 'highlight', 3, {0: origin.node.highlight, 0.3: (0.5,0.5,0.5)})
+            bs.animate_array(origin.node, 'color', 3, {0: origin.node.color, 0.3: (0.5, 0.5, 0.5)})
+            bs.animate_array(origin.node, 'highlight', 3, {
+                             0: origin.node.highlight, 0.3: (0.5, 0.5, 0.5)})
 
             origin.on_move_up_down(0)
             origin.on_move_left_right(0)
@@ -1360,8 +1446,10 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         if player.actor and player.actor.node:
             player.actor.node.name = name
             player.actor.node.name_color = name_color
-            bs.animate_array(player.actor.node, 'color', 3, {0: player.actor.node.color, 0.3: color})
-            bs.animate_array(player.actor.node, 'highlight', 3, {0: player.actor.node.highlight, 0.3: highlight})
+            bs.animate_array(player.actor.node, 'color', 3, {
+                             0: player.actor.node.color, 0.3: color})
+            bs.animate_array(player.actor.node, 'highlight', 3, {
+                             0: player.actor.node.highlight, 0.3: highlight})
             self.assign_controls(player, player.actor)
 
     def handle_release(self, piece):
@@ -1371,7 +1459,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         side = 1 if self.map.defs.points[f'spawn{piece.team_id+1}'][2] > 0 else -1
         rows = (6, 7) if side > 0 else (0, 1)
         if -4.0 <= px <= 4.0 and -4.0 <= pz <= 4.0 and (side * pz > 0):
-            occupied = {v for k, v in self.memory['squares'].items() if k is not piece and k.is_alive()}
+            occupied = {v for k, v in self.memory['squares'].items(
+            ) if k is not piece and k.is_alive()}
             occupied.update(self.memory['kings'].values())
             free = [
                 (c - 3.5, r - 3.5)
@@ -1542,7 +1631,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     if st == 'in':
                         bs.animate_array(node, 'color', 3, {0.0: node.color, 0.2: self.neon(*c)})
                     else:
-                        self.king_anims.setdefault(tid, []).extend(loop_array(node, 'color', 3, {0.0: c, 0.8: c, 1.1: self.neon(*c), 1.4: c}))
+                        self.king_anims.setdefault(tid, []).extend(loop_array(
+                            node, 'color', 3, {0.0: c, 0.8: c, 1.1: self.neon(*c), 1.4: c}))
                 if inner := self.map.inner_fills.get((round(ksq[0], 1), round(ksq[1], 1))):
                     inner.shape = 'circleOutline'
                     inner.size = (0.57,)
@@ -1550,7 +1640,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     if st == 'in':
                         bs.animate_array(inner, 'color', 3, {0.0: inner.color, 0.2: self.neon(*c)})
                     else:
-                        self.king_anims.setdefault(tid, []).extend(loop_array(inner, 'color', 3, {0.0: c, 0.8: c, 1.1: self.neon(*c), 1.4: c}))
+                        self.king_anims.setdefault(tid, []).extend(loop_array(
+                            inner, 'color', 3, {0.0: c, 0.8: c, 1.1: self.neon(*c), 1.4: c}))
 
         if self.memory.get('started'):
             return
@@ -1570,9 +1661,11 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
     def start_countdown(self):
         self.memory['count'] = 5
         _s = ref(self)
+
         def step():
             s = _s()
-            if not s or s.memory.get('started'): return
+            if not s or s.memory.get('started'):
+                return
             cnt = s.memory.get('count', 0)
             if cnt > 0:
                 s.alert(f'{Strings.STARTING_IN} {cnt}', (1, 1, 0))
@@ -1591,7 +1684,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
     def schedule_idle_emote(self):
         delay = uniform(6.0, 12.0)
         _s = ref(self)
-        self.memory['timers']['idle_emote'] = bs.Timer(delay, lambda: _s() and _s().trigger_idle_emote())
+        self.memory['timers']['idle_emote'] = bs.Timer(
+            delay, lambda: _s() and _s().trigger_idle_emote())
 
     def trigger_idle_emote(self):
         if not self.playing or not self.memory.get('started'):
@@ -1617,13 +1711,15 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             if 'kronk' in char:
                 b.on_punch_press()
                 pid = id(b)
-                self.memory['timers'][f'kronk_p_{pid}'] = bs.Timer(0.15, lambda: b and b.node and b.on_punch_release())
+                self.memory['timers'][f'kronk_p_{pid}'] = bs.Timer(
+                    0.15, lambda: b and b.node and b.on_punch_release())
             elif 'pixel' in char or 'pixie' in char:
                 rdx, rdz = choice([(-1, 0), (1, 0), (0, 1), (0, -1), (1, 1), (-1, -1)])
                 b.on_move_left_right(rdx * 0.05)
                 b.on_move_up_down(-rdz * 0.05)
                 pid = id(b)
-                self.memory['timers'][f'pixie_look_{pid}'] = bs.Timer(1.5, lambda: b and b.node and (b.on_move_left_right(0), b.on_move_up_down(0)))
+                self.memory['timers'][f'pixie_look_{pid}'] = bs.Timer(
+                    1.5, lambda: b and b.node and (b.on_move_left_right(0), b.on_move_up_down(0)))
             elif 'zoe' in char:
                 kpos = self.memory['kings'].get(b.team_id)
                 if kpos and b.node:
@@ -1634,6 +1730,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     b.on_move_up_down((-zvz / zl) * 0.05)
                     pid = id(b)
                     b.zoe_looking_at_master = True
+
                     def end_zoe():
                         if b and b.node:
                             b.zoe_looking_at_master = False
@@ -1685,10 +1782,12 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.schedule_idle_emote()
 
         _s = ref(self)
+
         def asub():
             s2 = _s()
             if s2:
-                s2.memory['timers']['start_turn'] = bs.Timer(4.0 - 0.45, lambda: _s() and _s().begin_turn_phase())
+                s2.memory['timers']['start_turn'] = bs.Timer(
+                    4.0 - 0.45, lambda: _s() and _s().begin_turn_phase())
         self.ttl(choice(Strings.SUBTITLES), (1.0, 1.0, 1.0), 3.9, on_sub=asub)
 
     def ttl(self, stx, scol, total, on_sub=None, hold=False):
@@ -1712,7 +1811,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             t1.flatness = -2.0
         except Exception:
             pass
-        bs.animate(t1, 'opacity', {0: 0, 0.1: 1} if hold else {0: 0, 0.1: 1, total - 0.4: 1, total: 0})
+        bs.animate(t1, 'opacity', {0: 0, 0.1: 1} if hold else {
+                   0: 0, 0.1: 1, total - 0.4: 1, total: 0})
         hold and self.memory['win_2d'].append(t1)
         bs.animate_array(t1, 'position', 2, {0.0: (-10.0, 100.0), total - 0.4: (-8.0, 100.0)})
         hold or bs.Timer(total, t1.delete)
@@ -1744,7 +1844,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                 pass
             hold and s.memory['win_2d'].append(t2)
             end2 = total - 0.45
-            bs.animate(t2, 'opacity', {0: 0, 0.1: 1} if hold else {0: 0, 0.1: 1, end2 - 0.4: 1, end2: 0})
+            bs.animate(t2, 'opacity', {0: 0, 0.1: 1} if hold else {
+                       0: 0, 0.1: 1, end2 - 0.4: 1, end2: 0})
             bs.animate_array(t2, 'position', 2, {0.0: (10.0, 100.0), end2 - 0.4: (8.0, 100.0)})
             hold or bs.Timer(end2, t2.delete)
 
@@ -1771,7 +1872,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                 hold and s2.memory['win_2d'].append(t_sub)
                 sub_end = total - 0.45 - 0.45
                 fl(t_sub, scol, 1.0, 0.6)
-                bs.animate(t_sub, 'opacity', {0: 0, 0.1: 1} if hold else {0: 0, 0.1: 1, sub_end - 0.4: 1, sub_end: 0})
+                bs.animate(t_sub, 'opacity', {0: 0, 0.1: 1} if hold else {
+                           0: 0, 0.1: 1, sub_end - 0.4: 1, sub_end: 0})
                 hold or bs.Timer(sub_end, t_sub.delete)
                 if on_sub:
                     on_sub()
@@ -1955,19 +2057,25 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.start_turn(first_team_id)
 
     def hide_team_selector(self, tid):
-        for d in (self.team_selector_anim, self.team_selector_blink): d.get(tid) and d[tid].delete(); d[tid] = None
+        for d in (self.team_selector_anim, self.team_selector_blink):
+            d.get(tid) and d[tid].delete()
+            d[tid] = None
         # delete
         (n := self.team_selectors.pop(tid, None)) and n.delete()
 
     def show_team_selector(self, tid):
         [self.hide_team_selector(o) for o in list(self.team_selectors) if o != tid]
-        k = self.memory['kings'].get(tid, (0.5, 3.5 if tid == 0 else -3.5)); pos = self.team_selector_pos.setdefault(tid, [round(k[0], 1), round(k[1], 1)])
+        k = self.memory['kings'].get(tid, (0.5, 3.5 if tid == 0 else -3.5))
+        pos = self.team_selector_pos.setdefault(tid, [round(k[0], 1), round(k[1], 1)])
         self.hide_team_selector(tid)
-        n = self.team_selectors[tid] = bs.newnode('locator', attrs={'shape': 'box', 'position': (pos[0], 0.6, pos[1]), 'size': (1.0, 1.2, 1.0), 'color': self.neon(*self.get_team_color(tid)), 'opacity': 0.0, 'draw_beauty': True})
-        self.team_selector_blink[tid] = bs.animate(n, 'opacity', {0.0: 0.0, 0.25: 0.85, 0.5: 0.0}, loop=True)
+        n = self.team_selectors[tid] = bs.newnode('locator', attrs={'shape': 'box', 'position': (pos[0], 0.6, pos[1]), 'size': (
+            1.0, 1.2, 1.0), 'color': self.neon(*self.get_team_color(tid)), 'opacity': 0.0, 'draw_beauty': True})
+        self.team_selector_blink[tid] = bs.animate(
+            n, 'opacity', {0.0: 0.0, 0.25: 0.85, 0.5: 0.0}, loop=True)
 
     def hide_legend(self, t=0.3):
-        [n.exists() and bs.animate(n, 'opacity', {0.0: n.opacity, t: 0.0}) for n in self.legend if n]
+        [n.exists() and bs.animate(n, 'opacity', {
+            0.0: n.opacity, t: 0.0}) for n in self.legend if n]
 
     def hide_selector(self):
         if self.current_turn_team_id is not None:
@@ -1999,23 +2107,29 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.turn_end_t = bs.time() + self.turn_time
             self.turn_clock_tick()
             _s = ref(self)
-            self.memory['timers']['turn_clock'] = bs.Timer(0.25, lambda: _s() and _s().turn_clock_tick(), repeat=True)
+            self.memory['timers']['turn_clock'] = bs.Timer(
+                0.25, lambda: _s() and _s().turn_clock_tick(), repeat=True)
 
         self.setup_turn_inputs()
         self.sel_last(team_id)
         self.show_team_selector(team_id)
 
     def turn_clock_tick(self):
-        if self.game_over or not self.turn_active or self.pending_action is not None or self.current_turn_team_id is None: return
+        if self.game_over or not self.turn_active or self.pending_action is not None or self.current_turn_team_id is None:
+            return
         left = max(0, int(self.turn_end_t - bs.time() + 0.999))
         tid = self.current_turn_team_id
-        try: txt = self.turn_msg.evaluate()
-        except Exception: txt = str(self.turn_msg)
+        try:
+            txt = self.turn_msg.evaluate()
+        except Exception:
+            txt = str(self.turn_msg)
         self.alert(f'{txt}  {left}', readable(self.get_team_color(tid)))
         if bs.time() >= self.turn_end_t:
             self.memory['timers']['turn_clock'] = None
-            self.stop_all_move_repeats(); self.clear_selection()
-            self.hide_team_selector(tid); self.hide_legend()
+            self.stop_all_move_repeats()
+            self.clear_selection()
+            self.hide_team_selector(tid)
+            self.hide_legend()
             bs.getsound('block').play()
             self.switch_turn()
 
@@ -2190,7 +2304,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         if is_master:
             char_name = spaz.node.name if (spaz.node and spaz.node.name) else 'Master'
             char_type = getattr(spaz, 'character', 'Spaz')
-            name_color = spaz.node.name_color if (spaz.node and hasattr(spaz.node, 'name_color') and spaz.node.name_color) else (1.0, 1.0, 1.0)
+            name_color = spaz.node.name_color if (spaz.node and hasattr(
+                spaz.node, 'name_color') and spaz.node.name_color) else (1.0, 1.0, 1.0)
         else:
             char_name = spaz.character if hasattr(spaz, 'character') else 'Spaz'
             char_type = char_name
@@ -2241,7 +2356,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     icon_tex = icon_mask_tex = None
         if icon_tex is None:
             try:
-                appearance = bs.app.classic.spaz_appearances.get(char_type) or bs.app.classic.spaz_appearances['Spaz']
+                appearance = bs.app.classic.spaz_appearances.get(
+                    char_type) or bs.app.classic.spaz_appearances['Spaz']
                 icon_tex = bs.gettexture(appearance.icon_texture)
                 icon_mask_tex = bs.gettexture(appearance.icon_mask_texture)
             except Exception:
@@ -2392,7 +2508,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         )
         bs.animate(t_spec, 'opacity', {0.0: 0.0, 0.2: 1.0})
 
-        self.char_overlay_nodes = [bg, border, char_pic, t_name, hp_icon, bar_red, bar_green, t_atk, spec_icon, t_spec]
+        self.char_overlay_nodes = [bg, border, char_pic, t_name,
+                                   hp_icon, bar_red, bar_green, t_atk, spec_icon, t_spec]
 
     def compute_moves_and_attacks(self, spaz):
         cur_sq = self.get_spaz_square(spaz)
@@ -2514,13 +2631,17 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             if node := self.map.fills.get((round(sq[0], 1), round(sq[1], 1))):
                 c_ours = self.get_team_color(my_team_id)
                 c_enemy = self.get_team_color(getattr(enemy, 'team_id', None))
-                getattr(enemy, 'is_master', False) and self.glows.append(node := bs.newnode('locator', attrs={'shape': 'circle', 'position': (sq[0], 0.007, sq[1]), 'size': (0.9,), 'color': c_ours, 'opacity': 0.0, 'additive': True, 'draw_beauty': True}))
-                self.attack_anims += loop_array(node, 'color', 3, {0.0: c_ours, 0.3: c_enemy, 0.6: c_ours})
-                self.attack_anims.append(bs.animate(node, 'opacity', {0.0: 0.0, 0.125: 0.8, 0.25: 0.0}, loop=True))
+                getattr(enemy, 'is_master', False) and self.glows.append(node := bs.newnode('locator', attrs={'shape': 'circle', 'position': (
+                    sq[0], 0.007, sq[1]), 'size': (0.9,), 'color': c_ours, 'opacity': 0.0, 'additive': True, 'draw_beauty': True}))
+                self.attack_anims += loop_array(node, 'color', 3,
+                                                {0.0: c_ours, 0.3: c_enemy, 0.6: c_ours})
+                self.attack_anims.append(bs.animate(
+                    node, 'opacity', {0.0: 0.0, 0.125: 0.8, 0.25: 0.0}, loop=True))
                 self.attack_highlighted_tiles.append(sq)
 
     def clear_move_highlights(self):
-        kill_anims(self.attack_anims); self.attack_anims.clear()
+        kill_anims(self.attack_anims)
+        self.attack_anims.clear()
         for sq in self.move_highlighted_tiles:
             pt = (round(sq[0], 1), round(sq[1], 1))
             if node := self.map.fills.get(pt):
@@ -2530,7 +2651,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                         owner_tid = tid
                         break
                 if owner_tid is not None:
-                    self.set_master_tile(sq, self.neon(*self.get_team_color(owner_tid)), active=True)
+                    self.set_master_tile(sq, self.neon(
+                        *self.get_team_color(owner_tid)), active=True)
                 elif any((round(s[0], 1), round(s[1], 1)) == pt for s in self.memory['squares'].values()):
                     for p, s in self.memory['squares'].items():
                         if (round(s[0], 1), round(s[1], 1)) == pt:
@@ -2558,7 +2680,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                         owner_tid = tid
                         break
                 if owner_tid is not None:
-                    self.set_master_tile(sq, self.neon(*self.get_team_color(owner_tid)), active=True)
+                    self.set_master_tile(sq, self.neon(
+                        *self.get_team_color(owner_tid)), active=True)
                 elif any((round(s[0], 1), round(s[1], 1)) == pt for s in self.memory['squares'].values()):
                     for p, s in self.memory['squares'].items():
                         if (round(s[0], 1), round(s[1], 1)) == pt:
@@ -2579,7 +2702,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         self.move_highlighted_tiles.clear()
         self.attack_highlighted_tiles.clear()
-        [n.delete() for n in self.glows]; self.glows.clear()
+        [n.delete() for n in self.glows]
+        self.glows.clear()
 
     def clear_selection(self):
         if self.selected_spaz and self.selected_spaz.node:
@@ -2604,7 +2728,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.start_turn(next_team_id)
 
     def dpu(self):
-        if not self.powerups: return
+        if not self.powerups:
+            return
         bx = self.memory['boxes']
         for k in [k for k, r in bx.items() if not (r() and r().node)]:
             del bx[k]
@@ -2621,7 +2746,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             return
         used = {tuple(round(v, 1) for v in sq) for sq in self.memory['squares'].values()}
         used |= {tuple(round(v, 1) for v in sq) for sq in self.memory['kings'].values()}
-        used |= {(round(r().node.position[0], 1), round(r().node.position[2], 1)) for r in bx.values()}
+        used |= {(round(r().node.position[0], 1), round(
+            r().node.position[2], 1)) for r in bx.values()}
         tl = [(x - 3.5, z - 3.5) for x in range(8) for z in range(8)]
         tl = [t for t in tl if (round(t[0], 1), round(t[1], 1)) not in used]
         if not tl:
@@ -2659,6 +2785,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
     def start_move_repeat(self, axis, dx, dz):
         self.stop_move_repeat(axis)
         _s = ref(self)
+
         def repeat_step():
             s = _s()
             if not s or not s.turn_active or s.pending_action is not None:
@@ -2666,6 +2793,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     s.stop_all_move_repeats()
                 return
             s.move_selector(dx, dz)
+
         def initial_delay():
             s = _s()
             if not s or not s.turn_active or s.pending_action is not None:
@@ -2745,7 +2873,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
             if is_master:
                 self.memory['kings'][spaz.team_id] = sel_sq
-                self.set_master_tile(sel_sq, self.neon(*self.get_team_color(spaz.team_id)), active=True)
+                self.set_master_tile(sel_sq, self.neon(
+                    *self.get_team_color(spaz.team_id)), active=True)
             else:
                 self.memory['squares'][spaz] = sel_sq
                 self.highlight_tile(
@@ -2820,7 +2949,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             _ts = ref(spaz)
             self.memory['timers'][f'punch_rel_{id(spaz)}'] = bs.Timer(
                 0.15,
-                lambda: _ts() and _ts().node and (_ts().on_punch_release(), _ts().on_move_left_right(0), _ts().on_move_up_down(0))
+                lambda: _ts() and _ts().node and (_ts().on_punch_release(),
+                                                  _ts().on_move_left_right(0), _ts().on_move_up_down(0))
             )
 
         self.clear_selection()
@@ -2922,6 +3052,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         )
 
         _s = ref(self)
+
         def cleanup_lerp(_tid=tid, _tgt=target_pos):
             s = _s()
             if not s:
@@ -2982,10 +3113,12 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
     def retain(self, piece):
         cnt = [0]
         _s, _b = ref(self), ref(piece)
+
         def tick():
             cnt[0] += 1
             s, b = _s(), _b()
-            if not s or not b: return
+            if not s or not b:
+                return
             if not b.node or not b.is_alive() or getattr(b, 'is_dead', False):
                 s.memory['timers'][f'retain_{id(b)}'] = None
                 if old_sq := s.memory['squares'].pop(b, None):
@@ -3032,7 +3165,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
             px, _, pz = b.node.position
             side = 1 if s.map.defs.points[f'spawn{team_id+1}'][2] > 0 else -1
-            is_master = getattr(b, 'is_master', False) or any(p.actor is b for p in s.memory['players'].values()) or any(m is b for m in s.memory['placeholder_masters'].values())
+            is_master = getattr(b, 'is_master', False) or any(p.actor is b for p in s.memory['players'].values(
+            )) or any(m is b for m in s.memory['placeholder_masters'].values())
 
             # active
             if pa and pa.get('spaz') is b:
@@ -3047,7 +3181,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     dx, dz = tgt[0] - px, tgt[1] - pz
                     dist = (dx * dx + dz * dz) ** 0.5
                     if dist > 0.08 or tgt != sq:
-                        spd = (3.0 if dist > 0.8 else 1.2) if has_run else (1.4 if dist > 0.8 else 1.0)
+                        spd = (3.0 if dist > 0.8 else 1.2) if has_run else (
+                            1.4 if dist > 0.8 else 1.0)
                         b.on_move_left_right(max(-1.0, min(1.0, dx * spd)))
                         b.on_move_up_down(max(-1.0, min(1.0, -dz * spd)))
                     else:
@@ -3055,6 +3190,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                             pa['state'] = 'arrived'
                             b.on_move_left_right(0)
                             b.on_move_up_down(0)
+
                             def finish_move():
                                 s.pending_action = None
                                 s.switch_turn()
@@ -3065,7 +3201,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     if p_state == 'moving_to_target':
                         sq = pa.get('target_sq')
                         victim = pa.get('victim')
-                        vx, vz = (victim.node.position[0], victim.node.position[2]) if (victim and victim.node) else (sq[0], sq[1])
+                        vx, vz = (victim.node.position[0], victim.node.position[2]) if (
+                            victim and victim.node) else (sq[0], sq[1])
                         dx, dz = vx - px, vz - pz
                         col_dist = (dx * dx + dz * dz) ** 0.5
 
@@ -3112,13 +3249,15 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                         dx, dz = tgt[0] - px, tgt[1] - pz
                         dist = (dx * dx + dz * dz) ** 0.5
                         if dist > 0.08 or tgt != sq:
-                            spd = (3.0 if dist > 0.8 else 1.2) if has_run else (1.4 if dist > 0.8 else 1.0)
+                            spd = (3.0 if dist > 0.8 else 1.2) if has_run else (
+                                1.4 if dist > 0.8 else 1.0)
                             b.on_move_left_right(max(-1.0, min(1.0, dx * spd)))
                             b.on_move_up_down(max(-1.0, min(1.0, -dz * spd)))
                         else:
                             pa['state'] = 'arrived'
                             b.on_move_left_right(0)
                             b.on_move_up_down(0)
+
                             def finish_attack():
                                 s.pending_action = None
                                 s.switch_turn()
@@ -3128,7 +3267,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                 elif p_type == 'special':
                     sq = pa.get('target_sq')
                     victim = pa.get('victim')
-                    vx, vz = (victim.node.position[0], victim.node.position[2]) if (victim and victim.node) else (sq[0], sq[1])
+                    vx, vz = (victim.node.position[0], victim.node.position[2]) if (
+                        victim and victim.node) else (sq[0], sq[1])
                     dx, dz = vx - px, vz - pz
                     col_dist = (dx * dx + dz * dz) ** 0.5
 
@@ -3183,14 +3323,18 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                             setattr(hit, 'is_backend', True)
                                             setattr(hit, 'custom_damage', dmg)
                                             victim.handlemessage(hit)
-                                            bs.emitfx(position=victim.node.position, count=20, scale=0.2, spread=0.4, chunk_type='spark')
-                                            bs.getsound('punch01').play(position=victim.node.position)
+                                            bs.emitfx(position=victim.node.position, count=20,
+                                                      scale=0.2, spread=0.4, chunk_type='spark')
+                                            bs.getsound('punch01').play(
+                                                position=victim.node.position)
 
                                             def sleep_spam():
                                                 if pa and pa.get('type') == 'special' and pa.get('state') == 'returning':
                                                     if victim and victim.node and victim.is_alive():
-                                                        victim.node.handlemessage('knockout', 1000.0)
-                                            s.memory['timers']['kronk_victim_sleep'] = bs.Timer(0.1, sleep_spam, repeat=True)
+                                                        victim.node.handlemessage(
+                                                            'knockout', 1000.0)
+                                            s.memory['timers']['kronk_victim_sleep'] = bs.Timer(
+                                                0.1, sleep_spam, repeat=True)
 
                                         pa['state'] = 'returning'
 
@@ -3232,7 +3376,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                             pa['state'] = 'returning'
                                             return
                                         pa['state'] = 'assault_hit2'
-                                        vx_c, vz_c = (victim.node.position[0], victim.node.position[2]) if (victim and victim.node) else (sq[0], sq[1])
+                                        vx_c, vz_c = (victim.node.position[0], victim.node.position[2]) if (
+                                            victim and victim.node) else (sq[0], sq[1])
                                         px_c, _, pz_c = b.node.position
                                         b.on_move_left_right(vx_c - px_c)
                                         b.on_move_up_down(-(vz_c - pz_c))
@@ -3260,11 +3405,14 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
                                             def start_agent_return():
                                                 pa['state'] = 'returning'
-                                            s.memory['timers']['agent_turn_delay'] = bs.Timer(0.3, start_agent_return)
+                                            s.memory['timers']['agent_turn_delay'] = bs.Timer(
+                                                0.3, start_agent_return)
 
-                                        s.memory['timers']['agent_p2_rel'] = bs.Timer(0.18, execute_hit2)
+                                        s.memory['timers']['agent_p2_rel'] = bs.Timer(
+                                            0.18, execute_hit2)
 
-                                    s.memory['timers']['agent_p2_wait'] = bs.Timer(0.5, execute_hit2_press)
+                                    s.memory['timers']['agent_p2_wait'] = bs.Timer(
+                                        0.5, execute_hit2_press)
 
                                 s.memory['timers']['agent_p1_rel'] = bs.Timer(0.18, execute_hit1)
 
@@ -3273,12 +3421,14 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                 pa['state'] = 'pixie_casting'
                                 b.on_jump_press()
                                 b.node.handlemessage('celebrate', 1750)
-                                s.memory['timers']['pixie_jrel'] = bs.Timer(0.2, lambda: b and b.node and b.on_jump_release())
+                                s.memory['timers']['pixie_jrel'] = bs.Timer(
+                                    0.2, lambda: b and b.node and b.on_jump_release())
                                 bs.getsound('shieldUp').play(position=victim.node.position)
 
                                 def cast_sparks():
                                     if victim and victim.node and victim.is_alive():
-                                        bs.emitfx(position=victim.node.position, count=12, scale=0.2, spread=0.5, chunk_type='spark')
+                                        bs.emitfx(position=victim.node.position, count=12,
+                                                  scale=0.2, spread=0.5, chunk_type='spark')
                                 cast_sparks()
                                 s.memory['timers']['pixie_fx1'] = bs.Timer(0.5, cast_sparks)
                                 s.memory['timers']['pixie_fx2'] = bs.Timer(1.0, cast_sparks)
@@ -3295,6 +3445,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                             victim.on_move_left_right(px_b - vx_n)
                                             victim.on_move_up_down(-(pz_b - vz_n))
                                             victim.on_punch_press()
+
                                             def finish_counter():
                                                 victim.on_punch_release()
                                                 victim.on_move_left_right(0)
@@ -3315,7 +3466,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                                     setattr(hit, 'custom_damage', m_dmg)
                                                     b.handlemessage(hit)
                                                 pa['state'] = 'returning'
-                                            s.memory['timers']['m_punch_rel'] = bs.Timer(0.2, finish_counter)
+                                            s.memory['timers']['m_punch_rel'] = bs.Timer(
+                                                0.2, finish_counter)
                                     else:
                                         v_tid = getattr(victim, 'team_id', 0)
                                         teammates = []
@@ -3331,13 +3483,15 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
                                         if teammates and victim.node:
                                             vx_n, _, vz_n = victim.node.position
-                                            nearest_tm = min(teammates, key=lambda tm: ((tm.node.position[0]-vx_n)**2 + (tm.node.position[2]-vz_n)**2))
+                                            nearest_tm = min(teammates, key=lambda tm: (
+                                                (tm.node.position[0]-vx_n)**2 + (tm.node.position[2]-vz_n)**2))
                                             pa['charm_pending'] = True
                                             pa['victim_orig_sq'] = s.get_spaz_square(victim)
                                             pa['nearest_tm'] = nearest_tm
                                         pa['state'] = 'returning'
 
-                                s.memory['timers']['pixie_cast_timer'] = bs.Timer(2.0, on_cast_finished)
+                                s.memory['timers']['pixie_cast_timer'] = bs.Timer(
+                                    2.0, on_cast_finished)
 
                             # zoe
                             elif 'zoe' in char:
@@ -3345,6 +3499,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                 b.on_move_left_right(dx)
                                 b.on_move_up_down(-dz)
                                 b.on_punch_press()
+
                                 def execute_curse():
                                     b.on_punch_release()
                                     b.on_move_left_right(0)
@@ -3364,8 +3519,10 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                         setattr(hit, 'is_backend', True)
                                         setattr(hit, 'custom_damage', dmg)
                                         victim.handlemessage(hit)
-                                        bs.emitfx(position=victim.node.position, count=25, scale=0.9, spread=0.5, chunk_type='spark')
-                                        bs.getsound('shieldDown').play(position=victim.node.position)
+                                        bs.emitfx(position=victim.node.position, count=25,
+                                                  scale=0.9, spread=0.5, chunk_type='spark')
+                                        bs.getsound('shieldDown').play(
+                                            position=victim.node.position)
                                         s.apply_cooldown(victim, turns=1)
                                     pa['state'] = 'returning'
                                 s.memory['timers']['zoe_curse_hit'] = bs.Timer(0.2, execute_curse)
@@ -3380,24 +3537,32 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                     choice(falls).play()
 
                                 v_tid = getattr(victim, 'team_id', 0)
-                                v_king_sq = s.memory['kings'].get(v_tid, (0.5, 3.5 if v_tid == 0 else -3.5))
+                                v_king_sq = s.memory['kings'].get(
+                                    v_tid, (0.5, 3.5 if v_tid == 0 else -3.5))
                                 cur_v_sq = s.get_spaz_square(victim)
-                                dist_to_king = ((cur_v_sq[0] - v_king_sq[0])**2 + (cur_v_sq[1] - v_king_sq[1])**2)**0.5
+                                dist_to_king = ((cur_v_sq[0] - v_king_sq[0])
+                                                ** 2 + (cur_v_sq[1] - v_king_sq[1])**2)**0.5
 
-                                occupied = { (round(sq[0], 1), round(sq[1], 1)) for p, sq in s.memory['squares'].items() if p is not victim and p.is_alive() }
-                                occupied.update({ (round(k[0], 1), round(k[1], 1)) for k in s.memory['kings'].values() })
+                                occupied = {(round(sq[0], 1), round(sq[1], 1)) for p, sq in s.memory['squares'].items(
+                                ) if p is not victim and p.is_alive()}
+                                occupied.update({(round(k[0], 1), round(k[1], 1))
+                                                for k in s.memory['kings'].values()})
 
-                                all_free = [ (c - 3.5, r - 3.5) for r in range(8) for c in range(8) if (round(c - 3.5, 1), round(r - 3.5, 1)) not in occupied ]
+                                all_free = [(c - 3.5, r - 3.5) for r in range(8) for c in range(8)
+                                            if (round(c - 3.5, 1), round(r - 3.5, 1)) not in occupied]
 
                                 if all_free:
                                     if dist_to_king > 2.0:
-                                        new_sq = min(all_free, key=lambda sq: ((sq[0]-v_king_sq[0])**2 + (sq[1]-v_king_sq[1])**2))
+                                        new_sq = min(all_free, key=lambda sq: (
+                                            (sq[0]-v_king_sq[0])**2 + (sq[1]-v_king_sq[1])**2))
                                     else:
-                                        new_sq = max(all_free, key=lambda sq: ((sq[0]-v_king_sq[0])**2 + (sq[1]-v_king_sq[1])**2))
+                                        new_sq = max(all_free, key=lambda sq: (
+                                            (sq[0]-v_king_sq[0])**2 + (sq[1]-v_king_sq[1])**2))
 
                                     s.highlight_tile(cur_v_sq, active=False)
                                     s.memory['squares'][victim] = new_sq
-                                    s.highlight_tile(new_sq, color=s.get_team_color(v_tid), active=True)
+                                    s.highlight_tile(
+                                        new_sq, color=s.get_team_color(v_tid), active=True)
 
                                     victim.on_run(1)
                                     v_falls = getattr(victim.node, 'fall_sounds', None)
@@ -3449,7 +3614,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                         dx, dz = tgt[0] - px, tgt[1] - pz
                         dist = (dx * dx + dz * dz) ** 0.5
                         if dist > 0.08 or tgt != sq:
-                            spd = (3.0 if dist > 0.8 else 1.2) if has_run else (1.4 if dist > 0.8 else 1.0)
+                            spd = (3.0 if dist > 0.8 else 1.2) if has_run else (
+                                1.4 if dist > 0.8 else 1.0)
                             b.on_move_left_right(max(-1.0, min(1.0, dx * spd)))
                             b.on_move_up_down(max(-1.0, min(1.0, -dz * spd)))
                         else:
@@ -3535,6 +3701,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                 va['state'] = 'waiting_tm'
                                 victim.on_move_left_right(0)
                                 victim.on_move_up_down(0)
+
                                 def start_tm_punch():
                                     if s.pending_action is not pa or va.get('state') != 'waiting_tm':
                                         return
@@ -3547,6 +3714,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                         victim.on_move_left_right(w_tx - w_px)
                                         victim.on_move_up_down(-(w_tz - w_pz))
                                     victim.on_punch_press()
+
                                     def execute_tm_hit():
                                         victim.on_punch_release()
                                         victim.on_move_left_right(0)
@@ -3644,7 +3812,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                                 pid = id(b)
                                 s.memory['timers'][f'turn_face_{pid}'] = bs.Timer(
                                     0.04,
-                                    lambda: b and b.node and (b.on_move_up_down(0), b.on_move_left_right(0))
+                                    lambda: b and b.node and (
+                                        b.on_move_up_down(0), b.on_move_left_right(0))
                                 )
                             else:
                                 b.on_move_left_right(0)
@@ -3752,10 +3921,12 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             a.on_move_left_right(0)
             a.on_move_up_down(0)
             a.on_run(0)
-            a.node.handlemessage('impulse', cx, cy - 0.3, cz, 0.0, 0.0, 0.0, 900.0, 0.0, 2.0, 0, 0.0, 0.0, 0.0)
+            a.node.handlemessage('impulse', cx, cy - 0.3, cz, 0.0, 0.0,
+                                 0.0, 900.0, 0.0, 2.0, 0, 0.0, 0.0, 0.0)
             a.node.handlemessage('knockout', 1000.0)
             tid = getattr(a, 'team_id', 0)
-            home = self.memory['kings'].get(tid) if getattr(a, 'is_master', False) else self.memory['squares'].get(a)
+            home = self.memory['kings'].get(tid) if getattr(
+                a, 'is_master', False) else self.memory['squares'].get(a)
             pa['bv'].append({
                 'piece': a,
                 'wk': now + 2.5,
@@ -3766,6 +3937,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             })
 
         _s, _pa = ref(self), pa
+
         def go_home():
             s = _s()
             if s and s.pending_action is _pa and not s.game_over:
@@ -3817,6 +3989,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         if all_done and pa.get('state') == 'bw':
             self.memory['timers']['bd'] = None
+
             def finish():
                 if self.pending_action is pa:
                     self.pending_action = None
@@ -3825,10 +3998,12 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
     def knockdown(self, team_id, origin):
         _s, _o = ref(self), ref(origin)
+
         def tick():
             s, o = _s(), _o()
             if not s or not o or (target := s.memory['control'].get(team_id)) is None or not o.node:
-                if s: s.memory['timers'][f'knock{team_id}'] = None
+                if s:
+                    s.memory['timers'][f'knock{team_id}'] = None
                 return
             o.node.handlemessage('knockout', 100)
             if target.node:
@@ -3868,13 +4043,16 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
     def shove(self, a):
         x, y, z = a.node.position
-        if y < -1.0: return self.respawn_spaz(a)
+        if y < -1.0:
+            return self.respawn_spaz(a)
         # bounds
         A = self.map.defs.boxes['area_of_interest_bounds']
         over = max(abs(x) - A[6], abs(z) - A[8])
-        if over <= 0: return
+        if over <= 0:
+            return
         d = (x * x + z * z) ** 0.5 or 1.0
-        a.node.handlemessage('impulse', x, y, z, 0, 0, 0, min(3000 + 1200 * over, 9000), 0, 0, 0, -x / d, 0.2, -z / d)
+        a.node.handlemessage('impulse', x, y, z, 0, 0, 0, min(
+            3000 + 1200 * over, 9000), 0, 0, 0, -x / d, 0.2, -z / d)
 
     def respawn_spaz(self, spaz):
         if not spaz or not spaz.node or getattr(spaz, 'is_dead', False):
@@ -3905,39 +4083,47 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                 self.retain(spaz)
 
     def floaters_tick(self, initial=False):
-        if not self.fancy: return
+        if not self.fancy:
+            return
         # prune
         t = bs.time()
         for f in self.memory['floaters']:
             # cap
-            if f.node and t - f.t0 > f.life + 2: f.node.delete()
+            if f.node and t - f.t0 > f.life + 2:
+                f.node.delete()
         fl = self.memory['floaters'] = [f for f in self.memory['floaters'] if f.node]
         cap = 247 if self.rotating else 140
         for _ in range(cap - len(fl) if initial else min(26 if self.rotating else 10, cap - len(fl))):
             self.mkfloater(initial)
 
     def mkfloater(self, instant=False):
-        if not self.fancy: return
+        if not self.fancy:
+            return
         if self.rotating:
             a, r = uniform(0, 6.2832), uniform(4.5 ** 2, 30.0 ** 2) ** 0.5
             x, z = r * cos(a), r * sin(a)
         else:
             for _ in range(80):
                 x, z = uniform(-17.0, 17.0), uniform(-21.0, 17.0)
-                if (abs(x) > 4.05 or abs(z) > 4.05) and not (z > 0 and abs(x) < 0.81 * z) and random() < exp(-(max(abs(x), abs(z)) - 4.0) / 5.0): break
-            else: return
+                if (abs(x) > 4.05 or abs(z) > 4.05) and not (z > 0 and abs(x) < 0.81 * z) and random() < exp(-(max(abs(x), abs(z)) - 4.0) / 5.0):
+                    break
+            else:
+                return
         # colors
         c0, c1, r = self.get_team_color(0), self.get_team_color(1), random()
-        if r < 0.3: col = c0
-        elif r < 0.6: col = c1
+        if r < 0.3:
+            col = c0
+        elif r < 0.6:
+            col = c1
         else:
             k = uniform(0.15, 0.85)
             col = tuple(a * (1 - k) + b * k for a, b in zip(c0, c1))
-        self.memory['floaters'].append(Floater(self, (x, uniform(0.5, 12 if self.rotating else 7), z), col, instant))
+        self.memory['floaters'].append(
+            Floater(self, (x, uniform(0.5, 12 if self.rotating else 7), z), col, instant))
 
-    def neon(self,a,b,c,z=4):
+    def neon(self, a, b, c, z=4):
         return (
-            a*z,b*z,c*z
+            a*z, b*z, c*z
         )
 
     def get_team_color(self, team_id):
@@ -4038,7 +4224,8 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
                     self.stop_run(b)
                     b.handlemessage(bs.DieMessage(immediate=True))
         # timers
-        self.memory['timers'] = {k: v for k, v in self.memory['timers'].items() if k in ('bounds', 'floaters')}
+        self.memory['timers'] = {k: v for k,
+                                 v in self.memory['timers'].items() if k in ('bounds', 'floaters')}
         for k in ['squares', 'swap', 'spazzes', 'kings', 'glow', 'team_colors', 'graveyard', 'cooldowns', 'lm', 'boxes', 'bage']:
             self.memory[k] = {}
         for tid in list(self.king_anims):
@@ -4049,60 +4236,65 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byBordd(bs.Plugin):
     def __init__(self):
         bs.app.classic.maps['Checkboard'] = Checkboard
         if not getattr(bs.JoinActivity.on_transition_in, '_cb', False):
             old_jti = bs.JoinActivity.on_transition_in
+
             def jti(self):
                 old_jti(self)
                 getattr(self.session, '_next_game', None) is Checkboom and cap_players(self.session)
             jti._cb = True
             bs.JoinActivity.on_transition_in = jti
         old_gt = bui.gettexture
+
         def new_gt(tex):
             if tex == 'checkboom':
                 return 'checkboom'
             return old_gt(tex)
         bui.gettexture = new_gt
+
         def wid(_):
-            def new(*a,**k):
-                if k.get('texture',None) == 'checkboom':
+            def new(*a, **k):
+                if k.get('texture', None) == 'checkboom':
                     k['texture'] = old_gt('reflectionSharper_-z')
-                    k['color'] = (0,2,2)
-                    wid = _(*a,**k)
+                    k['color'] = (0, 2, 2)
+                    wid = _(*a, **k)
                     bui.textwidget(
                         parent=k['parent'],
                         big=True,
-                        size=(size:=k['size']),
-                        scale=1.3*(scl:=size[0]/220),
+                        size=(size := k['size']),
+                        scale=1.3*(scl := size[0]/220),
                         position=(
-                            (p:=k['position']) and
-                            (p[0]-3*scl,p[1]-3*scl)
+                            (p := k['position']) and
+                            (p[0]-3*scl, p[1]-3*scl)
                         ),
                         h_align='center',
                         v_align='center',
                         text=Strings.CHECKBOOM,
                         flatness=-2,
-                        color=(1.4,1.4,1.4),
-                        draw_controller=k.get('draw_controller',wid)
+                        color=(1.4, 1.4, 1.4),
+                        draw_controller=k.get('draw_controller', wid)
                     )
                     return wid
-                return _(*a,**k)
+                return _(*a, **k)
             new.__name__ = _.__name__
             new.__doc__ = _.__doc__
             return new
-        bui.imagewidget = wid(_:=bui.imagewidget)
-        bui.buttonwidget = wid(_:=bui.buttonwidget)
+        bui.imagewidget = wid(_ := bui.imagewidget)
+        bui.buttonwidget = wid(_ := bui.buttonwidget)
         old = bs.app.config.get
-        bs.app.config.get = lambda b,*a,**k:(
+        bs.app.config.get = lambda b, *a, **k: (
             True if b == 'Auto Balance Teams' and
             (
                 (
-                    (activity:=(session:=bs.getsession()).getactivity()) and
-                    isinstance(activity,bs.JoinActivity) and
+                    (activity := (session := bs.getsession()).getactivity()) and
+                    isinstance(activity, bs.JoinActivity) and
                     session._next_game is Checkboom
                 ) or isinstance(activity, Checkboom)
             )
-            else old(b,*a,**k)
+            else old(b, *a, **k)
         )
