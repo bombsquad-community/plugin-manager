@@ -23,7 +23,7 @@ from bascenev1lib.actor.powerupbox import PowerupBox, PowerupBoxFactory
 __version__ = '1.0.0'
 
 plugman = dict(
-    plugin_name="movi",
+    plugin_name="checkboom",
     description=(
         "Simple turn-based game"
     ),
