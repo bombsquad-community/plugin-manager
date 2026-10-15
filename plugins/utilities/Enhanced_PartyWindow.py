@@ -1,9 +1,9 @@
-# COPYRIGHTED, and ee also i wasn't the only one working on this, so yeah we also got some ideas from fluffys party window, you can do changes here if you want.
+# EnhancedPartyWindow 
 """
-• Authors: Drap, Nizar
-• Discord accs: drap._ — prollynizar [Contact for any bugs ONLY]
-Have fun using our plugin!
+Copyright 2026 — by Drap & Nizar
+Bug? Help? → Discord: drap._ or prollynizar
 """
+
 # ba_meta require api 9
 from __future__ import annotations
 
@@ -28,12 +28,12 @@ from bauiv1lib.colorpicker import ColorPickerExact
 from bauiv1lib.confirm import ConfirmWindow
 from bauiv1lib.popup import PopupMenuWindow
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = ["Nizar", "Drap"]
 
 plugman = dict(
-    plugin_name="Enhanced_PartyWindow",  # optional, defaults to the file name
-    description="a fully enhanced version of the bs PartyWindow, includes many options and features!",
+    plugin_name="enhanced_party_window",  # fixed now
+    description="A test plugin for demonstration purposes blah blah.",
     external_url="https://discord.com/channels/1001896771347304639/1558597818359353515",
     authors=[
         {"name": __author__[0], "email": "", "discord": "prollynizar"},
