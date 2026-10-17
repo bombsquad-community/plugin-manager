@@ -1,5 +1,11 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+### 1.2.0 (17-10-2026)
+
+- Updated plugman for 1.8+ versions which now use docUI setting window
+- Older BombSquad versions (before 1.8) keep the classic settings window patch, so auto-updating doesn't break them
+- Added a github field to json files in plugins/ directory
+
 ### 1.1.13 (23-08-2026)
 
 - Changelog window hard-wraps its bullets across several source lines
