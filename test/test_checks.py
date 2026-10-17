@@ -25,6 +25,11 @@ import unittest
 # test/pip_reqs.txt does not declare directly.
 UNRESOLVED_COMMIT_ERRORS = (ValueError, git.exc.BadName, git.exc.BadObject)
 
+# A GitHub username: alphanumerics and hyphens, not starting or ending with
+# a hyphen, at most 39 characters. Kept in sync with the issue-assignment
+# workflow (.github/workflows/assign-plugin-owners.yml).
+GITHUB_USERNAME = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?")
+
 
 def is_unpublished_version(repository, version_metadata):
     """True if this version entry is being introduced by the PR under test.
@@ -233,15 +238,22 @@ class BaseCategoryMetadataTestCases:
                 self.assertEqual(sorted_versions, versions)
 
         def test_plugin_keys(self):
-            for plugin_metadata in self.content["plugins"].values():
+            for plugin_name, plugin_metadata in self.content["plugins"].items():
                 self.assertTrue(isinstance(plugin_metadata["description"], str))
                 self.assertTrue(isinstance(plugin_metadata["external_url"], str))
                 self.assertTrue(isinstance(plugin_metadata["authors"], list))
                 self.assertTrue(len(plugin_metadata["authors"]) > 0)
                 for author in plugin_metadata["authors"]:
-                    self.assertTrue(isinstance(author["name"], str))
-                    self.assertTrue(isinstance(author["email"], str))
-                    self.assertTrue(isinstance(author["discord"], str))
+                    for key in ("name", "email", "discord", "github"):
+                        self.assertIn(key, author, f"{plugin_name}: an author is missing "
+                                      f"{key!r} in plugman (use \"\" if you have none)")
+                        self.assertTrue(isinstance(author[key], str))
+                    github = author["github"]
+                    self.assertTrue(
+                        github == "" or GITHUB_USERNAME.fullmatch(github),
+                        f"{plugin_name}: invalid GitHub username {github!r} "
+                        "(leave out the @ and the URL)",
+                    )
                 self.assertTrue(isinstance(plugin_metadata["versions"], dict))
                 self.assertTrue(len(plugin_metadata["versions"]) > 0)
 

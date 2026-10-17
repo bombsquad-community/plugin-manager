@@ -88,6 +88,9 @@ There are three different ways the plugin manager can be installed:
 - You also need a `plugman` dict with the plugin metadata in the plugin (see the [example](https://github.com/bombsquad-community/plugin-manager?tab=readme-ov-file#example) below).
    - The name of the plugin must be in snake_case and matching the file name.
    - Must have the description, external_url, authors and version keys.
+   - Each author needs `name`, `email`, `discord` and `github` keys (empty strings are fine). `github` is your
+     GitHub username (no `@`, no URL). Bug reports filed for your plugin through the
+     [Plugin Bug Report](../../issues/new?template=plugin-bug-report.yml) form will then @mention you in the issue.
    - `plugin_name` is optional and defaults to the file name without `.py`. Spell it out only if you
      want it documented in the source; it still has to match the file name.
    - Values may be module-level constants defined *above* the dict, so a plugin that already keeps
@@ -112,8 +115,8 @@ plugman = dict(
     description="A test plugin for demonstration purposes blah blah.",
     external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     authors=[
-        {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_"},
-        {"name": __author__[1], "email": "", "discord": "brostos"}
+        {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_", "github": "Loup-Garou911XD"},
+        {"name": __author__[1], "email": "", "discord": "brostos", "github": ""}
     ],
     version=__version__,
 )
@@ -161,8 +164,8 @@ index ebb7dcc..da2b312 100644
      description="A test plugin for demonstration purposes blah blah.",
      external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
      authors=[
-         {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_"},
-         {"name": __author__[1], "email": "", "discord": "brostos"}
+         {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_", "github": "Loup-Garou911XD"},
+         {"name": __author__[1], "email": "", "discord": "brostos", "github": ""}
      ],
      version=__version__,
  )

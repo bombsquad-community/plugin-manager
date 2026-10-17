@@ -1,0 +1,120 @@
+name: Assign Plugin Owners
+
+# When a plugin bug report is opened, look the plugin up in the category
+# manifests (plugins/*.json) and assign and @mention the authors who list a
+# `github` username in their plugman `authors` entry.
+#
+# GitHub only lets an issue be assigned to people with write access (or
+# who have commented on it), and the assignees endpoint silently skips
+# everyone else; the @mention reaches every author regardless.
+#
+# The issue body and title are attacker-controlled. They reach the script
+# only through env vars, never through ${{ }} inside `run:`, and nothing
+# from the repository is checked out or executed: the manifests are read as
+# data through the API, from the default branch.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  assign:
+    if: contains(github.event.issue.labels.*.name, 'Plugin Bug')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign and mention plugin authors
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python3 - <<'EOF'
+          import json
+          import os
+          import re
+          import urllib.request
+
+          API = f"{os.environ['GITHUB_API_URL']}/repos/{os.environ['GITHUB_REPOSITORY']}"
+          NUMBER = os.environ["ISSUE_NUMBER"]
+          # Kept in sync with GITHUB_USERNAME in test/test_checks.py.
+          USERNAME = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?")
+          MAX_ASSIGNEES = 10
+
+
+          def api(path, data=None, raw=False):
+              request = urllib.request.Request(
+                  f"{API}/{path}",
+                  data=None if data is None else json.dumps(data).encode(),
+                  method="GET" if data is None else "POST",
+                  headers={
+                      "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                      "Accept": ("application/vnd.github.raw+json" if raw
+                                 else "application/vnd.github+json"),
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              with urllib.request.urlopen(request) as response:
+                  return json.loads(response.read())
+
+
+          def reported_plugin_name():
+              # Issue forms render each field as "### <label>" then its value.
+              match = re.search(r"^###\s*Plugin Name\s*\n+(.+)$",
+                                os.environ.get("ISSUE_BODY") or "", re.M)
+              if match is None:
+                  match = re.search(r"\[PLUGIN BUG\]:\s*(.+)",
+                                    os.environ.get("ISSUE_TITLE") or "")
+              if match is None:
+                  return None
+              return match.group(1).strip().strip("`").removesuffix(".py")
+
+
+          def squash(name):
+              # Reporters type the name by hand ("Color Scheme" for
+              # colorscheme, "auto-stunt" for auto_stunt), so compare
+              # ignoring case and separators.
+              return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+          def find_plugin(reported):
+              """The catalog's (name, authors) for a reported name, or None."""
+              wanted = squash(reported)
+              for entry in api("contents/plugins"):
+                  if entry["type"] == "file" and entry["name"].endswith(".json"):
+                      plugins = api(f"contents/plugins/{entry['name']}", raw=True)["plugins"]
+                      for name, info in plugins.items():
+                          if squash(name) == wanted:
+                              return name, info["authors"]
+              return None
+
+
+          reported = reported_plugin_name()
+          found = find_plugin(reported) if reported else None
+          if found is None:
+              print(f"No catalog plugin matches {reported!r}; nothing to do.")
+              raise SystemExit
+          name, authors = found
+
+          usernames = []
+          for author in authors:
+              username = author.get("github", "")
+              if USERNAME.fullmatch(username) and username not in usernames:
+                  usernames.append(username)
+          if not usernames:
+              print(f"No author of {name} lists a GitHub username; nothing to do.")
+              raise SystemExit
+
+          assigned = api(f"issues/{NUMBER}/assignees",
+                         {"assignees": usernames[:MAX_ASSIGNEES]})["assignees"]
+          print("Assigned:", ", ".join(a["login"] for a in assigned) or "nobody")
+
+          # `name` matched a catalog key, so it is safe to echo back.
+          mentions = " ".join(f"@{username}" for username in usernames)
+          api(f"issues/{NUMBER}/comments",
+              {"body": f"Pinging the author(s) of `{name}`: {mentions}"})
+          EOF
