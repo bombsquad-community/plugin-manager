@@ -5,6 +5,10 @@ import sys
 import re
 import datetime
 
+# A sibling module, found because Python puts this script's own directory on
+# sys.path. ci-apply.yml's trusted sparse checkout must include it too.
+from plugman_parsing import get_plugin_min_engine_build
+
 
 def get_comparable_version_tuple_from_string(version_string):
     return tuple(map(int, version_string.split(".")))
@@ -56,6 +60,19 @@ class PluginVersionMetadata:
 
         api_version = self.api_version_regexp.search(self._content).group()
         versions[self.version_name]["api_version"] = int(api_version)
+        return self
+
+    def set_min_engine_build(self):
+        if self._content is None:
+            with open(self.plugin_path, "rb") as fin:
+                self._content = fin.read()
+
+        versions = self.json["plugins"][self.plugin_name]["versions"]
+        if versions[self.version_name] is None:
+            versions[self.version_name] = {}
+
+        versions[self.version_name]["min_engine_build"] = get_plugin_min_engine_build(
+            self._content, self.plugin_path)
         return self
 
     def set_commit_sha(self, commit_sha):
@@ -161,6 +178,7 @@ class CategoryVersionMetadata:
             category_json = (
                 plugin.set_json(category_json)
                       .set_api_version()
+                      .set_min_engine_build()
                       .set_commit_sha(commit_sha)
                       .set_released_on(today)
                       .set_md5sum()

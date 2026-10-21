@@ -1,11 +1,15 @@
 import sys
 import json
 import ast
-import copy
 import os
 import hashlib
 import subprocess
 from auto_apply_version_metadata import get_comparable_version_tuple_from_string
+from plugman_parsing import (
+    collect_module_constants,
+    resolve_literal,
+    validate_min_engine_build,
+)
 
 DEBUG = True
 
@@ -135,88 +139,6 @@ def update_plugin_json(plugin_info, category, plugin_path):
         file.truncate()
 
 
-def resolve_literal(node, constants, where):
-    """ast.literal_eval, widened to module-level constants and indexing into them.
-
-    Plugins commonly keep a `__version__` / `__author__` dunder next to the code
-    that uses them and want the plugman dict to reference those rather than
-    repeat the values. Nothing here imports or executes the plugin, so only
-    names this module already resolved to a literal are available, and only
-    indexing (not attribute access or calls) is applied to them.
-    """
-    if isinstance(node, ast.Name):
-        if node.id not in constants:
-            raise ValueError(
-                f"{where}: {node.id} is not a module-level constant defined above "
-                "plugman. Only names assigned a literal earlier in the file can be "
-                "referenced, because the plugin is parsed, never imported."
-            )
-        # Copied so an entry like authors=__author__ cannot be mutated later
-        # through the constants table.
-        return copy.deepcopy(constants[node.id])
-
-    if isinstance(node, ast.Subscript):
-        container = resolve_literal(node.value, constants, where)
-        index = resolve_literal(node.slice, constants, where)
-        try:
-            return container[index]
-        except (TypeError, KeyError, IndexError) as err:
-            raise ValueError(
-                f"{where}: cannot index {container!r} with {index!r}: {err}"
-            ) from None
-
-    if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
-        items = [resolve_literal(item, constants, where) for item in node.elts]
-        if isinstance(node, ast.Tuple):
-            return tuple(items)
-        if isinstance(node, ast.Set):
-            return set(items)
-        return items
-
-    if isinstance(node, ast.Dict):
-        if any(key is None for key in node.keys):
-            raise ValueError(f"{where}: ** unpacking inside plugman is not supported.")
-        return {
-            resolve_literal(key, constants, where): resolve_literal(value, constants, where)
-            for key, value in zip(node.keys, node.values)
-        }
-
-    try:
-        return ast.literal_eval(node)
-    except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
-        raise ValueError(
-            f"{where}: unsupported expression `{ast.unparse(node)}`. plugman values must "
-            "be literals, or module-level constants (optionally indexed, e.g. "
-            "__author__[0]). Method calls such as __file__.split('/') are not evaluated."
-        ) from None
-
-
-def collect_module_constants(tree, stop_at):
-    """Module-level names bound to a literal, in the statements before `stop_at`.
-
-    Order matters: a name assigned *after* plugman would raise NameError when the
-    game imports the plugin, so it must not resolve here either.
-    """
-    constants = {}
-    for node in tree.body:
-        if node is stop_at:
-            break
-        if isinstance(node, ast.Assign):
-            targets = node.targets
-        elif isinstance(node, ast.AnnAssign) and node.value is not None:
-            targets = [node.target]
-        else:
-            continue
-        try:
-            value = ast.literal_eval(node.value)
-        except (ValueError, TypeError, SyntaxError, MemoryError, RecursionError):
-            continue
-        for target in targets:
-            if isinstance(target, ast.Name):
-                constants[target.id] = value
-    return constants
-
-
 def build_plugman_info(node, tree, plugin, file_name_no_extension):
     """Turn a `plugman = dict(...)` call node into the dict the manifest needs."""
     where = f"{plugin}: plugman"
@@ -251,6 +173,8 @@ def build_plugman_info(node, tree, plugin, file_name_no_extension):
             f"{where}: version must be a string in x.y.z form, got "
             f"{result['version']!r}. Quote it (version=\"1.0.0\")."
         )
+    if "min_engine_build" in result:
+        validate_min_engine_build(result["min_engine_build"], where)
     return result
 
 

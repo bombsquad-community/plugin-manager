@@ -2,6 +2,14 @@
 
 <!-- line length=80 columns -->
 
+### 1.2.2 (21-10-2026)
+
+- Plugins can set min_engine_build in their plugman dict; older game
+  builds stay on the newest version of the plugin they can run
+- Plugins with no version that runs on this game build are hidden, and
+  an installed version newer than the build supports is replaced with
+  one it does
+
 ### 1.2.1 (21-10-2026)
 
 - Fixed the settings window stretching across the screen on large

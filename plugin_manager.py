@@ -69,7 +69,7 @@ except (ImportError, AttributeError):
 # meant for engine bugs. On older builds it's just a named logger.
 logger = logging.getLogger("ba.user.pluginmanager")
 
-PLUGIN_MANAGER_VERSION = "1.2.1"
+PLUGIN_MANAGER_VERSION = "1.2.2"
 
 # Oldest BombSquad build (babase.app.env.engine_build_number) this release
 # runs on. CI copies it into this version's index.json entry, and plugin
@@ -167,6 +167,17 @@ def _remove_popup(popup):
         open_popups.remove(popup)
     except ValueError:
         pass
+
+
+def _runs_on_this_build(info):
+    """Whether this game can run the release an index/catalog entry describes.
+
+    Its API has to match, and its min_engine_build (missing means 0) can't
+    be above this build. Shared by the plugin manager's own updates and by
+    plugin installs and updates.
+    """
+    return (info["api_version"] == _app_api_version
+            and info.get("min_engine_build", 0) <= babase.app.env.engine_build_number)
 
 
 def _version_key(version):
@@ -1065,7 +1076,7 @@ class Plugin:
     def latest_compatible_version(self):
         if self._latest_compatible_version is None:
             for number, info in self.info["versions"].items():
-                if info["api_version"] == _app_api_version:
+                if _runs_on_this_build(info):
                     self._latest_compatible_version = PluginVersion(
                         self,
                         (number, info),
@@ -1074,7 +1085,8 @@ class Plugin:
                     break
         if self._latest_compatible_version is None:
             raise NoCompatibleVersion(
-                f"{self.name} has no version compatible with API {_app_api_version}."
+                f"{self.name} has no version that runs on this game "
+                f"(API {_app_api_version}, build {babase.app.env.engine_build_number})."
             )
         return self._latest_compatible_version
 
@@ -1283,12 +1295,9 @@ class PluginManager:
         index = await self.get_index()
         current = _version_key(PLUGIN_MANAGER_VERSION)
         for version, info in index["versions"].items():
-            if info["api_version"] != _app_api_version:
-                # No point checking a version of the API game doesn't support.
-                continue
-            if info.get("min_engine_build", 0) > babase.app.env.engine_build_number:
-                # Built for a newer game than this one; fall back to the
-                # newest version below it that this build can run.
+            if not _runs_on_this_build(info):
+                # Another API, or built for a newer game than this one; fall
+                # back to the newest version below it that this build can run.
                 continue
             target = _version_key(version)
             if current is None or target is None or target <= current:

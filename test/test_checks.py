@@ -6,12 +6,20 @@ import re
 import io
 import os
 import pathlib
+import sys
 
 from packaging.version import Version
 
 import unittest
 
-from test.auto_apply_version_metadata import get_min_engine_build
+# The metadata scripts are CI scripts, not package modules: they import their
+# siblings by bare name (plugman_parsing), so their directory must be on the path.
+TEST_DIR = pathlib.Path(__file__).resolve().parent
+if str(TEST_DIR) not in sys.path:
+    sys.path.insert(0, str(TEST_DIR))
+
+from auto_apply_version_metadata import get_min_engine_build  # noqa: E402
+from plugman_parsing import get_plugin_min_engine_build  # noqa: E402
 
 # Raised by Repo.commit() when a revision cannot be resolved. Both entries are
 # required because which one you get depends on how the sha is spelled: an
@@ -239,6 +247,19 @@ class BaseCategoryMetadataTestCases:
             self.current_path = pathlib.Path()
             self.repository = git.Repo()
 
+        def assert_min_engine_build_matches(self, content, plugin, version_name,
+                                            version_metadata):
+            # Missing means 0 on both sides, so entries stamped before CI knew
+            # about the field stay valid as long as plugman never set one.
+            expected = get_plugin_min_engine_build(content, plugin)
+            actual = version_metadata.get("min_engine_build", 0)
+            self.assertTrue(isinstance(actual, int))
+            self.assertEqual(
+                actual, expected,
+                f"{plugin} {version_name}: {self.category_metadata_file} has "
+                f"min_engine_build {actual} but plugman has {expected}",
+            )
+
         def test_keys(self):
             self.assertEqual(self.content["name"], self.name)
             self.assertTrue(isinstance(self.content["description"], str))
@@ -307,6 +328,8 @@ class BaseCategoryMetadataTestCases:
                         )
                     self.assertEqual(int(api_version.decode("utf-8")),
                                      version_metadata["api_version"])
+                    self.assert_min_engine_build_matches(
+                        content, plugin, version_name, version_metadata)
 
         def test_latest_version(self):
             for plugin_name, plugin_metadata in self.content["plugins"].items():
@@ -329,6 +352,8 @@ class BaseCategoryMetadataTestCases:
                 self.assertEqual(md5sum, latest_version_metadata["md5sum"])
                 self.assertEqual(int(api_version.decode("utf-8")),
                                  latest_version_metadata["api_version"])
+                self.assert_min_engine_build_matches(
+                    content, str(plugin), latest_version_name, latest_version_metadata)
 
 
 class TestUtilitiesCategoryMetadata(BaseCategoryMetadataTestCases.BaseTest):

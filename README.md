@@ -91,6 +91,11 @@ There are three different ways the plugin manager can be installed:
    - Each author needs `name`, `email`, `discord` and `github` keys (empty strings are fine). `github` is your
      GitHub username (no `@`, no URL). Bug reports filed for your plugin through the
      [Plugin Bug Report](../../issues/new?template=plugin-bug-report.yml) form will then @mention you in the issue.
+   - `min_engine_build` is optional: the oldest BombSquad build (`babase.app.env.engine_build_number`)
+     this version of your plugin runs on, e.g. `min_engine_build=23058` for 1.8.0. Players on older builds
+     keep the newest version they can run instead of being updated to one that breaks. Leave it out (it
+     defaults to 0) if your plugin still supports older builds, for example by checking the build number at
+     runtime. Needs plugin manager 1.2.2 or newer on the player's side; older ones ignore it.
    - `plugin_name` is optional and defaults to the file name without `.py`. Spell it out only if you
      want it documented in the source; it still has to match the file name.
    - Values may be module-level constants defined *above* the dict, so a plugin that already keeps

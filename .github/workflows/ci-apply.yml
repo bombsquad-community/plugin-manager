@@ -257,6 +257,7 @@ jobs:
           ref: main
           sparse-checkout: |
             test/auto_apply_version_metadata.py
+            test/plugman_parsing.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
           path: trusted

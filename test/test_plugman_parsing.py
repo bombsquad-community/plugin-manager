@@ -30,6 +30,7 @@ if str(TEST_DIR) not in sys.path:
     sys.path.insert(0, str(TEST_DIR))
 
 import auto_apply_plugin_metadata as apm  # noqa: E402  (needs the path above)
+import plugman_parsing as pp  # noqa: E402
 
 
 def plugman_node(source):
@@ -334,6 +335,61 @@ class TestExtractPlugman(unittest.TestCase):
         apm.extract_plugman([path])
         versions = self.manifest()["plugins"]["sample_plugin"]["versions"]
         self.assertEqual(list(versions), ["1.0.10", "1.0.9"])
+
+
+class TestMinEngineBuild(unittest.TestCase):
+    """plugman's optional min_engine_build, as validated and as stamped."""
+
+    @staticmethod
+    def source(value_line, prefix=""):
+        return (f'{prefix}plugman = dict(\n{COMMON_KEYS}    version="1.0.0",\n'
+                f'{value_line})\n').encode()
+
+    def test_missing_means_zero(self):
+        self.assertEqual(pp.get_plugin_min_engine_build(self.source(""), "p"), 0)
+
+    def test_no_plugman_block_means_zero(self):
+        self.assertEqual(pp.get_plugin_min_engine_build(b"x = 1\n", "p"), 0)
+
+    def test_literal_is_read(self):
+        self.assertEqual(pp.get_plugin_min_engine_build(
+            self.source("    min_engine_build=23058,\n"), "p"), 23058)
+
+    def test_constant_above_plugman_is_read(self):
+        self.assertEqual(pp.get_plugin_min_engine_build(
+            self.source("    min_engine_build=MIN_BUILD,\n", prefix="MIN_BUILD = 23068\n"),
+            "p"), 23068)
+
+    def test_mention_outside_plugman_is_ignored(self):
+        # The fast path sees the word; the AST read must still say 0.
+        src = b"# min_engine_build is not set here\n" + self.source("")
+        self.assertEqual(pp.get_plugin_min_engine_build(src, "p"), 0)
+
+    def test_non_integers_are_rejected(self):
+        for bad in ('"23058"', "True", "-1", "23058.0"):
+            with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "min_engine_build"):
+                pp.get_plugin_min_engine_build(
+                    self.source(f"    min_engine_build={bad},\n"), "p")
+
+    def test_build_plugman_info_validates_it(self):
+        # Caught when the PR is checked, not first when its version is stamped.
+        with self.assertRaisesRegex(ValueError, "min_engine_build"):
+            build(self.source('    min_engine_build="23058",\n').decode())
+        info = build(self.source("    min_engine_build=23058,\n").decode())
+        self.assertEqual(info["min_engine_build"], 23058)
+
+    def test_stamping_writes_it(self):
+        import auto_apply_version_metadata as avm
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "sample_plugin.py")
+            with open(path, "wb") as fout:
+                fout.write(b"# ba_meta require api 9\n"
+                           + self.source("    min_engine_build=23058,\n"))
+            category = {"plugins": {"sample_plugin": {"versions": {"1.0.0": None}}}}
+            entry = (avm.PluginVersionMetadata("sample_plugin", "1.0.0", path)
+                     .set_json(category).set_api_version().set_min_engine_build()
+                     .json["plugins"]["sample_plugin"]["versions"]["1.0.0"])
+        self.assertEqual(entry, {"api_version": 9, "min_engine_build": 23058})
 
 
 class TestVersionKey(unittest.TestCase):
