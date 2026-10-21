@@ -253,3 +253,29 @@ jobs:
       - name: Execute Tests
         run: |
           python -m unittest discover -v
+
+      # release.yml runs once this workflow succeeds (workflow_run), but that
+      # event only carries the PUSHED commit - not the [ci] commits this job
+      # added on top. Hand over the commit that was actually stamped and
+      # strictly tested, so that is exactly what gets released.
+      - name: Record the tested commit
+        run: |
+          mkdir -p "${RUNNER_TEMP}/tested"
+          git rev-parse HEAD > "${RUNNER_TEMP}/tested/sha.txt"
+
+      - name: Upload the tested commit for release.yml
+        uses: actions/upload-artifact@v7
+        with:
+          name: tested-commit
+          path: ${{ runner.temp }}/tested
+          retention-days: 5
+
+  # Forks can't run `build` (no App, and their main isn't authoritative), but
+  # contributors still get tests on their pushes: the same check their PR
+  # will get, compared against upstream's main. It is read-only and never
+  # pushes; see ci-check.yml.
+  fork-check:
+    if: github.repository != 'bombsquad-community/plugin-manager'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci-check.yml

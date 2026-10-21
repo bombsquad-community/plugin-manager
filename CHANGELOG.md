@@ -1,5 +1,28 @@
 ## Plugin Manager (dd-mm-yyyy)
 
+<!-- line length=80 columns -->
+
+### 1.2.1 (21-10-2026)
+
+- Fixed the settings window stretching across the screen on large
+  UI in BombSquad 1.8.4+
+- Fixed charstr() deprecation warnings in the console on
+  BombSquad 1.8+
+- Added min_engine_build to index.json, so future releases that
+  need a newer game aren't installed on older builds by auto-update
+- Auto-update always downloads a release from its own commit,
+  so it no longer fails while GitHub's cache of main is out of date
+- Auto-update never downgrades, so builds ahead of the
+  latest release are left alone
+- A broken settings window patch no longer stops the
+  plugin manager from loading or updating itself
+- Self-update now starts before any optional startup step,
+  and a failing step no longer hides or blocks the others
+- After 3 failed self-updates in a row, the plugin manager
+  tells you to reinstall it by hand
+- Added a `ba.user.pluginmanager` logger: updates and
+  failures show in the dev console, where its level can be changed
+
 ### 1.2.0 (17-10-2026)
 
 - Updated plugman for 1.8+ versions which now use docUI setting window

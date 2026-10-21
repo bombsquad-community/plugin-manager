@@ -10,6 +10,28 @@ def get_comparable_version_tuple_from_string(version_string):
     return tuple(map(int, version_string.split(".")))
 
 
+MIN_ENGINE_BUILD_LINE = re.compile(rb"^MIN_ENGINE_BUILD\s*=(.*)$", re.MULTILINE)
+MIN_ENGINE_BUILD_VALUE = re.compile(rb"\s*(\d+)\s*(?:#.*)?")
+
+
+def get_min_engine_build(plugin_manager_content):
+    """plugin_manager.py's MIN_ENGINE_BUILD, or 0 for releases predating it.
+
+    index.json entries treat a missing min_engine_build the same way, so
+    either side may lack it as long as the other agrees on 0. Anything but
+    a plain integer raises: guessing 0 would silently ship a release to
+    builds it doesn't support.
+    """
+    line = MIN_ENGINE_BUILD_LINE.search(plugin_manager_content)
+    if line is None:
+        return 0
+    value = MIN_ENGINE_BUILD_VALUE.fullmatch(line.group(1))
+    if value is None:
+        raise ValueError(
+            f"MIN_ENGINE_BUILD must be a plain integer, got {line.group(1).decode().strip()!r}")
+    return int(value.group(1))
+
+
 class PluginVersionMetadata:
     def __init__(self, plugin_name, version_name, plugin_path, from_json={}):
         self.plugin_name = plugin_name
@@ -171,6 +193,10 @@ class PluginManagerVersionMetadata:
         api_version = self.api_version_regexp.search(self._content).group()
         version["api_version"] = int(api_version)
 
+    def set_min_engine_build(self, version_name):
+        version = self.json["versions"][version_name]
+        version["min_engine_build"] = get_min_engine_build(self._content)
+
     def calculate_md5sum(self):
         md5sum = hashlib.md5(self._content).hexdigest()
         return md5sum
@@ -184,6 +210,7 @@ class PluginManagerVersionMetadata:
             self.json["versions"][latest_version_name] = {}
             version = self.json["versions"][latest_version_name]
             self.set_api_version(latest_version_name)
+            self.set_min_engine_build(latest_version_name)
             version["commit_sha"] = commit_sha[:8]
             version["released_on"] = today
             version["md5sum"] = self.calculate_md5sum()

@@ -1,25 +1,10 @@
 # ba_meta require api 9
-import babase
-import bauiv1 as bui
-from bauiv1lib import popup, confirm
-from dataclasses import replace
 
-# BombSquad 1.8.0 (build 23058) replaced the classic top level settings
-# window with a doc-ui page. Every API 9 client auto-updates to this file,
-# including ones on older builds, so both are supported in place:
-# settingsdocui is None on builds that still have the classic window.
-try:
-    import bauiv1lib.settings.allsettingsdocui as settingsdocui
-except ImportError:
-    settingsdocui = None
-    from bauiv1lib.settings.allsettings import AllSettingsWindow
-else:
-    import bauiv1lib.docui._layout as docui_layout
-    import bauiv1lib.docui._window as docui_window
-    import bacommon.docui.v2 as dui2
-    from bacommon.docui.routes import PressSound
-    from bacommon.langstr import LangStrSpecValue
-
+# Import order matters here. Whatever breaks at import time breaks self-update
+# with it, and a plugin manager that can't import can never fetch the release
+# that fixes it. So: the standard library first, then only the bombsquad
+# modules every API 9 build has, then everything build-specific guarded.
+import logging
 import urllib.error
 import urllib.request
 import http.client
@@ -37,19 +22,68 @@ import threading
 import contextlib
 import concurrent.futures
 
+from dataclasses import replace
 from typing import override
 from datetime import datetime
 
-# Used by the classic settings window patch (NewAllSettingsWindow).
-import logging
+# Only import bombsquad modules that every API 9 build has out here (the
+# four below do). Anything newer or build-specific goes inside the
+# try/except further down, so this file still imports on older builds.
+import babase
+import bauiv1 as bui
+from bauiv1lib import popup, confirm
 
-PLUGIN_MANAGER_VERSION = "1.2.0"
+# BombSquad 1.8.0 (build 23058) replaced the classic top level settings
+# window with a doc-ui page. Every API 9 client auto-updates to this file,
+# including ones on older builds, so both are supported in place. Exactly
+# one of settingsdocui and AllSettingsWindow is set on a supported build;
+# neither is if the engine moved things again.
+try:
+    import bauiv1lib.settings.allsettingsdocui as settingsdocui
+    import bauiv1lib.docui._layout as docui_layout
+    import bauiv1lib.docui._window as docui_window
+    import bacommon.docui.v2 as dui2
+    from bacommon.docui.routes import PressSound
+    from bacommon.langstr import LangStrSpecValue
+
+    # Private engine names, read here so a rename lands in the except
+    # below rather than failing the whole import. The row width is the
+    # settings page's four stock buttons plus ours, with a button gap of
+    # breathing room each side (see _settings_width_fraction).
+    _StockSettingsController = settingsdocui.AllSettingsController
+    _SETTINGS_ROW_WIDTH = (5 * settingsdocui._BW * settingsdocui._BUTTON_SCALE
+                           + 6 * settingsdocui._BUTTON_SPACING)
+    AllSettingsWindow = None
+except (ImportError, AttributeError):
+    settingsdocui = None
+    try:
+        from bauiv1lib.settings.allsettings import AllSettingsWindow
+    except ImportError:
+        AllSettingsWindow = None
+
+
+# Plugin Manager's logger. It lives under ba.user, the engine's logger for
+# problems with the player's own mods: entries show in the dev console's
+# Logging tab (where its level can be changed), but on builds from 1.8.x
+# on they never set off the engine's automatic error reports, which are
+# meant for engine bugs. On older builds it's just a named logger.
+logger = logging.getLogger("ba.user.pluginmanager")
+
+PLUGIN_MANAGER_VERSION = "1.2.1"
+
+# Oldest BombSquad build (babase.app.env.engine_build_number) this release
+# runs on. CI copies it into this version's index.json entry, and plugin
+# managers on older builds won't auto-update to it. Raise it only when a
+# release drops support for older builds; supporting them in place (see
+# the settingsdocui fallback) is preferred.
+MIN_ENGINE_BUILD = 0
+
 REPOSITORY_URL = "https://github.com/bombsquad-community/plugin-manager"
+
 # Current tag can be changed to "staging" or any other branch in
 # plugin manager repo for testing purpose.
 CURRENT_TAG = "main"
 
-_env = babase.env()
 _app_api_version = babase.app.env.api_version
 
 PLUGIN_ISSUE_TEMPLATE = "plugin-bug-report.yml"
@@ -57,11 +91,37 @@ GITHUB_PLUGIN_ISSUE_META = "{repository_url}/issues/new?template={issue_template
 INDEX_META = "{repository_url}/{content_type}/{tag}/index.json"
 CHANGELOG_META = "{repository_url}/{content_type}/{tag}/CHANGELOG.md"
 HEADERS = {
-    "User-Agent": _env["legacy_user_agent_string"],
+    "User-Agent": babase.user_agent_string(),
 }
-PLUGIN_DIRECTORY = _env["python_directory_user"]
+PLUGIN_DIRECTORY = babase.app.env.python_directory_user
 
 NETWORK_REQUEST_TIMEOUT = 10  # seconds
+
+# Consecutive failed self-updates (kept in the config) before the player
+# is told to reinstall by hand.
+UPDATE_FAILURES_CONFIG_KEY = "Failed Update Attempts"
+UPDATE_FAILURES_BEFORE_NOTICE = 3
+
+
+def _set_update_failures(count):
+    config = babase.app.config["Community Plugin Manager"]
+    if config[UPDATE_FAILURES_CONFIG_KEY] != count:
+        config[UPDATE_FAILURES_CONFIG_KEY] = count
+        babase.app.config.commit()
+
+
+def _record_update_failure(to_version):
+    failures = babase.app.config["Community Plugin Manager"][UPDATE_FAILURES_CONFIG_KEY] + 1
+    _set_update_failures(failures)
+    # Once, rather than every launch from here on; a successful update
+    # (or catching up some other way) resets the count.
+    if failures == UPDATE_FAILURES_BEFORE_NOTICE:
+        bui.screenmessage(
+            f"Plugin Manager couldn't update itself to v{to_version} "
+            f"({failures} tries). Reinstall it from {REPOSITORY_URL}/releases/latest",
+            color=(1, 0.5, 0),
+        )
+
 
 loop = babase.app.asyncio_loop
 pool = babase.app.threadpool
@@ -107,6 +167,29 @@ def _remove_popup(popup):
         open_popups.remove(popup)
     except ValueError:
         pass
+
+
+def _version_key(version):
+    """A version string as a comparable tuple, or None if it isn't x.y.z.
+
+    CI parses versions the same way (test/auto_apply_version_metadata.py's
+    get_comparable_version_tuple_from_string); this file can't import it.
+    """
+    try:
+        return tuple(int(part) for part in version.split("."))
+    except (AttributeError, ValueError):
+        return None
+
+
+def _charstr(char):
+    # remove this after 1.8 is widely adopted
+    """A SpecialChar as text, without charstr()'s deprecation warning.
+
+    From 1.8.0 a SpecialChar's value is the character itself and charstr()
+    is deprecated; older API 9 builds have integer values and need it.
+    """
+    value = char.value
+    return value if isinstance(value, str) else babase.charstr(char)
 
 
 def _uiscale(): return bui.app.ui_v1.uiscale
@@ -426,6 +509,7 @@ class StartupTasks:
         plugin_manager_config = babase.app.config.setdefault("Community Plugin Manager", {})
         plugin_manager_config.setdefault("Custom Sources", [])
         installed_plugins = plugin_manager_config.setdefault("Installed Plugins", {})
+        plugin_manager_config.setdefault(UPDATE_FAILURES_CONFIG_KEY, 0)
         for plugin_name in tuple(installed_plugins.keys()):
             plugin = PluginLocal(plugin_name)
             if not plugin.is_installed:
@@ -452,18 +536,24 @@ class StartupTasks:
     async def update_plugin_manager(self):
         if not babase.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugin Manager"]:
             return
+        # A failure to reach the index (offline, say) raises out of here
+        # and isn't counted; only failures once an update is known to
+        # exist are.
         update_details = await self.plugin_manager.get_update_details()
-        if update_details:
-            to_version, commit_sha = update_details
-            bui.screenmessage(f"Plugin Manager is being updated to v{to_version}")
-            try:
-                await self.plugin_manager.update(to_version, commit_sha)
-            except MD5CheckSumFailed:
-                bui.getsound('error').play()
-            else:
-                bui.screenmessage("Update successful. Restart game to reload changes.",
-                                  color=(0, 1, 0))
-                bui.getsound('shieldUp').play()
+        if not update_details:
+            # Caught up some other way (a manual reinstall, say).
+            _set_update_failures(0)
+            return
+        to_version, commit_sha = update_details
+        bui.screenmessage(f"Plugin Manager is being updated to v{to_version}")
+        try:
+            await self.plugin_manager.update(to_version, commit_sha)
+        except (MD5CheckSumFailed, urllib.error.URLError):
+            bui.getsound('error').play()
+        else:
+            bui.screenmessage("Update successful. Restart game to reload changes.",
+                              color=(0, 1, 0))
+            bui.getsound('shieldUp').play()
 
     async def update_plugins(self):
         if not babase.app.config["Community Plugin Manager"]["Settings"]["Auto Update Plugins"]:
@@ -532,15 +622,26 @@ class StartupTasks:
             babase.app.config.commit()
 
     async def execute(self):
-        self.setup_config()
         try:
-            await asyncio.gather(
-                self.update_plugin_manager(),
-                self.update_plugins(),
-                self.notify_new_plugins(),
-            )
-        except urllib.error.URLError:
-            pass
+            self.setup_config()
+        except Exception:
+            # Self-update below still has a go; it reads only a couple of
+            # config keys.
+            logger.exception("Failed to set up the plugin manager config.")
+        tasks = {
+            "self-update": self.update_plugin_manager(),
+            "plugin updates": self.update_plugins(),
+            "new plugin notice": self.notify_new_plugins(),
+        }
+        # return_exceptions keeps one task's failure from hiding the
+        # others'; each is reported on its own.
+        results = await asyncio.gather(*tasks.values(), return_exceptions=True)
+        for name, result in zip(tasks, results):
+            if isinstance(result, urllib.error.URLError):
+                # Usually just offline; nothing to tell the player about.
+                logger.info("Skipped %s, network unavailable: %s", name, result)
+            elif isinstance(result, Exception):
+                logger.error("Startup %s failed.", name, exc_info=result)
 
 
 class Category:
@@ -890,6 +991,8 @@ class PluginVersion:
         try:
             local_plugin = await self._download()
         except MD5CheckSumFailed:
+            logger.warning("%s %s failed its MD5 check during installation.",
+                           self.plugin.name, self.number)
             if not suppress_screenmessage:
                 bui.screenmessage(
                     f"{self.plugin.name} failed MD5 checksum during installation", color=(1, 0, 0))
@@ -1003,6 +1106,8 @@ class Plugin:
 
     async def update(self):
         if await self.latest_compatible_version.install(suppress_screenmessage=True):
+            logger.info("Updated plugin %s to %s.", self.name,
+                        self.latest_compatible_version.number)
             bui.screenmessage(f"{self.name} updated to {self.latest_compatible_version.number}",
                               color=(0, 1, 0))
             bui.getsound('shieldUp').play()
@@ -1169,38 +1274,58 @@ class PluginManager:
             _CACHE.pop(key, None)
 
     async def get_update_details(self):
+        """The (version, commit_sha) to update to, or None to stay put.
+
+        That's the newest release this game build can run, and only if it
+        is newer than the running one: a development or staging build
+        ahead of the index is never "updated" backwards.
+        """
         index = await self.get_index()
+        current = _version_key(PLUGIN_MANAGER_VERSION)
         for version, info in index["versions"].items():
             if info["api_version"] != _app_api_version:
                 # No point checking a version of the API game doesn't support.
                 continue
-            if version == PLUGIN_MANAGER_VERSION:
-                # We're already on the latest version for the current API.
-                return
-            else:
-                if next(iter(index["versions"])) == version:
-                    # Version on the top is the latest, so no need to specify
-                    # the commit SHA explicitly to GitHub to access the latest file.
-                    commit_sha = None
-                else:
-                    commit_sha = info["commit_sha"]
-                return version, commit_sha
+            if info.get("min_engine_build", 0) > babase.app.env.engine_build_number:
+                # Built for a newer game than this one; fall back to the
+                # newest version below it that this build can run.
+                continue
+            target = _version_key(version)
+            if current is None or target is None or target <= current:
+                return None
+            # Always fetch at the release's own commit, never the branch:
+            # raw.githubusercontent.com caches a branch for a few minutes,
+            # per file, so right after a push index.json and
+            # plugin_manager.py can disagree and fail the MD5 check.
+            return version, info["commit_sha"]
+        return None
 
-    async def update(self, to_version=None, commit_sha=None):
+    async def update(self, to_version, commit_sha):
+        """Replace this file with `to_version`, fetched at `commit_sha`.
+
+        Both auto-update and the settings window's update button come
+        through here, so consecutive failures are counted here too (see
+        _record_update_failure()).
+        """
         index = await self.get_index()
-        if to_version is None:
-            to_version, commit_sha = await self.get_update_details()
         to_version_info = index["versions"][to_version]
-        tag = commit_sha or CURRENT_TAG
         download_url = index["plugin_manager_url"].format(
             content_type="raw",
-            tag=tag,
+            tag=commit_sha,
         )
-        content = await async_send_network_request(download_url)
-        if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
-            raise MD5CheckSumFailed("MD5 checksum failed during plugin manager update.")
+        try:
+            content = await async_send_network_request(download_url)
+            if hashlib.md5(content).hexdigest() != to_version_info["md5sum"]:
+                raise MD5CheckSumFailed("MD5 checksum failed during plugin manager update.")
+        except (MD5CheckSumFailed, urllib.error.URLError):
+            logger.warning("Self-update to v%s failed.", to_version, exc_info=True)
+            _record_update_failure(to_version)
+            raise
         with open(self.module_path, "wb") as fout:
             fout.write(content)
+        logger.info("Updated itself from v%s to v%s; takes effect on restart.",
+                    PLUGIN_MANAGER_VERSION, to_version)
+        _set_update_failures(0)
         return to_version_info
 
     async def soft_refresh(self):
@@ -1246,7 +1371,7 @@ class ChangelogWindow(popup.PopupWindow):
             position=(width * 0.1, height * 0.8),
             size=(60, 60),
             scale=0.8,
-            label=babase.charstr(babase.SpecialChar.BACK),
+            label=_charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
             on_activate_call=self._back,
             enable_sound=False
@@ -1379,7 +1504,7 @@ class AuthorsWindow(popup.PopupWindow):
             position=(width * 0.1, height * 0.87),
             size=(60, 60),
             scale=0.8,
-            label=babase.charstr(babase.SpecialChar.BACK),
+            label=_charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
             on_activate_call=self._back,
             enable_sound=False
@@ -1514,7 +1639,7 @@ class PluginWindow(popup.PopupWindow):
                 parent=self._root_widget,
                 position=(-12.5*s + (4 if _uiscale() is babase.UIScale.SMALL else -5),
                           height/2 - 20*s),
-                label=bui.charstr(bui.SpecialChar.LEFT_ARROW),
+                label=_charstr(bui.SpecialChar.LEFT_ARROW),
                 size=(25, 40),
                 color=(1, 0.5, 0.5),
                 scale=s,
@@ -1529,7 +1654,7 @@ class PluginWindow(popup.PopupWindow):
                 parent=self._root_widget,
                 position=(width - 12.5*s - (8 if _uiscale()
                           is babase.UIScale.SMALL else 0), height/2 - 20*s),
-                label=bui.charstr(bui.SpecialChar.RIGHT_ARROW),
+                label=_charstr(bui.SpecialChar.RIGHT_ARROW),
                 size=(25, 40),
                 color=(1, 0.5, 0.5),
                 scale=s,
@@ -2123,7 +2248,7 @@ class MoreWindow:
             parent=self._root_widget,
             position=(px, py),
             size=(step, step),
-            label=babase.charstr(babase.SpecialChar.BACK),
+            label=_charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
             on_activate_call=self._back,
             enable_sound=False
@@ -2505,7 +2630,7 @@ class PluginManagerWindow(bui.MainWindow):
                 position=(back_pos_x, back_pos_y),
                 size=(60, 60),
                 scale=0.8,
-                label=babase.charstr(babase.SpecialChar.BACK),
+                label=_charstr(babase.SpecialChar.BACK),
                 button_type='backSmall',
                 on_activate_call=self.main_window_back
             )
@@ -3331,17 +3456,9 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
 
 _PLUGMAN_ACTION = "plugin_manager"
 
-# Set while a settings window is being built; see _layout_geometry.
-_sizing_settings_window = False
-
 
 if settingsdocui is not None:
-    # Width the settings row needs for its four stock buttons plus ours, with
-    # a button gap of breathing room each side (see _layout_geometry below).
-    _SETTINGS_ROW_WIDTH = (5 * settingsdocui._BW * settingsdocui._BUTTON_SCALE
-                           + 6 * settingsdocui._BUTTON_SPACING)
-
-    class PlugmanSettingsController(settingsdocui.AllSettingsController):
+    class PlugmanSettingsController(_StockSettingsController):
         """The settings page with a Plugin Manager button appended."""
 
         @override
@@ -3393,7 +3510,7 @@ if settingsdocui is not None:
                 lambda: PluginManagerWindow(origin_widget=action.widget)
             )
 
-else:
+elif AllSettingsWindow is not None:
     class NewAllSettingsWindow(AllSettingsWindow):
         @override
         def main_window_should_preserve_selection(self) -> bool:
@@ -3460,7 +3577,7 @@ else:
                     edit=self._back_button,
                     button_type='backSmall',
                     size=(60, 60),
-                    label=bui.charstr(bui.SpecialChar.BACK),
+                    label=_charstr(bui.SpecialChar.BACK),
                 )
 
             v = height - 265
@@ -3637,7 +3754,7 @@ else:
                 assert bui.app.classic is not None
                 bui.app.ui_v1.window_states[type(self)] = {'sel_name': sel_name}
             except Exception:
-                logging.exception('Error saving state for %s.', self)
+                logger.exception('Error saving state for %s.', self)
 
         def _restore_state(self) -> None:
             try:
@@ -3663,7 +3780,7 @@ else:
                 if sel is not None:
                     bui.containerwidget(edit=self._root_widget, selected_child=sel)
             except Exception:
-                logging.exception('Error restoring state for %s.', self)
+                logger.exception('Error restoring state for %s.', self)
 
 
 def _settings_window_layout(cls):
@@ -3672,40 +3789,55 @@ def _settings_window_layout(cls):
     return dui2.WindowLayout.WIDER
 
 
+def _settings_width_fraction(stock):
+    """WIDER_SCREEN_WIDTH_FRACTION giving the settings window just the width
+    its button row needs (never more than the stock fraction)."""
+    uiscale = bui.app.ui_v1.uiscale
+    if uiscale is babase.UIScale.SMALL:
+        # WIDER ignores the fraction there; windows fill the screen.
+        return stock
+    layout = dui2.WindowLayout.WIDER
+    # Inverse of layout_geometry()'s WIDER width (fraction * screen width /
+    # root scale) and of window framing's page width (width - side insets
+    # + scroll overhang).
+    needed = (_SETTINGS_ROW_WIDTH + docui_layout.window_insets(layout)[0]
+              - docui_layout.window_scroll_overhang(layout))
+    screen_width = bui.get_virtual_screen_size()[0]
+    return min(stock, needed * docui_layout.root_scale(uiscale) / screen_width)
+
+
 def _wrap_window_init(func):
-    # layout_geometry() can't tell which window it's sizing, so flag the
-    # settings window here. Windows are also rebuilt straight through
-    # __init__ (back navigation, resizes), so create_window won't do.
+    # WIDER windows take 85% of the screen width, far more than the
+    # settings row needs at large scale. layout_geometry() reads that
+    # fraction from its module on every call, so lower it while the
+    # settings window is built. That's done here rather than in
+    # create_window because back navigation and resizes rebuild windows
+    # straight through __init__.
     def wrapper(self, controller, *args, **kwargs):
-        global _sizing_settings_window
-        _sizing_settings_window = isinstance(controller, PlugmanSettingsController)
+        if not isinstance(controller, PlugmanSettingsController):
+            return func(self, controller, *args, **kwargs)
+        stock = docui_layout.WIDER_SCREEN_WIDTH_FRACTION
+        try:
+            fraction = _settings_width_fraction(stock)
+        except Exception:
+            # The engine reshuffled its layout helpers; a too-wide
+            # window beats no settings window.
+            logger.exception("Couldn't size the settings window; using the stock width.")
+            fraction = stock
+        docui_layout.WIDER_SCREEN_WIDTH_FRACTION = fraction
         try:
             return func(self, controller, *args, **kwargs)
         finally:
-            _sizing_settings_window = False
-    return wrapper
-
-
-def _wrap_layout_geometry(func):
-    # WIDER takes 85% of the screen width, far more than the settings row
-    # needs at large scale, so cap it for the settings window only.
-    def wrapper(layout, uiscale, screen_size):
-        width, height, scale = func(layout, uiscale, screen_size)
-        if (_sizing_settings_window
-                and layout is dui2.WindowLayout.WIDER
-                and uiscale is not babase.UIScale.SMALL):
-            needed = (_SETTINGS_ROW_WIDTH
-                      + docui_layout.window_insets(layout)[0]
-                      - docui_layout.window_scroll_overhang(layout))
-            # The 0.59 floor mirrors the engine's, keeping the rounder
-            # backing art.
-            width = max(height / 0.59, min(width, needed))
-        return width, height, scale
+            docui_layout.WIDER_SCREEN_WIDTH_FRACTION = stock
     return wrapper
 
 
 def _install_settings_patches():
     if settingsdocui is None:
+        if AllSettingsWindow is None:
+            logger.warning("No settings window this build supports;"
+                           " the Plugin Manager button won't appear in settings.")
+            return
         from bauiv1lib.settings import allsettings
         allsettings.AllSettingsWindow = NewAllSettingsWindow
         return
@@ -3714,16 +3846,26 @@ def _install_settings_patches():
     settingsdocui.AllSettingsController = PlugmanSettingsController
     settingsdocui.SettingsRoute.get_window_layout = classmethod(_settings_window_layout)
     docui_window.DocUIWindow.__init__ = _wrap_window_init(docui_window.DocUIWindow.__init__)
-    docui_layout.layout_geometry = _wrap_layout_geometry(docui_layout.layout_geometry)
 
 
 # ba_meta export babase.Plugin
 class EntryPoint(babase.Plugin):
     def on_app_running(self) -> None:
         """Called when the app is being launched."""
-        _install_settings_patches()
+        # Self-update first, so nothing optional below can keep the
+        # plugin manager from fetching a release that fixes it. The DNS
+        # workaround is plain Python and has to be in place before the
+        # first request.
         DNSBlockWorkaround.apply()
-        babase.app.add_shutdown_task(_shutdown_network_pool())
-        startup_tasks = StartupTasks()
+        loop.create_task(StartupTasks().execute())
 
-        loop.create_task(startup_tasks.execute())
+        # Then the optional pieces, each on its own so one breaking (an
+        # engine change, say) costs only that piece.
+        try:
+            babase.app.add_shutdown_task(_shutdown_network_pool())
+        except Exception:
+            logger.exception("Failed to register the network pool shutdown.")
+        try:
+            _install_settings_patches()
+        except Exception:
+            logger.exception("Failed to patch the settings window.")
