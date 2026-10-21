@@ -27,14 +27,20 @@ name: PR Check
 # is the `metadata-fixpoint` commit status that ci-apply.yml sets; make that
 # the required check on main.
 
+# workflow_call: ci.yml runs this same check for pushes to a fork's main,
+# so a contributor can see what their PR will get before opening it. There
+# "published" means upstream's main, just as it does for a PR. That run is
+# named after ci.yml ("CI"), not "PR Check", so ci-apply.yml never picks it
+# up, and it uploads no patch.
 on:
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: pr-check-${{ github.event.pull_request.number }}
+  group: pr-check-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,16 +51,30 @@ jobs:
       # `git fetch` below needs them on a private repo, and the workflow-level
       # `permissions: contents: read` caps this token to read-only in every
       # case - fork PRs get a read-only token from GitHub regardless.
-      - name: Checkout PR head
+      - name: Checkout PR head (or the pushed commit, when called)
         uses: actions/checkout@v7
         with:
-          ref: refs/pull/${{ github.event.pull_request.number }}/head
+          ref: ${{ github.event_name == 'pull_request' && format('refs/pull/{0}/head', github.event.pull_request.number) || github.sha }}
           fetch-depth: 0
 
-      - name: Fetch PR base commit (for diffing)
+      # BASE_SHA is the tree whose manifests count as already published: the
+      # PR's base, or upstream's main for a fork push (see workflow_call).
+      - name: Resolve base commit (for diffing)
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "$PR_BASE_SHA"
+            BASE_SHA="$PR_BASE_SHA"
+          else
+            git fetch --no-tags --depth=1 \
+              https://github.com/bombsquad-community/plugin-manager.git main
+            BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          fi
+          echo "Base: $BASE_SHA"
+          echo "BASE_SHA=$BASE_SHA" >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -72,8 +92,6 @@ jobs:
       # $GITHUB_OUTPUT (where a file named after the heredoc delimiter, or one
       # containing a newline, could inject extra output keys).
       - name: Compute changed files
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
           git diff --name-only "$BASE_SHA" HEAD > "${RUNNER_TEMP}/changed_files.txt"
@@ -94,11 +112,10 @@ jobs:
       # so every re-run of this workflow (including the one ci-apply.yml's push
       # triggers) would fail with "Version cant be lower or equal".
       - name: Apply Plugin Metadata (writes null version placeholders)
-        env:
-          PLUGMAN_BASE_REF: ${{ github.event.pull_request.base.sha }}
         run: |
           set -euo pipefail
-          python test/auto_apply_plugin_metadata.py "$(cat "${RUNNER_TEMP}/changed_files.txt")"
+          PLUGMAN_BASE_REF="$BASE_SHA" \
+            python test/auto_apply_plugin_metadata.py "$(cat "${RUNNER_TEMP}/changed_files.txt")"
 
       # IMPORTANT: capture the patch BEFORE the version-metadata preview step
       # below. commit_sha values computed there are fictitious (no real
@@ -121,6 +138,7 @@ jobs:
           python -m unittest discover -v
 
       - name: Upload patch for ci-apply.yml
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
           name: pr-fixups

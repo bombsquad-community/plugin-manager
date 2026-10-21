@@ -11,6 +11,8 @@ from packaging.version import Version
 
 import unittest
 
+from test.auto_apply_version_metadata import get_min_engine_build
+
 # Raised by Repo.commit() when a revision cannot be resolved. Both entries are
 # required because which one you get depends on how the sha is spelled: an
 # unresolvable abbreviated name - the 7-8 char form this repo actually stores,
@@ -62,6 +64,19 @@ class TestPluginManagerMetadata(unittest.TestCase):
         self.changelog = self.current_path / "CHANGELOG.md"
         self.repository = git.Repo()
 
+    def assert_min_engine_build_matches(self, content, version_name, version_metadata):
+        # A missing field means 0 to clients, and a release predating the
+        # constant means 0 too, so entries stamped before CI knew about the
+        # field stay valid as long as they never needed one.
+        expected = get_min_engine_build(content)
+        actual = version_metadata.get("min_engine_build", 0)
+        self.assertTrue(isinstance(actual, int))
+        self.assertEqual(
+            actual, expected,
+            f"{version_name}: index.json min_engine_build is {actual} but "
+            f"plugin_manager.py has MIN_ENGINE_BUILD = {expected}",
+        )
+
     def test_keys(self):
         self.assertTrue(isinstance(self.content["plugin_manager_url"], str))
         self.assertTrue(isinstance(self.content["versions"], dict))
@@ -107,6 +122,7 @@ class TestPluginManagerMetadata(unittest.TestCase):
                 )
             self.assertEqual(int(api_version.decode("utf-8")), version_metadata["api_version"])
             self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{version_name}"')
+            self.assert_min_engine_build_matches(content, version_name, version_metadata)
 
     def test_latest_version(self):
         versions = tuple(self.content["versions"].items())
@@ -127,6 +143,8 @@ class TestPluginManagerMetadata(unittest.TestCase):
             )
         self.assertEqual(int(api_version.decode("utf-8")), latest_version_metadata["api_version"])
         self.assertEqual(plugin_manager_version.decode("utf-8"), f'"{latest_version_name}"')
+        self.assert_min_engine_build_matches(
+            content, latest_version_name, latest_version_metadata)
 
     def test_changelog_entries(self):
         versions = tuple(self.content["versions"].keys())
