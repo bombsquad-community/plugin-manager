@@ -37,7 +37,8 @@ plugman = dict(
     external_url="https://discord.com/channels/1001896771347304639/1558597818359353515",
     authors=[
         {"name": __author__[0], "email": "", "discord": "prollynizar", "github": ""},
-        {"name": __author__[1], "email": "mrunittest@gmail.com", "discord": "drap._", "github": "DrapBS"}
+        {"name": __author__[1], "email": "mrunittest@gmail.com",
+            "discord": "drap._", "github": "DrapBS"}
     ],
     version=__version__,
 )
