@@ -23,7 +23,7 @@ from bauiv1lib.gather import publictab
 
 #-------- PLUGIN MANAGER DEFINATION -----------------
 
-__version__ = "1.0"
+__version__ = "1.0.0"
 __author__ = ["shailesh"]
 
 plugman = dict(
