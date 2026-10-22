@@ -25,7 +25,7 @@ __version__ = '1.0.0'
 plugman = dict(
     plugin_name="checkboom",
     description=(
-        "A turn-based game like chess, for two players.",
+        "A turn-based game like chess, for two players."
         "Take turns moving your pieces, and kill the King to win."
     ),
     external_url="https://BroBordd.github.io/byBordd",
