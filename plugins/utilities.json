@@ -2716,15 +2716,18 @@
         {
           "name": "Nizar",
           "email": "",
-          "discord": "prollynizar"
+          "discord": "prollynizar",
+          "github": ""
         },
         {
           "name": "Drap",
           "email": "mrunittest@gmail.com",
-          "discord": "drap._"
+          "discord": "drap._",
+          "github": "DrapBS"
         }
       ],
       "versions": {
+        "1.0.4": null,
         "1.0.3": {
           "api_version": 9,
           "min_engine_build": 0,
