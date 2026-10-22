@@ -42,6 +42,57 @@ plugman = dict(
 
 DEBUG = False
 
+def getuitexture(tex):
+    for i in (
+        'builtin',
+        'common',
+        'classic',
+        'classiccatalog',
+        'classiccharacter',
+        'uiv1',
+        'classicui',
+        'docuiv2test',
+    ):
+        if r := getattr(
+            getattr(
+                getattr(bui, f'_{i}assets', None),
+                'textures',
+                None,
+            ),
+            tex,
+            None,
+        ):
+            return r
+
+def gettexture(tex):
+    for i in (
+        'common',
+        'classicmap',
+        'classic',
+        'scenev1',
+    ):
+        if r := getattr(
+            getattr(getattr(bs, f'_{i}assets', None), 'textures', None),
+            tex,
+            None,
+        ):
+            return r.get()
+
+def getmesh(name):
+    for i in (
+        'common',
+        'classicmap',
+        'classic',
+        'scenev1',
+    ):
+        if r := getattr(
+            getattr(getattr(bs, f'_{i}assets', None), 'meshes', None),
+            name,
+            None,
+        ):
+            return r.get()
+    return bs.getmesh(name)
+
 class Strings:
     CHECKBOOM = 'Checkboom'
     DESCRIPTION = f'A turn-based game.\nVersion {__version__}'
@@ -104,9 +155,9 @@ class Strings:
     HEALTH = 'HP'
     ATTACK = 'Attack'
     SPECIAL_POWER = 'Special'
-    TEAM_TURN = "${TEAM}'s turn"
-    TEAM_WINS = '${TEAM} wins!'
-    CONTINUE = 'Press ${B}PUNCH to continue'
+    TEAM_TURN = "{team}'s turn"
+    TEAM_WINS = '{team} wins!'
+    CONTINUE = 'Press {b}PUNCH to continue'
     PROCEEDING = 'Proceeding...'
 
 class Checkboard(bs.Map):
@@ -123,7 +174,19 @@ class Checkboard(bs.Map):
     })
 
     @classmethod
-    def get_preview_texture_name(cls):
+    def get_preview_texture_spec(cls):
+        spec = getuitexture('white')
+        return type(
+            'spec',
+            (object,),
+            {
+                '_name':spec._name.replace('white','checkboom'),
+                '_apvernum':spec._apvernum
+            }
+        )
+
+    @classmethod
+    def get_preview_texture(cls):
         return 'checkboom'
 
     def __init__(self):
@@ -370,8 +433,8 @@ class Floater(bs.Actor):
         self.dying = False
         self.li = 0.9 + 0.2 * gain
         self.node = bs.newnode('prop', delegate=self, attrs={
-            'body': 'box', 'position': pos, 'mesh': bs.getmesh('box'),
-            'color_texture': bs.gettexture('black'), 'body_scale': s, 'mesh_scale': s,
+            'body': 'box', 'position': pos, 'mesh': getmesh('box'),
+            'color_texture': gettexture('black'), 'body_scale': s, 'mesh_scale': s,
             'gravity_scale': 0.0, 'damping': 0.004, 'max_speed': 1.2,
             'reflection': 'soft', 'reflection_scale': rs,
             'shadow_size': 0.0, 'materials': [game.fmat]
@@ -561,14 +624,14 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         self.rel = []
         self.rel_op = 0.0
         for i, (tex, c, t) in enumerate((
-            ('buttonPunch', (1, 1, 0.4), Strings.CONTROL),
-            ('buttonBomb', (1, 0, 0), Strings.RELEASE),
+            ('button_punch', (1, 1, 0.4), Strings.CONTROL),
+            ('button_bomb', (1, 0, 0), Strings.RELEASE),
         )):
             y = 40 - i * 50
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture(tex),
+                    'texture': gettexture(tex),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, y),
@@ -972,7 +1035,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         bs.setmusic(None)
         wp = self.memory['players'].get(wt)
         wname = wp.team.name if wp and wp.team else self.teams[wt].name if len(self.teams) > wt else f'Team {wt + 1}'
-        wtext = bui.Lstr(value=Strings.TEAM_WINS, subs=[('${TEAM}', wname)])
+        wtext = Strings.TEAM_WINS.format(team=wname.evaluate())
         total = 5.9
 
         def cel():
@@ -998,7 +1061,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         t = self.memory['timers']
         # overlay
-        self.memory['win_overlay'] = ov = bs.newnode('image', attrs={'texture': bs.gettexture('white'), 'absolute_scale': True, 'attach': 'center', 'scale': (4000, 3000), 'color': (0, 0, 0), 'opacity': 0.0})
+        self.memory['win_overlay'] = ov = bs.newnode('image', attrs={'texture': gettexture('white'), 'absolute_scale': True, 'attach': 'center', 'scale': (4000, 3000), 'color': (0, 0, 0), 'opacity': 0.0})
         self.memory['win_2d'].append(ov)
         t['wtt'] = bs.Timer(1.0, stt)
 
@@ -1056,7 +1119,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         d0 = 0.6
         for t in (0, 1):
             nm = self.teams[t].name if len(self.teams) > t else f'Team {t + 1}'
-            tx(bui.Lstr(value='${T}', subs=[('${T}', nm)]), xs[t], 42, tuple(self.get_team_color(t)) + (1.0,), 1.1, d0, 260)
+            tx(nm.evaluate(), xs[t], 42, tuple(self.get_team_color(t)) + (1.0,), 1.1, d0, 260)
         bs.timer(d0, bs.getsound('swip').play)
         for i, (lab, vals, cmpv, better) in enumerate(rows):
             d, y, last = d0 + 0.4 * (i + 1) + (0.5 if i == len(rows) - 1 else 0.0), 12 - 25 * i, i == len(rows) - 1
@@ -1076,7 +1139,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             if not s or not s.game_over:
                 return
             n = bs.newnode('text', attrs={
-                'text': bui.Lstr(value=Strings.CONTINUE, subs=[('${B}', bui.charstr(bui.SpecialChar.LEFT_BUTTON))]),
+                'text': Strings.CONTINUE.format(b=bui.charstr(bui.SpecialChar.LEFT_BUTTON)),
                 'scale': 1.0, 'v_attach': 'bottom', 'h_attach': 'center', 'h_align': 'center', 'v_align': 'center',
                 'position': (0, 50), 'color': (1, 1, 1), 'opacity': 0.0
             })
@@ -1187,12 +1250,12 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
 
         if team_id not in self.memory['players'] and DEBUG:
             master_bot = Spaz(
-                character='Spaz',
+                character='Bones',
                 color=(1, 1, 1),
                 highlight=col,
                 start_invincible=False
             )
-            master_bot.node.name = 'Master'
+            master_bot.node.name = 'Boner'
             master_bot.node.name_color = col
             master_bot.is_master = True
             master_bot.is_dead = False
@@ -1796,7 +1859,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('nub'),
+                    'texture': gettexture('nub'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, 40),
@@ -1808,7 +1871,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('nub'),
+                    'texture': gettexture('nub'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, 40),
@@ -1833,7 +1896,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('buttonPickUp'),
+                    'texture': gettexture('button_pick_up'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, -10),
@@ -1858,7 +1921,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('nub'),
+                    'texture': gettexture('nub'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, 65),
@@ -1870,7 +1933,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('nub'),
+                    'texture': gettexture('nub'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, 65),
@@ -1895,7 +1958,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('buttonPickUp'),
+                    'texture': gettexture('button_pick_up'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, 15),
@@ -1920,7 +1983,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
             self.legend.append(bs.newnode(
                 'image',
                 attrs={
-                    'texture': bs.gettexture('buttonBomb'),
+                    'texture': gettexture('button_bomb'),
                     'absolute_scale': True,
                     'attach': 'centerLeft',
                     'position': (30, -35),
@@ -1994,7 +2057,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         else:
             team_name = f'Team {team_id + 1}'
 
-        self.turn_msg = bui.Lstr(value=Strings.TEAM_TURN, subs=[('${TEAM}', team_name)])
+        self.turn_msg = Strings.TEAM_TURN.format(team=team_name.evaluate())
         self.alert(self.turn_msg, (1, 1, 1))
         self.memory['timers']['turn_clock'] = None
         if self.turn_time:
@@ -2011,8 +2074,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         if self.game_over or not self.turn_active or self.pending_action is not None or self.current_turn_team_id is None: return
         left = max(0, int(self.turn_end_t - bs.time() + 0.999))
         tid = self.current_turn_team_id
-        try: txt = self.turn_msg.evaluate()
-        except Exception: txt = str(self.turn_msg)
+        txt = self.turn_msg
         self.alert(f'{txt}  {left}', readable(self.get_team_color(tid)))
         if bs.time() >= self.turn_end_t:
             self.memory['timers']['turn_clock'] = None
@@ -2185,41 +2247,36 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         if not spaz or not spaz.node:
             return
 
-        is_master = getattr(spaz, 'is_master', False) or any(
-            p.actor is spaz for p in self.memory['players'].values()
-        ) or any(m is spaz for m in self.memory['placeholder_masters'].values())
+        is_master = spaz.is_master
+        team_id = spaz.team_id
+        depiction = None
 
         if is_master:
-            char_name = spaz.node.name if (spaz.node and spaz.node.name) else 'Master'
-            char_type = getattr(spaz, 'character', 'Spaz')
-            name_color = spaz.node.name_color if (spaz.node and hasattr(spaz.node, 'name_color') and spaz.node.name_color) else (1.0, 1.0, 1.0)
+            char_name = spaz.node.name or 'Boner'
+            player = self.memory['players'].get(team_id)
+            depiction = player.get_icon_depiction() if player else None
+            char_type = player.character if player else 'Bones'
+            name_color = spaz.node.name_color
         else:
-            char_name = spaz.character if hasattr(spaz, 'character') else 'Spaz'
-            char_type = char_name
-            team_id = getattr(spaz, 'team_id', 0)
-            name_color = (1.0, 1.0, 1.0)
+            char_name = char_type = spaz.character
             if player := self.memory['players'].get(team_id):
-                if player.actor and player.actor.node and hasattr(player.actor.node, 'name_color') and player.actor.node.name_color:
-                    name_color = player.actor.node.name_color
+                name_color = player.actor.node.name_color
             elif m := self.memory['placeholder_masters'].get(team_id):
-                if m.node and hasattr(m.node, 'name_color') and m.node.name_color:
-                    name_color = m.node.name_color
-            elif team_id in self.memory['swap']:
+                name_color = m.node.name_color
+            else:
                 name_color = self.memory['swap'][team_id][1]
 
-        hp = max(0, getattr(spaz, 'hitpoints', 1000))
+        hp = max(0, spaz.hitpoints)
         atk = self.get_spaz_damage(spaz)
         special = self.get_spaz_special(spaz)
 
-        team_id = getattr(spaz, 'team_id', 0)
-        base_color = self.get_team_color(team_id)
-        safe_color = tuple(spaz.node.color) if spaz.node else (1.0, 1.0, 1.0)
-        safe_highlight = tuple(spaz.node.highlight) if spaz.node else tuple(base_color)
+        safe_color = tuple(spaz.node.color)
+        safe_highlight = tuple(spaz.node.highlight)
 
         bg = bs.newnode(
             'image',
             attrs={
-                'texture': bs.gettexture('white'),
+                'texture': gettexture('white'),
                 'absolute_scale': True,
                 'attach': 'bottomCenter',
                 'position': (0, 75),
@@ -2230,30 +2287,10 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         )
         bs.animate(bg, 'opacity', {0.0: 0.0, 0.2: 0.8})
 
-        icon_tex = icon_mask_tex = None
-        if is_master:
-            plr = getattr(spaz, 'source_player', None) or self.memory['players'].get(team_id)
-            if plr:
-                try:
-                    info = plr.get_icon()
-                    icon_tex = info['texture']
-                    icon_mask_tex = info['tint_texture']
-                    char_type = None
-                except Exception:
-                    icon_tex = icon_mask_tex = None
-        if icon_tex is None:
-            try:
-                appearance = bs.app.classic.spaz_appearances.get(char_type) or bs.app.classic.spaz_appearances['Spaz']
-                icon_tex = bs.gettexture(appearance.icon_texture)
-                icon_mask_tex = bs.gettexture(appearance.icon_mask_texture)
-            except Exception:
-                icon_tex = bs.gettexture('spazIcon')
-                icon_mask_tex = bs.gettexture('spazIconColorMask')
-
         border = bs.newnode(
             'image',
             attrs={
-                'texture': bs.gettexture('characterIconMask'),
+                'texture': gettexture('character_icon_mask'),
                 'absolute_scale': True,
                 'attach': 'bottomCenter',
                 'position': (-215, 85),
@@ -2264,21 +2301,36 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         )
         bs.animate(border, 'opacity', {0.0: 0.0, 0.2: 1.0})
 
-        char_pic = bs.newnode(
-            'image',
-            attrs={
-                'texture': icon_tex,
-                'tint_texture': icon_mask_tex,
-                'tint_color': safe_color,
-                'tint2_color': safe_highlight,
-                'mask_texture': bs.gettexture('characterIconMask'),
-                'absolute_scale': True,
-                'attach': 'bottomCenter',
-                'position': (-215, 85),
-                'scale': (64, 64),
-                'opacity': 0.0,
-            }
-        )
+        if depiction is not None:
+            # Cloud look: draw the depiction (it carries its own colors)
+            char_pic = bs.newnode(
+                'depictiondisplay',
+                attrs={
+                    'depiction': depiction,
+                    'attach': 'bottomCenter',
+                    'position': (-215, 85),
+                    'scale': (64, 64),
+                    'opacity': 0.0,
+                }
+            )
+        else:
+            spaz_appearances = bs.app.classic.spaz_appearances
+            appearance = spaz_appearances.get(char_type) or spaz_appearances['Spaz']
+            char_pic = bs.newnode(
+                'image',
+                attrs={
+                    'texture': appearance.icon_texture.get(),
+                    'tint_texture': appearance.icon_mask_texture.get(),
+                    'tint_color': safe_color,
+                    'tint2_color': safe_highlight,
+                    'mask_texture': gettexture('character_icon_mask'),
+                    'absolute_scale': True,
+                    'attach': 'bottomCenter',
+                    'position': (-215, 85),
+                    'scale': (64, 64),
+                    'opacity': 0.0,
+                }
+            )
         bs.animate(char_pic, 'opacity', {0.0: 0.0, 0.2: 1.0})
 
         t_name = bs.newnode(
@@ -2300,7 +2352,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         hp_icon = bs.newnode(
             'image',
             attrs={
-                'texture': bs.gettexture('powerupHealth'),
+                'texture': gettexture('powerup_health'),
                 'absolute_scale': True,
                 'attach': 'bottomCenter',
                 'position': (-80, 90),
@@ -2318,7 +2370,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         bar_red = bs.newnode(
             'image',
             attrs={
-                'texture': bs.gettexture('white'),
+                'texture': gettexture('white'),
                 'absolute_scale': True,
                 'attach': 'bottomCenter',
                 'position': (bx, by),
@@ -2336,7 +2388,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         bar_green = bs.newnode(
             'image',
             attrs={
-                'texture': bs.gettexture('white'),
+                'texture': gettexture('white'),
                 'absolute_scale': True,
                 'attach': 'bottomCenter',
                 'position': (gx, by),
@@ -2367,7 +2419,7 @@ class Checkboom(bs.TeamGameActivity[bs.Player,bs.Team]):
         spec_icon = bs.newnode(
             'image',
             attrs={
-                'texture': bs.gettexture('buttonBomb'),
+                'texture': gettexture('button_bomb'),
                 'absolute_scale': True,
                 'attach': 'bottomCenter',
                 'position': (85, 55),
@@ -4061,17 +4113,17 @@ class byBordd(bs.Plugin):
                 getattr(self.session, '_next_game', None) is Checkboom and cap_players(self.session)
             jti._cb = True
             bs.JoinActivity.on_transition_in = jti
-        old_gt = bui.gettexture
+        old_gt = bui.texture_from_ref
         def new_gt(tex):
-            if tex == 'checkboom':
+            if 'checkboom' in tex:
                 return 'checkboom'
             return old_gt(tex)
-        bui.gettexture = new_gt
+        bui.texture_from_ref = new_gt
         def wid(_):
             def new(*a,**k):
                 if k.get('texture',None) == 'checkboom':
-                    k['texture'] = old_gt('reflectionSharper_-z')
-                    k['color'] = (0,2,2)
+                    k['texture'] = getuitexture('light').get()
+                    k['color'] = (0,0.2,0.45)
                     wid = _(*a,**k)
                     bui.textwidget(
                         parent=k['parent'],
@@ -4086,7 +4138,7 @@ class byBordd(bs.Plugin):
                         v_align='center',
                         text=Strings.CHECKBOOM,
                         flatness=-2,
-                        color=(1.4,1.4,1.4),
+                        color=(1.4,2,2),
                         draw_controller=k.get('draw_controller',wid)
                     )
                     return wid
