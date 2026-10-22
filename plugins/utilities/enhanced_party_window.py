@@ -28,7 +28,7 @@ from bauiv1lib.colorpicker import ColorPickerExact
 from bauiv1lib.confirm import ConfirmWindow
 from bauiv1lib.popup import PopupMenuWindow
 
-__version__ = "1.0.3"
+__version__ = "1.0.4"
 __author__ = ["Nizar", "Drap"]
 
 plugman = dict(
@@ -36,8 +36,8 @@ plugman = dict(
     description="A test plugin for demonstration purposes blah blah.",
     external_url="https://discord.com/channels/1001896771347304639/1558597818359353515",
     authors=[
-        {"name": __author__[0], "email": "", "discord": "prollynizar"},
-        {"name": __author__[1], "email": "mrunittest@gmail.com", "discord": "drap._"}
+        {"name": __author__[0], "email": "", "discord": "prollynizar", "github": ""},
+        {"name": __author__[1], "email": "mrunittest@gmail.com", "discord": "drap._", "github": "DrapBS"}
     ],
     version=__version__,
 )
