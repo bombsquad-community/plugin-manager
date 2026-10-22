@@ -69,7 +69,7 @@ except (ImportError, AttributeError):
 # meant for engine bugs. On older builds it's just a named logger.
 logger = logging.getLogger("ba.user.pluginmanager")
 
-PLUGIN_MANAGER_VERSION = "1.2.2"
+PLUGIN_MANAGER_VERSION = "1.2.3"
 
 # Oldest BombSquad build (babase.app.env.engine_build_number) this release
 # runs on. CI copies it into this version's index.json entry, and plugin
@@ -190,6 +190,50 @@ def _version_key(version):
         return tuple(int(part) for part in version.split("."))
     except (AttributeError, ValueError):
         return None
+
+
+# Sort keys offered by the plugin list's filter popup, mapped to
+# (label in the popup, short label on the main window's filter button).
+SORT_OPTIONS = {
+    "name_asc": ("Name (A - Z)", "A - Z"),
+    "name_desc": ("Name (Z - A)", "Z - A"),
+    "recently_added": ("Recently Added", "Newest"),
+    "recently_updated": ("Recently Updated", "Updated"),
+}
+
+
+def _released_on_date(info):
+    """A catalog version entry's release date, or datetime.min if unreadable.
+
+    Custom sources aren't stamped by our CI, so don't trust their dates.
+    """
+    try:
+        return datetime.strptime(info["released_on"], "%d-%m-%Y")
+    except (KeyError, TypeError, ValueError):
+        return datetime.min
+
+
+def _first_released_date(plugin):
+    dates = [_released_on_date(info) for info in plugin.info["versions"].values()]
+    return min((date for date in dates if date != datetime.min), default=datetime.min)
+
+
+def _last_updated_date(plugin):
+    # The newest release this game can run, so a plugin doesn't look freshly
+    # updated just because it got a release for another API.
+    versions = list(plugin.info["versions"].values())
+    runnable = [info for info in versions if _runs_on_this_build(info)]
+    return max(map(_released_on_date, runnable or versions), default=datetime.min)
+
+
+def _sort_plugins(plugins, sort):
+    plugins = sorted(plugins, key=lambda plugin: plugin.name, reverse=(sort == "name_desc"))
+    # sort() is stable, so plugins released on the same day stay A - Z.
+    if sort == "recently_added":
+        plugins.sort(key=_first_released_date, reverse=True)
+    elif sort == "recently_updated":
+        plugins.sort(key=_last_updated_date, reverse=True)
+    return plugins
 
 
 def _charstr(char):
@@ -1040,11 +1084,33 @@ class Plugin:
 
     @property
     def view_url(self):
-        if self.latest_compatible_version == self.latest_version:
+        if not self.is_compatible or self.latest_compatible_version == self.latest_version:
             tag = CURRENT_TAG
         else:
             tag = self.latest_compatible_version.commit_sha
         return self.url.format(content_type="blob", tag=tag)
+
+    @property
+    def is_compatible(self):
+        try:
+            self.latest_compatible_version
+        except NoCompatibleVersion:
+            return False
+        return True
+
+    @property
+    def incompatibility_reason(self):
+        """Why no version of this plugin runs here, in a few words; None if one does."""
+        if self.is_compatible:
+            return None
+        min_builds = [
+            info.get("min_engine_build", 0)
+            for info in self.info["versions"].values()
+            if info["api_version"] == _app_api_version
+        ]
+        if min_builds:
+            return f"needs build {min(min_builds)}+"
+        return f"API {self.latest_version.api_version}"
 
     @property
     def is_installed(self):
@@ -1755,9 +1821,22 @@ class PluginWindow(popup.PopupWindow):
             if has_update:
                 button3_label = "Update"
                 button3_action = self.update
-        else:
+        elif self.plugin.is_compatible:
             button1_label = "Install"
             button1_action = self.install
+        else:
+            to_draw_button1 = False
+            bui.textwidget(
+                parent=self._root_widget,
+                position=(width * 0.49, pos + button_size[1] / 2),
+                size=(0, 0),
+                h_align='center',
+                v_align='center',
+                text=f"Not compatible with this game ({self.plugin.incompatibility_reason})",
+                scale=text_scale * 0.7,
+                color=(1, 0.4, 0.4),
+                maxwidth=width * 0.7
+            )
 
         # button1
         if to_draw_button1:
@@ -2178,7 +2257,11 @@ class MoreWindow:
             maxwidth=mw,
             max_height=step,
             size=(step, step),
-            text=f"Version: {plugin.latest_compatible_version.number}"
+            text=(
+                f"Version: {plugin.latest_compatible_version.number}"
+                if plugin.is_compatible else
+                f"Version: {plugin.latest_version.number} ({plugin.incompatibility_reason})"
+            )
         )
         # source url
         py += step+margin
@@ -2535,45 +2618,170 @@ class PluginCustomSourcesWindow(popup.PopupWindow):
         bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
-class PluginCategoryWindow(popup.PopupMenuWindow):
-    def __init__(self, choices, current_choice, origin_widget, asyncio_callback):
-        choices = (*choices, "Installed", "Custom Sources")
+class PluginFilterWindow(popup.PopupWindow):
+    """Pick the plugin list's category, sort order and incompatible-plugin visibility.
+
+    Every change is applied to the list right away through `asyncio_callback`,
+    called as `(category, sort, show_incompatible)`, so the popup can stay open
+    while the user tries combinations.
+    """
+
+    def __init__(self, categories, category, sort, show_incompatible, origin_widget,
+                 asyncio_callback):
+        self._categories = (*categories, "Installed")
+        self._category = category
+        self._sort = sort
+        self._show_incompatible = show_incompatible
         self._asyncio_callback = asyncio_callback
         self.scale_origin = origin_widget.get_screen_space_center()
-        super().__init__(
-            position=self.scale_origin,
-            scale=(2.3 if _uiscale() is babase.UIScale.SMALL else
-                   1.65 if _uiscale() is babase.UIScale.MEDIUM else 1.23),
-            choices=choices,
-            current_choice=current_choice,
-            delegate=self
+
+        width, height = 420, 330
+        column_width, column_height = 175, 140
+        left_x, right_x = 25, 220
+        column_y = 115
+        b_textcolor = (0.8, 0.8, 0.85)
+
+        self._root_widget = bui.containerwidget(
+            size=(width, height),
+            on_outside_click_call=self._ok,
+            on_cancel_call=self._ok,
+            transition='in_scale',
+            scale=_by_scale(2.1, 1.5, 1.0),
+            scale_origin_stack_offset=self.scale_origin
         )
-        self._root_widget = self.root_widget
         _add_popup(self)
-        self._update_custom_sources_widget()
 
-    def _update_custom_sources_widget(self):
         bui.textwidget(
-            edit=self._columnwidget.get_children()[-1],
-            color=(0.5, 0.5, 0.5),
-            on_activate_call=self.show_sources_window
+            parent=self._root_widget,
+            position=(0, height - 40),
+            size=(width, 25),
+            text="Filter & Sort",
+            color=bui.app.ui_v1.title_color,
+            scale=0.8,
+            h_align="center",
+            v_align="center",
+            maxwidth=270,
+        )
+        for x, header in ((left_x, "Category"), (right_x, "Sort By")):
+            bui.textwidget(
+                parent=self._root_widget,
+                position=(x + 5, column_y + column_height + 15),
+                size=(column_width, 25),
+                text=header,
+                color=bui.app.ui_v1.title_color,
+                scale=0.6,
+                h_align="left",
+                v_align="center",
+            )
+
+        self._category_rows, category_scroll = self._draw_choice_column(
+            (left_x, column_y), (column_width, column_height),
+            {name: name for name in self._categories}, self._select_category,
+        )
+        self._sort_rows, sort_scroll = self._draw_choice_column(
+            (right_x, column_y), (column_width, column_height),
+            {key: labels[0] for key, labels in SORT_OPTIONS.items()}, self._select_sort,
+        )
+        self._update_row_colors()
+
+        incompatible_checkbox = bui.checkboxwidget(
+            parent=self._root_widget,
+            position=(left_x + 5, 68),
+            size=(width - 2 * left_x, 30),
+            text="Show incompatible plugins",
+            value=self._show_incompatible,
+            on_value_change_call=self._toggle_incompatible,
+            maxwidth=width - 2 * left_x - 40,
+            textcolor=(0.9, 0.9, 0.9),
+            scale=0.8
         )
 
-    def popup_menu_selected_choice(self, window, choice):
+        sources_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(left_x, 20),
+            size=(column_width, 35),
+            label="Custom Sources",
+            on_activate_call=self.show_sources_window,
+            button_type="square",
+            textcolor=b_textcolor,
+            text_scale=0.6
+        )
+        done_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=(right_x, 20),
+            size=(column_width, 35),
+            label="Done",
+            on_activate_call=self._ok,
+            button_type="square",
+            color=(0.2, 0.6, 0.3),
+            textcolor=b_textcolor,
+            text_scale=0.6
+        )
 
-        loop.create_task(self._asyncio_callback(choice))
+        bui.widget(category_scroll, right_widget=sort_scroll, down_widget=incompatible_checkbox)
+        bui.widget(sort_scroll, left_widget=category_scroll, down_widget=incompatible_checkbox)
+        bui.widget(incompatible_checkbox, up_widget=category_scroll, down_widget=sources_button)
+        bui.widget(sources_button, up_widget=incompatible_checkbox, right_widget=done_button)
+        bui.widget(done_button, up_widget=incompatible_checkbox, left_widget=sources_button)
+        bui.containerwidget(edit=self._root_widget, selected_child=category_scroll)
 
-    def popup_menu_closing(self, window):
-        pass
+    def _draw_choice_column(self, position, size, choices, on_choose):
+        """A scrollable column of selectable rows, one per choice; returns (rows, scroll)."""
+        scroll = bui.scrollwidget(parent=self._root_widget, size=size, position=position)
+        column = bui.columnwidget(parent=scroll, border=1, margin=0)
+        rows = {}
+        for key, label in choices.items():
+            rows[key] = bui.textwidget(
+                parent=column,
+                size=(size[0] - 10, 28),
+                selectable=True,
+                always_highlight=True,
+                click_activate=True,
+                text=label,
+                h_align='left',
+                v_align='center',
+                maxwidth=size[0] - 20,
+                on_activate_call=babase.CallPartial(on_choose, key)
+            )
+        return rows, scroll
+
+    def _update_row_colors(self):
+        for rows, current in ((self._category_rows, self._category),
+                              (self._sort_rows, self._sort)):
+            for key, row in rows.items():
+                bui.textwidget(
+                    edit=row,
+                    color=(0.5, 1, 0.5) if key == current else (0.75, 0.75, 0.75)
+                )
+
+    def _apply(self):
+        self._update_row_colors()
+        loop.create_task(
+            self._asyncio_callback(self._category, self._sort, self._show_incompatible)
+        )
+
+    def _select_category(self, category):
+        self._category = category
+        bui.getsound('deek').play()
+        self._apply()
+
+    def _select_sort(self, sort):
+        self._sort = sort
+        bui.getsound('deek').play()
+        self._apply()
+
+    def _toggle_incompatible(self, value):
+        self._show_incompatible = value
+        self._apply()
 
     def show_sources_window(self):
         self._ok()
-        PluginCustomSourcesWindow(origin_widget=self.root_widget)
+        PluginCustomSourcesWindow(origin_widget=self._root_widget)
 
     def _ok(self) -> None:
         bui.getsound('swish').play()
         _remove_popup(self)
-        bui.containerwidget(edit=self.root_widget, transition='out_scale')
+        bui.containerwidget(edit=self._root_widget, transition='out_scale')
 
 
 class PluginManagerWindow(bui.MainWindow):
@@ -2587,11 +2795,11 @@ class PluginManagerWindow(bui.MainWindow):
         origin_widget: bui.Widget | None = None
     ):
         self.plugin_manager = PluginManager()
-        self.category_selection_button = None
+        self.filter_button = None
         self.selected_category = 'All'
+        self.selected_sort = 'name_asc'
+        self.show_incompatible = False
         self.plugins_in_current_view = {}
-        self.selected_alphabet_order = 'a_z'
-        self.alphabet_order_selection_button = None
         global open_popups
         open_popups = []
 
@@ -2732,7 +2940,7 @@ class PluginManagerWindow(bui.MainWindow):
     async def draw_index(self):
         self.draw_search_bar()
         self.draw_plugins_scroll_bar()
-        self.draw_category_selection_button(post_label="All")
+        self.draw_filter_button("All")
         self.draw_refresh_icon()
         self.draw_settings_icon()
         with self.exception_handler():
@@ -2774,73 +2982,39 @@ class PluginManagerWindow(bui.MainWindow):
             down_widget=sw
         )
 
-    def draw_category_selection_button(self, post_label):
-        category_pos_x = (440 if _uiscale() is babase.UIScale.SMALL else
-                          340 if _uiscale() is babase.UIScale.MEDIUM else 370)
-        category_pos_y = self._height - (141 if _uiscale() is babase.UIScale.SMALL else
-                                         110 if _uiscale() is babase.UIScale.MEDIUM else 110)
-        b_size = (140, 30)
-        b_textcolor = (0.8, 0.8, 0.85)
+    def draw_filter_button(self, category):
+        """One button that sums up the current view and opens PluginFilterWindow."""
+        pos_x = (393 if _uiscale() is babase.UIScale.SMALL else
+                 293 if _uiscale() is babase.UIScale.MEDIUM else 323)
+        pos_y = self._height - (141 if _uiscale() is babase.UIScale.SMALL else
+                                110 if _uiscale() is babase.UIScale.MEDIUM else 110)
+        label = f"{category} | {SORT_OPTIONS[self.selected_sort][1]}"
+        if self.show_incompatible:
+            label += " | +Incompatible"
 
-        if self.alphabet_order_selection_button is None:
-            self.alphabet_order_selection_button = bui.buttonwidget(
+        if self.filter_button is None:
+            self.filter_button = b = bui.buttonwidget(
                 parent=self._root_widget,
-                size=(40, 30),
-                position=(category_pos_x - 47, category_pos_y),
-                label='Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z',
-                on_activate_call=lambda: loop.create_task(self._on_order_button_press()),
+                position=(pos_x, pos_y),
+                size=(187, 30),
+                label=label,
                 button_type="square",
-                textcolor=b_textcolor,
+                textcolor=(0.8, 0.8, 0.85),
                 text_scale=0.6,
-                enable_sound=False,
                 left_widget=self._filter_widget,
                 down_widget=self._scrollwidget,
                 up_widget=self._back_button
             )
-        else:
-            b = self.alphabet_order_selection_button
             bui.buttonwidget(
                 edit=b,
-                label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
-            ) if b.exists() else None
-
-        label = f"Category: {post_label}"
-
-        if self.category_selection_button is None:
-            self.category_selection_button = b = bui.buttonwidget(
-                parent=self._root_widget,
-                position=(category_pos_x, category_pos_y),
-                size=b_size,
-                label=label,
-                button_type="square",
-                textcolor=b_textcolor,
-                text_scale=0.6,
-                up_widget=self._back_button
-            )
-            bui.buttonwidget(
-                edit=b,
-                down_widget=self._scrollwidget,
-                on_activate_call=lambda: self.show_categories_window(source=b)
+                on_activate_call=lambda: self.show_filter_window(source=b)
             )
         else:
-            b = self.category_selection_button
+            b = self.filter_button
             bui.buttonwidget(
                 edit=b,
                 label=label
             ) if b.exists() else None
-
-    async def _on_order_button_press(self) -> None:
-        bui.getsound('deek').play()
-        self.selected_alphabet_order = ('a_z' if self.selected_alphabet_order == 'z_a' else 'z_a')
-        bui.buttonwidget(edit=self.alphabet_order_selection_button,
-                         label=('Z - A' if self.selected_alphabet_order == 'z_a' else 'A - Z')
-                         )
-        filter_text = bui.textwidget(parent=self._root_widget, query=self._filter_widget)
-        if self.plugin_manager.categories != {}:
-            if self.plugin_manager.categories['All'] is not None:
-                await self.draw_plugin_names(
-                    self.selected_category, search_term=filter_text, refresh=True, order=self.selected_alphabet_order
-                )
 
     def draw_search_bar(self):
         search_bar_pos_x = (85 if _uiscale() is babase.UIScale.SMALL else
@@ -2901,8 +3075,7 @@ class PluginManagerWindow(bui.MainWindow):
             if self.selected_category is None:
                 continue
             try:
-                await self.draw_plugin_names(
-                    self.selected_category, search_term=filter_text.lower(), order=self.selected_alphabet_order)
+                await self.draw_plugin_names(self.selected_category, search_term=filter_text.lower())
             except CategoryDoesNotExist:
                 pass
 
@@ -2983,7 +3156,7 @@ class PluginManagerWindow(bui.MainWindow):
         return False
 
     # XXX: Not sure if this is the best way to handle search filters.
-    async def draw_plugin_names(self, category, search_term="", refresh=False, order='a_z'):
+    async def draw_plugin_names(self, category, search_term="", refresh=False):
         # Re-draw plugin list UI if either search term or category was switched.
         to_draw_plugin_names = (search_term, category) != (self._last_filter_text,
                                                            self.selected_category)
@@ -3013,9 +3186,8 @@ class PluginManagerWindow(bui.MainWindow):
         else:
             plugins = category_plugins
 
-        def return_name(val):
-            return val.name
-        plugins.sort(key=return_name, reverse=(True if order == 'z_a' else False))
+        # Returns a new list, leaving the category's own one in its original order.
+        plugins = _sort_plugins(plugins, self.selected_sort)
 
         if plugins == self._last_filter_plugins and not refresh:
             # Plugins names to draw on UI are already drawn.
@@ -3040,24 +3212,23 @@ class PluginManagerWindow(bui.MainWindow):
         text_widget.delete()
         # await asyncio.gather(*plugin_names_to_draw)
 
-        plugin_names_ready_to_draw = []
-        for plugin in plugin_names_to_draw:
-            try:
-                plugin.latest_compatible_version
-            except NoCompatibleVersion:
-                continue
-            plugin_names_ready_to_draw += [plugin]
+        plugin_names_ready_to_draw = [
+            plugin for plugin in plugin_names_to_draw
+            if self.show_incompatible or plugin.is_compatible
+        ]
 
         for i, plugin in enumerate(plugin_names_ready_to_draw):
             await self.draw_plugin_name(plugin, plugin_names_ready_to_draw)
         kids = self._columnwidget.get_children()
-        first_child, last_child = kids[::len(kids)-1]
-        bui.widget(first_child, up_widget=self._filter_widget)
-        bui.widget(last_child, down_widget=self._back_button)
+        if kids:
+            bui.widget(kids[0], up_widget=self._filter_widget)
+            bui.widget(kids[-1], down_widget=self._back_button)
 
     async def draw_plugin_name(self, plugin, plugins_list):
 
-        if plugin.is_installed:
+        if not plugin.is_compatible:
+            color = (0.6, 0.35, 0.35)
+        elif plugin.is_installed:
             local_plugin = plugin.get_local()
             if await local_plugin.is_enabled():
                 if not local_plugin.is_installed_via_plugin_manager:
@@ -3084,7 +3255,9 @@ class PluginManagerWindow(bui.MainWindow):
                 selectable=True,
                 always_highlight=True,
                 color=color,
-                text=plugin.name.replace('_', ' ').title(),
+                text=plugin.name.replace('_', ' ').title() + (
+                    f" ({plugin.incompatibility_reason})" if not plugin.is_compatible else ""
+                ),
                 click_activate=True,
                 h_align='left',
                 v_align='center',
@@ -3111,19 +3284,25 @@ class PluginManagerWindow(bui.MainWindow):
             button_callback=lambda: self.draw_plugin_name(plugin, plugins_list)
         )
 
-    def show_categories_window(self, source):
-        PluginCategoryWindow(
+    def show_filter_window(self, source):
+        PluginFilterWindow(
             self.plugin_manager.categories.keys(),
             self.selected_category,
+            self.selected_sort,
+            self.show_incompatible,
             source,
-            self.select_category,
+            self.apply_filter,
         )
+
+    async def apply_filter(self, category, sort, show_incompatible):
+        self.selected_sort = sort
+        self.show_incompatible = show_incompatible
+        await self.select_category(category)
 
     async def select_category(self, category):
         self.plugins_in_current_view.clear()
-        self.draw_category_selection_button(post_label=category)
-        await self.draw_plugin_names(
-            category, search_term=self._last_filter_text, refresh=True, order=self.selected_alphabet_order)
+        self.draw_filter_button(category)
+        await self.draw_plugin_names(category, search_term=self._last_filter_text, refresh=True)
         self.selected_category = category
 
     def cleanup(self):
