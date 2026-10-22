@@ -2627,6 +2627,25 @@
           "md5sum": "687ab5195181d595a5b66b9214a8a380"
         }
       }
+    },
+    "enhanced_party_window": {
+      "description": "A test plugin for demonstration purposes blah blah.",
+      "external_url": "https://discord.com/channels/1001896771347304639/1558597818359353515",
+      "authors": [
+        {
+          "name": "Nizar",
+          "email": "",
+          "discord": "prollynizar"
+        },
+        {
+          "name": "Drap",
+          "email": "mrunittest@gmail.com",
+          "discord": "drap._"
+        }
+      ],
+      "versions": {
+        "1.0.3": null
+      }
     }
   }
 }

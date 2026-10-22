@@ -1,4 +1,4 @@
-# EnhancedPartyWindow 
+# EnhancedPartyWindow
 """
 Copyright 2026 — by Drap & Nizar
 Bug? Help? → Discord: drap._ or prollynizar
@@ -41,6 +41,7 @@ plugman = dict(
     ],
     version=__version__,
 )
+
 
 def _print_exception(msg: str = '') -> None:
     try:
