@@ -133,8 +133,8 @@ __version__ = "1.0.0"
 __author__ = ["Loup", "brostos"]
 
 plugman = dict(
-    plugin_name="sample_plugin",  # optional, defaults to the file name
-    description="A test plugin for demonstration purposes blah blah.", # can be set to __doc__
+    plugin_name="sample_plugin", # optional, should be same as file name without extension
+    description="A test plugin for demonstration purposes blah blah.", # can reuse module docstring with __doc__
     external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     authors=[
         {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_", "github": "Loup-Garou911XD"},
@@ -183,8 +183,8 @@ index ebb7dcc..da2b312 100644
  __author__ = ["Loup", "brostos"]
 
  plugman = dict(
-     plugin_name="sample_plugin",  # optional, defaults to the file name
-     description="A test plugin for demonstration purposes blah blah.", # can be set to __doc__
+     plugin_name="sample_plugin",  # optional, should be same as file name without extension
+     description="A test plugin for demonstration purposes blah blah.", # can reuse module docstring with __doc__
      external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
      authors=[
          {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_", "github": "Loup-Garou911XD"},
