@@ -100,6 +100,23 @@ class TestCollectModuleConstants(unittest.TestCase):
         constants = self.constants('def f():\n    HIDDEN = "x"\nplugman = dict()\n')
         self.assertNotIn("HIDDEN", constants)
 
+    def test_module_docstring_is_collected_as_dunder_doc(self):
+        constants = self.constants(
+            '"""hello\n    this is my new plugin\n\n    it does this   \n    and this"""\n'
+            "plugman = dict()\n"
+        )
+        # Indentation and trailing spaces go; every line break, blank ones too, stays.
+        self.assertEqual(constants["__doc__"],
+                         "hello\nthis is my new plugin\n\nit does this\nand this")
+
+    def test_docstring_surrounding_blank_lines_are_dropped(self):
+        constants = self.constants('"""\nFirst.\nSecond.\n\n"""\nplugman = dict()\n')
+        self.assertEqual(constants["__doc__"], "First.\nSecond.")
+
+    def test_no_docstring_means_no_dunder_doc(self):
+        constants = self.constants('X = "not a docstring"\nplugman = dict()\n')
+        self.assertNotIn("__doc__", constants)
+
 
 class TestResolveLiteral(unittest.TestCase):
     def test_plain_literals_are_unchanged(self):
@@ -204,6 +221,29 @@ class TestBuildPlugmanInfo(unittest.TestCase):
         self.assertEqual(info["version"], "1.2.3")
         self.assertEqual([author["name"] for author in info["authors"]],
                          ["Loup", "brostos"])
+
+    def test_description_from_module_docstring(self):
+        info = build(
+            '"""Does a thing,\nacross two lines."""\n'
+            "plugman = dict(\n"
+            "    description=__doc__,\n"
+            '    external_url="https://example.invalid/",\n'
+            '    authors=[{"name": "n", "email": "", "discord": ""}],\n'
+            '    version="1.0.0",\n'
+            ")\n"
+        )
+        self.assertEqual(info["description"], "Does a thing,\nacross two lines.")
+
+    def test_description_from_missing_docstring_raises(self):
+        with self.assertRaisesRegex(ValueError, "__doc__ is not a module-level constant"):
+            build(
+                "plugman = dict(\n"
+                "    description=__doc__,\n"
+                '    external_url="https://example.invalid/",\n'
+                '    authors=[{"name": "n", "email": "", "discord": ""}],\n'
+                '    version="1.0.0",\n'
+                ")\n"
+            )
 
 
 class TestExtractPlugman(unittest.TestCase):
