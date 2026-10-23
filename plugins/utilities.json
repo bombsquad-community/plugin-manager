@@ -2742,6 +2742,27 @@
           "md5sum": "3ce8c9647ea119acc5edefbeb87de502"
         }
       }
+    },
+    "checkboom": {
+      "description": "A turn-based game like chess, for two players.Take turns moving your pieces, and kill the King to win.",
+      "external_url": "https://BroBordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard",
+          "github": "BroBordd"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "b8951da4",
+          "released_on": "22-10-2026",
+          "md5sum": "a5f63693851d74c891f73cd417829444"
+        }
+      }
     }
   }
 }
