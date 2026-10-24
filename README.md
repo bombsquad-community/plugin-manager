@@ -2,11 +2,12 @@
 
 > [!NOTE]
 > If you are on BombSquad version less than 1.7.37
+>
 > - checkout the [api7](https://github.com/bombsquad-community/plugin-manager/tree/api7) branch for version 1.7.0 to 1.7.19 (which uses API 7).
-> - checkout the [api8](https://github.com/bombsquad-community/plugin-manager/tree/api8) branch for version 1.7.20 to 1.7.36 (which uses API 8).  \
-If you have version 1.7.37 or greater (which uses API 9), proceed with the rest of the README here.
+> - checkout the [api8](https://github.com/bombsquad-community/plugin-manager/tree/api8) branch for version 1.7.20 to 1.7.36 (which uses API 8). \
+>   If you have version 1.7.37 or greater (which uses API 9), proceed with the rest of the README here.
 
--------------------------------
+---
 
 # Plugin Manager
 
@@ -15,9 +16,9 @@ which makes further modding of your game more convenient by providing easier acc
 
 [![DownloadIcon]][DownloadLink]
 
-[DownloadIcon]:https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
-[DownloadLinkJSdelivr]:https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
-[DownloadLink]:https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py
+[DownloadIcon]: https://img.shields.io/badge/Download-5555ff?style=for-the-badge&logoColor=white&logo=DocuSign
+[DownloadLinkJSdelivr]: https://cdn.jsdelivr.net/gh/bombsquad-community/plugin-manager/plugin_manager.py
+[DownloadLink]: https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py
 
 ![Plugin Manager GIF](https://user-images.githubusercontent.com/106954762/190505304-519c4b91-2461-42b1-be57-655a3fb0cbe8.gif)
 
@@ -35,21 +36,18 @@ which makes further modding of your game more convenient by providing easier acc
 - [ ] Sync installed plugins with workspaces.
 - [ ] Sort plugins by popularity, downloads, rating or some other metric.
 
-
 ## Installation
 
 There are three different ways the plugin manager can be installed:
 
-
 1. From dev console
-
    - Enable "Show Dev Console Button" from advance BombSquad settings
    - Make sure you're connected to the internet
    - Paste the following code in dev console
      ```py
      import urllib.request;import _babase;import os;url="https://github.com/bombsquad-community/plugin-manager/releases/latest/download/plugin_manager.py";plugin_path=os.path.join(_babase.env()["python_directory_user"],"plugin_manager.py");file=urllib.request.urlretrieve(url)[0];fl = open(file,'r');f=open(plugin_path, 'w+');f.write(fl.read());fl.close();f.close();print("SUCCESS")
-      ```
-   - "SUCCESS" will be shown in the console 
+     ```
+   - "SUCCESS" will be shown in the console
 
 2. Another way is to add
    [plugin_manager.py](https://raw.githubusercontent.com/bombsquad-community/plugin-manager/main/plugin_manager.py)
@@ -86,28 +84,47 @@ There are three different ways the plugin manager can be installed:
 - New plugins are accepted through a [pull request](../../compare). Add your plugin in the minigames, utilities, or
   the category directory you feel is the most relevant to the type of plugin you're submitting, [here](plugins).
 - You also need a `plugman` dict with the plugin metadata in the plugin (see the [example](https://github.com/bombsquad-community/plugin-manager?tab=readme-ov-file#example) below).
-   - The name of the plugin must be in snake_case and matching the file name.
-   - Must have the description, external_url, authors and version keys.
-   - Each author needs `name`, `email`, `discord` and `github` keys (empty strings are fine). `github` is your
-     GitHub username (no `@`, no URL). Bug reports filed for your plugin through the
-     [Plugin Bug Report](../../issues/new?template=plugin-bug-report.yml) form will then @mention you in the issue.
-   - `min_engine_build` is optional: the oldest BombSquad build (`babase.app.env.engine_build_number`)
-     this version of your plugin runs on, e.g. `min_engine_build=23058` for 1.8.0. Players on older builds
-     keep the newest version they can run instead of being updated to one that breaks. Leave it out (it
-     defaults to 0) if your plugin still supports older builds, for example by checking the build number at
-     runtime. Needs plugin manager 1.2.2 or newer on the player's side; older ones ignore it.
-   - `plugin_name` is optional and defaults to the file name without `.py`. Spell it out only if you
-     want it documented in the source; it still has to match the file name.
-   - Values may be module-level constants defined *above* the dict, so a plugin that already keeps
-     a `__version__` or `__author__` around does not have to repeat itself:
-     `version=__version__` and `authors=[{"name": __author__[0], ...}]` both work. The plugin is
-     parsed, never imported, so only plain literals and indexing into them are understood;
-     expressions like `__file__.split("/")[-1]` are rejected.
 - Plugin manager will also show and execute the settings icon if your `ba.Plugin` class has methods `has_settings_ui` and `show_settings_ui`; check out the [colorscheme](https://github.com/bombsquad-community/plugin-manager/blob/eb163cf86014b2a057c4a048dcfa3d5b540b7fe1/plugins/utilities/colorscheme.py#L448-L452) plugin for an example.
+
+#### The [`plugman`](https://github.com/bombsquad-community/plugin-manager?tab=readme-ov-file#example) dict
+
+- `plugin_name` (optional)
+  - Must be in snake_case and match the file name.
+  - Defaults to the file name without `.py`. Spell it out only if you want it documented in the
+    source.
+- `description` (required)
+  - Can be a string or docstring
+  - `description=__doc__` reuses the module docstring, which can span several lines.
+  - Line breaks are kept as written; plugin manager still wraps long lines itself at about
+    40 characters.
+- `external_url` (required)
+- `authors` (required, can be empty string)
+  - `name`
+  - `email`
+  - `discord`
+  - `github`
+    - Your GitHub username (no `@`, no URL). Bug reports filed for your plugin through the
+      [Plugin Bug Report](../../issues/new?template=plugin-bug-report.yml) form will then @mention you
+      in the issue.
+- `version` (required)
+- `min_engine_build` (optional)
+  - The oldest BombSquad build (`babase.app.env.engine_build_number`) this version of your plugin
+    runs on, e.g. `min_engine_build=23058` for 1.8.0.
+  - Players on older builds keep the newest version they can run instead of being updated to one
+    that breaks.
+  - Leave it out (it defaults to 0) if your plugin still supports older builds, for example by
+    checking the build number at runtime.
+  - Needs plugin manager 1.2.2 or newer on the player's side; older ones ignore it.
+- Any value may be a module-level constant defined _above_ the dict
+  - A plugin that already keeps a `__version__` or `__author__` around does not have to repeat
+    itself: `version=__version__` and `authors=[{"name": __author__[0], ...}]` both work.
+  - The plugin is parsed, never imported, so only plain literals and indexing into them are
+    understood; expressions like `__file__.split("/")[-1]` are rejected.
 
 #### Example:
 
 Let's say you wanna submit this new utility-type plugin named as `sample_plugin.py`:
+
 ```python
 # ba_meta require api 9
 import babase
@@ -116,8 +133,8 @@ __version__ = "1.0.0"
 __author__ = ["Loup", "brostos"]
 
 plugman = dict(
-    plugin_name="sample_plugin",  # optional, defaults to the file name
-    description="A test plugin for demonstration purposes blah blah.",
+    plugin_name="sample_plugin", # optional, should be same as file name without extension
+    description="A test plugin for demonstration purposes blah blah.", # can reuse module docstring with __doc__
     external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     authors=[
         {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_", "github": "Loup-Garou911XD"},
@@ -151,6 +168,7 @@ guide) once you open a pull request.
 
 Continuing the example from [Submitting a Plugin](#submitting-a-plugin) section, if you also want to add a new screenmessage
 to the `sample_plugin.py` plugin after it has been submitted, edit `sample_plugin.py` with whatever changes you'd like:
+
 ```diff
 diff --git a/plugins/utilities/sample_plugin.py b/plugins/utilities/sample_plugin.py
 index ebb7dcc..da2b312 100644
@@ -159,14 +177,14 @@ index ebb7dcc..da2b312 100644
 @@ -1,16 +1,16 @@
  # ba_meta require api 9
  import babase
- 
+
 -__version__ = "1.0.0"
 +__version__ = "1.1.0"
  __author__ = ["Loup", "brostos"]
- 
+
  plugman = dict(
-     plugin_name="sample_plugin",  # optional, defaults to the file name
-     description="A test plugin for demonstration purposes blah blah.",
+     plugin_name="sample_plugin",  # optional, should be same as file name without extension
+     description="A test plugin for demonstration purposes blah blah.", # can reuse module docstring with __doc__
      external_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
      authors=[
          {"name": __author__[0], "email": "loupg450@gmail.com", "discord": "loupgarou_", "github": "Loup-Garou911XD"},
@@ -177,7 +195,7 @@ index ebb7dcc..da2b312 100644
 @@ -23,5 +23,5 @@
      def has_settings_ui(self):
          return True
- 
+
      def show_settings_ui(self, source_widget):
 -        babase.screenmessage("You tapped my settings!")
 +        babase.screenmessage("Hey! This is my new screenmessage!")
@@ -200,10 +218,8 @@ That's it! Now you can make a [pull request](../../compare) with the updated `sa
   If you maintain or know of a 3rd party plugin source, let us know and we'll add it below so people can know about it. It
   will also help us to notify the maintainers of any future breaking changes in plugin manager that could affect 3rd party
   plugin sources.
-
   - [rikkolovescats/sahilp-plugins](https://github.com/rikkolovescats/sahilp-plugins)
   - [Aeliux/arcane](https://github.com/Aeliux/arcane)
-
 
 ## Tests
 
@@ -226,7 +242,6 @@ If you've been with the community long enough, you may have known about the amaz
 [Mrmaxmeier's mod manager](https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager), which unfortunately wasn't
 maintained and failed to keep up with the game's latest versions and API changes. Well, this is another attempt to
 create something similar, with a hope we as a community can continue to keep it up-to-date with the original game.
-
 
 ## License
 

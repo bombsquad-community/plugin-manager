@@ -2,8 +2,11 @@
 
 <!-- line length=80 columns -->
 
-### 1.2.3 (22-10-2026)
+### 1.2.3 (24-10-2026)
 
+- Show when a plugin was first released in its More info window
+- "Last updated on" in the More info window shows the newest version's
+  date instead of the oldest one's
 - The A - Z and category buttons are merged into one button that opens
   a Filter & Sort window
 - Plugins can be sorted by name (A - Z or Z - A), recently added or
