@@ -1,8 +1,9 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
 """Hot Bomb game by SEBASTIAN2059 and zPanxo"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -27,6 +28,18 @@ import _babase
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
+
+
+plugman = dict(
+    plugin_name='hot_bomb',
+    description='Get the bomb to explode on the enemy team to win.',
+    external_url='',
+    authors=[
+        {'name': 'SEBASTIAN2059', 'email': '', 'discord': 'sebastian2059', 'github': 'SEBASTIAN2059'},
+        {'name': 'zPanxo', 'email': '', 'discord': 'zPanxo#7201', 'github': ''},
+    ],
+    version='1.2.0',
+)
 
 
 class BallDiedMessage:
@@ -100,8 +113,8 @@ class Ball(bs.Actor):
         self.node.connectattr('position', self.light, 'position')
         self.animate_light = None
 
-        self._particles = bs.Timer(0.1, call=bs.WeakCall(self.particles), repeat=True)
-        self._sound_effect = bs.Timer(4, call=bs.WeakCall(self.sound_effect), repeat=True)
+        self._particles = bs.Timer(0.1, call=bs.WeakCallPartial(self.particles), repeat=True)
+        self._sound_effect = bs.Timer(4, call=bs.WeakCallPartial(self.sound_effect), repeat=True)
 
         self.d_time = d_time
 
@@ -112,7 +125,7 @@ class Ball(bs.Actor):
         if self._timer is not None:
             self._count = self._timer
             self._tick_timer = bs.Timer(1.0,
-                                        call=bs.WeakCall(self._tick),
+                                        call=bs.WeakCallPartial(self._tick),
                                         repeat=True)
             m = bs.newnode('math', owner=self.node, attrs={
                            'input1': (0, 0.6, 0), 'operation': 'add'})
@@ -412,7 +425,7 @@ class NewPlayerSpaz(PlayerSpaz):
         if dropping_bomb:
             self.bomb_count -= 1
             bomb.node.add_death_action(
-                bs.WeakCall(self.handlemessage, BombDiedMessage()))
+                bs.WeakCallPartial(self.handlemessage, BombDiedMessage()))
         self._pick_up(bomb.node)
 
         try:
@@ -1008,7 +1021,7 @@ class HotBombGame(bs.TeamGameActivity[Player, Team]):
         self._ball._counter.text = str(self._bomb_timer)
         self._ball._tick_timer = bs.Timer(
             1.0,
-            call=bs.WeakCall(self._ball._tick),
+            call=bs.WeakCallPartial(self._ball._tick),
             repeat=True
         )
         self._ball._animate = bs.animate(
@@ -1348,7 +1361,7 @@ class NewBomb(bs.Actor):
                 bs.timer(5, scorch.delete)
 
             bs.timer(0.05, self.explode_region.delete)
-            bs.timer(0.001, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+            bs.timer(0.001, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
     def _touch_player(self):
         node = bs.getcollision().opposingnode

@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 """New Duel / Created by: byANG3L"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -18,6 +19,17 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     pass
+
+
+plugman = dict(
+    plugin_name='infection',
+    description="It's spreading, avoid the spread!",
+    external_url='',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 lang = bs.app.lang.language
 if lang == 'Spanish':
@@ -130,7 +142,7 @@ class Infection(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting(
                 mines,
@@ -218,13 +230,13 @@ class Infection(bs.TeamGameActivity[Player, Team]):
         self._start_time = bs.time()
         self.mine_count = 0
         bs.timer(self._update_rate,
-                 bs.WeakCall(self._mine_update),
+                 bs.WeakCallPartial(self._mine_update),
                  repeat=True)
         bs.timer(self._max_size_increases*1.0,
-                 bs.WeakCall(self._max_size_update),
+                 bs.WeakCallPartial(self._max_size_update),
                  repeat=True)
         bs.timer(self._extra_mines*1.0,
-                 bs.WeakCall(self._max_mine_update),
+                 bs.WeakCallPartial(self._max_mine_update),
                  repeat=True)
         self._timer = OnScreenTimer()
         self._timer.start()
@@ -287,7 +299,7 @@ class Infection(bs.TeamGameActivity[Player, Team]):
             pos = self.getRandomPowerupPoint()
             self.mine_count += 1
             self._flash_mine(pos)
-            bs.timer(0.95, babase.Call(self._make_mine, pos))
+            bs.timer(0.95, babase.CallPartial(self._make_mine, pos))
 
     def _make_mine(self, posn: Sequence[float]) -> None:
         m = myMine(pos=posn)

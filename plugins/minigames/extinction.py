@@ -1,7 +1,8 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
 """For 1.7.33"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -16,6 +17,17 @@ from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Optional, Type
+
+
+plugman = dict(
+    plugin_name='extinction',
+    description='Survive the Extinction. Playable in co-op',
+    external_url='',
+    authors=[
+        {'name': '-', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class Meteor(bs.Actor):
@@ -240,7 +252,7 @@ class NewMeteorShowerGame(bs.TeamGameActivity[Player, Team]):
         self.end(results=results)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##

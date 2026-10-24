@@ -1,8 +1,9 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 # BY Stary_Agent
 """Hockey game and support classes."""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -19,6 +20,17 @@ from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
+
+
+plugman = dict(
+    plugin_name='soccer',
+    description='Shoot the ball in left or right edge of the map to score',
+    external_url='',
+    authors=[
+        {'name': 'Stary_Agent', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='2.1.0',
+)
 
 
 class PuckDiedMessage:

@@ -1,7 +1,8 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Created By Idk
 # Ported to 1.7 by Yan
 
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -22,6 +23,17 @@ import bascenev1 as bs
 
 if TYPE_CHECKING:
     pass
+
+
+plugman = dict(
+    plugin_name='quake_original',
+    description="Good ol' Quake minigame",
+    external_url='',
+    authors=[
+        {'name': '-', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class TouchedToSpaz(object):
@@ -147,8 +159,8 @@ class QuakeBall(bs.Actor):
             'volume_intensity_scale': 15.0})
 
         self.node.connectattr('position', self.light_node, 'position')
-        self.emit_time = bs.Timer(0.015, bs.WeakCall(self.emit), repeat=True)
-        self.life_time = bs.Timer(5.0, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+        self.emit_time = bs.Timer(0.015, bs.WeakCallPartial(self.emit), repeat=True)
+        self.life_time = bs.Timer(5.0, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
     def emit(self):
         bs.emitfx(
@@ -269,7 +281,7 @@ class QuakeGame(bs.TeamGameActivity[Player, Team]):
     @classmethod
     def get_available_settings(
         cls, sessiontype: type[bs.Session]
-    ) -> list[babase.Setting]:
+    ) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Kills to Win Per Player',
@@ -369,7 +381,7 @@ class QuakeGame(bs.TeamGameActivity[Player, Team]):
         self.setup_standard_time_limit(self._time_limit)
 
         self.drop_shield()
-        self.drop_shield_timer = bs.Timer(8.001, bs.WeakCall(self.drop_shield), repeat=True)
+        self.drop_shield_timer = bs.Timer(8.001, bs.WeakCallPartial(self.drop_shield), repeat=True)
 
         shared = SharedObjects.get()
         if self.settings['Obstacles']:
@@ -443,7 +455,7 @@ class QuakeGame(bs.TeamGameActivity[Player, Team]):
                 delete_light()
                 del_checker()
 
-        self._checker = bs.Timer(0.1, babase.Call(check_exists), repeat=True)
+        self._checker = bs.Timer(0.1, babase.CallPartial(check_exists), repeat=True)
 
         def del_checker():
             if self._checker is not None:
@@ -453,8 +465,8 @@ class QuakeGame(bs.TeamGameActivity[Player, Team]):
             if p_light.exists():
                 p_light.delete()
 
-        bs.timer(6.9, babase.Call(del_checker))
-        bs.timer(7.0, babase.Call(delete_light))
+        bs.timer(6.9, babase.CallPartial(del_checker))
+        bs.timer(7.0, babase.CallPartial(delete_light))
 
     def spawn_player(self, player: bs.Player):
         spaz = self.spawn_player_spaz(player)

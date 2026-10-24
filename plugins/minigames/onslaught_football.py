@@ -1,8 +1,10 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
+import logging
 from asyncio import base_subprocess
 
 import math
@@ -46,6 +48,17 @@ from bascenev1lib.actor.spazbot import (
 if TYPE_CHECKING:
     from typing import Any, Sequence
     from bascenev1lib.actor.spazbot import SpazBot
+
+
+plugman = dict(
+    plugin_name='onslaught_football',
+    description='Onslaught but in football map',
+    external_url='',
+    authors=[
+        {'name': '-', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 @dataclass
@@ -97,7 +110,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
     name = 'Onslaught'
     description = 'Defeat all enemies.'
 
-    tips: list[str | babase.GameTip] = [
+    tips: list[str | bs.GameTip] = [
         'Hold any button to run.'
         '  (Trigger buttons work well if you have them)',
         'Try tricking enemies into killing eachother or running off cliffs.',
@@ -364,7 +377,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
 
     def _start_powerup_drops(self) -> None:
         self._powerup_drop_timer = bs.Timer(
-            3.0, bs.WeakCall(self._drop_powerups), repeat=True
+            3.0, bs.WeakCallPartial(self._drop_powerups), repeat=True
         )
 
     def _drop_powerups(
@@ -376,7 +389,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
             for i in range(len(points)):
                 bs.timer(
                     1.0 + i * 0.5,
-                    bs.WeakCall(
+                    bs.WeakCallPartial(
                         self._drop_powerup, i, poweruptype if i == 0 else None
                     ),
                 )
@@ -439,10 +452,10 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
 
             # Reward time bonus.
             if self._time_bonus > 0:
-                bs.timer(0, babase.Call(self._cashregistersound.play))
+                bs.timer(0, babase.CallPartial(self._cashregistersound.play))
                 bs.timer(
                     base_delay,
-                    bs.WeakCall(self._award_time_bonus, self._time_bonus),
+                    bs.WeakCallPartial(self._award_time_bonus, self._time_bonus),
                 )
                 base_delay += 1.0
 
@@ -454,7 +467,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
                         have_flawless = True
                         bs.timer(
                             base_delay,
-                            bs.WeakCall(self._award_flawless_bonus, player),
+                            bs.WeakCallPartial(self._award_flawless_bonus, player),
                         )
                     player.has_been_hurt = False  # reset
                 if have_flawless:
@@ -465,7 +478,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
             # Short celebration after waves.
             if self._wavenum > 1:
                 self.celebrate(0.5)
-            bs.timer(base_delay, bs.WeakCall(self._start_next_wave))
+            bs.timer(base_delay, bs.WeakCallPartial(self._start_next_wave))
 
     def _award_completion_bonus(self) -> None:
         self._cashregistersound.play()
@@ -482,7 +495,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
                         screenmessage=False,
                     )
             except Exception:
-                babase.print_exception()
+                logging.exception('Error')
 
     def _award_time_bonus(self, bonus: int) -> None:
         self._cashregistersound.play()
@@ -515,11 +528,11 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
                     screenmessage=False,
                 )
         except Exception:
-            babase.print_exception()
+            logging.exception('Error')
 
     def _start_time_bonus_timer(self) -> None:
         self._time_bonus_timer = bs.Timer(
-            1.0, bs.WeakCall(self._update_time_bonus), repeat=True
+            1.0, bs.WeakCallPartial(self._update_time_bonus), repeat=True
         )
 
     def _update_player_spawn_info(self) -> None:
@@ -592,7 +605,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
                 spacing = info.spacing
                 bot_angle += spacing * 0.5
                 if bot_type_2 is not None:
-                    tcall = bs.WeakCall(
+                    tcall = bs.WeakCallPartial(
                         self.add_bot_at_angle, bot_angle, bot_type_2, spawn_time
                     )
                     bs.timer(tval, tcall)
@@ -600,7 +613,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
                 bot_angle += spacing * 0.5
             else:
                 assert bot_type_2 is not None
-                spcall = bs.WeakCall(
+                spcall = bs.WeakCallPartial(
                     self.add_bot_at_point, bot_type_2, spawn_time
                 )
                 bs.timer(tval, spcall)
@@ -608,7 +621,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
         # We can end the wave after all the spawning happens.
         bs.timer(
             tval + spawn_time - dtime + 0.01,
-            bs.WeakCall(self._set_can_end_wave),
+            bs.WeakCallPartial(self._set_can_end_wave),
         )
 
     def _start_next_wave(self) -> None:
@@ -622,7 +635,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
         wave = self._generate_random_wave()
         self._setup_wave_spawns(wave)
         self._update_wave_ui_and_bonuses()
-        bs.timer(0.4, babase.Call(self._new_wave_sound.play))
+        bs.timer(0.4, babase.CallPartial(self._new_wave_sound.play))
 
     def _update_wave_ui_and_bonuses(self) -> None:
         self.show_zoom_message(
@@ -665,7 +678,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
             )
         )
 
-        bs.timer(5.0, bs.WeakCall(self._start_time_bonus_timer))
+        bs.timer(5.0, bs.WeakCallPartial(self._start_time_bonus_timer))
         wtcolor = (1, 1, 1, 1)
         wttxt = babase.Lstr(
             value='${A} ${B}',
@@ -864,7 +877,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
 
     def _start_updating_waves(self) -> None:
         self._wave_update_timer = bs.Timer(
-            2.0, bs.WeakCall(self._update_waves), repeat=True
+            2.0, bs.WeakCallPartial(self._update_waves), repeat=True
         )
 
     def _update_scores(self) -> None:
@@ -939,7 +952,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
             self._tnt_kills += 1
             if self._tnt_kills >= 6:
                 bs.timer(
-                    0.5, bs.WeakCall(self._award_achievement, 'TNT Terror')
+                    0.5, bs.WeakCallPartial(self._award_achievement, 'TNT Terror')
                 )
 
     def _handle_pro_kill_achievements(self, msg: SpazBotDiedMessage) -> None:
@@ -950,7 +963,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
             if self._tnt_kills >= 3:
                 bs.timer(
                     0.5,
-                    bs.WeakCall(
+                    bs.WeakCallPartial(
                         self._award_achievement, 'Boom Goes the Dynamite'
                     ),
                 )
@@ -998,7 +1011,7 @@ class OnslaughtFootballGame(bs.CoopGameActivity[Player, Team]):
             else:
                 self.end_game()
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class CustomOnslaughtLevel(babase.Plugin):

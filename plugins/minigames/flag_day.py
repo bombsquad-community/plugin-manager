@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 
 # Ported by brostos to api 8
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -24,6 +25,17 @@ from bascenev1lib.actor.spazbot import SpazBotSet, BrawlerBotLite, SpazBotDiedMe
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
+
+
+plugman = dict(
+    plugin_name='flag_day',
+    description='Pick up flags to receive a prize.But beware...',
+    external_url='https://youtu.be/ANDzdBicjA4?si=h8S_TPUAxSaG7nls',
+    authors=[
+        {'name': 'MattZ45986', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 lang = bs.app.lang.language
@@ -134,7 +146,7 @@ class FlagDayGame(bs.TeamGameActivity[Player, Team]):
     @classmethod
     def get_available_settings(
             cls, sessiontype: type[bs.Session]
-    ) -> list[babase.Setting]:
+    ) -> list[bs.Setting]:
         settings = [
             bs.BoolSetting(slow_motion_deaths, default=True),
             bs.BoolSetting('Epic Mode', default=False),
@@ -310,7 +322,7 @@ class FlagDayGame(bs.TeamGameActivity[Player, Team]):
                     'additive': True
                 })
             bs.broadcastmessage(climb_top, color=(0.5, 0.5, 0.5))
-            bs.timer(3.0, babase.Call(self.make_health_box, (0.0, 6.0, -9.0)))
+            bs.timer(3.0, babase.CallPartial(self.make_health_box, (0.0, 6.0, -9.0)))
             self.round_timer = bs.Timer(10.0, self.setup_next_round)
         if prize == 4:
             self.last_prize = 'land_mines'
@@ -445,7 +457,7 @@ class FlagDayGame(bs.TeamGameActivity[Player, Team]):
                      velocity=(12, 0.0, 0.0),
                      bomb_type='normal',
                      blast_radius=1.2))
-        bs.timer(1.0, babase.Call(self.make_bomb_row, num-1))
+        bs.timer(1.0, babase.CallPartial(self.make_bomb_row, num-1))
 
     def setup_rof(self) -> None:
         self.make_blast_ring(10)
@@ -466,7 +478,7 @@ class FlagDayGame(bs.TeamGameActivity[Player, Team]):
             x = length * math.cos(math.radians(angle))
             z = length * math.sin(math.radians(angle))
             blast = Blast(position=(x, 2.2, z-2), blast_radius=3.5)
-        bs.timer(0.75, babase.Call(self.make_blast_ring, length-1))
+        bs.timer(0.75, babase.CallPartial(self.make_blast_ring, length-1))
 
     # a method to remake the flags
     def reset_flags(self) -> None:

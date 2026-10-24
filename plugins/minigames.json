@@ -15,6 +15,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "a941899",
@@ -99,6 +100,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.2": {
           "api_version": 8,
           "commit_sha": "593ae6f",
@@ -131,6 +133,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -157,6 +160,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -183,6 +187,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -275,10 +280,11 @@
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
           "discord": "crossjoy",
-          "github": ""
+          "github": "CrossJoy"
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -485,7 +491,7 @@
           "name": "SEBASTIAN2059",
           "email": "",
           "discord": "sebastian2059",
-          "github": ""
+          "github": "SEBASTIAN2059"
         },
         {
           "name": "zPanxo",
@@ -495,6 +501,7 @@
         }
       ],
       "versions": {
+        "1.2.0": null,
         "1.1.0": {
           "api_version": 8,
           "commit_sha": "0069f15",
@@ -517,10 +524,11 @@
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -607,10 +615,11 @@
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.2": {
           "api_version": 8,
           "commit_sha": "78bc781",
@@ -639,10 +648,11 @@
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -723,10 +733,11 @@
           "name": "Mr.Smoothy",
           "email": "",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "505c948",
@@ -835,6 +846,7 @@
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "1a8037e",
@@ -857,10 +869,11 @@
           "name": "itsre3",
           "email": "",
           "discord": "itsre3#0267",
-          "github": ""
+          "github": "itsre3"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -887,6 +900,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -947,10 +961,11 @@
           "name": "itsre3",
           "email": "",
           "discord": "itsre3#0267",
-          "github": ""
+          "github": "itsre3"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -973,10 +988,11 @@
           "name": "SEBASTIAN2059",
           "email": "",
           "discord": "sebastian2059",
-          "github": ""
+          "github": "SEBASTIAN2059"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -1003,6 +1019,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "185480d",
@@ -1019,10 +1036,11 @@
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
           "discord": "crossjoy",
-          "github": ""
+          "github": "CrossJoy"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -1045,10 +1063,11 @@
           "name": "Freaku",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Freaku17"
         }
       ],
       "versions": {
+        "2.1.0": null,
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "8f281f9",
@@ -1127,6 +1146,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "2309aab",
@@ -1173,6 +1193,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1193,6 +1214,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ab26786",
@@ -1209,7 +1231,7 @@
           "name": "Mrmaxmeier",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Mrmaxmeier"
         },
         {
           "name": "JoseAngel",
@@ -1219,6 +1241,7 @@
         }
       ],
       "versions": {
+        "1.2.0": null,
         "1.1.0": {
           "api_version": 8,
           "commit_sha": "6a66826",
@@ -1271,6 +1294,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1287,10 +1311,11 @@
           "name": "EraOSBeta",
           "email": "",
           "discord": "3ra0",
-          "github": ""
+          "github": "EraOSBeta"
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "718039b",
@@ -1311,6 +1336,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "718039b",
@@ -1331,6 +1357,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "718039b",
@@ -1377,6 +1404,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1403,6 +1431,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1423,6 +1452,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1449,6 +1479,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1469,6 +1500,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1527,6 +1559,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1625,6 +1658,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1651,6 +1685,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1677,6 +1712,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ec6286e",
@@ -1697,6 +1733,7 @@
         }
       ],
       "versions": {
+        "1.1.0": null,
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ec6286e",

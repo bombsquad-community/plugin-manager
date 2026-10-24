@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 from typing import Sequence
 import babase
 import bauiv1 as bui
@@ -8,6 +9,17 @@ import _babase
 import random
 from bascenev1lib.actor.spaz import Spaz
 from bascenev1lib.actor.scoreboard import Scoreboard
+
+
+plugman = dict(
+    plugin_name='last_punch_stand',
+    description='Last one to punch the spaz when timer ends wins',
+    external_url='',
+    authors=[
+        {'name': 'ThePersonMan', 'email': '', 'discord': 'the.personman', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class Player(bs.Player['Team']):

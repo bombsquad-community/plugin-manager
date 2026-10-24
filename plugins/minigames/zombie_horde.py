@@ -1,9 +1,11 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import babase
@@ -25,6 +27,17 @@ from bascenev1lib.actor.spazfactory import SpazFactory
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
+
+
+plugman = dict(
+    plugin_name='zombie_horde',
+    description='Fight or defend against horde of zombies',
+    external_url='https://youtube.com/c/JoseANG3LYT',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class PlayerSpaz_Zom(PlayerSpaz):
@@ -110,7 +123,7 @@ class zBotSet(SpazBotSet):
     def start_moving(self) -> None:
         """Start processing bot AI updates so they start doing their thing."""
         self._bot_update_timer = bs.Timer(0.05,
-                                          bs.WeakCall(self.zUpdate),
+                                          bs.WeakCallPartial(self.zUpdate),
                                           repeat=True)
 
     def zUpdate(self) -> None:
@@ -121,8 +134,8 @@ class zBotSet(SpazBotSet):
             ])
         except Exception:
             bot_list = []
-            babase.print_exception('Error updating bot list: ' +
-                                   str(self._bot_lists[self._bot_update_list]))
+            logging.exception('Error updating bot list: ' +
+                              str(self._bot_lists[self._bot_update_list]))
         self._bot_update_list = (self._bot_update_list +
                                  1) % self._bot_list_count
 
@@ -138,7 +151,7 @@ class zBotSet(SpazBotSet):
                             (babase.Vec3(player.actor.node.position),
                              babase.Vec3(player.actor.node.velocity)))
             except Exception:
-                babase.print_exception('Error on bot-set _update.')
+                logging.exception('Error on bot-set _update.')
 
         for bot in bot_list:
             bot.set_player_points(player_pts)
@@ -167,7 +180,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives Per Player',
@@ -510,7 +523,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         bs.timer(0.5, light.delete)
 
         if not self._solo_mode:
-            bs.timer(0.3, babase.Call(self._print_lives, player))
+            bs.timer(0.3, babase.CallPartial(self._print_lives, player))
 
         for icon in player.icons:
             icon.handle_player_spawned()
@@ -544,7 +557,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         if player.actor and not self.has_ended():
             from bascenev1lib.actor.respawnicon import RespawnIcon
             player.customdata['respawn_timer'] = bs.Timer(
-                respawn_time, bs.WeakCall(
+                respawn_time, bs.WeakCallPartial(
                     self.spawn_player_if_exists_as_zombie, player))
             player.customdata['respawn_icon'] = RespawnIcon(
                 player, respawn_time)
@@ -601,7 +614,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         bs.timer(0.5, light.delete)
 
         if not self._solo_mode:
-            bs.timer(0.3, babase.Call(self._print_lives, player))
+            bs.timer(0.3, babase.CallPartial(self._print_lives, player))
 
         for icon in player.icons:
             icon.handle_player_spawned()
@@ -668,7 +681,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
             if msg._player in self.spazList:
                 self.spazList.remove(msg._player)
             if player.lives < 0:
-                babase.print_error(
+                logging.error(
                     "Got lives < 0 in Elim; this shouldn't happen. solo:" +
                     str(self._solo_mode))
                 player.lives = 0
@@ -744,7 +757,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         thePt = list(self.get_random_point_in_play())
         thePt2 = self.map.get_ffa_start_position(self.players)
         thePt[1] = thePt2[1]
-        bs.timer(0.1, babase.Call(
+        bs.timer(0.1, babase.CallPartial(
             self._bots.spawn_bot, BrawlerBot, pos=thePt, spawn_time=1.0))
 
     def _onSpazBotDied(self, DeathMsg) -> None:
@@ -872,7 +885,7 @@ class ZombieHordeCoop(ZombieHorde):
             super().handlemessage(msg)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class ZombieHordeLevel(babase.Plugin):
     def on_app_running(self) -> None:
         babase.app.classic.add_coop_practice_level(

@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 """New Duel / Created by: byANG3L"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -17,6 +18,17 @@ from bascenev1lib.game.elimination import Icon
 
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
+
+
+plugman = dict(
+    plugin_name='super_duel',
+    description='Crush your enemy in a 1v1',
+    external_url='https://www.youtube.com/watch?v=hvRtiXR-oC0',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class SuperSpaz(PlayerSpaz):
@@ -45,7 +57,7 @@ class SuperSpaz(PlayerSpaz):
                 if node.getnodetype() == 'spaz':
                     if not node.frozen:
                         node.frozen = True
-                        node.handlemessage(babase.FreezeMessage())
+                        node.handlemessage(bs.FreezeMessage())
                         bs.getsound('freeze').play()
                     bs.getsound('superPunch').play()
                     bs.getsound('punchStrong02').play()
@@ -117,7 +129,7 @@ class NewDuelGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Kills to Win Per Player',

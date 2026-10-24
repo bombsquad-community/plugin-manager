@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 """UFO Boss Fight v2.0:
 Made by Cross Joy"""
 
@@ -8,7 +9,7 @@ Made by Cross Joy"""
 # My Discord Id: Cross Joy#0721
 # My BS Discord Server: https://discford.gg/JyBY6haARJ
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 # ---------------------------------------
@@ -19,6 +20,7 @@ Made by Cross Joy"""
 
 from __future__ import annotations
 
+import logging
 import random
 from typing import TYPE_CHECKING
 
@@ -33,6 +35,18 @@ from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Union, Callable
+
+
+plugman = dict(
+    plugin_name='ufo_fight',
+    description='Fight the UFO boss!',
+    external_url='',
+    authors=[
+        {'name': 'Cross Joy', 'email': 'cross.joy.official@gmail.com',
+            'discord': 'crossjoy', 'github': 'CrossJoy'},
+    ],
+    version='1.1.0',
+)
 
 
 class UFODiedMessage:
@@ -241,10 +255,10 @@ class UFO(bs.Actor):
         self.node.connectattr('position', self.shield_deco, 'position')
         self._scoreboard()
         self._update()
-        self.drop_bomb_timer = bs.Timer(1.5, bs.Call(self._drop_bomb),
+        self.drop_bomb_timer = bs.Timer(1.5, bs.CallPartial(self._drop_bomb),
                                         repeat=True)
 
-        self.drop_bots_timer = bs.Timer(15.0, bs.Call(self._drop_bots), repeat=True)
+        self.drop_bots_timer = bs.Timer(15.0, bs.CallPartial(self._drop_bots), repeat=True)
 
     def _drop_bots(self) -> None:
         p = self.node.position
@@ -302,7 +316,7 @@ class UFO(bs.Actor):
 
             if not self.frozen:
                 for i in range(7):
-                    bs.timer(0.05 + i / 20, bs.Call(raise_player, p))
+                    bs.timer(0.05 + i / 20, bs.CallPartial(raise_player, p))
 
     def on_punched(self, damage: int) -> None:
         """Called when this spaz gets punched."""
@@ -623,7 +637,7 @@ class UFO(bs.Actor):
                                 position=(p_x, p[1], p_z),
                                 blast_radius=2.0).autoretain()
 
-                    bs.timer(0 + i, bs.Call(ded_explode, i))
+                    bs.timer(0 + i, bs.CallPartial(ded_explode, i))
 
                 bs.timer(5, self.node.delete)
                 bs.timer(0.1, self.suck.delete)
@@ -653,11 +667,11 @@ class UFO(bs.Actor):
                 def unfrozen():
                     self.frozen = False
                     self.drop_bomb_timer = bs.Timer(1.5,
-                                                    bs.Call(self._drop_bomb),
+                                                    bs.CallPartial(self._drop_bomb),
                                                     repeat=True)
 
                     self.drop_bots_timer = bs.Timer(15.0,
-                                                    bs.Call(self._drop_bots),
+                                                    bs.CallPartial(self._drop_bots),
                                                     repeat=True)
                     self.node.reflection_scale = [0.25]
 
@@ -699,7 +713,7 @@ class UFOSet:
             ]
         except Exception:
             bot_list = []
-            bs.print_exception(
+            logging.exception(
                 'Error updating bot list: '
                 + str(self._ufo_bot_lists[self._ufo_bot_update_list])
             )
@@ -725,7 +739,7 @@ class UFOSet:
                         )
                     )
             except Exception:
-                bs.print_exception('Error on bot-set _update.')
+                logging.exception('Error on bot-set _update.')
 
         for bot in bot_list:
             bot.set_player_points(player_pts)
@@ -734,7 +748,7 @@ class UFOSet:
     def start_moving(self) -> None:
         """Start processing bot AI updates so they start doing their thing."""
         self._ufo_bot_update_timer = bs.Timer(
-            0.05, bs.WeakCall(self._update), repeat=True
+            0.05, bs.WeakCallPartial(self._update), repeat=True
         )
 
     def spawn_bot(
@@ -751,7 +765,7 @@ class UFOSet:
             pt=pos,
             spawn_time=spawn_time,
             send_spawn_message=False,
-            spawn_callback=bs.Call(
+            spawn_callback=bs.CallPartial(
                 self._spawn_bot, bot_type, pos, on_spawn_call
             ),
         )
@@ -968,7 +982,7 @@ class UFOightGame(bs.TeamGameActivity[Player, Team]):
         self.end(results)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class MyUFOFightLevel(babase.Plugin):
 
     def on_app_running(self) -> None:
