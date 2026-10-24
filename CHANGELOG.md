@@ -15,6 +15,8 @@
   for other API versions or newer game builds, marked with the reason;
   they can be viewed but not installed
 - The Custom Sources button is moved to the settings window
+- The Source URL of a plugin from a custom source pinned to a branch
+  (owner/repo@branch) opens that branch instead of main
 
 ### 1.2.2 (21-10-2026)
 

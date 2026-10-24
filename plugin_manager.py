@@ -1085,7 +1085,7 @@ class Plugin:
     @property
     def view_url(self):
         if not self.is_compatible or self.latest_compatible_version == self.latest_version:
-            tag = CURRENT_TAG
+            tag = self.tag
         else:
             tag = self.latest_compatible_version.commit_sha
         return self.url.format(content_type="blob", tag=tag)
@@ -1110,6 +1110,8 @@ class Plugin:
         ]
         if min_builds:
             return f"needs build {min(min_builds)}+"
+        if not self.info["versions"]:
+            return "no versions"
         return f"API {self.latest_version.api_version}"
 
     @property
@@ -2033,7 +2035,12 @@ class PluginWindow(popup.PopupWindow):
             center_button = None
             rightmost_button = button2
         else:
-            leftmost_button = center_button = rightmost_button = None
+            # Incompatible and not installed: nothing to install or manage, so
+            # More... is the first thing to land on.
+            leftmost_button = more_button
+            center_button = None
+            rightmost_button = previous_plugin_button
+            bui.containerwidget(edit=self._root_widget, selected_child=more_button)
 
         # determine vertical stack
         bottom_stack = tutorial_button or settings_button or more_button
@@ -2805,6 +2812,7 @@ class PluginManagerWindow(bui.MainWindow):
         self.selected_category = 'All'
         self.selected_sort = 'name_asc'
         self.show_incompatible = False
+        self._draw_generation = 0
         self.plugins_in_current_view = {}
         global open_popups
         open_popups = []
@@ -3169,10 +3177,22 @@ class PluginManagerWindow(bui.MainWindow):
         if not (to_draw_plugin_names or refresh):
             return
 
+        # Filter & Sort stays open and each click starts another draw, as do
+        # search keystrokes, so several can be in flight at once. Each one
+        # bails out after an await if a newer one has started, rather than
+        # both clearing and filling the list.
+        self._draw_generation += 1
+        generation = self._draw_generation
+
+        def superseded():
+            return generation != self._draw_generation
+
         try:
             if self.plugin_manager.categories != {}:
                 if self.plugin_manager.categories['All'] is not None:
                     category_plugins = await self.plugin_manager.categories[category if category != 'Installed' else 'All'].get_plugins()
+                    if superseded():
+                        return
                 else:
                     return
             else:
@@ -3218,20 +3238,26 @@ class PluginManagerWindow(bui.MainWindow):
         text_widget.delete()
         # await asyncio.gather(*plugin_names_to_draw)
 
+        # A plugin with no versions at all (possible in a custom source) has
+        # nothing to show or install, so it stays hidden either way.
         plugin_names_ready_to_draw = [
             plugin for plugin in plugin_names_to_draw
-            if self.show_incompatible or plugin.is_compatible
+            if plugin.is_compatible or (self.show_incompatible and plugin.info["versions"])
         ]
 
         for i, plugin in enumerate(plugin_names_ready_to_draw):
-            await self.draw_plugin_name(plugin, plugin_names_ready_to_draw)
+            await self.draw_plugin_name(plugin, plugin_names_ready_to_draw, generation)
+            if superseded():
+                return
         kids = self._columnwidget.get_children()
         if kids:
             bui.widget(kids[0], up_widget=self._filter_widget)
             bui.widget(kids[-1], down_widget=self._back_button)
 
-    async def draw_plugin_name(self, plugin, plugins_list):
-
+    async def draw_plugin_name(self, plugin, plugins_list, generation=None):
+        """Draw or recolor one row. `generation` is draw_plugin_names()' own,
+        so a row from a superseded list draw isn't added after the newer one
+        has cleared the list."""
         if not plugin.is_compatible:
             color = (0.6, 0.35, 0.35)
         elif plugin.is_installed:
@@ -3245,6 +3271,8 @@ class PluginManagerWindow(bui.MainWindow):
                     color = (1, 0.6, 0)
             else:
                 color = (1, 1, 1)
+            if generation is not None and generation != self._draw_generation:
+                return
         else:
             color = (0.5, 0.5, 0.5)
 
@@ -3308,8 +3336,10 @@ class PluginManagerWindow(bui.MainWindow):
     async def select_category(self, category):
         self.plugins_in_current_view.clear()
         self.draw_filter_button(category)
-        await self.draw_plugin_names(category, search_term=self._last_filter_text, refresh=True)
+        # Set before drawing: if another selection starts while this one is
+        # still drawing, the newest choice must be the one that sticks.
         self.selected_category = category
+        await self.draw_plugin_names(category, search_term=self._last_filter_text, refresh=True)
 
     def cleanup(self):
         self.plugin_manager.cleanup()
@@ -3356,6 +3386,10 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         s = 1.25 if _uiscale() is babase.UIScale.SMALL else 1.27 if _uiscale() is babase.UIScale.MEDIUM else 1.3
         width = 380 * s
         height = 150 + 150 * s
+        # A band above the button row for the title, so the centred Custom
+        # Sources button doesn't sit on it. Everything else is laid out from
+        # `height` as before and keeps its distance from the bottom.
+        title_band = 30
         color = (0.9, 0.9, 0.9)
 
         # Subtracting the default bluish-purple color from the texture, so it's as close
@@ -3369,7 +3403,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         button_size = (32 * s, 32 * s)
         # index = await self._plugin_manager.get_index()
         self._root_widget = bui.containerwidget(
-            size=(width, height),
+            size=(width, height + title_band),
             on_outside_click_call=self._ok,
             transition=transition,
             scale=(2.1 if _uiscale() is babase.UIScale.SMALL else 1.5
@@ -3381,7 +3415,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         setting_title = "Settings"
         bui.textwidget(
             parent=self._root_widget,
-            position=(width * 0.49, pos),
+            position=(width * 0.49, pos + title_band),
             size=(0, 0),
             h_align='center',
             v_align='center',
@@ -3414,10 +3448,13 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         )
         # Opened on top of this window, like the changelog, so unsaved
         # setting toggles survive a trip to the sources list.
+        # On one line the label is ~108 wide at 0.6, more than the button, so
+        # it's wrapped onto two lines at 0.5 (~45 x 32). The button is 6
+        # taller than ChangeLog to fit them and stays centred on the same row.
         self._sources_button = bui.buttonwidget(
             parent=self._root_widget,
-            position=((width * 0.5) - 45, pos),
-            size=(90, 30),
+            position=((width * 0.5) - 45, pos - 3),
+            size=(90, 36),
             textcolor=b_text_color,
             button_type='square',
             label='',
@@ -3425,14 +3462,14 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         )
         bui.textwidget(
             parent=self._root_widget,
-            position=((width * 0.5) - 40, pos),
-            size=(80, 30),
-            scale=0.6,
+            position=((width * 0.5) - 40, pos - 3),
+            size=(80, 36),
+            scale=0.5,
             h_align='center',
             v_align='center',
-            text='Custom Sources',
+            text='Custom\nSources',
             color=b_text_color,
-            maxwidth=125,
+            maxwidth=80,
             draw_controller=self._sources_button,
         )
         self._save_button = bui.buttonwidget(
