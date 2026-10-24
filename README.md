@@ -209,7 +209,7 @@ That's it! Now you can make a [pull request](../../compare) with the updated `sa
   you can create your own GitHub repository and put all your plugins in there.
 - Check out [bombsquad-community/sample-plugin-source](https://github.com/bombsquad-community/sample-plugin-source) as an example.
   You can choose to show up plugins from this repository in your plugin manager by adding `bombsquad-community/sample-plugin-source`
-  as a custom source through the category selection popup window in-game.
+  as a custom source through the Custom Sources button in plugin manager's settings window in-game.
 - Plugin manager will default to picking up plugins from the `main` branch of the custom source repository. You
   can specify a different branch by suffixing the source URI with `@branchname`, such as `bombsquad-community/sample-plugin-source@experimental`.
 
