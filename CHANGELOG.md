@@ -14,6 +14,7 @@
 - Added a "Show incompatible plugins" option that lists plugins made
   for other API versions or newer game builds, marked with the reason;
   they can be viewed but not installed
+- The Custom Sources button is moved to the settings window
 
 ### 1.2.2 (21-10-2026)
 

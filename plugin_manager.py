@@ -2212,7 +2212,12 @@ class MoreWindow:
         # Versions are listed newest first, so the last one is the plugin's
         # first release, whichever API it targeted.
         released_on = tuple(plugin.info['versions'].values())[-1]['released_on']
-        last_updated = plugin.latest_compatible_version.released_on
+        # Matches the version shown below: the newest one that runs here, or
+        # for an incompatible plugin (listed via Show incompatible plugins),
+        # the newest one overall.
+        last_updated = (
+            plugin.latest_compatible_version if plugin.is_compatible else plugin.latest_version
+        ).released_on
         # math
         step = 40
         margin = 20
@@ -2712,19 +2717,9 @@ class PluginFilterWindow(popup.PopupWindow):
             scale=0.8
         )
 
-        sources_button = bui.buttonwidget(
-            parent=self._root_widget,
-            position=(left_x, 20),
-            size=(column_width, 35),
-            label="Custom Sources",
-            on_activate_call=self.show_sources_window,
-            button_type="square",
-            textcolor=b_textcolor,
-            text_scale=0.6
-        )
         done_button = bui.buttonwidget(
             parent=self._root_widget,
-            position=(right_x, 20),
+            position=((width - column_width) / 2, 20),
             size=(column_width, 35),
             label="Done",
             on_activate_call=self._ok,
@@ -2736,9 +2731,8 @@ class PluginFilterWindow(popup.PopupWindow):
 
         bui.widget(category_scroll, right_widget=sort_scroll, down_widget=incompatible_checkbox)
         bui.widget(sort_scroll, left_widget=category_scroll, down_widget=incompatible_checkbox)
-        bui.widget(incompatible_checkbox, up_widget=category_scroll, down_widget=sources_button)
-        bui.widget(sources_button, up_widget=incompatible_checkbox, right_widget=done_button)
-        bui.widget(done_button, up_widget=incompatible_checkbox, left_widget=sources_button)
+        bui.widget(incompatible_checkbox, up_widget=category_scroll, down_widget=done_button)
+        bui.widget(done_button, up_widget=incompatible_checkbox)
         bui.containerwidget(edit=self._root_widget, selected_child=category_scroll)
 
     def _draw_choice_column(self, position, size, choices, on_choose):
@@ -2789,10 +2783,6 @@ class PluginFilterWindow(popup.PopupWindow):
     def _toggle_incompatible(self, value):
         self._show_incompatible = value
         self._apply()
-
-    def show_sources_window(self):
-        self._ok()
-        PluginCustomSourcesWindow(origin_widget=self._root_widget)
 
     def _ok(self) -> None:
         bui.getsound('swish').play()
@@ -3358,6 +3348,7 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
         self._plugin_manager = plugin_manager
         self.scale_origin = origin_widget.get_screen_space_center()
         self.settings = babase.app.config["Community Plugin Manager"]["Settings"].copy()
+        self._update_button = None
         loop.create_task(self.draw_ui())
 
     async def draw_ui(self):
@@ -3421,6 +3412,29 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             color=b_text_color,
             draw_controller=self._changelog_button,
         )
+        # Opened on top of this window, like the changelog, so unsaved
+        # setting toggles survive a trip to the sources list.
+        self._sources_button = bui.buttonwidget(
+            parent=self._root_widget,
+            position=((width * 0.5) - 45, pos),
+            size=(90, 30),
+            textcolor=b_text_color,
+            button_type='square',
+            label='',
+            on_activate_call=lambda: PluginCustomSourcesWindow(self._sources_button)
+        )
+        bui.textwidget(
+            parent=self._root_widget,
+            position=((width * 0.5) - 40, pos),
+            size=(80, 30),
+            scale=0.6,
+            h_align='center',
+            v_align='center',
+            text='Custom Sources',
+            color=b_text_color,
+            maxwidth=125,
+            draw_controller=self._sources_button,
+        )
         self._save_button = bui.buttonwidget(
             parent=self._root_widget,
             position=((width * 0.82) - button_size[0] / 2, pos),
@@ -3455,11 +3469,14 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             up_widget=self._changelog_button
         )
         bui.widget(
-            self._changelog_button,
-            down_widget=self.checkboxes[0],
-            left_widget=self.checkboxes[0],
-            right_widget=self.checkboxes[0]
+            self._sources_button,
+            down_widget=self.checkboxes[0]
         )
+        bui.widget(
+            self._changelog_button,
+            down_widget=self.checkboxes[0]
+        )
+        self._update_top_row_navigation()
 
         pos = height - 200
         bui.textwidget(
@@ -3607,28 +3624,31 @@ class PluginManagerSettingsWindow(popup.PopupWindow):
             scale=0 if check else 1,
             selectable=(not check)
         )
-        bui.widget(
-            self._changelog_button,
-            right_widget=(
-                check and self.checkboxes[0]
-                or self._save_button
-            ),
-            left_widget=(
-                check and self.checkboxes[0]
-                or self._save_button
+        self._update_top_row_navigation(save_visible=not check)
+        # Only drawn when an update is available, and deleted once it's applied.
+        if self._update_button is not None and self._update_button.exists():
+            bui.widget(
+                self._update_button,
+                up_widget=(
+                    check and self.checkboxes[0]
+                    or self._save_button
+                ),
+                down_widget=(
+                    check and self._changelog_button
+                    or self._save_button
+                )
             )
-        )
-        bui.widget(
-            self._update_button,
-            up_widget=(
-                check and self.checkboxes[0]
-                or self._save_button
-            ),
-            down_widget=(
-                check and self._changelog_button
-                or self._save_button
-            )
-        )
+
+    def _update_top_row_navigation(self, save_visible=False):
+        # Left/right wrap around ChangeLog, Custom Sources and, while there are
+        # unsaved changes, the Save button (hidden at scale 0 otherwise).
+        last = self._save_button if save_visible else self._sources_button
+        bui.widget(self._changelog_button, right_widget=self._sources_button, left_widget=last)
+        bui.widget(self._sources_button, left_widget=self._changelog_button,
+                   right_widget=self._save_button if save_visible else self._changelog_button)
+        if save_visible:
+            bui.widget(self._save_button, left_widget=self._sources_button,
+                       right_widget=self._changelog_button)
 
     def save_settings_button(self):
         babase.app.config["Community Plugin Manager"]["Settings"] = self.settings.copy()
