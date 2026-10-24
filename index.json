@@ -1,6 +1,7 @@
 {
   "plugin_manager_url": "https://github.com/bombsquad-community/plugin-manager/{content_type}/{tag}/plugin_manager.py",
   "versions": {
+    "1.2.3": null,
     "1.2.2": {
       "api_version": 9,
       "min_engine_build": 0,

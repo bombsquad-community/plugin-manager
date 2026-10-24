@@ -69,7 +69,7 @@ except (ImportError, AttributeError):
 # meant for engine bugs. On older builds it's just a named logger.
 logger = logging.getLogger("ba.user.pluginmanager")
 
-PLUGIN_MANAGER_VERSION = "1.2.2"
+PLUGIN_MANAGER_VERSION = "1.2.3"
 
 # Oldest BombSquad build (babase.app.env.engine_build_number) this release
 # runs on. CI copies it into this version's index.json entry, and plugin
@@ -2130,10 +2130,10 @@ class MoreWindow:
 
         self.plugin = plugin
         # collect info
-        last_updated = None
-        for value in plugin.info['versions'].values():
-            if value['api_version'] == _app_api_version:
-                last_updated = value['released_on']
+        # Versions are listed newest first, so the last one is the plugin's
+        # first release, whichever API it targeted.
+        released_on = tuple(plugin.info['versions'].values())[-1]['released_on']
+        last_updated = plugin.latest_compatible_version.released_on
         # math
         step = 40
         margin = 20
@@ -2165,6 +2165,22 @@ class MoreWindow:
             text=(
                 last_updated and
                 f'Last updated on: {last_updated}'
+                or 'Unknown'
+            )
+        )
+        # released on
+        py += margin+step/3
+        bui.textwidget(
+            parent=self._root_widget,
+            position=(px, py),
+            h_align='left',
+            v_align='center',
+            maxwidth=width-margin*2,
+            max_height=step,
+            size=(step, step),
+            text=(
+                released_on and
+                f'Released on: {released_on}'
                 or 'Unknown'
             )
         )

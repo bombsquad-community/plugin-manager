@@ -2,6 +2,12 @@
 
 <!-- line length=80 columns -->
 
+### 1.2.3 (24-10-2026)
+
+- Show when a plugin was first released in its More info window
+- "Last updated on" in the More info window shows the newest version's
+  date instead of the oldest one's
+
 ### 1.2.2 (21-10-2026)
 
 - Plugins can set min_engine_build in their plugman dict; older game
