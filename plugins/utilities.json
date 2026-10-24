@@ -1477,6 +1477,7 @@
         }
       ],
       "versions": {
+        "5.0.0": null,
         "4.1.0": null,
         "4.0.0": {
           "api_version": 7,
