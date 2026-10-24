@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 
 
 # Released under the MIT License. See LICENSE for details.
@@ -8,11 +9,12 @@
 
 """Elimination mini-game."""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import babase
@@ -24,6 +26,17 @@ from bascenev1lib.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Optional, Union
 import random
+
+
+plugman = dict(
+    plugin_name='laser_tracer',
+    description='Dont touch dangerous laser light',
+    external_url='https://youtu.be/wTgwZKiykQw?si=Cr0ybDYAcKCUNFN4',
+    authors=[
+        {'name': 'Mr.Smoothy', 'email': '', 'discord': 'mr.smoothy', 'github': 'imayushsaini'},
+    ],
+    version='1.1.0',
+)
 
 
 class Icon(bs.Actor):
@@ -191,7 +204,7 @@ class LasorTracerGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives Per Player',
@@ -458,7 +471,7 @@ class LasorTracerGame(bs.TeamGameActivity[Player, Team]):
                                          enable_bomb=False,
                                          enable_pickup=False)
         if not self._solo_mode:
-            bs.timer(0.3, babase.Call(self._print_lives, player))
+            bs.timer(0.3, babase.CallPartial(self._print_lives, player))
 
         # If we have any icons, update their state.
         for icon in player.icons:
@@ -511,7 +524,7 @@ class LasorTracerGame(bs.TeamGameActivity[Player, Team]):
 
             player.lives -= 1
             if player.lives < 0:
-                babase.print_error(
+                logging.error(
                     "Got lives < 0 in Elim; this shouldn't happen. solo:" +
                     str(self._solo_mode))
                 player.lives = 0
@@ -602,10 +615,10 @@ class LasorTracerGame(bs.TeamGameActivity[Player, Team]):
             })
 
     def create_laser(self) -> None:
-        bs.timer(6, babase.Call(self.LRlaser, True))
+        bs.timer(6, babase.CallPartial(self.LRlaser, True))
 
-        bs.timer(7, babase.Call(self.UDlaser, True))
-        bs.timer(30, babase.Call(self.create_laser))
+        bs.timer(7, babase.CallPartial(self.UDlaser, True))
+        bs.timer(30, babase.CallPartial(self.create_laser))
 
     def LRlaser(self, left):
         ud_1_r = bs.newnode('region', attrs={'position': (-5, 2.6, 0), 'scale': (
@@ -643,9 +656,9 @@ class LasorTracerGame(bs.TeamGameActivity[Player, Team]):
             20: x2
         })
         _rcombine.connectattr('output', ud_1_r, 'position')
-        bs.timer(20, babase.Call(ud_1_r.delete))
+        bs.timer(20, babase.CallPartial(ud_1_r.delete))
         t = random.randrange(7, 13)
-        bs.timer(t, babase.Call(self.LRlaser, random.randrange(0, 2)))
+        bs.timer(t, babase.CallPartial(self.LRlaser, random.randrange(0, 2)))
 
     def UDlaser(self, up):
         ud_2_r = bs.newnode('region', attrs={'position': (-3, 2.6, -6), 'scale': (
@@ -684,6 +697,6 @@ class LasorTracerGame(bs.TeamGameActivity[Player, Team]):
         })
         _rcombine.connectattr('output', ud_2_r, 'position')
 
-        bs.timer(17, babase.Call(ud_2_r.delete))
+        bs.timer(17, babase.CallPartial(ud_2_r.delete))
         t = random.randrange(6, 13)
-        bs.timer(t, babase.Call(self.UDlaser, random.randrange(0, 2)))
+        bs.timer(t, babase.CallPartial(self.UDlaser, random.randrange(0, 2)))

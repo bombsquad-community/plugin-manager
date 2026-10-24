@@ -1,10 +1,11 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # snake
 # Released under the MIT License. See LICENSE for details.
 #
 """Snake game by SEBASTIAN2059"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -20,6 +21,17 @@ from bascenev1lib.actor import bomb as stdbomb
 
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Tuple, Union, Sequence, Optional
+
+
+plugman = dict(
+    plugin_name='snake',
+    description='Survive a set number of mines to win',
+    external_url='',
+    authors=[
+        {'name': 'SEBASTIAN2059', 'email': '', 'discord': 'sebastian2059', 'github': 'SEBASTIAN2059'},
+    ],
+    version='1.1.0',
+)
 
 
 class ScoreMessage:
@@ -87,7 +99,7 @@ class SnakeGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Score to Win',
@@ -255,7 +267,7 @@ class SnakeGame(bs.TeamGameActivity[Player, Team]):
 
     def generate_mines(self, player: Player):
         try:
-            player.actived = bs.Timer(0.5, babase.Call(self.spawn_mine, player), repeat=True)
+            player.actived = bs.Timer(0.5, babase.CallPartial(self.spawn_mine, player), repeat=True)
         except Exception as e:
             print('Exception -> ' + str(e))
 

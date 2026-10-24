@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
@@ -7,11 +8,12 @@
 # Besides that, enjoy.......!!
 """Provides the chosen-one mini-game."""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import babase
@@ -24,6 +26,17 @@ from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Type, List, Dict, Optional, Sequence, Union
+
+
+plugman = dict(
+    plugin_name='invisible_one',
+    description='Be the invisible one for a length of time to win. Kill the invisible one to become it.',
+    external_url='',
+    authors=[
+        {'name': 'itsre3', 'email': '', 'discord': 'itsre3#0267', 'github': 'itsre3'},
+    ],
+    version='1.1.0',
+)
 
 
 class Player(bs.Player['Team']):
@@ -96,7 +109,7 @@ class InvicibleOneGame(bs.TeamGameActivity[Player, Team]):
         self._scoreboard = Scoreboard()
         self._invicible_one_player: Optional[Player] = None
         self._swipsound = bs.getsound('swip')
-        self._countdownsounds: Dict[int, babase.Sound] = {
+        self._countdownsounds: Dict[int, bs.Sound] = {
             10: bs.getsound('announceTen'),
             9: bs.getsound('announceNine'),
             8: bs.getsound('announceEight'),
@@ -162,7 +175,7 @@ class InvicibleOneGame(bs.TeamGameActivity[Player, Team]):
                 ('modify_part_collision', 'collide', True),
                 ('modify_part_collision', 'physical', False),
                 ('call', 'at_connect',
-                 bs.WeakCall(self._handle_reset_collide)),
+                 bs.WeakCallPartial(self._handle_reset_collide)),
             ),
         )
 
@@ -215,7 +228,7 @@ class InvicibleOneGame(bs.TeamGameActivity[Player, Team]):
 
             # This shouldn't happen, but just in case.
             if not player.is_alive():
-                babase.print_error('got dead player as chosen one in _tick')
+                logging.error('got dead player as chosen one in _tick')
                 self._set_invicible_one_player(None)
             else:
                 scoring_team = player.team
@@ -243,7 +256,7 @@ class InvicibleOneGame(bs.TeamGameActivity[Player, Team]):
             # (Chosen-one player ceasing to exist should
             # trigger on_player_leave which resets chosen-one)
             if self._invicible_one_player is not None:
-                babase.print_error('got nonexistent player as chosen one in _tick')
+                logging.error('got nonexistent player as chosen one in _tick')
                 self._set_invicible_one_player(None)
 
     def end_game(self) -> None:

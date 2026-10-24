@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 """
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
@@ -20,6 +21,17 @@ import bauiv1 as bui
 import bascenev1 as bs
 from bascenev1lib.game.meteorshower import MeteorShowerGame
 from bascenev1lib.actor.bomb import Bomb
+
+
+plugman = dict(
+    plugin_name='meteor_shower_deluxe',
+    description='Meteor shower on all maps support',
+    external_url='',
+    authors=[
+        {'name': 'EraOSBeta', 'email': '', 'discord': '3ra0', 'github': 'EraOSBeta'},
+    ],
+    version='1.1.0',
+)
 
 
 class NewMeteorShowerGame(MeteorShowerGame):
@@ -56,12 +68,12 @@ class NewMeteorShowerGame(MeteorShowerGame):
                 random.uniform(-3.066, -4.12),
                 (-5 + random.random() * forcez) * dropdirz,
             )
-            bs.timer(delay, babase.Call(self._drop_bomb, pos, vel))
+            bs.timer(delay, babase.CallPartial(self._drop_bomb, pos, vel))
             delay += 0.1
         self._set_meteor_timer()
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class byEra0S(babase.Plugin):
     MeteorShowerGame.get_supported_maps = NewMeteorShowerGame.get_supported_maps
     MeteorShowerGame._drop_bomb_cluster = NewMeteorShowerGame._drop_bomb_cluster

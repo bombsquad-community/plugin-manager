@@ -1,7 +1,8 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
 """you vs BombSquad / Created by: byANG3L"""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -18,6 +19,17 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     from typing import Any, Optional
+
+
+plugman = dict(
+    plugin_name='you_vs_bombsquad',
+    description='You against bombsquad solo or with friends. Playable in co-op',
+    external_url='',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 lang = bs.app.lang.language
 if lang == 'Spanish':
@@ -153,7 +165,7 @@ class TUvsBombSquad(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.BoolSetting('Hard Mode', default=False),
             bs.BoolSetting('Epic Mode', default=False),
@@ -478,7 +490,7 @@ class TUvsBombSquad(bs.TeamGameActivity[Player, Team]):
         self.end(results)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##

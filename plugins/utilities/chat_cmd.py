@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported by brostos to api 8
 # Tool used to make porting easier.(https://github.com/bombsquad-community/baport)
 """python 3.9 | chatcmd for a beutiful game  - BombSquad OwO"""
@@ -7,16 +8,28 @@
 
 # -*- coding: utf-8 -*-
 # Ported by brostos to api 8
-# ba_meta require api 8
+# ba_meta require api 9
 
 import threading
 import time
 from bascenev1 import get_foreground_host_activity, get_foreground_host_session, get_game_roster, get_chat_messages, chatmessage as cmsg
-from bauiv1 import set_party_icon_always_visible, screenmessage as smsg
+from bauiv1 import screenmessage as smsg
 import babase
 import bauiv1 as bui
 import bascenev1 as bs
 from bauiv1lib import mainmenu
+
+
+plugman = dict(
+    plugin_name='chat_cmd',
+    description='chatcmd for a beutiful game  - BombSquad OwO,type /help in chat for more info',
+    external_url='',
+    authors=[
+        {'name': 'IM_NOT_PRANAV#7874', 'email': '', 'discord': 'IM_NOT_PRANAV#7874', 'github': ''},
+        {'name': 'FireFighter1037 ', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 # our prefix that what we starts cmds with
 px = '/'
@@ -144,7 +157,7 @@ class _cmds:
                 else:
                     try:
                         id = session_players[int(n[0])]
-                        cmsg(id.getname()+"'s accountid is "+id.get_v1_account_id())
+                        cmsg(id.getname()+"'s accountid is "+id.get_account_id())
                     except:
                         cmsg('could not found player')
 
@@ -548,7 +561,7 @@ class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
-        bui.set_party_icon_always_visible(True)
+        None
 
 # bs.timer(0.05, _update, repeat=True)
 

@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 
-# ba_meta require api 8
+# ba_meta require api 9
 """
 TheSpazGame - Mini game where all characters looks identical , identify enemies and kill them.
 Author:  Mr.Smoothy
@@ -24,6 +25,18 @@ if TYPE_CHECKING:
     from typing import Any, Sequence
 
 
+plugman = dict(
+    plugin_name='the_spaz_game',
+    description='Enemy Spaz Amoung us, kill correct person.',
+    external_url='https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg',
+    authors=[
+        {'name': 'Mr.Smoothy', 'email': 'smoothy@bombsquad.ga',
+            'discord': 'mr.smoothy', 'github': 'imayushsaini'},
+    ],
+    version='1.1.0',
+)
+
+
 CHARACTER = 'Spaz'
 
 # ba_meta export bascenev1.GameActivity
@@ -43,7 +56,7 @@ class TheSpazGame(EliminationGame):
     @classmethod
     def get_available_settings(
         cls, sessiontype: type[bs.Session]
-    ) -> list[babase.Setting]:
+    ) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives Per Player',

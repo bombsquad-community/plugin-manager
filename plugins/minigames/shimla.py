@@ -1,9 +1,10 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
 """DeathMatch game and support classes."""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -18,6 +19,18 @@ from bascenev1lib.game.deathmatch import DeathMatchGame, Player
 from bascenev1lib.gameutils import SharedObjects
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
+
+
+plugman = dict(
+    plugin_name='shimla',
+    description='Death match with elevators, 2-D view.',
+    external_url='https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg',
+    authors=[
+        {'name': 'Mr.Smoothy', 'email': 'smoothy@bombsquad.ga',
+            'discord': 'mr.smoothy', 'github': 'imayushsaini'},
+    ],
+    version='1.1.0',
+)
 
 # ba_meta export bascenev1.GameActivity
 
@@ -223,8 +236,8 @@ class ShimlaGame(DeathMatchGame):
                 9: 5+12,
                 15: 5.1
             })
-            bs.timer(16, babase.Call(lambda lift: lift.update({'state': 'end'}), lift))
-            bs.timer(12, babase.Call(clean, lift))
+            bs.timer(16, babase.CallPartial(lambda lift: lift.update({'state': 'end'}), lift))
+            bs.timer(12, babase.CallPartial(clean, lift))
 
     def _handle_lift_disconnect(self):
         region = bs.getcollision().sourcenode
