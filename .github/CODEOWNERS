@@ -1,0 +1,29 @@
+# Plugins whose source claims copyright without granting an open license,
+# or forbids edits without the author's permission. Changes to them need
+# their author's review, since nobody else holds the right to modify them.
+# Everything else in the catalog is under an open license (or none stated)
+# and has no code owner.
+#
+# Owners are GitHub usernames, matching the `github` key in each plugin's
+# plugman authors where one is set. Keep this list in sync when a plugin's
+# license header changes or a new proprietary plugin is added.
+
+# "Copyright 2025/2026 - Solely by BrotherBoard"
+/plugins/utilities/camera.py      @BroBordd
+/plugins/utilities/coolbox.py     @BroBordd
+/plugins/utilities/fileman.py     @BroBordd
+/plugins/utilities/finder.py      @BroBordd
+/plugins/utilities/movi.py        @BroBordd
+/plugins/utilities/path.py        @BroBordd
+/plugins/utilities/plugtools.py   @BroBordd
+/plugins/utilities/power.py       @BroBordd
+/plugins/utilities/replay.py      @BroBordd
+/plugins/utilities/topmsg.py      @BroBordd
+/plugins/utilities/sandbox.py     @BroBordd
+
+# "Copyright 2026 - by Drap & Nizar". Nizar has no GitHub username on
+# record (plugman `github` is empty), so only Drap can be requested.
+/plugins/utilities/enhanced_party_window.py   @DrapBS
+
+# EasyConnect by Mr.Smoothy: "DONT EDIT ANYTHING WITHOUT PERMISSION"
+/plugins/utilities/easy_connect.py   @imayushsaini
