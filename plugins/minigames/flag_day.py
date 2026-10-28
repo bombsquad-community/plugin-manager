@@ -85,11 +85,18 @@ class Icon(Icon):
             shadow: float = 1.0,
             dead: bool = False,
     ):
-        super().__init__(player, position, scale, show_lives, show_death,
-                         name_scale, name_maxwidth, flatness, shadow)
+        super().__init__(player, position, scale, show_lives=show_lives,
+                         show_death=show_death, name_scale=name_scale,
+                         name_maxwidth=name_maxwidth, flatness=flatness, shadow=shadow)
         if dead:
             self._name_text.opacity = 0.2
-            self.node.color = (0.7, 0.3, 0.3)
+            # Players with a character depiction get a 'depictiondisplay'
+            # node, which tints through color_override instead of color.
+            if self.node.getnodetype() == 'image':
+                self.node.color = (0.7, 0.3, 0.3)
+            else:
+                self.node.color_override = (0.7, 0.3, 0.3)
+                self.node.use_color_override = True
             self.node.opacity = 0.2
 
 

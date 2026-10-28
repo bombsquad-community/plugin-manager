@@ -730,7 +730,7 @@ class UFOSet:
                 # don't have to assume their actor type, but we have no
                 # abstracted velocity as of yet.
                 if player.is_alive():
-                    assert isinstance(player.actor, UFO)
+                    assert isinstance(player.actor, PlayerSpaz)
                     assert player.actor.node
                     player_pts.append(
                         (

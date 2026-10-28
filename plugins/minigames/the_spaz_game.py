@@ -133,8 +133,13 @@ class TheSpazGame(EliminationGame):
 
     def update_appearance(self, spaz, character):
         factory = SpazFactory.get()
-        media = factory.get_media(character)
-        for field, value in media.items():
-            setattr(spaz.node, field, value)
-        spaz.node.style = factory.get_style(character)
+        if hasattr(factory, 'get_look_attrs'):
+            # 1.8.1+: builtin characters are spaz defs, not loose media.
+            for field, value in factory.get_look_attrs(character).items():
+                setattr(spaz.node, field, value)
+        else:
+            media = factory.get_media(character)
+            for field, value in media.items():
+                setattr(spaz.node, field, value)
+            spaz.node.style = factory.get_style(character)
         spaz.node.name = ''

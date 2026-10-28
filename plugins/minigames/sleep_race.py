@@ -54,7 +54,7 @@ class RaceRegion(bs.Actor):
     def __init__(self, pt: Sequence[float], index: int):
         super().__init__()
         activity = self.activity
-        assert isinstance(activity, RaceGame)
+        assert isinstance(activity, SleepRaceGame)
         self.pos = pt
         self.index = index
         self.node = bs.newnode(

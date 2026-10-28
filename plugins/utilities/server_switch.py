@@ -118,11 +118,12 @@ def check_connect_status():
 
 def public_servers(window=None):
     from bauiv1lib.gather import GatherWindow
+    if window is None:
+        window = bui.app.ui_v1.get_main_window()
     if window is not None:
-        # Opened from the in-game menu, so it's the one to navigate from.
-        if window.main_window_has_control():
+        if not isinstance(window, GatherWindow) and window.main_window_has_control():
             window.main_window_replace(lambda: GatherWindow())
-    elif bui.app.ui_v1.get_main_window() is None:
+    else:
         bui.app.ui_v1.set_main_window(
             GatherWindow(), is_top_level=True, back_state=None, suppress_warning=True)
 

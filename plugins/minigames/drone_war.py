@@ -128,7 +128,8 @@ class Drone(bs.Actor):
         self.rocket_launcher = launcher
 
     def fire(self):
-        if hasattr(self.grab_node, "position"):
+        # The drone outlives its pilot, whose node is dead after it dies.
+        if self.grab_node and self.spaz.node:
             self.rocket_launcher.shot(self.spaz, self.x_direction, self.z_direction, (
                 self.grab_node.position[0], self.grab_node.position[1] - 1, self.grab_node.position[2]))
 
@@ -437,7 +438,7 @@ class ChooseQueen(DeathMatchGame):
             player.shatter(True)
 
     def spawn_drone(self, spaz):
-        with bs.get_foreground_host_activity().context:
+        with self.context:
 
             drone = Drone(spaz)
             r_launcher = RocketLauncher()

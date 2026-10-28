@@ -1035,7 +1035,9 @@ class PartyWindow(bui.Window):
         self._private_chat = False
         self._firstcall = True
         self.ping_server()
-        None
+        # Tells the engine a party window is open, so new chat messages
+        # come to on_chat_message instead of popping up on screen.
+        self._uiopenstate: bui.UIOpenState | None = bui.UIOpenState('classicparty')
         self._r = 'partyWindow'
         self._popup_type: Optional[str] = None
         self._popup_party_member_client_id: Optional[int] = None
@@ -1311,8 +1313,13 @@ class PartyWindow(bui.Window):
         self._popup_type = 'menu'
 
     def _update(self) -> None:
+        # A popup opened from this window (credits, say) can keep it alive
+        # after it closes; there is nothing left to update then.
+        if not self._root_widget:
+            return
         if not self._private_chat:
-            None
+            if self._uiopenstate is None:
+                self._uiopenstate = bui.UIOpenState('classicparty')
             bui.textwidget(edit=self._title_text, text=self.title)
             if self._firstcall:
                 if hasattr(self, '_status_text'):
@@ -1468,7 +1475,8 @@ class PartyWindow(bui.Window):
                                                c_height_total)),
                                      position=(30, 80))
         else:
-            None
+            # Private chat shows public messages on screen instead.
+            self._uiopenstate = None
             for widget in self._name_widgets:
                 widget.delete()
             self._name_widgets = []

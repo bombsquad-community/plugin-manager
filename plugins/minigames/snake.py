@@ -274,6 +274,9 @@ class SnakeGame(bs.TeamGameActivity[Player, Team]):
     def spawn_mine(self, player: Player):
         if player.team.score >= self._score_to_win:
             return
+        # The timer keeps running while the player is dead.
+        if not player.actor or not player.actor.node:
+            return
         pos = player.actor.node.position
         # mine = stdbomb.Bomb(position=(pos[0], pos[1] + 2.0, pos[2]),
         # velocity=(0, 0, 0),

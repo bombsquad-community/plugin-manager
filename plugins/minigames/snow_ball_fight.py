@@ -312,7 +312,7 @@ class NewPlayerSpaz(PlayerSpaz):
     def on_punch_press(self) -> None:
         if not self.node or self.frozen or self.node.knockout > 0.0:
             return
-        t_ms = bs.time() * 1000
+        t_ms = int(bs.time() * 1000)
         assert isinstance(t_ms, int)
         if t_ms - self.last_punch_time_ms >= self._punch_cooldown:
             if self.punch_callback is not None:

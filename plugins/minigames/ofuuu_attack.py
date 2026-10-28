@@ -65,11 +65,14 @@ class UFO(bs.Actor):
             def pass_():
                 self.regs.clear()
                 bs.timer(3875*0.001, self.move)
-                try:
-                    bs.timer(3277*0.001, lambda: Bomb(velocity=(0, 0, 0), position=(
-                        self.target[0], self.node.position[1]-0.43999, self.target[2]), bomb_type='impact').autoretain().arm())
-                except:
-                    pass
+
+                def drop_bomb():
+                    if not self.node:
+                        return
+                    Bomb(velocity=(0, 0, 0), position=(
+                        self.target[0], self.node.position[1]-0.43999, self.target[2]),
+                        bomb_type='impact').autoretain().arm()
+                bs.timer(3277*0.001, drop_bomb)
             key = bs.Material()
             key.add_actions(
                 conditions=('they_have_material', shared.object_material),
@@ -293,8 +296,11 @@ class UFOAttackGame(bs.TeamGameActivity[Player, Team]):
         if self._epic_mode:
             self.slow_motion = True
 
-    def get_instance_display_string(self) -> babase.Lstr:
-        return self.game_name
+    def get_instance_display_string(self, *, langstr: bool = False):
+        # The engine asks for a LangStr (langstr=True) since 1.8.0.
+        if langstr:
+            return babase.LangStr.from_text(self.game_name)
+        return babase.Lstr(value=self.game_name)
 
     def on_begin(self) -> None:
         super().on_begin()

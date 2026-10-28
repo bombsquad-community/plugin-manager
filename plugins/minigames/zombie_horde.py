@@ -20,6 +20,7 @@ from bascenev1._messages import PlayerDiedMessage, StandMessage
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
 from bascenev1lib.game.elimination import Icon, Player
+from bascenev1lib.actor.spaz import Spaz
 from bascenev1lib.actor.spaz import PickupMessage
 from bascenev1lib.actor.spazbot import SpazBotSet, BrawlerBot, SpazBotDiedMessage
 from bascenev1lib.actor.spazfactory import SpazFactory
@@ -38,6 +39,22 @@ plugman = dict(
     ],
     version='1.1.0',
 )
+
+
+# The mixed-up zombie look, as the legacy asset names of each part.
+ZOMBIE_PARTS = {
+    'head_mesh': 'zoeHead',
+    'color_texture': 'agentColor',
+    'color_mask_texture': 'pixieColorMask',
+    'torso_mesh': 'bonesTorso',
+    'pelvis_mesh': 'pixiePelvis',
+    'upper_arm_mesh': 'frostyUpperArm',
+    'forearm_mesh': 'frostyForeArm',
+    'hand_mesh': 'bonesHand',
+    'upper_leg_mesh': 'bonesUpperLeg',
+    'lower_leg_mesh': 'pixieLowerLeg',
+    'toes_mesh': 'bonesToes',
+}
 
 
 class PlayerSpaz_Zom(PlayerSpaz):
@@ -266,20 +283,38 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         myAppear = copy.copy(babase.app.classic.spaz_appearances['Kronk'])
         myAppear.name = 'Kronk2'
         babase.app.classic.spaz_appearances['Kronk2'] = myAppear
+        if getattr(myAppear, 'character', None) is not None:
+            # Since 1.8.1 the builtin characters are packaged spaz defs with
+            # no per-part media, so the zombie is put together from the
+            # parts' own asset names and drawn in the legacy form.
+            myAppear.character = None
+            for field, name in ZOMBIE_PARTS.items():
+                setattr(myAppear, field, name)
+            kronk_sounds = [f'kronk{i}' for i in range(1, 11)]
+            myAppear.jump_sounds = kronk_sounds
+            myAppear.attack_sounds = kronk_sounds
+            myAppear.impact_sounds = kronk_sounds
+            myAppear.pickup_sounds = kronk_sounds
+            myAppear.death_sounds = ['kronkDeath']
+            myAppear.fall_sounds = ['kronkFall']
+            myAppear.style = 'kronk'
+            my_factory.spaz_media.pop('Kronk2', None)
+            appears = []
         for appear in appears:
             my_factory.get_media(appear)
         med = my_factory.spaz_media
-        med['Kronk2']['head_mesh'] = med['Zoe']['head_mesh']
-        med['Kronk2']['color_texture'] = med['Agent Johnson']['color_texture']
-        med['Kronk2']['color_mask_texture'] = med['Pixel']['color_mask_texture']
-        med['Kronk2']['torso_mesh'] = med['Bones']['torso_mesh']
-        med['Kronk2']['pelvis_mesh'] = med['Pixel']['pelvis_mesh']
-        med['Kronk2']['upper_arm_mesh'] = med['Frosty']['upper_arm_mesh']
-        med['Kronk2']['forearm_mesh'] = med['Frosty']['forearm_mesh']
-        med['Kronk2']['hand_mesh'] = med['Bones']['hand_mesh']
-        med['Kronk2']['upper_leg_mesh'] = med['Bones']['upper_leg_mesh']
-        med['Kronk2']['lower_leg_mesh'] = med['Pixel']['lower_leg_mesh']
-        med['Kronk2']['toes_mesh'] = med['Bones']['toes_mesh']
+        if appears:
+            med['Kronk2']['head_mesh'] = med['Zoe']['head_mesh']
+            med['Kronk2']['color_texture'] = med['Agent Johnson']['color_texture']
+            med['Kronk2']['color_mask_texture'] = med['Pixel']['color_mask_texture']
+            med['Kronk2']['torso_mesh'] = med['Bones']['torso_mesh']
+            med['Kronk2']['pelvis_mesh'] = med['Pixel']['pelvis_mesh']
+            med['Kronk2']['upper_arm_mesh'] = med['Frosty']['upper_arm_mesh']
+            med['Kronk2']['forearm_mesh'] = med['Frosty']['forearm_mesh']
+            med['Kronk2']['hand_mesh'] = med['Bones']['hand_mesh']
+            med['Kronk2']['upper_leg_mesh'] = med['Bones']['upper_leg_mesh']
+            med['Kronk2']['lower_leg_mesh'] = med['Pixel']['lower_leg_mesh']
+            med['Kronk2']['toes_mesh'] = med['Bones']['toes_mesh']
 
     def get_instance_description(self) -> str | Sequence:
         return ('Kill walkers for points! ',

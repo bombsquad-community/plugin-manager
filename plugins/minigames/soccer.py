@@ -74,7 +74,7 @@ class Puck(bs.Actor):
         if isinstance(msg, bs.DieMessage):
             assert self.node
             self.node.delete()
-            activity = self._activity()
+            activity = self.getactivity(doraise=False)
             if activity and not msg.immediate:
                 activity.handlemessage(PuckDiedMessage(self))
 
@@ -96,7 +96,7 @@ class Puck(bs.Actor):
             # If this hit came from a player, log them as the last to touch us.
             s_player = msg.get_source_player(Player)
             if s_player is not None:
-                activity = self._activity()
+                activity = self.getactivity(doraise=False)
                 if activity:
                     if s_player in activity.players:
                         self.last_players_to_touch[s_player.team.id] = s_player

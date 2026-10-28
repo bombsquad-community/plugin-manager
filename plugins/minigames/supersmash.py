@@ -38,8 +38,10 @@ plugman = dict(
 class Icon(Icon):
     def update_for_lives(self) -> None:
         """Update for the target player's current lives."""
-        if self._player:
-            lives = self._player.lives
+        # The stock Icon keeps a weakref to its player.
+        player = self._player()
+        if player:
+            lives = player.lives
         else:
             lives = 0
         if self._show_lives:
@@ -60,8 +62,8 @@ class PowBox(Bomb):
                  position: Sequence[float] = (0.0, 1.0, 0.0),
                  velocity: Sequence[float] = (0.0, 0.0, 0.0)) -> None:
         Bomb.__init__(self,
-                      position,
-                      velocity,
+                      position=position,
+                      velocity=velocity,
                       bomb_type='tnt',
                       blast_radius=2.5,
                       source_player=None,
@@ -348,7 +350,7 @@ class SSPlayerSpaz(PlayerSpaz):
                 self.last_attacked_time = bs.time()
                 self.last_attacked_type = (msg.hit_type, msg.hit_subtype)
             Spaz.handlemessage(self, bs.HitMessage)  # Augment standard behavior.
-            activity = self._activity()
+            activity = self.getactivity(doraise=False)
             if activity is not None and self._player.exists():
                 activity.handlemessage(PlayerSpazHurtMessage(self))
 
@@ -916,7 +918,7 @@ class SuperSmashElimination(bs.TeamGameActivity[Player2, Team2]):
         if isinstance(msg, bs.PlayerDiedMessage):
             # Augment standard behavior.
             super().handlemessage(msg)
-            player: Player = msg.getplayer(Player)
+            player: Player2 = msg.getplayer(Player2)
 
             player.lives -= 1
             if player.lives < 0:

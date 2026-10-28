@@ -384,9 +384,9 @@ class QuakeGame(bs.TeamGameActivity[Player, Team]):
         self.drop_shield_timer = bs.Timer(8.001, bs.WeakCallPartial(self.drop_shield), repeat=True)
 
         shared = SharedObjects.get()
+        map = bs.getactivity()._map.getname()
         if self.settings['Obstacles']:
             count = self.settings['Obstacle Count']
-            map = bs.getactivity()._map.getname()
             for i in range(count):
                 if map == 'Football Stadium':
                     radius = (random.uniform(-10, 1),
@@ -404,7 +404,8 @@ class QuakeGame(bs.TeamGameActivity[Player, Team]):
                     graphics=self.settings['Graphics'],
                     random_color=self.settings['Random Obstacle Color'],
                     rebound=self.settings['Obstacles Bounces Shots'],
-                    shape=int(self.settings['Obstacles Shape'])).autoretain()
+                    shape=int(self.settings['Obstacles Shape']),
+                    first_half=i < count / 2).autoretain()
 
         if self.settings['Graphics'] == 2:
             bs.getactivity().globalsnode.tint = (bs.getactivity(
@@ -569,7 +570,8 @@ class Obstacle(bs.Actor):
                  graphics: bool,
                  random_color: bool,
                  rebound: bool,
-                 shape: int) -> None:
+                 shape: int,
+                 first_half: bool = True) -> None:
         super().__init__()
 
         shared = SharedObjects.get()
@@ -610,7 +612,7 @@ class Obstacle(bs.Actor):
         if graphics == 2:
             self.light_node = bs.newnode('light', attrs={
                 'position': (0, 0, 0),
-                'color': ((0.8, 0.2, 0.2) if i < count/2 else (0.2, 0.2, 0.8))
+                'color': ((0.8, 0.2, 0.2) if first_half else (0.2, 0.2, 0.8))
                 if not random_color else ((random.uniform(0, 1.1), random.uniform(0, 1.1), random.uniform(0, 1.1))),
                 'radius': 0.2,
                 'intensity': 1,
