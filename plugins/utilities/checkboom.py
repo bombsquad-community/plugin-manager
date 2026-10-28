@@ -4155,7 +4155,7 @@ class byBordd(bs.Plugin):
                 (
                     (activity:=(session:=bs.getsession()).getactivity()) and
                     isinstance(activity,bs.JoinActivity) and
-                    session._next_game is Checkboom
+                    getattr(session, '_next_game', None) is Checkboom
                 ) or isinstance(activity, Checkboom)
             )
             else old(b,*a,**k)
