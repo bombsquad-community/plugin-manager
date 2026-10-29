@@ -1,16 +1,11 @@
 # ba_meta require api 9
 
 """
-    by shailesh
-    discord: shailesh_gabu_11/shailesh
-
     This plugin keeps the track of party names you recently interacted with.
-    and Allows you to view/filter of those names for easy search
+    and Allows you to view/filter of those names for easy search. 
+    (by adding a recent button in gather public tab)
 
-    helps when you forgot to add a party in favorite list \
-         which you recently enjoy the most.
-
-    (this happens to me several times that's why I made this little plugin)
+    Helps when you forgot to add a party in favorite list which you recently enjoy the most.
 """
 
 from __future__ import annotations
@@ -23,19 +18,16 @@ from bauiv1lib.gather import publictab
 
 #-------- PLUGIN MANAGER DEFINATION -----------------
 
-__version__ = "1.0.0"
-__author__ = ["shailesh"]
+__version__ = "1.0.1"
+__author__ = "shailesh"
 
 plugman = dict(
     plugin_name="recent_party_names_log",
-    description=(
-        "This plugin keeps the track of party names you recently interacted with."
-        + "And allows you to view/filter of those names for easy search "
-    ),
+    description=__doc__,
     external_url="https://youtu.be/EyQWRstNmzc?si=lrf4zS0r7Kj8Ngd4",
     authors=[
         {
-            "name": __author__[0],
+            "name": __author__,
             "email": "shaileshgabu11@gmail.com",
             "discord": "shailesh_gabu_11",
             "github": "Shailesh051211"
@@ -47,13 +39,14 @@ plugman = dict(
 
 
 MAX_RECENTS = 50
-RECENT_PARTIES_CONFIG_KEY = "GS:Party History"
-
-if bui.app.config.get(RECENT_PARTIES_CONFIG_KEY) is None:
-    bui.app.config[RECENT_PARTIES_CONFIG_KEY] = OrderedDict()
+RECENT_PARTY_CONGIF_KEY = "GS:Party History"
 
 # ba_meta export babase.Plugin
 class plg(bui.Plugin):
+
+    party_log = OrderedDict()
+    if isinstance(bui.app.config.get(RECENT_PARTY_CONGIF_KEY), list):
+        party_log = OrderedDict(bui.app.config[RECENT_PARTY_CONGIF_KEY])
 
     def _new_build_join_tab(func):
         def wrapper(*args, **kwargs):
@@ -64,7 +57,10 @@ class plg(bui.Plugin):
             recent_button = bui.buttonwidget(
                 id="GS|recent_button",
                 parent=args[0]._container,
-                position=(c_width * 0.86, c_height - btn_height - 25),
+                position=(
+                    c_width * 0.86,
+                    c_height - btn_height - 25
+                ),
                 size=(btn_width, btn_height),
                 label="Recents",
                 left_widget=args[0]._host_text,
@@ -97,22 +93,17 @@ class plg(bui.Plugin):
 
     def _add_party(party: publictab.PartyEntry) -> None:
 
-        if not party.name:
-            return
-
-        config = bui.app.config
-        recent_parties_dict = config[RECENT_PARTIES_CONFIG_KEY]
-
         key = party.address
         # remove if its already exists
-        recent_parties_dict.pop(key, None)
+        plg.party_log.pop(key, None)
         # re/new add
-        recent_parties_dict[key] = party.name
+        plg.party_log[key] = party.name
 
-        if len(recent_parties_dict) > MAX_RECENTS:
-            recent_parties_dict.popitem(last=False) # oldest remove
+        if len(plg.party_log) > MAX_RECENTS:
+            plg.party_log.popitem(last=False) # oldest remove
 
-        config.commit()
+        bui.app.config[RECENT_PARTY_CONGIF_KEY] = list(plg.party_log.items())
+        bui.app.config.commit()
 
 
 class RecentPartiesWindow(popup.PopupWindow):
@@ -128,16 +119,17 @@ class RecentPartiesWindow(popup.PopupWindow):
 
         uiscale = bui.app.ui_v1.uiscale
 
-        scrn_width, scrn_height = bui.get_virtual_screen_size()
-        self._width, self._height = scrn_width * 0.6, scrn_height
+        vs_width, vs_height = bui.get_virtual_screen_size()
+        self._width = vs_width * 0.6
+        self._height = vs_height
 
         # original popup pop's up too high for MEDIUM and HIGH
         # so, lets downgrade it and centralized
         focus_position = (0.0, 0.0)
         if uiscale is not bui.UIScale.SMALL:
             focus_position = (
-                scrn_width/2 - self._width/2,
-                scrn_height/2 - self._height * 0.30
+                vs_width/2 - self._width/2,
+                vs_height/2 - self._height * 0.30
             )
 
         super().__init__(
@@ -187,12 +179,12 @@ class RecentPartiesWindow(popup.PopupWindow):
             border_opacity=0.8,
             highlight=False,
         )
+        self._subcontainer: bui.Widget | None = None
         self._draw_subcontainer()
 
     def _draw_subcontainer(self) -> None:
 
-        parties = bui.app.config[RECENT_PARTIES_CONFIG_KEY]
-        if len(parties) == 0:
+        if len(plg.party_log) == 0:
             bui.textwidget(
                 parent=self.root_widget,
                 size=(0, 0),
@@ -204,37 +196,46 @@ class RecentPartiesWindow(popup.PopupWindow):
             )
             return
 
-        ypad = 30
+        ypad = 10
         row_height = 50
 
         filter_btns = []
         remove_btns = []
 
         subwidth = self._scrollwidth
-        subheight = row_height * len(parties) + ypad * 2
-        self._subcontainer = bui.containerwidget(
-            parent=self._scrollwidget,
-            size=(subwidth, subheight),
-            background=False,
-        )
+        subheight = row_height * len(plg.party_log) + ypad * 2
+        if self._subcontainer is None:
+            self._subcontainer = bui.containerwidget(
+                parent=self._scrollwidget,
+                size=(subwidth, subheight),
+                background=False,
+            )
+        else:
+            bui.containerwidget(
+                edit=self._subcontainer,
+                size=(subwidth, subheight)
+            )
 
         btn_height = row_height * 0.8
-        ypos = subheight - ypad
-        for address, name in reversed(parties.items()):
+        btn_ypad = row_height - btn_height
+        ypos = subheight - ypad - row_height
+        for address, name in reversed(plg.party_log.items()):
             # Pary Name
             bui.textwidget(
                 parent=self._subcontainer,
                 position=(15, ypos),
-                size=(0, 0),
+                size=(0, row_height),
                 scale=1.2,
                 maxwidth=subwidth * 0.66,
                 text=name,
+                h_align="left",
+                v_align="center",
             )
             # Filter
             filter_btns.append(
                 bui.buttonwidget(
                   parent=self._subcontainer,
-                  position=(subwidth * 0.69, ypos - btn_height),
+                  position=(subwidth * 0.69, ypos + btn_ypad),
                   size=(80, btn_height),
                   label="Filter",
                   color=(0.3, 0.3, 0.9),
@@ -245,7 +246,7 @@ class RecentPartiesWindow(popup.PopupWindow):
             remove_btns.append(
                 bui.buttonwidget(
                   parent=self._subcontainer,
-                  position=(subwidth * 0.82, ypos - btn_height),
+                  position=(subwidth * 0.82, ypos + btn_ypad),
                   size=(100, btn_height),
                   label="Remove",
                   color=(0.7, 0.3, 0.3),
@@ -291,22 +292,22 @@ class RecentPartiesWindow(popup.PopupWindow):
         from bauiv1lib import confirm
 
         confirm.ConfirmWindow(
-            f'Remove "{bui.app.config[RECENT_PARTIES_CONFIG_KEY][key]}"?',
+            f'Remove "{plg.party_log[key]}"?',
             lambda: self._do_remove(key),
             width=450, height=150,
         )
 
     def _do_remove(self, key: str) -> None:
 
-        cfg = bui.app.config
-        cfg[RECENT_PARTIES_CONFIG_KEY].pop(key)
-        cfg.commit()
+        plg.party_log.pop(key)
+        bui.app.config[RECENT_PARTY_CONGIF_KEY] = list(plg.party_log.items())
+        bui.app.config.commit()
         bui.getsound("shieldDown").play()
         self._re_build_subcontainer()
 
     def _re_build_subcontainer(self) -> None:
-        self._subcontainer.delete()
-        self._subcontainer = None
+        for child in self._subcontainer.get_children():
+            child.delete()
         self._draw_subcontainer()
 
     @override
