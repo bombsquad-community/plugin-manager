@@ -25,7 +25,7 @@ plugman = dict(
     description='chatcmd for a beutiful game  - BombSquad OwO,type /help in chat for more info',
     external_url='',
     authors=[
-        {'name': 'IM_NOT_PRANAV#7874', 'email': '', 'discord': 'IM_NOT_PRANAV#7874', 'github': ''},
+        {'name': 'IM_NOT_PRANAV#7874', 'email': '', 'discord': 'IM_NOT_PRANAV#7874', 'github': 'pranav-1711'},
         {'name': 'FireFighter1037 ', 'email': '', 'discord': '', 'github': ''},
     ],
     version='1.1.0',
