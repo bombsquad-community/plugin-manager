@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -19,6 +20,17 @@ from bascenev1lib.actor.spazfactory import SpazFactory
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
+
+
+plugman = dict(
+    plugin_name='snow_ball_fight',
+    description='Throw snoballs and dominate',
+    external_url='https://youtu.be/uXyb_meBjGI?si=D_N_OXZT5BFh8R5C',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 lang = bs.app.lang.language
@@ -163,7 +175,7 @@ class Snowball(bs.Actor):
             0.26: self.radius
         })
         if self.snowball_melt:
-            bs.timer(1.5, bs.WeakCall(self._disappear))
+            bs.timer(1.5, bs.WeakCallPartial(self._disappear))
 
     def hit(self) -> None:
         if not self.node:
@@ -173,7 +185,7 @@ class Snowball(bs.Actor):
         if self.snowball_explode:
             self._exploded = True
             self.do_explode()
-            bs.timer(0.001, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+            bs.timer(0.001, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
         else:
             self.do_hit()
 
@@ -200,7 +212,7 @@ class Snowball(bs.Actor):
                         hit_subtype='default'))
 
         if not self.snowball_bounce:
-            bs.timer(0.05, bs.WeakCall(self.do_bounce))
+            bs.timer(0.05, bs.WeakCallPartial(self.do_bounce))
 
     def do_explode(self) -> None:
         Blast(position=self.node.position,
@@ -217,7 +229,7 @@ class Snowball(bs.Actor):
             return
         if not self.snowball_bounce:
             vel = self.node.velocity
-            bs.timer(0.01, bs.WeakCall(self.calc_bounce, vel))
+            bs.timer(0.01, bs.WeakCallPartial(self.calc_bounce, vel))
         else:
             return
 
@@ -227,7 +239,7 @@ class Snowball(bs.Actor):
         ospd = babase.Vec3(*vel).length()
         dot = sum(x*y for x, y in zip(vel, self.node.velocity))
         if ospd*ospd - dot > 50.0:
-            bs.timer(0.05, bs.WeakCall(self.do_bounce))
+            bs.timer(0.05, bs.WeakCallPartial(self.do_bounce))
 
     def do_bounce(self) -> None:
         if not self.node:
@@ -258,7 +270,7 @@ class Snowball(bs.Actor):
             0.05: 0.0
         })
         bs.timer(0.08,
-                 bs.WeakCall(self.handlemessage, bs.DieMessage()))
+                 bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
     def _disappear(self) -> None:
         self._exploded = True
@@ -276,7 +288,7 @@ class Snowball(bs.Actor):
                 0.5: 0.0
             })
             bs.timer(0.55,
-                     bs.WeakCall(self.handlemessage, bs.DieMessage()))
+                     bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
     def handlemessage(self, msg: Any) -> Any:
         if isinstance(msg, bs.DieMessage):
@@ -300,7 +312,7 @@ class NewPlayerSpaz(PlayerSpaz):
     def on_punch_press(self) -> None:
         if not self.node or self.frozen or self.node.knockout > 0.0:
             return
-        t_ms = bs.time() * 1000
+        t_ms = int(bs.time() * 1000)
         assert isinstance(t_ms, int)
         if t_ms - self.last_punch_time_ms >= self._punch_cooldown:
             if self.punch_callback is not None:
@@ -330,8 +342,8 @@ class NewPlayerSpaz(PlayerSpaz):
             if not self.node.hold_node:
                 bs.timer(
                     0.1,
-                    bs.WeakCall(self._safe_play_sound,
-                                SpazFactory.get().swish_sound, 0.8))
+                    bs.WeakCallPartial(self._safe_play_sound,
+                                       SpazFactory.get().swish_sound, 0.8))
         self._turbo_filter_add_press('punch')
 
     def handlemessage(self, msg: Any) -> Any:
@@ -365,7 +377,7 @@ class SnowballFightGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Kills to Win Per Player',

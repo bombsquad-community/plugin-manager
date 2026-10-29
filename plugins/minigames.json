@@ -15,6 +15,13 @@
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "182e288db5114ddb5948a6f493977893"
+        },
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "a941899",
@@ -99,6 +106,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "4d181f37721d754840f52a112d2a691f"
+        },
         "1.0.2": {
           "api_version": 8,
           "commit_sha": "593ae6f",
@@ -131,6 +145,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "5978f1f4c305b07c74d275b0ea9d991b"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -157,6 +178,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "9e9262a92bbeb50fd392b0938f53e0fb"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -183,6 +211,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "0d7df9cbd1a1b3cb5dd99636d6437a6b"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -275,10 +310,17 @@
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
           "discord": "crossjoy",
-          "github": ""
+          "github": "CrossJoy"
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "1dab72ff647dc31297e17dd2c03a482e"
+        },
         "2.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -485,7 +527,7 @@
           "name": "SEBASTIAN2059",
           "email": "",
           "discord": "sebastian2059",
-          "github": ""
+          "github": "SEBASTIAN2059"
         },
         {
           "name": "zPanxo",
@@ -495,6 +537,13 @@
         }
       ],
       "versions": {
+        "1.2.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "93dc6729a4daba0843b3e161bd21c203"
+        },
         "1.1.0": {
           "api_version": 8,
           "commit_sha": "0069f15",
@@ -517,10 +566,17 @@
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "ededc1458b71f87ae5a7b4e6c2344d63"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -607,10 +663,17 @@
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "13396d0a8253ebfc0a9a81187857dec5"
+        },
         "1.0.2": {
           "api_version": 8,
           "commit_sha": "78bc781",
@@ -639,10 +702,17 @@
           "name": "Mr.Smoothy",
           "email": "smoothy@bombsquad.ga",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "2b713843b05c43216e9aafc923d91aa1"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -723,10 +793,17 @@
           "name": "Mr.Smoothy",
           "email": "",
           "discord": "mr.smoothy",
-          "github": ""
+          "github": "imayushsaini"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "9c3613ee888536f564abbc42d57e2baf"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "505c948",
@@ -835,6 +912,13 @@
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "85cd38ed7d9eab02978941e4756aa6c6"
+        },
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "1a8037e",
@@ -857,10 +941,17 @@
           "name": "itsre3",
           "email": "",
           "discord": "itsre3#0267",
-          "github": ""
+          "github": "itsre3"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "eeacc94f6c92083331ba31c6eb64111a"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -887,6 +978,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "e41b141f6789e4e42f7fe259eeef2dba"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -947,10 +1045,17 @@
           "name": "itsre3",
           "email": "",
           "discord": "itsre3#0267",
-          "github": ""
+          "github": "itsre3"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "bba52c731a6434a754e5bae7d5abb24d"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -973,10 +1078,17 @@
           "name": "SEBASTIAN2059",
           "email": "",
           "discord": "sebastian2059",
-          "github": ""
+          "github": "SEBASTIAN2059"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "5e1352226ba76adf8d5ad057a6b4c458"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -1003,6 +1115,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "df2f9ee0ffbf1e95c019010be247111e"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "185480d",
@@ -1019,10 +1138,17 @@
           "name": "Cross Joy",
           "email": "cross.joy.official@gmail.com",
           "discord": "crossjoy",
-          "github": ""
+          "github": "CrossJoy"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "b55e4f61acc6bc6d69820c83bb8c1534"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "2b5c9ee",
@@ -1045,10 +1171,17 @@
           "name": "Freaku",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Freaku17"
         }
       ],
       "versions": {
+        "2.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "a11af9e95789420d63d009db75061418"
+        },
         "2.0.0": {
           "api_version": 8,
           "commit_sha": "8f281f9",
@@ -1127,6 +1260,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "fb2c382a08f9a9667ef37e9a06648df9"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "2309aab",
@@ -1173,6 +1313,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "0917f6269542cb23186fd543bdf62204"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1193,6 +1340,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "6e63047891fa766d7a6c7d489003cfe8"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ab26786",
@@ -1209,7 +1363,7 @@
           "name": "Mrmaxmeier",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Mrmaxmeier"
         },
         {
           "name": "JoseAngel",
@@ -1219,6 +1373,13 @@
         }
       ],
       "versions": {
+        "1.2.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "016eb24999fa6bec40f79ce5592fb94a"
+        },
         "1.1.0": {
           "api_version": 8,
           "commit_sha": "6a66826",
@@ -1271,6 +1432,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "8018110165f48a282fb41f849375e177"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1287,10 +1455,17 @@
           "name": "EraOSBeta",
           "email": "",
           "discord": "3ra0",
-          "github": ""
+          "github": "EraOSBeta"
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "4e702175193940975a17415db27d17c4"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "718039b",
@@ -1311,6 +1486,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "58ee81784e7fe07ad96bf182dd1a2947"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "718039b",
@@ -1331,6 +1513,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "62efee3938c993b9395f492f2752f2f4"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "718039b",
@@ -1377,6 +1566,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "98df04f833b2546b96ba71eabd729906"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1403,6 +1599,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "0c47e72a6811865cb04f94d71be87cde"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1423,6 +1626,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "fe9485da6e9ba50a1de340b833a12493"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1449,6 +1659,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "5cc9717b39f849abe02d2be5ee9d69c8"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "5063690",
@@ -1469,6 +1686,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "85d32447aa00d6b5972b89bb44df58c6"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1527,6 +1751,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "52f749b9436dca60dcf614b70b02cc30"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "4941d0c",
@@ -1625,6 +1856,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "106b945fc6674b3dd84544bdf27b491c"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1651,6 +1889,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "dacfaca2b0a48321fa7905ca234fdc85"
+        },
         "1.0.1": {
           "api_version": 8,
           "commit_sha": "9ca6039",
@@ -1677,6 +1922,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "1904d2cd",
+          "released_on": "24-10-2026",
+          "md5sum": "ab0f7c6796090df3c487e5a539273a40"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ec6286e",
@@ -1697,6 +1949,13 @@
         }
       ],
       "versions": {
+        "1.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "c8776b8e",
+          "released_on": "28-10-2026",
+          "md5sum": "0fa46949a85f60d5271abf9e0605167d"
+        },
         "1.0.0": {
           "api_version": 8,
           "commit_sha": "ec6286e",

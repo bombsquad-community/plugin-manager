@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported by brostos to api 8
 # Tool used to make porting easier.(https://github.com/bombsquad-community/baport)
 """python 3.9 | chatcmd for a beutiful game  - BombSquad OwO"""
@@ -7,16 +8,29 @@
 
 # -*- coding: utf-8 -*-
 # Ported by brostos to api 8
-# ba_meta require api 8
+# ba_meta require api 9
 
 import threading
 import time
 from bascenev1 import get_foreground_host_activity, get_foreground_host_session, get_game_roster, get_chat_messages, chatmessage as cmsg
-from bauiv1 import set_party_icon_always_visible, screenmessage as smsg
+from bauiv1 import screenmessage as smsg
 import babase
 import bauiv1 as bui
 import bascenev1 as bs
 from bauiv1lib import mainmenu
+
+
+plugman = dict(
+    plugin_name='chat_cmd',
+    description='chatcmd for a beutiful game  - BombSquad OwO,type /help in chat for more info',
+    external_url='',
+    authors=[
+        {'name': 'IM_NOT_PRANAV#7874', 'email': '',
+            'discord': 'IM_NOT_PRANAV#7874', 'github': 'pranav-1711'},
+        {'name': 'FireFighter1037 ', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 # our prefix that what we starts cmds with
 px = '/'
@@ -29,7 +43,7 @@ class _cmds:
     def _process_cmd():
         try:
             messages = get_chat_messages()
-            if len(messages) > 1:
+            if messages:
                 lastmsg = messages[len(messages)-1]
 
                 m = lastmsg.split(' ')[1]
@@ -42,7 +56,7 @@ class _cmds:
 
     def _handle():
         messages = get_chat_messages()
-        if len(messages) > 1:
+        if messages:
             lastmsg = messages[len(messages)-1]
 
             m = lastmsg.split(' ')[1]  # cmd
@@ -54,6 +68,9 @@ class _cmds:
 
             activity = get_foreground_host_activity()
             activity_players = activity.players
+            # 'all' commands skip players who are dead or waiting to respawn,
+            # whose actor or node is gone.
+            alive_players = [p for p in activity_players if p.actor and p.actor.node]
 
             if m == px:
                 cmsg(px+'help for help')
@@ -144,7 +161,7 @@ class _cmds:
                 else:
                     try:
                         id = session_players[int(n[0])]
-                        cmsg(id.getname()+"'s accountid is "+id.get_v1_account_id())
+                        cmsg(id.getname()+"'s accountid is "+id.get_account_id())
                     except:
                         cmsg('could not found player')
 
@@ -232,7 +249,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'help : {px}inv all or {px}inv number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         body = i.actor.node
                         if not body.torso_mesh == None:
                             body.head_mesh = None
@@ -270,7 +287,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'help : {px}spaz all or {px}spaz number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         body = i.actor.node
                         if not body.head_mesh == None:
                             body.head_mesh = None
@@ -292,7 +309,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'use: {px}creepy all or {px}creepy number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         body = i.actor.node
                         body.head_mesh = None
                         body.handlemessage(bs.PowerupMessage(poweruptype='punch'))
@@ -312,7 +329,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use : {px}kill all or {px}kill number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.DieMessage())
                         cmsg('Killed all')
                 else:
@@ -324,7 +341,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}heal all or {px}heal number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='health'))
                         cmsg('Heald all')
                 else:
@@ -337,7 +354,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}curse all or {px}curse number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='curse'))
                         cmsg('Cursed all')
                 else:
@@ -350,7 +367,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}sleep all or {px}sleep number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage('knockout', 8000)
                         cmsg('Sleep all its Night :)')
                 else:
@@ -362,7 +379,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use : {px}sp/superpunch all or {px}sp/superpunch number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         if not i.actor._punch_power_scale == 15:
                             i.actor._punch_power_scale = 15
                             i.actor._punch_cooldown = 0
@@ -389,7 +406,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}gloves all or {px}gloves number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='punch'))
                         cmsg('Free Gloves enjoy all')
                 else:
@@ -402,7 +419,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}shield all or {px}shield number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.PowerupMessage(poweruptype='shield'))
                         cmsg('Everyone enjoy free shield :)')
                 else:
@@ -415,7 +432,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}freeze all or {px}freeze number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.FreezeMessage())
                         cmsg('Freezed all')
                 else:
@@ -427,7 +444,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}unfreeze/thaw all or {px}unfreeze/thaw number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.ThawMessage())
                         cmsg('Un freezed all ')
                 else:
@@ -439,7 +456,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}fall all or {px}fall number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.StandMessage())
                         cmsg('Felt everyone')
                 else:
@@ -451,7 +468,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}celebrate all or {px}celebrate number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.node.handlemessage(bs.CelebrateMessage())
                         cmsg('Celebrate all :)')
                 else:
@@ -463,7 +480,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}fly all or {px}fly number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         if not i.actor.node.fly == True:
                             i.actor.node.fly = True
                             cmsg('fly all dont go out ok')
@@ -487,7 +504,7 @@ class _cmds:
                 if n == []:
                     cmsg(f'Use: {px}gm all or {px}gm number of list')
                 elif n[0] == 'all':
-                    for i in activity_players:
+                    for i in alive_players:
                         if not i.actor.node.hockey == True:
                             i.actor.node.hockey = True
                             i.actor.node.invincible = True
@@ -520,7 +537,7 @@ class _cmds:
                 elif n[0] == 'help':
                     cmsg("bombtypes - ['ice', 'impact', 'land_mine', 'normal', 'sticky','tnt']")
                 elif n[0] in ['ice', 'impact',  'land_mine', 'normal', 'sticky', 'tnt']:
-                    for i in activity_players:
+                    for i in alive_players:
                         i.actor.bomb_type = n[0]
                         cmsg('default bomb type - '+str(n[0])+' now')
                 else:
@@ -532,7 +549,7 @@ class _cmds:
                         f'Use: {px}d_bomb_count/default_bomb/dbc all or {px}d_bomb_count/default_bomb_count/dbc number of list')
                 else:
                     try:
-                        for i in activity_players:
+                        for i in alive_players:
                             i.actor.set_bomb_count(int(n[0]))
                             cmsg('default bomb count is '+(str(n[0]))+' now')
                     except:
@@ -548,7 +565,7 @@ class NewMainMenuWindow(mainmenu.MainMenuWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Display chat icon, but if user open/close gather it may disappear
-        bui.set_party_icon_always_visible(True)
+        None
 
 # bs.timer(0.05, _update, repeat=True)
 

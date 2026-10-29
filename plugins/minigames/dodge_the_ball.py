@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 """
 
     DondgeTheBall minigame by EmperoR#4098
@@ -6,7 +7,7 @@
 
 # Feel free to edit.
 
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
@@ -23,6 +24,17 @@ from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import NoReturn, Sequence, Any
+
+
+plugman = dict(
+    plugin_name='dodge_the_ball',
+    description='Survive from shooting balls',
+    external_url='',
+    authors=[
+        {'name': 'EmperoR', 'email': '', 'discord': 'EmperoR#4098', 'github': ''},
+    ],
+    version='2.1.0',
+)
 
 
 # Type of ball in this game
@@ -56,7 +68,7 @@ class Ball(bs.Actor):
     def __init__(self,
                  position: Sequence[float],
                  velocity: Sequence[float],
-                 texture: babase.Texture,
+                 texture: bs.Texture,
                  body_scale: float = 1.0,
                  gravity_scale: float = 1.0,
                  ) -> NoReturn:
@@ -97,7 +109,7 @@ class Ball(bs.Actor):
         )
 
         # die the ball manually incase the ball doesn't fall the outside of the map
-        bs.timer(2.5, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+        bs.timer(2.5, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
     # i am not handling anything in this ball Class(except for diemessage).
     # all game things and logics going to be in the box class
@@ -211,7 +223,7 @@ class Box(bs.Actor):
         self.force_shoot_speed: float = 0.0
         self.ball_mag = 3000
         self.ball_gravity: float = 1.0
-        self.ball_tex: babase.Texture | None = None
+        self.ball_tex: bs.Texture | None = None
         # only for Hard ball_type
         self.player_facing_direction: list[float, float] = [0.0, 0.0]
         # ball shoot soound.

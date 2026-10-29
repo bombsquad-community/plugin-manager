@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -15,6 +16,17 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
+
+
+plugman = dict(
+    plugin_name='meteor_shower',
+    description='MeteorShower with many different bombs',
+    external_url='https://youtube.com/c/JoseANG3LYT',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 lang = bs.app.lang.language
@@ -83,7 +95,7 @@ class MeteorShowerv2Game(bs.TeamGameActivity[Player, Team]):
     @classmethod
     def get_available_settings(
             cls, sessiontype: type[bs.Session]
-    ) -> list[babase.Setting]:
+    ) -> list[bs.Setting]:
         settings = [
             bs.IntChoiceSetting(
                 bomb_type,
@@ -272,7 +284,7 @@ class MeteorShowerv2Game(bs.TeamGameActivity[Player, Team]):
                 random.uniform(-3.066, -4.12),
                 0,
             )
-            bs.timer(delay, babase.Call(self._drop_bomb, pos, vel))
+            bs.timer(delay, babase.CallPartial(self._drop_bomb, pos, vel))
             delay += 0.1
         self._set_meteor_timer()
 
@@ -348,7 +360,7 @@ class MeteorShowerv2Game(bs.TeamGameActivity[Player, Team]):
         self.end(results=results)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class MeteorShowerv2Coop(babase.Plugin):
     def on_app_running(self) -> None:
         babase.app.classic.add_coop_practice_level(

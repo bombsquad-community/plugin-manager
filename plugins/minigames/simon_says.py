@@ -1,7 +1,8 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # SimonSays
 # you had really better do what Simon says...
-# ba_meta require api 8
+# ba_meta require api 9
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -14,6 +15,17 @@ import babase
 import bauiv1 as bui
 import bascenev1 as bs
 import random
+
+
+plugman = dict(
+    plugin_name='simon_says',
+    description='You better do what Simon says. Playable in co-op',
+    external_url='',
+    authors=[
+        {'name': '-', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class CustomText(bs.Actor):
@@ -86,7 +98,7 @@ class CustomText(bs.Actor):
             lifespan: 0})
         self._combine.connectattr('output', self.node, 'color')
         self._die_timer = bs.Timer(
-            lifespan, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+            lifespan, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
     def handlemessage(self, msg: Any) -> Any:
         assert not self.expired
@@ -119,7 +131,7 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
     description = "You have to better do what Simon says!"
 
     @classmethod
-    def get_available_settings(cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+    def get_available_settings(cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.BoolSetting("Epic Mode", default=False),
             bs.BoolSetting("Enable Jumping", default=False),
@@ -231,7 +243,7 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
             player.score = 0
         # check for immediate end if theres only 1 player
         if len(self.players) == 1:
-            bs.timer(4000/1000, bs.Call(self.check_end))
+            bs.timer(4000/1000, bs.CallPartial(self.check_end))
         bs.timer(6000/1000, self.call_round)
 
     def spawn_player(self, player: PlayerT) -> bs.Actor:
@@ -371,13 +383,13 @@ class SimonSays(bs.TeamGameActivity[Player, Team]):
                 i += 1
         if isinstance(self.session, bs.CoopSession):
             if i <= 0:
-                bs.timer(0.6, bs.Call(self.end_game))
+                bs.timer(0.6, bs.CallPartial(self.end_game))
         else:
             if i <= 2:
-                bs.timer(0.6, bs.Call(self.end_game))
+                bs.timer(0.6, bs.CallPartial(self.end_game))
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##

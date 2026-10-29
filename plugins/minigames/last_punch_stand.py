@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 from typing import Sequence
 import babase
 import bauiv1 as bui
@@ -8,6 +9,17 @@ import _babase
 import random
 from bascenev1lib.actor.spaz import Spaz
 from bascenev1lib.actor.scoreboard import Scoreboard
+
+
+plugman = dict(
+    plugin_name='last_punch_stand',
+    description='Last one to punch the spaz when timer ends wins',
+    external_url='',
+    authors=[
+        {'name': 'ThePersonMan', 'email': '', 'discord': 'the.personman', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class Player(bs.Player['Team']):
@@ -39,7 +51,8 @@ class ChooseingSpaz(Spaz):
             color: Sequence[float] = (1.0, 1.0, 1.0),
             highlight: Sequence[float] = (0.5, 0.5, 0.5),
     ):
-        super().__init__(color, highlight, "Spaz", None, True, True, False, False)
+        super().__init__(color=color, highlight=highlight, character="Spaz", source_player=None,
+                         start_invincible=True, can_accept_powerups=True, powerups_expire=False, demo_mode=False)
         self.last_player_attacked_by = None
         self.stand(pos)
         self.loc = bs.newnode(
@@ -204,7 +217,7 @@ class LastPunchStand(bs.TeamGameActivity[Player, Team]):
 
     def on_begin(self) -> None:
         super().on_begin()
-        time_limit = random.randint(self._min_timelimit, self._max_timelimit)
+        time_limit = random.randint(int(self._min_timelimit), int(self._max_timelimit))
         self.spaw_bot()
         bs.timer(time_limit, self.times_up)
 
@@ -234,6 +247,9 @@ class LastPunchStand(bs.TeamGameActivity[Player, Team]):
     def show_score_board(self):
         self.scoreboard = Scoreboard()
         for team in self.teams:
+            # A dropped scoreboard leaves its entry marker on the team, and
+            # a new one refuses to add the team while it's there.
+            team.customdata.pop(Scoreboard._ENTRYSTORENAME, None)
             self.scoreboard.set_team_value(team, team.score)
 
     def hide_score_board(self):

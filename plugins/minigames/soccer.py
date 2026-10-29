@@ -1,8 +1,9 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 # BY Stary_Agent
 """Hockey game and support classes."""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -19,6 +20,17 @@ from bascenev1lib.gameutils import SharedObjects
 
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
+
+
+plugman = dict(
+    plugin_name='soccer',
+    description='Shoot the ball in left or right edge of the map to score',
+    external_url='',
+    authors=[
+        {'name': 'Stary_Agent', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='2.1.0',
+)
 
 
 class PuckDiedMessage:
@@ -62,7 +74,7 @@ class Puck(bs.Actor):
         if isinstance(msg, bs.DieMessage):
             assert self.node
             self.node.delete()
-            activity = self._activity()
+            activity = self.getactivity(doraise=False)
             if activity and not msg.immediate:
                 activity.handlemessage(PuckDiedMessage(self))
 
@@ -84,7 +96,7 @@ class Puck(bs.Actor):
             # If this hit came from a player, log them as the last to touch us.
             s_player = msg.get_source_player(Player)
             if s_player is not None:
-                activity = self._activity()
+                activity = self.getactivity(doraise=False)
                 if activity:
                     if s_player in activity.players:
                         self.last_players_to_touch[s_player.team.id] = s_player

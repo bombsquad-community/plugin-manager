@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # -*- coding: utf-8 -*-
-# ba_meta require api 8
+# ba_meta require api 9
 '''
 Server Switch Plugin by My.Smoothy
 Let you switch recently joined servers very quickly
@@ -12,9 +13,20 @@ Download more mods from
 https://bombsquad-community.web.app/mods
 '''
 import babase
-import bauiv1lib.mainmenu as bastd_ui_mainmenu
+from bauiv1lib.ingamemenu import InGameMenuWindow
 import bauiv1 as bui
 import bascenev1 as bs
+
+
+plugman = dict(
+    plugin_name='server_switch',
+    description='Let you switch between recents servers',
+    external_url='https://www.youtube.com/watch?v=QrES1jQGXF0',
+    authors=[
+        {'name': 'Mr.Smoothy', 'email': '', 'discord': 'mr.smoothy', 'github': 'imayushsaini'},
+    ],
+    version='2.1.0',
+)
 current_server_ip = "127.0.0.1"
 current_server_port = 43210
 servers = []
@@ -54,7 +66,7 @@ def _refresh_in_game(func):
             scale=1.0,
             autoselect=self._use_autoselect,
             label="~~~",
-            on_activate_call=bs.Call(public_servers))
+            on_activate_call=bs.CallPartial(public_servers, self))
         for server in servers:
             self._server_button = bui.buttonwidget(
                 color=(0.8, 0, 1),
@@ -64,7 +76,7 @@ def _refresh_in_game(func):
                 scale=1.0,
                 autoselect=self._use_autoselect,
                 label=server["name"][0:22],
-                on_activate_call=bs.Call(bs.connect_to_party, server["ip"], server["port"]))
+                on_activate_call=bs.CallPartial(bs.connect_to_party, server["ip"], server["port"]))
 
             v -= 50
 
@@ -104,15 +116,22 @@ def check_connect_status():
         public_servers()
 
 
-def public_servers(origin=None):
+def public_servers(window=None):
     from bauiv1lib.gather import GatherWindow
-    bui.app.ui_v1.set_main_menu_window(GatherWindow(origin_widget=origin).get_root_widget())
+    if window is None:
+        window = bui.app.ui_v1.get_main_window()
+    if window is not None:
+        if not isinstance(window, GatherWindow) and window.main_window_has_control():
+            window.main_window_replace(lambda: GatherWindow())
+    else:
+        bui.app.ui_v1.set_main_window(
+            GatherWindow(), is_top_level=True, back_state=None, suppress_warning=True)
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 
 
 class bySmoothy(babase.Plugin):
     def __init__(self):
-        bastd_ui_mainmenu.MainMenuWindow._refresh_in_game = _refresh_in_game(
-            bastd_ui_mainmenu.MainMenuWindow._refresh_in_game)
+        InGameMenuWindow._refresh_in_game = _refresh_in_game(
+            InGameMenuWindow._refresh_in_game)
         bs.connect_to_party = connect_to_party

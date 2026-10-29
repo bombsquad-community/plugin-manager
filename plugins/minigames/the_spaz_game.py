@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 
-# ba_meta require api 8
+# ba_meta require api 9
 """
 TheSpazGame - Mini game where all characters looks identical , identify enemies and kill them.
 Author:  Mr.Smoothy
@@ -24,6 +25,18 @@ if TYPE_CHECKING:
     from typing import Any, Sequence
 
 
+plugman = dict(
+    plugin_name='the_spaz_game',
+    description='Enemy Spaz Amoung us, kill correct person.',
+    external_url='https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg',
+    authors=[
+        {'name': 'Mr.Smoothy', 'email': 'smoothy@bombsquad.ga',
+            'discord': 'mr.smoothy', 'github': 'imayushsaini'},
+    ],
+    version='1.1.0',
+)
+
+
 CHARACTER = 'Spaz'
 
 # ba_meta export bascenev1.GameActivity
@@ -43,7 +56,7 @@ class TheSpazGame(EliminationGame):
     @classmethod
     def get_available_settings(
         cls, sessiontype: type[bs.Session]
-    ) -> list[babase.Setting]:
+    ) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives Per Player',
@@ -120,8 +133,13 @@ class TheSpazGame(EliminationGame):
 
     def update_appearance(self, spaz, character):
         factory = SpazFactory.get()
-        media = factory.get_media(character)
-        for field, value in media.items():
-            setattr(spaz.node, field, value)
-        spaz.node.style = factory.get_style(character)
+        if hasattr(factory, 'get_look_attrs'):
+            # 1.8.1+: builtin characters are spaz defs, not loose media.
+            for field, value in factory.get_look_attrs(character).items():
+                setattr(spaz.node, field, value)
+        else:
+            media = factory.get_media(character)
+            for field, value in media.items():
+                setattr(spaz.node, field, value)
+            spaz.node.style = factory.get_style(character)
         spaz.node.name = ''
