@@ -2742,6 +2742,21 @@
           "md5sum": "3ce8c9647ea119acc5edefbeb87de502"
         }
       }
+    },
+    "recent_party_names_log": {
+      "description": "This plugin keeps the track of party names you recently interacted with.\nand Allows you to view/filter of those names for easy search.\n(by adding a recent button in gather public tab)\n\nHelps when you forgot to add a party in favorite list which you recently enjoy the most.",
+      "external_url": "https://youtu.be/EyQWRstNmzc?si=lrf4zS0r7Kj8Ngd4",
+      "authors": [
+        {
+          "name": "shailesh",
+          "email": "shaileshgabu11@gmail.com",
+          "discord": "shailesh_gabu_11",
+          "github": "Shailesh051211"
+        }
+      ],
+      "versions": {
+        "1.0.1": null
+      }
     }
   }
 }

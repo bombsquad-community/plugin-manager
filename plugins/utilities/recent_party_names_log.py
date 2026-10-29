@@ -16,7 +16,7 @@ import bauiv1 as bui
 from bauiv1lib import popup
 from bauiv1lib.gather import publictab
 
-#-------- PLUGIN MANAGER DEFINATION -----------------
+# -------- PLUGIN MANAGER DEFINATION -----------------
 
 __version__ = "1.0.1"
 __author__ = "shailesh"
@@ -35,13 +35,15 @@ plugman = dict(
     ],
     version=__version__,
 )
-#--------------------------------------------------
+# --------------------------------------------------
 
 
 MAX_RECENTS = 50
 RECENT_PARTY_CONGIF_KEY = "GS:Party History"
 
 # ba_meta export babase.Plugin
+
+
 class plg(bui.Plugin):
 
     party_log = OrderedDict()
@@ -66,7 +68,7 @@ class plg(bui.Plugin):
                 left_widget=args[0]._host_text,
             )
 
-            call = lambda: RecentPartiesWindow(recent_button, args[0])
+            def call(): return RecentPartiesWindow(recent_button, args[0])
             bui.buttonwidget(edit=recent_button, on_activate_call=call)
             bui.widget(edit=args[0]._host_text, right_widget=recent_button)
 
@@ -100,7 +102,7 @@ class plg(bui.Plugin):
         plg.party_log[key] = party.name
 
         if len(plg.party_log) > MAX_RECENTS:
-            plg.party_log.popitem(last=False) # oldest remove
+            plg.party_log.popitem(last=False)  # oldest remove
 
         bui.app.config[RECENT_PARTY_CONGIF_KEY] = list(plg.party_log.items())
         bui.app.config.commit()
@@ -142,7 +144,7 @@ class RecentPartiesWindow(popup.PopupWindow):
             ),
             focus_position=focus_position,
             bg_color=(0.40, 0.40, 0.55),
-            darken_behind=False # Too Dark
+            darken_behind=False  # Too Dark
         )
         # title
         bui.textwidget(
@@ -234,23 +236,23 @@ class RecentPartiesWindow(popup.PopupWindow):
             # Filter
             filter_btns.append(
                 bui.buttonwidget(
-                  parent=self._subcontainer,
-                  position=(subwidth * 0.69, ypos + btn_ypad),
-                  size=(80, btn_height),
-                  label="Filter",
-                  color=(0.3, 0.3, 0.9),
-                  on_activate_call=bui.CallStrict(self._do_filter, name)
+                    parent=self._subcontainer,
+                    position=(subwidth * 0.69, ypos + btn_ypad),
+                    size=(80, btn_height),
+                    label="Filter",
+                    color=(0.3, 0.3, 0.9),
+                    on_activate_call=bui.CallStrict(self._do_filter, name)
                 )
             )
             # Remove
             remove_btns.append(
                 bui.buttonwidget(
-                  parent=self._subcontainer,
-                  position=(subwidth * 0.82, ypos + btn_ypad),
-                  size=(100, btn_height),
-                  label="Remove",
-                  color=(0.7, 0.3, 0.3),
-                  on_activate_call=bui.CallStrict(self._ask_remove, address)
+                    parent=self._subcontainer,
+                    position=(subwidth * 0.82, ypos + btn_ypad),
+                    size=(100, btn_height),
+                    label="Remove",
+                    color=(0.7, 0.3, 0.3),
+                    on_activate_call=bui.CallStrict(self._ask_remove, address)
                 )
             )
             ypos -= row_height
