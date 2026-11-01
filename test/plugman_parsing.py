@@ -76,6 +76,12 @@ def collect_module_constants(tree, stop_at):
     game imports the plugin, so it must not resolve here either.
     """
     constants = {}
+    # The module docstring, so a plugin can write description=__doc__ instead of
+    # repeating it. Line breaks are kept as written; clean=True strips the
+    # indentation and the blank first/last lines that triple quotes bring along.
+    docstring = ast.get_docstring(tree, clean=True)
+    if docstring is not None:
+        constants["__doc__"] = "\n".join(line.rstrip() for line in docstring.splitlines())
     for node in tree.body:
         if node is stop_at:
             break

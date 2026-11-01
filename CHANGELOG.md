@@ -2,6 +2,22 @@
 
 <!-- line length=80 columns -->
 
+### 1.2.3 (24-10-2026)
+
+- Show when a plugin was first released in its More info window
+- "Last updated on" in the More info window shows the newest version's
+  date instead of the oldest one's
+- The A - Z and category buttons are merged into one button that opens
+  a Filter & Sort window
+- Plugins can be sorted by name (A - Z or Z - A), recently added or
+  recently updated
+- Added a "Show incompatible plugins" option that lists plugins made
+  for other API versions or newer game builds, marked with the reason;
+  they can be viewed but not installed
+- The Custom Sources button is moved to the settings window
+- The Source URL of a plugin from a custom source pinned to a branch
+  (owner/repo@branch) opens that branch instead of main
+
 ### 1.2.2 (21-10-2026)
 
 - Plugins can set min_engine_build in their plugman dict; older game
