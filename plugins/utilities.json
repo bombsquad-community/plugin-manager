@@ -2697,10 +2697,11 @@
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "1.0.1": null,
         "1.0.0": {
           "api_version": 9,
           "commit_sha": "af2c9632",
