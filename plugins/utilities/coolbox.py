@@ -43,12 +43,6 @@ from bauiv1 import _classiccatalogassets as _uicc
 from bauiv1 import _commonassets as _uicm
 from bauiv1 import _uiv1assets as _uiu1
 
-# --- asset lookup (new asset-package wrapper API) ----------------------------
-# Static names are resolved at migration time to wrapper handles
-# (e.g. _uicc.textures.chest_icon.get()). Names only known at runtime
-# (user data, character/map attributes, f-strings) go through these helpers:
-# they accept a legacy camelCase str *or* a handle, search the wrappers, and
-# fall back to the plain legacy call for anything the wrappers don't carry.
 import importlib as _il
 import re as _re
 
@@ -77,7 +71,7 @@ def _find(pkg, kind, name):
     return h
 
 def _res(pkg, kind, legacy, v, scene):
-    if not isinstance(v, str):  # already a handle
+    if not isinstance(v, str):  # yes
         if scene is False and hasattr(v, 'ui'): v = v.ui()  # scene handle -> ui
         return v.get()
     h = _find(pkg, kind, v)
@@ -89,7 +83,6 @@ def _uimesh(v): return _res('bauiv1', 'meshes', bui.getmesh, v, False)
 def _sctex(v): return _res('bascenev1', 'textures', bs.gettexture, v, True)
 def _scsnd(v): return _res('bascenev1', 'audio', bs.getsound, v, True)
 def _scmesh(v): return _res('bascenev1', 'meshes', bs.getmesh, v, True)
-# -----------------------------------------------------------------------------
 
 plugman = dict(
     plugin_name="coolbox",
@@ -103,7 +96,8 @@ plugman = dict(
         {
             "name": "BrotherBoard",
             "email": "brobordd@gmail.com",
-            "discord": "BrotherBoard"
+            "discord": "BrotherBoard",
+            "github": "BroBordd"
         },
     ],
     version='1.0.0',
