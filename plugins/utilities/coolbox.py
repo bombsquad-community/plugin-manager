@@ -3,7 +3,7 @@
 # Bug? Feedback? Telegram >> @GalaxyA14user
 
 """
-Coolbox v1.0.0 - Own the scene.
+Coolbox v1.0.1 - Own the scene.
 
 Experimental.
 Coolbox is an advanced menu that can do almost everything!
@@ -100,7 +100,7 @@ plugman = dict(
             "github": "BroBordd"
         },
     ],
-    version='1.0.0',
+    version='1.0.1',
 )
 
 class Coolbox:
