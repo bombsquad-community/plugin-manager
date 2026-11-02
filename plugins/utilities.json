@@ -2697,10 +2697,17 @@
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "51670f8a",
+          "released_on": "01-11-2026",
+          "md5sum": "b453b32e89ddccc643c4290b1850227b"
+        },
         "1.0.0": {
           "api_version": 9,
           "commit_sha": "af2c9632",
