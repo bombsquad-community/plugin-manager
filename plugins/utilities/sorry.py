@@ -49,9 +49,10 @@ lmao = [
     "%, $ entirely."
 ]
 
+
 def sorry(old):
-    def ret(_,*a,**k):
-        old(_,*a,**k)
+    def ret(_, *a, **k):
+        old(_, *a, **k)
         sorry.btn = bui.buttonwidget(
             parent=_._root_widget,
             size=(50, 35),
@@ -63,21 +64,21 @@ def sorry(old):
         )
         bui.buttonwidget(
             sorry.btn,
-            on_activate_call=lambda:(
-                getattr(sorry,'cool',1) and (
+            on_activate_call=lambda: (
+                getattr(sorry, 'cool', 1) and (
                     chatmessage(
                         choice(lmao)
-                        .replace('%',choice(sory))
-                        .replace('$',choice(cash))
+                        .replace('%', choice(sory))
+                        .replace('$', choice(cash))
                     ),
                     bui.getsound('deek').play(),
-                    setattr(sorry,'cool',0),
-                    getattr(sorry,'tick',0) or setattr(
+                    setattr(sorry, 'cool', 0),
+                    getattr(sorry, 'tick', 0) or setattr(
                         sorry, 'tick', bui.AppTimer(
-                            0.1, lambda:sorry.btn and (
+                            0.1, lambda: sorry.btn and (
                                 bui.buttonwidget(
                                     sorry.btn, label=str(
-                                        (time:=getattr(
+                                        (time := getattr(
                                             sorry,
                                             'time',
                                             50
@@ -129,6 +130,8 @@ def sorry(old):
 
 # ba_meta require api 9
 # ba_meta export babase.Plugin
+
+
 class byBordd(bui.Plugin):
     def __init__(s):
-        PartyWindow.__init__ = sorry(_:=PartyWindow.__init__)
+        PartyWindow.__init__ = sorry(_ := PartyWindow.__init__)

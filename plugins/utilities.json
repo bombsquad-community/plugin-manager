@@ -360,17 +360,18 @@
       }
     },
     "sorry": {
-      "description": "Send a random sorry to chat, preventing revenge attempts from teammates you kill by mistake.",
-      "external_url": "https://brobordd.github.io/byBordd",
+      "description": "Adds a button to party window which allows you to apologize if you made a mistake.",
+      "external_url": "https://BroBordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "3.1.0": null,
         "2.1.1": {
           "api_version": 9,
           "commit_sha": "e604a3c",
