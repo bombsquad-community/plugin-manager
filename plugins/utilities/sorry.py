@@ -88,7 +88,7 @@ def sorry(old):
                                     sorry,
                                     'time',
                                     time-1
-                                ) if time else (
+                                ) if time > 0 else (
                                     delattr(
                                         sorry,
                                         'tick'
