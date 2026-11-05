@@ -1,13 +1,15 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
 """Defines Race mini-game."""
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
+import logging
 import random
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
@@ -24,6 +26,17 @@ if TYPE_CHECKING:
     from typing import (Any, Type, Tuple, List, Sequence, Optional, Dict,
                         Union)
     from bascenev1lib.actor.onscreentimer import OnScreenTimer
+
+
+plugman = dict(
+    plugin_name='squid_race',
+    description='Race inspired by the squid games',
+    external_url='https://youtube.com/c/JoseANG3LYT',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class NewBlast(Blast):
@@ -47,7 +60,7 @@ class RaceRegion(bs.Actor):
     def __init__(self, pt: Sequence[float], index: int):
         super().__init__()
         activity = self.activity
-        assert isinstance(activity, RaceGame)
+        assert isinstance(activity, SquidRaceGame)
         self.pos = pt
         self.index = index
         self.node = bs.newnode(
@@ -94,7 +107,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting('Laps', min_value=1, default=3, increment=1),
             bs.IntChoiceSetting(
@@ -371,7 +384,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
                             })
                             bs.timer(2.3, mathnode.delete)
                         except Exception:
-                            babase.print_exception('Error printing lap.')
+                            logging.exception('Error printing lap.')
 
     def on_team_join(self, team: Team) -> None:
         self._update_scoreboard()
@@ -413,7 +426,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
                     if otherplayer.actor is not None:
                         otherplayer.actor.handlemessage(bs.DieMessage())
                 except Exception:
-                    babase.print_exception('Error sending DieMessage.')
+                    logging.exception('Error sending DieMessage.')
 
         # Defer so team/player lists will be updated.
         babase.pushcall(self._check_end_game)
@@ -738,7 +751,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
                     assert isinstance(player.actor, PlayerSpaz)
                     player.actor.connect_controls_to_player()
                 except Exception:
-                    babase.print_exception('Error in race player connects.')
+                    logging.exception('Error in race player connects.')
         assert self._timer is not None
         self._timer.start()
 
@@ -801,7 +814,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
         pos = (pos[0] + random.uniform(*x_range), pos[1] + 1.0,
                pos[2] + random.uniform(*z_range))
         bs.timer(random.uniform(0.0, 2.0),
-                 bs.WeakCall(self._spawn_bomb_at_pos, pos))
+                 bs.WeakCallPartial(self._spawn_bomb_at_pos, pos))
 
     def _spawn_bomb_at_pos(self, pos: Sequence[float]) -> None:
         if self.has_ended():
@@ -839,7 +852,7 @@ class SquidRaceGame(bs.TeamGameActivity[Player, Team]):
         assert rmine is not None
         if not rmine.mine:
             self._flash_mine(m_index)
-            bs.timer(0.95, babase.Call(self._make_mine, m_index))
+            bs.timer(0.95, babase.CallPartial(self._make_mine, m_index))
 
     def spawn_player(self, player: Player) -> bs.Actor:
         if player.team.finished:

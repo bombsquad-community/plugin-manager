@@ -1,6 +1,7 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
 
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -16,6 +17,17 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     from typing import Any, Type, Dict, List, Optional
+
+
+plugman = dict(
+    plugin_name='lame_fight',
+    description='Save World With Super Powers. Playable in co-op',
+    external_url='',
+    authors=[
+        {'name': 'Blitz', 'email': '', 'discord': 'itsmeblitz', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class Player(bs.Player['Team']):
@@ -158,7 +170,7 @@ class LameFightGame(bs.TeamGameActivity[Player, Team]):
         self.end(results)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class plugin(babase.Plugin):
     def __init__(self):
         ## Campaign support ##

@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
@@ -23,6 +24,17 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
+
+
+plugman = dict(
+    plugin_name='down_into_the_abyss',
+    description='Survive as long as you can but dont miss a step',
+    external_url='',
+    authors=[
+        {'name': '-', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 lang = bs.app.lang.language
@@ -265,11 +277,11 @@ class Foothold(bs.Actor):
                     self.lrSig *= -1
                 self.node.velocity = (
                     self.lrSig * speed * self.lrSpeedPlus, speed, 0)
-                bs.timer(0.1, bs.WeakCall(self.keep_vel))
+                bs.timer(0.1, bs.WeakCallPartial(self.keep_vel))
             else:
                 self.node.velocity = (0, speed, 0)
                 # self.node.extraacceleration = (0, self.speed, 0)
-                bs.timer(0.1, bs.WeakCall(self.keep_vel))
+                bs.timer(0.1, bs.WeakCallPartial(self.keep_vel))
 
     def tnt_explode(self) -> None:
         pos = self.node.position
@@ -345,7 +357,7 @@ class AbyssPlayerSpaz(PlayerSpaz):
         self.node.hockey = True
         self.hitpoints_max = self.hitpoints = 1500  # more HP to handle drop
         bs.timer(bs.getactivity().peace_time,
-                 bs.WeakCall(self.safe_connect_controls_to_player))
+                 bs.WeakCallPartial(self.safe_connect_controls_to_player))
 
     def safe_connect_controls_to_player(self) -> None:
         try:
@@ -383,7 +395,7 @@ class AbyssPlayerSpaz(PlayerSpaz):
 
     def fix_2D_position(self) -> None:
         self.node.fly = True
-        bs.timer(0.02, bs.WeakCall(self.disable_fly))
+        bs.timer(0.02, bs.WeakCallPartial(self.disable_fly))
 
     def disable_fly(self) -> None:
         if self.node:
@@ -414,7 +426,7 @@ class AbyssPlayerSpaz(PlayerSpaz):
                 tval = bs.time()
                 assert isinstance(tval, (float, int))
                 self.node.curse_death_time = bs.time() + 15
-                bs.timer(15, bs.WeakCall(self.curse_explode))
+                bs.timer(15, bs.WeakCallPartial(self.curse_explode))
 
     def handlemessage(self, msg: Any) -> Any:
         dontUp = False
@@ -491,7 +503,7 @@ class AbyssGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.FloatChoiceSetting(
                 peaceTime,
@@ -601,13 +613,13 @@ class AbyssGame(bs.TeamGameActivity[Player, Team]):
                 power='shield', breakable=False).autoretain()
 
         bs.timer(int(5.0 / self.cur_speed),
-                 bs.WeakCall(self.add_foothold), repeat=True)
+                 bs.WeakCallPartial(self.add_foothold), repeat=True)
 
         # Repeat check game end
         bs.timer(1.0, self._check_end_game, repeat=True)
         bs.timer(self.peace_time + 0.1,
-                 bs.WeakCall(self.tip_hint, hint_use_punch))
-        bs.timer(6.0, bs.WeakCall(self.faster_speed), repeat=True)
+                 bs.WeakCallPartial(self.tip_hint, hint_use_punch))
+        bs.timer(6.0, bs.WeakCallPartial(self.faster_speed), repeat=True)
 
     def tip_hint(self, text: str) -> None:
         bs.broadcastmessage(text, color=(0.2, 0.2, 1))

@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 
 # - - - - - - - - - - - - - - - - - - - - -
 # - Fat-Pigs! by Zacker Tz || Zacker#5505 -
@@ -21,6 +22,17 @@ from bascenev1lib.actor.scoreboard import Scoreboard
 
 if TYPE_CHECKING:
     from typing import Any, Union, Sequence, Optional
+
+
+plugman = dict(
+    plugin_name='fat_pigs',
+    description="Eliminate other Mels' while dodging falling stickies.",
+    external_url='',
+    authors=[
+        {'name': 'Zacker Tz', 'email': '', 'discord': 'zacker_tz', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 # - - - - - - - Mini - Settings - - - - - - - - - - - - - - - - #
 
@@ -55,7 +67,7 @@ class FatPigs(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Kills to Win Per Player',
@@ -243,7 +255,7 @@ class FatPigs(bs.TeamGameActivity[Player, Team]):
                    -5.5 + 2.1 * random.random())
             dropdir = (-1.0 if pos[0] > 0 else 1.0)
             vel = ((-5.0 + random.random() * 30.0) * dropdir, -4.0, 0)
-            bs.timer(delay, babase.Call(self._drop_bomb, pos, vel))
+            bs.timer(delay, babase.CallPartial(self._drop_bomb, pos, vel))
             delay += 0.1
         self._set_meteor_timer()
 

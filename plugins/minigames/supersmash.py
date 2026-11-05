@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # To learn more, see https://ballistica.net/wiki/meta-tag-system
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 
@@ -22,11 +23,25 @@ if TYPE_CHECKING:
     from typing import Any, Type, List, Sequence, Optional
 
 
+plugman = dict(
+    plugin_name='supersmash',
+    description='Blow up your enemies off the map!',
+    external_url='',
+    authors=[
+        {'name': 'Mrmaxmeier', 'email': '', 'discord': '', 'github': 'Mrmaxmeier'},
+        {'name': 'JoseAngel', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.2.0',
+)
+
+
 class Icon(Icon):
     def update_for_lives(self) -> None:
         """Update for the target player's current lives."""
-        if self._player:
-            lives = self._player.lives
+        # The stock Icon keeps a weakref to its player.
+        player = self._player()
+        if player:
+            lives = player.lives
         else:
             lives = 0
         if self._show_lives:
@@ -47,8 +62,8 @@ class PowBox(Bomb):
                  position: Sequence[float] = (0.0, 1.0, 0.0),
                  velocity: Sequence[float] = (0.0, 0.0, 0.0)) -> None:
         Bomb.__init__(self,
-                      position,
-                      velocity,
+                      position=position,
+                      velocity=velocity,
                       bomb_type='tnt',
                       blast_radius=2.5,
                       source_player=None,
@@ -311,8 +326,8 @@ class SSPlayerSpaz(PlayerSpaz):
                 if self._cursed and damage > 0:
                     bs.timer(
                         0.05,
-                        bs.WeakCall(self.curse_explode,
-                                    msg.get_source_player(bs.Player)))
+                        bs.WeakCallPartial(self.curse_explode,
+                                           msg.get_source_player(bs.Player)))
 
                 # If we're frozen, shatter.. otherwise die if we hit zero
                 # if self.frozen and (damage > 200 or self.hitpoints <= 0):
@@ -335,7 +350,7 @@ class SSPlayerSpaz(PlayerSpaz):
                 self.last_attacked_time = bs.time()
                 self.last_attacked_type = (msg.hit_type, msg.hit_subtype)
             Spaz.handlemessage(self, bs.HitMessage)  # Augment standard behavior.
-            activity = self._activity()
+            activity = self.getactivity(doraise=False)
             if activity is not None and self._player.exists():
                 activity.handlemessage(PlayerSpazHurtMessage(self))
 
@@ -377,7 +392,7 @@ class SuperSmash(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Kills to Win Per Player',
@@ -460,7 +475,7 @@ class SuperSmash(bs.TeamGameActivity[Player, Team]):
         self.setup_standard_powerup_drops(enable_tnt=False)
         self._pow = None
         self._tnt_drop_timer = bs.timer(1.0 * 0.30,
-                                        bs.WeakCall(self._drop_pow_box),
+                                        bs.WeakCallPartial(self._drop_pow_box),
                                         repeat=True)
 
         # Base kills needed to win on the size of the largest team.
@@ -626,7 +641,7 @@ class SuperSmashElimination(bs.TeamGameActivity[Player2, Team2]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives (0 = Unlimited)',
@@ -708,7 +723,7 @@ class SuperSmashElimination(bs.TeamGameActivity[Player2, Team2]):
         self.setup_standard_powerup_drops(enable_tnt=False)
         self._pow = None
         self._tnt_drop_timer = bs.timer(1.0 * 0.30,
-                                        bs.WeakCall(self._drop_pow_box),
+                                        bs.WeakCallPartial(self._drop_pow_box),
                                         repeat=True)
         self._update_icons()
         bs.timer(1.0, self.check_end_game, repeat=True)
@@ -903,7 +918,7 @@ class SuperSmashElimination(bs.TeamGameActivity[Player2, Team2]):
         if isinstance(msg, bs.PlayerDiedMessage):
             # Augment standard behavior.
             super().handlemessage(msg)
-            player: Player = msg.getplayer(Player)
+            player: Player2 = msg.getplayer(Player2)
 
             player.lives -= 1
             if player.lives < 0:

@@ -1,8 +1,10 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 
+import logging
 import random
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
@@ -21,6 +23,17 @@ if TYPE_CHECKING:
     from typing import (Any, Type, Tuple, List, Sequence, Optional, Dict,
                         Union)
     from bascenev1lib.actor.onscreentimer import OnScreenTimer
+
+
+plugman = dict(
+    plugin_name='hyper_race',
+    description='Race and avoid the obstacles',
+    external_url='',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 
 class ThePadDefs:
@@ -131,7 +144,7 @@ class ThePadMapb(bs.Map):
         gnode.vignette_inner = (0.95, 0.95, 0.93)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class NewMap(babase.Plugin):
     """My first ballistica plugin!"""
 
@@ -436,7 +449,7 @@ class NewBomb(Bomb):
 
         # We blew up so we need to go away.
         # NOTE TO SELF: do we actually need this delay?
-        bs.timer(0.001, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+        bs.timer(0.001, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
 
 class TNT(bs.Actor):
@@ -550,7 +563,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: Type[bs.Session]) -> List[babase.Setting]:
+            cls, sessiontype: Type[bs.Session]) -> List[bs.Setting]:
         settings = [
             bs.IntSetting('Laps', min_value=1, default=3, increment=1),
             bs.IntChoiceSetting(
@@ -810,7 +823,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                             })
                             bs.timer(2.3, mathnode.delete)
                         except Exception:
-                            babase.print_exception('Error printing lap.')
+                            logging.exception('Error printing lap.')
 
     def on_team_join(self, team: Team) -> None:
         self._update_scoreboard()
@@ -840,7 +853,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                     if otherplayer.actor is not None:
                         otherplayer.actor.handlemessage(bs.DieMessage())
                 except Exception:
-                    babase.print_exception('Error sending DieMessage.')
+                    logging.exception('Error sending DieMessage.')
 
         # Defer so team/player lists will be updated.
         babase.pushcall(self._check_end_game)
@@ -966,59 +979,59 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
         self._tnt((-7, 5, -1), (0, 0, 0), 1.3)
         self._tnt((-6, 5, 1), (0, 0, 0), 1.3)
 
-        bs.timer(0.1, bs.WeakCall(self._tnt, (-3.2, 5, 1),
-                                  (0, 0, 0), 1.0, (0, 20, 60)), repeat=True)
+        bs.timer(0.1, bs.WeakCallPartial(self._tnt, (-3.2, 5, 1),
+                                         (0, 0, 0), 1.0, (0, 20, 60)), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6.8, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (7.6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6.8, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (7.6, 7, 1), (0, 0, 0), 1.0, 1.0), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6.8, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (7.6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6.8, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (7.6, 7, -2.2), (0, 0, 0), 1.0, 1.0), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6.8, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (7.6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6.8, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (7.6, 7, -5.2), (0, 0, 0), 1.0, 1.0), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (6.8, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (7.6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (6.8, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (7.6, 7, -8), (0, 0, 0), 1.0, 1.0), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (-5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'impact',
-                                  (-1.5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (-5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'impact',
+                                         (-1.5, 5, 0), (0, 0, 0), 1.0, 1.0, (0, 20, 3)), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-                                  (-1, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-                                  (-1, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-                                  (-1, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'sticky',
+                                         (-1, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'sticky',
+                                         (-1, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'sticky',
+                                         (-1, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-                                  (-4.6, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-                                  (-4.6, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
-        bs.timer(1.6, bs.WeakCall(self._bomb, 'sticky',
-                                  (-4.6, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'sticky',
+                                         (-4.6, 5, -8), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'sticky',
+                                         (-4.6, 5, -9), (0, 10, 0), 1.0, 1.0), repeat=True)
+        bs.timer(1.6, bs.WeakCallPartial(self._bomb, 'sticky',
+                                         (-4.6, 5, -10), (0, 10, 0), 1.0, 1.0), repeat=True)
 
-        bs.timer(1.6, bs.WeakCall(
+        bs.timer(1.6, bs.WeakCallPartial(
             self._powerup, (2, 5, -5), 'curse', (0, 20, -3)), repeat=True)
-        bs.timer(1.6, bs.WeakCall(
+        bs.timer(1.6, bs.WeakCallPartial(
             self._powerup, (4, 5, -5), 'curse', (0, 20, -3)), repeat=True)
 
     def _tnt(self,
@@ -1085,7 +1098,7 @@ class RaceGame(bs.TeamGameActivity[Player, Team]):
                     assert isinstance(player.actor, PlayerSpaz)
                     player.actor.connect_controls_to_player()
                 except Exception:
-                    babase.print_exception('Error in race player connects.')
+                    logging.exception('Error in race player connects.')
         assert self._timer is not None
         self._timer.start()
 
