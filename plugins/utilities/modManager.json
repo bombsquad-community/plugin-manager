@@ -1,0 +1,6 @@
+{
+  "name": "Mod Manager (this thingy)",
+  "author": "Mrmaxmeier",
+  "category": "utilities",
+  "requires": ["ui_wrappers", "settings_patcher"]
+}
