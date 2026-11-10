@@ -1,5 +1,6 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Ported to api 8 by brostos using baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 
 # Copy pasted from ExplodoRun by Blitz,just edited Bots and map 😝
 
@@ -17,6 +18,17 @@ from bascenev1lib.actor.onscreentimer import OnScreenTimer
 
 if TYPE_CHECKING:
     from typing import Any, Type, Dict, List, Optional
+
+
+plugman = dict(
+    plugin_name='infinite_ninjas',
+    description='How long can you survive from Ninjas??',
+    external_url='',
+    authors=[
+        {'name': '-', 'email': '', 'discord': '', 'github': ''},
+    ],
+    version='1.1.0',
+)
 
 ## MoreMinigames.py support ##
 

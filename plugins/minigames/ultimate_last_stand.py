@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 """Ultimate Last Stand V2:
 Made by Cross Joy"""
@@ -26,10 +27,11 @@ Made by Cross Joy"""
 
 # ----------------------------------------------------------------------------
 
-# ba_meta require api 8
+# ba_meta require api 9
 
 from __future__ import annotations
 
+import logging
 import random
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -52,6 +54,18 @@ from bascenev1lib.actor.spazbot import (SpazBot, SpazBotSet, BomberBot,
 if TYPE_CHECKING:
     from typing import Any, Sequence
     from bascenev1lib.actor.spazbot import SpazBot
+
+
+plugman = dict(
+    plugin_name='ultimate_last_stand',
+    description='Bring Last Stand minigame into team fight and FFA.',
+    external_url='',
+    authors=[
+        {'name': 'Cross Joy', 'email': 'cross.joy.official@gmail.com',
+            'discord': 'crossjoy', 'github': 'CrossJoy'},
+    ],
+    version='2.1.0',
+)
 
 
 class IceBot(SpazBot):
@@ -253,7 +267,7 @@ class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
     @classmethod
     def get_available_settings(
             cls,
-            sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives Per Player',
@@ -383,7 +397,7 @@ class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
             1.6: (0.5, 0.5, 0.5)
         }, loop=True)
 
-        bs.timer(0.001, bs.WeakCall(self._start_bot_updates))
+        bs.timer(0.001, bs.WeakCallPartial(self._start_bot_updates))
         self._tntspawner = TNTSpawner(position=self._tntspawnpos,
                                       respawn_time=10.0)
 
@@ -470,7 +484,7 @@ class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
     # overriding the default character spawning..
     def spawn_player(self, player: Player) -> bs.Actor:
         actor = self.spawn_player_spaz(player)
-        bs.timer(0.3, babase.Call(self._print_lives, player))
+        bs.timer(0.3, babase.CallPartial(self._print_lives, player))
 
         # If we have any icons, update their state.
         for icon in player.icons:
@@ -503,13 +517,13 @@ class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
         if len(self.players) > 3:
             self._update_bots()
         self._bot_update_timer = bs.Timer(self._bot_update_interval,
-                                          bs.WeakCall(self._update_bots))
+                                          bs.WeakCallPartial(self._update_bots))
 
     def _update_bots(self) -> None:
         assert self._bot_update_interval is not None
         self._bot_update_interval = max(0.5, self._bot_update_interval * 0.98)
         self._bot_update_timer = bs.Timer(self._bot_update_interval,
-                                          bs.WeakCall(self._update_bots))
+                                          bs.WeakCallPartial(self._update_bots))
         botspawnpts: list[Sequence[float]] = [[-5.0, 5.5, -4.14],
                                               [0.0, 5.5, -4.14],
                                               [5.0, 5.5, -4.14]]
@@ -519,7 +533,7 @@ class UltimateLastStand(bs.TeamGameActivity[Player, Team]):
                     assert isinstance(player.actor, PlayerSpaz)
                     assert player.actor.node
             except Exception:
-                babase.print_exception('Error updating bots.')
+                logging.exception('Error updating bots.')
 
         spawnpt = random.choice(
             [botspawnpts[0], botspawnpts[1], botspawnpts[2]])

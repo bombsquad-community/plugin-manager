@@ -1,3 +1,4 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
 # Released under the MIT License. See LICENSE for details.
 #
@@ -9,24 +10,38 @@ Youtube: https://www.youtube.com/c/HeySmoothy
 Website: https://bombsquad-community.web.app
 Github:  https://github.com/bombsquad-community
 """
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
+from bascenev1lib.actor import spaz
+from bascenev1lib.game.deathmatch import DeathMatchGame, Player
 
+import typing
 from typing import TYPE_CHECKING
 
 import babase
 import bascenev1 as bs
-from babase._mgen.enums import InputType
+from babase import InputType
 from bascenev1lib.actor.bomb import Blast
 
 from bascenev1lib.gameutils import SharedObjects
-from bascenev1lib.actor.playerspaz import PlayerSpaz, PlayerT
-from bascenev1lib.game.deathmatch import DeathMatchGame, Player
-from bascenev1lib.actor import spaz
+from bascenev1lib.actor.playerspaz import PlayerSpaz
+PlayerT = typing.TypeVar('PlayerT')
 if TYPE_CHECKING:
     from typing import Any, Sequence, Dict, Type, List, Optional, Union
+
+
+plugman = dict(
+    plugin_name='drone_war',
+    description='Fly with Drone and attack with rocket launcher',
+    external_url='https://www.youtube.com/channel/UCaQajfKHrTPgiOhuias5iPg',
+    authors=[
+        {'name': 'Mr.Smoothy', 'email': 'smoothy@bombsquad.ga',
+            'discord': 'mr.smoothy', 'github': 'imayushsaini'},
+    ],
+    version='1.1.0',
+)
 
 STORAGE_ATTR_NAME = f'_shared_{__name__}_factory'
 
@@ -113,7 +128,8 @@ class Drone(bs.Actor):
         self.rocket_launcher = launcher
 
     def fire(self):
-        if hasattr(self.grab_node, "position"):
+        # The drone outlives its pilot, whose node is dead after it dies.
+        if self.grab_node and self.spaz.node:
             self.rocket_launcher.shot(self.spaz, self.x_direction, self.z_direction, (
                 self.grab_node.position[0], self.grab_node.position[1] - 1, self.grab_node.position[2]))
 
@@ -331,9 +347,9 @@ class Rocket(bs.Actor):
                                         self.node.velocity[2] * 200)
 
         self._life_timer = bs.Timer(
-            5, bs.WeakCall(self.handlemessage, bs.DieMessage()))
+            5, bs.WeakCallPartial(self.handlemessage, bs.DieMessage()))
 
-        self._emit_timer = bs.Timer(0.001, bs.WeakCall(self.emit), repeat=True)
+        self._emit_timer = bs.Timer(0.001, bs.WeakCallPartial(self.emit), repeat=True)
         self.base_pos_y = self.node.position[1]
 
         bs.camerashake(5.0)
@@ -405,7 +421,7 @@ class ChooseQueen(DeathMatchGame):
             conditions=('they_have_material', shared.player_material),
             actions=(
                 ('modify_part_collision', 'collide', True),
-                ('call', 'at_connect', babase.Call(self._handle_player_collide)),
+                ('call', 'at_connect', babase.CallPartial(self._handle_player_collide)),
             ),
         )
         pos = (0, 0.1, -5)
@@ -422,7 +438,7 @@ class ChooseQueen(DeathMatchGame):
             player.shatter(True)
 
     def spawn_drone(self, spaz):
-        with bs.get_foreground_host_activity().context:
+        with self.context:
 
             drone = Drone(spaz)
             r_launcher = RocketLauncher()

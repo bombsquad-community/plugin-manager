@@ -1,9 +1,11 @@
+# Porting made easier by baport.(https://github.com/bombsquad-community/baport)
 # Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# ba_meta require api 8
+# ba_meta require api 9
 # (see https://ballistica.net/wiki/meta-tag-system)
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 import babase
@@ -18,6 +20,7 @@ from bascenev1._messages import PlayerDiedMessage, StandMessage
 from bascenev1lib.actor.playerspaz import PlayerSpaz
 from bascenev1lib.actor.scoreboard import Scoreboard
 from bascenev1lib.game.elimination import Icon, Player
+from bascenev1lib.actor.spaz import Spaz
 from bascenev1lib.actor.spaz import PickupMessage
 from bascenev1lib.actor.spazbot import SpazBotSet, BrawlerBot, SpazBotDiedMessage
 from bascenev1lib.actor.spazfactory import SpazFactory
@@ -25,6 +28,33 @@ from bascenev1lib.actor.spazfactory import SpazFactory
 
 if TYPE_CHECKING:
     from typing import Any, Sequence
+
+
+plugman = dict(
+    plugin_name='zombie_horde',
+    description='Fight or defend against horde of zombies',
+    external_url='https://youtube.com/c/JoseANG3LYT',
+    authors=[
+        {'name': 'JoseAng3l', 'email': '', 'discord': 'joseang3l', 'github': ''},
+    ],
+    version='1.1.0',
+)
+
+
+# The mixed-up zombie look, as the legacy asset names of each part.
+ZOMBIE_PARTS = {
+    'head_mesh': 'zoeHead',
+    'color_texture': 'agentColor',
+    'color_mask_texture': 'pixieColorMask',
+    'torso_mesh': 'bonesTorso',
+    'pelvis_mesh': 'pixiePelvis',
+    'upper_arm_mesh': 'frostyUpperArm',
+    'forearm_mesh': 'frostyForeArm',
+    'hand_mesh': 'bonesHand',
+    'upper_leg_mesh': 'bonesUpperLeg',
+    'lower_leg_mesh': 'pixieLowerLeg',
+    'toes_mesh': 'bonesToes',
+}
 
 
 class PlayerSpaz_Zom(PlayerSpaz):
@@ -110,7 +140,7 @@ class zBotSet(SpazBotSet):
     def start_moving(self) -> None:
         """Start processing bot AI updates so they start doing their thing."""
         self._bot_update_timer = bs.Timer(0.05,
-                                          bs.WeakCall(self.zUpdate),
+                                          bs.WeakCallPartial(self.zUpdate),
                                           repeat=True)
 
     def zUpdate(self) -> None:
@@ -121,8 +151,8 @@ class zBotSet(SpazBotSet):
             ])
         except Exception:
             bot_list = []
-            babase.print_exception('Error updating bot list: ' +
-                                   str(self._bot_lists[self._bot_update_list]))
+            logging.exception('Error updating bot list: ' +
+                              str(self._bot_lists[self._bot_update_list]))
         self._bot_update_list = (self._bot_update_list +
                                  1) % self._bot_list_count
 
@@ -138,7 +168,7 @@ class zBotSet(SpazBotSet):
                             (babase.Vec3(player.actor.node.position),
                              babase.Vec3(player.actor.node.velocity)))
             except Exception:
-                babase.print_exception('Error on bot-set _update.')
+                logging.exception('Error on bot-set _update.')
 
         for bot in bot_list:
             bot.set_player_points(player_pts)
@@ -167,7 +197,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
 
     @classmethod
     def get_available_settings(
-            cls, sessiontype: type[bs.Session]) -> list[babase.Setting]:
+            cls, sessiontype: type[bs.Session]) -> list[bs.Setting]:
         settings = [
             bs.IntSetting(
                 'Lives Per Player',
@@ -253,20 +283,38 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         myAppear = copy.copy(babase.app.classic.spaz_appearances['Kronk'])
         myAppear.name = 'Kronk2'
         babase.app.classic.spaz_appearances['Kronk2'] = myAppear
+        if getattr(myAppear, 'character', None) is not None:
+            # Since 1.8.1 the builtin characters are packaged spaz defs with
+            # no per-part media, so the zombie is put together from the
+            # parts' own asset names and drawn in the legacy form.
+            myAppear.character = None
+            for field, name in ZOMBIE_PARTS.items():
+                setattr(myAppear, field, name)
+            kronk_sounds = [f'kronk{i}' for i in range(1, 11)]
+            myAppear.jump_sounds = kronk_sounds
+            myAppear.attack_sounds = kronk_sounds
+            myAppear.impact_sounds = kronk_sounds
+            myAppear.pickup_sounds = kronk_sounds
+            myAppear.death_sounds = ['kronkDeath']
+            myAppear.fall_sounds = ['kronkFall']
+            myAppear.style = 'kronk'
+            my_factory.spaz_media.pop('Kronk2', None)
+            appears = []
         for appear in appears:
             my_factory.get_media(appear)
         med = my_factory.spaz_media
-        med['Kronk2']['head_mesh'] = med['Zoe']['head_mesh']
-        med['Kronk2']['color_texture'] = med['Agent Johnson']['color_texture']
-        med['Kronk2']['color_mask_texture'] = med['Pixel']['color_mask_texture']
-        med['Kronk2']['torso_mesh'] = med['Bones']['torso_mesh']
-        med['Kronk2']['pelvis_mesh'] = med['Pixel']['pelvis_mesh']
-        med['Kronk2']['upper_arm_mesh'] = med['Frosty']['upper_arm_mesh']
-        med['Kronk2']['forearm_mesh'] = med['Frosty']['forearm_mesh']
-        med['Kronk2']['hand_mesh'] = med['Bones']['hand_mesh']
-        med['Kronk2']['upper_leg_mesh'] = med['Bones']['upper_leg_mesh']
-        med['Kronk2']['lower_leg_mesh'] = med['Pixel']['lower_leg_mesh']
-        med['Kronk2']['toes_mesh'] = med['Bones']['toes_mesh']
+        if appears:
+            med['Kronk2']['head_mesh'] = med['Zoe']['head_mesh']
+            med['Kronk2']['color_texture'] = med['Agent Johnson']['color_texture']
+            med['Kronk2']['color_mask_texture'] = med['Pixel']['color_mask_texture']
+            med['Kronk2']['torso_mesh'] = med['Bones']['torso_mesh']
+            med['Kronk2']['pelvis_mesh'] = med['Pixel']['pelvis_mesh']
+            med['Kronk2']['upper_arm_mesh'] = med['Frosty']['upper_arm_mesh']
+            med['Kronk2']['forearm_mesh'] = med['Frosty']['forearm_mesh']
+            med['Kronk2']['hand_mesh'] = med['Bones']['hand_mesh']
+            med['Kronk2']['upper_leg_mesh'] = med['Bones']['upper_leg_mesh']
+            med['Kronk2']['lower_leg_mesh'] = med['Pixel']['lower_leg_mesh']
+            med['Kronk2']['toes_mesh'] = med['Bones']['toes_mesh']
 
     def get_instance_description(self) -> str | Sequence:
         return ('Kill walkers for points! ',
@@ -510,7 +558,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         bs.timer(0.5, light.delete)
 
         if not self._solo_mode:
-            bs.timer(0.3, babase.Call(self._print_lives, player))
+            bs.timer(0.3, babase.CallPartial(self._print_lives, player))
 
         for icon in player.icons:
             icon.handle_player_spawned()
@@ -544,7 +592,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         if player.actor and not self.has_ended():
             from bascenev1lib.actor.respawnicon import RespawnIcon
             player.customdata['respawn_timer'] = bs.Timer(
-                respawn_time, bs.WeakCall(
+                respawn_time, bs.WeakCallPartial(
                     self.spawn_player_if_exists_as_zombie, player))
             player.customdata['respawn_icon'] = RespawnIcon(
                 player, respawn_time)
@@ -601,7 +649,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         bs.timer(0.5, light.delete)
 
         if not self._solo_mode:
-            bs.timer(0.3, babase.Call(self._print_lives, player))
+            bs.timer(0.3, babase.CallPartial(self._print_lives, player))
 
         for icon in player.icons:
             icon.handle_player_spawned()
@@ -668,7 +716,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
             if msg._player in self.spazList:
                 self.spazList.remove(msg._player)
             if player.lives < 0:
-                babase.print_error(
+                logging.error(
                     "Got lives < 0 in Elim; this shouldn't happen. solo:" +
                     str(self._solo_mode))
                 player.lives = 0
@@ -744,7 +792,7 @@ class ZombieHorde(bs.TeamGameActivity[Player, Team]):
         thePt = list(self.get_random_point_in_play())
         thePt2 = self.map.get_ffa_start_position(self.players)
         thePt[1] = thePt2[1]
-        bs.timer(0.1, babase.Call(
+        bs.timer(0.1, babase.CallPartial(
             self._bots.spawn_bot, BrawlerBot, pos=thePt, spawn_time=1.0))
 
     def _onSpazBotDied(self, DeathMsg) -> None:
@@ -872,7 +920,7 @@ class ZombieHordeCoop(ZombieHorde):
             super().handlemessage(msg)
 
 
-# ba_meta export plugin
+# ba_meta export babase.Plugin
 class ZombieHordeLevel(babase.Plugin):
     def on_app_running(self) -> None:
         babase.app.classic.add_coop_practice_level(
