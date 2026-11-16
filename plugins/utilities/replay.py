@@ -3,9 +3,8 @@
 # Bug? Feedback? Telegram >> @BroBordd
 
 """
-Replay v3.0 - Simple replay player
+Replay v3.0.1 - Simple replay player
 
-Experimental. Feedback is appreciated.
 Adds a button to pause menu and watch menu.
 
 Features:
@@ -33,9 +32,26 @@ from random import uniform
 from threading import Thread
 from struct import unpack
 
+plugman = dict(
+    plugin_name="replay",
+    description=(
+        "Adds a button to pause menu and watch menu. "
+        "To see features, read the source, or just try it!"
+    ),
+    external_url="https://BroBordd.github.io/byBordd",
+    authors=[
+        {
+            "name": "BrotherBoard",
+            "email": "brobordd@gmail.com",
+            "discord": "BrotherBoard",
+            "github": "BroBordd"
+        },
+    ],
+    version='3.0.1',
+)
 
 class Replay:
-    VER = '3.0'
+    VER = '3.0.1'
     COL1 = (0.18, 0.18, 0.18)
     COL2 = (1, 1, 1)
     COL3 = (0, 1, 0)
@@ -57,8 +73,7 @@ class Replay:
             p=get_overlay_stack(),
             size=(400, 500),
             oac=lambda: (
-                bui.containerwidget(
-                    self.parent, transition='out_scale' if source and source.exists() else 'out_left'),
+                bui.containerwidget(self.parent, transition='out_scale' if source and source.exists() else 'out_left'),
                 self.play_sound('laser'),
                 self.transition_sound.stop()
             )
@@ -155,11 +170,11 @@ class Replay:
             return
         self.is_busy(True)
         bui.getsound('deek').play()
-
+        
         # Start replay immediately
         bs.set_replay_speed_exponent(0)
         bui.fade_screen(1)
-
+        
         # Create player with unknown duration
         Player(path=self.get_replay_path(), duration=None)
         self.is_busy(False)
@@ -230,12 +245,10 @@ class Replay:
 
     def finish_calculation(self, duration):
         bui.textwidget(self.status_text, text='Starting...' if duration else 'Wait what?')
-        bui.textwidget(self.progress_text2,
-                       text=f'result was {duration} milleseconds') if duration else duration
+        bui.textwidget(self.progress_text2, text=f'result was {duration} milleseconds') if duration else duration
         if not duration:
             self.error = True
-            bui.textwidget(
-                self.progress_text, text='pybrp returned zero duration, error?\nclosing this window in 5 seconds')
+            bui.textwidget(self.progress_text, text='pybrp returned zero duration, error?\nclosing this window in 5 seconds')
             bui.textwidget(self.progress_text2, text='')
         bui.apptimer(1 if duration else 5, CallPartial(self.start_player, duration))
 
@@ -294,7 +307,6 @@ class Replay:
             **kwargs
         )
 
-
 class Player:
     TICK = 0.01
     COL0 = (0.5, 0, 0)
@@ -330,17 +342,38 @@ class Player:
         self.camera_look = None
         self.replay_time = self.start_time = self.progress_val = 0
         self.camera_zoom = 1
-        [setattr(self, attr, []) for attr in ['ui_widgets', 'camera_widgets',
-                                              'hide_widgets', 'cinema_widgets', 'cinema_ui_widgets']]
-
+        [setattr(self, attr, []) for attr in ['ui_widgets', 'camera_widgets', 'hide_widgets', 'cinema_widgets', 'cinema_ui_widgets']]
+        
+        # The game (1.8) writes its seek snapshots in the compact stream framing
+        # but reads them back with the replay's own protocol, so seeking a replay
+        # recorded before protocol 44 (BombSquad 1.7) fails with 'invalid state
+        # message' and kills the session. Detect that up front and refuse to seek.
+        self.protocol = None
+        try:
+            with open(path, 'rb') as f:
+                self.protocol = _brp_header(f)[2]
+        except Exception:
+            pass
+        self.can_seek = self.protocol is None or self.protocol >= 44
+        
         # Start replay immediately
         bs.new_replay_session(path)
-
-        width, height = bui.get_virtual_screen_size()
+        
         self.bar_height = 80
+        self.speed = 1
+        self.seen = False
+        self.waited = 0.0
+        # Like BRP Studio: the replay session replaces the ui when it starts,
+        # so the overlay is only built once bs.is_in_replay() is true.
+        self.watch_timer = bui.AppTimer(0.1, self.watch, repeat=True)
+
+    def build(self):
+        """Build the overlay on the overlay stack (bottom-left origin)."""
+        width, height = bui.get_virtual_screen_size()
         self.parent = bui.containerwidget(
-            size=(width, self.bar_height),
-            stack_offset=(0, -height / 2 + self.bar_height / 2),
+            parent=get_overlay_stack(),
+            size=(width, height),
+            position=(0, 0),
             background=False
         )
         self.background = bui.imagewidget(
@@ -353,7 +386,6 @@ class Player:
 
         self.create_ui()
         self.create_hide_button()
-        self.speed = 1
         self.start_focus()
         self.play()
 
@@ -363,34 +395,62 @@ class Player:
             Thread(target=self.calculate_duration).start()
             self.scan_timer = bui.AppTimer(0.1, self.update_scan_progress, repeat=True)
 
+    def watch(self):
+        """Tear our overlay down when the replay session ends (it outlives scenes)."""
+        running = bs.is_in_replay()
+        if not self.seen:
+            if running:
+                self.seen = True
+                self.build()
+            else:
+                self.waited += 0.1
+                if self.waited > 30:
+                    self.teardown()
+            return
+        if not running:
+            self.teardown()
+
+    def teardown(self):
+        self.watch_timer = None
+        self.scan_timer = None
+        self.exit_timer = None
+        self.info_timer = None
+        self.stop()
+        self.stop_focus()
+        _ba.set_camera_manual(False)
+        parent = getattr(self, 'parent', None)
+        if parent is not None and parent.exists():
+            parent.delete()
+
     def calculate_duration(self):
         """Calculate duration in background thread with reduced load"""
         import time as pytime
-
+        
         try:
             total_ms = 0
             last_yield = pytime.time()
-
+            
             with open(self.path, 'rb') as f:
                 f.seek(0, 2)
                 file_size = f.tell()
                 self.scan_progress[1] = file_size
-                f.seek(6)
-
+                f.seek(0)
+                compact = _brp_header(f)[0]
+                
                 while True:
                     current_pos = f.tell()
                     self.scan_progress[0] = current_pos
-
+                    
                     # Yield control every 10ms to prevent freezing
                     current_time = pytime.time()
                     if current_time - last_yield > 0.01:
                         pytime.sleep(0.005)  # Small sleep to reduce CPU load
                         last_yield = current_time
-
+                    
                     b_data = f.read(1)
                     if not b_data:
                         break
-
+                    
                     b1, comp_len = b_data[0], 0
                     if b1 < 254:
                         comp_len = b1
@@ -398,49 +458,38 @@ class Player:
                         comp_len = int.from_bytes(f.read(2), 'little')
                     else:
                         comp_len = int.from_bytes(f.read(4), 'little')
-
+                    
                     if comp_len == 0:
                         continue
-
+                    
                     raw_msg = self.huffman.decompress(f.read(comp_len))
-
+                    
                     if not raw_msg or raw_msg[0] != 1:
                         continue
-
-                    sub_off = 1
-                    while sub_off + 2 <= len(raw_msg):
-                        sub_size_bytes = raw_msg[sub_off:sub_off+2]
-                        if len(sub_size_bytes) < 2:
-                            break
-                        sub_size = int.from_bytes(sub_size_bytes, 'little')
-                        sub_off += 2
-                        if sub_off + sub_size > len(raw_msg):
-                            break
-                        sub_data = raw_msg[sub_off:sub_off+sub_size]
-                        if len(sub_data) >= 2 and sub_data[0] == 0:
-                            total_ms += sub_data[1]
-                        sub_off += sub_size
-
+                    
+                    for cmd in _brp_commands(raw_msg, compact):
+                        total_ms += _brp_step_ms(cmd, compact)
+                    
                     # Update confirmed duration (this is safe to seek to!)
                     self.confirmed_duration_sec = total_ms / 1000
-
+                    
                     # Update estimated duration based on progress
                     if current_pos > 1000:  # After reading at least 1KB
                         progress_percent = current_pos / file_size
                         if progress_percent > 0:
                             estimated_total_ms = total_ms / progress_percent
                             self.estimated_duration = max(10.0, estimated_total_ms / 1000)
-
+            
             self.scan_progress[0] = self.scan_progress[1]
             self.duration_ms = total_ms
             self.duration_sec = total_ms / 1000
-
+            
         except Exception as e:
             self.duration_ms = 0
             self.duration_sec = 0
         finally:
             self.scanning = False
-
+    
     def update_scan_progress(self):
         """Update duration text with scan progress - alternates between % and estimated time"""
         if not self.scanning:
@@ -450,7 +499,7 @@ class Player:
                 bui.imagewidget(self.loading_bar, opacity=0)
             if self.main_bar.exists():
                 bui.imagewidget(self.main_bar, opacity=0.6)
-
+            
             # Update to show final duration with normal color
             if hasattr(self, 'duration_time_text') and self.duration_time_text.exists():
                 bui.textwidget(
@@ -459,17 +508,17 @@ class Player:
                     color=self.COL6
                 )
             return
-
+        
         # Show scanning progress
         if hasattr(self, 'duration_time_text') and self.duration_time_text.exists():
             current, total = self.scan_progress
             if total > 0:
                 percent = int((current / total) * 100)
-
+                
                 # Cycle between showing percentage and estimated time
                 self.scan_cycle += 1
                 show_percent = (self.scan_cycle // 10) % 2 == 0  # Switch every second
-
+                
                 if show_percent:
                     # Show scan percentage
                     bui.textwidget(
@@ -486,7 +535,7 @@ class Player:
                         text=format_time(self.estimated_duration),
                         color=self.COL19  # Orange color
                     )
-
+                
                 # Update loading bar width based on scan progress
                 if hasattr(self, 'loading_bar') and self.loading_bar.exists():
                     loading_width = (current / total) * self.progress_width
@@ -564,7 +613,7 @@ class Player:
             ))
             widgets(bui.textwidget(
                 parent=parent,
-                text=bui.charstr(getattr(bui.SpecialChar, arrow)),
+                text=getattr(bui.SpecialChar, arrow).value,
                 color=self.COL3,
                 position=(pos[0] - 2, pos[1] + 13),
                 h_align='center',
@@ -587,7 +636,7 @@ class Player:
             ))
             widgets(bui.textwidget(
                 parent=parent,
-                text=bui.charstr(getattr(bui.SpecialChar, arrow)),
+                text=getattr(bui.SpecialChar, arrow).value,
                 color=self.COL5,
                 position=(pos[0] - 1, pos[1] + 12),
                 h_align='center',
@@ -679,7 +728,7 @@ class Player:
             maxwidth=100
         )
         widgets(self.current_time_text)
-
+        
         # Duration display - alternates between scan% and estimated time while scanning
         self.duration_time_text = bui.textwidget(
             parent=parent,
@@ -887,8 +936,7 @@ class Player:
             self.camera_look = None
             bui.textwidget(self.look_text, text='players')
         self.camera_zoom = new_zoom
-        bui.textwidget(
-            self.zoom_text, text=f'x{round(0.5 ** (new_zoom - 1), 2)}' if new_zoom != 1 else 'x1.0' if self.manual_zoom else 'auto')
+        bui.textwidget(self.zoom_text, text=f'x{round(0.5 ** (new_zoom - 1), 2)}' if new_zoom != 1 else 'x1.0' if self.manual_zoom else 'auto')
         self.apply_zoom()
 
     def look(self):
@@ -960,8 +1008,8 @@ class Player:
             label='',
             repeat=True
         ))
-            for i in range(cols)
-            for j in range(rows)]
+        for i in range(cols)
+        for j in range(rows)]
 
     def create_cinema_ui(self):
         widgets = self.cinema_ui_widgets.append
@@ -1041,8 +1089,7 @@ class Player:
         crosshair = 20
         [widgets(bui.imagewidget(
             parent=self.parent,
-            position=(width / 2, height / 2 - crosshair / 2 + crosshair *
-                      0.1) if i else (width / 2 - crosshair / 2, height / 2 + crosshair * 0.1),
+            position=(width / 2, height / 2 - crosshair / 2 + crosshair * 0.1) if i else (width / 2 - crosshair / 2, height / 2 + crosshair * 0.1),
             size=(3, crosshair * 1.15) if i else (crosshair * 1.15, 3),
             color=self.COL1,
             texture=bui.gettexture('white')
@@ -1063,8 +1110,7 @@ class Player:
                 parent=self.parent,
                 texture=bui.gettexture('white'),
                 color=self.COL1,
-                position=(width / 2 + offset, height / 2 +
-                          [offset - crosshair, -offset + crosshair * 0.3][j]),
+                position=(width / 2 + offset, height / 2 + [offset - crosshair, -offset + crosshair * 0.3][j]),
                 size=(3, crosshair * +1.1)
             ))
 
@@ -1073,8 +1119,7 @@ class Player:
                 parent=self.parent,
                 texture=bui.gettexture('white'),
                 color=self.COL1,
-                position=(width / 2 + [-offset, offset - crosshair][j],
-                          height / 2 - crosshair / 2 - offset + crosshair * 0.8),
+                position=(width / 2 + [-offset, offset - crosshair][j], height / 2 - crosshair / 2 - offset + crosshair * 0.8),
                 size=(crosshair * 1.1, 3)
             ))
 
@@ -1083,8 +1128,7 @@ class Player:
                 parent=self.parent,
                 texture=bui.gettexture('white'),
                 color=self.COL1,
-                position=(width / 2 - offset, height / 2 +
-                          [offset - crosshair, -offset + crosshair * 0.3][j]),
+                position=(width / 2 - offset, height / 2 + [offset - crosshair, -offset + crosshair * 0.3][j]),
                 size=(3, crosshair * 1.1)
             ))
 
@@ -1098,7 +1142,7 @@ class Player:
         self.cinema_busy = True
         if self.cinema_mode:
             self.animate_cinema(204, 14, -1)
-            bui.buttonwidget(self.cinema_button, label=bui.charstr(bui.SpecialChar.UP_ARROW))
+            bui.buttonwidget(self.cinema_button, label=bui.SpecialChar.UP_ARROW.value)
             self.destroy_cinema_ui()
         else:
             bui.buttonwidget(self.cinema_button, texture=bui.gettexture('white'))
@@ -1222,8 +1266,7 @@ class Player:
         self.ui_hidden = hidden = not self.ui_hidden
         bui.textwidget(self.hide_text, text=self.hide_icons[hidden])
         if hidden:
-            bui.apptimer(0.2, lambda: bui.buttonwidget(
-                self.hide_button, texture=bui.gettexture('empty')))
+            bui.apptimer(0.2, lambda: bui.buttonwidget(self.hide_button, texture=bui.gettexture('empty')))
             self.fade_hide_button(0.4, -0.05)
             self.destroy_ui()
         else:
@@ -1266,12 +1309,11 @@ class Player:
     def toggle_pause(self, dry=False, silent=False):
         if not dry:
             self.paused = not self.paused
-        icon = bui.charstr(getattr(bui.SpecialChar, ['PAUSE', 'PLAY'][self.paused] + '_BUTTON'))
+        icon = getattr(bui.SpecialChar, ['PAUSE', 'PLAY'][self.paused] + '_BUTTON').value
         bui.textwidget(self.pause_text, text=icon)
         if not dry:
             if not silent:
-                self.show_message(['Resume', 'Pause'][self.paused], os.path.basename(
-                    self.path) + f' of {os.path.getsize(self.path)} bytes', self.COL6, self.COL7)
+                self.show_message(['Resume', 'Pause'][self.paused], os.path.basename(self.path) + f' of {os.path.getsize(self.path)} bytes', self.COL6, self.COL7)
             if self.paused:
                 self.stop()
                 bs.pause_replay()
@@ -1316,56 +1358,65 @@ class Player:
 
     def seek(self, direction):
         """Seek with confirmed duration checking"""
+        if not self.check_can_seek():
+            return
         label = ['Forward by', 'Rewind by'][direction == -1]
         amount = direction * self.speed
-
+        
         # Use estimated duration for calculating seek amount
         if self.scanning:
             seek_base = self.estimated_duration
         else:
             seek_base = self.duration_sec
-
+        
         amount = (seek_base / 20) * amount
         new_time = (self.replay_time - self.start_time) + amount
-
+        
         # Check if trying to seek beyond confirmed duration while scanning
         if self.scanning and new_time > self.confirmed_duration_sec:
             current, total = self.scan_progress
             percent = int((current / total) * 100) if total > 0 else 0
             self.show_message('Buffering...', f'{percent}% loaded', self.COL2, self.COL3)
             return
-
+        
         # Use appropriate duration for loop check
         max_duration = self.confirmed_duration_sec if self.scanning else self.duration_sec
-
+        
         if (new_time >= max_duration) or (new_time <= 0):
             self.loop()
         else:
             self.start_time = self.replay_time - new_time
             self.reset_replay()
             bs.seek_replay(new_time)
-
+        
         self.real_time = time()
         self.fix_pause()
         amount = abs(round(amount, 2))
-        self.show_message(
-            'Seek', label + f" {amount} second{['s', ''][amount == 1]}", self.COL4, self.COL5)
-
+        self.show_message('Seek', label + f" {amount} second{['s', ''][amount == 1]}", self.COL4, self.COL5)
+    
+    def check_can_seek(self):
+        if self.can_seek:
+            return True
+        show_warning(f"Can't seek: this replay is from an older version (protocol {self.protocol}) and BombSquad 1.8 can't seek it")
+        return False
+    
     def jump(self, percent):
         """Jump with WYSIWYG behavior - percent is based on ESTIMATED duration, checked against CONFIRMED"""
+        if not self.check_can_seek():
+            return
         # Calculate target time based on ESTIMATED duration (what user sees on bar)
         if self.scanning:
             target_time = self.estimated_duration * percent
         else:
             target_time = self.duration_sec * percent
-
+        
         # Check if trying to jump beyond CONFIRMED duration while scanning
         if self.scanning and target_time > self.confirmed_duration_sec:
             current, total = self.scan_progress
             scan_percent = int((current / total) * 100) if total > 0 else 0
             self.show_message('Buffering...', f'{scan_percent}% loaded', self.COL2, self.COL3)
             return
-
+        
         self.start_time = self.replay_time - target_time
         self.reset_replay()
         bs.seek_replay(target_time)
@@ -1392,7 +1443,7 @@ class Player:
     def update_progress_ui(self):
         """Modified to handle scanning state with growing progress bar"""
         elapsed = self.replay_time - self.start_time
-
+        
         # Determine the current max duration to check against
         if self.scanning:
             max_duration = self.estimated_duration
@@ -1400,14 +1451,14 @@ class Player:
             max_duration = self.duration_sec
         else:
             max_duration = None
-
+        
         # Check if elapsed exceeds duration and loop if needed
         if max_duration and elapsed >= max_duration:
             self.loop()
             elapsed = 0  # Reset elapsed after loop
-
+        
         nub_x, nub_y = self.nub_pos
-
+        
         # Calculate progress
         if self.scanning:
             # Use estimated duration for progress bar
@@ -1418,12 +1469,11 @@ class Player:
                 progress = self.progress_width
         elif not self.duration_sec:
             # Fallback if scan failed
-            progress = min(elapsed / max(elapsed, 1) * self.progress_width *
-                           0.1, self.progress_width * 0.1)
+            progress = min(elapsed / max(elapsed, 1) * self.progress_width * 0.1, self.progress_width * 0.1)
         else:
             # Normal progress calculation, cap at 100%
             progress = min((elapsed / self.duration_sec) * self.progress_width, self.progress_width)
-
+        
         try:
             bui.imagewidget(self.nub, position=(nub_x + progress, nub_y))
             bui.textwidget(self.current_time_text, text=format_time(elapsed))
@@ -1449,106 +1499,139 @@ class Player:
         )
 
 # Tools
-
-
 def get_ui_scale(small, medium, large=None):
     scale = bui.app.ui_v1.uiscale
     return small if scale is bui.UIScale.SMALL else medium if scale is bui.UIScale.MEDIUM else (large or medium)
-
-
-def return_to_menu(): return bui.app.classic.return_to_main_menu_session_gracefully(reset_ui=False)
-def show_warning(text): return (bui.getsound('block').play()
-                                or 1) and bui.screenmessage(text, color=(1, 1, 0))
-
-
-def format_time(seconds): return strftime('%H:%M:%S', gmtime(seconds))
-def get_overlay_stack(): return bui.get_special_widget('overlay_stack')
-def round_tuple(tup): return type(tup)([round(val, 1) for val in tup])
-
+return_to_menu = lambda: bui.app.classic.return_to_main_menu_session_gracefully(reset_ui=False)
+show_warning = lambda text: (bui.getsound('block').play() or 1) and bui.screenmessage(text, color=(1, 1, 0))
+format_time = lambda seconds: strftime('%H:%M:%S', gmtime(seconds))
+get_overlay_stack = lambda: bui.get_special_widget('overlay_stack')
+round_tuple = lambda tup: type(tup)([round(val, 1) for val in tup])
 
 # pybrp
-def Z(_): return [0]*_
-
-
-def G_FREQS(): return [
-    101342, 9667, 3497, 1072, 0, 3793, *Z(2), 2815, 5235, *Z(3), 3570, *Z(3),
-    1383, *Z(3), 2970, *Z(2), 2857, *Z(8), 1199, *Z(30),
-    1494, 1974, *Z(12), 1351, *Z(122), 1475, *Z(65)
+Z = lambda _:[0]*_
+G_FREQS = lambda: [
+    101342,9667,3497,1072,0,3793,*Z(2),2815,5235,*Z(3),3570,*Z(3),
+    1383,*Z(3),2970,*Z(2),2857,*Z(8),1199,*Z(30),
+    1494,1974,*Z(12),1351,*Z(122),1475,*Z(65)
 ]
-
-
 class _Huffman:
     class _N:
         def __init__(self):
-            self.l, self.r, self.p, self.f = -1, -1, 0, 0
-
+            self.l,self.r,self.p,self.f=-1,-1,0,0
     def __init__(self):
-        self.nodes = [self._N()for _ in range(511)]
+        self.nodes=[self._N()for _ in range(511)]
         gf = G_FREQS()
-        for i in range(256):
-            self.nodes[i].f = gf[i]
-        nc = 256
-        while nc < 511:
-            s1, s2 = -1, -1
-            i = 0
-            while self.nodes[i].p != 0:
-                i += 1
-            s1 = i
-            i += 1
-            while self.nodes[i].p != 0:
-                i += 1
-            s2 = i
-            i += 1
-            while i < nc:
-                if self.nodes[i].p == 0:
-                    if self.nodes[s1].f > self.nodes[s2].f:
-                        if self.nodes[i].f < self.nodes[s1].f:
-                            s1 = i
-                    elif self.nodes[i].f < self.nodes[s2].f:
-                        s2 = i
-                i += 1
-            self.nodes[nc].f = self.nodes[s1].f+self.nodes[s2].f
-            self.nodes[s1].p = self.nodes[s2].p = nc-255
-            self.nodes[nc].r, self.nodes[nc].l = s1, s2
-            nc += 1
-
-    def decompress(self, src):
-        if not src:
-            return b''
-        rem, comp = src[0] & 15, src[0] >> 7
-        if not comp:
-            return src
-        out, ptr, l = bytearray(), src[1:], len(src)
-        bl = ((l-1)*8)-rem
-        bit = 0
-        while bit < bl:
-            m_bit = (ptr[bit >> 3] >> (bit & 7)) & 1
-            bit += 1
+        for i in range(256):self.nodes[i].f=gf[i]
+        nc=256
+        while nc<511:
+            s1,s2=-1,-1
+            i=0
+            while self.nodes[i].p!=0:i+=1
+            s1=i;i+=1
+            while self.nodes[i].p!=0:i+=1
+            s2=i;i+=1
+            while i<nc:
+                if self.nodes[i].p==0:
+                    if self.nodes[s1].f>self.nodes[s2].f:
+                        if self.nodes[i].f<self.nodes[s1].f:s1=i
+                    elif self.nodes[i].f<self.nodes[s2].f:s2=i
+                i+=1
+            self.nodes[nc].f=self.nodes[s1].f+self.nodes[s2].f
+            self.nodes[s1].p=self.nodes[s2].p=nc-255
+            self.nodes[nc].r,self.nodes[nc].l=s1,s2
+            nc+=1
+    def decompress(self,src):
+        if not src:return b''
+        rem,comp=src[0]&15,src[0]>>7
+        if not comp:return src
+        out,ptr,l=bytearray(),src[1:],len(src)
+        bl=((l-1)*8)-rem;bit=0
+        while bit<bl:
+            m_bit=(ptr[bit>>3]>>(bit&7))&1;bit+=1
             if m_bit:
-                n = 510
-                while n >= 256:
-                    if bit >= bl:
-                        raise ValueError("Incomplete Huffman code")
-                    p_bit = (ptr[bit >> 3] >> (bit & 7)) & 1
-                    bit += 1
-                    n = self.nodes[n].l if p_bit == 0 else self.nodes[n].r
+                n=510
+                while n>=256:
+                    if bit>=bl:raise ValueError("Incomplete Huffman code")
+                    p_bit=(ptr[bit>>3]>>(bit&7))&1;bit+=1
+                    n=self.nodes[n].l if p_bit==0 else self.nodes[n].r
                 out.append(n)
             else:
-                if bit+8 > bl:
-                    break
-                bi, b_in_b = bit >> 3, bit & 7
-                val = ptr[bi]if b_in_b == 0 else (ptr[bi] >> b_in_b) | (ptr[bi+1] << (8-b_in_b))
-                out.append(val & 255)
-                bit += 8
+                if bit+8>bl:break
+                bi,b_in_b=bit>>3,bit&7
+                val=ptr[bi]if b_in_b==0 else(ptr[bi]>>b_in_b)|(ptr[bi+1]<<(8-b_in_b))
+                out.append(val&255);bit+=8
         return bytes(out)
-
-
+# 1.8 replay format: protocol >= 39 adds an asset-package listing after the
+# 6 byte header; protocol >= 44 uses varint command lengths + zigzag varint
+# ints and may fold time steps into commands 65 / 67.
+def _brp_header(f):
+    """Read header from file at 0; returns (compact, data_offset, version)."""
+    head = f.read(6)
+    if len(head) < 6 or unpack('<I', head[:4])[0] != 83749:
+        raise ValueError('not a brp file')
+    version = unpack('<H', head[4:])[0]
+    if version < 24 or 38 <= version <= 55:
+        raise ValueError(f'unsupported replay protocol {version}')
+    if version >= 39:
+        d = f.read(4)
+        if len(d) < 4:
+            raise ValueError('truncated brp header')
+        for _ in range(unpack('<I', d)[0]):
+            d = f.read(4)
+            if len(d) < 4:
+                raise ValueError('truncated brp header')
+            f.seek(unpack('<I', d)[0], 1)
+    return version >= 44, f.tell(), version
+def _brp_varint(b, p):
+    v = shift = 0
+    while True:
+        x = b[p]; p += 1
+        v |= (x & 0x7f) << shift
+        if not x & 0x80:
+            return v, p
+        shift += 7
+def _brp_zz(b, p):
+    v, p = _brp_varint(b, p)
+    return (v >> 1) ^ -(v & 1), p
+def _brp_commands(raw, compact):
+    off = 1
+    while off < len(raw):
+        try:
+            if compact:
+                size, off = _brp_varint(raw, off)
+            else:
+                if off + 2 > len(raw):
+                    return
+                size = unpack('<H', raw[off:off+2])[0]; off += 2
+        except IndexError:
+            return
+        if off + size > len(raw):
+            return
+        if size:
+            yield raw[off:off+size]
+        off += size
+def _brp_step_ms(cmd, compact):
+    """ms of time advanced by one command (0 if it is not a time command)."""
+    try:
+        c = cmd[0]
+        if c == 0:
+            return _brp_zz(cmd, 1)[0] if compact else unpack('<i', cmd[1:5])[0]
+        if compact and c == 65:  # step scene graph + time step
+            return _brp_zz(cmd, _brp_zz(cmd, 1)[1])[0]
+        if compact and c == 67:  # time step + step scene graph + time step
+            pre, p = _brp_zz(cmd, 1)
+            return pre + _brp_zz(cmd, _brp_zz(cmd, p)[1])[0]
+    except Exception:
+        pass
+    return 0
 def get_replay_duration(_h, brp_path, progress):
     total_ms = 0
     with open(brp_path, 'rb') as f:
-        f.seek(0, 2)
+        f.seek(0,2)
         progress[1] = f.tell()
-        f.seek(6)
+        f.seek(0)
+        compact = _brp_header(f)[0]
         while True:
             progress[0] = f.tell()
             b_data = f.read(1)
@@ -1566,40 +1649,24 @@ def get_replay_duration(_h, brp_path, progress):
             raw_msg = _h.decompress(f.read(comp_len))
             if not raw_msg or raw_msg[0] != 1:
                 continue
-            sub_off = 1
-            while sub_off + 2 <= len(raw_msg):
-                sub_size_bytes = raw_msg[sub_off:sub_off+2]
-                if len(sub_size_bytes) < 2:
-                    break
-                sub_size = int.from_bytes(sub_size_bytes, 'little')
-                sub_off += 2
-                if sub_off + sub_size > len(raw_msg):
-                    break
-                sub_data = raw_msg[sub_off:sub_off+sub_size]
-                if len(sub_data) >= 2 and sub_data[0] == 0:
-                    total_ms += sub_data[1]
-                sub_off += sub_size
+            for cmd in _brp_commands(raw_msg, compact):
+                total_ms += _brp_step_ms(cmd, compact)
     progress[0] = progress[1]
     return total_ms
 
 # brobord collide grass
 # ba_meta require api 9
 # ba_meta export babase.Plugin
-
-
 class byBordd(Plugin):
-    def has_settings_ui(c=0): return True
-    def show_settings_ui(c=0, w=None): return Replay(source=w)
-
+    has_settings_ui = lambda c=0: True
+    show_settings_ui = lambda c=0, w=None: Replay(source=w)
     def __init__(self):
         from bauiv1lib.ingamemenu import InGameMenuWindow as ingame
         orig_refresh = getattr(ingame, '_refresh_in_game')
-        setattr(ingame, '_refresh_in_game', lambda window, *args, **
-                kwargs: (self.add_button(window), orig_refresh(window, *args, **kwargs))[1])
+        setattr(ingame, '_refresh_in_game', lambda window, *args, **kwargs: (self.add_button(window), orig_refresh(window, *args, **kwargs))[1])
         from bauiv1lib.watch import WatchWindow as watch
         orig_init = getattr(watch, '__init__')
-        setattr(watch, '__init__', lambda window, *args, **
-                kwargs: (orig_init(window, *args, **kwargs), self.add_button(window, 1))[0])
+        setattr(watch, '__init__', lambda window, *args, **kwargs: (orig_init(window, *args, **kwargs), self.add_button(window, 1))[0])
 
     def add_button(self, window, watch_mode=0):
         if watch_mode:
