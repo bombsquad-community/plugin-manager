@@ -296,17 +296,18 @@
       }
     },
     "replay": {
-      "description": "Simple replay player. Experimental. Adds a button to pause menu and watch menu. For full features, either read first lines of py file, or check source.",
-      "external_url": "https://brobordd.github.io/byBordd",
+      "description": "Adds a button to pause menu and watch menu. To see features, read the source, or just try it!",
+      "external_url": "https://BroBordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "3.0.1": null,
         "3.0": {
           "api_version": 9,
           "commit_sha": "fd4bcc1",
