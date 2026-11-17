@@ -176,17 +176,24 @@
       }
     },
     "power": {
-      "description": "With one click. Experimental. Adds a dev console tab with some features I find useful. Power is mainly focused on the multiplayer side. Can be considered a good tool to have around.",
-      "external_url": "https://brobordd.github.io/byBordd",
+      "description": "Adds a dev console tab with some features I find useful. Power is mainly focused on the multiplayer side. Can be considered a good tool to have around.",
+      "external_url": "https://BroBordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "3.0.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "3b7ced9b",
+          "released_on": "17-11-2026",
+          "md5sum": "c99be1ae842b163c652884898904f1d1"
+        },
         "2.7": {
           "api_version": 9,
           "commit_sha": "99611b9",
