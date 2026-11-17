@@ -3,9 +3,8 @@
 # Bug? Feedback? Telegram >> @BroBordd
 
 """
-Replay v3.0 - Simple replay player
+Replay v3.0.1 - Simple replay player
 
-Experimental. Feedback is appreciated.
 Adds a button to pause menu and watch menu.
 
 Features:
@@ -33,9 +32,27 @@ from random import uniform
 from threading import Thread
 from struct import unpack
 
+plugman = dict(
+    plugin_name="replay",
+    description=(
+        "Adds a button to pause menu and watch menu. "
+        "To see features, read the source, or just try it!"
+    ),
+    external_url="https://BroBordd.github.io/byBordd",
+    authors=[
+        {
+            "name": "BrotherBoard",
+            "email": "brobordd@gmail.com",
+            "discord": "BrotherBoard",
+            "github": "BroBordd"
+        },
+    ],
+    version='3.0.1',
+)
+
 
 class Replay:
-    VER = '3.0'
+    VER = '3.0.1'
     COL1 = (0.18, 0.18, 0.18)
     COL2 = (1, 1, 1)
     COL3 = (0, 1, 0)
@@ -333,14 +350,36 @@ class Player:
         [setattr(self, attr, []) for attr in ['ui_widgets', 'camera_widgets',
                                               'hide_widgets', 'cinema_widgets', 'cinema_ui_widgets']]
 
+        # The game (1.8) writes its seek snapshots in the compact stream framing
+        # but reads them back with the replay's own protocol, so seeking a replay
+        # recorded before protocol 44 (BombSquad 1.7) fails with 'invalid state
+        # message' and kills the session. Detect that up front and refuse to seek.
+        self.protocol = None
+        try:
+            with open(path, 'rb') as f:
+                self.protocol = _brp_header(f)[2]
+        except Exception:
+            pass
+        self.can_seek = self.protocol is None or self.protocol >= 44
+
         # Start replay immediately
         bs.new_replay_session(path)
 
-        width, height = bui.get_virtual_screen_size()
         self.bar_height = 80
+        self.speed = 1
+        self.seen = False
+        self.waited = 0.0
+        # Like BRP Studio: the replay session replaces the ui when it starts,
+        # so the overlay is only built once bs.is_in_replay() is true.
+        self.watch_timer = bui.AppTimer(0.1, self.watch, repeat=True)
+
+    def build(self):
+        """Build the overlay on the overlay stack (bottom-left origin)."""
+        width, height = bui.get_virtual_screen_size()
         self.parent = bui.containerwidget(
-            size=(width, self.bar_height),
-            stack_offset=(0, -height / 2 + self.bar_height / 2),
+            parent=get_overlay_stack(),
+            size=(width, height),
+            position=(0, 0),
             background=False
         )
         self.background = bui.imagewidget(
@@ -353,7 +392,6 @@ class Player:
 
         self.create_ui()
         self.create_hide_button()
-        self.speed = 1
         self.start_focus()
         self.play()
 
@@ -362,6 +400,33 @@ class Player:
             self.scan_cycle = 0  # For alternating display
             Thread(target=self.calculate_duration).start()
             self.scan_timer = bui.AppTimer(0.1, self.update_scan_progress, repeat=True)
+
+    def watch(self):
+        """Tear our overlay down when the replay session ends (it outlives scenes)."""
+        running = bs.is_in_replay()
+        if not self.seen:
+            if running:
+                self.seen = True
+                self.build()
+            else:
+                self.waited += 0.1
+                if self.waited > 30:
+                    self.teardown()
+            return
+        if not running:
+            self.teardown()
+
+    def teardown(self):
+        self.watch_timer = None
+        self.scan_timer = None
+        self.exit_timer = None
+        self.info_timer = None
+        self.stop()
+        self.stop_focus()
+        _ba.set_camera_manual(False)
+        parent = getattr(self, 'parent', None)
+        if parent is not None and parent.exists():
+            parent.delete()
 
     def calculate_duration(self):
         """Calculate duration in background thread with reduced load"""
@@ -375,7 +440,8 @@ class Player:
                 f.seek(0, 2)
                 file_size = f.tell()
                 self.scan_progress[1] = file_size
-                f.seek(6)
+                f.seek(0)
+                compact = _brp_header(f)[0]
 
                 while True:
                     current_pos = f.tell()
@@ -407,19 +473,8 @@ class Player:
                     if not raw_msg or raw_msg[0] != 1:
                         continue
 
-                    sub_off = 1
-                    while sub_off + 2 <= len(raw_msg):
-                        sub_size_bytes = raw_msg[sub_off:sub_off+2]
-                        if len(sub_size_bytes) < 2:
-                            break
-                        sub_size = int.from_bytes(sub_size_bytes, 'little')
-                        sub_off += 2
-                        if sub_off + sub_size > len(raw_msg):
-                            break
-                        sub_data = raw_msg[sub_off:sub_off+sub_size]
-                        if len(sub_data) >= 2 and sub_data[0] == 0:
-                            total_ms += sub_data[1]
-                        sub_off += sub_size
+                    for cmd in _brp_commands(raw_msg, compact):
+                        total_ms += _brp_step_ms(cmd, compact)
 
                     # Update confirmed duration (this is safe to seek to!)
                     self.confirmed_duration_sec = total_ms / 1000
@@ -564,7 +619,7 @@ class Player:
             ))
             widgets(bui.textwidget(
                 parent=parent,
-                text=bui.charstr(getattr(bui.SpecialChar, arrow)),
+                text=getattr(bui.SpecialChar, arrow).value,
                 color=self.COL3,
                 position=(pos[0] - 2, pos[1] + 13),
                 h_align='center',
@@ -587,7 +642,7 @@ class Player:
             ))
             widgets(bui.textwidget(
                 parent=parent,
-                text=bui.charstr(getattr(bui.SpecialChar, arrow)),
+                text=getattr(bui.SpecialChar, arrow).value,
                 color=self.COL5,
                 position=(pos[0] - 1, pos[1] + 12),
                 h_align='center',
@@ -1098,7 +1153,7 @@ class Player:
         self.cinema_busy = True
         if self.cinema_mode:
             self.animate_cinema(204, 14, -1)
-            bui.buttonwidget(self.cinema_button, label=bui.charstr(bui.SpecialChar.UP_ARROW))
+            bui.buttonwidget(self.cinema_button, label=bui.SpecialChar.UP_ARROW.value)
             self.destroy_cinema_ui()
         else:
             bui.buttonwidget(self.cinema_button, texture=bui.gettexture('white'))
@@ -1266,7 +1321,7 @@ class Player:
     def toggle_pause(self, dry=False, silent=False):
         if not dry:
             self.paused = not self.paused
-        icon = bui.charstr(getattr(bui.SpecialChar, ['PAUSE', 'PLAY'][self.paused] + '_BUTTON'))
+        icon = getattr(bui.SpecialChar, ['PAUSE', 'PLAY'][self.paused] + '_BUTTON').value
         bui.textwidget(self.pause_text, text=icon)
         if not dry:
             if not silent:
@@ -1316,6 +1371,8 @@ class Player:
 
     def seek(self, direction):
         """Seek with confirmed duration checking"""
+        if not self.check_can_seek():
+            return
         label = ['Forward by', 'Rewind by'][direction == -1]
         amount = direction * self.speed
 
@@ -1351,8 +1408,17 @@ class Player:
         self.show_message(
             'Seek', label + f" {amount} second{['s', ''][amount == 1]}", self.COL4, self.COL5)
 
+    def check_can_seek(self):
+        if self.can_seek:
+            return True
+        show_warning(
+            f"Can't seek: this replay is from an older version (protocol {self.protocol}) and BombSquad 1.8 can't seek it")
+        return False
+
     def jump(self, percent):
         """Jump with WYSIWYG behavior - percent is based on ESTIMATED duration, checked against CONFIRMED"""
+        if not self.check_can_seek():
+            return
         # Calculate target time based on ESTIMATED duration (what user sees on bar)
         if self.scanning:
             target_time = self.estimated_duration * percent
@@ -1541,6 +1607,81 @@ class _Huffman:
                 out.append(val & 255)
                 bit += 8
         return bytes(out)
+# 1.8 replay format: protocol >= 39 adds an asset-package listing after the
+# 6 byte header; protocol >= 44 uses varint command lengths + zigzag varint
+# ints and may fold time steps into commands 65 / 67.
+
+
+def _brp_header(f):
+    """Read header from file at 0; returns (compact, data_offset, version)."""
+    head = f.read(6)
+    if len(head) < 6 or unpack('<I', head[:4])[0] != 83749:
+        raise ValueError('not a brp file')
+    version = unpack('<H', head[4:])[0]
+    if version < 24 or 38 <= version <= 55:
+        raise ValueError(f'unsupported replay protocol {version}')
+    if version >= 39:
+        d = f.read(4)
+        if len(d) < 4:
+            raise ValueError('truncated brp header')
+        for _ in range(unpack('<I', d)[0]):
+            d = f.read(4)
+            if len(d) < 4:
+                raise ValueError('truncated brp header')
+            f.seek(unpack('<I', d)[0], 1)
+    return version >= 44, f.tell(), version
+
+
+def _brp_varint(b, p):
+    v = shift = 0
+    while True:
+        x = b[p]
+        p += 1
+        v |= (x & 0x7f) << shift
+        if not x & 0x80:
+            return v, p
+        shift += 7
+
+
+def _brp_zz(b, p):
+    v, p = _brp_varint(b, p)
+    return (v >> 1) ^ -(v & 1), p
+
+
+def _brp_commands(raw, compact):
+    off = 1
+    while off < len(raw):
+        try:
+            if compact:
+                size, off = _brp_varint(raw, off)
+            else:
+                if off + 2 > len(raw):
+                    return
+                size = unpack('<H', raw[off:off+2])[0]
+                off += 2
+        except IndexError:
+            return
+        if off + size > len(raw):
+            return
+        if size:
+            yield raw[off:off+size]
+        off += size
+
+
+def _brp_step_ms(cmd, compact):
+    """ms of time advanced by one command (0 if it is not a time command)."""
+    try:
+        c = cmd[0]
+        if c == 0:
+            return _brp_zz(cmd, 1)[0] if compact else unpack('<i', cmd[1:5])[0]
+        if compact and c == 65:  # step scene graph + time step
+            return _brp_zz(cmd, _brp_zz(cmd, 1)[1])[0]
+        if compact and c == 67:  # time step + step scene graph + time step
+            pre, p = _brp_zz(cmd, 1)
+            return pre + _brp_zz(cmd, _brp_zz(cmd, p)[1])[0]
+    except Exception:
+        pass
+    return 0
 
 
 def get_replay_duration(_h, brp_path, progress):
@@ -1548,7 +1689,8 @@ def get_replay_duration(_h, brp_path, progress):
     with open(brp_path, 'rb') as f:
         f.seek(0, 2)
         progress[1] = f.tell()
-        f.seek(6)
+        f.seek(0)
+        compact = _brp_header(f)[0]
         while True:
             progress[0] = f.tell()
             b_data = f.read(1)
@@ -1566,19 +1708,8 @@ def get_replay_duration(_h, brp_path, progress):
             raw_msg = _h.decompress(f.read(comp_len))
             if not raw_msg or raw_msg[0] != 1:
                 continue
-            sub_off = 1
-            while sub_off + 2 <= len(raw_msg):
-                sub_size_bytes = raw_msg[sub_off:sub_off+2]
-                if len(sub_size_bytes) < 2:
-                    break
-                sub_size = int.from_bytes(sub_size_bytes, 'little')
-                sub_off += 2
-                if sub_off + sub_size > len(raw_msg):
-                    break
-                sub_data = raw_msg[sub_off:sub_off+sub_size]
-                if len(sub_data) >= 2 and sub_data[0] == 0:
-                    total_ms += sub_data[1]
-                sub_off += sub_size
+            for cmd in _brp_commands(raw_msg, compact):
+                total_ms += _brp_step_ms(cmd, compact)
     progress[0] = progress[1]
     return total_ms
 
