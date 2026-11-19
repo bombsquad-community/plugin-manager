@@ -1650,7 +1650,7 @@ class PluginWindow(popup.PopupWindow):
 
         loop.create_task(self.draw_ui())
 
-    def get_description(self, minimum_character_offset=40):
+    def get_description(self, max_char_per_line=40):
         """
         Splits the long plugin description into multiple lines.
         """
