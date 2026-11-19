@@ -1650,28 +1650,27 @@ class PluginWindow(popup.PopupWindow):
 
         loop.create_task(self.draw_ui())
 
-    def get_description(self, minimum_character_offset=40):
+    def get_description(self, max_char_per_line=40):
         """
         Splits the long plugin description into multiple lines.
         """
-        string = self.plugin.info["description"]
-        string_length = len(string)
+        import textwrap # this will make life lil easy to format
 
-        partitioned_string = ""
-        partitioned_string_length = len(partitioned_string)
+        description = self.plugin.info["description"].strip()
+        # split every paragraph the modder provide us
+        paragraphs = description.split("\n")
+        formatted_description = ""
+        # formatting every paragraph.
+        for paragraph in paragraphs:
+            formatted_description += (
+                textwrap.fill(
+                    paragraph,
+                    width=max_char_per_line,
+                    initial_indent="    "
+                )
+            ) + "\n"
 
-        while partitioned_string_length != string_length:
-            next_empty_space = string[partitioned_string_length +
-                                      minimum_character_offset:].find(" ")
-            next_word_end_position = partitioned_string_length + \
-                minimum_character_offset + max(0, next_empty_space)
-            partitioned_string += string[partitioned_string_length:next_word_end_position]
-            if next_empty_space != -1:
-                # Insert a line break here, there's still more partitioning to do.
-                partitioned_string += "\n"
-            partitioned_string_length = len(partitioned_string)
-
-        return partitioned_string
+        return formatted_description
 
     async def draw_ui(self):
         bui.getsound('swish').play()
