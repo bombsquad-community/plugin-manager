@@ -59,6 +59,8 @@ jobs:
 
       # BASE_SHA is the tree whose manifests count as already published: the
       # PR's base, or upstream's main for a fork push (see workflow_call).
+      # Fetched with full history, not --depth=1: "Compute changed files"
+      # diffs from the merge base, which a shallow base commit can't reach.
       - name: Resolve base commit (for diffing)
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -66,10 +68,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$EVENT_NAME" = "pull_request" ]; then
-            git fetch --no-tags --depth=1 origin "$PR_BASE_SHA"
+            git fetch --no-tags origin "$PR_BASE_SHA"
             BASE_SHA="$PR_BASE_SHA"
           else
-            git fetch --no-tags --depth=1 \
+            git fetch --no-tags \
               https://github.com/bombsquad-community/plugin-manager.git main
             BASE_SHA="$(git rev-parse FETCH_HEAD)"
           fi
@@ -91,11 +93,17 @@ jobs:
       # passed as shell variables - never interpolated into a script or into
       # $GITHUB_OUTPUT (where a file named after the heredoc delimiter, or one
       # containing a newline, could inject extra output keys).
+      #
+      # BASE_SHA...HEAD (three dots) diffs from the merge base, so a branch that
+      # is behind its base only lists its own changes: with two dots, every file
+      # the base gained since the branch point counts as changed, and one added
+      # there is missing from this checkout. --diff-filter=d drops deletions,
+      # since autopep8 and the metadata script open each path they are handed.
       - name: Compute changed files
         run: |
           set -euo pipefail
-          git diff --name-only "$BASE_SHA" HEAD > "${RUNNER_TEMP}/changed_files.txt"
-          git diff --name-only -z "$BASE_SHA" HEAD -- '*.py' > "${RUNNER_TEMP}/changed_py.z"
+          git diff --name-only --diff-filter=d "$BASE_SHA...HEAD" > "${RUNNER_TEMP}/changed_files.txt"
+          git diff --name-only --diff-filter=d -z "$BASE_SHA...HEAD" -- '*.py' > "${RUNNER_TEMP}/changed_py.z"
           cat "${RUNNER_TEMP}/changed_files.txt"
 
       - name: Apply AutoPEP8 (changed .py files only)
