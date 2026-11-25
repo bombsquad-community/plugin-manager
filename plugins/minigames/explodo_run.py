@@ -26,7 +26,7 @@ plugman = dict(
     authors=[
         {'name': 'Blitz', 'email': '', 'discord': 'itsmeblitz', 'github': 'Ayush-Deep'},
     ],
-    version='1.1.0',
+    version='1.1.1',
 )
 
 

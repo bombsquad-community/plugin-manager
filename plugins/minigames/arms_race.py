@@ -18,6 +18,18 @@ if TYPE_CHECKING:
     from typing import Any, Type, List, Union, Sequence
 
 
+plugman = dict(
+    plugin_name='arms_race',
+    description='Upgrade your weapons by eliminating enemies. Win by being first one to kill while cursed',
+    external_url='',
+    authors=[
+        {'name': 'Freaku', 'email': '', 'discord': '', 'github': 'Freaku17'},
+        {'name': 'Mrmaxmeier', 'email': '', 'discord': '', 'github': 'Mrmaxmeier'},
+    ],
+    version='2.1.2',
+)
+
+
 class State:
     def __init__(self, bomb=None, grab=False, punch=False, curse=False, required=False, final=False, name=''):
         self.bomb = bomb

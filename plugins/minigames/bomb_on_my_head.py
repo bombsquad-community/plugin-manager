@@ -17,6 +17,17 @@ if TYPE_CHECKING:
     from typing import Any, Sequence
 
 
+plugman = dict(
+    plugin_name='bomb_on_my_head',
+    description='Bomb on your head, Survive as long as you can!',
+    external_url='',
+    authors=[
+        {'name': 'Mrmaxmeier', 'email': '', 'discord': '', 'github': 'Mrmaxmeier'},
+    ],
+    version='1.1.1',
+)
+
+
 lang = bs.app.lang.language
 
 if lang == 'Spanish':

@@ -28,10 +28,10 @@ plugman = dict(
     description='Blow up your enemies off the map!',
     external_url='',
     authors=[
-        {'name': 'Mrmaxmeier', 'email': '', 'discord': '', 'github': 'Mrmaxmeier'},
         {'name': 'JoseAngel', 'email': '', 'discord': 'joseang3l', 'github': ''},
+        {'name': 'Mrmaxmeier', 'email': '', 'discord': '', 'github': 'Mrmaxmeier'},
     ],
-    version='1.2.0',
+    version='1.2.1',
 )
 
 
