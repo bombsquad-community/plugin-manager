@@ -817,19 +817,20 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Mrmaxmeier",
-          "email": "",
-          "discord": "",
-          "github": ""
-        },
-        {
           "name": "Freaku",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Freaku17"
+        },
+        {
+          "name": "Mrmaxmeier",
+          "email": "",
+          "discord": "",
+          "github": "Mrmaxmeier"
         }
       ],
       "versions": {
+        "2.1.2": null,
         "2.1.1": {
           "api_version": 9,
           "commit_sha": "6bf081a",
@@ -1082,6 +1083,7 @@
         }
       ],
       "versions": {
+        "1.1.1": null,
         "1.1.0": {
           "api_version": 9,
           "min_engine_build": 0,
@@ -1280,13 +1282,14 @@
       "external_url": "",
       "authors": [
         {
-          "name": "-",
+          "name": "Mrmaxmeier",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Mrmaxmeier"
         }
       ],
       "versions": {
+        "1.1.1": null,
         "1.1.0": {
           "api_version": 9,
           "commit_sha": "17e968d",
@@ -1360,19 +1363,20 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Mrmaxmeier",
-          "email": "",
-          "discord": "",
-          "github": "Mrmaxmeier"
-        },
-        {
           "name": "JoseAngel",
           "email": "",
           "discord": "joseang3l",
           "github": ""
+        },
+        {
+          "name": "Mrmaxmeier",
+          "email": "",
+          "discord": "",
+          "github": "Mrmaxmeier"
         }
       ],
       "versions": {
+        "1.2.1": null,
         "1.2.0": {
           "api_version": 9,
           "min_engine_build": 0,
@@ -1622,10 +1626,11 @@
           "name": "Blitz",
           "email": "",
           "discord": "itsmeblitz",
-          "github": ""
+          "github": "Ayush-Deep"
         }
       ],
       "versions": {
+        "1.1.1": null,
         "1.1.0": {
           "api_version": 9,
           "min_engine_build": 0,
@@ -1852,10 +1857,11 @@
           "name": "Blitz",
           "email": "",
           "discord": "itsmeblitz",
-          "github": ""
+          "github": "Ayush-Deep"
         }
       ],
       "versions": {
+        "1.1.1": null,
         "1.1.0": {
           "api_version": 9,
           "min_engine_build": 0,
