@@ -1,7 +1,7 @@
 # Porting made easier by baport.(https://github.com/bombsquad-community/baport)
+# Adapted/ported from https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager/blob/master/mods/smash.py
 # To learn more, see https://ballistica.net/wiki/meta-tag-system
 # ba_meta require api 9
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -215,6 +215,11 @@ class SSPlayerSpaz(PlayerSpaz):
                              shield_leftover_ratio)
             else:
                 # Hit it with an impulse and get the resulting damage.
+                if self.multiplyer > 3.0:
+                    # At about 8.0 the physics glitch out
+                    velocity_mag *= min((3.0 + (self.multiplyer - 3.0) / 4), 7.5) ** 1.9
+                else:
+                    velocity_mag *= self.multiplyer ** 1.9
                 assert msg.force_direction is not None
                 self.node.handlemessage(
                     'impulse', msg.pos[0], msg.pos[1], msg.pos[2],

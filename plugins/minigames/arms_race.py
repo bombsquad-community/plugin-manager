@@ -1,4 +1,5 @@
 # Ported by your friend: Freaku
+# Adapted/ported from https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager/blob/master/mods/arms_race.py
 
 # Join BCS:
 # https://discord.gg/ucyaesh

@@ -1,8 +1,7 @@
 # Porting made easier by baport.(https://github.com/bombsquad-community/baport)
-# Porting to api 8 made easier by baport.(https://github.com/bombsquad-community/baport)
-# snake
+# Initially adapted from https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager/blob/master/mods/snake.py
+
 # Released under the MIT License. See LICENSE for details.
-#
 """Snake game by SEBASTIAN2059"""
 
 # ba_meta require api 9

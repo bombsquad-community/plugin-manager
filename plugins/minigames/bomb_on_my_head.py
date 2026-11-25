@@ -1,3 +1,4 @@
+# Adapted/ported from https://github.com/Mrmaxmeier/BombSquad-Community-Mod-Manager/blob/master/mods/bomb_on_my_head.py
 # ba_meta require api 9
 
 from __future__ import annotations
