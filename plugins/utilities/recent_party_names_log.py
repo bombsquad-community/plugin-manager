@@ -1,11 +1,7 @@
 # ba_meta require api 9
 
 """
-    This plugin keeps the track of party names you recently interacted with.
-    and Allows you to view/filter of those names for easy search. 
-    (by adding a recent button in gather public tab)
-
-    Helps when you forgot to add a party in favorite list which you recently enjoy the most.
+    This plugin keeps the track of party names you recently interacted with, and allows you to view/filter of those names for easy search.(by adding a recent button in gather public tab)
 """
 
 from __future__ import annotations
