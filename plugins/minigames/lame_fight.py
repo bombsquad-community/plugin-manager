@@ -24,7 +24,7 @@ plugman = dict(
     description='Save World With Super Powers. Playable in co-op',
     external_url='',
     authors=[
-        {'name': 'Blitz', 'email': '', 'discord': 'itsmeblitz', 'github': ''},
+        {'name': 'Blitz', 'email': '', 'discord': 'itsmeblitz', 'github': 'Ayush-Deep'},
     ],
     version='1.1.0',
 )
