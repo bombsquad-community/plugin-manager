@@ -817,19 +817,26 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Mrmaxmeier",
-          "email": "",
-          "discord": "",
-          "github": ""
-        },
-        {
           "name": "Freaku",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Freaku17"
+        },
+        {
+          "name": "Mrmaxmeier",
+          "email": "",
+          "discord": "",
+          "github": "Mrmaxmeier"
         }
       ],
       "versions": {
+        "2.1.2": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "4c3af9d4",
+          "released_on": "25-11-2026",
+          "md5sum": "a7011390b206ce35f8199f51d78a73bf"
+        },
         "2.1.1": {
           "api_version": 9,
           "commit_sha": "6bf081a",
@@ -1082,6 +1089,13 @@
         }
       ],
       "versions": {
+        "1.1.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "4c3af9d4",
+          "released_on": "25-11-2026",
+          "md5sum": "62d8629c2a462686088dafebe8b46f0a"
+        },
         "1.1.0": {
           "api_version": 9,
           "min_engine_build": 0,
@@ -1280,13 +1294,20 @@
       "external_url": "",
       "authors": [
         {
-          "name": "-",
+          "name": "Mrmaxmeier",
           "email": "",
           "discord": "",
-          "github": ""
+          "github": "Mrmaxmeier"
         }
       ],
       "versions": {
+        "1.1.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "4c3af9d4",
+          "released_on": "25-11-2026",
+          "md5sum": "31fff7b3f1b6054ebd42a3b16cb55e15"
+        },
         "1.1.0": {
           "api_version": 9,
           "commit_sha": "17e968d",
@@ -1360,19 +1381,26 @@
       "external_url": "",
       "authors": [
         {
-          "name": "Mrmaxmeier",
-          "email": "",
-          "discord": "",
-          "github": "Mrmaxmeier"
-        },
-        {
           "name": "JoseAngel",
           "email": "",
           "discord": "joseang3l",
           "github": ""
+        },
+        {
+          "name": "Mrmaxmeier",
+          "email": "",
+          "discord": "",
+          "github": "Mrmaxmeier"
         }
       ],
       "versions": {
+        "1.2.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "4c3af9d4",
+          "released_on": "25-11-2026",
+          "md5sum": "428206f76efd84f3c2b27c36d34c4cad"
+        },
         "1.2.0": {
           "api_version": 9,
           "min_engine_build": 0,
@@ -1622,10 +1650,17 @@
           "name": "Blitz",
           "email": "",
           "discord": "itsmeblitz",
-          "github": ""
+          "github": "Ayush-Deep"
         }
       ],
       "versions": {
+        "1.1.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "4c3af9d4",
+          "released_on": "25-11-2026",
+          "md5sum": "776e3a4bfa41d4d3c1d38eff395ce1d7"
+        },
         "1.1.0": {
           "api_version": 9,
           "min_engine_build": 0,
@@ -1852,10 +1887,17 @@
           "name": "Blitz",
           "email": "",
           "discord": "itsmeblitz",
-          "github": ""
+          "github": "Ayush-Deep"
         }
       ],
       "versions": {
+        "1.1.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "4c3af9d4",
+          "released_on": "25-11-2026",
+          "md5sum": "9ccec69c6944382f217cd14ef3aa7e75"
+        },
         "1.1.0": {
           "api_version": 9,
           "min_engine_build": 0,
