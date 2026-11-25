@@ -1,6 +1,6 @@
 [![Version](https://img.shields.io/github/v/release/bombsquad-community/plugin-manager)](https://github.com/bombsquad-community/plugin-manager/releases)
 [![Downloads](https://img.shields.io/github/downloads/bombsquad-community/plugin-manager/total)](https://github.com/bombsquad-community/plugin-manager/releases)
-[![LICENSE](https://img.shields.io/github/license/bombsquad-community/plugin-manager)](https://github.com/bombsquad-community/plugin-manager/LICENSE)
+[![LICENSE](https://img.shields.io/github/license/bombsquad-community/plugin-manager)](LICENSE)
 [![CI](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/bombsquad-community/plugin-manager/actions/workflows/ci.yml)
 
 
