@@ -176,17 +176,24 @@
       }
     },
     "power": {
-      "description": "With one click. Experimental. Adds a dev console tab with some features I find useful. Power is mainly focused on the multiplayer side. Can be considered a good tool to have around.",
-      "external_url": "https://brobordd.github.io/byBordd",
+      "description": "Adds a dev console tab with some features I find useful. Power is mainly focused on the multiplayer side. Can be considered a good tool to have around.",
+      "external_url": "https://BroBordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "3.0.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "3b7ced9b",
+          "released_on": "17-11-2026",
+          "md5sum": "c99be1ae842b163c652884898904f1d1"
+        },
         "2.7": {
           "api_version": 9,
           "commit_sha": "99611b9",
@@ -296,17 +303,31 @@
       }
     },
     "replay": {
-      "description": "Simple replay player. Experimental. Adds a button to pause menu and watch menu. For full features, either read first lines of py file, or check source.",
-      "external_url": "https://brobordd.github.io/byBordd",
+      "description": "Adds a button to pause menu and watch menu. To see features, read the source, or just try it!",
+      "external_url": "https://BroBordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "3.1.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "81af7c96",
+          "released_on": "22-11-2026",
+          "md5sum": "21e481db9ba2fb9443793b483b4ddbe2"
+        },
+        "3.0.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "a1cb6796",
+          "released_on": "16-11-2026",
+          "md5sum": "fd510a364150f02b8b6dd0d8bf538d92"
+        },
         "3.0": {
           "api_version": 9,
           "commit_sha": "fd4bcc1",
@@ -360,17 +381,24 @@
       }
     },
     "sorry": {
-      "description": "Send a random sorry to chat, preventing revenge attempts from teammates you kill by mistake.",
-      "external_url": "https://brobordd.github.io/byBordd",
+      "description": "Adds a button to party window which allows you to apologize if you made a mistake.",
+      "external_url": "https://BroBordd.github.io/byBordd",
       "authors": [
         {
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "3.1.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "7c90cc28",
+          "released_on": "05-11-2026",
+          "md5sum": "5604b8ac645cda79542cc4099bede501"
+        },
         "2.1.1": {
           "api_version": 9,
           "commit_sha": "e604a3c",
@@ -2725,10 +2753,17 @@
           "name": "BrotherBoard",
           "email": "brobordd@gmail.com",
           "discord": "BrotherBoard",
-          "github": ""
+          "github": "BroBordd"
         }
       ],
       "versions": {
+        "1.0.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "51670f8a",
+          "released_on": "01-11-2026",
+          "md5sum": "b453b32e89ddccc643c4290b1850227b"
+        },
         "1.0.0": {
           "api_version": 9,
           "commit_sha": "af2c9632",
@@ -2768,6 +2803,48 @@
           "commit_sha": "9812bfa7",
           "released_on": "22-10-2026",
           "md5sum": "3ce8c9647ea119acc5edefbeb87de502"
+        }
+      }
+    },
+    "checkboom": {
+      "description": "A turn-based game like chess, for two players.Take turns moving your pieces, and kill the King to win.",
+      "external_url": "https://BroBordd.github.io/byBordd",
+      "authors": [
+        {
+          "name": "BrotherBoard",
+          "email": "brobordd@gmail.com",
+          "discord": "BrotherBoard",
+          "github": "BroBordd"
+        }
+      ],
+      "versions": {
+        "1.0.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "abc4b7be",
+          "released_on": "28-10-2026",
+          "md5sum": "e3e51890d055bb1922325923e43bf636"
+        }
+      }
+    },
+    "recent_party_names_log": {
+      "description": "This plugin keeps the track of party names you recently interacted with.\nand Allows you to view/filter of those names for easy search.\n(by adding a recent button in gather public tab)\n\nHelps when you forgot to add a party in favorite list which you recently enjoy the most.",
+      "external_url": "https://youtu.be/EyQWRstNmzc?si=lrf4zS0r7Kj8Ngd4",
+      "authors": [
+        {
+          "name": "shailesh",
+          "email": "shaileshgabu11@gmail.com",
+          "discord": "shailesh_gabu_11",
+          "github": "Shailesh051211"
+        }
+      ],
+      "versions": {
+        "1.0.1": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "cb1a8570",
+          "released_on": "29-10-2026",
+          "md5sum": "6923805eb748fddc6754ad38faedf231"
         }
       }
     }

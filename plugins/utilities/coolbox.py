@@ -3,7 +3,7 @@
 # Bug? Feedback? Telegram >> @GalaxyA14user
 
 """
-Coolbox v1.0.0 - Own the scene.
+Coolbox v1.0.1 - Own the scene.
 
 Experimental.
 Coolbox is an advanced menu that can do almost everything!
@@ -35,6 +35,67 @@ import time
 import json
 import os
 import uuid
+from bascenev1 import _classicassets as _scca
+from bascenev1 import _commonassets as _sccm
+from bauiv1 import _builtinassets as _uibi
+from bauiv1 import _classicassets as _uica
+from bauiv1 import _classiccatalogassets as _uicc
+from bauiv1 import _commonassets as _uicm
+from bauiv1 import _uiv1assets as _uiu1
+
+import importlib as _il
+import re as _re
+
+_WRAPS = ('_classicassets', '_commonassets', '_uiv1assets', '_builtinassets',
+          '_classiccatalogassets', '_classiccharacterassets', '_classicmapassets',
+          '_classicuiassets', '_scenev1assets')
+_wcache = {}
+
+
+def _snakes(s):
+    b = _re.sub(r'(?<=[a-z0-9])(?=[A-Z])', '_', s).lower()
+    a = _re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
+    return (b,) if a == b else (b, a)
+
+
+def _find(pkg, kind, name):
+    key = (pkg, kind, name)
+    if key in _wcache:
+        return _wcache[key]
+    h = None
+    for w in _WRAPS:
+        try:
+            g = getattr(_il.import_module(f'{pkg}.{w}'), kind)
+        except (ImportError, AttributeError):
+            continue
+        for n in _snakes(name):
+            try:
+                h = getattr(g, n)
+                break
+            except AttributeError:
+                pass
+        if h is not None:
+            break
+    _wcache[key] = h
+    return h
+
+
+def _res(pkg, kind, legacy, v, scene):
+    if not isinstance(v, str):  # yes
+        if scene is False and hasattr(v, 'ui'):
+            v = v.ui()  # scene handle -> ui
+        return v.get()
+    h = _find(pkg, kind, v)
+    return h.get() if h is not None else legacy(v)
+
+
+def _uitex(v): return _res('bauiv1', 'textures', bui.gettexture, v, False)
+def _uisnd(v): return _res('bauiv1', 'audio', bui.getsound, v, False)
+def _uimesh(v): return _res('bauiv1', 'meshes', bui.getmesh, v, False)
+def _sctex(v): return _res('bascenev1', 'textures', bs.gettexture, v, True)
+def _scsnd(v): return _res('bascenev1', 'audio', bs.getsound, v, True)
+def _scmesh(v): return _res('bascenev1', 'meshes', bs.getmesh, v, True)
+
 
 plugman = dict(
     plugin_name="coolbox",
@@ -48,18 +109,19 @@ plugman = dict(
         {
             "name": "BrotherBoard",
             "email": "brobordd@gmail.com",
-            "discord": "BrotherBoard"
+            "discord": "BrotherBoard",
+            "github": "BroBordd"
         },
     ],
-    version='1.0.0',
+    version='1.0.1',
 )
 
 
 class Coolbox:
     @classmethod
     def state(s, t=0):
-        bui.apptimer(0 if t else 0.13, bs.CallPartial(bui.buttonwidget, s.in_source,
-                     icon=bui.gettexture(f"chest{'Open' if t else ''}Icon")))
+        bui.apptimer(0 if t else 0.13, bs.CallPartial(bui.buttonwidget,
+                     s.in_source, icon=_uitex(f"chest{'Open' if t else ''}Icon")))
 
     def __init__(s, fresh=True, in_source=None, fb=None, fake=False, extra=None):
         # safe
@@ -99,7 +161,7 @@ class Coolbox:
                     label=l,
                     pos=(47+171.5*j, 300-64*k),
                     size=(173, 64),
-                    icon=bui.gettexture(i),
+                    icon=_uitex(i),
                 )
                 bcls = mem[l]
                 args = (w, b, i, in_source, s.__class__, extra)
@@ -152,12 +214,12 @@ class Bot(bs_spazbot.SpazBot):
         )
         n = s.node
         n.name, n.name_color = name, name_color
-        n.color_texture, n.color_mask_texture = bs.gettexture(ctex), bs.gettexture(ctex2)
+        n.color_texture, n.color_mask_texture = _sctex(ctex), _sctex(ctex2)
         a = DIR('mesh')
         for i, m in enumerate(mesh):
             if not m:
                 continue
-            setattr(n, a[i], bs.getmesh(m))
+            setattr(n, a[i], _scmesh(m))
         s.act = []
         s.uid = None
         s.group_id = var('lastid')
@@ -585,7 +647,7 @@ class icw:
         s.__class__.INS.delete(s)
 
     def snd(s, t):
-        l = bui.getsound(t)
+        l = _uisnd(t)
         l.play()
         bui.apptimer(random.uniform(0.14, 0.18), l.stop)
         return l
@@ -634,7 +696,7 @@ class icw:
                 button_type='backSmall',
                 pos=([30, 55][s.size[0] > 400], y-70),
                 oac=s.back,
-                label=bui.charstr(bui.SpecialChar.BACK),
+                label=bui.SpecialChar.BACK.value,
             )
             cw(w, cancel_button=b)
             s.back_button = b
@@ -644,7 +706,7 @@ class icw:
                 pos=(510, y-70),
                 oac=s.nuke,
                 size=(43, 43),
-                label=bui.charstr(bui.SpecialChar.CLOSE),
+                label=bui.SpecialChar.CLOSE.value,
             )
             if not show_back:
                 cw(w, cancel_button=b)
@@ -678,7 +740,7 @@ class icw:
                 parent=w,
                 position=(215, y-75),
                 size=(50, 50),
-                texture=bui.gettexture(icon)
+                texture=_uitex(icon)
             )
         if note:
             tw(
@@ -747,11 +809,11 @@ class icw:
     def toggle(s, dry=False):
         assert hasattr(s, 'tog_button')
         i = [[1, 0], [0, 1]][dry][pause()]
-        bw(s.tog_button, label=bui.charstr(
-            [bui.SpecialChar.PAUSE_BUTTON, bui.SpecialChar.PLAY_BUTTON][i]))
+        bw(s.tog_button, label=(
+            [bui.SpecialChar.PAUSE_BUTTON, bui.SpecialChar.PLAY_BUTTON][i]).value)
         if dry:
             return
-        bui.getsound('deek').play()
+        _uica.audio.deek.get().play()
         pause(i)
 
 
@@ -881,7 +943,7 @@ class ctw:
         if v and not bool:
             if not s.bad:
                 push(f'Invalid {s.hint}', color=(1, 0, 0))
-                bui.getsound('error').play()
+                _uibi.audio.error.get().play()
                 s.bad = True
                 if s.tint:
                     tw(t, color=(1, 0, 0))
@@ -948,7 +1010,7 @@ class SoundManager:
         s.update()
         sbw(
             p=w,
-            icon=bui.gettexture('backIcon'),
+            icon=_uiu1.textures.back_icon.get(),
             pos=(275, 330),
             color=darken(var('bg')),
             oac=s.reset
@@ -962,17 +1024,17 @@ class SoundManager:
             if t == 1:
                 ah = AUDIO()
                 t = ah[i]
-                bw(s.kids[o], texture=bui.gettexture('audioIcon'), oac=bs.CallPartial(
-                    bs.broadcastmessage, t), color=(1, 1, 1), tint_texture=bui.gettexture('black'))
+                bw(s.kids[o], texture=_uica.textures.audio_icon.get(), oac=bs.CallPartial(
+                    bs.broadcastmessage, t), color=(1, 1, 1), tint_texture=_uicm.textures.black.get())
             else:
                 char = list(s.D.values())[i]
-                bw(s.kids[o], texture=bui.gettexture(char.icon_texture), tint_texture=bui.gettexture(
-                    char.icon_mask_texture), oac=bs.CallPartial(bs.broadcastmessage, list(s.D)[i], color=var(s.cols()[2])), color=(1, 1, 1))
+                bw(s.kids[o], texture=_uitex(char.icon_texture), tint_texture=_uitex(char.icon_mask_texture), oac=bs.CallPartial(
+                    bs.broadcastmessage, list(s.D)[i], color=var(s.cols()[2])), color=(1, 1, 1))
     """Reset"""
     def reset(s):
         c = var(f'{s.prf}char')
         fixsounds(c, prf=s.prf)
-        bui.getsound('block').play()
+        _uica.audio.block.get().play()
         push('Restored default sounds!', color=(0.5, 0.5, 1))
         s.update()
     """Fresh"""
@@ -1069,7 +1131,7 @@ class SoundPicker:
             bw(
                 pos=p,
                 oac=bs.CallPartial(s.preview, i, extra),
-                texture=bui.gettexture('empty'),
+                texture=_uica.textures.empty.get(),
                 **j
             )
             s.texts.append(t)
@@ -1092,7 +1154,7 @@ class SoundPicker:
             k = [s.play, s.stop, s.prev, s.next][i]
             sbw(
                 p=w,
-                icon=bui.gettexture(j),
+                icon=_uitex(j),
                 pos=(300+50*i, 300),
                 repeat=i > 1,
                 oac=k
@@ -1124,7 +1186,7 @@ class SoundPicker:
     """Play"""
     def play(s):
         s.stop()
-        s.v = bui.getsound(s.al[s.n()])
+        s.v = _uisnd(s.al[s.n()])
         s.v.play()
     """Stop"""
     def stop(s):
@@ -1200,7 +1262,7 @@ class MeshManager:
             s.kids.append(t)
         sbw(
             p=w,
-            icon=bui.gettexture('backIcon'),
+            icon=_uiu1.textures.back_icon.get(),
             pos=(320, 461),
             color=darken(var('bg')),
             oac=s.reset
@@ -1250,7 +1312,7 @@ class MeshManager:
     def reset(s, c=None):
         if not c:
             c = var(f'{s.prf}char')
-            bui.getsound('block').play()
+            _uica.audio.block.get().play()
             push('Restored default mesh!', color=(0.5, 0.5, 1))
         fixmesh(c, prf=s.prf)
         s.update()
@@ -1258,12 +1320,10 @@ class MeshManager:
     def update(s):
         for i in range(len(DIR('mesh'))):
             g = var(f'{s.prf}mesh{i}')
-            bw(s.kids[i], texture=bui.gettexture('menuIcon'), color=(
+            bw(s.kids[i], texture=_uica.textures.menu_icon.get(), color=(
                 1, 1, 1), oac=bs.CallPartial(bs.broadcastmessage, g))
-        bui.imagewidget(s.img[0], texture=bui.gettexture(
-            var(f'{s.prf}ctex') or get_ctex(var('char'))))
-        bui.imagewidget(s.img[1], texture=bui.gettexture(
-            var(f'{s.prf}ctex2') or get_ctex2(var('char'))))
+        bui.imagewidget(s.img[0], texture=_uitex(var(f'{s.prf}ctex') or get_ctex(var('char'))))
+        bui.imagewidget(s.img[1], texture=_uitex(var(f'{s.prf}ctex2') or get_ctex2(var('char'))))
     """Fresh"""
     def fresh(s, j, n):
         var(f'{s.prf}mesh{j}', n)
@@ -1340,7 +1400,7 @@ class MeshPicker:
         n = s.n()
         try:
             with bs.get_foreground_host_activity().context:
-                bs.getmesh(s.m)
+                _scmesh(s.m)
         except:
             btw("Can't use this mesh!")
             return
@@ -1478,7 +1538,7 @@ class TexPicker:
                     p=cv,
                     size=(65, 65),
                     pos=(j*85, (ss-65)-i*100),
-                    texture=bui.gettexture(al[n]),
+                    texture=_uitex(al[n]),
                 )
                 bw(b, color=(1, 1, 1), oac=bs.CallPartial(s.pick, n))
                 t = al[n]
@@ -1544,8 +1604,8 @@ class CharPicker:
                     p=cv,
                     size=(120, 120),
                     pos=(xp, yp-20),
-                    texture=bui.gettexture(ah[n].icon_texture),
-                    tint_texture=bui.gettexture(ah[n].icon_mask_texture),
+                    texture=_uitex(ah[n].icon_texture),
+                    tint_texture=_uitex(ah[n].icon_mask_texture),
                     oac=bs.CallPartial(s.pick, n, extra),
                     tex=mem
                 )
@@ -1706,7 +1766,7 @@ class ColorPicker:
                 size=(33, 33),
                 opacity=0,
                 color=(30, 0, 0),
-                texture=bui.gettexture('crossOut'),
+                texture=_uica.textures.cross_out.get(),
             )
             o = ctw(
                 parent=w,
@@ -1729,7 +1789,7 @@ class ColorPicker:
             color=darken(var('bg')),
             pos=(380, 500),
             oac=s.randomize,
-            icon=bui.gettexture('replayIcon'),
+            icon=_uica.textures.replay_icon.get(),
             button_type='regular',
             repeat=True,
             iconscale=1.2
@@ -1779,10 +1839,10 @@ class ColorPicker:
                     color=c,
                     oac=bs.CallPartial(s.set, c),
                 )
-        None if silent else bui.getsound('cashRegister2').play()
+        None if silent else _uica.audio.cash_register2.get().play()
     """Set color"""
     def set(s, c):
-        bui.getsound('tap').play()
+        _uicm.audio.tap.get().play()
         for i in range(3):
             var(s.what+s.rgb[i], c[i])
             w = s.kids[s.rgb[i]].widget
@@ -1882,7 +1942,7 @@ class NodeManager:
             b = bw(
                 p=w,
                 label=j,
-                icon=bui.gettexture(m),
+                icon=_uitex(m),
                 size=(130, 35),
                 oac=bs.CallPartial(s.t.insp, f=o),
                 pos=(30+130*i, 20)
@@ -2019,7 +2079,7 @@ class CallPartialer:
         bw(
             p=w,
             pos=(325, 20),
-            icon=bui.gettexture('startButton'),
+            icon=_uiu1.textures.start_button.get(),
             label='CallPartial',
             size=(100, 40),
             oac=s.call
@@ -2029,11 +2089,11 @@ class CallPartialer:
         try:
             o = str(s.obj(*eval(f"[{s.at.get_text()}]")))
         except:
-            bui.getsound('error').play()
+            _uibi.audio.error.get().play()
             o = traceback.format_exc()
             c = (1, 0, 0)
         else:
-            bui.getsound('ding').play()
+            _uicm.audio.ding.get().play()
             c = (0, 1, 0)
         if var('icall'):
             tw(s.log, text='')
@@ -2074,7 +2134,7 @@ class Modder:
         b = bw(
             p=w,
             pos=(330, 20),
-            icon=bui.gettexture('settingsIcon'),
+            icon=_uica.textures.settings_icon.get(),
             label=label,
             size=(100, 40),
             oac=s.mod
@@ -2091,7 +2151,7 @@ class Modder:
         except Exception as E:
             err(str(E))
         else:
-            bui.getsound('ding').play()
+            _uicm.audio.ding.get().play()
             s.z.back()
             push('Success!', color=(0, 1, 0))
             if Zoom.__ob__ == s.obj:
@@ -2121,8 +2181,8 @@ class atw:
             p=p,
             pos=(400, pos[1]),
             size=(35, 35),
-            label=bui.charstr(bui.SpecialChar.UP_ARROW),
-            oac=lambda: bui.getsound('tap').play()
+            label=bui.SpecialChar.UP_ARROW.value,
+            oac=lambda: _uicm.audio.tap.get().play()
         )
         s.kids = []
         for i in range(4):
@@ -2243,7 +2303,7 @@ class atw:
         bui.imagewidget(
             parent=c,
             size=(s.x+1500, l+1000),
-            texture=bui.gettexture('black'),
+            texture=_uicm.textures.black.get(),
             opacity=0.7,
             position=(-300, -500)
         )
@@ -2383,7 +2443,7 @@ class NodePicker:
                 pos=(l, [430, 480][i < 3]),
                 label=j,
                 size=(170, 45),
-                icon=bui.gettexture(k),
+                icon=_uitex(k),
                 oac=o
             )
             s.btns.append(b)
@@ -2403,8 +2463,8 @@ class NodePicker:
             var('npp', [1, 0][v])
             v = not v
         if d:
-            bui.getsound('deek').play()
-        bw(s.btns[0], label=['Pause', 'Resume'][v], icon=bui.gettexture(
+            _uica.audio.deek.get().play()
+        bw(s.btns[0], label=['Pause', 'Resume'][v], icon=_uitex(
             ['achievementFootballShutout', 'startButton'][v]))
         npause()
     """Confirm safely"""
@@ -2493,8 +2553,8 @@ class NodePicker:
             f = y-30*(i+1)
             for j in range(3):
                 x = [10, 140, 375][j]
-                k = [t, str(rnd(p)).replace('()', 'N/A'), bui.charstr(bui.SpecialChar.LOGO_FLAT)
-                     if hasattr(n, 'color') else bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][j]
+                k = [t, str(rnd(p)).replace('()', 'N/A'), bui.SpecialChar.LOGO_FLAT.value if hasattr(n,
+                                                                                                     'color') else bui.SpecialChar.DPAD_CENTER_BUTTON.value][j]
                 m = [120, 200, 150][j]
                 t = tw(
                     p=s.cv,
@@ -2514,9 +2574,9 @@ class NodePicker:
             p1 = t.find('"')+1
             p2 = t[p1:t.find('"', p1)]
             try:
-                t = bui.gettexture(p2)
+                t = _uitex(p2)
             except:
-                t = bui.gettexture('empty')
+                t = _uica.textures.empty.get()
             g = bui.imagewidget(
                 parent=s.cv,
                 size=(25, 25),
@@ -2681,7 +2741,7 @@ class ActionManager:
                size=(100, 50),
                pos=(470, 310),
                label='Add',
-               icon=bui.gettexture('powerupHealth'))
+               icon=_uica.textures.powerup_health.get())
         bw(b, oac=bs.CallPartial(ActionPipe, source=b, pipe=s.add, what='Add'))
         s.kids = []
         for i in range(3):
@@ -2693,7 +2753,7 @@ class ActionManager:
                    size=(100, 50),
                    pos=(470, l),
                    label=k,
-                   icon=bui.gettexture(m),
+                   icon=_uitex(m),
                    oac=j)
             s.kids.append(b)
         for i in [-1, 1]:
@@ -2703,7 +2763,7 @@ class ActionManager:
                size=(100, 50),
                pos=(470, k),
                label=j,
-               icon=bui.gettexture(f'{j.lower()}Button'),
+               icon=_uitex(f'{j.lower()}Button'),
                repeat=True,
                oac=bs.CallPartial(s.nav, -i))
         s.texts = []
@@ -2717,10 +2777,10 @@ class ActionManager:
         else:
             i = s.sl + i
         if i < 0 or i > l:
-            bui.getsound('block').play()
+            _uica.audio.block.get().play()
             return
         s.select(i)
-        bui.getsound('tap').play()
+        _uicm.audio.tap.get().play()
     """Conditional collect"""
     def collect(s, i):
         if i == 0:
@@ -2823,7 +2883,7 @@ class ActionManager:
         if s.sl is not None:
             var('act').pop(s.sl)
             s.update()
-            bui.getsound('pop01').play()
+            _uica.audio.pop01.get().play()
         else:
             btw('Select an action to delete!')
 
@@ -2975,7 +3035,7 @@ class ActionKey:
             sbw(
                 p=w,
                 pos=(j, k),
-                icon=bui.gettexture('button'+l),
+                icon=_uitex('button'+l),
                 oac=bs.CallPartial(s.set, i)
             )
     """Initial set"""
@@ -3294,7 +3354,7 @@ class Overlay:
                 n = bs.newnode(
                     'image',
                     attrs={
-                        'texture': bs.gettexture('button'+j),
+                        'texture': _sctex('button'+j),
                         'absolute_scale': True,
                         'attach': 'topRight',
                         'position': (k, l),
@@ -3341,7 +3401,7 @@ class Overlay:
                 n = bs.newnode(
                     'image',
                     attrs={
-                        'texture': bs.gettexture('nub'),
+                        'texture': _scca.textures.nub.get(),
                         'absolute_scale': True,
                         'attach': 'topRight',
                         'position': s.np,
@@ -3428,8 +3488,8 @@ class Mapper:
                 'prop',
                 delegate=s,
                 attrs={
-                    'mesh': bs.getmesh('tnt'),
-                    'color_texture': bs.gettexture(s.tex),
+                    'mesh': _scca.meshes.tnt.get(),
+                    'color_texture': _sctex(s.tex),
                     'body': 'crate',
                     'reflection': 'soft',
                     'density': 4.0,
@@ -3572,7 +3632,7 @@ class Mapper:
                 return
         with bs.get_foreground_host_activity().context:
             try:
-                s.node.color_texture = bs.gettexture(s.btex if i else s.tex)
+                s.node.color_texture = _sctex(s.btex if i else s.tex)
             except:
                 return
     """Build at current position (repeatable - does not exit)"""
@@ -3611,7 +3671,7 @@ class Mapper:
     """Complain"""
     def complain(s):
         push('You destroyed the mapper!', color=(1, 0, 0))
-        bui.getsound('swip').play()
+        _uica.audio.swip.get().play()
         s.overlay.destroy()
         None if s.safe else btw('Mapper was destroyed too early.\nFix your positions!')
     """Handle move() losing the node (e.g. quitting mid-map): only
@@ -3711,7 +3771,7 @@ class Spawn:
                 p=a[0],
                 pos=(230+50*j, 150),
                 size=(43, 43),
-                icon=bui.gettexture(i),
+                icon=_uitex(i),
                 icon_tint=-8,
                 cons=[None, CONS()[0]][j == 2],
                 oac=c
@@ -3721,7 +3781,7 @@ class Spawn:
             bw(
                 p=a[0],
                 pos=(222, 30+60*i),
-                icon=bui.gettexture(['touchArrows', 'cursor'][i]),
+                icon=_uitex(['touchArrows', 'cursor'][i]),
                 size=(160, 55),
                 label=['Teleport', 'Map'][i],
                 cons={
@@ -3760,7 +3820,7 @@ class Spawn:
             b = bw(
                 p=a[0],
                 pos=(48, 30+60*i),
-                icon=bui.gettexture(k),
+                icon=_uitex(k),
                 size=(160, 55),
                 label=j
             )
@@ -3804,7 +3864,7 @@ class Spawn:
             sbw(
                 p=a[0],
                 pos=(410+50*i, 150),
-                icon=bui.gettexture(j),
+                icon=_uitex(j),
                 oac=k
             )
         s.sbtn = []
@@ -3818,7 +3878,7 @@ class Spawn:
             b = bw(
                 p=a[0],
                 pos=(398, 30+60*i),
-                icon=bui.gettexture(k),
+                icon=_uitex(k),
                 size=(160, 55),
                 label=j,
                 oac=l
@@ -3832,7 +3892,7 @@ class Spawn:
     """Copy seed"""
     def copy(s):
         bui.clipboard_set_text(var('seed'))
-        bui.getsound('ding').play()
+        _uicm.audio.ding.get().play()
         s.seed_t.blink()
         push('Copied seed to clipboard!', color=(0, 1, 0))
     """Paste seed"""
@@ -3845,11 +3905,11 @@ class Spawn:
     def randomize(s):
         if not s.can_ran:
             (setattr(s, 'can_blud', False), btw(random.choice(SLOWDOWN())), bui.apptimer(
-                5, bs.CallPartial(setattr, s, 'can_blud', True))) if s.can_blud else bui.getsound('block').play()
+                5, bs.CallPartial(setattr, s, 'can_blud', True))) if s.can_blud else _uica.audio.block.get().play()
             return
         s.can_ran = False
         s.seed_t.set_text(RANDOM(), silent=True)
-        bui.getsound('cashRegister2').play()
+        _uica.audio.cash_register2.get().play()
         push('Randomized seed!', color=(1, 1, 0))
         bui.apptimer(0.2, lambda: setattr(s, 'can_ran', True))
     """Refresh previews"""
@@ -3870,9 +3930,9 @@ class Spawn:
         tc2 = var(mem[1]) or (1, 1, 1)
         bw(
             s.b,
-            texture=bui.gettexture(char.icon_texture),
+            texture=_uitex(char.icon_texture),
             color=(1, 1, 1),
-            tint_texture=bui.gettexture(char.icon_mask_texture),
+            tint_texture=_uitex(char.icon_mask_texture),
             tint_color=tc,
             tint2_color=tc2
         )
@@ -3924,7 +3984,7 @@ class Spawn:
     def on_spawn(s, b):
         n = b.node
         pos = getpos()
-        bs.getsound('spawn').play(position=pos)
+        _scca.audio.spawn.get().play(position=pos)
         n.handlemessage('flash')
         n.is_area_of_interest = True
         b.handlemessage(bs.StandMessage(pos, 0))
@@ -3948,7 +4008,7 @@ class Spawn:
     def invert(s):
         p = getpos()
         s.setpos((-p[0], p[1], -p[2]))
-        bui.getsound('deek').play()
+        _uica.audio.deek.get().play()
         push('Inverted position!', color=(0.5, 0.7, 1))
     """Same player position"""
     def same(s):
@@ -3975,7 +4035,7 @@ class shadow:
         s.conf = conf
         s.size = size
         s.a = bui.imagewidget(
-            texture=bui.gettexture('black'),
+            texture=_uicm.textures.black.get(),
             parent=p,
             size=size,
             position=pos,
@@ -4038,7 +4098,7 @@ class Modify:
             b = bw(
                 p=w,
                 pos=(53+50*i, 25),
-                label=[bui.charstr(bui.SpecialChar.UP_ARROW), '?', '&'][i],
+                label=[bui.SpecialChar.UP_ARROW.value, '?', '&'][i],
                 text_scale=[1.2, 1.4][i > 0],
                 size=(40, 40),
                 **([{}, {'cons': CONS()[0]}][i > 1])
@@ -4061,7 +4121,7 @@ class Modify:
         b = bw(
             p=w,
             pos=(227, 25),
-            icon=bui.gettexture('achievementOutline'),
+            icon=_uica.textures.achievement_outline.get(),
             label='Load',
             size=(150, 40)
         )
@@ -4069,7 +4129,7 @@ class Modify:
         bw(
             p=w,
             pos=(410, 153),
-            icon=bui.gettexture('cursor'),
+            icon=_uibi.textures.cursor.get(),
             label='Map',
             size=(150, 40),
             oac=s.map,
@@ -4115,7 +4175,7 @@ class Modify:
             b = sbw(
                 p=a[0],
                 pos=(230+50*i, 103),
-                icon=bui.gettexture(['audioIcon', 'menuIcon', 'textClearButton'][i])
+                icon=_uitex(['audioIcon', 'menuIcon', 'textClearButton'][i])
             )
             bw(b, oac=[
                 bs.CallPartial(SoundManager, source=b, prf='m', cols=s.cols),
@@ -4159,14 +4219,14 @@ class Modify:
             p=a[0],
             oac=s.modify,
             label='Modify',
-            icon=bui.gettexture('settingsIcon'),
+            icon=_uica.textures.settings_icon.get(),
             pos=(410, 25),
             size=(150, 40)
         )
         # What button
         b = sbw(
             p=a[0],
-            icon=bui.gettexture('menuButton'),
+            icon=_uiu1.textures.menu_button.get(),
             pos=(102, 380),
             size=(40, 40)
         )
@@ -4174,7 +4234,7 @@ class Modify:
         # Attr button
         b = sbw(
             p=a[0],
-            icon=bui.gettexture('file'),
+            icon=_uica.textures.file.get(),
             pos=(152, 380),
             size=(40, 40),
         )
@@ -4285,8 +4345,8 @@ class Modify:
         tex = [var(f'mmesh{i}') for i in z]
         act = bs.get_foreground_host_activity()
         with act.context:
-            mem = [bs.gettexture(var('mctex')), bs.gettexture(getattr(mem, ok[1])), mem.style]
-            tex = [bs.getmesh(tex[i]) for i in z]
+            mem = [_sctex(var('mctex')), _sctex(getattr(mem, ok[1])), mem.style]
+            tex = [_scmesh(tex[i]) for i in z]
             [[setattr(n, ok[i], mem[i]) for i in range(2)] for n in l] if var('what0') else None
             [[setattr(n, ok2[i], tex[i]) for i in z] for n in l] if var('what3') else None
             [set_sounds(n, prf='m', spa=spa) for n in l] if var(f'what2') else None
@@ -4363,7 +4423,7 @@ class Modify:
         tw(s.ct2, color=(1, 1, 1))
         fixall(o, prf='m')
         s.fresh()
-        bui.getsound('swip').play()
+        _uica.audio.swip.get().play()
     """Load spaz"""
     def load(s, n):
         ui = NTEX(n)
@@ -4373,7 +4433,7 @@ class Modify:
         var(c[1], ui[0]['tint2_color'])
         var(c[2], ui[1])
         [bw(s.cbs[i], color=var(c[i])) for i in range(3)]
-        s.pipe(ICONS().index(ui[2]+'Icon'))
+        s.pipe(ICONS().index(ui[2]+'Icon') if ui[2]+'Icon' in ICONS() else 0)
         o = n.getdelegate(object)
         s.ht.set_text(str(round(o.hitpoints, 1)))
         gun()
@@ -4424,7 +4484,7 @@ class Modify:
     """Remove target"""
     def remove(s, n):
         s.targets.remove(n)
-        bui.getsound('pop01').play()
+        _uica.audio.pop01.get().play()
         s.fresh()
     """Refresh"""
     def fresh(s, pipe=True):
@@ -4439,7 +4499,7 @@ class Modify:
                 ui = NTEX(n, tex)
                 t = getattr(n, 'name', '') or f'Target {i+1}'
             else:
-                ui = {'color': (1, 1, 1), 'texture': bui.gettexture(
+                ui = {'color': (1, 1, 1), 'texture': _uitex(
                     ['achievementSharingIsCaring', 'achievementTeamPlayer'][n[0]])}, (1, 1, 1)
                 t = n[1]
             k1 = [bw, pbw][b](
@@ -4508,7 +4568,7 @@ class Control:
             color=(1, 1, 1),
             pos=(63.5, 225),
             size=(136, 136),
-            texture=bui.gettexture('achievementEmpty')
+            texture=_uica.textures.achievement_empty.get()
         )
         bw(s.b, oac=s.pick)
         s.t = tw(
@@ -4529,14 +4589,14 @@ class Control:
             p=w,
             oac=s.apply,
             label='Apply',
-            icon=bui.gettexture('settingsIcon'),
+            icon=_uica.textures.settings_icon.get(),
             pos=(410, 15),
             size=(150, 40)
         )
         b = bw(
             p=w,
             label='Hold',
-            icon=bui.gettexture('achievementOutline'),
+            icon=_uica.textures.achievement_outline.get(),
             pos=(235, 15),
             size=(150, 40)
         )
@@ -4544,7 +4604,7 @@ class Control:
         bw(
             p=w,
             label='Right arm',
-            icon=bui.gettexture('rightButton'),
+            icon=_uica.textures.right_button.get(),
             pos=(235, 155),
             size=(150, 40),
             oac=bs.CallPartial(s.yay, '_r'),
@@ -4553,7 +4613,7 @@ class Control:
         bw(
             p=w,
             label='Left arm',
-            icon=bui.gettexture('leftButton'),
+            icon=_uica.textures.left_button.get(),
             pos=(235, 108),
             size=(150, 40),
             oac=bs.CallPartial(s.yay, '_l'),
@@ -4562,7 +4622,7 @@ class Control:
         bw(
             p=w,
             label='Both arms',
-            icon=bui.gettexture('upButton'),
+            icon=_uica.textures.up_button.get(),
             pos=(235, 60),
             size=(150, 40),
             oac=s.yay,
@@ -4595,13 +4655,13 @@ class Control:
                     size=(30, 30),
                     color=c[i],
                     position=(x+4, y),
-                    texture=bui.gettexture(f'button{j}')
+                    texture=_uitex(f'button{j}')
                 )
             else:
                 [bui.imagewidget(
                     parent=w,
                     color=l[k],
-                    texture=bui.gettexture('nub'),
+                    texture=_uica.textures.nub.get(),
                     size=[(35, 35), (20, 20)][k],
                     position=(x+1+7*k, y-2+7*k)
                 ) for k in [0, 1]]
@@ -4615,7 +4675,7 @@ class Control:
                 size=(20, 20),
                 text_scale=0.7,
                 position=(x+115, y+5),
-                label=['', bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)][b],
+                label=['', bui.SpecialChar.DPAD_CENTER_BUTTON.value][b],
             )
             bw(bb, oac=bs.CallPartial(s.check, bb, i, b))
         for i in range(4):
@@ -4650,7 +4710,7 @@ class Control:
                 color=c[i],
                 size=(50, 50),
                 oac=bs.CallPartial(s.key, i),
-                texture=bui.gettexture('button'+l)
+                texture=_uitex('button'+l)
             )
         s.mbs = []
         s.mb = None
@@ -4666,7 +4726,7 @@ class Control:
                 ][ij]
                 b = bw(
                     p=s.w,
-                    label=bui.charstr(getattr(bui.SpecialChar, k)) if k else k,
+                    label=(getattr(bui.SpecialChar, k)).value if k else k,
                     repeat=True,
                     size=(40, 40),
                     position=(240+50*j, 225+50*i)
@@ -4683,7 +4743,7 @@ class Control:
             tw(
                 parent=s.w,
                 position=j,
-                text=bui.charstr(bui.SpecialChar.LEFT_ARROW),
+                text=bui.SpecialChar.LEFT_ARROW.value,
                 rotate=45+90*i
             )
         tw(
@@ -4763,9 +4823,9 @@ class Control:
     def check(s, bb, i, b):
         b = not b
         var(f'cont{i}', b)
-        bw(bb, label=['', bui.charstr(bui.SpecialChar.DPAD_CENTER_BUTTON)]
+        bw(bb, label=['', bui.SpecialChar.DPAD_CENTER_BUTTON.value]
            [b], oac=bs.CallPartial(s.check, bb, i, b))
-        bui.getsound('deek').play()
+        _uica.audio.deek.get().play()
     """Conditional CharPicker"""
     def pick(s):
         SpazPicker(source=s.b, pipe=s.fresh, deny=[s.n], deny_msg="Already picked!")
@@ -4825,7 +4885,7 @@ class Control:
         me = getme(1).node
         c = s.__class__
         if s.n == me and not shut:
-            bui.getsound('block').play()
+            _uica.audio.block.get().play()
             if not getattr(s, 'lmao1', True):
                 return
             s.lmao1 = False
@@ -4836,7 +4896,7 @@ class Control:
         b = s.__class__.__up__
         if not dry:
             s.__class__.__up__ = b = not b
-        bw(s.sb, label=['Start', 'Stop'][b], icon=bui.gettexture(f"ouya{['O', 'A'][b]}Button"))
+        bw(s.sb, label=['Start', 'Stop'][b], icon=_uitex(f"ouya{['O', 'A'][b]}Button"))
         if dry:
             return
         if not b:
@@ -4864,10 +4924,10 @@ class Control:
             Bubble(
                 node=s.n,
                 time=4,
-                text=bui.charstr(getattr(bui.SpecialChar, random.choice([
+                text=(getattr(bui.SpecialChar, random.choice([
                     'DPAD_CENTER_BUTTON',
                     'LOGO_FLAT'
-                ])))+' '+random.choice(CONSTR()),
+                ]))).value+' '+random.choice(CONSTR()),
                 color=s.n.color
             )
             p = s.n.position
@@ -4936,7 +4996,7 @@ class Control:
         s.n = n
         ui = NTEX(n)
         tw(s.t, text=getattr(n, 'name', '') or 'Unnamed', color=ui[1])
-        bw(s.b, **ui[0], mask_texture=bui.gettexture('characterIconMask'))
+        bw(s.b, **ui[0], mask_texture=_uicc.textures.character_icon_mask.get())
         if not b:
             return
         gun()
@@ -4965,7 +5025,7 @@ class Effect:
             color=(1, 1, 1),
             pos=(60, 225),
             size=(136, 136),
-            texture=bui.gettexture('achievementEmpty')
+            texture=_uica.textures.achievement_empty.get()
         )
         bw(s.b, oac=s.pick)
         s.t = tw(
@@ -5031,7 +5091,7 @@ class Effect:
                     size=(60, 60),
                     position=(405+x*70, 315-65*y),
                     parent=w,
-                    icon=bui.gettexture(i),
+                    icon=_uitex(i),
                     oac=bs.CallPartial(s.nah, f),
                     iconscale=1.2
                 ))
@@ -5049,20 +5109,20 @@ class Effect:
                 parent=p2,
                 size=(90, 90),
                 position=(22, 18+20+_*155),
-                texture=bui.gettexture(x),
+                texture=_uitex(x),
                 color=(1, 1, 1),
                 oac=bs.CallPartial(s.nah, bs.CallPartial(s.add, _))
             )
 
     def pup(s, j):
         s.n.handlemessage(bs.PowerupMessage(j))
-        bui.getsound('powerup01').play()
+        _uica.audio.powerup01.get().play()
 
     def add(s, _):
         if _ in s.MEM.get(s.n, []):
             btw('Already applied!')
             return
-        bui.getsound('powerup01').play()
+        _uica.audio.powerup01.get().play()
         s.man(_)
         s.check()
 
@@ -5118,7 +5178,7 @@ class Effect:
         if not i in s.MEM.get(s.n, []):
             btw('Effect isn\'t applied... hmm?')
             return
-        bui.getsound('pop01').play()
+        _uica.audio.pop01.get().play()
         s.man(i, False)
         s.check()
 
@@ -5179,7 +5239,7 @@ class Effect:
         s.n = n
         ui = NTEX(n)
         tw(s.t, text=getattr(n, 'name', 0) or 'Unnamed', color=ui[1])
-        bw(s.b, **ui[0], mask_texture=bui.gettexture('characterIconMask'))
+        bw(s.b, **ui[0], mask_texture=_uicc.textures.character_icon_mask.get())
         s.check()
 
     def nah(s, f):
@@ -5232,7 +5292,7 @@ class Deploy:
                 {
                     'mesh': f.bomb_mesh,
                     'body': 'sphere',
-                    'color_texture': GA(lambda: bs.gettexture('white')),
+                    'color_texture': GA(lambda: _sccm.textures.white.get()),
                     'shadow_size': 0.6,
                     'gravity_scale': 0.5,
                     'materials': [
@@ -5245,9 +5305,9 @@ class Deploy:
             ('Gold Coin', 'coin'): [
                 'prop',
                 {
-                    'mesh': GA(lambda: bs.getmesh('puck')),
+                    'mesh': GA(lambda: _scca.meshes.puck.get()),
                     'body': 'puck',
-                    'color_texture': GA(lambda: bs.gettexture('tokens4')),
+                    'color_texture': GA(lambda: _scca.textures.tokens4.get()),
                     'reflection': 'sharper',
                     'reflection_scale': [5, 5, 5],
                     'materials': [
@@ -5285,7 +5345,7 @@ class Deploy:
             b = bw(
                 parent=s.prp,
                 size=(100, 100),
-                texture=bui.gettexture(tx[1]),
+                texture=_uitex(tx[1]),
                 position=(15, y+50),
                 color=(1, 1, 1),
                 oac=bs.CallPartial(s.load, at, _)
@@ -5386,7 +5446,7 @@ class Deploy:
             size=(60.0, 60.0),
             position=(217.1, 153.8),
             parent=w,
-            icon=bui.gettexture('cursor'),
+            icon=_uibi.textures.cursor.get(),
             iconscale=1.2,
             oac=s.map
         )
@@ -5405,7 +5465,7 @@ class Deploy:
             position=(492.4, 59.6),
             parent=w,
             iconscale=1.55,
-            icon=bui.gettexture('downButton'),
+            icon=_uica.textures.down_button.get(),
             oac=s.make
         )
         tw(
@@ -5533,7 +5593,7 @@ class Deploy:
 
     def dattr(s, a):
         s.data['attrs'].pop(a)
-        bui.getsound('pop01').play()
+        _uica.audio.pop01.get().play()
         s.fattr()
 
     def eattr(s, a, dv, old, _):
@@ -5666,8 +5726,8 @@ class Listen:
             parent=w,
             position=(c_x - 60, 220),
             size=(120, 120),
-            texture=bui.gettexture('audioIcon'),
-            mask_texture=bui.gettexture('characterIconMask'),
+            texture=_uica.textures.audio_icon.get(),
+            mask_texture=_uicc.textures.character_icon_mask.get(),
             color=(1, 1, 1)
         )
 
@@ -5700,7 +5760,7 @@ class Listen:
             pos=(c_x - 110, 80),
             size=(100, 45),
             label='Play',
-            icon=bui.gettexture('startButton'),
+            icon=_uiu1.textures.start_button.get(),
             oac=s.play
         )
 
@@ -5709,7 +5769,7 @@ class Listen:
             pos=(c_x + 10, 80),
             size=(100, 45),
             label='Default',
-            icon=bui.gettexture('replayIcon'),
+            icon=_uica.textures.replay_icon.get(),
             oac=s.play_def
         )
 
@@ -5730,7 +5790,7 @@ class Listen:
 
     def select(s, i):
         if s.sl != i and s.sl is not None:
-            bui.getsound('tap').play()
+            _uicm.audio.tap.get().play()
         s.sl = i
 
         for idx, t in enumerate(s.texts):
@@ -5742,9 +5802,9 @@ class Listen:
 
         tex_name = s.tex_map.get(m_val, 'audioIcon')
         try:
-            tex = bui.gettexture(tex_name)
+            tex = _uitex(tex_name)
         except:
-            tex = bui.gettexture('audioIcon')
+            tex = _uica.textures.audio_icon.get()
         bui.imagewidget(s.img, texture=tex)
 
     def play(s):
@@ -5833,7 +5893,7 @@ class Tune:
         var(key, val)
         if key == 'npp':
             npause(1 if val else 0)
-        bui.getsound('click01').play()
+        _uibi.audio.click01.get().play()
 
 
 @NEW
@@ -5868,12 +5928,12 @@ class Quick:
 
         bw(
             p=w, pos=(40, 105), size=(220, 55),
-            label='Meteor Shower', icon=bui.gettexture('powerupBomb'), oac=s.meteors
+            label='Meteor Shower', icon=_uica.textures.powerup_bomb.get(), oac=s.meteors
         )
 
         bw(
             p=w, pos=(40, 40), size=(220, 55),
-            label='Earthquake', icon=bui.gettexture('achievementOnslaught'), oac=s.quake
+            label='Earthquake', icon=_uica.textures.achievement_onslaught.get(), oac=s.quake
         )
 
         b_list = [
@@ -5888,18 +5948,17 @@ class Quick:
         ]
 
         for lbl, ic, act, p in b_list:
-            bw(p=w, pos=p, size=(120, 55), label=lbl,
-               icon=bui.gettexture(ic), oac=bs.CallPartial(s.mass, act))
+            bw(p=w, pos=p, size=(120, 55), label=lbl, icon=_uitex(ic), oac=bs.CallPartial(s.mass, act))
 
     def epic(s, v):
         var('epic_mode', v)
         with bs.get_foreground_host_activity().context:
             bs.get_foreground_host_activity().globalsnode.slow_motion = v
-        bui.getsound('click01').play()
+        _uibi.audio.click01.get().play()
 
     def disco(s, v):
         type(s)._disco_on = v
-        bui.getsound('click01').play()
+        _uibi.audio.click01.get().play()
         if v:
             s.__class__._disco_timer = bui.AppTimer(0.3, s.step_disco, repeat=True)
         else:
@@ -5924,13 +5983,13 @@ class Quick:
             bui.apptimer(i * 0.15, drop)
 
         push("Meteors Incoming!", color=(1, 0.5, 0))
-        bui.getsound('shieldDown').play()
+        _uica.audio.shield_down.get().play()
 
     def quake(s):
         with bs.get_foreground_host_activity().context:
             bs.camerashake(10)
         push("Earthquake!", color=(0.8, 0.4, 0))
-        bui.getsound('block').play()
+        _uica.audio.block.get().play()
 
     def mass(s, act):
         with bs.get_foreground_host_activity().context:
@@ -5990,7 +6049,7 @@ class Tweak:
 
             b = bw(
                 p=w, pos=(bx, by), size=(160, 55),
-                label=lbl, icon=bui.gettexture(ic),
+                label=lbl, icon=_uitex(ic),
                 text_scale=1.0, iconscale=1.0
             )
             bw(b, oac=bs.CallPartial(oac, b))
@@ -6090,7 +6149,7 @@ class Tweak:
                     n.delete()
                     c += 1
         push(f'Cleared {c} orphaned nodes!', color=(1, 0.5, 0))
-        bui.getsound('shieldDown').play()
+        _uica.audio.shield_down.get().play()
 
     def draw_line(s, b):
         NodePicker(source=b, allow='3D', pipe=lambda n1: NodePicker(
@@ -6218,7 +6277,7 @@ class Gather:
         # Add Team Button
         bw(
             p=w, pos=(30, 20), size=(180, 40),
-            label='Create Team', icon=bui.gettexture('achievementTeamPlayer'),
+            label='Create Team', icon=_uica.textures.achievement_team_player.get(),
             oac=s.add_team
         )
 
@@ -6314,14 +6373,14 @@ class Gather:
            id2='t_col', chr='char', on_back=bs.CallPartial(s.recolor_team, t), mode=2))
 
         bw(p=s.dcv, pos=(220, ss - 85), size=(100, 35), label='Nuke',
-           icon=bui.gettexture('crossOut'), oac=bs.CallPartial(s.nuke_team, t))
+           icon=_uica.textures.cross_out.get(), oac=bs.CallPartial(s.nuke_team, t))
 
         bw(p=s.dcv, pos=(10, ss - 130), size=(100, 35), label='Gather',
-           icon=bui.gettexture('achievementTeamPlayer'), oac=bs.CallPartial(s.gather_team, t))
+           icon=_uica.textures.achievement_team_player.get(), oac=bs.CallPartial(s.gather_team, t))
         bw(p=s.dcv, pos=(115, ss - 130), size=(100, 35), label='Smite',
-           icon=bui.gettexture('achievementOffYouGo'), oac=bs.CallPartial(s.smite_team, t))
+           icon=_uica.textures.achievement_off_you_go.get(), oac=bs.CallPartial(s.smite_team, t))
         bw(p=s.dcv, pos=(220, ss - 130), size=(100, 35), label='Heal',
-           icon=bui.gettexture('powerupHealth'), oac=bs.CallPartial(s.heal_team, t))
+           icon=_uica.textures.powerup_health.get(), oac=bs.CallPartial(s.heal_team, t))
 
         tw(p=s.dcv, pos=(10, ss - 170),
            text=f'Players ({count}):', color=(0.5, 0.5, 0.5), scale=0.8)
@@ -6835,8 +6894,8 @@ class Load:
             parent=w,
             position=(50, 270),
             size=(90, 90),
-            texture=bui.gettexture('empty'),
-            mask_texture=bui.gettexture('empty')
+            texture=_uica.textures.empty.get(),
+            mask_texture=_uica.textures.empty.get()
         )
 
         s.t_name = tw(
@@ -6852,7 +6911,7 @@ class Load:
 
         s.b_load = bw(
             p=w, pos=(420, 280), size=(130, 50),
-            label='Load', icon=bui.gettexture('inventoryIcon'),
+            label='Load', icon=_uica.textures.inventory_icon.get(),
             oac=s.load_preset
         )
 
@@ -6893,7 +6952,7 @@ class Load:
 
     def select(s, i):
         if s.sl != i and s.sl is not None:
-            bui.getsound('tap').play()
+            _uicm.audio.tap.get().play()
         s.sl = i
 
         for idx, t in enumerate(s.texts):
@@ -6909,23 +6968,23 @@ class Load:
             char_obj = SPAZ()[NAME().index(valid_char)]
             bui.imagewidget(
                 edit=s.img,
-                texture=bui.gettexture(char_obj.icon_texture),
-                mask_texture=bui.gettexture('characterIconMask'),
-                tint_texture=bui.gettexture(char_obj.icon_mask_texture),
+                texture=_uitex(char_obj.icon_texture),
+                mask_texture=_uicc.textures.character_icon_mask.get(),
+                tint_texture=_uitex(char_obj.icon_mask_texture),
                 color=(1, 1, 1),
                 tint_color=p['v'].get('Main', (1, 1, 1)),
                 tint2_color=p['v'].get('Highlight', (1, 1, 1))
             )
         else:
             try:
-                tex = bui.gettexture(p.get('i') or 'logo')
+                tex = _uitex(p.get('i') or 'logo')
             except Exception:
-                tex = bui.gettexture('logo')
+                tex = _uica.textures.logo.get()
             bui.imagewidget(
                 edit=s.img,
                 texture=tex,
-                mask_texture=bui.gettexture('empty'),
-                tint_texture=bui.gettexture('empty'),
+                mask_texture=_uica.textures.empty.get(),
+                tint_texture=_uica.textures.empty.get(),
                 color=(1, 1, 1),
                 tint_color=(1, 1, 1),
                 tint2_color=(1, 1, 1)
@@ -6972,13 +7031,13 @@ class Mapper2D:
 
         with bs.get_foreground_host_activity().context:
             s.node = bs.newnode('image', attrs={
-                'texture': bs.gettexture('achievementCrossHair'),
+                'texture': _scca.textures.achievement_cross_hair.get(),
                 'absolute_scale': True,
                 'scale': (50, 50),
                 'position': p,
                 'color': (0, 1, 0)
             })
-            bui.getsound('laser').play()
+            _uica.audio.laser.get().play()
 
             s.safe = None
             def f(): s.safe = s.node.exists()
@@ -7029,7 +7088,7 @@ class Mapper2D:
     def destroy(s):
         with bs.get_foreground_host_activity().context:
             n = s.node
-            bui.getsound('shatter').play()
+            _uica.audio.shatter.get().play()
             n.delete()
             bs.timer(1, s.reset)
 
@@ -7051,7 +7110,7 @@ class Mapper2D:
 
         with bs.get_foreground_host_activity().context:
             bs.timer(0.1, lambda: s.overlay.release(3))
-            bui.getsound('gunCocking').play()
+            _uicm.audio.gun_cocking.get().play()
             bs.animate_array(s.node, 'scale', 2, {0: (50, 50), 0.1: (30, 30), 0.2: (50, 50)})
 
         s.pipe((p[0], p[1], 0.0))
@@ -7066,7 +7125,7 @@ class Mapper2D:
             p = None
         with bs.get_foreground_host_activity().context:
             if p:
-                bui.getsound('powerup01').play()
+                _uica.audio.powerup01.get().play()
                 bs.animate_array(s.node, 'scale', 2, {0: (50, 50), 0.1: (0, 0)})
                 bs.timer(0.1, s.node.delete)
             else:
@@ -7079,7 +7138,7 @@ class Mapper2D:
 
     def complain(s):
         push('You destroyed the mapper!', color=(1, 0, 0))
-        bui.getsound('swip').play()
+        _uica.audio.swip.get().play()
         s.overlay.destroy()
         None if s.safe else btw('Mapper destroyed too early.')
 
@@ -7231,7 +7290,7 @@ class Build:
 
             bp = bw(
                 p=s.rp, pos=(115, 25), size=(160, 45), label='Map & Build',
-                icon=bui.gettexture('cursor'), oac=bs.CallPartial(s.map_it, 'prop')
+                icon=_uibi.textures.cursor.get(), oac=bs.CallPartial(s.map_it, 'prop')
             )
             s.kids.append(bp)
 
@@ -7267,7 +7326,7 @@ class Build:
 
             bp = bw(
                 p=s.rp, pos=(115, 25), size=(160, 45), label='Map & Build',
-                icon=bui.gettexture('cursor'), oac=bs.CallPartial(s.map_it, 'text')
+                icon=_uibi.textures.cursor.get(), oac=bs.CallPartial(s.map_it, 'text')
             )
             s.kids.append(bp)
 
@@ -7296,7 +7355,7 @@ class Build:
 
             bp = bw(
                 p=s.rp, pos=(115, 25), size=(160, 45), label='Map & Build',
-                icon=bui.gettexture('cursor'), oac=bs.CallPartial(s.map_it, 'light')
+                icon=_uibi.textures.cursor.get(), oac=bs.CallPartial(s.map_it, 'light')
             )
             s.kids.append(bp)
 
@@ -7324,14 +7383,14 @@ class Build:
 
             bp = bw(
                 p=s.rp, pos=(115, 25), size=(160, 45), label='Build (2D)',
-                icon=bui.gettexture('cursor'), oac=bs.CallPartial(s.map_it, 'image')
+                icon=_uibi.textures.cursor.get(), oac=bs.CallPartial(s.map_it, 'image')
             )
             s.kids.append(bp)
 
         elif m == 4:
             b1 = bw(
                 p=s.rp, pos=(95, 215), size=(200, 45), label='Pick & Edit',
-                icon=bui.gettexture('menuIcon')
+                icon=_uica.textures.menu_icon.get()
             )
             bw(b1, oac=bs.CallPartial(NodePicker, source=b1,
                pipe=lambda n: NodeManager(node=n, source=b1)))
@@ -7339,7 +7398,7 @@ class Build:
 
             b2 = bw(
                 p=s.rp, pos=(95, 160), size=(200, 45), label='Pick & Delete',
-                icon=bui.gettexture('crossOut')
+                icon=_uica.textures.cross_out.get()
             )
             bw(b2, oac=bs.CallPartial(
                 NodePicker, source=b2,
@@ -7349,14 +7408,14 @@ class Build:
 
             b3 = bw(
                 p=s.rp, pos=(95, 105), size=(200, 45), label='Pick & Attach Light',
-                icon=bui.gettexture('star')
+                icon=_uica.textures.star.get()
             )
             bw(b3, oac=bs.CallPartial(NodePicker, source=b3, pipe=s.attach_light))
             s.kids.append(b3)
 
             b4 = bw(
                 p=s.rp, pos=(95, 50), size=(200, 45), label='Pick & Scale Up',
-                icon=bui.gettexture('upButton')
+                icon=_uica.textures.up_button.get()
             )
             bw(b4, oac=bs.CallPartial(NodePicker, source=b4, pipe=s.scale_up))
             s.kids.append(b4)
@@ -7364,28 +7423,28 @@ class Build:
         elif m == 5:
             b1 = bw(
                 p=s.rp, pos=(95, 215), size=(200, 45), label='Rain Current Prop',
-                icon=bui.gettexture('downButton')
+                icon=_uica.textures.down_button.get()
             )
             bw(b1, oac=s.rain_props)
             s.kids.append(b1)
 
             b2 = bw(
                 p=s.rp, pos=(95, 160), size=(200, 45), label='Clear All Props',
-                icon=bui.gettexture('crossOut')
+                icon=_uica.textures.cross_out.get()
             )
             bw(b2, oac=bs.CallPartial(s.clear_nodes, 'prop'))
             s.kids.append(b2)
 
             b3 = bw(
                 p=s.rp, pos=(95, 105), size=(200, 45), label='Clear All Texts',
-                icon=bui.gettexture('crossOut')
+                icon=_uica.textures.cross_out.get()
             )
             bw(b3, oac=bs.CallPartial(s.clear_nodes, 'text'))
             s.kids.append(b3)
 
             b4 = bw(
                 p=s.rp, pos=(95, 50), size=(200, 45), label='Clear All Images',
-                icon=bui.gettexture('crossOut')
+                icon=_uica.textures.cross_out.get()
             )
             bw(b4, oac=bs.CallPartial(s.clear_nodes, 'image'))
             s.kids.append(b4)
@@ -7442,8 +7501,8 @@ class Build:
             try:
                 bs.newnode('prop', attrs={
                     'position': pos,
-                    'mesh': bs.getmesh(var('b_mesh')),
-                    'color_texture': bs.gettexture(var('b_tex')),
+                    'mesh': _scmesh(var('b_mesh')),
+                    'color_texture': _sctex(var('b_tex')),
                     'body': var('b_body'),
                     'materials': [o.object_material, o.footing_material],
                     'reflection': 'soft',
@@ -7501,7 +7560,7 @@ class Build:
             with bs.get_foreground_host_activity().context:
                 bs.newnode('image', attrs={
                     'position': (pos[0], pos[1]),
-                    'texture': bs.gettexture(var('b_tex')),
+                    'texture': _sctex(var('b_tex')),
                     'color': var('Image'),
                     'scale': (scl, scl),
                     'absolute_scale': True
@@ -7540,7 +7599,7 @@ class Build:
                 if n and n.getnodetype() == t and n != bs.get_foreground_host_activity().globalsnode:
                     n.delete()
                     c += 1
-        bui.getsound('shieldDown').play()
+        _uica.audio.shield_down.get().play()
         push(f'Cleared {c} {t}s!', color=(1, 0.5, 0))
 
     def rain_props(s):
@@ -7555,7 +7614,7 @@ class Build:
         for i in range(25):
             bui.apptimer(i * 0.1, drop)
 
-        bui.getsound('spawn').play()
+        _uica.audio.spawn.get().play()
         push('Raining Props!', color=(0, 1, 1))
 
 
@@ -7604,7 +7663,7 @@ class Camera:
         # --- Live preview toggle ---
         s.b_live = bw(
             p=w, pos=(410, 290), size=(150, 40),
-            label='Live Preview', icon=bui.gettexture('replayIcon'),
+            label='Live Preview', icon=_uica.textures.replay_icon.get(),
             oac=s.toggle_live
         )
 
@@ -7649,19 +7708,19 @@ class Camera:
 
         # --- Apply / Reset / Sync ---
         bw(p=w, pos=(220, 105), size=(120, 35),
-           label='Apply', icon=bui.gettexture('settingsIcon'),
+           label='Apply', icon=_uica.textures.settings_icon.get(),
            oac=s.apply)
 
         bw(p=w, pos=(350, 105), size=(120, 35),
-           label='Sync', icon=bui.gettexture('replayIcon'),
+           label='Sync', icon=_uica.textures.replay_icon.get(),
            oac=s.sync)
 
         bw(p=w, pos=(50, 55), size=(150, 35),
-           label='Reset Camera', icon=bui.gettexture('replayIcon'),
+           label='Reset Camera', icon=_uica.textures.replay_icon.get(),
            oac=s.reset)
 
         bw(p=w, pos=(220, 55), size=(250, 35),
-           label='Pick Node → Focus', icon=bui.gettexture('star'),
+           label='Pick Node → Focus', icon=_uica.textures.star.get(),
            oac=s.pick_focus)
 
         # init sync
@@ -7680,17 +7739,17 @@ class Camera:
     def toggle_mode(s):
         s.tar_mode = not s.tar_mode
         bw(s.b_mode, label=f"Moving: {'Tar' if s.tar_mode else 'Pos'}")
-        bui.getsound('deek').play()
+        _uica.audio.deek.get().play()
 
     def toggle_live(s):
         s.live = not s.live
         bw(s.b_live, color=(0, 0.6, 0) if s.live else var('bg'))
         if s.live:
             s.live_timer = bui.AppTimer(0.02, s._live_tick, repeat=True)
-            bui.getsound('ding').play()
+            _uicm.audio.ding.get().play()
         else:
             s.live_timer = None
-            bui.getsound('tap').play()
+            _uicm.audio.tap.get().play()
 
     def _live_tick(s):
         if not s.w.exists() or s.w.transitioning_out:
@@ -7735,7 +7794,7 @@ class Camera:
         for i in range(3):
             s.pos_inputs[i].set_text(str(round(p[i], 3)), silent=True)
             s.tar_inputs[i].set_text(str(round(t[i], 3)), silent=True)
-        bui.getsound('tap').play()
+        _uicm.audio.tap.get().play()
 
     def reset(s):
         _ba.set_camera_manual(False)
@@ -7802,12 +7861,12 @@ class Scene:
 
         s.b_switch = bw(
             p=w, pos=(40, 60), size=(118, 42),
-            label='Switch Map', icon=bui.gettexture('levelIcon'),
+            label='Switch Map', icon=_uica.textures.level_icon.get(),
             oac=s.do_map
         )
         s.b_mapnode = bw(
             p=w, pos=(166, 60), size=(118, 42),
-            label='Map Node', icon=bui.gettexture('settingsIcon'),
+            label='Map Node', icon=_uica.textures.settings_icon.get(),
             oac=s.map_node
         )
 
@@ -7820,7 +7879,7 @@ class Scene:
            oac=bs.CallPartial(s.mult_tint, 1 / 1.1))
 
         bw(p=w, pos=(305, 284), size=(250, 40),
-           label='Reset Tint', icon=bui.gettexture('replayIcon'),
+           label='Reset Tint', icon=_uica.textures.replay_icon.get(),
            oac=s.reset_tint)
 
         # ── TINT PRESETS (right bottom: x=305..555) ──────────
@@ -7847,7 +7906,7 @@ class Scene:
 
         s.b_custom_tint = bw(
             p=w, pos=(305, 60), size=(250, 42),
-            label='Custom Tint', icon=bui.gettexture('settingsIcon'),
+            label='Custom Tint', icon=_uica.textures.settings_icon.get(),
             oac=s.open_tint
         )
 
@@ -7910,7 +7969,7 @@ class Scene:
         for idx, b in enumerate(s.map_btns):
             bw(b, color=(0.0, 0.45, 0.0) if idx == i else var('bg'))
         s.sel_map = name
-        bui.getsound('tap').play()
+        _uicm.audio.tap.get().play()
 
     def do_map(s):
         if not s.sel_map:
@@ -8164,11 +8223,50 @@ def SPAZ(): return list(D().values())
 def KIDS(): return [i for i in bs.getnodes() if i.getnodetype() == 'spaz']
 
 
-def ALL(): return sorted([i[:-4] for i in os.listdir(os.path.join(BASE(), 'textures'))])
-def AUDIO(): return sorted([i[:-4] for i in os.listdir(os.path.join(BASE(), 'audio'))])
-def MESH(): return sorted([i[:-4] for i in os.listdir(os.path.join(BASE(), 'meshes'))])
-def ICONS(): return [i.icon_texture for i in SPAZ()]
-def CTEX(): return [i.color_texture for i in SPAZ()]
+# Asset lists come from the asset-package wrapper trees (assets are packaged
+# now, there are no loose ba_data/{textures,audio,meshes} dirs to list).
+# Names are returned legacy-style (camelCase) so string handling elsewhere
+# keeps working; the _uitex/_scsnd/... helpers map them back to wrappers.
+_lcache = {}
+def _camel(n): return _re.sub(r'_([a-z])', lambda m: m.group(1).upper(), n)
+
+
+def _leaves(t):
+    for k, v in t.items():
+        if isinstance(v, dict):
+            yield from _leaves(v)
+        else:
+            yield k
+
+
+def _list(kind):
+    if kind in _lcache:
+        return _lcache[kind]
+    out = set()
+    for w in _WRAPS:
+        try:
+            m = _il.import_module(f'bascenev1.{w}')
+        except ImportError:
+            continue
+        out.update(_camel(n) for n in _leaves(getattr(m, '_TREE', {}).get(kind, {})))
+    _lcache[kind] = r = sorted(out)
+    return r
+
+
+def _nm(v):
+    # handle(s) -> legacy-style name str(s); anything else passes through
+    if isinstance(v, (list, tuple)):
+        return type(v)(_nm(i) for i in v)
+    if not isinstance(v, str) and hasattr(v, '_name'):
+        return _camel(v._name.rsplit('/', 1)[-1])
+    return v
+
+
+def ALL(): return _list('textures')
+def AUDIO(): return _list('audio')
+def MESH(): return _list('meshes')
+def ICONS(): return [_nm(i.icon_texture) for i in SPAZ()]
+def CTEX(): return [_nm(i.color_texture) for i in SPAZ()]
 
 
 def DIR(t): a = dir(SPAZ()[0]); b = []; [b.append(i)
@@ -8313,11 +8411,13 @@ def var(s, v=None, cb=True):
     if v is None:
         return cfg.get(s, v)
     else:
-        cfg[s] = v
+        cfg[s] = _nm(v)
         cfg.commit()
 
 
 def con(n, v): var(n, v) if var(n) is None else None
+
+
 def reset_conf(): cfg = bui.app.config; [(cfg.pop(c) if c.startswith(
     'cb_') else None) for c in cfg.copy()]; cfg.commit()
 
@@ -8328,6 +8428,20 @@ f = ba.PluginSubsystem.on_screen_size_change
 ba.PluginSubsystem.on_screen_size_change = lambda *a, **k: (icw.on_resume(), f(*a, **k))
 f = ba.PluginSubsystem.on_ui_scale_change
 ba.PluginSubsystem.on_ui_scale_change = lambda *a, **k: (icw.on_resume(), f(*a, **k))
+# Spaz nodes in the new engine wear a spaz_def (no readable textures), so
+# remember the character name each Spaz was created with for icon lookups.
+_spaz_init = bs_spaz.Spaz.__init__
+
+
+def _spaz_init_tag(self, *a, **k):
+    _spaz_init(self, *a, **k)
+    try:
+        self._cb_char = k.get('character', 'Spaz')
+    except Exception:
+        pass
+
+
+bs_spaz.Spaz.__init__ = _spaz_init_tag
 def gos(): return bui.get_special_widget("overlay_stack")
 
 
@@ -8375,7 +8489,7 @@ def pbw(*a, tex=None, **k):
     b = bw(*a, **k)
     if tex:
         bw(b, tint_color=var(tex[0]) or (1, 1, 1), tint2_color=var(tex[1]) or (1, 1, 1))
-    bw(b, color=(1, 1, 1), mask_texture=bui.gettexture('characterIconMask'))
+    bw(b, color=(1, 1, 1), mask_texture=_uicc.textures.character_icon_mask.get())
     return b
 
 
@@ -8392,14 +8506,14 @@ def sbw(*a, **k):
 
 # Mini tools
 # May look dirty, but they're extremely useful
-def err(t): return (bui.getsound('error').play(), bs.broadcastmessage(t, color=(1, 0, 0)))
-def btw(t): return (bui.getsound('block').play(), bs.broadcastmessage(t, color=(1, 1, 0)))
+def err(t): return (_uibi.audio.error.get().play(), bs.broadcastmessage(t, color=(1, 0, 0)))
+def btw(t): return (_uica.audio.block.get().play(), bs.broadcastmessage(t, color=(1, 1, 0)))
 def darken(c): return (c[0]/2, c[1]/2, c[2]/2)
 def gc(w): return w.get_screen_space_center()
 def smol(c): return [i/255 for i in c]
 def huge(c): return [int(i*255) for i in c]
-def gun(): return bui.getsound('gunCocking').play()
-def ding(): return bui.getsound('dingSmallHigh').play()
+def gun(): return _uicm.audio.gun_cocking.get().play()
+def ding(): return _uica.audio.ding_small_high.get().play()
 def UUID(): return str(uuid.uuid4())[:5]
 
 
@@ -8605,7 +8719,7 @@ def MESS(p):
 
 def LOOK(p, on_found=lambda: None):
     d = math.dist(p, _ba.get_camera_target())/17
-    h = bui.getsound('shieldUp')
+    h = _uica.audio.shield_up.get()
     FOCUS(p, 2)
     h.play() if d > 0.3 else None
     bui.apptimer(d, lambda: (None if pause() else SPARK(p), h.stop(), on_found()))
@@ -8617,7 +8731,7 @@ def rnd(p): return tuple([round(i, 3) for i in p])
 
 def SND(s, p, v=3):
     with bs.get_foreground_host_activity().context:
-        bs.getsound(s).play(v, position=p)
+        _scsnd(s).play(v, position=p)
 
 
 def STATE(b=None):
@@ -8642,8 +8756,8 @@ def fixmesh(c=None, prf=''):
 
 
 def fixall(c=None, prf=''): fixmesh(c, prf); fixsounds(c, prf)
-def get_ctex(c): return SPAZ()[NAME().index(c)].color_texture
-def get_ctex2(c): return SPAZ()[NAME().index(c)].color_mask_texture
+def get_ctex(c): return _nm(SPAZ()[NAME().index(c)].color_texture)
+def get_ctex2(c): return _nm(SPAZ()[NAME().index(c)].color_mask_texture)
 
 
 def set_sounds(n, prf='', dr=None, aud=None, spa=None):
@@ -8655,9 +8769,9 @@ def set_sounds(n, prf='', dr=None, aud=None, spa=None):
         if not j:
             continue
         if j[1]:
-            v = [bs.getsound(aud[j[0]])]
+            v = [_scsnd(aud[j[0]])]
         else:
-            v = [bs.getsound(k) for k in getattr(spa[j[0]], a[i])]
+            v = [_scsnd(k) for k in getattr(spa[j[0]], a[i])]
         setattr(n, a[i], v)
 
 
@@ -8688,27 +8802,43 @@ def GETSIG(o):
 
 
 def NTEX(n, tex=None):
-    t = str(getattr(n, 'color_texture', '"black"'))
-    f = t.find('"')+1
-    c = t[f:t.find('"', f)].replace('Color', '')
+    col, hi = getattr(n, 'color', (1, 1, 1)), getattr(n, 'highlight', (1, 1, 1))
+    ch = None
+    try:
+        ch = getattr(n.getdelegate(object), '_cb_char', None)
+    except Exception:
+        pass
+    a = bui.app.classic.spaz_appearances.get(ch) if ch else None
+    if a is not None:  # known character: use its own icon + mask
+        c = _nm(a.icon_texture)
+        c = c[:-4] if c.endswith('Icon') else c
+        return {
+            'texture': _uitex(a.icon_texture),
+            'tint_texture': _uitex(a.icon_mask_texture),
+            'tint_color': col,
+            'tint2_color': hi
+        }, getattr(n, 'name_color', (1, 1, 1)), c, ch
+    t = str(getattr(n, 'color_texture', '\"black\"'))
+    f = t.find('\"')+1
+    c = _camel(t[f:t.find('\"', f)].rsplit('/', 1)[-1]).replace('Color', '')
     b = c+'Icon' in (tex or ALL())
     return {
-        'texture': bui.gettexture(c+['', 'Icon'][b]),
-        'tint_texture': bui.gettexture(c+['', 'IconColorMask'][b]),
-        'tint_color': getattr(n, 'color', (1, 1, 1)),
-        'tint2_color': getattr(n, 'highlight', (1, 1, 1))
-    }, getattr(n, 'name_color', (1, 1, 1)), c
+        'texture': _uitex(c+['', 'Icon'][b]),
+        'tint_texture': _uitex(c+['', 'IconColorMask'][b]),
+        'tint_color': col,
+        'tint2_color': hi
+    }, getattr(n, 'name_color', (1, 1, 1)), c, ch
 
 
 def MK(ch, f, g):
     j = {'tint_color': var(f)}
     return [{
         'tint2_color': var(g),
-        'mask_texture': bui.gettexture('characterIconMask'),
-        'tint_texture': bui.gettexture(ch.icon_mask_texture),
-        'texture': bui.gettexture(ch.icon_texture),
+        'mask_texture': _uicc.textures.character_icon_mask.get(),
+        'tint_texture': _uitex(ch.icon_mask_texture),
+        'texture': _uitex(ch.icon_texture),
         **j
-    }, {'texture': bui.gettexture('buttonSquare'), **j}]
+    }, {'texture': _uiu1.textures.button_square.get(), **j}]
 
 
 def clone(n, a):
@@ -8804,7 +8934,7 @@ class byBordd(ba.Plugin):
                 p=s._root_widget,
                 pos=(-80, s._height-50),
                 label="Coolbox",
-                icon=bui.gettexture('chestIcon'),
+                icon=_uicc.textures.chest_icon.get(),
                 iconscale=0.8,
                 scale=1.0,
                 size=(100, 40)
