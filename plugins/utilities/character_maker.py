@@ -55,6 +55,16 @@ import os
 import copy
 import json
 
+plugman = dict(
+    plugin_name="character_maker",
+    description="Make new characters by manipulating models and textures.",
+    external_url="https://www.youtube.com/watch?v=q0KxY1hfMPQ",
+    authors=[
+        {"name": "Mr.Smoothy", "email": "", "discord": "mr.smoothy", "github": ""},
+    ],
+    version="2.1.2",
+)
+
 GAME_USER_DIRECTORY = _babase.env()["python_directory_user"]
 CUSTOM_CHARACTERS = os.path.join(GAME_USER_DIRECTORY, "CustomCharacters")
 os.makedirs(CUSTOM_CHARACTERS, exist_ok=True)
@@ -82,6 +92,45 @@ SPAZ_PRESET = {
     "icon_mask_texture": "neoSpazIconColorMask",
     "style": "spaz"
 }
+
+
+_SOUND_KEYS = ("jump_sounds", "attack_sounds", "impact_sounds",
+               "death_sounds", "pickup_sounds", "fall_sounds")
+
+
+def _wears_definition(node):
+    """Whether a spaz node draws itself from a character definition.
+
+    Since BombSquad 1.8.0 every built-in character is one, and a node in
+    that form ignores its individual mesh and texture attrs outright, so
+    nothing the maker set would show. Older builds have no such attr.
+    """
+    return getattr(node, "spaz_def", None) is not None
+
+
+def _make_editable(node, preset=SPAZ_PRESET):
+    """Switch a spaz node to the piece-by-piece form, dressed in `preset`."""
+    if not _wears_definition(node):
+        return
+    node.spaz_def = None
+    _apply_pieces(node, preset)
+
+
+def _apply_pieces(node, character):
+    node.head_mesh = bs.getmesh(character["head"])
+    node.hand_mesh = bs.getmesh(character["hand"])
+    node.torso_mesh = bs.getmesh(character["torso"])
+    node.pelvis_mesh = bs.getmesh(character["pelvis"])
+    node.upper_arm_mesh = bs.getmesh(character["upper_arm"])
+    node.forearm_mesh = bs.getmesh(character["forearm"])
+    node.upper_leg_mesh = bs.getmesh(character["upper_leg"])
+    node.lower_leg_mesh = bs.getmesh(character["lower_leg"])
+    node.toes_mesh = bs.getmesh(character["toes_mesh"])
+    node.color_texture = bs.gettexture(character["color_texture"])
+    node.color_mask_texture = bs.gettexture(character["color_mask"])
+    node.style = character["style"]
+    for key in _SOUND_KEYS:
+        setattr(node, key, [bs.getsound(name) for name in character[key]])
 
 
 class Player(bs.Player['Team']):
@@ -186,7 +235,7 @@ class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
             bs.gettexture('buttonPickUp'),
             position=(385, 240),
             scale=(50, 50),
-            color=(0, 0.7, 0.9)
+            color=(0, 0.7, 0.9, 0.9)
         )
         self._grab_text = Text(
             "Component-",
@@ -424,6 +473,9 @@ class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
         spaz.node.highlight = highlight
 
     def setModel(self, spaz, bodypart, meshname):
+        # A built-in character brought in with /import wears its
+        # definition; editing it starts over from the Spaz pieces.
+        _make_editable(spaz.node)
         if bodypart == 'head':
             spaz.node.head_mesh = bs.getmesh(meshname)
         elif bodypart == 'torso':
@@ -451,6 +503,7 @@ class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
 
     def spawn_player(self, player):
         spaz = self.spawn_player_spaz(player)
+        _make_editable(spaz.node)
         spaz.bodyindex = 0
         spaz.meshindex = 0
         spaz.bodypart = bs.newnode(
@@ -502,10 +555,17 @@ class CharacterBuilder(bs.TeamGameActivity[Player, Team]):
         #                                 enable_pickup=False)
 
         intp = babase.InputType
-        player.assigninput(intp.JUMP_PRESS, lambda: self.nextBodyPart(spaz))
-        player.assigninput(intp.PICK_UP_PRESS, lambda: self.prevBodyPart(spaz))
-        player.assigninput(intp.PUNCH_PRESS, lambda: self.nextModel(spaz))
-        player.assigninput(intp.BOMB_PRESS, lambda: self.prevModel(spaz))
+
+        def edit(fn):
+            # A press between dying and respawning has no spaz to edit.
+            def call():
+                if spaz.node:
+                    fn(spaz)
+            return call
+        player.assigninput(intp.JUMP_PRESS, edit(self.nextBodyPart))
+        player.assigninput(intp.PICK_UP_PRESS, edit(self.prevBodyPart))
+        player.assigninput(intp.PUNCH_PRESS, edit(self.nextModel))
+        player.assigninput(intp.BOMB_PRESS, edit(self.prevModel))
         # Also lets have them make some noise when they die.
         spaz.play_big_death_sound = True
         return spaz
@@ -605,6 +665,13 @@ def import_character(name, spaz):
         return (False, name)
     activity = bs.get_foreground_host_activity()
     with activity.context:
+        if getattr(character, "character", None) is not None:
+            # A built-in character on 1.8+: there are no pieces to copy,
+            # so wear its whole definition.
+            spaz.node.spaz_def = character.character.get_spaz_def()
+            return (True, appearance_name)
+        if _wears_definition(spaz.node):
+            spaz.node.spaz_def = None
         spaz.node.head_mesh = bs.getmesh(character.head_mesh)
         spaz.node.hand_mesh = bs.getmesh(character.hand_mesh)
         spaz.node.torso_mesh = bs.getmesh(character.torso_mesh)
@@ -621,6 +688,10 @@ def import_character(name, spaz):
 
 
 def export_character(name, spaz):
+    if _wears_definition(spaz.node):
+        bs.screenmessage("Built-in characters can't be exported as they are;"
+                         " change a part first.", color=(1, 0, 0))
+        return (None, name)
     default_characters = tuple(bs.app.classic.spaz_appearances.keys())[:30]
     os.makedirs(CUSTOM_CHARACTERS, exist_ok=True)
     character_file = name + ".json"
@@ -686,7 +757,9 @@ def _new_chatmessage(msg: str | babase.Lstr, *args, **kwargs):
     if msg.startswith("/export"):
         if len(msg.split(" ")) > 1:
             success, character_name = export_character(" ".join(msg.split(" ")[1:]), player.actor)
-            if success:
+            if success is None:
+                bui.getsound("error").play()
+            elif success:
                 bs.screenmessage(
                     'Exported character "{}"'.format(character_name),
                     color=(0, 1, 0)
