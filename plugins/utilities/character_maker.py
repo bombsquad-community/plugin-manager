@@ -60,7 +60,7 @@ plugman = dict(
     description="Make new characters by manipulating models and textures.",
     external_url="https://www.youtube.com/watch?v=q0KxY1hfMPQ",
     authors=[
-        {"name": "Mr.Smoothy", "email": "", "discord": "mr.smoothy", "github": ""},
+        {"name": "Mr.Smoothy", "email": "", "discord": "mr.smoothy", "github": "imayushsaini"},
     ],
     version="2.1.2",
 )
