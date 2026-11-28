@@ -2170,11 +2170,12 @@
         {
           "name": "pranav",
           "email": "",
-          "discord": "",
-          "github": ""
+          "discord": "pranav1711.",
+          "github": "pranav-1711"
         }
       ],
       "versions": {
+        "2.2.0": null,
         "2.1.1": {
           "api_version": 9,
           "commit_sha": "e604a3c",
