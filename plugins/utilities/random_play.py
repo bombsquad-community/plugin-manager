@@ -1,4 +1,5 @@
 # ba_meta require api 9
+from dataclasses import replace
 from random import choice, randint
 from typing import Any, Union
 
@@ -15,9 +16,35 @@ from bascenev1 import (
 )
 
 from bauiv1 import Widget, UIScale, buttonwidget
-from bauiv1lib.play import PlaylistSelectContext
-from bauiv1lib.playlist.browser import PlaylistBrowserWindow
 from bascenev1lib.activity.multiteamjoin import MultiTeamJoinActivity
+
+# BombSquad 1.8.0 replaced the classic playlist browser window with a doc-ui
+# page. Exactly one of these is set on a build this plugin supports.
+try:
+    import bauiv1lib.playlist.browserdocui as browserdocui
+    import bacommon.docui.v2 as dui2
+    from bacommon.docui.routes import PressSound
+    from bacommon.langstr import LangStrSpecValue
+    PlaylistBrowserWindow = None
+except ImportError:
+    browserdocui = None
+    from bauiv1lib.playlist.browser import PlaylistBrowserWindow
+
+plugman = dict(
+    plugin_name="random_play",
+    description="Play randomly generated FFA or Teams matches from your installed minigames and maps.",
+    external_url="",
+    authors=[
+        {"name": "silver_volt4", "email": "", "discord": "Silver_Volt4#6502", "github": ""},
+    ],
+    version="1.2.0",
+)
+
+# Session.__init__ dropped its leading depsets argument in 2026.
+# (Read off the code object: inspect.signature() would evaluate the
+# annotations, which name types the engine only imports for type checking.)
+_code = Session.__init__.__code__
+_SESSION_TAKES_DEPSETS = "depsets" in _code.co_varnames[:_code.co_argcount]
 
 DEFAULT_TEAM_COLORS = ((0.1, 0.25, 1.0), (1.0, 0.25, 0.2))
 DEFAULT_TEAM_NAMES = ("Blue", "Red")
@@ -35,7 +62,7 @@ class RandomPlaySessionMixin(MultiTeamSession, Session):
         _cfg = app.config
 
         super(MultiTeamSession, self).__init__(
-            [],
+            *([[]] if _SESSION_TAKES_DEPSETS else []),
             team_names=DEFAULT_TEAM_NAMES,
             team_colors=DEFAULT_TEAM_COLORS,
             min_players=1,
@@ -128,7 +155,7 @@ def patched__init__(
     sessiontype: type[Session],
     transition: str | None = "in_right",
     origin_widget: Widget | None = None,
-    playlist_select_context: PlaylistSelectContext | None = None,
+    playlist_select_context=None,
 ):
     width = 800
     height = 650
@@ -190,9 +217,57 @@ def game_starter_factory(sessiontype: type[Session]):
 
         babase.fade_screen(False, time=0.25, endcall=has_faded)
         babase.lock_all_input()
-        babase.app.meta.load_exported_classes(GameActivity, do_start)
+        if babase.app.env.engine_build_number >= 22379:
+            # 1.7.40 added the leading export-name argument.
+            babase.app.meta.load_exported_classes(
+                "bascenev1.GameActivity", GameActivity, do_start
+            )
+        else:
+            babase.app.meta.load_exported_classes(GameActivity, do_start)
 
     return on_run
+
+
+_RANDOM_ACTION = "random_play"
+
+
+if browserdocui is not None:
+    class RandomPlaylistBrowserController(browserdocui.PlaylistBrowserController):
+        """The playlist browser with a Random button beside Customize."""
+
+        def fulfill_route(self, route):
+            response = super().fulfill_route(route)
+            # The last row holds the Customize button; clone it so ours
+            # matches its size and style.
+            row = response.page.rows[-1]
+            template = row.buttons[0]
+            row.buttons.append(
+                replace(
+                    template,
+                    label=LangStrSpecValue.literal("Random"),
+                    action=dui2.Local(
+                        immediate_local_action=_RANDOM_ACTION,
+                        immediate_local_action_args={"k": route.kind.value},
+                    ),
+                    widget_id=_RANDOM_ACTION,
+                )
+            )
+            return response
+
+        # Our action isn't in the page's typed action family, so handle it
+        # before the typed decoding, which would reject it.
+        def get_local_action_press_sound(self, name):
+            if name == _RANDOM_ACTION:
+                return PressSound.SWISH
+            return super().get_local_action_press_sound(name)
+
+        def local_action(self, action):
+            if action.name != _RANDOM_ACTION:
+                return super().local_action(action)
+            if not action.window.main_window_has_control():
+                return
+            kind = browserdocui.SessionKind(action.args["k"])
+            game_starter_factory(kind.sessiontype())()
 
 
 # ba_meta export babase.Plugin
@@ -203,5 +278,11 @@ class RandomPlayPlugin(babase.Plugin):
     """
 
     def __init__(self):
-        PlaylistBrowserWindow.old__init__ = PlaylistBrowserWindow.__init__
-        PlaylistBrowserWindow.__init__ = patched__init__
+        if browserdocui is not None:
+            # The play page imports the controller by name on each press,
+            # so rebinding it here is enough. (Private-party select mode
+            # uses its own controller and is left alone.)
+            browserdocui.PlaylistBrowserController = RandomPlaylistBrowserController
+        else:
+            PlaylistBrowserWindow.old__init__ = PlaylistBrowserWindow.__init__
+            PlaylistBrowserWindow.__init__ = patched__init__
