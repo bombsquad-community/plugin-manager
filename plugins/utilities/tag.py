@@ -13,6 +13,7 @@ how to use:
 """
 
 from __future__ import annotations
+import copy
 from bauiv1lib.profile.edit import EditProfileWindow
 from bauiv1lib.popup import PopupMenu
 from bascenev1lib.actor.playerspaz import PlayerSpaz
@@ -32,8 +33,43 @@ from typing import (
     cast
 )
 
-__version__ = 2.0
+__version__ = "2.2.0"
 __author__ = "pranav1711#2006"
+
+plugman = dict(
+    plugin_name="tag",
+    description="Get a tag",
+    external_url="",
+    authors=[
+        {"name": "pranav", "email": "", "discord": "pranav1711.", "github": "pranav-1711"},
+    ],
+    version=__version__,
+)
+
+
+# API 9 spans builds from before and after several renames; use the new
+# names where the running build has them, so newer builds log no
+# deprecation warnings, and fall back to the old ones elsewhere.
+_BUILD = babase.app.env.engine_build_number
+CallPartial = getattr(babase, 'CallPartial', babase.Call)
+CallStrict = getattr(babase, 'CallStrict', babase.Call)
+WeakCallPartial = getattr(bs, 'WeakCallPartial', bs.WeakCall)
+
+
+def _charstr(char) -> str:
+    # From 1.8.0 a SpecialChar's value is the character itself and
+    # charstr() is deprecated; older builds need charstr().
+    if isinstance(char.value, str):
+        return char.value
+    return babase.charstr(char)
+
+
+def _add_ui_cleanup_check(obj: Any, widget: bui.Widget) -> None:
+    ui = bui.app.ui_v1
+    if hasattr(ui, 'add_ui_cleanup_check'):  # 1.7.51+
+        ui.add_ui_cleanup_check(obj, widget)
+    else:
+        bui.uicleanupcheck(obj, widget)
 
 
 # Default Confings/Settings
@@ -55,13 +91,26 @@ def setconfigs() -> None:
     Set required defualt configs for mod
     """
     cnfg = babase.app.config
-    profiles = cnfg['Player Profiles']
+    # (A fresh install has no profiles yet.)
+    profiles = cnfg.get('Player Profiles', {})
     if not "TagConf" in cnfg:
         cnfg["TagConf"] = {}
     for p in profiles:
-        if not p in cnfg["TagConf"]:
-            cnfg["TagConf"][str(p)] = Configs
+        ensureconfig(p)
     babase.app.config.apply_and_commit()
+
+
+def ensureconfig(name: str) -> dict:
+    """
+    Return a profile's tag configs, adding the defaults if it has none yet
+    (a profile made since launch, say).
+    """
+    tagconf = babase.app.config.setdefault("TagConf", {})
+    if str(name) not in tagconf:
+        # A copy each: sharing one dict made every profile's settings change
+        # together until the next launch.
+        tagconf[str(name)] = copy.deepcopy(Configs)
+    return tagconf[str(name)]
 
 
 def getanimcolor(name: str) -> dict:
@@ -86,12 +135,18 @@ def gethostname() -> str:
     Return player name, by using -1 only host can use tags.
     """
     session = bs.get_foreground_host_session()
+    name = None
     with session.context:
         for player in session.sessionplayers:
             if player.inputdevice.client_id == -1:
                 name = player.getname(full=True, icon=False)
                 break
-        if name == bui.app.plus.get_v1_account_name():
+        try:
+            account_name = bui.app.plus.get_v1_account_name()
+        except RuntimeError:
+            # Raises when not signed in; local profiles still get tags.
+            account_name = None
+        if account_name is not None and name == account_name:
             return '__account__'
         return name
 
@@ -103,20 +158,14 @@ EditProfileWindow.init = EditProfileWindow.__init__
 # PlayerSpaz object at -> bascenev1lib.actor.playerspaz
 
 
-def NewPlayerSzapInit(self,
-                      player: bs.Player,
-                      color: Sequence[float] = (1.0, 1.0, 1.0),
-                      highlight: Sequence[float] = (0.5, 0.5, 0.5),
-                      character: str = 'Spaz',
-                      powerups_expire: bool = True) -> None:
-    self.init(player,
-              color=color,
-              highlight=highlight,
-              character=character,
-              powerups_expire=powerups_expire)
-    self.curname = gethostname()
+def NewPlayerSzapInit(self, *args, **kwargs) -> None:
+    # Pass every argument through untouched: the engine adds new ones from
+    # time to time (1.8.0 added cloud_spaz_def), and a copied parameter list
+    # turns each into a TypeError that stops every player spawning.
+    self.init(*args, **kwargs)
 
     try:
+        self.curname = gethostname()
         cnfg = babase.app.config["TagConf"]
         if cnfg[str(self.curname)]["enabletag"]:
             # Tag node
@@ -128,7 +177,7 @@ def NewPlayerSzapInit(self,
             opacity = cnfg[str(self.curname)]["opacity"]
             shadow = cnfg[str(self.curname)]["shadow"]
             sl = cnfg[str(self.curname)]["scale"]
-            scale = 0.01 if sl == 'mediam' else 0.009 if not sl == 'large' else 0.02
+            scale = 0.01 if sl == 'medium' else 0.009 if not sl == 'large' else 0.02
 
             self.Tag = bs.newnode(
                 type='text',
@@ -151,15 +200,14 @@ def NewPlayerSzapInit(self,
         pass
 
 
-def NewEditProfileWindowInit(self,
-                             existing_profile: Optional[str],
-                             transition: str = 'in_right',
-                             origin_widget: bui.Widget | None = None) -> None:
+def NewEditProfileWindowInit(self, existing_profile: Optional[str], *args, **kwargs) -> None:
     """
     New boilerplate for editprofilewindow, addeds button to call TagSettings window
     """
     self.existing_profile = existing_profile
-    self.init(existing_profile, transition, origin_widget)
+    # Passed through as given: transition and origin_widget became
+    # keyword-only, and newer builds add more.
+    self.init(existing_profile, *args, **kwargs)
 
     v = self._height - 115.0
     x_inset = self._x_inset
@@ -175,7 +223,7 @@ def NewEditProfileWindowInit(self,
         label='Tag',
         button_type='square',
         text_scale=1.2,
-        on_activate_call=babase.Call(_on_tagwinbtn_press, self))
+        on_activate_call=CallStrict(_on_tagwinbtn_press, self))
 
 
 def _on_tagwinbtn_press(self):
@@ -185,14 +233,16 @@ def _on_tagwinbtn_press(self):
     if not self.main_window_has_control():
         return
 
-    self.main_window_replace(
-        TagWindow(
-            self.existing_profile,
-            self._name,
-            transition='in_right',
-            origin_widget=self.tagwinbtn
-        )
-    )
+    existing_profile = self.existing_profile
+    name = self._name
+    origin = self.tagwinbtn
+
+    def make_window():
+        return TagWindow(existing_profile, name, transition='in_right', origin_widget=origin)
+
+    # main_window_replace() takes a call making the window since 1.7.51, and
+    # deprecates being passed the window itself; older builds need that.
+    self.main_window_replace(make_window if _BUILD >= 22569 else make_window())
 
 # ba_meta require api 9
 
@@ -219,6 +269,9 @@ class Tag(babase.Plugin):
 
 class TagWindow(bui.MainWindow):
 
+    def main_window_should_preserve_selection(self) -> bool:
+        return False
+
     def __init__(self,
                  existing_profile: Optional[str],
                  profilename: str,
@@ -226,6 +279,7 @@ class TagWindow(bui.MainWindow):
                  origin_widget: bui.Widget | None = None):
         self.existing_profile = existing_profile
         self.profilename = profilename
+        ensureconfig(profilename)
 
         uiscale = bui.app.ui_v1.uiscale
         self._width = 870.0 if uiscale is babase.UIScale.SMALL else 670.0
@@ -251,7 +305,7 @@ class TagWindow(bui.MainWindow):
             position=(52 + self.extra_x, self._height - 60),
             size=(60, 60),
             scale=0.8,
-            label=babase.charstr(babase.SpecialChar.BACK),
+            label=_charstr(babase.SpecialChar.BACK),
             button_type='backSmall',
             on_activate_call=self.main_window_back)
         bui.containerwidget(edit=self._root_widget, cancel_button=self._back_button)
@@ -317,7 +371,7 @@ class TagWindow(bui.MainWindow):
             text='Enable Tag',
             textcolor=(0.8, 0.8, 0.8),
             value=self._prof['enabletag'],
-            on_value_change_call=babase.Call(self.change_val, [f'{self.profilename}', 'enabletag']),
+            on_value_change_call=CallPartial(self.change_val, [f'{self.profilename}', 'enabletag']),
             scale=1.1 if uiscale is babase.UIScale.SMALL else 1.5,
             maxwidth=430)
 
@@ -372,7 +426,7 @@ class TagWindow(bui.MainWindow):
             position=(330.0, v - 145),
             width=150,
             autoselect=True,
-            on_value_change_call=bs.WeakCall(self._on_menu_choice),
+            on_value_change_call=WeakCallPartial(self._on_menu_choice),
             choices=['large', 'medium', 'small'],
             button_size=(150, 50),
             # choices_display=('large', 'medium', 'small'),
@@ -409,8 +463,8 @@ class TagWindow(bui.MainWindow):
             size=(10, 10),
             text='Animate tag',
             textcolor=(0.8, 0.8, 0.8),
-            value=self._prof['enabletag'],
-            on_value_change_call=babase.Call(self.change_val, [f'{self.profilename}', 'animtag']),
+            value=self._prof['animtag'],
+            on_value_change_call=CallPartial(self.change_val, [f'{self.profilename}', 'animtag']),
             scale=1.1 if uiscale is babase.UIScale.SMALL else 1.5,
             maxwidth=430)
 
@@ -425,6 +479,18 @@ class TagWindow(bui.MainWindow):
             maxval=5.0,
             increment=0.1,
             textscale=1.25)
+
+    def get_main_window_state(self) -> bui.MainWindowState:
+        # Support recreating our window for back/refresh purposes.
+        cls = type(self)
+        existing_profile = self.existing_profile
+        profilename = self.profilename
+        return bui.BasicMainWindowState(
+            create_call=lambda transition, origin_widget: cls(
+                existing_profile, profilename,
+                transition=transition, origin_widget=origin_widget
+            )
+        )
 
     def change_val(self, config: List[str], val: bool) -> None:
         """
@@ -532,7 +598,7 @@ class CustomConfigNumberEdit:
             size=(28, 28),
             label='-',
             autoselect=True,
-            on_activate_call=babase.Call(self._down),
+            on_activate_call=CallStrict(self._down),
             repeat=True,
             enable_sound=changesound)
 
@@ -541,11 +607,11 @@ class CustomConfigNumberEdit:
                                            size=(28, 28),
                                            label='+',
                                            autoselect=True,
-                                           on_activate_call=babase.Call(self._up),
+                                           on_activate_call=CallStrict(self._up),
                                            repeat=True,
                                            enable_sound=changesound)
 
-        bui.uicleanupcheck(self, self.nametext)
+        _add_ui_cleanup_check(self, self.nametext)
         self._update_display()
 
     def _up(self) -> None:

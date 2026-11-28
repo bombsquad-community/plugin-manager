@@ -2170,11 +2170,18 @@
         {
           "name": "pranav",
           "email": "",
-          "discord": "",
-          "github": ""
+          "discord": "pranav1711.",
+          "github": "pranav-1711"
         }
       ],
       "versions": {
+        "2.2.0": {
+          "api_version": 9,
+          "min_engine_build": 0,
+          "commit_sha": "58074f9d",
+          "released_on": "28-11-2026",
+          "md5sum": "a0123ccdfa737cbc7b519ee815d7b070"
+        },
         "2.1.1": {
           "api_version": 9,
           "commit_sha": "e604a3c",
